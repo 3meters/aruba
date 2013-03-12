@@ -44,8 +44,9 @@ public class SourceBuilder extends FormActivity {
 
 	private WebImageView	mSourceIcon;
 	private Spinner			mSourceTypePicker;
-	private EditText		mSourceCaption;
+	private EditText		mSourceLabel;
 	private EditText		mSourceId;
+	private EditText		mSourceUrl;
 	private Integer			mSpinnerItem;
 
 	private List<String>	mSourceSuggestionStrings;
@@ -79,30 +80,28 @@ public class SourceBuilder extends FormActivity {
 		}
 		mSourceIcon = (WebImageView) findViewById(R.id.image);
 		mSourceTypePicker = (Spinner) findViewById(R.id.source_type_picker);
-		mSourceCaption = (EditText) findViewById(R.id.caption);
-		mSourceId = (EditText) findViewById(R.id.id);
+		mSourceLabel = (EditText) findViewById(R.id.source_label);
+		mSourceId = (EditText) findViewById(R.id.source_id);
+		mSourceUrl = (EditText) findViewById(R.id.source_url);
 
 		mSpinnerItem = mCommon.mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
-		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.caption));
-		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.id));
+		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.source_label));
+		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.source_id));
+		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.source_url));
 	}
 
 	private void bind() {
 		if (mEditing) {
-			mSourceCaption.setText(mSource.label);
+			mSourceLabel.setText(mSource.label);
 			mSourceId.setText(mSource.id);
+			mSourceUrl.setText(mSource.url);
 			drawSourceIcon();
 		}
 		else {
 			mSourceTypePicker.setVisibility(View.VISIBLE);
 			mSourceSuggestionStrings = new ArrayList<String>();
-			//			if (mEntity != null && mEntity.sourceSuggestions != null) {
-			//				for (Source source : mEntity.sourceSuggestions) {
-			//					mSourceSuggestionStrings.add(source.type);
-			//				}
-			//			}
 			mSourceSuggestionStrings.add("website");
 			mSourceSuggestionStrings.add("facebook");
 			mSourceSuggestionStrings.add("twitter");
@@ -159,16 +158,18 @@ public class SourceBuilder extends FormActivity {
 
 	private void gather() {
 		if (mEditing) {
-			mSource.label = mSourceCaption.getEditableText().toString();
+			mSource.label = mSourceLabel.getEditableText().toString();
 			mSource.id = mSourceId.getEditableText().toString();
+			mSource.url = mSourceUrl.getEditableText().toString();
 		}
 		else {
-			mSource.label = mSourceCaption.getEditableText().toString();
+			mSource.label = mSourceLabel.getEditableText().toString();
 			mSource.id = mSourceId.getEditableText().toString();
+			mSource.url = mSourceUrl.getEditableText().toString();
 		}
 		if (mSource.type.equals("website")) {
-			if (!mSource.id.startsWith("http://") && !mSource.id.startsWith("https://")) {
-				mSource.id = "http://" + mSource.id;
+			if (!mSource.url.startsWith("http://") && !mSource.url.startsWith("https://")) {
+				mSource.url = "http://" + mSource.url;
 			}
 		}
 	}
@@ -193,20 +194,10 @@ public class SourceBuilder extends FormActivity {
 	}
 
 	private boolean validate() {
-		if (mSourceCaption.getText().length() == 0) {
+		if (mSourceLabel.getText().length() == 0) {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
-					, getResources().getString(R.string.error_missing_source_name)
-					, null
-					, this
-					, android.R.string.ok
-					, null, null, null);
-			return false;
-		}
-		if (mSourceId.getText().length() == 0) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
-					, null
-					, getResources().getString(R.string.error_missing_source_id)
+					, getResources().getString(R.string.error_missing_source_label)
 					, null
 					, this
 					, android.R.string.ok
@@ -214,18 +205,27 @@ public class SourceBuilder extends FormActivity {
 			return false;
 		}
 
-		final String sourceId = mSourceId.getEditableText().toString();
-		if (sourceId.startsWith("http") || sourceId.startsWith("https")) {
-			if (!MiscUtils.validWebUri(sourceId)) {
-				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
-						, null
-						, getResources().getString(R.string.error_weburi_invalid)
-						, null
-						, this
-						, android.R.string.ok
-						, null, null, null);
-				return false;
-			}
+		if (mSourceId.getText().length() == 0 && mSourceUrl.getText().length() == 0) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_source_id_and_url)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
+			return false;
+		}
+
+		final String sourceUrl = mSourceUrl.getEditableText().toString();
+		if (sourceUrl != null && sourceUrl.length() > 0 && !MiscUtils.validWebUri(sourceUrl)) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_weburi_invalid)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
+			return false;
 		}
 		return true;
 	}
@@ -319,7 +319,7 @@ public class SourceBuilder extends FormActivity {
 					if (position == 0) {
 						final String sourceType = mSourceSuggestionStrings.get(position);
 						mSource = buildCustomSource(sourceType);
-						mSourceCaption.setText(mSource.label);
+						mSourceLabel.setText(mSource.label);
 						mSourceId.setText(mSource.id);
 						mSource.custom = true;
 						drawSourceIcon();
@@ -327,16 +327,16 @@ public class SourceBuilder extends FormActivity {
 				}
 				else {
 					if (position != parent.getCount()) {
-//						if (mEntity.sourceSuggestions != null && position < mEntity.sourceSuggestions.size()) {
-//							mSource = mEntity.sourceSuggestions.get(position);
-//							mSourceCaption.setText(mSource.label);
-//							mSourceId.setText(mSource.id);
-//							drawSourceIcon();
-//						}
+						//						if (mEntity.sourceSuggestions != null && position < mEntity.sourceSuggestions.size()) {
+						//							mSource = mEntity.sourceSuggestions.get(position);
+						//							mSourceCaption.setText(mSource.label);
+						//							mSourceId.setText(mSource.id);
+						//							drawSourceIcon();
+						//						}
 						if (position < mSourceSuggestionStrings.size()) {
 							final String sourceType = mSourceSuggestionStrings.get(position);
 							mSource = buildCustomSource(sourceType);
-							mSourceCaption.setText(mSource.label);
+							mSourceLabel.setText(mSource.label);
 							mSourceId.setText(mSource.id);
 							mSource.custom = true;
 							drawSourceIcon();

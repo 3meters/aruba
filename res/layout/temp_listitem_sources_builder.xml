@@ -30,7 +30,7 @@
         android:scaleType="centerCrop" />
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/source_label"
         style="@style/form_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -42,11 +42,11 @@
         android:text="@string/dummy_title" />
 
     <TextView
-        android:id="@+id/subtitle"
+        android:id="@+id/source_id"
         style="@style/form_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/title"
+        android:layout_below="@+id/source_label"
         android:layout_toLeftOf="@+id/image_forward"
         android:layout_toRightOf="@+id/image"
         android:ellipsize="end"
@@ -54,6 +54,19 @@
         android:text="@string/dummy_title"
         android:textColor="@color/text_secondary" />
 
+    <TextView
+        android:id="@+id/source_url"
+        style="@style/form_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/source_id"
+        android:layout_toLeftOf="@+id/image_forward"
+        android:layout_toRightOf="@+id/image"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/dummy_title"
+        android:textColor="@color/text_secondary" />
+    
     <ImageView
         android:id="@+id/image_forward"
         android:layout_width="6dp"

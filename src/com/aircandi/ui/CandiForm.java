@@ -402,7 +402,7 @@ public class CandiForm extends CandiActivity {
 					AndroidManager.getInstance().callOpentableActivity(this, entity.source.id, entity.source.url);
 				}
 				else if (entity.source.type.equals("website")) {
-					AndroidManager.getInstance().callBrowserActivity(this, (entity.source.id != null) ? entity.source.id : entity.source.url);
+					AndroidManager.getInstance().callBrowserActivity(this, (entity.source.url != null) ? entity.source.url : entity.source.id);
 				}
 				else if (entity.source.type.equals("email")) {
 					AndroidManager.getInstance().callSendToActivity(this, entity.source.label, entity.source.id, null, null);

@@ -6,14 +6,17 @@
 
     <com.aircandi.ui.widgets.BounceScrollView
         android:id="@+id/form_list"
-        style="@style/dialog_content_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fillViewport="true" >
+        android:fillViewport="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true" >
 
         <LinearLayout
+            style="@style/form_content_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|top"
             android:orientation="vertical" >
 
             <!-- Public Image -->
@@ -41,7 +44,7 @@
                 android:visibility="gone" />
 
             <EditText
-                android:id="@+id/caption"
+                android:id="@+id/source_label"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:hint="@string/form_source_caption_hint"
@@ -49,11 +52,22 @@
                 android:textAppearance="@style/app_text_appearance_small" />
 
             <EditText
-                android:id="@+id/id"
+                android:id="@+id/source_id"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:hint="@string/form_source_id_hint"
-                android:inputType="textUri"
+                android:inputType="textNoSuggestions"
+                android:textAppearance="@style/app_text_appearance_small" />
+
+            <EditText
+                android:id="@+id/source_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/form_source_url_hint"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:maxLines="5"
+                android:minHeight="@dimen/form_field_height"
+                android:minLines="1"
                 android:textAppearance="@style/app_text_appearance_small" />
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>

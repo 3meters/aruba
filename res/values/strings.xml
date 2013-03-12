@@ -142,8 +142,8 @@
     <string name="error_missing_password_new">Enter a new password.</string>
     <string name="error_missing_password">Enter a password.</string>
     <string name="error_missing_password_confirmation">Enter password confirmation.</string>
-    <string name="error_missing_source_name">Enter a name.</string>
-    <string name="error_missing_source_id">Enter a web address or id.</string>
+    <string name="error_missing_source_label">Enter a label.</string>
+    <string name="error_missing_source_id_and_url">Enter a web address or id.</string>
     <string name="error_missing_message">Enter a message.</string>
     
     <!-- Toast -->
@@ -311,7 +311,8 @@
 
     <string name="form_source_type_hint">type of link</string>
     <string name="form_source_caption_hint">label</string>
-    <string name="form_source_id_hint">web address or id</string>
+    <string name="form_source_id_hint">id</string>
+    <string name="form_source_url_hint">web address</string>
     <string name="form_title_hint">title</string>
     <string name="form_place_title_hint">name</string>
     <string name="form_place_sources_hint">links</string>

@@ -93,6 +93,26 @@ public class AndroidManager {
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
+	public void callMapNavigationActivity(Context context, String latitude, String longitude, String label) {
+		final String uri = "google.navigation:q="
+				+ latitude
+				+ "," + longitude
+				+ "(" + label + ")";
+		final Intent searchAddress = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+		context.startActivity(searchAddress);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+	}
+	
+	public void callMapLocalActivity(Context context, String latitude, String longitude, String label) {
+		final String uri = "google.local:q="
+				+ latitude
+				+ "," + longitude
+				+ "(" + label + ")";
+		final Intent searchAddress = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+		context.startActivity(searchAddress);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+	}
+	
 	public void callDialerActivity(Context context, String phoneNumber) {
 		final String number = "tel:" + phoneNumber.trim();
 		final Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(number));

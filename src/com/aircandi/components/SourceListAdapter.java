@@ -45,8 +45,9 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 			view = mInflater.inflate(mItemLayoutId, null);
 			holder = new ViewHolder();
 			holder.image = (WebImageView) view.findViewById(R.id.image);
-			holder.title = (TextView) view.findViewById(R.id.title);
-			holder.subtitle = (TextView) view.findViewById(R.id.subtitle);
+			holder.label = (TextView) view.findViewById(R.id.source_label);
+			holder.id = (TextView) view.findViewById(R.id.source_id);
+			holder.url = (TextView) view.findViewById(R.id.source_url);
 			holder.check = (CheckBox) view.findViewById(R.id.check);
 			if (holder.check != null) {
 				holder.check.setOnClickListener(new OnClickListener() {
@@ -61,8 +62,9 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 			}
 			view.setTag(holder);
 
-			FontManager.getInstance().setTypefaceDefault(holder.title);
-			FontManager.getInstance().setTypefaceDefault(holder.subtitle);
+			FontManager.getInstance().setTypefaceDefault(holder.label);
+			FontManager.getInstance().setTypefaceDefault(holder.id);
+			FontManager.getInstance().setTypefaceDefault(holder.url);
 		}
 		else {
 			holder = (ViewHolder) view.getTag();
@@ -78,18 +80,28 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 				setVisibility(holder.check, View.VISIBLE);
 			}
 
-			setVisibility(holder.title, View.GONE);
-			if (holder.title != null && source.label != null && source.label.length() > 0) {
-				holder.title.setText(source.label);
-				setVisibility(holder.title, View.VISIBLE);
+			setVisibility(holder.label, View.GONE);
+			if (holder.label != null && source.label != null && source.label.length() > 0) {
+				holder.label.setText(source.label);
+				setVisibility(holder.label, View.VISIBLE);
 			}
 
-			setVisibility(holder.subtitle, View.GONE);
-			if (holder.subtitle != null && source.id != null && source.id.length() > 0) {
-				holder.subtitle.setText(source.id);
-				setVisibility(holder.subtitle, View.VISIBLE);
+			setVisibility(holder.id, View.GONE);
+			if (holder.id != null) {
+				if (source.id != null && source.id.length() > 0) {
+					holder.id.setText(source.id);
+					setVisibility(holder.id, View.VISIBLE);
+				}
 			}
 
+			setVisibility(holder.url, View.GONE);
+			if (holder.url != null) {
+				if (source.url != null && source.url.length() > 0) {
+					holder.url.setText(source.url);
+					setVisibility(holder.url, View.VISIBLE);
+				}
+			}
+			
 			if (holder.image != null) {
 				holder.image.setTag(source);
 				/*
@@ -139,8 +151,9 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 
 	private static class ViewHolder {
 		private WebImageView	image;
-		private TextView		title;
-		private TextView		subtitle;
+		private TextView		label;
+		private TextView		id;
+		private TextView		url;
 		private CheckBox		check;
 	}
 }
