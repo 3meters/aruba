@@ -32,7 +32,6 @@ import com.aircandi.components.BusProvider;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.EntitiesChangedEvent;
 import com.aircandi.components.EntitiesForBeaconsFinishedEvent;
-import com.aircandi.components.EntitiesForLocationFinishedEvent;
 import com.aircandi.components.EntityModel;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.IntentBuilder;
@@ -312,11 +311,11 @@ public class CandiRadar extends CandiActivity {
 
 							@Override
 							protected Object doInBackground(Object... params) {
-								
+
 								Logger.d(CandiRadar.this, "Location changed event: getting places near location");
 								Thread.currentThread().setName("GetPlacesNearLocation");
 								Aircandi.stopwatch2.start("Get places near location");
-								
+
 								final ServiceResponse serviceResponse = ProxiManager.getInstance().getPlacesNearLocation(observation);
 								return serviceResponse;
 							}
@@ -345,48 +344,6 @@ public class CandiRadar extends CandiActivity {
 	public void onPlacesNearLocationFinished(final PlacesNearLocationFinishedEvent event) {
 		Aircandi.stopwatch2.stop("Places near location complete");
 		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "places_near_location", null);
-		
-		mHandler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				Logger.d(CandiRadar.this, "Entities for location finished event: ** done **");
-				if (LocationManager.getInstance().getObservationLocked() != null) {
-					new AsyncTask() {
-
-						@Override
-						protected Object doInBackground(Object... params) {
-							
-							Logger.d(CandiRadar.this, "Location changed event: getting entities for location");
-							Thread.currentThread().setName("GetEntitiesForLocation");
-							Aircandi.stopwatch2.start("Get entities for location");
-							final ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForLocation((int) event.maxDistance);
-							return serviceResponse;
-						}
-
-						@Override
-						protected void onPostExecute(Object result) {
-							final ServiceResponse serviceResponse = (ServiceResponse) result;
-							if (serviceResponse.responseCode != ResponseCode.Success) {
-								mCommon.handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
-								mCommon.hideBusy(true);
-							}
-						}
-
-					}.execute();
-				}
-				else {
-					mCommon.hideBusy(true);
-				}
-			}
-		});
-	}
-	
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onEntitiesForLocationFinished(EntitiesForLocationFinishedEvent event) {
-		Aircandi.stopwatch2.stop("Entities for location complete");
-		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "entities_for_location", null);
 		mHandler.post(new Runnable() {
 
 			@Override
@@ -766,7 +723,9 @@ public class CandiRadar extends CandiActivity {
 			Logger.d(this, "Start place search because of staleness or location change");
 			searchForPlaces();
 		}
-		else if (!mWifiState.equals(NetworkManager.getInstance().getWifiState())) {
+		else if (mWifiState != null 
+				&& NetworkManager.getInstance().getWifiState() != null 
+				&& !mWifiState.equals(NetworkManager.getInstance().getWifiState())) {
 			/*
 			 * Changes in wifi state have a big effect on what we can show
 			 * for a search.

@@ -8,10 +8,13 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
@@ -67,6 +70,20 @@ public class RegisterForm extends FormActivity {
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
+		
+		mTextPasswordConfirm.setImeOptions(EditorInfo.IME_ACTION_GO);
+		mTextPasswordConfirm.setOnEditorActionListener(new OnEditorActionListener() {
+
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_GO) {
+					doSave();
+					return true;
+				}
+				return false;
+			}
+		});
+		
 
 		FontManager.getInstance().setTypefaceDefault(mTextFullname);
 		FontManager.getInstance().setTypefaceDefault(mTextEmail);
@@ -209,7 +226,7 @@ public class RegisterForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		if (mTextEmail.getText().length() == 0) {
@@ -219,7 +236,7 @@ public class RegisterForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		if (mTextPassword.getText().length() < 6) {
@@ -229,7 +246,7 @@ public class RegisterForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		if (mTextPasswordConfirm.getText().length() < 6) {
@@ -239,7 +256,7 @@ public class RegisterForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		if (!MiscUtils.validEmail(mTextEmail.getText().toString())) {
@@ -249,7 +266,7 @@ public class RegisterForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
@@ -259,7 +276,7 @@ public class RegisterForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			mTextPasswordConfirm.setText("");
 			return false;
 		}

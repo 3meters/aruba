@@ -22,7 +22,10 @@ import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.AndroidManager;
+import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
+import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
@@ -30,6 +33,7 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Source;
+import com.aircandi.ui.CommentList;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -149,6 +153,11 @@ public class SourceBuilder extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
+	public void onTestButtonClick(View view) {
+		doSourceTest();
+	}
+
+	@SuppressWarnings("ucd")
 	public void onSaveButtonClick(View view) {
 		if (validate()) {
 			gather();
@@ -179,6 +188,44 @@ public class SourceBuilder extends FormActivity {
 		return false;
 	}
 
+	private void doSourceTest() {
+		gather();
+		if (mSource.type.equals("twitter")) {
+			AndroidManager.getInstance().callTwitterActivity(this, (mSource.id != null) ? mSource.id : mSource.url);
+		}
+		else if (mSource.type.equals("foursquare")) {
+			AndroidManager.getInstance().callFoursquareActivity(this, (mSource.id != null) ? mSource.id : mSource.url);
+		}
+		else if (mSource.type.equals("facebook")) {
+			AndroidManager.getInstance().callFacebookActivity(this, (mSource.id != null) ? mSource.id : mSource.url);
+		}
+		else if (mSource.type.equals("yelp")) {
+			AndroidManager.getInstance().callYelpActivity(this, mSource.id, mSource.url);
+		}
+		else if (mSource.type.equals("opentable")) {
+			AndroidManager.getInstance().callOpentableActivity(this, mSource.id, mSource.url);
+		}
+		else if (mSource.type.equals("website")) {
+			AndroidManager.getInstance().callBrowserActivity(this, (mSource.url != null) ? mSource.url : mSource.id);
+		}
+		else if (mSource.type.equals("email")) {
+			AndroidManager.getInstance().callSendToActivity(this, mSource.label, mSource.id, null, null);
+		}
+		else if (mSource.type.equals("comments")) {
+			final IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
+			intentBuilder.setCommandType(CommandType.View)
+					.setEntityId(mEntity.id)
+					.setParentEntityId(mEntity.parentId)
+					.setCollectionId(mEntity.id);
+			final Intent intent = intentBuilder.create();
+			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
+		}
+		else {
+			AndroidManager.getInstance().callGenericActivity(this, (mSource.url != null) ? mSource.url : mSource.id);
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Service routines
 	// --------------------------------------------------------------------------------------------
@@ -201,7 +248,7 @@ public class SourceBuilder extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 
@@ -212,7 +259,7 @@ public class SourceBuilder extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 
@@ -224,7 +271,7 @@ public class SourceBuilder extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		return true;
@@ -241,12 +288,6 @@ public class SourceBuilder extends FormActivity {
 				gather();
 				doSave();
 			}
-			return true;
-		}
-		if (item.getItemId() == R.id.cancel) {
-			setResult(Activity.RESULT_CANCELED);
-			finish();
-			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
 			return true;
 		}
 

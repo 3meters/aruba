@@ -110,6 +110,7 @@ public final class CandiConstants {
 	public static final int		ACTIVITY_CATEGORY_EDIT				= 810;
 	public static final int		ACTIVITY_ENTITY_EDIT				= 900;
 	public static final int		ACTIVITY_PICTURE_SOURCE_PICK		= 950;
+	public static final int		ACTIVITY_ENTITY_INSERT				= 960;
 
 	public static final int		RESULT_ENTITY_INSERTED				= 100;
 	public static final int		RESULT_ENTITY_UPDATED				= 110;

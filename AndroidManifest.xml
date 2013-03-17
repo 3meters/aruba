@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi.beta"
-    android:versionCode="15"
-    android:versionName="0.8.12" 
+    android:versionCode="18"
+    android:versionName="0.8.13" 
     android:installLocation="auto">
 
     <uses-sdk
@@ -87,6 +87,12 @@
             android:name="com.aircandi.ui.CommentList"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_browse"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="com.aircandi.ui.TuningForm"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/form_title_tune"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity

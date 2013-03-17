@@ -66,6 +66,7 @@ public class SplashForm extends SherlockActivity {
 		if (Build.PRODUCT.contains("sdk")) {
 			Aircandi.usingEmulator = true;
 		}
+		
 		/* Tickle the bitmap manager to get it initialized */
 		BitmapManager.getInstance();
 

@@ -17,7 +17,8 @@
 		- Tabbar tone
 		- Set window background
 		- Select right set of drawables based on the theme tone.
-		- Custom line and text colors in pages, forms, buttons.    -->
+		- Custom line and text colors in pages, forms, buttons.
+    -->
 
     <style name="aircandi_theme_dark" parent="Theme.Sherlock">
         <item name="themeTone">dark</item>
@@ -64,9 +65,9 @@
         <item name="backgroundTabBar">@color/background_tabbar_dark</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_dark</item>
         <item name="backgroundAccuracyNone">@color/background_button_dark</item>
-        
+
         <!-- Images and icons -->
-        
+
         <item name="logo">@drawable/ic_launcher</item>
         <item name="iconSearch">@drawable/ic_action_search_dark</item>
         <item name="iconForward">@drawable/ic_action_more_arrow_dark</item>
@@ -93,11 +94,13 @@
         <item name="iconAndroid">@drawable/ic_action_android_dark</item>
         <item name="iconZoom">@drawable/ic_action_zoom</item>
         <item name="iconSend">@drawable/ic_action_send_dark</item>
-        <item name="iconSave">@drawable/ic_action_save_dark</item>
+        <item name="iconSave">@drawable/ic_action_tick_dark</item>
         <item name="iconAccept">@drawable/ic_action_tick_dark</item>
         <item name="iconCancel">@drawable/ic_action_cancel_dark</item>
         <item name="iconSuggest">@drawable/ic_action_bulb_dark</item>
-        
+        <item name="iconStarOn">@drawable/ic_action_star_10_dark</item>
+        <item name="iconStarOff">@drawable/ic_action_star_0_dark</item>
+
         <!-- Actionbar Sherlock -->
 
         <item name="actionBarStyle">@style/actionbar_dark</item>
@@ -127,6 +130,18 @@
         <item name="candiFormTitleStyle">@style/candi_form_title</item>
         <item name="candiListTitleStyle">@style/candi_list_title</item>
 
+        <!-- Dialogs -->
+
+        <!--
+        <item name="android:alertDialogTheme">@style/Theme.Sherlock.Light.Dialog</item>
+        <item name="android:dialogTheme">@android:style/Theme.Holo.Light.Dialog</item>
+        <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_holo</item>
+        <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_holo</item>
+        <item name="dialogTitleDecorLayout">@layout/dialog_title_holo</item>
+        <item name="alertDialogCenterButtons">false</item>
+        <item name="alertDialogIcon">@android:drawable/ic_dialog_alert_holo_light</item>
+        -->
+
         <!-- Text and line colors -->
 
         <item name="ruleColor">@color/rule_15_light</item>
@@ -154,9 +169,9 @@
         <item name="backgroundTabBar">@color/background_tabbar_light</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_light</item>
         <item name="backgroundAccuracyNone">@color/background_button_light</item>
-        
+
         <!-- Images and icons -->
-        
+
         <item name="logo">@drawable/ic_launcher</item>
         <item name="iconSearch">@drawable/ic_action_search_light</item>
         <item name="iconForward">@drawable/ic_action_more_arrow_light</item>
@@ -183,11 +198,13 @@
         <item name="iconZoom">@drawable/ic_action_zoom</item>
         <item name="iconAndroid">@drawable/ic_action_android_light</item>
         <item name="iconSend">@drawable/ic_action_send_light</item>
-        <item name="iconSave">@drawable/ic_action_save_light</item>
+        <item name="iconSave">@drawable/ic_action_tick_light</item>
         <item name="iconAccept">@drawable/ic_action_tick_light</item>
         <item name="iconCancel">@drawable/ic_action_cancel_light</item>
         <item name="iconSuggest">@drawable/ic_action_bulb_light</item>
-        
+        <item name="iconStarOn">@drawable/ic_action_star_10_light</item>
+        <item name="iconStarOff">@drawable/ic_action_star_0_light</item>
+
         <!-- Actionbar Sherlock -->
 
         <item name="actionBarStyle">@style/actionbar_light</item>
@@ -218,7 +235,7 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:backgroundDimAmount">0.6</item>
-        
+
         <!-- Text and line colors -->
 
         <item name="android:textColor">@android:color/white</item>
@@ -246,7 +263,7 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:backgroundDimAmount">0.6</item>
-        
+
         <!-- Default overrides -->
 
         <item name="android:textAppearance">@style/app_text_appearance</item>

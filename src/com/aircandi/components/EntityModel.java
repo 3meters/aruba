@@ -1094,22 +1094,13 @@ public class EntityModel {
 						/* Must do this to cache the distance before sorting */
 						Float distance = entity.getDistance();
 
-						Beacon beacon = entity.getActivePrimaryBeacon(LinkType.proximity.name());
+						Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
 						if (beacon != null) {
 							entities.add(entity);
 						}
 						else {
-							beacon = entity.getActivePrimaryBeacon(LinkType.browse.name());
-							/*
-							 * Entities that were first found by beacon hang around and could
-							 * later be visible via location if we continue with this approach.
-							 * 
-							 * One thought is that if it qualifies then so be it. Sorting should
-							 * put it in the right priority order and place with beacons should
-							 * sort higher.
-							 */
 							/* No beacon for this entity so check using location */
-							if (beacon != null || (distance != null && distance != -1 && distance < searchRangeMeters)) {
+							if (distance != null && distance != -1 && distance < searchRangeMeters) {
 								entities.add(entity);
 							}
 						}
@@ -1154,14 +1145,14 @@ public class EntityModel {
 				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 					Entity entity = entry.getValue();
 					if (!entity.synthetic) {
-						Beacon beacon = entity.getActivePrimaryBeacon(LinkType.proximity.name());
+						Beacon beacon = entity.getActiveBeaconPrimary(LinkType.proximity.name());
 						/* Must do this to cache the distance before sorting */
 						Float distance = entity.getDistance();
 						if (beacon != null) {
 							entities.add(entity);
 						}
 						else {
-							beacon = entity.getActivePrimaryBeacon(LinkType.browse.name());
+							beacon = entity.getActiveBeaconPrimary(LinkType.browse.name());
 							/*
 							 * Entities that were first found by beacon hang around and could
 							 * later be visible via location if we continue with this approach.
@@ -1194,7 +1185,7 @@ public class EntityModel {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 					Entity entity = entry.getValue();
-					Beacon beacon = entity.getActivePrimaryBeacon(LinkType.proximity.name());
+					Beacon beacon = entity.getActiveBeaconPrimary(LinkType.proximity.name());
 					if (beacon != null) {
 						entities.add(entity);
 					}
@@ -1217,7 +1208,7 @@ public class EntityModel {
 				if (entry.getValue().isCollection) {
 					Entity entity = entry.getValue();
 					if (!entity.hidden && !entity.synthetic) {
-						Beacon beacon = entity.getActivePrimaryBeacon(LinkType.proximity.name());
+						Beacon beacon = entity.getActiveBeaconPrimary(LinkType.proximity.name());
 						/* Must do this to cache the distance before sorting */
 						Float distance = entity.getDistance();
 						if (beacon != null) {
@@ -1259,7 +1250,7 @@ public class EntityModel {
 					Entity entity = entry.getValue();
 					if (!entity.hidden && entity.synthetic) {
 						Float distance = entity.getDistance();
-						Beacon beacon = entity.getActivePrimaryBeacon(LinkType.proximity.name());
+						Beacon beacon = entity.getActiveBeaconPrimary(LinkType.proximity.name());
 						if (beacon != null) {
 							entities.add(entity);
 						}
@@ -1632,10 +1623,6 @@ public class EntityModel {
 	}
 
 	void removeSyntheticEntities() {
-		/*
-		 * We clean out user entities and their children when the entity
-		 * is associated with a beacon that isn't a radar hit.
-		 */
 		synchronized (mEntityCache) {
 			final Iterator iter = mEntityModel.mEntityModel.mEntityCache.keySet().iterator();
 			Entity entity = null;
@@ -1651,10 +1638,6 @@ public class EntityModel {
 	}
 
 	void removeBeaconEntities() {
-		/*
-		 * We clean out user entities and their children when the entity
-		 * is associated with a beacon that isn't a radar hit.
-		 */
 		synchronized (mEntityCache) {
 			final Iterator iter = mEntityModel.mEntityModel.mEntityCache.keySet().iterator();
 			Entity entity = null;
@@ -1672,10 +1655,6 @@ public class EntityModel {
 
 	@SuppressWarnings("ucd")
 	public void removeEntitiesForBeacon(String beaconId) {
-		/*
-		 * We clean out entities and their children when the top
-		 * level entity is associated with the beacon.
-		 */
 		synchronized (mEntityCache) {
 			final Iterator iter = mEntityModel.mEntityModel.mEntityCache.keySet().iterator();
 			Entity entity = null;

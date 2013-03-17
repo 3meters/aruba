@@ -271,7 +271,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			location = parent.getLocation();
 		}
 		else {
-			final Beacon beacon = getActivePrimaryBeacon("proximity");
+			final Beacon beacon = getActiveBeaconPrimary("proximity");
 			if (beacon != null) {
 				location = beacon.getLocation();
 			}
@@ -284,7 +284,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 	public Float getDistance() {
 		distance = -1f;
-		final Beacon beacon = getActivePrimaryBeacon("proximity");
+		final Beacon beacon = getActiveBeaconPrimary("proximity");
 		if (beacon != null) {
 			distance = beacon.getDistance();
 		}
@@ -419,7 +419,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return ProxiManager.getInstance().getEntityModel().getCacheEntity(parentId);
 	}
 
-	public Beacon getActivePrimaryBeacon(String linkType) {
+	public Beacon getActiveBeaconPrimary(String linkType) {
 		final Link link = getActiveLink(linkType, true);
 		if (link != null) {
 			final Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
@@ -428,6 +428,15 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return null;
 	}
 
+	public Beacon getActiveBeacon(String linkType) {
+		final Link link = getActiveLink(linkType, false);
+		if (link != null) {
+			final Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
+			return beacon;
+		}
+		return null;
+	}
+	
 	public Link getLink(Beacon beacon, String linkType) {
 		if (links != null) {
 			for (Link link : links) {
@@ -499,7 +508,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 							}
 						}
 						else if (link.type.equals("browse")) {
-							//placeRankScore += (link.tuneCount.intValue() * 1);
+							placeRankScore += (link.tuneCount.intValue() * 1);
 						}
 					}
 				}
@@ -546,7 +555,15 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 					return 1;
 				}
 				else {
-					return 0;
+					if (entity1.getPlaceRankScore() > entity2.getPlaceRankScore()) {
+						return -1;
+					}
+					else if (entity1.getPlaceRankScore() < entity2.getPlaceRankScore()) {
+						return 1;
+					}
+					else {
+						return 0;
+					}
 				}
 			}
 		}

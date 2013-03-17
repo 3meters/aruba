@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
@@ -31,6 +32,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.components.ProxiManager.ArrayListType;
 import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Entity;
@@ -513,6 +515,24 @@ public class CandiUser extends CandiActivity {
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		if (item.getItemId() == R.id.edit) {
+			Tracker.sendEvent("ui_action", "edit_user", null, 0);
+			mCommon.doEditUserClick();
+			return true;
+		}
+
+		/* In case we add general menu items later */
+		mCommon.doOptionsItemSelected(item);
+		return true;
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------

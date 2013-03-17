@@ -21,6 +21,8 @@ ic_action_save_light.png
 ic_action_search_light.png
 ic_action_send_light.png
 ic_action_settings_light.png
+ic_action_star_0_light.png
+ic_action_star_10_light.png
 ic_action_tick_light.png
 ic_action_tiles_large_light.png
 ic_action_trash_light.png

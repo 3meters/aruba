@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -39,8 +40,8 @@ import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Photo;
-import com.aircandi.service.objects.User;
 import com.aircandi.service.objects.Photo.PhotoSource;
+import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -66,7 +67,7 @@ public class ProfileForm extends FormActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		if (!isFinishing()) {
 			initialize();
 			bind();
@@ -226,6 +227,9 @@ public class ProfileForm extends FormActivity {
 		mTextLink.setText(mUser.webUri);
 		mTextLocation.setText(mUser.location);
 		mTextEmail.setText(mUser.email);
+		if (mUser.doNotTrack == null) {
+			mUser.doNotTrack = false;
+		}
 		mCheckBrowseInPrivate.setChecked(mUser.doNotTrack);
 		if (mUser.doNotTrack) {
 			((TextView) findViewById(R.id.do_not_track_hint)).setText(R.string.form_do_not_track_on_hint);
@@ -356,13 +360,17 @@ public class ProfileForm extends FormActivity {
 				, getResources().getString(R.string.alert_entity_dirty_exit_message)
 				, null
 				, this
-				, android.R.string.ok
+				, R.string.alert_dirty_save
 				, android.R.string.cancel
+				, R.string.alert_dirty_discard
 				, new DialogInterface.OnClickListener() {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
+							updateProfile();
+						}
+						else if (which == Dialog.BUTTON_NEUTRAL) {
 							setResult(Activity.RESULT_CANCELED);
 							finish();
 							AnimUtils.doOverridePendingTransition(ProfileForm.this, TransitionType.FormToPage);
@@ -454,7 +462,7 @@ public class ProfileForm extends FormActivity {
 						, null
 						, this
 						, android.R.string.ok
-						, null, null, null);
+						, null, null, null, null);
 				return false;
 			}
 		}
@@ -467,8 +475,19 @@ public class ProfileForm extends FormActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.save) {
+		if (item.getItemId() == R.id.accept) {
 			updateProfile();
+			return true;
+		}
+		else if (item.getItemId() == R.id.cancel) {
+			if (isDirty()) {
+				confirmDirtyExit();
+			}
+			else {
+				setResult(Activity.RESULT_CANCELED);
+				finish();
+				AnimUtils.doOverridePendingTransition(ProfileForm.this, TransitionType.FormToPage);
+			}
 			return true;
 		}
 

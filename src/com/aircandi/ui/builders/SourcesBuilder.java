@@ -48,7 +48,6 @@ public class SourcesBuilder extends FormActivity {
 	private BounceListView		mList;
 	private TextView			mMessage;
 	private final List<Source>	mSystemSources	= new ArrayList<Source>();
-	private final List<Source>	mHiddenSources	= new ArrayList<Source>();
 	private final List<Source>	mActiveSources	= new ArrayList<Source>();
 	private Entity				mEntity;
 	private Source				mSourceEditing;
@@ -58,11 +57,10 @@ public class SourcesBuilder extends FormActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-
 		if (!isFinishing()) {
 			initialize();
 			bind();
-			mCommon.hideBusy(true);
+			mCommon.hideBusy(true); // Visible by default
 		}
 	}
 
@@ -92,13 +90,14 @@ public class SourcesBuilder extends FormActivity {
 
 		mMessage = (TextView) findViewById(R.id.message);
 		mList = (BounceListView) findViewById(R.id.list);
+
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.message));
 	}
 
 	private void bind() {
 
 		if (mActiveSources.size() == 0) {
-			mCommon.hideBusy(true);
+			mCommon.hideBusy(true); // visible by default
 			mMessage.setText(R.string.sources_builder_empty);
 			mMessage.setVisibility(View.VISIBLE);
 		}
@@ -129,6 +128,13 @@ public class SourcesBuilder extends FormActivity {
 			finish();
 			AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToPage);
 		}
+	}
+
+	public void onCheckedClick(View view) {
+		CheckBox check = (CheckBox) view.findViewById(R.id.check);
+		check.setChecked(!check.isChecked());
+		final Source source = (Source) check.getTag();
+		source.checked = check.isChecked();
 	}
 
 	@SuppressWarnings("ucd")
@@ -195,7 +201,7 @@ public class SourcesBuilder extends FormActivity {
 	@SuppressWarnings("ucd")
 	public void onListItemClick(View view) {
 		final Intent intent = new Intent(this, SourceBuilder.class);
-		final CheckBox check = (CheckBox) view.findViewById(R.id.check);
+		final CheckBox check = (CheckBox) ((View) view.getParent()).findViewById(R.id.check);
 		mSourceEditing = (Source) check.getTag();
 		final String jsonSource = ProxibaseService.convertObjectToJsonSmart(mSourceEditing, false, true);
 		intent.putExtra(CandiConstants.EXTRA_SOURCE, jsonSource);
@@ -255,15 +261,11 @@ public class SourcesBuilder extends FormActivity {
 
 	private void splitSources(List<Source> sources) {
 		mActiveSources.clear();
-		mHiddenSources.clear();
 		mSystemSources.clear();
 
 		for (Source source : sources) {
 			if (source.system != null && source.system) {
 				mSystemSources.add(source);
-			}
-			else if (source.hidden != null && source.hidden) {
-				mHiddenSources.add(source);
 			}
 			else {
 				mActiveSources.add(source);
@@ -275,7 +277,6 @@ public class SourcesBuilder extends FormActivity {
 		List<Source> sources = new ArrayList<Source>();
 		sources.addAll(mSystemSources);
 		sources.addAll(mActiveSources);
-		sources.addAll(mHiddenSources);
 		return sources;
 	}
 
@@ -323,6 +324,7 @@ public class SourcesBuilder extends FormActivity {
 				, this
 				, android.R.string.ok
 				, android.R.string.cancel
+				, null
 				, new DialogInterface.OnClickListener() {
 
 					@Override
@@ -330,11 +332,7 @@ public class SourcesBuilder extends FormActivity {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							for (int i = mActiveSources.size() - 1; i >= 0; i--) {
 								if (mActiveSources.get(i).checked) {
-									Source source = mActiveSources.remove(i);
-									source.hidden = true;
-									if (!source.data.containsKey("origin") || !((String)source.data.get("origin")).equals("user")) {
-										mHiddenSources.add(source);
-									}
+									mActiveSources.remove(i);
 								}
 							}
 							mList.invalidateViews();
@@ -350,14 +348,18 @@ public class SourcesBuilder extends FormActivity {
 				, getResources().getString(R.string.alert_sources_dirty_exit_title)
 				, getResources().getString(R.string.alert_sources_dirty_exit_message)
 				, null
-				, this
-				, android.R.string.ok
+				, SourcesBuilder.this
+				, R.string.alert_dirty_save
 				, android.R.string.cancel
+				, R.string.alert_dirty_discard
 				, new DialogInterface.OnClickListener() {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
+							gatherAndExit();
+						}
+						else if (which == Dialog.BUTTON_NEUTRAL) {
 							setResult(Activity.RESULT_CANCELED);
 							finish();
 							AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToPage);
@@ -439,11 +441,6 @@ public class SourcesBuilder extends FormActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
 	}
 
-	@Override
-	protected Boolean isDialog() {
-		return false;
-	}
-
 	private Boolean isDirty() {
 
 		/* Gather */
@@ -496,7 +493,7 @@ public class SourcesBuilder extends FormActivity {
 			gatherAndExit();
 			return true;
 		}
-		if (item.getItemId() == R.id.cancel) {
+		else if (item.getItemId() == R.id.cancel) {
 			if (isDirty()) {
 				confirmDirtyExit();
 			}

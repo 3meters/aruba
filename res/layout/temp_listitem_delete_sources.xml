@@ -24,6 +24,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="@string/dummy_title"
+        android:textColor="?attr/textColor"
         android:textAppearance="@style/app_text_appearance_tiny" />
 
 </RelativeLayout>

@@ -64,7 +64,6 @@ public class CommentList extends CandiActivity {
 		mButtonNewComment = (Button) findViewById(R.id.button_new_comment);
 		
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_new_comment));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_comment));
 	}
 
 	private void configureActionBar() {

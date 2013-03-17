@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
@@ -37,19 +38,14 @@ import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AndroidManager;
-import com.aircandi.components.BeaconsLockedEvent;
-import com.aircandi.components.BusProvider;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.components.ProxiManager.ArrayListType;
 import com.aircandi.components.ProxiManager.ModelResult;
-import com.aircandi.components.ProxiManager.ScanReason;
-import com.aircandi.components.QueryWifiScanReceivedEvent;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
@@ -69,7 +65,6 @@ import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.ImageUtils;
-import com.squareup.otto.Subscribe;
 
 public class CandiForm extends CandiActivity {
 
@@ -83,7 +78,6 @@ public class CandiForm extends CandiActivity {
 	private Boolean					mUpsize;
 	private Boolean					mTracked			= false;
 	private final PackageReceiver	mPackageReceiver	= new PackageReceiver();
-	private Boolean					mTuningInProcess	= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -121,11 +115,7 @@ public class CandiForm extends CandiActivity {
 		}
 	}
 
-	private void bind(Boolean refresh) {
-		doBind(refresh);
-	}
-
-	private void doBind(final Boolean refresh) {
+	private void bind(final Boolean refresh) {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
@@ -156,6 +146,12 @@ public class CandiForm extends CandiActivity {
 						mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
 						mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
 						mCommon.mActionBar.setTitle(mEntity.name);
+						if (mCommon.mMenuItemEdit != null) {
+							mCommon.mMenuItemEdit.setVisible(canEdit());
+						}
+						if (mCommon.mMenuItemAdd != null) {
+							mCommon.mMenuItemAdd.setVisible(canAdd());
+						}
 
 						draw();
 						if (mUpsize) {
@@ -187,16 +183,17 @@ public class CandiForm extends CandiActivity {
 	}
 
 	private void track() {
-
-		final List<Beacon> beacons = ProxiManager.getInstance().getStrongestBeacons(5);
-		final Beacon primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
-
+		/*
+		 * By not passing any beacons, a "browse_entity" action will be logged
+		 * but we are not creating any browse links. Also not sending beacons means
+		 * no modifications for the local cache and place rank scores.
+		 */
 		new AsyncTask() {
 
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("TrackEntityBrowse");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().trackEntity(mEntity, beacons, primaryBeacon, "browse");
+				final ModelResult result = ProxiManager.getInstance().getEntityModel().trackEntity(mEntity, null, null, "browse");
 				return result;
 			}
 
@@ -236,7 +233,7 @@ public class CandiForm extends CandiActivity {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					final Entity upsizedEntity = (Entity) result.data;
 					mCommon.mEntityId = upsizedEntity.id;
-					doBind(false);
+					bind(false);
 				}
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.Tuning);
@@ -255,51 +252,6 @@ public class CandiForm extends CandiActivity {
 	private void draw() {
 		CandiForm.buildCandiForm(this, mEntity, mContentView, mCommon.mMenu, null, false);
 		mCandiForm.setVisibility(View.VISIBLE);
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Event bus routines
-	// --------------------------------------------------------------------------------------------
-
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onQueryWifiScanReceived(final QueryWifiScanReceivedEvent event) {
-
-		if (mTuningInProcess) {
-			runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					Logger.d(CandiForm.this, "Query wifi scan received event: locking beacons");
-					if (event.wifiList != null && event.wifiList.size() > 0) {
-						ProxiManager.getInstance().lockBeacons();
-					}
-					else {
-						/*
-						 * We fake that the tuning happened because it is simpler than enabling/disabling ui
-						 */
-						setSupportProgressBarIndeterminateVisibility(false);
-						mCommon.hideBusy(true);
-						mTuningInProcess = false;
-						ImageUtils.showToastNotification(getString(R.string.toast_tuned), Toast.LENGTH_SHORT);
-					}
-				}
-			});
-		}
-	}
-
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onBeaconsLocked(BeaconsLockedEvent event) {
-
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				Logger.d(CandiForm.this, "Beacons locked event: tune entity");
-				tuneProximity();
-			}
-		});
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -331,19 +283,6 @@ public class CandiForm extends CandiActivity {
 		AndroidManager.getInstance().callMapActivity(this, String.valueOf(location.latitude.doubleValue())
 				, String.valueOf(location.longitude.doubleValue())
 				, mEntity.name);
-	}
-
-	@SuppressWarnings("ucd")
-	public void onTuneButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "tune_place", null, 0);
-		mCommon.showBusy(R.string.progress_tuning, true);
-		mTuningInProcess = true;
-		if (NetworkManager.getInstance().isWifiEnabled()) {
-			ProxiManager.getInstance().scanForWifi(ScanReason.query);
-		}
-		else {
-			tuneProximity();
-		}
 	}
 
 	@SuppressWarnings("ucd")
@@ -450,27 +389,6 @@ public class CandiForm extends CandiActivity {
 	}
 
 	@SuppressWarnings("ucd")
-	public void onAddCandiButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "add_candi", null, 0);
-		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
-			mCommon.showTemplatePicker(false);
-		}
-		else {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
-					, null
-					, getResources().getString(R.string.alert_entity_locked)
-					, null
-					, this, android.R.string.ok, null, null, null);
-		}
-	}
-
-	@SuppressWarnings("ucd")
-	public void onEditCandiButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "edit_entity", null, 0);
-		mCommon.doEditCandiClick();
-	}
-
-	@SuppressWarnings("ucd")
 	public void onNewCommentButtonClick(View view) {
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 			final IntentBuilder intentBuilder = new IntentBuilder(this, CommentForm.class);
@@ -485,7 +403,25 @@ public class CandiForm extends CandiActivity {
 					, null
 					, getResources().getString(R.string.alert_entity_locked)
 					, null
-					, this, android.R.string.ok, null, null, null);
+					, this, android.R.string.ok, null, null, null, null);
+		}
+	}
+
+	@SuppressWarnings("ucd")
+	public void onTuneButtonClick(View view) {
+		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
+			final IntentBuilder intentBuilder = new IntentBuilder(this, TuningForm.class);
+			intentBuilder.setEntityId(mEntity.id);
+			final Intent intent = intentBuilder.create();
+			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		}
+		else {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.alert_entity_locked)
+					, null
+					, this, android.R.string.ok, null, null, null, null);
 		}
 	}
 
@@ -557,42 +493,6 @@ public class CandiForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
-
-	private void tuneProximity() {
-
-		final List<Beacon> beacons = ProxiManager.getInstance().getStrongestBeacons(5);
-		final Beacon primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
-
-		new AsyncTask() {
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("TrackEntityProximity");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().trackEntity(mEntity, beacons, primaryBeacon, "proximity");
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-				/*
-				 * Rebind so distance info gets updated.
-				 * 
-				 * TODO: We could check to see if proximity is new and only
-				 * refresh if true.
-				 */
-				if (mCandiView != null) {
-					mCandiView.showDistance(mEntity);
-					final Integer placeRankScore = mEntity.getPlaceRankScore();
-					mCandiView.getPlaceRankScore().setText(String.valueOf(placeRankScore));
-				}
-				//doBind(true);
-				setSupportProgressBarIndeterminateVisibility(false);
-				mCommon.hideBusy(true);
-				mTuningInProcess = false;
-				ImageUtils.showToastNotification(getString(R.string.toast_tuned), Toast.LENGTH_SHORT);
-			}
-		}.execute();
-	}
 
 	private static ViewGroup buildCandiForm(Context context, final Entity entity, final ViewGroup layout, Menu menu, GeoLocation mLocation, boolean refresh) { // $codepro.audit.disable largeNumberOfParameters
 		/*
@@ -876,18 +776,10 @@ public class CandiForm extends CandiActivity {
 		setVisibility(layout.findViewById(R.id.button_map), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_call), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_tune), View.GONE);
-		setVisibility(layout.findViewById(R.id.button_comment), View.GONE);
-		setVisibility(layout.findViewById(R.id.button_new), View.GONE);
-		setVisibility(layout.findViewById(R.id.button_edit), View.GONE);
-		setVisibility(layout.findViewById(R.id.button_comments_browse), View.GONE);
 
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_map));
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_call));
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_tune));
-		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_comments_browse));
-		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_comment));
-		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_new));
-		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_edit));
 
 		if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 
@@ -917,40 +809,71 @@ public class CandiForm extends CandiActivity {
 				setVisibility(layout.findViewById(R.id.form_footer), View.VISIBLE);
 			}
 		}
-
-		/* Browse comments */
-		setVisibility(layout.findViewById(R.id.button_comments_browse), View.VISIBLE);
-		if (entity.commentCount != null && entity.commentCount > 0) {
-			final Button button = (Button) layout.findViewById(R.id.button_comments_browse);
-			if (button != null) {
-				button.setText(String.valueOf(entity.commentCount) + ((entity.commentCount == 1) ? " Comment" : " Comments"));
-			}
-		}
-
-		/* Add candi */
-		if (entity.isCollection != null && entity.isCollection) {
-			setVisibility(layout.findViewById(R.id.button_new), View.VISIBLE);
-		}
-
-		/* Add comment */
-		setVisibility(layout.findViewById(R.id.button_comment), View.VISIBLE);
-
-		/* Edit */
-		if (entity.ownerId != null) {
-			if (entity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
-				setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
-			}
-			else if (entity.ownerId.equals(ProxiConstants.ADMIN_USER_ID)) {
-				setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
-			}
-			else if (!entity.ownerId.equals(ProxiConstants.ADMIN_USER_ID) && !entity.locked) {
-				setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
-			}
-		}
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		mCommon.doCreateOptionsMenu(menu);
+		mCommon.mMenuItemEdit.setVisible(canEdit());
+		mCommon.mMenuItemAdd.setVisible(canAdd());
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		if (item.getItemId() == R.id.edit) {
+			Tracker.sendEvent("ui_action", "edit_entity", null, 0);
+			mCommon.doEditCandiClick();
+			return true;
+		}
+		else if (item.getItemId() == R.id.add) {
+			Tracker.sendEvent("ui_action", "add_candi", null, 0);
+			if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
+				mCommon.showTemplatePicker(false);
+			}
+			else {
+				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+						, null
+						, getResources().getString(R.string.alert_entity_locked)
+						, null
+						, this, android.R.string.ok, null, null, null, null);
+			}
+			return true;
+		}
+
+		/* In case we add general menu items later */
+		mCommon.doOptionsItemSelected(item);
+		return true;
+	}
+
+	private Boolean canEdit() {
+		if (mEntity != null && mEntity.ownerId != null) {
+			if (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
+				return true;
+			}
+			else if (mEntity.ownerId.equals(ProxiConstants.ADMIN_USER_ID)) {
+				return true;
+			}
+			else if (!mEntity.ownerId.equals(ProxiConstants.ADMIN_USER_ID) && !mEntity.locked) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private Boolean canAdd() {
+		if (mEntity != null && mEntity.isCollection != null && mEntity.isCollection) {
+			return true;
+		}
+		return false;
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
@@ -993,18 +916,6 @@ public class CandiForm extends CandiActivity {
 		super.onPause();
 	}
 
-	@Override
-	protected void onStart() {
-		super.onStart();
-		enableEvents();
-	}
-
-	@Override
-	protected void onStop() {
-		disableEvents();
-		super.onStop();
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Dialogs
 	// --------------------------------------------------------------------------------------------
@@ -1018,6 +929,7 @@ public class CandiForm extends CandiActivity {
 				, this
 				, R.string.dialog_install_ok
 				, R.string.dialog_install_cancel
+				, null
 				, new DialogInterface.OnClickListener() {
 
 					@Override
@@ -1061,17 +973,6 @@ public class CandiForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
-
-	private void enableEvents() {
-		BusProvider.getInstance().register(this);
-	}
-
-	private void disableEvents() {
-		try {
-			BusProvider.getInstance().unregister(this);
-		}
-		catch (Exception e) {} // $codepro.audit.disable emptyCatchClause
-	}
 
 	@Override
 	protected int getLayoutId() {

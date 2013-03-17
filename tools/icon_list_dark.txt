@@ -21,6 +21,8 @@ ic_action_save_dark.png
 ic_action_search_dark.png
 ic_action_send_dark.png
 ic_action_settings_dark.png
+ic_action_star_0_dark.png
+ic_action_star_10_dark.png
 ic_action_tick_dark.png
 ic_action_tiles_large_dark.png
 ic_action_trash_dark.png

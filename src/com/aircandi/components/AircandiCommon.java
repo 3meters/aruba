@@ -110,6 +110,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 	private View				mRefreshImage;
 	private View				mRefreshProgress;
 	private MenuItem			mMenuItemRefresh;
+	public MenuItem				mMenuItemEdit;
+	public MenuItem				mMenuItemDelete;
+	public MenuItem				mMenuItemAdd;
 	private MenuItem			mMenuItemBeacons;
 	public Menu					mMenu;
 	private ProgressDialog		mProgressDialog;
@@ -212,14 +215,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		updateDevIndicator(null, event.location);
 	}
 
-	private void doProfileClick() {
-		final IntentBuilder intentBuilder = new IntentBuilder(mContext, ProfileForm.class);
-		intentBuilder.setCommandType(CommandType.View);
-		final Intent intent = intentBuilder.create();
-		mActivity.startActivity(intent);
-		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
-	}
-
 	public void doEditCandiClick() {
 		final IntentBuilder intentBuilder = new IntentBuilder(mActivity, EntityForm.class)
 				.setCommandType(CommandType.Edit)
@@ -228,6 +223,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 				.setEntityType(((CandiForm) mActivity).getEntity().type);
 		final Intent intent = intentBuilder.create();
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_EDIT);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
+	}
+
+	public void doEditUserClick() {
+		final IntentBuilder intentBuilder = new IntentBuilder(mActivity, ProfileForm.class)
+				.setCommandType(CommandType.View);
+		final Intent intent = intentBuilder.create();
+		mActivity.startActivity(intent);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
@@ -240,14 +243,16 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	private void doInfoClick() {
 		final String title = mActivity.getString(R.string.alert_about_title);
-		final String message = mActivity.getString(R.string.alert_about_message) + " "
+		final String message = mActivity.getString(R.string.alert_about_label_version) + " "
 				+ Aircandi.getVersionName(mContext, CandiRadar.class) + System.getProperty("line.separator")
-				+ mActivity.getString(R.string.dialog_info);
+				+ mActivity.getString(R.string.alert_about_label_code) + " "
+				+ String.valueOf(Aircandi.getVersionCode(mContext, CandiRadar.class)) + System.getProperty("line.separator")
+				+ mActivity.getString(R.string.dialog_about_copyright);
 		AircandiCommon.showAlertDialog(R.drawable.ic_launcher
 				, title
 				, message
 				, null
-				, mActivity, android.R.string.ok, null, new DialogInterface.OnClickListener() {
+				, mActivity, android.R.string.ok, null, null, new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {}
 				}, null);
@@ -297,7 +302,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					, mActivity.getString(R.string.alert_beacons_title)
 					, beaconMessage.toString()
 					, null
-					, mActivity, android.R.string.ok, null, new
+					, mActivity, android.R.string.ok, null, null, new
 					DialogInterface.OnClickListener() {
 
 						@Override
@@ -657,9 +662,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 			, Context context
 			, Integer okButtonId
 			, Integer cancelButtonId
+			, Integer neutralButtonId
 			, OnClickListener listenerClick
 			, OnCancelListener listenerCancel) {
-
+		
 		final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
 		if (iconResource != null) {
@@ -681,12 +687,16 @@ public class AircandiCommon implements ActionBar.TabListener {
 			builder.setPositiveButton(okButtonId, listenerClick);
 		}
 
-		if (listenerCancel != null) {
-			builder.setOnCancelListener(listenerCancel);
-		}
-
 		if (cancelButtonId != null) {
 			builder.setNegativeButton(cancelButtonId, listenerClick);
+		}
+
+		if (neutralButtonId != null) {
+			builder.setNeutralButton(neutralButtonId, listenerClick);
+		}
+
+		if (listenerCancel != null) {
+			builder.setOnCancelListener(listenerCancel);
 		}
 
 		final AlertDialog alert = builder.create();
@@ -718,6 +728,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 							, null
 							, mContext
 							, android.R.string.ok
+							, null
 							, null
 							, null
 							, null);
@@ -997,95 +1008,83 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 */
 		final SherlockActivity activity = (SherlockActivity) mActivity;
 		if (mPageName.equals("CandiRadar")) {
-			activity.getSupportMenuInflater().inflate(R.menu.menu_primary_radar, menu);
+			activity.getSupportMenuInflater().inflate(R.menu.menu_radar, menu);
+
+			/* Show update menuitem if one is needed */
+			MenuItem menuItem = menu.findItem(R.id.update);
+			if (menuItem != null) {
+				if (!Aircandi.applicationUpdateNeeded) {
+					menuItem.setVisible(false);
+				}
+			}
+			/* Beacon indicator */
+			mMenuItemBeacons = menu.findItem(R.id.beacons);
+			if (mMenuItemBeacons != null) {
+
+				/* Only show beacon indicator if user is a developer */
+				if (!Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
+						|| Aircandi.getInstance().getUser() == null
+						|| Aircandi.getInstance().getUser().isDeveloper == null
+						|| !Aircandi.getInstance().getUser().isDeveloper) {
+					mMenuItemBeacons.setVisible(false);
+				}
+				else {
+					mBeaconIndicator = (TextView) mMenuItemBeacons.getActionView().findViewById(R.id.beacon_indicator);
+					mMenuItemBeacons.getActionView().findViewById(R.id.beacon_frame).setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View view) {
+							doBeaconIndicatorClick();
+						}
+					});
+					//updateDevIndicator(ProxiManager.getInstance().mWifiList, LocationManager.getInstance().getLocationLocked());
+				}
+			}
+		}
+		else if (mPageName.equals("CandiForm")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_candi, menu);
+			activity.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
+		}
+		else if (mPageName.equals("CandiList")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_candi_list, menu);
+			activity.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
 		}
 		else if (mPageName.equals("CandiUser")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_user, menu);
+			activity.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
 
 			/* Hide user edit menu item if not the current user */
-			MenuItem menuItem = menu.findItem(R.id.edit_user);
+			MenuItem menuItem = menu.findItem(R.id.edit);
 			if (menuItem != null && !Aircandi.getInstance().getUser().id.equals(mUserId)) {
 				menuItem.setVisible(false);
 			}
 		}
+		else if (mPageName.equals("CommentList")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_comment_list, menu);
+			activity.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
+		}
+		else if (mPageName.equals("CommentForm")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_comment_form, menu);
+		}
+		else if (mPageName.equals("TuningForm")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
+		}
 		else if (mPageName.equals("EntityForm")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_entity, menu);
-		}
-		else if (mPageName.equals("CommentList")) {
-			activity.getSupportMenuInflater().inflate(R.menu.menu_comment, menu);
 		}
 		else if (mPageName.equals("FeedbackForm")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_send, menu);
 		}
-		else if (mPageName.equals("CommentForm")) {
-			activity.getSupportMenuInflater().inflate(R.menu.menu_post, menu);
-		}
-		else if (mPageName.equals("ProfileForm")) {
-			activity.getSupportMenuInflater().inflate(R.menu.menu_save, menu);
-		}
-		else if (mPageName.equals("PasswordForm")) {
-			activity.getSupportMenuInflater().inflate(R.menu.menu_save, menu);
-		}
-		else if (mPageName.equals("AddressBuilder")) {
+		else if (mPageName.equals("ProfileForm") || mPageName.equals("PasswordForm")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);
 		}
-		else if (mPageName.equals("CategoryBuilder")) {
+		else if (mPageName.contains("Builder")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);
 		}
-		else if (mPageName.equals("SourceBuilder")) {
-			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);
-		}
-		else if (mPageName.equals("SourcesBuilder")) {
-			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);
-		}
-		else {
-			activity.getSupportMenuInflater().inflate(R.menu.menu_primary, menu);
-		}
 
-		/* Hide add comment menu item if not in commentlist */
-		MenuItem menuItem = menu.findItem(R.id.add_comment);
-		if (menuItem != null && !mPageName.equals("CommentList")) {
-			if (mEntity != null && mEntity.locked) {
-				menuItem.setVisible(false);
-			}
-		}
-
-		/* Hide add custom place menuitem if this is not the CandiRadar activity */
-		menuItem = menu.findItem(R.id.add_custom_place);
-		if (menuItem != null && !mPageName.equals("CandiRadar")) {
-			menuItem.setVisible(false);
-		}
-
-		/* Show update menuitem if one is needed */
-		menuItem = menu.findItem(R.id.update);
-		if (menuItem != null && !mPageName.equals("SignInForm")) {
-			if (!Aircandi.applicationUpdateNeeded) {
-				menuItem.setVisible(false);
-			}
-		}
-
-		/* Beacon indicator */
-		mMenuItemBeacons = menu.findItem(R.id.beacons);
-		if (mMenuItemBeacons != null) {
-
-			/* Only show beacon indicator if user is a developer */
-			if (!Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
-					|| Aircandi.getInstance().getUser() == null
-					|| Aircandi.getInstance().getUser().isDeveloper == null
-					|| !Aircandi.getInstance().getUser().isDeveloper) {
-				mMenuItemBeacons.setVisible(false);
-			}
-			else {
-				mBeaconIndicator = (TextView) mMenuItemBeacons.getActionView().findViewById(R.id.beacon_indicator);
-				mMenuItemBeacons.getActionView().findViewById(R.id.beacon_frame).setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View view) {
-						doBeaconIndicatorClick();
-					}
-				});
-				//updateDevIndicator(ProxiManager.getInstance().mWifiList, LocationManager.getInstance().getLocationLocked());
-			}
-		}
+		/* Cache edit and delete menus because we need to toggle it later */
+		mMenuItemEdit = menu.findItem(R.id.edit);
+		mMenuItemDelete = menu.findItem(R.id.delete);
+		mMenuItemAdd = menu.findItem(R.id.add);
 
 		/* Cache refresh menu item for later ui updates */
 		mMenuItemRefresh = menu.findItem(R.id.refresh);
@@ -1122,11 +1121,15 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		switch (menuItem.getItemId()) {
 			case android.R.id.home:
-				/*
-				 * If this doesn't get handled directly by the activity then
-				 * it falls through to here and we want to go to the top of the app.
-				 */
 				mActivity.onBackPressed();
+				return;
+			case R.id.home:
+				intent = new Intent(mActivity, CandiRadar.class);
+				//intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				mActivity.finish();
+				mActivity.startActivity(intent);
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToPage);
 				return;
 			case R.id.settings:
 				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);
@@ -1135,9 +1138,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 			case R.id.signout:
 				Tracker.sendEvent("ui_action", "signout_user", null, 0);
 				signout();
-				return;
-			case R.id.edit_user:
-				doProfileClick();
 				return;
 			case R.id.update:
 				Logger.d(this, "Update menu item: navigating to install page");
@@ -1173,6 +1173,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 					mActivity.startActivity(intentBuilder.create());
 					AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 				}
+				return;
+			case R.id.cancel:
+				mActivity.setResult(Activity.RESULT_CANCELED);
+				mActivity.finish();
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.FormToPage);
 				return;
 			case R.id.about:
 				doInfoClick();
@@ -1267,10 +1272,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	@Override
 	public void onTabReselected(Tab tab, FragmentTransaction ft) {}
-
-	// --------------------------------------------------------------------------------------------
-	// Utility routines
-	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines

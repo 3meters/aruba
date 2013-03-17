@@ -17,8 +17,6 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Location;
 import com.aircandi.ui.base.FormActivity;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class AddressBuilder extends FormActivity {
 
@@ -151,12 +149,6 @@ public class AddressBuilder extends FormActivity {
 		if (item.getItemId() == R.id.accept) {
 			gather();
 			doSave();
-			return true;
-		}
-		if (item.getItemId() == R.id.cancel) {
-			setResult(Activity.RESULT_CANCELED);
-			finish();
-			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
 			return true;
 		}
 

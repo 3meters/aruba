@@ -107,7 +107,7 @@ public class PasswordForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		if (mTextPassword.getText().length() == 0) {
@@ -117,7 +117,7 @@ public class PasswordForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		if (mTextPasswordConfirm.getText().length() == 0) {
@@ -127,7 +127,7 @@ public class PasswordForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		if (mTextPassword.getText().length() < 6 || mTextPasswordConfirm.getText().length() < 6) {
@@ -137,7 +137,7 @@ public class PasswordForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
@@ -148,7 +148,7 @@ public class PasswordForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			mTextPasswordConfirm.setText("");
 			return false;
 		}
@@ -161,7 +161,7 @@ public class PasswordForm extends FormActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.save) {
+		if (item.getItemId() == R.id.accept) {
 			doSave();
 			return true;
 		}

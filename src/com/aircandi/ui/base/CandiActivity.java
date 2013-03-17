@@ -101,6 +101,7 @@ public abstract class CandiActivity extends SherlockActivity {
 							, CandiActivity.this
 							, R.string.alert_upgrade_ok
 							, R.string.alert_upgrade_cancel
+							, null
 							, new DialogInterface.OnClickListener() {
 
 								@Override
@@ -160,6 +161,7 @@ public abstract class CandiActivity extends SherlockActivity {
 							, CandiActivity.this
 							, R.string.alert_wifi_settings
 							, R.string.alert_wifi_cancel
+							, null
 							, new DialogInterface.OnClickListener() {
 
 								@Override

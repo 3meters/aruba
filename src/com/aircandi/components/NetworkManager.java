@@ -25,15 +25,15 @@ import com.aircandi.service.ServiceRequest;
 
 public class NetworkManager {
 
-	private static NetworkManager		singletonObject;
-	public static int					CONNECT_TRIES				= 10;
-	public static int					CONNECT_WAIT				= 500;
+	private static NetworkManager			singletonObject;
+	public static int						CONNECT_TRIES				= 10;
+	public static int						CONNECT_WAIT				= 500;
 
-	private Context						mApplicationContext;
+	private Context							mApplicationContext;
 	private final WifiStateChangedReceiver	mWifiStateChangedReceiver	= new WifiStateChangedReceiver();
-	private Integer						mWifiState;
-	private WifiManager					mWifiManager;
-	private ConnectivityManager			mConnectivityManager;
+	private Integer							mWifiState;
+	private WifiManager						mWifiManager;
+	private ConnectivityManager				mConnectivityManager;
 
 	public static synchronized NetworkManager getInstance() {
 		if (singletonObject == null) {
@@ -154,11 +154,14 @@ public class NetworkManager {
 	}
 
 	@SuppressWarnings("ucd")
-	protected boolean isMobileNetwork() {
+	protected Boolean isMobileNetwork() {
 		/* Check if we're connected to a data network, and if so - if it's a mobile network. */
-		final NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
-		final Boolean mobileNetwork = activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE;
-		return mobileNetwork;
+		Boolean isMobileNetwork = null;
+		if (mConnectivityManager != null) {
+			final NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
+			isMobileNetwork = activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE;
+		}
+		return isMobileNetwork;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -166,7 +169,11 @@ public class NetworkManager {
 	// --------------------------------------------------------------------------------------------
 
 	public Boolean isWifiEnabled() {
-		return mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED;
+		Boolean wifiEnabled = null;
+		if (mWifiManager != null) {
+			wifiEnabled = mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED;
+		}
+		return wifiEnabled;
 	}
 
 	public boolean isWifiTethered() {

@@ -102,7 +102,9 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 		SessionException,
 		PasswordException,
 		GatewayTimeoutException,
-		SocketException
+		SocketException,
+		WhitelistException,
+		UnverifiedException
 	}
 
 	/**

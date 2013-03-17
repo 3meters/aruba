@@ -53,7 +53,6 @@ import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.User;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Location;
 import com.aircandi.service.objects.Observation;
@@ -61,6 +60,7 @@ import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Source;
+import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.builders.AddressBuilder;
 import com.aircandi.ui.builders.CategoryBuilder;
@@ -178,9 +178,6 @@ public class EntityForm extends FormActivity {
 				}
 			}
 		}
-		@SuppressWarnings("unused")
-		List<Entity> entities = mEntityForForm.getChildren();
-
 	}
 
 	private Entity makeEntity(String type) {
@@ -645,7 +642,11 @@ public class EntityForm extends FormActivity {
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
-						setResult(CandiConstants.RESULT_ENTITY_INSERTED);
+
+						/* Return the id of the inserted entity in case the caller can use it */
+						final Intent intent = new Intent();
+						intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, ((Entity)result.data).id);
+						setResult(CandiConstants.RESULT_ENTITY_INSERTED, intent);
 					}
 				}
 				else if (mCommon.mCommandType == CommandType.Edit) {
@@ -690,14 +691,18 @@ public class EntityForm extends FormActivity {
 				, getResources().getString(R.string.alert_entity_dirty_exit_title)
 				, getResources().getString(R.string.alert_entity_dirty_exit_message)
 				, null
-				, this
-				, android.R.string.ok
+				, EntityForm.this
+				, R.string.alert_dirty_save
 				, android.R.string.cancel
+				, R.string.alert_dirty_discard
 				, new DialogInterface.OnClickListener() {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
+							doSave();
+						}
+						else if (which == Dialog.BUTTON_NEUTRAL) {
 							setResult(Activity.RESULT_CANCELED);
 							finish();
 							AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
@@ -718,6 +723,7 @@ public class EntityForm extends FormActivity {
 				, this
 				, android.R.string.ok
 				, android.R.string.cancel
+				, null
 				, new DialogInterface.OnClickListener() {
 
 					@Override
@@ -881,12 +887,13 @@ public class EntityForm extends FormActivity {
 		mCommon.doCreateOptionsMenu(menu);
 		if (mEntityForForm != null) {
 
+			MenuItem menuItem = menu.findItem(R.id.delete);
+			menuItem.setVisible(false);
 			if (mEntityForForm.ownerId != null
 					&& (mEntityForForm.ownerId.equals(Aircandi.getInstance().getUser().id)
 					|| (Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
 							&& Aircandi.getInstance().getUser().isDeveloper != null
 							&& Aircandi.getInstance().getUser().isDeveloper))) {
-				MenuItem menuItem = menu.findItem(R.id.delete);
 				menuItem.setVisible(true);
 			}
 		}
@@ -895,11 +902,22 @@ public class EntityForm extends FormActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.save) {
+		if (item.getItemId() == R.id.accept) {
 			if (isDirty()) {
 				doSave();
 			}
 			else {
+				finish();
+				AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
+			}
+			return true;
+		}
+		else if (item.getItemId() == R.id.cancel) {
+			if (isDirty()) {
+				confirmDirtyExit();
+			}
+			else {
+				setResult(Activity.RESULT_CANCELED);
 				finish();
 				AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
 			}

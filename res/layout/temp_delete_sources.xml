@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:text="@string/dummy_title"
+        android:textColor="?attr/textColor"
         android:textAppearance="@style/app_text_appearance_tiny" />
 
     <LinearLayout

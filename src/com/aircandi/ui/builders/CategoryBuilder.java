@@ -35,8 +35,6 @@ import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class CategoryBuilder extends FormActivity {
 
@@ -170,12 +168,6 @@ public class CategoryBuilder extends FormActivity {
 		if (item.getItemId() == R.id.accept) {
 			gather();
 			doSave();
-			return true;
-		}
-		if (item.getItemId() == R.id.cancel) {
-			setResult(Activity.RESULT_CANCELED);
-			finish();
-			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
 			return true;
 		}
 

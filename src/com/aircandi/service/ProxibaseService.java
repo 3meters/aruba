@@ -28,6 +28,7 @@ import net.minidev.json.parser.ContainerFactory;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 
+import org.acra.ACRA;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -202,11 +203,13 @@ public class ProxibaseService {
 	private DefaultHttpClient createHttpClient() {
 
 		/*
-		 * FIXME: AllowAllHostnameVerifier doesn't verify host names contained in SSL certificate. It should not be set in
+		 * Set to BrowserCompatHostnameVerifier
+		 * 
+		 * AllowAllHostnameVerifier doesn't verify host names contained in SSL certificate. It should not be set in
 		 * production environment. It may allow man in middle attack. Other host name verifiers for specific needs
 		 * are StrictHostnameVerifier and BrowserCompatHostnameVerifier.
 		 */
-		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
 
 		final SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
 		sslSocketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
@@ -607,12 +610,12 @@ public class ProxibaseService {
 			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
 				proxibaseException = new ProxibaseServiceException("Unauthorized whitelist");
 				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.UnauthorizedException);
+				proxibaseException.setErrorCode(ErrorCode.WhitelistException);
 			}
 			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED) {
 				proxibaseException = new ProxibaseServiceException("Unauthorized unverified");
 				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.UnauthorizedException);
+				proxibaseException.setErrorCode(ErrorCode.UnverifiedException);
 			}
 			else if (httpStatusCode == HttpStatus.SC_FORBIDDEN) {
 				/* weak password, duplicate email */
@@ -978,6 +981,16 @@ public class ProxibaseService {
 			return serviceData;
 		}
 		catch (ParseException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		catch (ClassCastException e) {
+			/*
+			 * Sometimes we get back something that isn't a json object so we
+			 * catch the exception, log it and keep going.
+			 */
+			ACRA.getErrorReporter().handleSilentException(e);
 			if (BuildConfig.DEBUG) {
 				e.printStackTrace();
 			}

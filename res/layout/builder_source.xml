@@ -68,7 +68,16 @@
                 android:maxLines="5"
                 android:minHeight="@dimen/form_field_height"
                 android:minLines="1"
+                android:layout_marginBottom="20dp"
                 android:textAppearance="@style/app_text_appearance_small" />
+
+            <Button
+                android:id="@+id/button_test"
+                style="@style/form_button"
+                android:layout_width="@dimen/image_medium"
+                android:layout_height="wrap_content"
+                android:onClick="onTestButtonClick"
+                android:text="@string/form_button_test" />
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
 

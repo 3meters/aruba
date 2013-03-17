@@ -11,10 +11,12 @@
 
     <string name="menu_beacons_item">Beacons</string>
     <string name="menu_add_custom_place_item">Add custom place</string>
+    <string name="menu_add_candi_item">Add candi</string>
     <string name="menu_add_comment_item">Add comment</string>
     <string name="menu_refresh_item">Refresh</string>
     <string name="menu_edit_item">Edit</string>
     <string name="menu_profile_item">Profile</string>
+    <string name="menu_home_item">Home</string>
     <string name="menu_settings_item">Settings</string>
     <string name="menu_feedback_item">Feedback</string>
     <string name="menu_update_item">Update</string>
@@ -27,7 +29,7 @@
     <string name="menu_delete_item">Delete</string>
     <string name="menu_accept_item">Accept</string>
     <string name="menu_cancel_item">Cancel</string>
-    
+
     <!-- Preferences -->
 
     <string name="pref_dialog_ok">OK</string>
@@ -43,7 +45,7 @@
     <string name="pref_theme_dialog_title">Select theme</string>
     <string name="pref_sound_effects_summary">Play sound notifications and effects</string>
     <string name="pref_sound_effects_title">Sounds</string>
-    
+
     <!-- Testing (used for view previews) -->
 
     <string name="dummy_title">Zoka Coffee Roaster &amp; Tea Company</string>
@@ -75,33 +77,41 @@
     <string name="alert_wifi_disabled">Enable wifi for best results using Aircandi.</string>
     <string name="alert_wifi_settings">Settings</string>
     <string name="alert_wifi_cancel" tools:ignore="ButtonCase">cancel</string>
-    <string name="alert_source_delete_title">Delete link</string>
-    <string name="alert_source_delete_message_single">Are you sure you want to delete this link?</string>
-    <string name="alert_source_delete_message_multiple">Are you sure you want to delete these links?</string>
-    <string name="alert_entity_dirty_exit_title">Editing</string>
-    <string name="alert_entity_dirty_exit_message">Do you want to discard your editing changes?</string>
-    <string name="alert_comment_dirty_exit_title">Unposted</string>
-    <string name="alert_comment_dirty_exit_message">Do you want to discard your comment?</string>
-    <string name="alert_feedback_dirty_exit_title">Unposted</string>
-    <string name="alert_feedback_dirty_exit_message">Do you want to discard your feedback?</string>
-    <string name="alert_sources_dirty_exit_title">Editing</string>
-    <string name="alert_sources_dirty_exit_message">Do you want to discard your editing changes?</string>
     <string name="alert_deleted">deleted</string>
     <string name="alert_updated">saved</string>
     <string name="alert_inserted">saved</string>
     <string name="alert_signed_in">signed in as</string>
     <string name="alert_password_changed">password changed for</string>
     <string name="alert_about_title">about</string>
-    <string name="alert_about_message">version:</string>
+    <string name="alert_about_label_version">version:</string>
+    <string name="alert_about_label_code">package version:</string>
     <string name="alert_beacons_title">aircandi beacons</string>
     <string name="alert_send_password_title">forgot password</string>
     <string name="alert_send_password_message">A message has been sent to your email address with your current password.</string>
     <string name="alert_feedback_sent">Thank you for the feedback!</string>
-    
+
+    <!-- Alerts: confirm dirty -->
+
+    <string name="alert_dirty_save">Save</string>
+    <string name="alert_dirty_discard">Discard</string>
+    <string name="alert_entity_dirty_exit_title">Editing</string>
+    <string name="alert_entity_dirty_exit_message">Do you want to save your editing changes?</string>
+    <string name="alert_comment_dirty_exit_title">Unposted</string>
+    <string name="alert_comment_dirty_exit_message">Do you want to send your comment?</string>
+    <string name="alert_feedback_dirty_exit_title">Unposted</string>
+    <string name="alert_feedback_dirty_exit_message">Do you want to send your feedback?</string>
+    <string name="alert_sources_dirty_exit_title">Editing</string>
+    <string name="alert_sources_dirty_exit_message">Do you want to save your editing changes?</string>
+
+    <!-- Alerts: confirm delete -->
+
     <string name="alert_entity_delete_title">Confirm delete</string>
     <string name="alert_place_delete_message_single">Are you sure you want to delete this place?</string>
     <string name="alert_candi_delete_message_single">Are you sure you want to delete this candi?</string>
-    
+    <string name="alert_source_delete_title">Delete link</string>
+    <string name="alert_source_delete_message_single">Are you sure you want to delete this link?</string>
+    <string name="alert_source_delete_message_multiple">Are you sure you want to delete these links?</string>
+
     <!-- Errors -->
 
     <string name="error_signup_missmatched_passwords_title">Password</string>
@@ -129,7 +139,6 @@
     <string name="error_session_expired">Your login session expired. Please re-sign in.</string>
     <string name="error_session_invalid">Your login session is invalid. Please re-sign in.</string>
     <string name="error_weburi_invalid">Web address isn\'t in a valid format.</string>
-    
     <string name="error_missing_fullname">Enter a name.</string>
     <string name="error_missing_email">Enter an email address.</string>
     <string name="error_missing_password_weak">Password must be a minimum of six characters long.</string>
@@ -139,7 +148,7 @@
     <string name="error_missing_source_label">Enter a label.</string>
     <string name="error_missing_source_id_and_url">Enter a web address or id.</string>
     <string name="error_missing_message">Enter a message.</string>
-    
+
     <!-- Toast -->
 
     <string name="toast_signed_out">Signed out.</string>
@@ -174,7 +183,7 @@
     <!-- Android choosers -->
 
     <string name="chooser_gallery_title">Select a picture</string>
-    
+
     <!-- Symbols -->
 
     <string name="symbol_bullet">•</string>
@@ -186,8 +195,8 @@
 
     <!-- Dialogs -->
 
-    <string name="dialog_info">copyright 3meters LLC 2010&#8211;2013</string>
-    <string name="dialog_template_picker_title">select candi type</string>
+    <string name="dialog_about_copyright">copyright 3meters LLC 2010&#8211;2013</string>
+    <string name="dialog_template_picker_title">add some candi</string>
     <string name="dialog_address_builder_title">address</string>
     <string name="dialog_category_builder_title">category</string>
     <string name="dialog_source_builder_title_new">new link</string>
@@ -201,13 +210,12 @@
     <string name="dialog_picture_source_camera">Take a new picture</string>
     <string name="dialog_picture_source_place">Select a place picture</string>
     <string name="dialog_picture_source_default">Default</string>
-
     <string name="dialog_install_title">Install</string>
     <string name="dialog_install_message">An android application is available for this link.</string>
     <string name="dialog_install_ok">install</string>
     <string name="dialog_install_cancel">no thanks</string>
     <string name="dialog_install_toast_package_installed">has been installed. Tap the link to launch.</string>
-        
+
     <!-- CandiList -->
 
     <string name="name_entity_list_type_collection">collections</string>
@@ -219,11 +227,12 @@
     <string name="candi_section_photos_more">view all photos</string>
     <string name="candi_section_places_more">view all places</string>
     <string name="candi_section_posts_more">view all posts</string>
-    <string name="candi_section_candi_more">view all candi</string>    
-    <string name="candi_button_tune">i\'m here</string>
+    <string name="candi_section_candi_more">view all candi</string>
+    <string name="candi_button_tune">tune it!</string>
     <string name="candi_button_call">call</string>
     <string name="candi_button_new">add candi</string>
     <string name="candi_button_edit">edit</string>
+    <string name="candi_button_polish">polish</string>
     <string name="candi_section_switchboard_place">place info</string>
     <string name="candi_section_candi">candi</string>
     <string name="candi_section_user_candi_places">my places</string>
@@ -234,7 +243,7 @@
     <string name="candi_label_user_added_by">added</string>
     <string name="candi_label_user_posted_by">posted</string>
     <string name="candi_label_user_edited_by">edited</string>
-    
+
     <!-- Comments -->
 
     <string name="candi_button_comment">comment</string>
@@ -259,7 +268,8 @@
     <string name="form_title_comment">comment</string>
     <string name="form_title_feedback">feedback</string>
     <string name="form_title_links">links</string>
-    
+    <string name="form_title_tune">tune</string>
+
     <!-- Forms.misc -->
 
     <string name="form_tab_content">content</string>
@@ -270,6 +280,7 @@
     <!-- Forms.buttons -->
 
     <string name="form_button_change_picture">select</string>
+    <string name="form_button_save_picture">save</string>
     <string name="form_button_test_link">test</string>
     <string name="form_button_change_password">change password</string>
     <string name="form_button_sign_in">sign in</string>
@@ -278,21 +289,34 @@
     <string name="form_button_cancel" tools:ignore="ButtonCase">cancel</string>
     <string name="form_button_terms">terms</string>
     <string name="form_button_send_password">forgot password?</string>
-    
+    <string name="form_button_test">test</string>
+    <string name="form_button_tuning_tune">i\'m here</string>
+    <string name="form_button_tuning_tuned">thanks!</string>
+    <string name="form_button_tuning_add_candi">add candi</string>
+    <string name="form_button_tuning_edit">edit</string>
+
     <!-- Forms.labels -->
 
     <string name="form_label_fullname">full name</string>
     <string name="form_label_bio">bio</string>
     <string name="form_label_link">web</string>
     <string name="form_label_location">location</string>
-    <string name="form_label_password">password (minimum of 6 characters)</string>
+    <string name="form_label_password">password (6 characters or more)</string>
     <string name="form_label_terms">By clicking the register button, you agree to the terms of service:</string>
     <string name="form_label_password_confirm">confirm password</string>
     <string name="form_label_password_old">old password</string>
     <string name="form_label_email">email</string>
     <string name="form_label_locked">locked</string>
     <string name="form_label_do_not_track">browse in private</string>
-    
+    <string name="tuning_section_banner">great banner</string>
+    <string name="tuning_section_tune">lock it in</string>
+    <string name="tuning_section_add_candi">add some candi</string>
+    <string name="tuning_section_edit">advanced editing</string>
+    <string name="form_label_tuning_banner">Is there a picture that would make a better banner for this place? Search, browse or use the camera.</string>
+    <string name="form_label_tuning_tune">If you are currently at the place you are browsing, make Aircandi better by tuning the place for faster and more accurate discovery.</string>
+    <string name="form_label_tuning_add_candi">Add some candi and make your mark with a photo or post.</string>
+    <string name="form_label_tuning_edit">Update place details like the address or customize links.</string>
+
     <!-- Forms.hints -->
 
     <string name="form_source_type_hint">type of link</string>
@@ -317,7 +341,7 @@
     <string name="picture_search_query_hint">search</string>
     <string name="form_do_not_track_on_hint">All browsing activity is anonymous but editing, creating and commenting are public.</string>
     <string name="form_do_not_track_off_hint">All browsing, editing, creating and commenting activities are public.</string>
-    
+
     <!-- Forms.messages -->
 
     <string name="signin_message_general">Sign in to create and share candi with other Aircandi users!</string>
@@ -326,6 +350,7 @@
     <!-- Crash reporting -->
 
     <string name="crash_toast_text">Ouch! Aircandi stopped, but a report can be sent to help us fix the error!</string>
+    <string name="crash_sent_toast_text">Ouch! Aircandi stopped, but a report has been sent to help us fix the error!</string>
     <string name="crash_notif_ticker_text">Unexpected error, please send a report&#8230;</string>
     <string name="crash_notif_title">Aircandi has stopped&#8230;</string>
     <string name="crash_notif_text">Please click here to help us fix the error.</string>

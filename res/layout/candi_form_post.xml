@@ -13,7 +13,6 @@
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
         android:background="?attr/backgroundCandi"
         android:fillViewport="true"
@@ -90,41 +89,5 @@
             </LinearLayout>
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
-
-    <!-- Footer -->
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_above="@+id/form_footer"
-        android:background="?attr/ruleColor" />
-
-    <LinearLayout
-        android:id="@+id/form_footer"
-        style="?attr/buttonBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/button_comment"
-            style="@style/form_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onNewCommentButtonClick"
-            android:text="@string/candi_button_comment" />
-
-        <Button
-            android:id="@+id/button_edit"
-            style="@style/form_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:minWidth="100dp"
-            android:onClick="onEditCandiButtonClick"
-            android:text="@string/candi_button_edit" />
-    </LinearLayout>
 
 </RelativeLayout>

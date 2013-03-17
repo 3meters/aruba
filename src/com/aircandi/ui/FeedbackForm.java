@@ -12,8 +12,8 @@ import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
@@ -120,13 +120,17 @@ public class FeedbackForm extends FormActivity {
 				, getResources().getString(R.string.alert_feedback_dirty_exit_message)
 				, null
 				, this
-				, android.R.string.ok
+				, R.string.alert_dirty_save
 				, android.R.string.cancel
+				, R.string.alert_dirty_discard
 				, new DialogInterface.OnClickListener() {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
+							doSave();
+						}
+						else if (which == Dialog.BUTTON_NEUTRAL) {
 							setResult(Activity.RESULT_CANCELED);
 							finish();
 							AnimUtils.doOverridePendingTransition(FeedbackForm.this, TransitionType.FormToPage);
@@ -145,7 +149,7 @@ public class FeedbackForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		return true;

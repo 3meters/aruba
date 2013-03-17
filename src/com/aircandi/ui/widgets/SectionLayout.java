@@ -28,7 +28,7 @@ public class SectionLayout extends LinearLayout {
 
 		final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.SectionLayout);
 
-		mLayoutHeaderId = ta.getResourceId(R.styleable.SectionLayout_layoutHeader, R.layout.temp_section_header);
+		mLayoutHeaderId = ta.getResourceId(R.styleable.SectionLayout_layoutHeader, 0);
 		mLayoutFooterId = ta.getResourceId(R.styleable.SectionLayout_layoutFooter, 0);
 		mHeaderTitle = ta.getString(R.styleable.SectionLayout_headerTitle);
 

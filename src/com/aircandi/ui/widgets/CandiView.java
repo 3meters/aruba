@@ -243,18 +243,19 @@ public class CandiView extends RelativeLayout {
 					setVisibility(mCandiSources, View.VISIBLE);
 				}
 
-				/* Distance */
-				showDistance(entity);
-
-				/* Place rank score - dev only */
-				setVisibility(mPlaceRankScore, View.GONE);
-				if (mPlaceRankScore != null
-						&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
-						&& Aircandi.settings.getBoolean(CandiConstants.PREF_SHOW_PLACE_RANK_SCORE, CandiConstants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT)) {
-					mPlaceRankScore.setText(String.valueOf(entity.getPlaceRankScore()));
-					setVisibility(mPlaceRankScore, View.VISIBLE);
-				}
 			}
+			/* Distance */
+			showDistance(entity);
+
+			/* Place rank score - dev only */
+			setVisibility(mPlaceRankScore, View.GONE);
+			//			if (mPlaceRankScore != null
+			//					&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
+			//					&& Aircandi.settings.getBoolean(CandiConstants.PREF_SHOW_PLACE_RANK_SCORE, CandiConstants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT)) {
+			//				mPlaceRankScore.setText(String.valueOf(entity.getPlaceRankScore()));
+			//				setVisibility(mPlaceRankScore, View.VISIBLE);
+			//			}
+
 		}
 	}
 
@@ -287,6 +288,7 @@ public class CandiView extends RelativeLayout {
 
 					if (imageUri.equals("resource:img_placeholder_logo_bw")) {
 						(mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
+						mCandiImage.getImageView().setTag(imageUri);
 						mCandiImage.getImageView().setImageDrawable(null);
 					}
 					else {
@@ -320,8 +322,8 @@ public class CandiView extends RelativeLayout {
 	public void showDistance(Entity entity) {
 		setVisibility(mDistance, View.GONE);
 		if (mDistance != null) {
-			String info = "here";
 
+			String info = "here";
 			final float distance = entity.getDistance(); // In meters
 			final String target = entity.hasActiveProximityLink() ? "B:" : "L:";
 			/*

@@ -4,10 +4,13 @@ import java.util.Locale;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
@@ -51,6 +54,19 @@ public class SignInForm extends FormActivity {
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextMessage = (TextView) findViewById(R.id.form_message);
 
+		mTextPassword.setImeOptions(EditorInfo.IME_ACTION_GO);
+		mTextPassword.setOnEditorActionListener(new OnEditorActionListener() {
+
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_GO) {
+					doSignIn();
+					return true;
+				}
+				return false;
+			}
+		});
+
 		FontManager.getInstance().setTypefaceDefault(mTextEmail);
 		FontManager.getInstance().setTypefaceDefault(mTextPassword);
 		FontManager.getInstance().setTypefaceDefault(mTextMessage);
@@ -79,10 +95,10 @@ public class SignInForm extends FormActivity {
 				, getResources().getString(R.string.alert_send_password_title)
 				, getResources().getString(R.string.alert_send_password_message)
 				, null
-				, SignInForm.this, android.R.string.ok, null, null, null);
+				, SignInForm.this, android.R.string.ok, null, null, null, null);
 		Tracker.sendEvent("ui_action", "recover_password", null, 0);
 	}
-	
+
 	@SuppressWarnings("ucd")
 	public void onSignInButtonClick(View view) {
 		doSignIn();
@@ -157,7 +173,7 @@ public class SignInForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		if (!MiscUtils.validEmail(mTextEmail.getText().toString())) {
@@ -167,7 +183,7 @@ public class SignInForm extends FormActivity {
 					, null
 					, this
 					, android.R.string.ok
-					, null, null, null);
+					, null, null, null, null);
 			return false;
 		}
 		return true;

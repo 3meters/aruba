@@ -39,9 +39,9 @@ import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.LinkType;
-import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.Photo;
+import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.User;
@@ -298,114 +298,15 @@ public class ProxiManager {
 		return serviceResponse;
 	}
 
-	public synchronized ServiceResponse getEntitiesForLocation(Integer maxDistance) {
-
-		ServiceResponse serviceResponse = new ServiceResponse();
-
-		/* Set method parameters */
-		final Bundle parameters = new Bundle();
-
-		final Observation observation = LocationManager.getInstance().getObservationLocked();
-		if (observation != null) {
-			parameters.putString("observation", "object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
-//			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
-//					CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
-			parameters.putFloat("radius", LocationManager.getRadiusForMeters((float) maxDistance));
-		}
-
-		/* We don't want to fetch entities we already have via proximity links to local beacons */
-		final List<String> excludeEntityIds = new ArrayList<String>();
-		for (Entity entity : mEntityModel.getProximityPlaces()) {
-			excludeEntityIds.add(entity.id);
-		}
-
-		if (excludeEntityIds.size() > 0) {
-			parameters.putStringArrayList("excludeEntityIds", (ArrayList<String>) excludeEntityIds);
-		}
-
-		parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
-		parameters.putString("options", "object:{\"limit\":"
-				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
-				+ ",\"skip\":0"
-				+ ",\"sort\":{\"modifiedDate\":-1} "
-				+ ",\"children\":{\"limit\":"
-				+ String.valueOf(ProxiConstants.RADAR_CHILDENTITY_LIMIT)
-				+ ",\"skip\":0"
-				+ ",\"sort\":{\"modifiedDate\":-1}}"
-				+ "}");
-
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForLocation")
-				.setRequestType(RequestType.Method)
-				.setParameters(parameters)
-				.setResponseFormat(ResponseFormat.Json);
-
-		serviceResponse = dispatch(serviceRequest);
-
-		if (serviceResponse.responseCode == ResponseCode.Success) {
-
-			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
-			serviceResponse.data = serviceData;
-
-			if (serviceData != null) {
-
-				final List<Entity> entities = (List<Entity>) serviceData.data;
-				/*
-				 * Make sure we don't have duplicates keyed on sourceId because
-				 * getPlacesNearLocation could have already completed.
-				 */
-				synchronized (mEntityModel.mEntityCache) {
-					for (Entity entity : entities) {
-						if (entity.place != null) {
-							if (mEntityModel.mEntityCache.containsKey(entity.place.id)) {
-								mEntityModel.mEntityCache.remove(entity.place.id);
-							}
-						}
-					}
-				}
-				/*
-				 * These were found purely using location but they can still come with
-				 * links to beacons not currently visible. To keep things clean, we
-				 * make sure the links without beacons are stripped.
-				 */
-				for (Entity entity : entities) {
-					if (entity.links != null) {
-						entity.links.clear();
-					}
-				}
-
-				/* Proximity place trumps location place with the same id */
-				for (Entity proximityEntity : mEntityModel.getProximityPlaces()) {
-					for (Entity entity : entities) {
-						if (entity.id.equals(proximityEntity.id)) {
-							entities.remove(entity);
-							break;
-						}
-					}
-				}
-
-				/* Merge entities into data model */
-				mEntityModel.upsertEntities(entities);
-			}
-
-			final List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
-
-			BusProvider.getInstance().post(new EntitiesForLocationFinishedEvent());
-			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
-		}
-		return serviceResponse;
-	}
-
 	public synchronized ServiceResponse getPlacesNearLocation(Observation observation) {
-		
+
 		ServiceResponse serviceResponse = new ServiceResponse();
+		final Bundle parameters = new Bundle();
 		/*
-		 * Make a list of places that should be excluded because
-		 * we already have entities for them.
-		 * 
-		 * Note: It is possible for this to get called before places by beacons has
-		 * completed.
+		 * We find all aircandi place entities in the cache (via proximity or location) that are active based
+		 * on the current search parameters (beacons and search radius) and could be supplied by the place provider. We
+		 * create an array of the provider place id's and pass them so they can be excluded from the places
+		 * that get returned.
 		 */
 		final List<String> excludePlaceIds = new ArrayList<String>();
 		for (Entity entity : mEntityModel.getAircandiPlaces()) {
@@ -414,7 +315,6 @@ public class ProxiManager {
 			}
 		}
 
-		final Bundle parameters = new Bundle();
 		if (excludePlaceIds.size() > 0) {
 			parameters.putStringArrayList("excludePlaceIds", (ArrayList<String>) excludePlaceIds);
 		}
@@ -425,7 +325,7 @@ public class ProxiManager {
 		parameters.putFloat("latitude", observation.latitude.floatValue());
 		parameters.putFloat("longitude", observation.longitude.floatValue());
 		parameters.putInt("limit", ProxiConstants.RADAR_PLACES_LIMIT);
-		
+
 		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
 				CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
 		parameters.putInt("radius", searchRangeMeters);
@@ -439,6 +339,7 @@ public class ProxiManager {
 		serviceResponse = dispatch(serviceRequest);
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
+
 			final String jsonResponse = (String) serviceResponse.data;
 			final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
@@ -449,22 +350,32 @@ public class ProxiManager {
 				/* Do a bit of fixup */
 				final List<Entity> entities = (List<Entity>) serviceData.data;
 				for (Entity entity : entities) {
-					entity.modifiedDate = DateUtils.nowDate().getTime();
-					entity.synthetic = true;
+					/* No id means it's a synthetic */
+					if (entity.id == null) {
+						entity.id = entity.place.id;
+						entity.modifiedDate = DateUtils.nowDate().getTime();
+						entity.synthetic = true;
+					}
+					else {
+						entity.synthetic = false;
+					}
 				}
 
-				/* Double check to make sure we don't have any duplicates of radar places */
-				final List<Entity> aircandiPlaces = mEntityModel.getAircandiPlaces();
+				/* Places locked in by proximity trump places locked in by location */
+				final List<Entity> proximityPlaces = mEntityModel.getProximityPlaces();
 				for (int i = entities.size() - 1; i >= 0; i--) {
-					for (Entity entity : aircandiPlaces) {
-						if (!entity.place.provider.equals("user")) {
+					for (Entity entity : proximityPlaces) {
+						if (entity.id.equals(entities.get(i).id)) {
+							entities.remove(i);
+						}
+						else if (!entity.place.provider.equals("user")) {
 							if (entity.place.id.equals(entities.get(i).id)) {
 								entities.remove(i);
 							}
 						}
 					}
 				}
-				
+
 				/* Find the place with the maximum distance */
 				for (Entity entity : entities) {
 					float distance = entity.getDistance(); // In meters
@@ -479,7 +390,7 @@ public class ProxiManager {
 
 			final List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
 
-			BusProvider.getInstance().post(new PlacesNearLocationFinishedEvent(maxDistance));
+			BusProvider.getInstance().post(new PlacesNearLocationFinishedEvent());
 			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
 		}
 		return serviceResponse;
@@ -562,7 +473,7 @@ public class ProxiManager {
 		 * them.
 		 */
 		float signalThresholdFluid = entity.signalFence.floatValue();
-		if (!oldIsHidden && entity.getActivePrimaryBeacon(LinkType.proximity.name()) != null) {
+		if (!oldIsHidden && entity.getActiveBeaconPrimary(LinkType.proximity.name()) != null) {
 			signalThresholdFluid = entity.signalFence.floatValue() - 5;
 		}
 
