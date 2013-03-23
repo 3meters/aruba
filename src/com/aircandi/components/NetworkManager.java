@@ -15,13 +15,16 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
+import android.widget.Toast;
 
 import com.aircandi.CandiConstants;
+import com.aircandi.ProxiConstants;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.WalledGardenException;
+import com.aircandi.utilities.ImageUtils;
 
 /**
  * Designed as a singleton. The private Constructor prevents any other class from instantiating.
@@ -30,17 +33,18 @@ import com.aircandi.service.WalledGardenException;
 public class NetworkManager {
 
 	private static NetworkManager			singletonObject;
-	public static int						CONNECT_TRIES					= 10;
-	public static int						CONNECT_WAIT					= 500;
-	public static String					WALLED_GARDEN_URI				= "http://clients3.google.com/generate_204";
-	private static final int				WALLED_GARDEN_SOCKET_TIMEOUT_MS	= 10000;
+
+	/* monitor platform changes */
+	private IntentFilter					mNetworkStateChangedFilter;
+	@SuppressWarnings("unused")
+	private BroadcastReceiver				mNetworkStateIntentReceiver;
 
 	private Context							mApplicationContext;
-	private final WifiStateChangedReceiver	mWifiStateChangedReceiver		= new WifiStateChangedReceiver();
+	private final WifiStateChangedReceiver	mWifiStateChangedReceiver	= new WifiStateChangedReceiver();
 	private Integer							mWifiState;
 	private WifiManager						mWifiManager;
 	private ConnectivityManager				mConnectivityManager;
-	private ConnectedState					mConnectedState					= ConnectedState.Normal;
+	private ConnectedState					mConnectedState				= ConnectedState.Normal;
 
 	public static synchronized NetworkManager getInstance() {
 		if (singletonObject == null) {
@@ -59,6 +63,34 @@ public class NetworkManager {
 		mWifiManager = (WifiManager) mApplicationContext.getSystemService(Context.WIFI_SERVICE);
 		mConnectivityManager = (ConnectivityManager) mApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 		mApplicationContext.registerReceiver(mWifiStateChangedReceiver, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
+
+		/*
+		 * Enables registration for changes in network status from http stack
+		 */
+		mNetworkStateChangedFilter = new IntentFilter();
+		mNetworkStateChangedFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+		mNetworkStateIntentReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(final Context context, final Intent intent) {
+				if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+
+					final NetworkInfo wifi = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+					final NetworkInfo mobile = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+					boolean noConnection = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+
+					if (noConnection) {
+						ImageUtils.showToastNotification("Lost network connection", Toast.LENGTH_SHORT);
+					}
+					if (wifi.isAvailable()) {
+						ImageUtils.showToastNotification("Wifi network is available", Toast.LENGTH_SHORT);
+					}
+					if (mobile.isAvailable()) {
+						ImageUtils.showToastNotification("Mobile network is available", Toast.LENGTH_SHORT);
+					}
+				}
+			}
+		};
+		//mApplicationContext.registerReceiver(mNetworkStateIntentReceiver, mNetworkStateChangedFilter);
 	}
 
 	public ServiceResponse request(ServiceRequest serviceRequest) {
@@ -120,12 +152,12 @@ public class NetworkManager {
 			attempts++;
 			Logger.v(this, "No network connection: attempt: " + String.valueOf(attempts));
 
-			if (attempts >= CONNECT_TRIES) {
+			if (attempts >= ProxiConstants.CONNECT_TRIES) {
 				connectedState = ConnectedState.None;
 				break;
 			}
 			try {
-				Thread.sleep(CONNECT_WAIT);
+				Thread.sleep(ProxiConstants.CONNECT_WAIT);
 			}
 			catch (InterruptedException exception) {
 				connectedState = ConnectedState.None;
@@ -207,11 +239,11 @@ public class NetworkManager {
 	public boolean isWalledGardenConnection() {
 		HttpURLConnection urlConnection = null;
 		try {
-			URL url = new URL(WALLED_GARDEN_URI);
+			URL url = new URL(ProxiConstants.WALLED_GARDEN_URI);
 			urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.setInstanceFollowRedirects(false);
-			urlConnection.setConnectTimeout(WALLED_GARDEN_SOCKET_TIMEOUT_MS);
-			urlConnection.setReadTimeout(WALLED_GARDEN_SOCKET_TIMEOUT_MS);
+			urlConnection.setConnectTimeout(ProxiConstants.WALLED_GARDEN_SOCKET_TIMEOUT_MS);
+			urlConnection.setReadTimeout(ProxiConstants.WALLED_GARDEN_SOCKET_TIMEOUT_MS);
 			urlConnection.setUseCaches(false);
 			urlConnection.getInputStream();
 			// We got a valid response, but not from the real google

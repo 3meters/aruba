@@ -14,7 +14,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:layout_marginLeft="-3dp"
         android:orientation="horizontal" >
 
         <com.aircandi.ui.widgets.ComboButton
@@ -25,6 +24,7 @@
             aircandi:drawableScale="@dimen/combo_button_drawable_large_scale"
             android:drawablePadding="5dp"
             android:drawableTop="?attr/iconTune"
+            android:layout_marginRight="3dp"
             android:onClick="onTuneButtonClick"
             android:text="@string/candi_button_tune" />
 
@@ -35,6 +35,7 @@
             android:layout_height="wrap_content"
             aircandi:drawableScale="@dimen/combo_button_drawable_scale"
             android:drawablePadding="5dp"
+            android:layout_marginRight="3dp"
             android:drawableTop="?attr/iconCall"
             android:onClick="onCallButtonClick"
             android:text="@string/candi_button_call" />

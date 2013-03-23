@@ -4,9 +4,29 @@ package com.aircandi;
 @SuppressWarnings("ucd")
 public final class ProxiConstants {
 
-	public static final int		TIMEOUT_SOCKET_QUERIES								= 50000;
+	public static final int		TIMEOUT_SOCKET_QUERIES								= 2000;
 	public static final int		TIMEOUT_SOCKET_UPDATES								= 30000;
-	public static final int		TIMEOUT_CONNECTION									= 10000;
+	public static final int		TIMEOUT_CONNECTION									= 2000;
+	
+	public static String		WALLED_GARDEN_URI									= "http://clients3.google.com/generate_204";
+	public static final int		WALLED_GARDEN_SOCKET_TIMEOUT_MS						= 5000;
+
+	/* 
+	 * Used when trying to verify that a network connection is available. The retries
+	 * are used to allow for the case where the connecting process is underway.
+	 */
+	public static int			CONNECT_TRIES										= 10;
+	public static int			CONNECT_WAIT										= 500;
+	
+	/* 
+	 * When spotty connectivity causes timeouts, we retry using softer constraints.
+	 * We do not attempt retries if the call involved an update/insert/delete.
+	 */
+	public static final int		MAX_BACKOFF_IN_MILLISECONDS							= 5 * 1000;
+	public static final int		MAX_BACKOFF_RETRIES									= 6;
+	
+	public static final int		DEFAULT_MAX_CONNECTIONS								= 50;
+	public static final int		DEFAULT_CONNECTIONS_PER_ROUTE						= 20;
 
 	public static final String	INSERT_USER_SECRET									= "larissa";																																	//$NON-NLS-1$
 	public static final String	ADMIN_USER_ID										= "0001.000000.00000.000.000000";																												//$NON-NLS-1$
@@ -21,7 +41,7 @@ public final class ProxiConstants {
 	public static final String	URL_PROXIBASE_SERVICE_USER							= URL_PROXIBASE_SERVICE + "/user/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_ADMIN							= URL_PROXIBASE_SERVICE + "/admin/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_METHOD						= URL_PROXIBASE_SERVICE + "/do/";																												//$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE_SOURCES						= URL_PROXIBASE_SERVICE + "/sources/";																												//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_SOURCES						= URL_PROXIBASE_SERVICE + "/sources/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_AUTH							= URL_PROXIBASE_SERVICE + "/auth/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS			= URL_PROXIBASE_SERVICE + PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS;																			//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_ASSETS_CATEGORIES				= URL_PROXIBASE_SERVICE + PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES;																			//$NON-NLS-1$
@@ -44,7 +64,7 @@ public final class ProxiConstants {
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED		= 401.2f;																																		// $codepro.audit.disable questionableName
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST				= 401.4f;																																		// $codepro.audit.disable questionableName
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED			= 401.5f;																																		// $codepro.audit.disable questionableName
-	
+
 	public static final float	HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE	= 403.1f;																																		// $codepro.audit.disable questionableName
 	public static final float	HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK		= 403.21f;																																		// $codepro.audit.disable questionableName
 

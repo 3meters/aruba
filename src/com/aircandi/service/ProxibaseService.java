@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 
 import net.minidev.json.JSONValue;
 import net.minidev.json.parser.ContainerFactory;
@@ -70,7 +69,6 @@ import android.graphics.Bitmap;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
@@ -123,11 +121,6 @@ public class ProxibaseService {
 
 	private static ProxibaseService			singletonObject;
 
-	private static final int				MAX_BACKOFF_IN_MILLISECONDS		= 5 * 1000;
-	private static final int				MAX_BACKOFF_RETRIES				= 6;
-	private static final int				DEFAULT_MAX_CONNECTIONS			= 50;
-	private static final int				DEFAULT_CONNECTIONS_PER_ROUTE	= 20;
-
 	private final DefaultHttpClient			mHttpClient;
 	private final HttpParams				mHttpParams;
 
@@ -170,7 +163,7 @@ public class ProxibaseService {
 
 			@Override
 			public int getMaxForRoute(HttpRoute route) {
-				return DEFAULT_CONNECTIONS_PER_ROUTE;
+				return ProxiConstants.DEFAULT_CONNECTIONS_PER_ROUTE;
 			}
 		};
 
@@ -184,7 +177,7 @@ public class ProxibaseService {
 		 * - setConnectionTimeout: Used trying to establish a connection to the server.
 		 * - setSoTimeout: How long a socket will wait for data before throwing up.
 		 */
-		ConnManagerParams.setMaxTotalConnections(params, DEFAULT_MAX_CONNECTIONS);
+		ConnManagerParams.setMaxTotalConnections(params, ProxiConstants.DEFAULT_MAX_CONNECTIONS);
 		ConnManagerParams.setMaxConnectionsPerRoute(params, connPerRoute);
 		ConnManagerParams.setTimeout(params, 1000);
 		HttpConnectionParams.setStaleCheckingEnabled(params, false);
@@ -228,70 +221,6 @@ public class ProxibaseService {
 				request.addHeader("User-Agent", "Mozilla/5.0");
 			}
 		});
-		return httpClient;
-	}
-
-	@SuppressWarnings("unused")
-	private HttpParams createHttpParamsOld() {
-
-		HttpParams params = new BasicHttpParams();
-		final ConnPerRoute connPerRoute = new ConnPerRoute() {
-
-			@Override
-			public int getMaxForRoute(HttpRoute route) {
-				return DEFAULT_CONNECTIONS_PER_ROUTE;
-			}
-		};
-
-		/*
-		 * Turn off stale checking. Our connections break all the time anyway, and
-		 * it's not worth it to pay the penalty of checking every time.
-		 * 
-		 * Timeouts:
-		 * 
-		 * - setTimeout: Used when retrieving a ManagedClientConnection from the ClientConnectionManager.
-		 * - setConnectionTimeout: Used trying to establish a connection to the server.
-		 * - setSoTimeout: How long a socket will wait for data before throwing up.
-		 */
-		ConnManagerParams.setMaxTotalConnections(params, DEFAULT_MAX_CONNECTIONS);
-		ConnManagerParams.setMaxConnectionsPerRoute(params, connPerRoute);
-		ConnManagerParams.setTimeout(params, 1000);
-		HttpConnectionParams.setStaleCheckingEnabled(params, false);
-		HttpConnectionParams.setConnectionTimeout(params, ProxiConstants.TIMEOUT_CONNECTION);
-		HttpConnectionParams.setSoTimeout(params, ProxiConstants.TIMEOUT_SOCKET_QUERIES);
-		HttpConnectionParams.setTcpNoDelay(params, true);
-		HttpConnectionParams.setSocketBufferSize(params, 8192);
-		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-		HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
-		HttpProtocolParams.setUserAgent(params, ProxiConstants.USER_AGENT_DESKTOP);
-
-		params.setBooleanParameter("http.protocol.expect-continue", false);
-
-		return params;
-	}
-
-	@SuppressWarnings("unused")
-	private DefaultHttpClient createHttpClientOld() {
-
-		/* Support http and https */
-
-		final SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
-		sslSocketFactory.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER); /* Might not work */
-
-		final SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-		schemeRegistry.register(new Scheme("https", sslSocketFactory, 443));
-
-		HttpsURLConnection.setDefaultHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
-
-		/* Create connection manager and http client */
-		final ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager(mHttpParams, schemeRegistry);
-
-		DefaultHttpClient httpClient = new DefaultHttpClient(connectionManager, mHttpParams);
-
-		/* Start a thread to monitor for expired or idle connections */
-		// mIdleConnectionMonitorThread = new IdleConnectionMonitorThread(connectionManager);
-		// mIdleConnectionMonitorThread.start();
 		return httpClient;
 	}
 
@@ -420,8 +349,16 @@ public class ProxibaseService {
 
 			try {
 				if (retryCount > 0) {
+					/*
+					 * We do not retry if this is an update/insert/delete.
+					 * 
+					 * We could be retrying because of a socket timeout exception. A socket timeout exception 
+					 * could be caused by: 1) poor/slow connection, 2) connectivity changes like drops, or switching
+					 * between networks.
+					 * 
+					 * We pause between retries and we add two more seconds to the socket timeout.
+					 */
 					pauseExponentially(retryCount);
-					/* We keep relaxing the socket timeout threshold */
 					final int newSocketTimeout = HttpConnectionParams.getSoTimeout(mHttpParams) + 2000;
 					HttpConnectionParams.setSoTimeout(mHttpParams, newSocketTimeout);
 				}
@@ -561,8 +498,8 @@ public class ProxibaseService {
 				proxibaseException = new ProxibaseServiceException("Not connected to network", ErrorType.Client,
 						ErrorCode.ConnectionException, exception);
 				proxibaseException.setResponseMessage("Device is not connected to a network: "
-						+ String.valueOf(NetworkManager.CONNECT_TRIES) + " tries over "
-						+ String.valueOf(NetworkManager.CONNECT_WAIT * NetworkManager.CONNECT_TRIES / 1000) + " second window");
+						+ String.valueOf(ProxiConstants.CONNECT_TRIES) + " tries over "
+						+ String.valueOf(ProxiConstants.CONNECT_WAIT * ProxiConstants.CONNECT_TRIES / 1000) + " second window");
 			}
 			else if (exception instanceof SocketException) { // derives from IOException
 				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
@@ -655,7 +592,7 @@ public class ProxibaseService {
 				proxibaseException.setErrorCode(ErrorCode.AircandiServiceException);
 			}
 			else {
-				proxibaseException = new ProxibaseServiceException("Service error");
+				proxibaseException = new ProxibaseServiceException("Service error: Unknown status code: " + String.valueOf(httpStatusCode));
 				proxibaseException.setErrorType(ErrorType.Service);
 				proxibaseException.setErrorCode(ErrorCode.AircandiServiceException);
 			}
@@ -681,7 +618,7 @@ public class ProxibaseService {
 
 	private boolean shouldRetry(HttpRequestBase httpAction, Exception exception, int retries) {
 
-		if (retries > MAX_BACKOFF_RETRIES) {
+		if (retries > ProxiConstants.MAX_BACKOFF_RETRIES) {
 			return false;
 		}
 
@@ -734,7 +671,7 @@ public class ProxibaseService {
 		long delay = 0;
 		final long scaleFactor = 100;
 		delay = (long) (Math.pow(2, retries) * scaleFactor);
-		delay = Math.min(delay, MAX_BACKOFF_IN_MILLISECONDS);
+		delay = Math.min(delay, ProxiConstants.MAX_BACKOFF_IN_MILLISECONDS);
 		Logger.d(this, "Retryable error detected, will retry in " + delay + "ms, attempt number: " + retries);
 
 		try {

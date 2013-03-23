@@ -1582,23 +1582,41 @@ public class EntityModel {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 				if (entry.getValue().creatorId != null && entry.getValue().creatorId.equals(user.id)) {
 					if (entry.getValue().creator != null) {
-						entry.getValue().creator.photo = user.photo.clone();
-						entry.getValue().creator.location = user.location;
-						entry.getValue().creator.name = user.name;
+						if (user.photo != null) {
+							entry.getValue().creator.photo = user.photo.clone();
+						}
+						if (user.location != null) {
+							entry.getValue().creator.location = user.location;
+						}
+						if (user.name != null) {
+							entry.getValue().creator.name = user.name;
+						}
 					}
 				}
 				if (entry.getValue().ownerId != null && entry.getValue().ownerId.equals(user.id)) {
 					if (entry.getValue().owner != null) {
-						entry.getValue().owner.photo = user.photo.clone();
-						entry.getValue().owner.location = user.location;
-						entry.getValue().owner.name = user.name;
+						if (user.photo != null) {
+							entry.getValue().owner.photo = user.photo.clone();
+						}
+						if (user.location != null) {
+							entry.getValue().owner.location = user.location;
+						}
+						if (user.name != null) {
+							entry.getValue().owner.name = user.name;
+						}
 					}
 				}
 				if (entry.getValue().modifierId != null && entry.getValue().modifierId.equals(user.id)) {
 					if (entry.getValue().modifier != null) {
-						entry.getValue().modifier.photo = user.photo.clone();
-						entry.getValue().modifier.location = user.location;
-						entry.getValue().modifier.name = user.name;
+						if (user.photo != null) {
+							entry.getValue().modifier.photo = user.photo.clone();
+						}
+						if (user.location != null) {
+							entry.getValue().modifier.location = user.location;
+						}
+						if (user.name != null) {
+							entry.getValue().modifier.name = user.name;
+						}
 					}
 				}
 			}

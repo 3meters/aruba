@@ -779,9 +779,9 @@ public class CandiRadar extends CandiActivity {
 
 			}.execute();
 		}
-		else if ((entityModel.getLastBeaconRefreshDate() != null
+		else if ((entityModel.getLastBeaconRefreshDate() != null && mEntityModelRefreshDate != null
 				&& entityModel.getLastBeaconRefreshDate().longValue() > mEntityModelRefreshDate.longValue())
-				|| (entityModel.getLastActivityDate() != null
+				|| (entityModel.getLastActivityDate() != null && mEntityModelActivityDate != null
 				&& entityModel.getLastActivityDate().longValue() > mEntityModelActivityDate.longValue())) {
 			/*
 			 * Everytime we show details for a place, we fetch place details from the service
