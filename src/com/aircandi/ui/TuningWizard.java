@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
@@ -53,7 +54,6 @@ import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
-import com.aircandi.service.objects.Source;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
@@ -63,17 +63,20 @@ import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.ImageUtils;
 import com.squareup.otto.Subscribe;
 
-public class TuningForm extends FormActivity {
+public class TuningWizard extends FormActivity {
 
 	private WebImageView	mImageViewPicture;
 	private Button			mButtonTune;
+	private Button			mButtonUntune;
 	private Bitmap			mEntityBitmap;
 	private Boolean			mEntityBitmapLocalOnly	= false;
 	private Entity			mEntityForForm;
 	private Boolean			mMuteColor;
 	private Integer			mColorResId;
 	private Boolean			mTuned					= false;
+	private Boolean			mUntuned				= false;
 	private Boolean			mTuningInProcess		= false;
+	private Boolean			mUntuning				= false;
 	private List<Entity>	mAddedCandi				= new ArrayList<Entity>();
 
 	@Override
@@ -91,6 +94,7 @@ public class TuningForm extends FormActivity {
 		mCommon.mActionBar.setTitle(R.string.form_title_tune);
 		mImageViewPicture = (WebImageView) findViewById(R.id.image_picture);
 		mButtonTune = (Button) findViewById(R.id.button_tune);
+		mButtonUntune = (Button) findViewById(R.id.button_untune);
 
 		/* Color */
 
@@ -103,6 +107,7 @@ public class TuningForm extends FormActivity {
 
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_image));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_tune));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_untune));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_add_candi));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_edit));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.section_title_banner));
@@ -142,6 +147,12 @@ public class TuningForm extends FormActivity {
 			final Entity entity = mEntityForForm;
 			final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+			/* Tuning buttons */
+			final Boolean hasActiveProximityLink = entity.hasActiveProximityLink();
+			if (hasActiveProximityLink) {
+				mButtonUntune.setVisibility(View.VISIBLE);
+			}
+
 			/* Content */
 			if (mAddedCandi.size() > 0) {
 				final ViewStub stub = (ViewStub) findViewById(R.id.stub_candi);
@@ -156,7 +167,7 @@ public class TuningForm extends FormActivity {
 				final SectionLayout section = (SectionLayout) findViewById(R.id.section_layout_candi);
 				if (section != null) {
 
-					if (mAddedCandi.size() > CandiConstants.CANDI_FLOW_LIMIT) {
+					if (mAddedCandi.size() > getResources().getInteger(R.integer.candi_flow_limit)) {
 						View footer = inflater.inflate(R.layout.temp_section_footer, null);
 						Button button = (Button) footer.findViewById(R.id.button_more);
 						FontManager.getInstance().setTypefaceDefault(button);
@@ -166,8 +177,8 @@ public class TuningForm extends FormActivity {
 					}
 
 					final FlowLayout flow = (FlowLayout) findViewById(R.id.flow_candi);
-					drawCandi(this, flow, mAddedCandi.size() > CandiConstants.CANDI_FLOW_LIMIT
-							? mAddedCandi.subList(0, CandiConstants.CANDI_FLOW_LIMIT)
+					drawCandi(this, flow, mAddedCandi.size() > getResources().getInteger(R.integer.candi_flow_limit)
+							? mAddedCandi.subList(0, getResources().getInteger(R.integer.candi_flow_limit))
 							: mAddedCandi, R.layout.temp_place_candi_item);
 
 					setVisibility(findViewById(R.id.section_candi), View.VISIBLE);
@@ -195,9 +206,9 @@ public class TuningForm extends FormActivity {
 		final Integer spacingHorizontalPixels = ImageUtils.getRawPixels(context, spacing);
 		final Integer spacingVerticalPixels = ImageUtils.getRawPixels(context, spacing);
 
-		Integer desiredWidthPixels = (int) (metrics.xdpi * 0.45f);
+		Integer desiredWidthPixels = (int) (metrics.density * 75);
 		if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			desiredWidthPixels = (int) (metrics.ydpi * 0.45f);
+			desiredWidthPixels = (int) (metrics.density * 75);
 		}
 
 		final Integer candiCount = (int) Math.ceil(layoutWidthPixels / desiredWidthPixels);
@@ -218,41 +229,15 @@ public class TuningForm extends FormActivity {
 
 			TextView title = (TextView) view.findViewById(R.id.title);
 			TextView badge = (TextView) view.findViewById(R.id.badge);
-			ImageView indicator = (ImageView) view.findViewById(R.id.indicator);
 
 			FontManager.getInstance().setTypefaceDefault(title);
 			FontManager.getInstance().setTypefaceDefault(badge);
 
-			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-				indicator.setVisibility(View.GONE);
-				badge.setVisibility(View.GONE);
-				if (entity.source.type.equals("comments")) {
-					if (entity.commentCount != null && entity.commentCount > 0) {
-						badge.setText(String.valueOf(entity.commentCount));
-						badge.setVisibility(View.VISIBLE);
-					}
-				}
-				else {
-					/* Show hint if source has app that hasn't been installed */
-					final Source meta = ProxiManager.getInstance().getEntityModel().getSourceMeta().get(entity.source.type);
-					if (meta != null && !meta.installDeclined
-							&& meta.intentSupport
-							&& entity.source.appExists()
-							&& !entity.source.appInstalled()) {
-						/* Show hint */
-						indicator.setVisibility(View.VISIBLE);
-					}
-				}
+			if (entity.name != null && !entity.name.equals("")) {
 				title.setText(entity.name);
-				title.setVisibility(View.VISIBLE);
 			}
 			else {
-				if (entity.name != null && !entity.name.equals("")) {
-					title.setText(entity.name);
-				}
-				else {
-					title.setVisibility(View.GONE);
-				}
+				title.setVisibility(View.GONE);
 			}
 
 			String imageUri = entity.getEntityPhotoUri();
@@ -337,8 +322,8 @@ public class TuningForm extends FormActivity {
 
 				@Override
 				public void run() {
-					Logger.d(TuningForm.this, "Query wifi scan received event: locking beacons");
-					if (event.wifiList != null && event.wifiList.size() > 0) {
+					Logger.d(TuningWizard.this, "Query wifi scan received event: locking beacons");
+					if (event.wifiList != null) {
 						ProxiManager.getInstance().lockBeacons();
 					}
 					else {
@@ -348,6 +333,14 @@ public class TuningForm extends FormActivity {
 						disableEvents();
 						setSupportProgressBarIndeterminateVisibility(false);
 						mCommon.hideBusy(true);
+						if (mUntuning) {
+							mButtonUntune.setText(R.string.form_button_tuning_tuned);
+							mUntuned = true;
+						}
+						else {
+							mButtonTune.setText(R.string.form_button_tuning_tuned);
+							mTuned = true;
+						}
 						toggleStarOn(R.id.image_star_tune);
 						mTuningInProcess = false;
 					}
@@ -365,7 +358,7 @@ public class TuningForm extends FormActivity {
 
 				@Override
 				public void run() {
-					Logger.d(TuningForm.this, "Beacons locked event: tune entity");
+					Logger.d(TuningWizard.this, "Beacons locked event: tune entity");
 					disableEvents();
 					tuneProximity();
 				}
@@ -381,7 +374,7 @@ public class TuningForm extends FormActivity {
 	public void onBackPressed() {
 		setResult(Activity.RESULT_CANCELED);
 		finish();
-		AnimUtils.doOverridePendingTransition(TuningForm.this, TransitionType.FormToPage);
+		AnimUtils.doOverridePendingTransition(TuningWizard.this, TransitionType.FormToPage);
 	}
 
 	@SuppressWarnings("ucd")
@@ -425,7 +418,7 @@ public class TuningForm extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onEditButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "edit_entity", null, 0);
+		Tracker.sendEvent("ui_action", "edit_entity", null, 0, Aircandi.getInstance().getUser());
 		final IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
 				.setCommandType(CommandType.Edit)
 				.setEntityId(mEntityForForm.id)
@@ -439,7 +432,25 @@ public class TuningForm extends FormActivity {
 	@SuppressWarnings("ucd")
 	public void onTuneButtonClick(View view) {
 		if (!mTuned) {
-			Tracker.sendEvent("ui_action", "tune_place", null, 0);
+			Tracker.sendEvent("ui_action", "tune_place", null, 0, Aircandi.getInstance().getUser());
+			mUntuning = false;
+			mCommon.showBusy(R.string.progress_tuning, true);
+			if (NetworkManager.getInstance().isWifiEnabled()) {
+				mTuningInProcess = true;
+				enableEvents();
+				ProxiManager.getInstance().scanForWifi(ScanReason.query);
+			}
+			else {
+				tuneProximity();
+			}
+		}
+	}
+
+	@SuppressWarnings("ucd")
+	public void onUntuneButtonClick(View view) {
+		if (!mUntuned) {
+			Tracker.sendEvent("ui_action", "untune_place", null, 0, Aircandi.getInstance().getUser());
+			mUntuning = true;
 			mCommon.showBusy(R.string.progress_tuning, true);
 			if (NetworkManager.getInstance().isWifiEnabled()) {
 				mTuningInProcess = true;
@@ -454,7 +465,7 @@ public class TuningForm extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onAddCandiButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "add_candi", null, 0);
+		Tracker.sendEvent("ui_action", "add_candi", null, 0, Aircandi.getInstance().getUser());
 		if (!mEntityForForm.locked || mEntityForForm.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 			mCommon.showTemplatePicker(false);
 		}
@@ -544,7 +555,7 @@ public class TuningForm extends FormActivity {
 		mEntityBitmapLocalOnly = false;
 		drawImage(entity);
 		doSave();
-		Tracker.sendEvent("ui_action", "set_entity_picture_to_default", null, 0);
+		Tracker.sendEvent("ui_action", "set_entity_picture_to_default", null, 0, Aircandi.getInstance().getUser());
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -591,7 +602,7 @@ public class TuningForm extends FormActivity {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				mCommon.hideBusy(true);
 				if (serviceResponse.responseCode != ResponseCode.Success) {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, TuningForm.this);
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, TuningWizard.this);
 				}
 			}
 
@@ -618,7 +629,8 @@ public class TuningForm extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("TrackEntityProximity");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().trackEntity(mEntityForForm, beacons, primaryBeacon, "proximity");
+				final ModelResult result = ProxiManager.getInstance().getEntityModel()
+						.trackEntity(mEntityForForm, beacons, primaryBeacon, "proximity", mUntuning);
 				return result;
 			}
 
@@ -626,16 +638,25 @@ public class TuningForm extends FormActivity {
 			protected void onPostExecute(Object response) {
 				setSupportProgressBarIndeterminateVisibility(false);
 				mCommon.hideBusy(true);
-				mButtonTune.setText(R.string.form_button_tuning_tuned);
+				if (mUntuning) {
+					mButtonUntune.setText(R.string.form_button_tuning_tuned);
+					mUntuned = true;
+				}
+				else {
+					mButtonTune.setText(R.string.form_button_tuning_tuned);
+					mTuned = true;
+					if (mButtonUntune.getVisibility() != View.VISIBLE) {
+						mButtonUntune.setVisibility(View.VISIBLE);
+					}
+				}
 				toggleStarOn(R.id.image_star_tune);
 				mTuningInProcess = false;
-				mTuned = true;
 			}
 		}.execute();
 	}
 
 	private ModelResult updateEntityAtService() {
-		Tracker.sendEvent("ui_action", "entity_update", mEntityForForm.type, 0);
+		Tracker.sendEvent("ui_action", "entity_update", mEntityForForm.type, 0, Aircandi.getInstance().getUser());
 		Bitmap bitmap = mEntityBitmap;
 		if (mEntityBitmapLocalOnly) {
 			bitmap = null;
@@ -687,6 +708,24 @@ public class TuningForm extends FormActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.accept) {
+			setResult(Activity.RESULT_OK);
+			finish();
+			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
+			return true;
+		}
+
+		/* In case we add general menu items later */
+		mCommon.doOptionsItemSelected(item);
+		return true;
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
@@ -729,6 +768,6 @@ public class TuningForm extends FormActivity {
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.tuning_form;
+		return R.layout.tuning_wizard;
 	}
 }

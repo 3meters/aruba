@@ -54,12 +54,12 @@ public final class CandiConstants {
 
 	/* Wifi scanning */
 	public static final int		INTERVAL_SCAN_WIFI					= TIME_ONE_MINUTE;
+	public static final int		INTERVAL_CATEGORIES_DOWNLOAD		= TIME_ONE_MINUTE;
 	public static final int		INTERVAL_UPDATE_CHECK				= TIME_SIXTY_MINUTES;
 	public static final int		INTERVAL_REFRESH					= TIME_THIRTY_MINUTES;
 
 	/* Ui */
 	public static final int		MAX_Y_OVERSCROLL_DISTANCE			= 50;
-	public static final int		CANDI_FLOW_LIMIT					= 8;
 	public static final int		TABS_PRIMARY_ID						= 1;
 	public static final int		TABS_PROFILE_FORM_ID				= 2;
 	public static final int		TABS_ENTITY_FORM_ID					= 3;
@@ -122,9 +122,6 @@ public final class CandiConstants {
 	public static final int		NOTIFICATION_NETWORK				= 1000;
 	public static final int		NOTIFICATION_UPDATE					= 2000;
 
-	/* The default search radius in meters when searching for nearby beacons. */
-	public static final int		LOCATION_DEFAULT_RADIUS				= 150;
-
 	public static final boolean	SUPPORTS_ECLAIR						= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ECLAIR;
 	public static final boolean	SUPPORTS_FROYO						= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO;
 	public static final boolean	SUPPORTS_GINGERBREAD				= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD;
@@ -153,7 +150,7 @@ public final class CandiConstants {
 
 	/* Defaults */
 	public static final String	PREF_THEME_DEFAULT					= "aircandi_theme_midnight";
-	public static final String	PREF_SEARCH_RADIUS_DEFAULT			= "8047";
+	public static final String	PREF_SEARCH_RADIUS_DEFAULT			= "8047";  // five miles
 	public static final Boolean	PREF_SOUND_EFFECTS_DEFAULT			= true;
 
 	public static final Boolean	PREF_ENABLE_DEV_DEFAULT				= false;

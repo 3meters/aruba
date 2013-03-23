@@ -22,6 +22,7 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
+import com.aircandi.components.NetworkManager.ConnectedState;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
@@ -35,6 +36,7 @@ import com.aircandi.ui.user.SignInForm;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 
 public class SplashForm extends SherlockActivity {
@@ -45,7 +47,7 @@ public class SplashForm extends SherlockActivity {
 		/*
 		 * Used by other activities to determine if they were launched normally or auto launched after a crash
 		 */
-		Aircandi.getInstance().setLaunchedNormally(true);
+		Aircandi.LAUNCHED_NORMALLY = true;
 
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -66,15 +68,16 @@ public class SplashForm extends SherlockActivity {
 		if (Build.PRODUCT.contains("sdk")) {
 			Aircandi.usingEmulator = true;
 		}
-		
+
 		/* Tickle the bitmap manager to get it initialized */
 		BitmapManager.getInstance();
 
 		/* AWS Credentials */
 		startGetAWSCredentials();
-		
+
 		/* Google analytics tracking */
 		GoogleAnalytics.getInstance(this).setDebug(false);
+		EasyTracker.getInstance().setContext(getApplicationContext());
 
 		/* Connectivity monitoring */
 		NetworkManager.getInstance().setContext(getApplicationContext());
@@ -91,7 +94,7 @@ public class SplashForm extends SherlockActivity {
 			public void run() {
 				loadCategories();
 			}
-		}, 60000);
+		}, CandiConstants.INTERVAL_CATEGORIES_DOWNLOAD);
 
 		Aircandi.firstStartApp = false;
 	}
@@ -113,11 +116,15 @@ public class SplashForm extends SherlockActivity {
 		if (jsonUser != null && jsonSession != null) {
 			Logger.i(this, "Auto sign in...");
 			final User user = (User) ProxibaseService.convertJsonToObjectInternalSmart(jsonUser, ServiceDataType.User);
-			user.session = (Session) ProxibaseService.convertJsonToObjectInternalSmart(jsonSession, ServiceDataType.Session);
-			Tracker.startNewSession();
-			Tracker.sendEvent("action", "signin_auto", null, 0);
-			Aircandi.getInstance().setUser(user);
-			startMainApp();
+			if (user != null) {
+				user.session = (Session) ProxibaseService.convertJsonToObjectInternalSmart(jsonSession, ServiceDataType.Session);
+				if (user.session != null) {
+					Aircandi.getInstance().setUser(user);
+					Tracker.startNewSession(Aircandi.getInstance().getUser());
+					Tracker.sendEvent("action", "signin_auto", null, 0, Aircandi.getInstance().getUser());
+					startMainApp();
+				}
+			}
 		}
 	}
 
@@ -128,18 +135,36 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	private void loadCategories() {
-		new AsyncTask() {
+		if (NetworkManager.getInstance().getConnectedState() == ConnectedState.Normal) {
+			new AsyncTask() {
 
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("LoadCategories");
-				ModelResult result = new ModelResult();
-				if (ProxiManager.getInstance().getEntityModel().getCategories().size() == 0) {
-					result = ProxiManager.getInstance().getEntityModel().loadCategories();
+				@Override
+				protected void onPostExecute(Object result) {
+					// TODO Auto-generated method stub
+					super.onPostExecute(result);
 				}
-				return result;
-			}
-		}.execute();
+
+				@Override
+				protected Object doInBackground(Object... params) {
+					Thread.currentThread().setName("LoadCategories");
+					ModelResult result = new ModelResult();
+					if (ProxiManager.getInstance().getEntityModel().getCategories().size() == 0) {
+						result = ProxiManager.getInstance().getEntityModel().loadCategories();
+					}
+					return result;
+				}
+			}.execute();
+		}
+		else {
+			/* Schedule the next attempt */
+			Aircandi.mainThreadHandler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					loadCategories();
+				}
+			}, CandiConstants.INTERVAL_CATEGORIES_DOWNLOAD);
+
+		}
 	}
 
 	private void startGetAWSCredentials() {

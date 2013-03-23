@@ -183,7 +183,7 @@ public class FeedbackForm extends FormActivity {
 					final ModelResult result = (ModelResult) response;
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
-						Tracker.sendEvent("ui_action", "send_feedback", null, 0);
+						Tracker.sendEvent("ui_action", "send_feedback", null, 0, Aircandi.getInstance().getUser());
 						mCommon.hideBusy(true);
 						ImageUtils.showToastNotification(getString(R.string.alert_feedback_sent), Toast.LENGTH_SHORT);
 						finish();

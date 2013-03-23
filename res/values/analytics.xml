@@ -11,12 +11,15 @@
     <bool name="ga_autoActivityTracking">true</bool>
 
     <!--
-    	Set how often auto dispatch gets fired. Should be set to 30 minutes
-    	before app is released.    -->
-    <integer name="ga_dispatchPeriod">1</integer>
+    	Set how often auto dispatch gets fired in seconds.
+    	FIXME: Should be set to 30 minutes before app is released.    -->
+    <integer name="ga_dispatchPeriod">10</integer>
 
-    <!-- Set how often auto dispatch gets fired -->
-    <integer name="ga_sessionTimeout">60</integer>
+	<!--     	
+		The amount of time (in seconds) your application can stay in the background before the 
+		session is ended. Default is 30 seconds. Negative value disables EasyTracker session management. 
+	-->
+    <integer name="ga_sessionTimeout">30</integer>
 
     <!-- Privacy settings that strips the last octet of the IP before storage in service -->
     <bool name="ga_anonymizeIp">false</bool>
@@ -25,7 +28,7 @@
     <bool name="ga_debug">false</bool>
 
     <!-- The screen names that will appear in the reporting -->
-    
+
     <string name="com.aircandi.ui.CandiForm">CandiForm</string>
     <string name="com.aircandi.ui.CandiList">CandiList</string>
     <string name="com.aircandi.ui.CandiRadar">CandiRadar</string>
@@ -35,18 +38,19 @@
     <string name="com.aircandi.ui.FeedbackForm">FeedbackForm</string>
     <string name="com.aircandi.ui.PictureDetail">PictureDetail</string>
     <string name="com.aircandi.ui.Preferences">Preferences</string>
+    <string name="com.aircandi.ui.TuningWizard">LinkWizard</string>
     <string name="com.aircandi.ui.SplashForm">SplashForm</string>
-    
+
     <!-- User -->
-    
+
     <string name="com.aircandi.ui.user.CandiUser">CandiUser</string>
     <string name="com.aircandi.ui.user.PasswordForm">PasswordForm</string>
     <string name="com.aircandi.ui.user.ProfileForm">ProfileForm</string>
     <string name="com.aircandi.ui.user.RegisterForm">RegisterForm</string>
     <string name="com.aircandi.ui.user.SignInForm">SigninForm</string>
-    
+
     <!-- Builders -->
-    
+
     <string name="com.aircandi.ui.builders.AddressBuilder">AddressBuilder</string>
     <string name="com.aircandi.ui.builders.CategoryBuilder">CategoryBuilder</string>
     <string name="com.aircandi.ui.builders.LinkPicker">LinkPicker</string>

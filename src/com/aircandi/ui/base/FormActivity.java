@@ -38,6 +38,7 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Photo;
+import com.aircandi.ui.SplashForm;
 import com.aircandi.ui.builders.PicturePicker;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -56,10 +57,16 @@ public abstract class FormActivity extends SherlockActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		if (!Aircandi.getInstance().wasLaunchedNormally()) {
-			/* Try to detect case where this is being created after a crash and bail out. */
+		if (Aircandi.LAUNCHED_NORMALLY == null) {
+			/*
+			 * We restarting after a crash or after being killed by Android
+			 */
 			super.onCreate(savedInstanceState);
+			Logger.d(this, "Aircandi not launched normally, routing to splash activity");
+			Intent intent = new Intent(this, SplashForm.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			setResult(Activity.RESULT_CANCELED);
+			startActivity(intent);
 			finish();
 		}
 		else {
@@ -120,7 +127,7 @@ public abstract class FormActivity extends SherlockActivity {
 		if (resultCode == Activity.RESULT_OK) {
 			if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE) {
 
-				Tracker.sendEvent("ui_action", "select_picture_device", null, 0);
+				Tracker.sendEvent("ui_action", "select_picture_device", null, 0, Aircandi.getInstance().getUser());
 				final Uri imageUri = intent.getData();
 				Bitmap bitmap = null;
 
@@ -138,7 +145,7 @@ public abstract class FormActivity extends SherlockActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
 
-				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0);
+				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0, Aircandi.getInstance().getUser());
 				final Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
 				if (mImageRequestListener != null) {
@@ -153,7 +160,7 @@ public abstract class FormActivity extends SherlockActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_SEARCH) {
 
-				Tracker.sendEvent("ui_action", "select_picture_search", null, 0);
+				Tracker.sendEvent("ui_action", "select_picture_search", null, 0, Aircandi.getInstance().getUser());
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
 					final String imageTitle = extras.getString(CandiConstants.EXTRA_URI_TITLE);
@@ -216,7 +223,7 @@ public abstract class FormActivity extends SherlockActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_PLACE) {
 
-				Tracker.sendEvent("ui_action", "select_picture_place", null, 0);
+				Tracker.sendEvent("ui_action", "select_picture_place", null, 0, Aircandi.getInstance().getUser());
 				if (intent != null && intent.getExtras() != null) {
 
 					final Bundle extras = intent.getExtras();
@@ -372,7 +379,9 @@ public abstract class FormActivity extends SherlockActivity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		mCommon.doPause();
+		if (mCommon != null) {
+			mCommon.doPause();
+		}
 	}
 
 	@Override
@@ -397,7 +406,9 @@ public abstract class FormActivity extends SherlockActivity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		mCommon.doStop();
+		if (mCommon != null) {
+			mCommon.doStop();
+		}
 	}
 
 	@Override

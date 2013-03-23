@@ -85,6 +85,7 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 		IOException,
 		ClientProtocolException,
 		ConnectionException,
+		WalledGardenException,
 		UnsupportedEncodingException,
 		IllegalStateException,
 		AircandiServiceException,

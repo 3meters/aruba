@@ -31,12 +31,13 @@
 
                 <com.aircandi.ui.widgets.UserView
                     android:id="@+id/created_by"
-                    android:clickable="true"
-                    android:onClick="onUserClick"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     aircandi:layout="@layout/widget_user_view_large_image"
-                    android:minWidth="80dp" />
+                    android:background="?attr/backgroundButton"
+                    android:clickable="true"
+                    android:minWidth="80dp"
+                    android:onClick="onUserClick" />
 
                 <LinearLayout
                     android:layout_width="match_parent"

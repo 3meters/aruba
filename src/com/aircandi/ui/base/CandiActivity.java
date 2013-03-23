@@ -1,5 +1,6 @@
 package com.aircandi.ui.base;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -19,6 +20,7 @@ import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.Logger;
 import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.ui.SplashForm;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
@@ -33,10 +35,16 @@ public abstract class CandiActivity extends SherlockActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Logger.d(this, "Launched normally: " + String.valueOf(Aircandi.getInstance().wasLaunchedNormally()));
-		if (!Aircandi.getInstance().wasLaunchedNormally()) {
-			/* Try to detect case where this is being created after a crash and bail out. */
+		if (Aircandi.LAUNCHED_NORMALLY == null) {
+			/*
+			 * We restarting after a crash or after being killed by Android
+			 */
 			super.onCreate(savedInstanceState);
+			Logger.d(this, "Aircandi not launched normally, routing to splash activity");
+			Intent intent = new Intent(this, SplashForm.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			setResult(Activity.RESULT_CANCELED);
+			startActivity(intent);
 			finish();
 		}
 		else {
@@ -299,7 +307,9 @@ public abstract class CandiActivity extends SherlockActivity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		mCommon.doStop();
+		if (mCommon != null) {
+			mCommon.doStop();
+		}
 	}
 
 	@Override
@@ -316,7 +326,9 @@ public abstract class CandiActivity extends SherlockActivity {
 
 	@Override
 	protected void onPause() {
-		mCommon.doPause();
+		if (mCommon != null) {
+			mCommon.doPause();
+		}
 		super.onPause();
 	}
 

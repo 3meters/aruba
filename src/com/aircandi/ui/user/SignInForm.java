@@ -96,7 +96,7 @@ public class SignInForm extends FormActivity {
 				, getResources().getString(R.string.alert_send_password_message)
 				, null
 				, SignInForm.this, android.R.string.ok, null, null, null, null);
-		Tracker.sendEvent("ui_action", "recover_password", null, 0);
+		Tracker.sendEvent("ui_action", "recover_password", null, 0, Aircandi.getInstance().getUser());
 	}
 
 	@SuppressWarnings("ucd")
@@ -131,9 +131,6 @@ public class SignInForm extends FormActivity {
 					mCommon.hideBusy(true);
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
-						Tracker.startNewSession();
-						Tracker.sendEvent("ui_action", "signin_user", null, 0);
-
 						final String jsonResponse = (String) result.serviceResponse.data;
 						final ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);
 						final User user = serviceData.user;
@@ -141,6 +138,10 @@ public class SignInForm extends FormActivity {
 						Logger.i(this, "User signed in: " + user.name + " (" + user.id + ")");
 
 						Aircandi.getInstance().setUser(user);
+
+						Tracker.startNewSession(Aircandi.getInstance().getUser());
+						Tracker.sendEvent("ui_action", "signin_user", null, 0, Aircandi.getInstance().getUser());
+
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
@@ -157,7 +158,6 @@ public class SignInForm extends FormActivity {
 						AnimUtils.doOverridePendingTransition(SignInForm.this, TransitionType.FormToPage);
 					}
 					else {
-						mTextPassword.setText("");
 						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.Signin);
 					}
 				}

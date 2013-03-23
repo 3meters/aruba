@@ -33,6 +33,7 @@ import android.os.SystemClock;
 import android.support.v4.app.FragmentTransaction;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -144,7 +145,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mNotificationManager = (NotificationManager) mContext.getSystemService(Service.NOTIFICATION_SERVICE);
 
 		Logger.i(this, "Activity created: " + mPageName);
-		Logger.d(this, "Started from radar flag: " + String.valueOf(Aircandi.getInstance().wasLaunchedNormally()));
 
 		/* Stash the action bar */
 		mActionBar = ((SherlockActivity) mActivity).getSupportActionBar();
@@ -256,7 +256,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {}
 				}, null);
-		Tracker.sendEvent("ui_action", "open_dialog", "about", 0);
+		Tracker.sendEvent("ui_action", "open_dialog", "about", 0, Aircandi.getInstance().getUser());
 
 	}
 
@@ -518,47 +518,53 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * Client errors occur when we are unable to get a response from a service, or when the client is
 		 * unable to understand a response from a service. This includes protocol, network and timeout errors.
 		 */
-		if (errorType == ErrorType.Client && errorCode == ErrorCode.ConnectionException) {
-			/*
-			 * We don't have a network connection.
-			 */
-			final Intent intent = new Intent(mContext, CandiRadar.class);
-			showNotification(mActivity.getString(R.string.error_connection_title), mActivity.getString(R.string.error_connection_notification), context,
-					intent, CandiConstants.NOTIFICATION_NETWORK);
-			showAlertDialogSimple(null, mActivity.getString(R.string.error_connection));
-		}
-		else if (errorType == ErrorType.Client && errorCode == ErrorCode.IOException) {
-			/*
-			 * We have a bad network connection.
-			 * 
-			 * This could be any of these:
-			 * - ConnectTimeoutException: timeout expired trying to connect to service
-			 * - SocketTimeoutException: timeout expired on a socket
-			 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
-			 * - UnknownHostException: hostname didn't exist in the dns system
-			 */
-			ImageUtils.showToastNotification(mActivity.getString(R.string.error_connection_poor), Toast.LENGTH_SHORT);
-		}
-		else if (errorType == ErrorType.Client && errorCode == ErrorCode.SocketException) {
-			/* Connection could be good but the remote service has a problem with our request */
-			ImageUtils.showToastNotification(mActivity.getString(R.string.error_client_request_socket_error), Toast.LENGTH_SHORT);
-		}
-		else if (errorType == ErrorType.Client) {
-			/*
-			 * Something wrong with the request. In most cases, this is a bug and
-			 * not something that a user should cause unless they provided a bad uri.
-			 */
-			if (errorCode == ErrorCode.UnknownHostException) {
-				showAlertDialogSimple(null, mActivity.getString(R.string.error_client_unknown_host));
+		if (errorType == ErrorType.Client) {
+			if (errorCode == ErrorCode.ConnectionException) {
+				/*
+				 * We don't have a network connection.
+				 */
+				final Intent intent = new Intent(mContext, CandiRadar.class);
+				showNotification(mActivity.getString(R.string.error_connection_title), mActivity.getString(R.string.error_connection_notification), context,
+						intent, CandiConstants.NOTIFICATION_NETWORK);
+				showAlertDialogSimple(null, mActivity.getString(R.string.error_connection));
+			}
+			else if (errorCode == ErrorCode.WalledGardenException) {
+				/* We have a connection but user is locked in a walled garden until they sign-in, pay, etc. */
+				showAlertDialogSimple(null, mActivity.getString(R.string.error_connection_walled_garden));
+			}
+			else if (errorCode == ErrorCode.IOException) {
+				/*
+				 * We have a bad network connection.
+				 * 
+				 * This could be any of these:
+				 * - ConnectTimeoutException: timeout expired trying to connect to service
+				 * - SocketTimeoutException: timeout expired on a socket
+				 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
+				 * - UnknownHostException: hostname didn't exist in the dns system
+				 */
+				ImageUtils.showToastNotification(mActivity.getString(R.string.error_connection_poor), Toast.LENGTH_SHORT);
+			}
+			else if (errorCode == ErrorCode.SocketException) {
+				/* Connection could be good but the remote service has a problem with our request */
+				ImageUtils.showToastNotification(mActivity.getString(R.string.error_client_request_socket_error), Toast.LENGTH_SHORT);
 			}
 			else {
-				if (errorCode == ErrorCode.ClientProtocolException
-						|| errorCode == ErrorCode.URISyntaxException) {
-					ImageUtils.showToastNotification(mActivity.getString(R.string.error_client_request_error), Toast.LENGTH_SHORT);
+				/*
+				 * Something wrong with the request. In most cases, this is a bug and
+				 * not something that a user should cause unless they provided a bad uri.
+				 */
+				if (errorCode == ErrorCode.UnknownHostException) {
+					showAlertDialogSimple(null, mActivity.getString(R.string.error_client_unknown_host));
 				}
 				else {
-					/* Something without special handling */
-					ImageUtils.showToastNotification(serviceResponse.exception.getMessage(), Toast.LENGTH_SHORT);
+					if (errorCode == ErrorCode.ClientProtocolException
+							|| errorCode == ErrorCode.URISyntaxException) {
+						ImageUtils.showToastNotification(mActivity.getString(R.string.error_client_request_error), Toast.LENGTH_SHORT);
+					}
+					else {
+						/* Something without special handling */
+						ImageUtils.showToastNotification(serviceResponse.exception.getMessage(), Toast.LENGTH_SHORT);
+					}
 				}
 			}
 		}
@@ -665,7 +671,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			, Integer neutralButtonId
 			, OnClickListener listenerClick
 			, OnCancelListener listenerCancel) {
-		
+
 		final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
 		if (iconResource != null) {
@@ -673,7 +679,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 
 		if (titleText != null) {
-			builder.setTitle(titleText);
+			final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View title = inflater.inflate(R.layout.temp_dialog_title, null);
+			//FontManager.getInstance().setTypefaceDefault((TextView) title.findViewById(R.id.title));
+			((TextView) title.findViewById(R.id.title)).setText(titleText);
+			builder.setCustomTitle(title);
 		}
 
 		if (customView == null) {
@@ -794,7 +804,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 							Logger.w(this, "User signed out, service call failed: " + Aircandi.getInstance().getUser().id);
 						}
 
+						/* Stop the current tracking session. Starts again when a user logs in. */
+						Tracker.stopSession(Aircandi.getInstance().getUser());
+
 						/* Clear the user and session that is tied into auto-signin */
+						Aircandi.getInstance().setUser(null);
 						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER, null);
 						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER_SESSION, null);
 						Aircandi.settingsEditor.commit();
@@ -1036,7 +1050,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 							doBeaconIndicatorClick();
 						}
 					});
-					//updateDevIndicator(ProxiManager.getInstance().mWifiList, LocationManager.getInstance().getLocationLocked());
 				}
 			}
 		}
@@ -1050,7 +1063,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 		else if (mPageName.equals("CandiUser")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_user, menu);
-			activity.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
 
 			/* Hide user edit menu item if not the current user */
 			MenuItem menuItem = menu.findItem(R.id.edit);
@@ -1062,17 +1074,20 @@ public class AircandiCommon implements ActionBar.TabListener {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_comment_list, menu);
 			activity.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
 		}
+
+		/* Editing */
+
 		else if (mPageName.equals("CommentForm")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_comment_form, menu);
-		}
-		else if (mPageName.equals("TuningForm")) {
-			activity.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
 		}
 		else if (mPageName.equals("EntityForm")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_entity, menu);
 		}
 		else if (mPageName.equals("FeedbackForm")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_send, menu);
+		}
+		else if (mPageName.equals("TuningWizard")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_tuning_wizard, menu);
 		}
 		else if (mPageName.equals("ProfileForm") || mPageName.equals("PasswordForm")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);
@@ -1136,7 +1151,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 				return;
 			case R.id.signout:
-				Tracker.sendEvent("ui_action", "signout_user", null, 0);
+				Tracker.sendEvent("ui_action", "signout_user", null, 0, Aircandi.getInstance().getUser());
 				signout();
 				return;
 			case R.id.update:
@@ -1296,11 +1311,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void doStop() {
-		Tracker.activityStop(mActivity);
+		Tracker.activityStop(mActivity, Aircandi.getInstance().getUser());
 	}
 
 	public void doStart() {
-		Tracker.activityStart(mActivity);
+		Tracker.activityStart(mActivity, Aircandi.getInstance().getUser());
 	}
 
 	public void doResume() {

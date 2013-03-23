@@ -1,8 +1,11 @@
 package com.aircandi.components;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ConnectException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -18,6 +21,7 @@ import com.aircandi.beta.BuildConfig;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
 import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.WalledGardenException;
 
 /**
  * Designed as a singleton. The private Constructor prevents any other class from instantiating.
@@ -26,14 +30,17 @@ import com.aircandi.service.ServiceRequest;
 public class NetworkManager {
 
 	private static NetworkManager			singletonObject;
-	public static int						CONNECT_TRIES				= 10;
-	public static int						CONNECT_WAIT				= 500;
+	public static int						CONNECT_TRIES					= 10;
+	public static int						CONNECT_WAIT					= 500;
+	public static String					WALLED_GARDEN_URI				= "http://clients3.google.com/generate_204";
+	private static final int				WALLED_GARDEN_SOCKET_TIMEOUT_MS	= 10000;
 
 	private Context							mApplicationContext;
-	private final WifiStateChangedReceiver	mWifiStateChangedReceiver	= new WifiStateChangedReceiver();
+	private final WifiStateChangedReceiver	mWifiStateChangedReceiver		= new WifiStateChangedReceiver();
 	private Integer							mWifiState;
 	private WifiManager						mWifiManager;
 	private ConnectivityManager				mConnectivityManager;
+	private ConnectedState					mConnectedState					= ConnectedState.Normal;
 
 	public static synchronized NetworkManager getInstance() {
 		if (singletonObject == null) {
@@ -55,14 +62,6 @@ public class NetworkManager {
 	}
 
 	public ServiceResponse request(ServiceRequest serviceRequest) {
-		final ServiceResponse serviceResponse = request(serviceRequest, null);
-		return serviceResponse;
-	}
-
-	private ServiceResponse request(ServiceRequest serviceRequest, ServiceResponse testServiceResponse) {
-		if (testServiceResponse != null) {
-			return testServiceResponse;
-		}
 		/*
 		 * Don't assume this is being called from the UI thread.
 		 */
@@ -71,13 +70,20 @@ public class NetworkManager {
 			AircandiCommon.mNotificationManager.cancel(CandiConstants.NOTIFICATION_NETWORK);
 		}
 
-		/* Make sure we have a network connection */
-		if (!verifyIsConnected()) {
+		/* Determine what kind of network connection we have */
+		checkConnectedState();
+
+		if (mConnectedState == ConnectedState.None) {
 			final Exception exception = new ConnectException();
 			final ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(null, exception);
 			serviceResponse = new ServiceResponse(ResponseCode.Failed, null, proxibaseException);
 		}
-		else {
+		else if (mConnectedState == ConnectedState.WalledGarden) {
+			final Exception exception = new WalledGardenException();
+			final ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(null, exception);
+			serviceResponse = new ServiceResponse(ResponseCode.Failed, null, proxibaseException);
+		}
+		else if (mConnectedState == ConnectedState.Normal) {
 			/*
 			 * We have a network connection so give it a try. Request processing
 			 * will retry using an exponential backoff scheme if needed and possible.
@@ -102,23 +108,40 @@ public class NetworkManager {
 	// Connectivity routines
 	// --------------------------------------------------------------------------------------------
 
-	private boolean verifyIsConnected() {
+	public ConnectedState checkConnectedState() {
 		int attempts = 0;
+
+		/*
+		 * We create a little time for a connection process to complete
+		 * Max attempt time = CONNECT_TRIES * CONNECT_WAIT
+		 */
+		ConnectedState connectedState = ConnectedState.Normal;
 		while (!NetworkManager.getInstance().isConnected()) {
 			attempts++;
 			Logger.v(this, "No network connection: attempt: " + String.valueOf(attempts));
 
 			if (attempts >= CONNECT_TRIES) {
-				return false;
+				connectedState = ConnectedState.None;
+				break;
 			}
 			try {
 				Thread.sleep(CONNECT_WAIT);
 			}
 			catch (InterruptedException exception) {
-				return false;
+				connectedState = ConnectedState.None;
+				break;
 			}
 		}
-		return true;
+
+		/* We have a network connection so now check for a walled garden */
+		if (isWalledGardenConnection()) {
+			connectedState = ConnectedState.WalledGarden;
+		}
+
+		synchronized (mConnectedState) {
+			mConnectedState = connectedState;
+		}
+		return mConnectedState;
 	}
 
 	private boolean isConnected() {
@@ -162,6 +185,49 @@ public class NetworkManager {
 			isMobileNetwork = activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE;
 		}
 		return isMobileNetwork;
+	}
+
+	/**
+	 * 
+	 * @return Based on ConnectivityManager.TYPE_*. Can return null.
+	 */
+	@SuppressWarnings("ucd")
+	protected Integer getNetworkTypeId() {
+		/* Check if we're connected to a data network, and if so - if it's a mobile network. */
+		Integer networkTypeId = null;
+		if (mConnectivityManager != null) {
+			final NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
+			if (activeNetwork != null) {
+				networkTypeId = activeNetwork.getType();
+			}
+		}
+		return networkTypeId;
+	}
+
+	public boolean isWalledGardenConnection() {
+		HttpURLConnection urlConnection = null;
+		try {
+			URL url = new URL(WALLED_GARDEN_URI);
+			urlConnection = (HttpURLConnection) url.openConnection();
+			urlConnection.setInstanceFollowRedirects(false);
+			urlConnection.setConnectTimeout(WALLED_GARDEN_SOCKET_TIMEOUT_MS);
+			urlConnection.setReadTimeout(WALLED_GARDEN_SOCKET_TIMEOUT_MS);
+			urlConnection.setUseCaches(false);
+			urlConnection.getInputStream();
+			// We got a valid response, but not from the real google
+			return urlConnection.getResponseCode() != 204;
+		}
+		catch (IOException e) {
+			if (BuildConfig.DEBUG) {
+				Logger.w(this, "Walled garden check - probably not a portal: exception " + e);
+			}
+			return false;
+		}
+		finally {
+			if (urlConnection != null) {
+				urlConnection.disconnect();
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -221,6 +287,10 @@ public class NetworkManager {
 		mWifiState = wifiState;
 	}
 
+	public ConnectedState getConnectedState() {
+		return mConnectedState;
+	}
+
 	private class WifiStateChangedReceiver extends BroadcastReceiver {
 
 		@Override
@@ -273,5 +343,9 @@ public class NetworkManager {
 
 	public static enum ResponseCode {
 		Success, Failed
+	}
+
+	public static enum ConnectedState {
+		None, Normal, WalledGarden,
 	}
 }

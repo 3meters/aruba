@@ -23,21 +23,14 @@ import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AndroidManager;
-import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.IntentBuilder;
-import com.aircandi.components.ProxiManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
-import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Source;
-import com.aircandi.ui.CommentList;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.MiscUtils;
 
 @SuppressWarnings("ucd")
@@ -54,7 +47,8 @@ public class SourceBuilder extends FormActivity {
 	private Integer			mSpinnerItem;
 
 	private List<String>	mSourceSuggestionStrings;
-	private Entity			mEntity;
+
+	//private Entity			mEntity;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -75,9 +69,7 @@ public class SourceBuilder extends FormActivity {
 				mEditing = true;
 				mCommon.mActionBar.setTitle(R.string.dialog_source_builder_title_editing);
 			}
-			final String entityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
-			if (entityId != null) {
-				mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(entityId);
+			else {
 				mEditing = false;
 				mCommon.mActionBar.setTitle(R.string.dialog_source_builder_title_new);
 			}
@@ -210,16 +202,6 @@ public class SourceBuilder extends FormActivity {
 		}
 		else if (mSource.type.equals("email")) {
 			AndroidManager.getInstance().callSendToActivity(this, mSource.label, mSource.id, null, null);
-		}
-		else if (mSource.type.equals("comments")) {
-			final IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setEntityId(mEntity.id)
-					.setParentEntityId(mEntity.parentId)
-					.setCollectionId(mEntity.id);
-			final Intent intent = intentBuilder.create();
-			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
 		}
 		else {
 			AndroidManager.getInstance().callGenericActivity(this, (mSource.url != null) ? mSource.url : mSource.id);
@@ -356,32 +338,20 @@ public class SourceBuilder extends FormActivity {
 				}
 
 				/* Do nothing when the hint item is selected */
-				if (mEntity == null) {
-					if (position == 0) {
+				if (position != parent.getCount()) {
+					if (position < mSourceSuggestionStrings.size()) {
 						final String sourceType = mSourceSuggestionStrings.get(position);
 						mSource = buildCustomSource(sourceType);
 						mSourceLabel.setText(mSource.label);
 						mSourceId.setText(mSource.id);
+						if (mSource.type.equals("website")) {
+							mSourceId.setVisibility(View.GONE);
+						}
+						else {
+							mSourceId.setVisibility(View.VISIBLE);
+						}
 						mSource.custom = true;
 						drawSourceIcon();
-					}
-				}
-				else {
-					if (position != parent.getCount()) {
-						//						if (mEntity.sourceSuggestions != null && position < mEntity.sourceSuggestions.size()) {
-						//							mSource = mEntity.sourceSuggestions.get(position);
-						//							mSourceCaption.setText(mSource.label);
-						//							mSourceId.setText(mSource.id);
-						//							drawSourceIcon();
-						//						}
-						if (position < mSourceSuggestionStrings.size()) {
-							final String sourceType = mSourceSuggestionStrings.get(position);
-							mSource = buildCustomSource(sourceType);
-							mSourceLabel.setText(mSource.label);
-							mSourceId.setText(mSource.id);
-							mSource.custom = true;
-							drawSourceIcon();
-						}
 					}
 				}
 			}

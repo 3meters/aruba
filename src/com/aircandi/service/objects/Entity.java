@@ -136,64 +136,66 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		entity = (Entity) ServiceEntryBase.setPropertiesFromMap(entity, map);
+		synchronized (entity) {
+			entity = (Entity) ServiceEntryBase.setPropertiesFromMap(entity, map);
 
-		entity.name = (String) map.get("name");
-		entity.subtitle = (String) map.get("subtitle");
-		entity.description = (String) map.get("description");
-		entity.isCollection = (Boolean) map.get("isCollection");
-		entity.locked = (Boolean) map.get("locked");
-		entity.signalFence = (Number) map.get("signalFence");
-		entity.visibility = (String) map.get("visibility");
+			entity.name = (String) map.get("name");
+			entity.subtitle = (String) map.get("subtitle");
+			entity.description = (String) map.get("description");
+			entity.isCollection = (Boolean) map.get("isCollection");
+			entity.locked = (Boolean) map.get("locked");
+			entity.signalFence = (Number) map.get("signalFence");
+			entity.visibility = (String) map.get("visibility");
 
-		if (map.get("links") != null) {
-			entity.links = new ArrayList<Link>();
-			final List<LinkedHashMap<String, Object>> linkMaps = (List<LinkedHashMap<String, Object>>) map.get("links");
-			for (Map<String, Object> linkMap : linkMaps) {
-				entity.links.add(Link.setPropertiesFromMap(new Link(), linkMap));
+			if (map.get("links") != null) {
+				entity.links = new ArrayList<Link>();
+				final List<LinkedHashMap<String, Object>> linkMaps = (List<LinkedHashMap<String, Object>>) map.get("links");
+				for (Map<String, Object> linkMap : linkMaps) {
+					entity.links.add(Link.setPropertiesFromMap(new Link(), linkMap));
+				}
 			}
-		}
 
-		if (map.get("sources") != null) {
-			entity.sources = new ArrayList<Source>();
-			final List<LinkedHashMap<String, Object>> sourceMaps = (List<LinkedHashMap<String, Object>>) map.get("sources");
-			for (Map<String, Object> sourceMap : sourceMaps) {
-				entity.sources.add(Source.setPropertiesFromMap(new Source(), sourceMap));
+			if (map.get("sources") != null) {
+				entity.sources = new ArrayList<Source>();
+				final List<LinkedHashMap<String, Object>> sourceMaps = (List<LinkedHashMap<String, Object>>) map.get("sources");
+				for (Map<String, Object> sourceMap : sourceMaps) {
+					entity.sources.add(Source.setPropertiesFromMap(new Source(), sourceMap));
+				}
 			}
-		}
 
-		if (map.get("comments") != null) {
-			entity.comments = new ArrayList<Comment>();
-			final List<LinkedHashMap<String, Object>> commentMaps = (List<LinkedHashMap<String, Object>>) map.get("comments");
-			for (Map<String, Object> commentMap : commentMaps) {
-				entity.comments.add(Comment.setPropertiesFromMap(new Comment(), commentMap));
+			if (map.get("comments") != null) {
+				entity.comments = new ArrayList<Comment>();
+				final List<LinkedHashMap<String, Object>> commentMaps = (List<LinkedHashMap<String, Object>>) map.get("comments");
+				for (Map<String, Object> commentMap : commentMaps) {
+					entity.comments.add(Comment.setPropertiesFromMap(new Comment(), commentMap));
+				}
 			}
-		}
 
-		entity.commentCount = (Integer) map.get("commentCount");
-		entity.commentsMore = (Boolean) map.get("commentsMore");
+			entity.commentCount = (Integer) map.get("commentCount");
+			entity.commentsMore = (Boolean) map.get("commentsMore");
 
-		entity.children = new ArrayList<Entity>();
-		if (map.get("children") != null) {
-			final List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("children");
-			for (Map<String, Object> childMap : childMaps) {
-				entity.children.add(Entity.setPropertiesFromMap(new Entity(), childMap));
+			entity.children = new ArrayList<Entity>();
+			if (map.get("children") != null) {
+				final List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("children");
+				for (Map<String, Object> childMap : childMaps) {
+					entity.children.add(Entity.setPropertiesFromMap(new Entity(), childMap));
+				}
 			}
+			entity.childCount = (Integer) map.get("childCount");
+			entity.childrenMore = (Boolean) map.get("childrenMore");
+
+			if (map.get("place") != null) {
+				entity.place = Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("place"));
+			}
+
+			if (map.get("photo") != null) {
+				entity.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
+			}
+
+			entity.parentId = (String) map.get("_parent");
+
+			entity.activityDate = (Number) map.get("activityDate");
 		}
-		entity.childCount = (Integer) map.get("childCount");
-		entity.childrenMore = (Boolean) map.get("childrenMore");
-
-		if (map.get("place") != null) {
-			entity.place = Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("place"));
-		}
-
-		if (map.get("photo") != null) {
-			entity.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
-		}
-
-		entity.parentId = (String) map.get("_parent");
-
-		entity.activityDate = (Number) map.get("activityDate");
 
 		return entity;
 	}
@@ -228,9 +230,9 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 		to.childCount = from.childCount;
 		to.comments = from.comments;
-		to.sources = from.sources;
 		to.commentCount = from.commentCount;
 		to.commentsMore = from.commentsMore;
+		to.sources = from.sources;
 
 		to.activityDate = from.activityDate;
 	}
@@ -436,7 +438,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		}
 		return null;
 	}
-	
+
 	public Link getLink(Beacon beacon, String linkType) {
 		if (links != null) {
 			for (Link link : links) {

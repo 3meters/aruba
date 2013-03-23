@@ -525,10 +525,10 @@ public class EntityModel {
 		return result;
 	}
 
-	public ModelResult trackEntity(Entity entity, List<Beacon> beacons, Beacon primaryBeacon, String actionType) {
+	public ModelResult trackEntity(Entity entity, List<Beacon> beacons, Beacon primaryBeacon, String actionType, Boolean untuning) {
 
 		final ModelResult result = new ProxiManager.ModelResult();
-		Logger.i(this, "Tracking entity");
+		Logger.i(this, untuning ? "Untracking entity" : "Tracking entity");
 
 		/* Construct entity, link, and observation */
 		final Bundle parameters = new Bundle();
@@ -540,6 +540,7 @@ public class EntityModel {
 
 		if (beacons != null && beacons.size() > 0) {
 			final List<String> beaconStrings = new ArrayList<String>();
+			final List<String> beaconIds = new ArrayList<String>();
 			for (Beacon beacon : beacons) {
 				if (beacon.id.equals(primaryBeacon.id)) {
 					Observation observation = LocationManager.getInstance().getObservationLocked();
@@ -566,9 +567,15 @@ public class EntityModel {
 				beacon.beaconType = BeaconType.Fixed.name().toLowerCase(Locale.US);
 				beacon.locked = false;
 				beaconStrings.add("object:" + ProxibaseService.convertObjectToJsonSmart(beacon, true, true));
+				beaconIds.add(beacon.id);
 			}
 
-			parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
+			if (untuning) {
+				parameters.putStringArrayList("beaconIds", (ArrayList<String>) beaconIds);
+			}
+			else {
+				parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
+			}
 		}
 
 		/* Observation */
@@ -584,8 +591,11 @@ public class EntityModel {
 		/* Action type */
 		parameters.putString("actionType", actionType);
 
+		/* Method */
+		String methodName = untuning ? "untrackEntity" : "trackEntity";
+
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "trackEntity")
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + methodName)
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setSession(Aircandi.getInstance().getUser().session)
@@ -1563,7 +1573,6 @@ public class EntityModel {
 		source.installDeclined = false;
 		sourceEntity.source = source;
 
-		sourceEntity.commentCount = entity.commentCount;
 		sourceEntity.parentId = entity.id;
 		upsertEntity(sourceEntity);
 	}

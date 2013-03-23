@@ -202,7 +202,7 @@ public class RegisterForm extends FormActivity {
 		}
 		mBitmap = null;
 		drawImage(user);
-		Tracker.sendEvent("ui_action", "set_user_picture_to_default", null, 0);
+		Tracker.sendEvent("ui_action", "set_user_picture_to_default", null, 0, Aircandi.getInstance().getUser());
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -210,7 +210,7 @@ public class RegisterForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private void doViewTerms() {
-		Tracker.sendEvent("ui_action", "view_terms", null, 0);
+		Tracker.sendEvent("ui_action", "view_terms", null, 0, Aircandi.getInstance().getUser());
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(CandiConstants.URL_AIRCANDI_TERMS));
 		startActivity(intent);
@@ -291,7 +291,7 @@ public class RegisterForm extends FormActivity {
 			mUser.name = mTextFullname.getText().toString().trim();
 			mUser.password = mTextPassword.getText().toString().trim();
 
-			Tracker.sendEvent("ui_action", "register_user", null, 0);
+			Tracker.sendEvent("ui_action", "register_user", null, 0, Aircandi.getInstance().getUser());
 			Logger.d(this, "Inserting user: " + mUser.name);
 
 			new AsyncTask() {
@@ -344,8 +344,6 @@ public class RegisterForm extends FormActivity {
 						 * TODO: Need to handle AmazonClientException.
 						 * Does clearing the password fields always make sense?
 						 */
-						mTextPassword.setText("");
-						mTextPasswordConfirm.setText("");
 						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.Signup);
 					}
 				}

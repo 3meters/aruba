@@ -85,7 +85,7 @@ public class PasswordForm extends FormActivity {
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						Logger.i(this, "User changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
-						Tracker.sendEvent("ui_action", "change_password", null, 0);
+						Tracker.sendEvent("ui_action", "change_password", null, 0, Aircandi.getInstance().getUser());
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_password_changed)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 						finish();

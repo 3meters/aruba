@@ -1,9 +1,6 @@
 package com.aircandi.components.bitmaps;
 
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Locale;
 
@@ -37,12 +34,12 @@ import com.aircandi.utilities.MiscUtils;
 @SuppressWarnings("ucd")
 public class BitmapManager {
 
-	private static BitmapManager		singletonObject;
-	private DiskLruImageCache			mDiskLruCache;
-	private final Object				mDiskCacheLock		= new Object();
-	private boolean						mDiskCacheStarting	= true;
-	private static final int			DISK_CACHE_SIZE		= 10 << 10 << 10; // 10MB
-	private static final String			DISK_CACHE_SUBDIR	= "bitmaps";
+	private static BitmapManager			singletonObject;
+	private DiskLruImageCache				mDiskLruCache;
+	private final Object					mDiskCacheLock		= new Object();
+	private boolean							mDiskCacheStarting	= true;
+	private static final int				DISK_CACHE_SIZE		= 10 << 10 << 10;	// 10MB
+	private static final String				DISK_CACHE_SUBDIR	= "bitmaps";
 	private final BitmapLoader				mBitmapLoader;
 
 	private final LruCache<String, Bitmap>	mMemoryCache;
@@ -127,7 +124,8 @@ public class BitmapManager {
 			return serviceResponse;
 		}
 
-		final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable", Aircandi.getInstance().getPackageName());
+		final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable",
+				Aircandi.getInstance().getPackageName());
 		String memCacheKey = String.valueOf(resourceId);
 		if (bitmapRequest.getImageSize() != null) {
 			memCacheKey += "." + String.valueOf(bitmapRequest.getImageSize());
@@ -163,7 +161,7 @@ public class BitmapManager {
 	}
 
 	public synchronized ServiceResponse fetchBitmap(final BitmapRequest bitmapRequest) {
-		
+
 		final ServiceResponse serviceResponse = new ServiceResponse();
 		final Bitmap bitmap = getBitmap(bitmapRequest.getImageUri(), bitmapRequest.getImageSize());
 
@@ -292,7 +290,7 @@ public class BitmapManager {
 				imageData = cursor.getString(dataColumn);
 				rotation = cursor.getInt(orientationColumn);
 			}
-			
+
 			imageFile = new File(imageData);
 			cursor.close();
 		}
@@ -311,81 +309,11 @@ public class BitmapManager {
 				return null;
 			}
 		}
-		
+
 		final Bitmap bitmap = bitmapForImageFileSampled(imageFile, null, rotation);
 		return bitmap;
 	}
 
-	public Bitmap loadBitmapFromDeviceSampledOld(final Uri imageUri) {
-
-		final String[] projection = new String[] { Images.Thumbnails._ID, Images.Thumbnails.DATA, Images.Media.ORIENTATION };
-		File imageFile = null;
-		int rotation = 0;
-
-		final Cursor cursor = Aircandi.applicationContext.getContentResolver().query(imageUri, projection, null, null, null);
-
-		if (cursor != null) {
-
-			/* Means the image is in the media store */
-			String imageData = "";
-			if (cursor.moveToFirst()) {
-				final int dataColumn = cursor.getColumnIndex(Images.Media.DATA);
-				final int orientationColumn = cursor.getColumnIndex(Images.Media.ORIENTATION);
-				imageData = cursor.getString(dataColumn);
-				rotation = cursor.getInt(orientationColumn);
-			}
-			
-			imageFile = new File(imageData);
-			cursor.close();
-		}
-		else {
-
-			/* The image is in the local file system */
-			imageFile = new File(imageUri.toString().replace("file://", ""));
-
-			final ExifInterface exif;
-			try {
-				exif = new ExifInterface(imageUri.getPath());
-				rotation = (int) exifOrientationToDegrees(exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
-			}
-			catch (IOException exception) {
-				Exceptions.handle(exception);
-				return null;
-			}
-		}
-
-		final byte[] imageBytes = new byte[(int) imageFile.length()];
-
-		DataInputStream inputStream = null;
-
-		try {
-			inputStream = new DataInputStream(new FileInputStream(imageFile));
-		}
-		catch (FileNotFoundException exception) {
-			Exceptions.handle(exception);
-			return null;
-		}
-		
-		try {
-			inputStream.readFully(imageBytes);
-		}
-		catch (IOException exception) {
-			Exceptions.handle(exception);
-			return null;
-		}
-		
-		try {
-			inputStream.close();
-		}
-		catch (IOException exception) {
-			Exceptions.handle(exception);
-			return null;
-		}
-
-		final Bitmap bitmap = bitmapForByteArraySampled(imageBytes, null, rotation);
-		return bitmap;
-	}
-	
 	private Bitmap loadBitmapFromResourcesSampled(final Integer resourceId, Integer size) {
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
@@ -516,7 +444,7 @@ public class BitmapManager {
 
 		return bitmapSampled;
 	}
-	
+
 	private String resolveResourceName(String rawResourceName) {
 		int resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "drawable", Aircandi.getInstance().getPackageName());
 		if (resourceId == 0) {

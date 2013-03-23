@@ -21,6 +21,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.MenuItem;
+import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
@@ -352,7 +353,7 @@ public class CandiUser extends CandiActivity {
 			if (section != null) {
 				section.setHeaderTitle(context.getString(R.string.candi_section_user_candi_places));
 
-				if (places.size() > CandiConstants.CANDI_FLOW_LIMIT) {
+				if (places.size() > getResources().getInteger(R.integer.candi_flow_limit)) {
 					View footer = inflater.inflate(R.layout.temp_section_footer, null);
 					Button button = (Button) footer.findViewById(R.id.button_more);
 					FontManager.getInstance().setTypefaceDefault(button);
@@ -362,8 +363,8 @@ public class CandiUser extends CandiActivity {
 				}
 
 				FlowLayout flow = (FlowLayout) findViewById(R.id.section_candi_places).findViewById(R.id.flow_candi);
-				drawCandi(context, flow, places.size() > CandiConstants.CANDI_FLOW_LIMIT
-						? places.subList(0, CandiConstants.CANDI_FLOW_LIMIT)
+				drawCandi(context, flow, places.size() > getResources().getInteger(R.integer.candi_flow_limit)
+						? places.subList(0, getResources().getInteger(R.integer.candi_flow_limit))
 						: places, R.layout.temp_place_candi_item);
 
 				setVisibility(findViewById(R.id.section_candi_places), View.VISIBLE);
@@ -374,7 +375,7 @@ public class CandiUser extends CandiActivity {
 			if (section != null) {
 				section.setHeaderTitle(context.getString(R.string.candi_section_user_candi_pictures));
 
-				if (pictures.size() > CandiConstants.CANDI_FLOW_LIMIT) {
+				if (pictures.size() > getResources().getInteger(R.integer.candi_flow_limit)) {
 					View footer = inflater.inflate(R.layout.temp_section_footer, null);
 					Button button = (Button) footer.findViewById(R.id.button_more);
 					FontManager.getInstance().setTypefaceDefault(button);
@@ -384,8 +385,8 @@ public class CandiUser extends CandiActivity {
 				}
 
 				FlowLayout flow = (FlowLayout) findViewById(R.id.section_candi_pictures).findViewById(R.id.flow_candi);
-				drawCandi(context, flow, pictures.size() > CandiConstants.CANDI_FLOW_LIMIT
-						? pictures.subList(0, CandiConstants.CANDI_FLOW_LIMIT)
+				drawCandi(context, flow, pictures.size() > getResources().getInteger(R.integer.candi_flow_limit)
+						? pictures.subList(0, getResources().getInteger(R.integer.candi_flow_limit))
 						: pictures, R.layout.temp_place_candi_item);
 
 				setVisibility(findViewById(R.id.section_candi_pictures), View.VISIBLE);
@@ -396,7 +397,7 @@ public class CandiUser extends CandiActivity {
 			if (section != null) {
 				section.setHeaderTitle(context.getString(R.string.candi_section_user_candi_posts));
 
-				if (posts.size() > CandiConstants.CANDI_FLOW_LIMIT) {
+				if (posts.size() > getResources().getInteger(R.integer.candi_flow_limit)) {
 					View footer = inflater.inflate(R.layout.temp_section_footer, null);
 					Button button = (Button) footer.findViewById(R.id.button_more);
 					FontManager.getInstance().setTypefaceDefault(button);
@@ -406,8 +407,8 @@ public class CandiUser extends CandiActivity {
 				}
 
 				FlowLayout flow = (FlowLayout) findViewById(R.id.section_candi_posts).findViewById(R.id.flow_candi);
-				drawCandi(context, flow, posts.size() > CandiConstants.CANDI_FLOW_LIMIT
-						? posts.subList(0, CandiConstants.CANDI_FLOW_LIMIT)
+				drawCandi(context, flow, posts.size() > getResources().getInteger(R.integer.candi_flow_limit)
+						? posts.subList(0, getResources().getInteger(R.integer.candi_flow_limit))
 						: posts, R.layout.temp_place_candi_item);
 
 				setVisibility(findViewById(R.id.section_candi_posts), View.VISIBLE);
@@ -431,9 +432,9 @@ public class CandiUser extends CandiActivity {
 		Integer spacingHorizontalPixels = ImageUtils.getRawPixels(context, spacing);
 		Integer spacingVerticalPixels = ImageUtils.getRawPixels(context, spacing);
 
-		Integer desiredWidthPixels = (int) (metrics.xdpi * 0.45f);
+		Integer desiredWidthPixels = (int) (metrics.density * 75);
 		if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			desiredWidthPixels = (int) (metrics.ydpi * 0.45f);
+			desiredWidthPixels = (int) (metrics.density * 75);
 		}
 
 		Integer candiCount = (int) Math.ceil(layoutWidthPixels / desiredWidthPixels);
@@ -458,26 +459,11 @@ public class CandiUser extends CandiActivity {
 			FontManager.getInstance().setTypefaceDefault(title);
 			FontManager.getInstance().setTypefaceDefault(badge);
 
-			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-				if (entity.source.name != null && entity.source.name.equals("comments")) {
-					if (entity.commentCount != null && entity.commentCount > 0) {
-						badge.setText(String.valueOf(entity.commentCount));
-						badge.setVisibility(View.VISIBLE);
-					}
-					else {
-						badge.setVisibility(View.GONE);
-					}
-				}
+			if (entity.name != null && !entity.name.equals("")) {
 				title.setText(entity.name);
-				title.setVisibility(View.VISIBLE);
 			}
 			else {
-				if (entity.name != null && !entity.name.equals("")) {
-					title.setText(entity.name);
-				}
-				else {
-					title.setVisibility(View.GONE);
-				}
+				title.setVisibility(View.GONE);
 			}
 
 			if (entity.photo == null && entity.place != null) {
@@ -518,12 +504,12 @@ public class CandiUser extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
+
 		if (item.getItemId() == R.id.edit) {
-			Tracker.sendEvent("ui_action", "edit_user", null, 0);
+			Tracker.sendEvent("ui_action", "edit_user", null, 0, Aircandi.getInstance().getUser());
 			mCommon.doEditUserClick();
 			return true;
 		}
@@ -532,7 +518,7 @@ public class CandiUser extends CandiActivity {
 		mCommon.doOptionsItemSelected(item);
 		return true;
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------

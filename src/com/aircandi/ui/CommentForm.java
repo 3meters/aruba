@@ -182,7 +182,7 @@ public class CommentForm extends FormActivity {
 					final ModelResult result = (ModelResult) response;
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
-						Tracker.sendEvent("ui_action", "add_comment", null, 0);
+						Tracker.sendEvent("ui_action", "add_comment", null, 0, Aircandi.getInstance().getUser());
 						mCommon.hideBusy(true);
 						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_COMMENT_INSERTED);

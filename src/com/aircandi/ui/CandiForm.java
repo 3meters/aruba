@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -77,6 +78,7 @@ public class CandiForm extends CandiActivity {
 	private Number					mEntityModelActivityDate;
 	private Boolean					mUpsize;
 	private Boolean					mTracked			= false;
+	private static Resources		mResources;
 	private final PackageReceiver	mPackageReceiver	= new PackageReceiver();
 
 	@Override
@@ -106,6 +108,7 @@ public class CandiForm extends CandiActivity {
 		mCandiForm = (ViewGroup) body.findViewById(R.id.candi_form);
 		mScrollView = (ScrollView) body.findViewById(R.id.scroll_view);
 		mCandiView = (CandiView) body.findViewById(R.id.candi_view);
+		mResources = getResources();
 
 		mContentView.addView(body, 0);
 
@@ -193,7 +196,7 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("TrackEntityBrowse");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().trackEntity(mEntity, null, null, "browse");
+				final ModelResult result = ProxiManager.getInstance().getEntityModel().trackEntity(mEntity, null, null, "browse", false);
 				return result;
 			}
 
@@ -250,7 +253,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	private void draw() {
-		CandiForm.buildCandiForm(this, mEntity, mContentView, mCommon.mMenu, null, false);
+		buildCandiForm(mEntity, mContentView, mCommon.mMenu, null, false);
 		mCandiForm.setVisibility(View.VISIBLE);
 	}
 
@@ -259,26 +262,8 @@ public class CandiForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
-	public void onBrowseCommentsButtonClick(View view) {
-		if (mEntity.commentCount != null && mEntity.commentCount > 0) {
-			Tracker.sendEvent("ui_action", "browse_comments", null, 0);
-			final IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setEntityId(mEntity.id)
-					.setParentEntityId(mEntity.parentId)
-					.setCollectionId(mEntity.id);
-			final Intent intent = intentBuilder.create();
-			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
-		}
-		else {
-			onNewCommentButtonClick(view);
-		}
-	}
-
-	@SuppressWarnings("ucd")
 	public void onMapButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "map_place", null, 0);
+		Tracker.sendEvent("ui_action", "map_place", null, 0, Aircandi.getInstance().getUser());
 		final GeoLocation location = mEntity.getLocation();
 		AndroidManager.getInstance().callMapActivity(this, String.valueOf(location.latitude.doubleValue())
 				, String.valueOf(location.longitude.doubleValue())
@@ -287,7 +272,7 @@ public class CandiForm extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onCallButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "call_place", null, 0);
+		Tracker.sendEvent("ui_action", "call_place", null, 0, Aircandi.getInstance().getUser());
 		AndroidManager.getInstance().callDialerActivity(this, mEntity.place.contact.phone);
 	}
 
@@ -324,7 +309,7 @@ public class CandiForm extends CandiActivity {
 				showInstallDialog(entity);
 			}
 			else {
-				Tracker.sendEvent("ui_action", "browse_source", entity.source.type, 0);
+				Tracker.sendEvent("ui_action", "browse_source", entity.source.type, 0, Aircandi.getInstance().getUser());
 				if (entity.source.type.equals("twitter")) {
 					AndroidManager.getInstance().callTwitterActivity(this, (entity.source.id != null) ? entity.source.id : entity.source.url);
 				}
@@ -401,7 +386,7 @@ public class CandiForm extends CandiActivity {
 		else {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
-					, getResources().getString(R.string.alert_entity_locked)
+					, mResources.getString(R.string.alert_entity_locked)
 					, null
 					, this, android.R.string.ok, null, null, null, null);
 		}
@@ -410,7 +395,7 @@ public class CandiForm extends CandiActivity {
 	@SuppressWarnings("ucd")
 	public void onTuneButtonClick(View view) {
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
-			final IntentBuilder intentBuilder = new IntentBuilder(this, TuningForm.class);
+			final IntentBuilder intentBuilder = new IntentBuilder(this, TuningWizard.class);
 			intentBuilder.setEntityId(mEntity.id);
 			final Intent intent = intentBuilder.create();
 			startActivity(intent);
@@ -419,7 +404,7 @@ public class CandiForm extends CandiActivity {
 		else {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
-					, getResources().getString(R.string.alert_entity_locked)
+					, mResources.getString(R.string.alert_entity_locked)
 					, null
 					, this, android.R.string.ok, null, null, null, null);
 		}
@@ -494,7 +479,7 @@ public class CandiForm extends CandiActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	private static ViewGroup buildCandiForm(Context context, final Entity entity, final ViewGroup layout, Menu menu, GeoLocation mLocation, boolean refresh) { // $codepro.audit.disable largeNumberOfParameters
+	private ViewGroup buildCandiForm(final Entity entity, final ViewGroup layout, Menu menu, GeoLocation mLocation, boolean refresh) { // $codepro.audit.disable largeNumberOfParameters
 		/*
 		 * For now, we assume that the candi form isn't recycled.
 		 * 
@@ -504,7 +489,7 @@ public class CandiForm extends CandiActivity {
 		 * - WebImageView child views are gone by default
 		 * - Header views are visible by default
 		 */
-		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		final CandiView candiView = (CandiView) layout.findViewById(R.id.candi_view);
 		final WebImageView image = (WebImageView) layout.findViewById(R.id.candi_form_image);
@@ -576,7 +561,7 @@ public class CandiForm extends CandiActivity {
 			final SectionLayout section = (SectionLayout) layout.findViewById(R.id.section_layout_switchboard);
 			if (section != null) {
 				final FlowLayout flow = (FlowLayout) layout.findViewById(R.id.flow_switchboard);
-				drawCandi(context, flow, entities, R.layout.temp_place_switchboard_item);
+				drawCandi(flow, entities, R.layout.temp_place_switchboard_item);
 				setVisibility(layout.findViewById(R.id.section_layout_switchboard), View.VISIBLE);
 			}
 		}
@@ -595,9 +580,9 @@ public class CandiForm extends CandiActivity {
 
 			final SectionLayout section = (SectionLayout) layout.findViewById(R.id.section_layout_candi);
 			if (section != null) {
-				section.getTextViewHeader().setText(context.getString(R.string.candi_section_candi));
+				section.getTextViewHeader().setText(getString(R.string.candi_section_candi));
 
-				if (entities.size() > CandiConstants.CANDI_FLOW_LIMIT) {
+				if (entities.size() > R.integer.candi_flow_limit) {
 					View footer = inflater.inflate(R.layout.temp_section_footer, null);
 					Button button = (Button) footer.findViewById(R.id.button_more);
 					FontManager.getInstance().setTypefaceDefault(button);
@@ -607,8 +592,8 @@ public class CandiForm extends CandiActivity {
 				}
 
 				final FlowLayout flow = (FlowLayout) layout.findViewById(R.id.flow_candi);
-				drawCandi(context, flow, entities.size() > CandiConstants.CANDI_FLOW_LIMIT
-						? entities.subList(0, CandiConstants.CANDI_FLOW_LIMIT)
+				drawCandi(flow, entities.size() > mResources.getInteger(R.integer.candi_flow_limit)
+						? entities.subList(0, mResources.getInteger(R.integer.candi_flow_limit))
 						: entities, R.layout.temp_place_candi_item);
 
 				setVisibility(layout.findViewById(R.id.section_candi), View.VISIBLE);
@@ -639,20 +624,20 @@ public class CandiForm extends CandiActivity {
 		if (creator != null && entity.creator != null && !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 				if (entity.place.provider.equals("user")) {
-					creator.setLabel(context.getString(R.string.candi_label_user_created_by));
+					creator.setLabel(getString(R.string.candi_label_user_created_by));
 				}
 				else {
-					creator.setLabel(context.getString(R.string.candi_label_user_discovered_by));
+					creator.setLabel(getString(R.string.candi_label_user_discovered_by));
 				}
 			}
 			else if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-				creator.setLabel(context.getString(R.string.candi_label_user_added_by));
+				creator.setLabel(getString(R.string.candi_label_user_added_by));
 			}
 			else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-				creator.setLabel(context.getString(R.string.candi_label_user_posted_by));
+				creator.setLabel(getString(R.string.candi_label_user_posted_by));
 			}
 			else {
-				creator.setLabel(context.getString(R.string.candi_label_user_created_by));
+				creator.setLabel(getString(R.string.candi_label_user_created_by));
 			}
 			creator.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
 			setVisibility(creator, View.VISIBLE);
@@ -663,37 +648,37 @@ public class CandiForm extends CandiActivity {
 		setVisibility(editor, View.GONE);
 		if (editor != null && entity.modifier != null && !entity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 			if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
-				editor.setLabel(context.getString(R.string.candi_label_user_edited_by));
+				editor.setLabel(getString(R.string.candi_label_user_edited_by));
 				editor.bindToAuthor(entity.modifier, entity.modifiedDate.longValue(), null);
 				setVisibility(editor, View.VISIBLE);
 			}
 		}
 
 		/* Buttons */
-		buildCandiButtons(context, entity, layout, menu, mLocation);
+		buildCandiButtons(entity, layout, menu, mLocation);
 
 		return layout;
 	}
 
-	private static void drawCandi(Context context, FlowLayout layout, List<Entity> entities, Integer viewResId) {
+	private void drawCandi(FlowLayout layout, List<Entity> entities, Integer viewResId) {
 
 		layout.removeAllViews();
-		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+		final DisplayMetrics metrics = getResources().getDisplayMetrics();
 		final View parentView = (View) layout.getParent();
 		Integer layoutWidthPixels = metrics.widthPixels
 				- (parentView.getPaddingLeft() + parentView.getPaddingRight() + layout.getPaddingLeft() + layout.getPaddingRight());
-		final Integer bonusPadding = ImageUtils.getRawPixels(context, 20);
+		final Integer bonusPadding = ImageUtils.getRawPixels(this, 20);
 		layoutWidthPixels -= bonusPadding;
 
 		final Integer spacing = 3;
-		final Integer spacingHorizontalPixels = ImageUtils.getRawPixels(context, spacing);
-		final Integer spacingVerticalPixels = ImageUtils.getRawPixels(context, spacing);
+		final Integer spacingHorizontalPixels = ImageUtils.getRawPixels(this, spacing);
+		final Integer spacingVerticalPixels = ImageUtils.getRawPixels(this, spacing);
 
-		Integer desiredWidthPixels = (int) (metrics.xdpi * 0.45f);
-		if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			desiredWidthPixels = (int) (metrics.ydpi * 0.45f);
+		Integer desiredWidthPixels = (int) (metrics.density * 75);
+		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+			desiredWidthPixels = (int) (metrics.density * 75);
 		}
 
 		final Integer candiCount = (int) Math.ceil(layoutWidthPixels / desiredWidthPixels);
@@ -771,7 +756,7 @@ public class CandiForm extends CandiActivity {
 		}
 	}
 
-	private static void buildCandiButtons(Context context, final Entity entity, final ViewGroup layout, Menu menu, GeoLocation mLocation) {
+	private void buildCandiButtons(final Entity entity, final ViewGroup layout, Menu menu, GeoLocation mLocation) {
 
 		setVisibility(layout.findViewById(R.id.button_map), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_call), View.GONE);
@@ -827,12 +812,12 @@ public class CandiForm extends CandiActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		if (item.getItemId() == R.id.edit) {
-			Tracker.sendEvent("ui_action", "edit_entity", null, 0);
+			Tracker.sendEvent("ui_action", "edit_entity", null, 0, Aircandi.getInstance().getUser());
 			mCommon.doEditCandiClick();
 			return true;
 		}
 		else if (item.getItemId() == R.id.add) {
-			Tracker.sendEvent("ui_action", "add_candi", null, 0);
+			Tracker.sendEvent("ui_action", "add_candi", null, 0, Aircandi.getInstance().getUser());
 			if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 				mCommon.showTemplatePicker(false);
 			}
@@ -936,7 +921,7 @@ public class CandiForm extends CandiActivity {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
-								Tracker.sendEvent("ui_action", "install_source", entity.source.packageName, 0);
+								Tracker.sendEvent("ui_action", "install_source", entity.source.packageName, 0, Aircandi.getInstance().getUser());
 								Logger.d(this, "Install: navigating to market install page");
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=" + entity.source.packageName
 										+ "&referrer=utm_source%3Dcom.aircandi"));

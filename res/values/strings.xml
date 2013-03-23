@@ -125,6 +125,7 @@
     <string name="error_connection">Check network connection and retry</string>
     <string name="error_connection_notification">Touch to retry network connection</string>
     <string name="error_connection_poor">Network connection is poor or service is unavailable, retry later</string>
+    <string name="error_connection_walled_garden">You need to sign in to enable internet access</string>
     <string name="error_client_request_socket_error">Resource has moved or been deleted</string>
     <string name="error_client_unknown_host">The website you entered can\'t be found.</string>
     <string name="error_client_request_error">Aircandi request error</string>
@@ -291,6 +292,7 @@
     <string name="form_button_send_password">forgot password?</string>
     <string name="form_button_test">test</string>
     <string name="form_button_tuning_tune">i\'m here</string>
+    <string name="form_button_tuning_untune">i\'m not here</string>
     <string name="form_button_tuning_tuned">thanks!</string>
     <string name="form_button_tuning_add_candi">add candi</string>
     <string name="form_button_tuning_edit">edit</string>

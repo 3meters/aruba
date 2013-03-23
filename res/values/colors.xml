@@ -4,17 +4,10 @@
     <!--
 	   	Theme Colors
 	   	- light suffix means a theme where backgrounds are generally light in tone. 
-	   	- dark suffix means a theme where backgrounds are generally dark in tone.
-    -->
+	   	- dark suffix means a theme where backgrounds are generally dark in tone.    -->
 
     <color name="progress_start">#ffffd300</color>
     <color name="progress_end">#ffffd300</color>
-
-    <!--
-    	We also used the pressed color in radar and that color is hardcoded
-    	in CandiPatchPresenter.initializeScene
-    -->
-
 
     <!-- Text -->
 
@@ -26,42 +19,43 @@
     <color name="text_pressed">#ff000000</color>
     <color name="edit_hint">#ff888888</color>
 
-    <!-- Beacons -->
-
-    <color name="beacon_stop">#99990000</color>
-    <color name="beacon_caution">#99999900</color>
-    <color name="beacon_go">#99009900</color>
-    <color name="beacon_off">#33ffffff</color>
-
     <!-- Accuracy -->
 
     <color name="accuracy_halo">#9933b5e5</color>
     <color name="accuracy_center">#ff33b5e5</color>
 
-    <!-- Buttons -->
+    <!-- Buttons dark -->
 
-    <color name="background_button_dark">@color/background_buttonbar_dark</color>
-    <color name="background_button_light">@color/background_actionbar_light</color>
-    <color name="stroke_button_dark">#44ffffff</color>
-    <color name="stroke_button_light">#00cccccc</color>
+    <color name="background_button_dark">@color/gray_80_pcnt</color>
+    <color name="background_button_start_dark">@color/gray_80_pcnt</color>
+    <color name="background_button_end_dark">@color/gray_80_pcnt</color>
+    <color name="stroke_button_dark">@color/gray_75_pcnt</color>
+    <color name="button_pressed">@color/accent_blue</color>
     
+    <!-- Buttons light -->
+    
+    <color name="background_button_light">@color/gray_20_pcnt</color>
+    <color name="background_button_start_light">@color/gray_05_pcnt</color>
+    <color name="background_button_end_light">@color/gray_10_pcnt</color>
+    <color name="stroke_button_light">@color/gray_25_pcnt</color>
+
     <!-- Backgrounds -->
 
-    <color name="background_dark">@android:color/black</color>
-    <color name="background_light">@android:color/white</color>
-    <color name="background_gray_light">#55333333</color>
-    <color name="background_gray_dark">#ff555555</color>
+    <color name="background_dark">@color/gray_100_pcnt</color>
+    <color name="background_light">@color/gray_00_pcnt</color>
     <color name="background_picture_detail">#ff282828</color>
     <color name="background_progress_dark">#99000000</color>
     <color name="background_progress_light">#ccffffff</color>
-    <color name="button_pressed">#ff33b5e5</color>
+    
     <color name="image_pressed">@color/accent_blue</color>
-    <color name="holo_blue_light">#8833b5e5</color>
+    
     <color name="drop_start">#66000000</color>
     <color name="drop_end">#00000000</color>
 
     <!-- Overlays -->
 
+    <color name="overlay_gray_light">#55333333</color>
+    <color name="overlay_gray_dark">#ff555555</color>
     <color name="overlay_start">#00000000</color>
     <color name="overlay_center">#88000000</color>
     <color name="overlay_end">#aa000000</color>
@@ -69,15 +63,15 @@
 
     <!-- Darken bars: mostly transparent -->
 
-    <color name="background_actionbar_light">#ffefefef</color>
-    <color name="background_tabbar_light">#ffdfdfdf</color>
-    <color name="background_buttonbar_light">#ffdfdfdf</color>
+    <color name="background_actionbar_light">@color/gray_10_pcnt</color>
+    <color name="background_tabbar_light">@color/gray_20_pcnt</color>
+    <color name="background_buttonbar_light">@color/gray_20_pcnt</color>
 
     <!-- Lighten bars: mostly transparent -->
 
-    <color name="background_actionbar_dark">#10ffffff</color>
-    <color name="background_tabbar_dark">#10ffffff</color>
-    <color name="background_buttonbar_dark">#22ffffff</color>
+    <color name="background_actionbar_dark">@color/gray_90_pcnt</color>
+    <color name="background_tabbar_dark">@color/gray_80_pcnt</color>
+    <color name="background_buttonbar_dark">@color/gray_80_pcnt</color>
 
     <!-- Rules -->
 
@@ -88,7 +82,22 @@
     <color name="rule_15_dark">#2dffffff</color>
     <color name="rule_15_light">#2d000000</color>
 
-    <!-- Aircandi branding colors HSV: 300,50,60-->
+    <!-- Android grays -->
+
+    <color name="gray_00_pcnt">#ffffffff</color>
+    <color name="gray_05_pcnt">#fff2f2f2</color>
+    <color name="gray_10_pcnt">#ffe5e5e5</color>
+    <color name="gray_15_pcnt">#ffd8d8d8</color>
+    <color name="gray_20_pcnt">#ffcccccc</color>
+    <color name="gray_25_pcnt">#ffbfbfbf</color>
+    <color name="gray_50_pcnt">#ff7f7f7f</color>
+    <color name="gray_75_pcnt">#ff3f3f3f</color>
+    <color name="gray_80_pcnt">#ff333333</color>
+    <color name="gray_90_pcnt">#ff191919</color>
+    <color name="gray_95_pcnt">#ff0c0c0c</color>
+    <color name="gray_100_pcnt">#ff000000</color>
+    
+    <!-- Aircandi branding colors HSV: 300,50,60 -->
 
     <color name="brand_pink">#ffb45eb4</color>
     <color name="brand_pink_light">#ffBF5FBF</color>
@@ -97,32 +106,51 @@
     <color name="brand_pink_dark">#ff7F3B7F</color>
     <color name="brand_pink_darker">#ff662F66</color>
 
-    <!-- Android accent colors -->
+    <!-- Accent light orange -->
 
     <color name="accent">#ffffaa00</color>
     <color name="accent_darker">#ffbb7700</color>
     <color name="accent_darkest">#ff995500</color>
     <color name="accent_lighter">#ffffcc00</color>
+
+    <!-- Accent red -->
+
     <color name="accent_red">#ffff4444</color>
     <color name="accent_red_dark">#ffcc0000</color>
     <color name="accent_red_dark_mute">#ffbd4852</color>
     <color name="accent_red_dark_mute_semi">#66bd4852</color>
+
+    <!-- Accent orange -->
+
     <color name="accent_orange">#ffffbb33</color>
     <color name="accent_orange_dark">#ffff8800</color>
     <color name="accent_orange_dark_mute">#ffe0904e</color>
     <color name="accent_orange_dark_mute_semi">#66e0904e</color>
+
+    <!-- Accent green -->
+
     <color name="accent_green">#ff99cc00</color>
     <color name="accent_green_dark">#ff669900</color>
     <color name="accent_green_dark_mute">#ff839942</color>
     <color name="accent_green_dark_mute_semi">#66839942</color>
+
+    <!-- Accent purple -->
+
     <color name="accent_purple">#ffaa66cc</color>
     <color name="accent_purple_dark">#ff9933cc</color>
     <color name="accent_purple_dark_mute">#ff9e6bc3</color>
     <color name="accent_purple_dark_mute_semi">#669e6bc3</color>
+
+    <!-- Accent blue -->
+
     <color name="accent_blue">#ff33b5e5</color>
     <color name="accent_blue_dark">#ff0099cc</color>
     <color name="accent_blue_dark_mute">#ff48a8bd</color>
     <color name="accent_blue_dark_mute_semi">#6648a8bd</color>
+    <color name="holo_blue_light">#8833b5e5</color>
+    
+    <!-- Accent gray -->
+
     <color name="accent_gray">#ffaaaaaa</color>
     <color name="accent_gray_dark">#ff777777</color>
     <color name="accent_gray_semi">#66aaaaaa</color>

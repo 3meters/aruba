@@ -2,8 +2,8 @@ package com.aircandi.components;
 
 import android.app.Activity;
 
-import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
+import com.aircandi.service.objects.User;
 import com.google.analytics.tracking.android.EasyTracker;
 
 /*
@@ -27,84 +27,100 @@ import com.google.analytics.tracking.android.EasyTracker;
 @SuppressWarnings("ucd")
 public class Tracker {
 
-	public static void sendEvent(String category, String action, String target, long value) {
+	public static void sendEvent(String category, String action, String target, long value, User user) {
 		/*
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
+			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
 				EasyTracker.getTracker().sendEvent(category, action, target, value);
 			}
 		}
-		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	public static void sendView(String viewName) {
+	public static void sendView(String viewName, User user) {
 		/*
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
+			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
 				EasyTracker.getTracker().sendView(viewName);
 			}
 		}
-		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	public static void sendTiming(String category, Long timing, String name, String label) {
+	public static void sendTiming(String category, Long timing, String name, String label, User user) {
 		/*
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
+			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
 				EasyTracker.getTracker().sendTiming(category, timing, name, label);
 			}
 		}
-		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	public static void dispatch() {
+	public static void dispatch(User user) {
 		try {
-			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
+			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
 				EasyTracker.getInstance().dispatch();
 			}
 		}
-		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	public static void stopSession() {
+	public static void stopSession(User user) {
 		try {
-			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
+			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
 				EasyTracker.getTracker().setStartSession(false);
 			}
 		}
-		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	public static void startNewSession() {
+	public static void startNewSession(User user) {
 		try {
-			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
+			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
 				EasyTracker.getTracker().setStartSession(true);
 			}
 		}
-		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	public static void activityStart(Activity activity) {
+	public static void activityStart(Activity activity, User user) {
 		try {
-			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
+			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
 				EasyTracker.getInstance().activityStart(activity);
 			}
 		}
-		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	public static void activityStop(Activity activity) {
+	public static void activityStop(Activity activity, User user) {
 		try {
-			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
+			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
 				EasyTracker.getInstance().activityStop(activity);
 			}
 		}
-		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

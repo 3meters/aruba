@@ -34,7 +34,6 @@ import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
-import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Source;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.BounceListView;
@@ -49,7 +48,6 @@ public class SourcesBuilder extends FormActivity {
 	private TextView			mMessage;
 	private final List<Source>	mSystemSources	= new ArrayList<Source>();
 	private final List<Source>	mActiveSources	= new ArrayList<Source>();
-	private Entity				mEntity;
 	private Source				mSourceEditing;
 	private List<String>		mJsonSourcesOriginal;
 
@@ -70,10 +68,6 @@ public class SourcesBuilder extends FormActivity {
 		mCommon.mActionBar.setTitle(R.string.form_title_links);
 
 		/* We use this to access the source suggestions */
-		if (mCommon.mEntityId != null) {
-			mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
-		}
-
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
 			final List<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
@@ -142,7 +136,7 @@ public class SourcesBuilder extends FormActivity {
 		/* Go get source suggestions again */
 		List<Source> sources = mergeSources();
 		if (sources.size() > 0) {
-			loadSourceSuggestions(mEntity, sources, true);
+			loadSourceSuggestions(sources, true);
 		}
 	}
 
@@ -159,9 +153,6 @@ public class SourcesBuilder extends FormActivity {
 	@SuppressWarnings("ucd")
 	public void onAddButtonClick(View view) {
 		final Intent intent = new Intent(this, SourceBuilder.class);
-		if (mEntity != null) {
-			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntity.id);
-		}
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCE_NEW);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
@@ -370,7 +361,7 @@ public class SourcesBuilder extends FormActivity {
 		dialog.setCanceledOnTouchOutside(false);
 	}
 
-	private void loadSourceSuggestions(final Entity entity, final List<Source> sources, final Boolean autoInsert) {
+	private void loadSourceSuggestions(final List<Source> sources, final Boolean autoInsert) {
 		new AsyncTask() {
 
 			@Override
@@ -390,34 +381,32 @@ public class SourcesBuilder extends FormActivity {
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					if (entity != null) {
-						final List<Source> sourcesProcessed = (List<Source>) result.serviceResponse.data;
-						if (autoInsert) {
-							if (sourcesProcessed.size() > 0) {
+					final List<Source> sourcesProcessed = (List<Source>) result.serviceResponse.data;
+					if (autoInsert) {
+						if (sourcesProcessed.size() > 0) {
 
-								/* First make sure they have default captions */
-								for (Source source : sourcesProcessed) {
-									if (source.label == null) {
-										source.label = source.type;
-									}
-									if (source.hidden != null) {
-										source.hidden = false;
-									}
+							/* First make sure they have default captions */
+							for (Source source : sourcesProcessed) {
+								if (source.label == null) {
+									source.label = source.type;
 								}
-								int activeCountOld = mActiveSources.size();
-								splitSources(sourcesProcessed);
-								int activeCountNew = mActiveSources.size();
-								if (activeCountNew == activeCountOld) {
-									ImageUtils.showToastNotification(getResources().getString(R.string.toast_source_no_links), Toast.LENGTH_SHORT);
-								}
-								else {
-									ImageUtils.showToastNotification(getResources().getString((sourcesProcessed.size() == 1)
-											? R.string.toast_source_linked
-											: R.string.toast_sources_linked), Toast.LENGTH_SHORT);
+								if (source.hidden != null) {
+									source.hidden = false;
 								}
 							}
-
+							int activeCountOld = mActiveSources.size();
+							splitSources(sourcesProcessed);
+							int activeCountNew = mActiveSources.size();
+							if (activeCountNew == activeCountOld) {
+								ImageUtils.showToastNotification(getResources().getString(R.string.toast_source_no_links), Toast.LENGTH_SHORT);
+							}
+							else {
+								ImageUtils.showToastNotification(getResources().getString((sourcesProcessed.size() == 1)
+										? R.string.toast_source_linked
+										: R.string.toast_sources_linked), Toast.LENGTH_SHORT);
+							}
 						}
+
 					}
 				}
 				bind();

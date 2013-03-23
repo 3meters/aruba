@@ -547,36 +547,41 @@ public class ProxibaseService {
 		ProxibaseServiceException proxibaseException = null;
 
 		if (exception != null) {
-			if (exception instanceof ClientProtocolException) {
+			if (exception instanceof ClientProtocolException) { // derives from IOException
 				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
 						ErrorCode.ClientProtocolException, exception);
 				proxibaseException.setResponseMessage(proxibaseException.getMessage());
 			}
-			else if (exception instanceof ConnectException) {
+			else if (exception instanceof WalledGardenException) { // derived from ConnectException
+				proxibaseException = new ProxibaseServiceException("Network connects to a walled garden", ErrorType.Client,
+						ErrorCode.WalledGardenException, exception);
+				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			}
+			else if (exception instanceof ConnectException) { // derives from SocketException
 				proxibaseException = new ProxibaseServiceException("Not connected to network", ErrorType.Client,
 						ErrorCode.ConnectionException, exception);
 				proxibaseException.setResponseMessage("Device is not connected to a network: "
 						+ String.valueOf(NetworkManager.CONNECT_TRIES) + " tries over "
 						+ String.valueOf(NetworkManager.CONNECT_WAIT * NetworkManager.CONNECT_TRIES / 1000) + " second window");
 			}
-			else if (exception instanceof SocketException) {
+			else if (exception instanceof SocketException) { // derives from IOException
 				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
 						ErrorCode.SocketException, exception);
 				proxibaseException.setResponseMessage(proxibaseException.getMessage());
 			}
-			else if (exception instanceof IOException) {
+			else if (exception instanceof IOException) { // derives from Exception
 				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
 						ErrorCode.IOException, exception);
 				proxibaseException.setResponseMessage(proxibaseException.getMessage());
 			}
-			else if (exception instanceof AmazonClientException) {
-				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
-						ErrorCode.AmazonClientException, exception);
-				proxibaseException.setResponseMessage(proxibaseException.getMessage());
-			}
-			else if (exception instanceof AmazonServiceException) {
+			else if (exception instanceof AmazonServiceException) { // derives from AmazonClientException
 				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
 						ErrorCode.AmazonServiceException, exception);
+				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			}
+			else if (exception instanceof AmazonClientException) { // derives from RuntimeException
+				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
+						ErrorCode.AmazonClientException, exception);
 				proxibaseException.setResponseMessage(proxibaseException.getMessage());
 			}
 			else if (exception instanceof InterruptedException) {

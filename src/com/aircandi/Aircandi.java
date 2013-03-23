@@ -64,7 +64,7 @@ public class Aircandi extends Application {
 	public static Number					lastApplicationUpdateCheckDate;
 
 	private User							mUser;
-	private Boolean							mLaunchedNormally			= false;
+	public static Boolean					LAUNCHED_NORMALLY;
 
 	/* Common preferences */
 	private String							mPrefTheme;
@@ -155,14 +155,6 @@ public class Aircandi extends Application {
 
 	public User getUser() {
 		return mUser;
-	}
-
-	public void setLaunchedNormally(Boolean launchedNormally) {
-		mLaunchedNormally = launchedNormally;
-	}
-
-	public Boolean wasLaunchedNormally() {
-		return mLaunchedNormally;
 	}
 
 	public String getPrefTheme() {

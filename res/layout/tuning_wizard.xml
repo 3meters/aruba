@@ -17,6 +17,88 @@
             android:shrinkColumns="*"
             android:stretchColumns="*" >
 
+            <!-- Tuning -->
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/section_title_tune"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:layout_span="2"
+                    android:text="@string/tuning_section_tune"
+                    android:textAppearance="@style/app_text_appearance_medium_accent" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/label_tune"
+                    style="@style/form_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_span="2"
+                    android:text="@string/form_label_tuning_tune" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0" >
+
+                    <Button
+                        android:id="@+id/button_tune"
+                        style="@style/form_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:onClick="onTuneButtonClick"
+                        android:text="@string/form_button_tuning_tune" />
+
+                    <Button
+                        android:id="@+id/button_untune"
+                        style="@style/form_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:onClick="onUntuneButtonClick"
+                        android:visibility="gone"
+                        android:text="@string/form_button_tuning_untune" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/image_star_tune"
+                    style="@style/actionbar_beacons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="?attr/iconStarOff"
+                    android:tint="@color/brand_pink" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_span="2"
+                    android:background="?attr/ruleColor" />
+            </TableRow>
+
             <!-- Set banner -->
 
             <TableRow
@@ -104,71 +186,6 @@
                     android:background="?attr/ruleColor" />
             </TableRow>
 
-            <!-- Tuning -->
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/section_title_tune"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="2dp"
-                    android:layout_span="2"
-                    android:text="@string/tuning_section_tune"
-                    android:textAppearance="@style/app_text_appearance_medium_accent" />
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/label_tune"
-                    style="@style/form_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_span="2"
-                    android:text="@string/form_label_tuning_tune" />
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <Button
-                    android:id="@+id/button_tune"
-                    style="@style/form_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:onClick="onTuneButtonClick"
-                    android:text="@string/form_button_tuning_tune" />
-
-                <ImageView
-                    android:id="@+id/image_star_tune"
-                    style="@style/actionbar_beacons"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="?attr/iconStarOff"
-                    android:tint="@color/brand_pink" />
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1px"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_span="2"
-                    android:background="?attr/ruleColor" />
-            </TableRow>
-
             <!-- Add candi -->
 
             <TableRow
@@ -229,12 +246,12 @@
                     android:id="@+id/stub_candi"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
                     android:layout_marginTop="15dp"
                     android:layout_span="2"
                     android:inflatedId="@+id/section_candi"
                     android:layout="@layout/section_tuning_candi"
                     android:paddingLeft="10dp"
-                    android:layout_marginLeft="5dp"
                     android:paddingRight="10dp" />
             </TableRow>
 
@@ -292,7 +309,6 @@
                     android:layout_height="wrap_content"
                     android:onClick="onEditButtonClick"
                     android:text="@string/form_button_tuning_edit" />
-
             </TableRow>
         </TableLayout>
     </com.aircandi.ui.widgets.BounceScrollView>

@@ -3,7 +3,6 @@
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/backgroundButton"
     android:paddingBottom="5dp"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"

@@ -92,6 +92,7 @@
                         android:layout_marginRight="2dp"
                         android:layout_weight="1"
                         aircandi:layout="@layout/widget_user_view_detailed"
+                        android:background="?attr/backgroundButton"
                         android:clickable="true"
                         android:onClick="onUserClick" />
 
@@ -102,6 +103,7 @@
                         android:layout_marginLeft="2dp"
                         android:layout_weight="1"
                         aircandi:layout="@layout/widget_user_view_detailed"
+                        android:background="?attr/backgroundButton"
                         android:clickable="true"
                         android:onClick="onUserClick" />
                 </LinearLayout>

@@ -124,7 +124,7 @@ public class EntityForm extends FormActivity {
 
 				@Override
 				public void afterTextChanged(Editable s) {
-					if (!s.toString().equals(mEntityForForm.name)) {
+					if (mEntityForForm.name == null || !s.toString().equals(mEntityForForm.name)) {
 						mDirty = true;
 					}
 				}
@@ -135,7 +135,7 @@ public class EntityForm extends FormActivity {
 
 				@Override
 				public void afterTextChanged(Editable s) {
-					if (!s.toString().equals(mEntityForForm.description)) {
+					if (mEntityForForm.description == null || !s.toString().equals(mEntityForForm.description)) {
 						mDirty = true;
 					}
 				}
@@ -479,7 +479,6 @@ public class EntityForm extends FormActivity {
 	@SuppressWarnings("ucd")
 	public void onSourcesBuilderClick(View view) {
 		final Intent intent = new Intent(this, SourcesBuilder.class);
-		intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntityForForm.id);
 
 		/* Serialize the sources for the current entity */
 		if (mEntityForForm.sources != null && mEntityForForm.sources.size() > 0) {
@@ -590,7 +589,7 @@ public class EntityForm extends FormActivity {
 		mEntityBitmap = null;
 		mEntityBitmapLocalOnly = false;
 		drawImage(entity);
-		Tracker.sendEvent("ui_action", "set_entity_picture_to_default", null, 0);
+		Tracker.sendEvent("ui_action", "set_entity_picture_to_default", null, 0, Aircandi.getInstance().getUser());
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -779,7 +778,7 @@ public class EntityForm extends FormActivity {
 			}
 		}
 
-		Tracker.sendEvent("ui_action", "entity_insert", mEntityForForm.type, 0);
+		Tracker.sendEvent("ui_action", "entity_insert", mEntityForForm.type, 0, Aircandi.getInstance().getUser());
 		Bitmap bitmap = mEntityBitmap;
 		if (mEntityBitmapLocalOnly) {
 			bitmap = null;
@@ -798,7 +797,7 @@ public class EntityForm extends FormActivity {
 	}
 
 	private ModelResult updateEntityAtService() {
-		Tracker.sendEvent("ui_action", "entity_update", mEntityForForm.type, 0);
+		Tracker.sendEvent("ui_action", "entity_update", mEntityForForm.type, 0, Aircandi.getInstance().getUser());
 		Bitmap bitmap = mEntityBitmap;
 		if (mEntityBitmapLocalOnly) {
 			bitmap = null;
@@ -849,7 +848,7 @@ public class EntityForm extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("DeleteEntity");
-				Tracker.sendEvent("ui_action", "entity_delete", mEntityForForm.type, 0);
+				Tracker.sendEvent("ui_action", "entity_delete", mEntityForForm.type, 0, Aircandi.getInstance().getUser());
 				final ModelResult result = ProxiManager.getInstance().getEntityModel().deleteEntity(mEntityForForm.id, false);
 				return result;
 			}

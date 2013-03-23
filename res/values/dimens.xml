@@ -29,7 +29,7 @@
     <dimen name="action_button_min_width">56dp</dimen>
     
     <dimen name="form_button_stroke_width">1px</dimen>
-    <dimen name="form_button_corner_radius">2dp</dimen>
+    <dimen name="form_button_corner_radius">0dp</dimen>
     <dimen name="form_button_padding">3dp</dimen>
     
     <!-- Dialogs -->

@@ -202,7 +202,7 @@ public class LocationManager {
 		 * If aircandi crashes or is stopped, the active receiver can still be running
 		 * so we check and switch to passive if appropriate.
 		 */
-		if (!Aircandi.getInstance().wasLaunchedNormally()) {
+		if (Aircandi.LAUNCHED_NORMALLY == null) {
 			Logger.d(this, "Aircandi not launched normally, refusing location");
 			this.initialize(Aircandi.getInstance().getApplicationContext());
 			stopLocationBurst();

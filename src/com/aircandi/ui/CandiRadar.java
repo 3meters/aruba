@@ -1,9 +1,7 @@
 package com.aircandi.ui;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import android.content.Intent;
 import android.location.Location;
@@ -40,6 +38,7 @@ import com.aircandi.components.LocationLockedEvent;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
+import com.aircandi.components.NetworkManager.ConnectedState;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.PlacesNearLocationFinishedEvent;
@@ -200,7 +199,7 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Wifi scan received event");
-				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "wifi_scan_received", null);
+				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "wifi_scan_received", null, Aircandi.getInstance().getUser());
 				Logger.d(CandiRadar.this, "Query wifi scan received event: locking beacons");
 
 				if (event.wifiList != null) {
@@ -256,7 +255,7 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.stop("Search for places by beacon complete");
-				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "entities_for_beacons", null);
+				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "entities_for_beacons", null, Aircandi.getInstance().getUser());
 				Logger.d(CandiRadar.this, "Entities for beacons finished event: ** done **");
 			}
 		});
@@ -299,7 +298,7 @@ public class CandiRadar extends CandiActivity {
 
 					if (Aircandi.stopwatch2.isStarted()) {
 						Aircandi.stopwatch2.stop("Location acquired");
-						Tracker.sendTiming("location", Aircandi.stopwatch2.getTotalTimeMills(), "location_acquired", null);
+						Tracker.sendTiming("location", Aircandi.stopwatch2.getTotalTimeMills(), "location_acquired", null, Aircandi.getInstance().getUser());
 					}
 
 					final Observation observation = LocationManager.getInstance().getObservationLocked();
@@ -343,7 +342,7 @@ public class CandiRadar extends CandiActivity {
 	@SuppressWarnings("ucd")
 	public void onPlacesNearLocationFinished(final PlacesNearLocationFinishedEvent event) {
 		Aircandi.stopwatch2.stop("Places near location complete");
-		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "places_near_location", null);
+		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "places_near_location", null, Aircandi.getInstance().getUser());
 		mHandler.post(new Runnable() {
 
 			@Override
@@ -414,8 +413,11 @@ public class CandiRadar extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void doRefresh() {
+		/*
+		 * This only gets called by a user clicking the refresh button.
+		 */
 		Logger.d(this, "Starting refresh");
-		Tracker.sendEvent("ui_action", "refresh_radar", null, 0);
+		Tracker.sendEvent("ui_action", "refresh_radar", null, 0, Aircandi.getInstance().getUser());
 		searchForPlaces();
 	}
 
@@ -427,17 +429,43 @@ public class CandiRadar extends CandiActivity {
 			AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.PageToForm);
 		}
 		else {
-			mCommon.showBusy(true);
-			searchForPlacesByBeacon();
-
-			/* We give the beacon query a bit of a head start */
-			mHandler.postDelayed(new Runnable() {
+			new AsyncTask() {
 
 				@Override
-				public void run() {
-					searchForPlacesByLocation();
+				protected void onPreExecute() {
+					mCommon.showBusy(true);
 				}
-			}, 500);
+
+				@Override
+				protected Object doInBackground(Object... params) {
+
+					ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
+					if (connectedState == ConnectedState.Normal) {
+						searchForPlacesByBeacon();
+
+						/* We give the beacon query a bit of a head start */
+						mHandler.postDelayed(new Runnable() {
+
+							@Override
+							public void run() {
+								searchForPlacesByLocation();
+							}
+						}, 500);
+					}
+					return connectedState;
+				}
+
+				@Override
+				protected void onPostExecute(Object result) {
+					ConnectedState connectedState = (ConnectedState) result;
+					if (connectedState != ConnectedState.Normal) {
+						mCommon.hideBusy(true);
+						if (connectedState == ConnectedState.WalledGarden) {
+							mCommon.showAlertDialogSimple(null, getString(R.string.error_connection_walled_garden));
+						}
+					}
+				}
+			}.execute();
 		}
 	}
 
@@ -525,6 +553,7 @@ public class CandiRadar extends CandiActivity {
 				}
 			}.execute();
 		}
+
 		return updateCheckNeeded;
 	}
 
@@ -608,13 +637,7 @@ public class CandiRadar extends CandiActivity {
 		 * be followed by onStop if we are not visible. Does not fire if the activity window
 		 * loses focus but the activity is still active.
 		 */
-
-		if (Aircandi.getInstance().getUser() != null
-				&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
-				&& Aircandi.getInstance().getUser().isDeveloper != null
-				&& Aircandi.getInstance().getUser().isDeveloper) {
-			mCommon.stopScanService();
-		}
+		mCommon.stopScanService();
 
 		super.onPause();
 	}
@@ -647,31 +670,35 @@ public class CandiRadar extends CandiActivity {
 		if (!mInitialized) return;
 
 		if (hasFocus && (mFreshWindow || mUpdateCheckNeeded)) {
-			mFreshWindow = false;
 			mUpdateCheckNeeded = false;
 			if (Aircandi.applicationUpdateRequired) {
 				showUpdateAlert(null);
 			}
 			else {
 				/* Check for update */
-				mUpdateCheckNeeded = handleUpdateChecks(new RequestListener() {
-					@Override
-					public void onComplete(Object dialogDisplayed) {
-						/*
-						 * We don't do anything right now because window focus returning
-						 * when dismissing the update dialog will restart the logic
-						 * to trigger data updates.
-						 */
-						if (!(Boolean) dialogDisplayed) {
-							manageData();
-						}
-					}
-				});
+				if (NetworkManager.getInstance().getConnectedState() == ConnectedState.Normal) {
+					mUpdateCheckNeeded = handleUpdateChecks(new RequestListener() {
 
-				if (!mUpdateCheckNeeded) {
-					manageData();
+						/* Never gets called if we don't have a good network connection */
+						@Override
+						public void onComplete(Object dialogDisplayed) {
+							/*
+							 * We don't do anything right now because window focus returning
+							 * when dismissing the update dialog will restart the logic
+							 * to trigger data updates.
+							 */
+							if (!(Boolean) dialogDisplayed) {
+								manageData();
+							}
+						}
+					});
+
+					if (!mUpdateCheckNeeded) {
+						manageData();
+					}
 				}
 			}
+			mFreshWindow = false;
 		}
 	}
 
@@ -723,8 +750,8 @@ public class CandiRadar extends CandiActivity {
 			Logger.d(this, "Start place search because of staleness or location change");
 			searchForPlaces();
 		}
-		else if (mWifiState != null 
-				&& NetworkManager.getInstance().getWifiState() != null 
+		else if (mWifiState != null
+				&& NetworkManager.getInstance().getWifiState() != null
 				&& !mWifiState.equals(NetworkManager.getInstance().getWifiState())) {
 			/*
 			 * Changes in wifi state have a big effect on what we can show
@@ -787,7 +814,7 @@ public class CandiRadar extends CandiActivity {
 		super.onDestroy();
 
 		/* This is the only place we manually stop the analytics session. */
-		Tracker.stopSession();
+		Tracker.stopSession(Aircandi.getInstance().getUser());
 
 		/* Don't count on this always getting called when this activity is killed */
 		try {
@@ -833,20 +860,6 @@ public class CandiRadar extends CandiActivity {
 			BusProvider.getInstance().unregister(this);
 		}
 		catch (Exception e) {} // $codepro.audit.disable emptyCatchClause
-	}
-
-	@SuppressWarnings("unused")
-	private String getGoogleAnalyticsId() {
-		final Properties properties = new Properties();
-
-		try {
-			properties.load(getClass().getResourceAsStream("/com/aircandi/google_analytics.properties"));
-			final String analyticsId = properties.getProperty("analyticsId");
-			return analyticsId;
-		}
-		catch (IOException exception) {
-			throw new IllegalStateException("Unable to retrieve google analytics id");
-		}
 	}
 
 	@Override

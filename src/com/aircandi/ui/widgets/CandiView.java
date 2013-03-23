@@ -92,170 +92,177 @@ public class CandiView extends RelativeLayout {
 	}
 
 	public void bindToEntity(Entity entity) {
-		/*
-		 * If it is the same entity and it hasn't changed then nothing to do
-		 */
-		if (!entity.synthetic) {
-			if (mEntity != null && entity.id.equals(mEntity.id) && entity.activityDate.longValue() == mEntityActivityDate.longValue()) {
-				mEntity = entity;
-				showDistance(entity);
-				return;
+		synchronized (entity) {
+			/*
+			 * If it is the same entity and it hasn't changed then nothing to do
+			 */
+			if (!entity.synthetic) {
+				if (mEntity != null && entity.id.equals(mEntity.id) && entity.activityDate.longValue() == mEntityActivityDate.longValue()) {
+					if (mEntity.links == null && entity.links == null) {
+						mEntity = entity;
+						showDistance(entity);
+						return;
+					}
+				}
 			}
-		}
-		else {
-			if (mEntity != null && entity.id != null && mEntity.id != null && entity.id.equals(mEntity.id)) {
-				mEntity = entity;
-				showDistance(entity);
-				return;
-			}
-		}
-
-		/* Clear image as quickly as possible */
-		if (mCandiImage != null) {
-			mCandiImage.getImageView().setImageDrawable(null);
-		}
-
-		mEntity = entity;
-		mEntityActivityDate = entity.activityDate;
-		mMuteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others
-		mColorResId = Place.getCategoryColorResId((mEntity.place.category != null) ? mEntity.place.category.name : null, true, mMuteColor, false);
-
-		/* Primary candi image */
-
-		drawImage();
-
-		if (mCandiViewGroup != null) {
-			final Integer padding = ImageUtils.getRawPixels(this.getContext(), 3);
-			this.setPadding(padding, padding, padding, padding);
-			this.setBackgroundResource(R.drawable.selector_image);
-			mCandiViewGroup.setBackgroundResource(mColorResId);
-		}
-
-		setVisibility(mTitle, View.GONE);
-		if (mTitle != null && entity.name != null && !entity.name.equals("")) {
-			mTitle.setText(Html.fromHtml(entity.name));
-			setVisibility(mTitle, View.VISIBLE);
-		}
-
-		setVisibility(mSubtitle, View.GONE);
-		if (mSubtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
-			mSubtitle.setText(Html.fromHtml(entity.subtitle.toUpperCase(Locale.US)));
-			setVisibility(mSubtitle, View.VISIBLE);
-		}
-
-		/* Place specific info */
-		if (entity.place != null) {
-			final Place place = entity.place;
-
-			/* We take over the subtitle field and use it for categories */
-			if (mSubtitle != null) {
-				setVisibility(mSubtitle, View.GONE);
-				if (place.category != null) {
-					mSubtitle.setText(Html.fromHtml(place.category.name.toUpperCase(Locale.US)));
-					setVisibility(mSubtitle, View.VISIBLE);
+			else {
+				if (mEntity != null && entity.id != null && mEntity.id != null && entity.id.equals(mEntity.id)) {
+					mEntity = entity;
+					showDistance(entity);
+					return;
 				}
 			}
 
-			setVisibility(mCategoryImage, View.GONE);
-			if (mCategoryImage != null) {
-				if (entity.place.category != null) {
-					mCategoryImage.setTag(entity.place.category.iconUri());
-					final BitmapRequest bitmapRequest = new BitmapRequest(entity.place.category.iconUri(), mCategoryImage);
-					bitmapRequest.setImageRequestor(mCategoryImage);
-					bitmapRequest.setImageSize(ImageUtils.getRawPixels(this.getContext(), 50));
-					BitmapManager.getInstance().masterFetch(bitmapRequest);
-					mCategoryImage.setVisibility(View.VISIBLE);
-				}
+			/* Clear image as quickly as possible */
+			if (mCandiImage != null) {
+				mCandiImage.getImageView().setImageDrawable(null);
 			}
 
+			mEntity = entity;
+			mEntityActivityDate = entity.activityDate;
+			mMuteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others
+			mColorResId = Place.getCategoryColorResId((mEntity.place.category != null) ? mEntity.place.category.name : null, true, mMuteColor, false);
+
+			/* Primary candi image */
+
+			drawImage();
+
+			if (mCandiViewGroup != null) {
+				final Integer padding = ImageUtils.getRawPixels(this.getContext(), 3);
+				this.setPadding(padding, padding, padding, padding);
+				this.setBackgroundResource(R.drawable.selector_image);
+				mCandiViewGroup.setBackgroundResource(mColorResId);
+			}
+
+			setVisibility(mTitle, View.GONE);
+			if (mTitle != null && entity.name != null && !entity.name.equals("")) {
+				mTitle.setText(Html.fromHtml(entity.name));
+				setVisibility(mTitle, View.VISIBLE);
+			}
+
+			setVisibility(mSubtitle, View.GONE);
 			if (mSubtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
 				mSubtitle.setText(Html.fromHtml(entity.subtitle.toUpperCase(Locale.US)));
 				setVisibility(mSubtitle, View.VISIBLE);
 			}
 
-			/* Sources */
+			/* Place specific info */
+			if (entity.place != null) {
+				final Place place = entity.place;
 
-			setVisibility(mCandiSources, View.GONE);
-			if (mCandiSources != null && !entity.synthetic) {
-
-				final List<Entity> entities = entity.getSourceEntities();
-				if (entities.size() > 0) {
-
-					mCandiSources.removeAllViews();
-					final int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
-					final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
-
-					/* We only show the first five */
-					int sourceCount = 0;
-					for (Entity sourceEntity : entities) {
-						if (sourceEntity.source != null
-								&& sourceEntity.source.type.equals("comments")
-								&& (entity.commentCount == null || entity.commentCount == 0)) {
-							continue;
-						}
-						if (sourceCount >= 5) {
-							break;
-						}
-						View view = mInflater.inflate(R.layout.temp_radar_candi_item, null);
-						WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
-						webImageView.setSizeHint(sizePixels);
-
-						String imageUri = sourceEntity.getEntityPhotoUri();
-						if (!imageUri.equals("resource:img_placeholder_logo_bw")) {
-							/*
-							 * TODO: temp fixup until I figure out what to do with icons that look bad against color
-							 * backgrounds
-							 */
-							if (sourceEntity.source != null) {
-								if (sourceEntity.source.type.equals("yelp")) {
-									imageUri = "resource:ic_yelp_holo_dark";
-								}
-								if (sourceEntity.source.type.equals("facebook")) {
-									imageUri = "resource:ic_facebook_dark";
-								}
-								if (sourceEntity.source.type.equals("comments")) {
-									imageUri = "resource:ic_comments_dark";
-								}
-								if (sourceEntity.source.type.equals("twitter")) {
-									imageUri = "resource:ic_twitter_dark";
-								}
-								if (sourceEntity.source.type.equals("website")) {
-									imageUri = "resource:ic_website_holo_dark";
-								}
-							}
-							webImageView.getImageView().setTag(imageUri);
-							BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
-							bitmapRequest.setImageSize(mCandiImage.getSizeHint());
-							bitmapRequest.setImageRequestor(webImageView.getImageView());
-
-							BitmapManager.getInstance().masterFetch(bitmapRequest);
-
-							LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
-							params.setMargins(marginPixels
-									, marginPixels
-									, marginPixels
-									, marginPixels);
-							view.setLayoutParams(params);
-							mCandiSources.addView(view);
-							sourceCount++;
-						}
+				/* We take over the subtitle field and use it for categories */
+				if (mSubtitle != null) {
+					setVisibility(mSubtitle, View.GONE);
+					if (place.category != null) {
+						mSubtitle.setText(Html.fromHtml(place.category.name.toUpperCase(Locale.US)));
+						setVisibility(mSubtitle, View.VISIBLE);
 					}
-					setVisibility(mCandiSources, View.VISIBLE);
 				}
 
+				setVisibility(mCategoryImage, View.GONE);
+				if (mCategoryImage != null) {
+					if (entity.place.category != null) {
+						mCategoryImage.setTag(entity.place.category.iconUri());
+						final BitmapRequest bitmapRequest = new BitmapRequest(entity.place.category.iconUri(), mCategoryImage);
+						bitmapRequest.setImageRequestor(mCategoryImage);
+						bitmapRequest.setImageSize(ImageUtils.getRawPixels(this.getContext(), 50));
+						BitmapManager.getInstance().masterFetch(bitmapRequest);
+						mCategoryImage.setVisibility(View.VISIBLE);
+					}
+				}
+
+				if (mSubtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
+					mSubtitle.setText(Html.fromHtml(entity.subtitle.toUpperCase(Locale.US)));
+					setVisibility(mSubtitle, View.VISIBLE);
+				}
+
+				/* Sources */
+
+				setVisibility(mCandiSources, View.GONE);
+				if (mCandiSources != null && !entity.synthetic) {
+
+					final List<Entity> entities = entity.getSourceEntities();
+					synchronized (entities) {
+						if (entities.size() > 0) {
+
+							mCandiSources.removeAllViews();
+							final int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
+							final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
+
+							/* We only show the first five */
+							int sourceCount = 0;
+							for (Entity sourceEntity : entities) {
+								if (sourceEntity.source != null && sourceEntity.source.type.equals("comments")) {
+									if (entity.commentCount == null || entity.commentCount < 1) {
+										continue;
+									}
+								}
+								if (sourceCount >= 5) {
+									break;
+								}
+								View view = mInflater.inflate(R.layout.temp_radar_candi_item, null);
+								WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+								webImageView.setSizeHint(sizePixels);
+
+								String imageUri = sourceEntity.getEntityPhotoUri();
+								if (!imageUri.equals("resource:img_placeholder_logo_bw")) {
+									/*
+									 * TODO: temp fixup until I figure out what to do with icons that look bad against
+									 * color
+									 * backgrounds
+									 */
+									if (sourceEntity.source != null) {
+										if (sourceEntity.source.type.equals("yelp")) {
+											imageUri = "resource:ic_yelp_holo_dark";
+										}
+										if (sourceEntity.source.type.equals("facebook")) {
+											imageUri = "resource:ic_facebook_dark";
+										}
+										if (sourceEntity.source.type.equals("comments")) {
+											imageUri = "resource:ic_comments_dark";
+										}
+										if (sourceEntity.source.type.equals("twitter")) {
+											imageUri = "resource:ic_twitter_dark";
+										}
+										if (sourceEntity.source.type.equals("website")) {
+											imageUri = "resource:ic_website_holo_dark";
+										}
+									}
+									webImageView.getImageView().setTag(imageUri);
+									BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
+									bitmapRequest.setImageSize(mCandiImage.getSizeHint());
+									bitmapRequest.setImageRequestor(webImageView.getImageView());
+
+									BitmapManager.getInstance().masterFetch(bitmapRequest);
+
+									LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
+									params.setMargins(marginPixels
+											, marginPixels
+											, marginPixels
+											, marginPixels);
+									view.setLayoutParams(params);
+									mCandiSources.addView(view);
+									sourceCount++;
+								}
+							}
+							setVisibility(mCandiSources, View.VISIBLE);
+						}
+					}
+
+				}
+				/* Distance */
+				showDistance(entity);
+
+				/* Place rank score - dev only */
+				setVisibility(mPlaceRankScore, View.GONE);
+				//			if (mPlaceRankScore != null
+				//					&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
+				//					&& Aircandi.settings.getBoolean(CandiConstants.PREF_SHOW_PLACE_RANK_SCORE, CandiConstants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT)) {
+				//				mPlaceRankScore.setText(String.valueOf(entity.getPlaceRankScore()));
+				//				setVisibility(mPlaceRankScore, View.VISIBLE);
+				//			}
+
 			}
-			/* Distance */
-			showDistance(entity);
-
-			/* Place rank score - dev only */
-			setVisibility(mPlaceRankScore, View.GONE);
-			//			if (mPlaceRankScore != null
-			//					&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
-			//					&& Aircandi.settings.getBoolean(CandiConstants.PREF_SHOW_PLACE_RANK_SCORE, CandiConstants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT)) {
-			//				mPlaceRankScore.setText(String.valueOf(entity.getPlaceRankScore()));
-			//				setVisibility(mPlaceRankScore, View.VISIBLE);
-			//			}
-
 		}
 	}
 

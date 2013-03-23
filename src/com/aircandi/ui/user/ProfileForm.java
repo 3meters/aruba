@@ -351,7 +351,7 @@ public class ProfileForm extends FormActivity {
 		}
 		mBitmap = null;
 		drawImage(user);
-		Tracker.sendEvent("ui_action", "set_user_picture_to_default", null, 0);
+		Tracker.sendEvent("ui_action", "set_user_picture_to_default", null, 0, Aircandi.getInstance().getUser());
 	}
 
 	private void confirmDirtyExit() {
@@ -420,7 +420,7 @@ public class ProfileForm extends FormActivity {
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "Updated user profile: " + mUser.name + " (" + mUser.id + ")");
-						Tracker.sendEvent("ui_action", "update_user", null, 0);
+						Tracker.sendEvent("ui_action", "update_user", null, 0, Aircandi.getInstance().getUser());
 						mCommon.hideBusy(true);
 						/*
 						 * We treat updating the profile like a change to an entity in the entity model. This forces
