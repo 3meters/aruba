@@ -181,6 +181,7 @@ public class ProxiManager {
 		 * visibility.
 		 */
 		Logger.d(this, "Processing beacons from scan");
+		Aircandi.stopwatch1.segmentTime("Entities for beacons: processing started");
 
 		/*
 		 * Call the proxi service to see if the new beacons have been tagged with any entities. If call comes back

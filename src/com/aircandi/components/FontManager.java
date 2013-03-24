@@ -38,7 +38,7 @@ public class FontManager {
 
 	public void setTypefaceLight(TextView view) {
 		if (view != null) {
-			view.setTypeface(fontRobotoLight);
+			view.setTypeface(getFontRobotoLight());
 		}
 	}
 
@@ -50,7 +50,7 @@ public class FontManager {
 
 	public void setTypefaceDefault(TextView view) {
 		if (view != null) {
-			view.setTypeface(fontRobotoLight);
+			view.setTypeface(getFontRobotoLight());
 		}
 	}
 
@@ -77,4 +77,13 @@ public class FontManager {
 			view.setTypeface(fontRobotoBoldCondensed);
 		}
 	}
+
+	public static Typeface getFontRobotoLight() {
+		return fontRobotoLight;
+	}
+
+	public static Typeface getFontRobotoRegular() {
+		return fontRobotoRegular;
+	}
+
 }

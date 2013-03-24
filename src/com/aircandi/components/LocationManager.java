@@ -1,5 +1,6 @@
 package com.aircandi.components;
 
+import java.util.List;
 import java.util.Locale;
 
 import android.app.PendingIntent;
@@ -104,35 +105,18 @@ public class LocationManager {
 	}
 
 	public Location getLastKnownLocation() {
+
 		Location location = null;
-
-		Location locationCandidate = mLocationManager.getLastKnownLocation(android.location.LocationManager.PASSIVE_PROVIDER);
 		LocationBetterReason reason = LocationBetterReason.None;
-		if (locationCandidate != null) {
-			reason = isBetterLocation(locationCandidate, location);
-			if (reason != LocationBetterReason.None) {
-				location = locationCandidate;
+		List<String> providers = mLocationManager.getAllProviders();
+		for (String provider : providers) {
+			Location locationCandidate = mLocationManager.getLastKnownLocation(provider);
+			if (locationCandidate != null) {
+				reason = isBetterLocation(locationCandidate, location);
+				if (reason != LocationBetterReason.None) {
+					location = locationCandidate;
+				}
 			}
-		}
-
-		locationCandidate = mLocationManager.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER);
-		if (locationCandidate != null) {
-			reason = isBetterLocation(locationCandidate, location);
-			if (reason != LocationBetterReason.None) {
-				location = locationCandidate;
-			}
-		}
-
-		locationCandidate = mLocationManager.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER);
-		if (locationCandidate != null) {
-			reason = isBetterLocation(locationCandidate, location);
-			if (reason != LocationBetterReason.None) {
-				location = locationCandidate;
-			}
-		}
-
-		if (!isGoodLocation(location)) {
-			location = null;
 		}
 
 		return location;
@@ -279,7 +263,7 @@ public class LocationManager {
 
 		final long fixAge = System.currentTimeMillis() - location.getTime();
 		final float fixAccuracy = location.getAccuracy();
-		if ((fixAge <= PlacesConstants.MAXIMUM_AGE && fixAccuracy <= PlacesConstants.MINIMUM_ACCURACY)) {
+		if ((fixAge <= PlacesConstants.MAXIMUM_AGE_PREFERRED && fixAccuracy <= PlacesConstants.MINIMUM_ACCURACY)) {
 			return true;
 		}
 		return false;

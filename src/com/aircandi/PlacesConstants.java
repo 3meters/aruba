@@ -25,7 +25,8 @@ public class PlacesConstants {
 	 * We use aggresive criteria for passive updates because they are free
 	 * and we aren't doing any processing in response to them.
 	 */
-	public static long		MAXIMUM_AGE									= CandiConstants.TIME_TWO_MINUTES;
+	public static long		MAXIMUM_AGE									= CandiConstants.TIME_THIRTY_MINUTES;
+	public static long		MAXIMUM_AGE_PREFERRED						= CandiConstants.TIME_TWO_MINUTES;
 	public static long		BURST_TIMEOUT								= CandiConstants.TIME_TWO_MINUTES;
 	public static long		BUSY_TIMEOUT								= CandiConstants.TIME_THIRTY_SECONDS;
 

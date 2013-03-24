@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.aircandi.ui.widgets.BounceListView
+    <com.handmark.pulltorefresh.library.PullToRefreshListView
         android:id="@+id/radar_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -15,10 +15,20 @@
 
     <ProgressBar
         android:id="@+id/progress"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="35dp"
+        android:background="?attr/backgroundProgress"
+        android:padding="10dp" />
+    <!--
+    <ProgressBar
+        android:id="@+id/progress"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_below="@+id/radar_list"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="35dp" />
+    -->
 
 </RelativeLayout>

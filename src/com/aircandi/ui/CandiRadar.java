@@ -32,6 +32,7 @@ import com.aircandi.components.EntitiesChangedEvent;
 import com.aircandi.components.EntitiesForBeaconsFinishedEvent;
 import com.aircandi.components.EntityModel;
 import com.aircandi.components.Exceptions;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.LocationChangedEvent;
 import com.aircandi.components.LocationLockedEvent;
@@ -56,6 +57,9 @@ import com.aircandi.service.objects.Observation;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.squareup.otto.Subscribe;
 
 /*
@@ -97,28 +101,29 @@ import com.squareup.otto.Subscribe;
 
 public class CandiRadar extends CandiActivity {
 
-	private final Handler		mHandler			= new Handler();
+	private final Handler			mHandler			= new Handler();
 
-	private Number				mEntityModelRefreshDate;
-	private Number				mEntityModelActivityDate;
-	private Number				mEntityModelBeaconDate;
-	private Integer				mWifiState			= WifiManager.WIFI_STATE_UNKNOWN;
+	private Number					mEntityModelRefreshDate;
+	private Number					mEntityModelActivityDate;
+	private Number					mEntityModelBeaconDate;
+	private Integer					mWifiState			= WifiManager.WIFI_STATE_UNKNOWN;
 
-	private ListView			mList;
+	private PullToRefreshListView	mList;
 
-	private SoundPool			mSoundPool;
-	private int					mNewCandiSoundId;
-	private Boolean				mInitialized		= false;
+	private SoundPool				mSoundPool;
+	private int						mNewCandiSoundId;
+	private Boolean					mInitialized		= false;
 
-	private final List<Entity>	mEntities			= new ArrayList<Entity>();
-	private RadarListAdapter	mRadarAdapter;
-	private Boolean				mFreshWindow		= false;
-	private Boolean				mUpdateCheckNeeded	= false;
+	private final List<Entity>		mEntities			= new ArrayList<Entity>();
+	private RadarListAdapter		mRadarAdapter;
+	private Boolean					mFreshWindow		= false;
+	private Boolean					mUpdateCheckNeeded	= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!isFinishing()) {
+			Aircandi.stopwatch4.start("Creating radar");
 			/*
 			 * Get setup for location snapshots. Initialize will populate location
 			 * with the best of any cached location fixes. A single update will
@@ -165,8 +170,8 @@ public class CandiRadar extends CandiActivity {
 		ProxiManager.getInstance().getEntityModel().removeAllEntities();
 
 		/* Other UI references */
-		mList = (ListView) findViewById(R.id.radar_list);
-		mList.setOnItemClickListener(new OnItemClickListener() {
+		mList = (PullToRefreshListView) findViewById(R.id.radar_list);
+		mList.getRefreshableView().setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -177,7 +182,23 @@ public class CandiRadar extends CandiActivity {
 
 		/* Adapter snapshots the items in mEntities */
 		mRadarAdapter = new RadarListAdapter(this, mEntities);
-		mList.setAdapter(mRadarAdapter);
+		mList.getRefreshableView().setAdapter(mRadarAdapter);
+		
+		/* Refresh listener */
+		mList.setOnRefreshListener(new OnRefreshListener<ListView>() {
+
+			@Override
+			public void onRefresh(PullToRefreshBase<ListView> refreshView) {
+				doRefresh();
+			}
+			
+		});	
+		
+		mList.getLoadingLayoutProxy().setRefreshingLabel("scanning...");
+		mList.getLoadingLayoutProxy().setPullLabel("pull to scan...");
+		mList.getLoadingLayoutProxy().setReleaseLabel("release to scan...");
+		mList.getLoadingLayoutProxy().setLoadingDrawable(null);
+		mList.getLoadingLayoutProxy().setTextTypeface(FontManager.getFontRobotoRegular());
 
 		/* Store sounds */
 		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
@@ -221,7 +242,6 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Beacons locked event");
-				Logger.d(CandiRadar.this, "Beacons locked event: get entities for beacons");
 				mEntityModelBeaconDate = ProxiManager.getInstance().getEntityModel().getLastBeaconLockedDate();
 				new AsyncTask() {
 
@@ -362,6 +382,7 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void run() {
 				Logger.d(CandiRadar.this, "Entities changed event: updating radar");
+				Aircandi.stopwatch4.stop("Aircandi initialization finished and got first entities");
 
 				mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
 				mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
@@ -371,6 +392,9 @@ public class CandiRadar extends CandiActivity {
 				final List<Entity> entities = event.entities;
 				mRadarAdapter.setItems(entities);
 				mRadarAdapter.notifyDataSetChanged();
+				
+				/* Clear loading */
+				mList.onRefreshComplete();				
 
 				/* Add some sparkle */
 				if (previousCount == 0 && entities.size() > 0) {
@@ -482,6 +506,10 @@ public class CandiRadar extends CandiActivity {
 		Aircandi.stopwatch2.start("Lock location");
 		LocationManager.getInstance().setLocationLocked(null);
 		LocationManager.getInstance().lockLocationBurst();
+		Location location = LocationManager.getInstance().getLastKnownLocation();
+		if (location != null) {
+			LocationManager.getInstance().setLocation(location);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -515,7 +543,7 @@ public class CandiRadar extends CandiActivity {
 
 			@Override
 			public void run() {
-				mList.setSelection(0);
+				mList.getRefreshableView().setSelection(0);
 			}
 		});
 	}
