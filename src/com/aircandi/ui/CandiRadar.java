@@ -175,7 +175,7 @@ public class CandiRadar extends CandiActivity {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				final Entity entity = mRadarAdapter.getItems().get(position);
+				final Entity entity = mRadarAdapter.getItems().get(position - 1);
 				showCandiForm(entity, entity.synthetic);
 			}
 		});
