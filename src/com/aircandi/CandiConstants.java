@@ -93,6 +93,23 @@ public final class CandiConstants {
 	public static final String	TYPE_CANDI_PICTURE					= "com.aircandi.candi.picture";															//$NON-NLS-1$
 	public static final String	TYPE_CANDI_PLACE					= "com.aircandi.candi.place";																//$NON-NLS-1$
 	public static final String	TYPE_CANDI_SOURCE					= "com.aircandi.candi.source";																//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_FACEBOOK			= "facebook";																				//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_TWITTER			= "twitter";																				//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_WEBSITE			= "website";																				//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_EMAIL				= "email";																					//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_YELP				= "yelp";																					//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_FOURSQUARE		= "foursquare";																			//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_OPENTABLE			= "opentable";																				//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_COMMENTS			= "comments";																				//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_URBANSPOON		= "urbanspoon";																			//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_CITYSEARCH		= "citysearch";																			//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_CITYGRID			= "citygrid";																				//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_YAHOOLOCAL		= "yahoolocal";																			//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_OPENMENU			= "openmenu";																				//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_ZAGAT				= "zagat";																					//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_TRIPADVISOR		= "tripadvisor";																			//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_GOOGLEPLACE		= "googleplace";																			//$NON-NLS-1$
+	public static final String	TYPE_CANDI_SOURCE_INSTAGRAM			= "instagram";																				//$NON-NLS-1$
 
 	public static final int		ACTIVITY_MARKET						= 200;
 	public static final int		ACTIVITY_PICTURE_PICK_DEVICE		= 300;
@@ -150,7 +167,7 @@ public final class CandiConstants {
 
 	/* Defaults */
 	public static final String	PREF_THEME_DEFAULT					= "aircandi_theme_midnight";
-	public static final String	PREF_SEARCH_RADIUS_DEFAULT			= "8047";  // five miles
+	public static final String	PREF_SEARCH_RADIUS_DEFAULT			= "8047";																					// five miles
 	public static final Boolean	PREF_SOUND_EFFECTS_DEFAULT			= true;
 
 	public static final Boolean	PREF_ENABLE_DEV_DEFAULT				= false;

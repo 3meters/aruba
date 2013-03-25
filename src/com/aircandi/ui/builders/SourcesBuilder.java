@@ -215,6 +215,7 @@ public class SourcesBuilder extends FormActivity {
 							mSourceEditing.label = sourceUpdated.label;
 							mSourceEditing.id = sourceUpdated.id;
 							mSourceEditing.url = sourceUpdated.url;
+							mSourceEditing.icon = sourceUpdated.icon;
 							mList.invalidateViews();
 						}
 					}

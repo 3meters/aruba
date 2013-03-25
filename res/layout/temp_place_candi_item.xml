@@ -19,7 +19,7 @@
         android:scaleType="centerCrop" />
 
     <TextView
-        android:id="@+id/badge"
+        android:id="@+id/badge_upper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="8dp"

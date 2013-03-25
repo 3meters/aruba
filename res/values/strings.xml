@@ -149,7 +149,9 @@
     <string name="error_missing_source_label">Enter a label.</string>
     <string name="error_missing_source_id_and_url">Enter a web address or id.</string>
     <string name="error_missing_message">Enter a message.</string>
-
+    <string name="error_missing_source_id_facebook">Enter a Facebook user id and then select picture again.</string>
+    <string name="error_missing_source_id_twitter">Enter a Twitter user id and then select picture again.</string>
+    
     <!-- Toast -->
 
     <string name="toast_signed_out">Signed out.</string>
@@ -170,7 +172,8 @@
     <string name="progress_searching">Searching&#8230;</string>
     <string name="progress_signing_in">Signing in&#8230;</string>
     <string name="progress_signing_up">Creating&#8230;</string>
-
+    <string name="progress_scanning_for_location">Scanning for location&#8230;</string>
+    
     <!-- Splash -->
 
     <string name="splash_message">be there, do more</string>
@@ -210,6 +213,8 @@
     <string name="dialog_picture_source_gallery">Select a gallery picture</string>
     <string name="dialog_picture_source_camera">Take a new picture</string>
     <string name="dialog_picture_source_place">Select a place picture</string>
+    <string name="dialog_picture_source_facebook">Use Facebook picture</string>
+    <string name="dialog_picture_source_twitter">Use Twitter picture</string>
     <string name="dialog_picture_source_default">Default</string>
     <string name="dialog_install_title">Install</string>
     <string name="dialog_install_message">An android application is available for this link.</string>

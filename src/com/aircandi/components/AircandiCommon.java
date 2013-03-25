@@ -367,10 +367,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
-	public void showPictureSourcePicker(String entityId) {
+	public void showPictureSourcePicker(String entityId, String entityType) {
 		final Intent intent = new Intent(mActivity, PictureSourcePicker.class);
 		if (entityId != null) {
 			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, entityId);
+		}
+		if (entityType != null) {
+			intent.putExtra(CandiConstants.EXTRA_ENTITY_TYPE, entityType);
 		}
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);

@@ -454,10 +454,12 @@ public class CandiUser extends CandiActivity {
 			WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
 
 			TextView title = (TextView) view.findViewById(R.id.title);
-			TextView badge = (TextView) view.findViewById(R.id.badge);
+			TextView badgeUpper = (TextView) view.findViewById(R.id.badge_upper);
+			@SuppressWarnings("unused")
+			TextView badgeLower = (TextView) view.findViewById(R.id.badge_lower);
 
 			FontManager.getInstance().setTypefaceDefault(title);
-			FontManager.getInstance().setTypefaceDefault(badge);
+			FontManager.getInstance().setTypefaceDefault(badgeUpper);
 
 			if (entity.name != null && !entity.name.equals("")) {
 				title.setText(entity.name);

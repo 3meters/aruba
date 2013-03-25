@@ -69,6 +69,8 @@ import android.graphics.Bitmap;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.Logger;
+import com.aircandi.components.NetworkManager;
+import com.aircandi.components.NetworkManager.ConnectedState;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
@@ -124,18 +126,18 @@ public class ProxibaseService {
 	private final DefaultHttpClient			mHttpClient;
 	private final HttpParams				mHttpParams;
 
-	private static final JSONParser			parser							= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
-	private static final ContainerFactory	containerFactory				= new ContainerFactory() {
-																				@Override
-																				public Map createObjectContainer() {
-																					return new LinkedHashMap();
-																				}
+	private static final JSONParser			parser				= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+	private static final ContainerFactory	containerFactory	= new ContainerFactory() {
+																	@Override
+																	public Map createObjectContainer() {
+																		return new LinkedHashMap();
+																	}
 
-																				@Override
-																				public List<Object> createArrayContainer() {
-																					return new ArrayList<Object>();
-																				}
-																			};
+																	@Override
+																	public List<Object> createArrayContainer() {
+																		return new ArrayList<Object>();
+																	}
+																};
 
 	public static synchronized ProxibaseService getInstance() {
 		if (singletonObject == null) {
@@ -228,135 +230,39 @@ public class ProxibaseService {
 	// Public methods
 	// ----------------------------------------------------------------------------------------
 
-	public Object request(final ServiceRequest serviceRequest)
-			throws ProxibaseServiceException {
+	public Object request(final ServiceRequest serviceRequest) throws ProxibaseServiceException {
 
-		HttpRequestBase httpRequest = null;
-		StringBuilder jsonBody = new StringBuilder(5000);
-		URI redirectedUri = null;
+		HttpRequestBase httpRequest = buildHttpRequest(serviceRequest);
+		HttpResponse httpResponse = null;
+
 		int retryCount = 0;
-		Query query = null;
-		HttpConnectionParams.setSoTimeout(mHttpParams,
-				(serviceRequest.getSocketTimeout() == null)
-						? ProxiConstants.TIMEOUT_SOCKET_QUERIES
-						: serviceRequest.getSocketTimeout());
-
 		while (true) {
 
-			/* Construct the request */
-			if (serviceRequest.getRequestType() == RequestType.Get) {
-				httpRequest = new HttpGet();
-			}
-			else if (serviceRequest.getRequestType() == RequestType.Insert) {
-				httpRequest = new HttpPost();
-				if (serviceRequest.getRequestBody() != null) {
-					if (serviceRequest.getUseSecret()) {
-						addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + ", \"secret\":\""
-								+ ProxiConstants.INSERT_USER_SECRET + "\"}");
-					}
-					else {
-						addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + "}");
-					}
-				}
-			}
-			else if (serviceRequest.getRequestType() == RequestType.Update) {
-				httpRequest = new HttpPost();
-				if (serviceRequest.getRequestBody() != null) {
-					addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + "}");
-				}
-			}
-			else if (serviceRequest.getRequestType() == RequestType.Delete) {
-				httpRequest = new HttpDelete();
-			}
-			else if (serviceRequest.getRequestType() == RequestType.Method) {
-				httpRequest = new HttpPost();
-
-				/* Method parameters */
-				if (serviceRequest.getParameters() != null && serviceRequest.getParameters().size() != 0) {
-					if (jsonBody.toString().length() == 0) {
-						jsonBody.append("{");
-
-						for (String key : serviceRequest.getParameters().keySet()) {
-							if (serviceRequest.getParameters().get(key) != null) {
-								if (serviceRequest.getParameters().get(key) instanceof ArrayList<?>) {
-
-									if (key.equals("beaconLevels")) {
-										List<Integer> items = serviceRequest.getParameters().getIntegerArrayList(key);
-										jsonBody.append("\"" + key + "\":[");
-										for (Integer beaconLevel : items) {
-											jsonBody.append(String.valueOf(beaconLevel) + ",");
-										}
-										jsonBody = new StringBuilder(jsonBody.substring(0, jsonBody.length() - 1) + "],"); // $codepro.audit.disable stringConcatenationInLoop
-									}
-									else {
-										List<String> items = serviceRequest.getParameters().getStringArrayList(key);
-										jsonBody.append("\"" + key + "\":[");
-										for (String itemString : items) {
-											if (itemString.startsWith("object:")) {
-												jsonBody.append(itemString.substring(7) + ",");
-											}
-											else {
-												jsonBody.append("\"" + itemString + "\",");
-											}
-										}
-										jsonBody = new StringBuilder(jsonBody.substring(0, jsonBody.length() - 1) + "],"); // $codepro.audit.disable stringConcatenationInLoop
-									}
-								}
-								else if (serviceRequest.getParameters().get(key) instanceof String) {
-									String value = serviceRequest.getParameters().get(key).toString();
-									if (value.startsWith("object:")) {
-										jsonBody.append("\"" + key + "\":" + serviceRequest.getParameters().get(key).toString().substring(7) + ",");
-									}
-									else {
-										jsonBody.append("\"" + key + "\":\"" + serviceRequest.getParameters().get(key).toString() + "\",");
-									}
-								}
-								else {
-									jsonBody.append("\"" + key + "\":" + serviceRequest.getParameters().get(key).toString() + ",");
-								}
-							}
-						}
-						jsonBody = new StringBuilder(jsonBody.substring(0, jsonBody.length() - 1) + "}"); // $codepro.audit.disable stringConcatenationInLoop
-					}
-					addEntity((HttpEntityEnclosingRequestBase) httpRequest, jsonBody.toString());
-				}
-			}
-
-			/* Add headers and set the Uri */
-			addHeaders(httpRequest, serviceRequest);
-			if (redirectedUri != null) {
-				httpRequest.setURI(redirectedUri);
-			}
-			else {
-				query = serviceRequest.getQuery(); // $codepro.audit.disable variableDeclaredInLoop
-				String uriString = (query == null) ? serviceRequest.getUri() : serviceRequest.getUri() + query.queryString();
-
-				/* Add session info to uri if supplied */
-				String sessionInfo = sessionInfo(serviceRequest);
-				if (!sessionInfo.equals("")) {
-					if (uriString.contains("?")) {
-						uriString += "&" + sessionInfo;
-					}
-					else {
-						uriString += "?" + sessionInfo;
-					}
-				}
-
-				httpRequest.setURI(uriFromString(uriString));
-			}
-
-			HttpResponse httpResponse = null;
-
 			try {
+				/* Always pre-flight our connection */
+				ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
+
+				if (connectedState == ConnectedState.None) {
+					final Exception exception = new ConnectException();
+					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, exception);
+					throw proxibaseException;
+				}
+				else if (connectedState == ConnectedState.WalledGarden) {
+					final Exception exception = new WalledGardenException();
+					final ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(null, exception);
+					throw proxibaseException;
+				}
+
+				/* If we get to here, we have a network connection so give it a try. */
 				if (retryCount > 0) {
 					/*
 					 * We do not retry if this is an update/insert/delete.
 					 * 
-					 * We could be retrying because of a socket timeout exception. A socket timeout exception 
+					 * We could be retrying because of a socket timeout exception. A socket timeout exception
 					 * could be caused by: 1) poor/slow connection, 2) connectivity changes like drops, or switching
 					 * between networks.
 					 * 
-					 * We pause between retries and we add two more seconds to the socket timeout.
+					 * We put longer and longer pauses between retries and increase the socket timeout.
 					 */
 					pauseExponentially(retryCount);
 					final int newSocketTimeout = HttpConnectionParams.getSoTimeout(mHttpParams) + 2000;
@@ -381,7 +287,8 @@ public class ProxibaseService {
 					Header[] locationHeaders = httpResponse.getHeaders("location");
 					String redirectedLocation = locationHeaders[0].getValue();
 					Logger.d(this, "Redirecting to: " + redirectedLocation);
-					redirectedUri = URI.create(redirectedLocation);
+					URI redirectedUri = URI.create(redirectedLocation);
+					httpRequest.setURI(redirectedUri);
 				}
 				else {
 					/*
@@ -406,14 +313,14 @@ public class ProxibaseService {
 					}
 				}
 			}
-			catch (ClientProtocolException exception) {
+			catch (ClientProtocolException e) {
 				/*
 				 * Can't recover from this with a retry.
 				 */
-				ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, exception);
+				ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, e);
 				throw proxibaseException;
 			}
-			catch (IOException exception) {
+			catch (IOException e) {
 				/*
 				 * This could be any of these:
 				 * - ConnectTimeoutException: timeout expired trying to connect to service
@@ -422,12 +329,134 @@ public class ProxibaseService {
 				 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
 				 * - UnknownHostException: hostname didn't exist in the dns system
 				 */
-				if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, exception, retryCount)) {
-					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, exception);
+				if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, e, retryCount)) {
+					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, e);
 					throw proxibaseException;
+				}
+				else {
+					/* Ok to retry, check our connection again */
+					ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
+					if (connectedState == ConnectedState.None) {
+						final Exception exception = new ConnectException();
+						ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, exception);
+						throw proxibaseException;
+					}
+					else if (connectedState == ConnectedState.WalledGarden) {
+						final Exception exception = new WalledGardenException();
+						final ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(null, exception);
+						throw proxibaseException;
+					}
 				}
 			}
 		}
+	}
+
+	private HttpRequestBase buildHttpRequest(final ServiceRequest serviceRequest) {
+		HttpRequestBase httpRequest = null;
+		StringBuilder jsonBody = new StringBuilder(5000);
+		Query query = null;
+		HttpConnectionParams.setSoTimeout(mHttpParams,
+				(serviceRequest.getSocketTimeout() == null)
+						? ProxiConstants.TIMEOUT_SOCKET_QUERIES
+						: serviceRequest.getSocketTimeout());
+
+		/* Construct the request */
+		if (serviceRequest.getRequestType() == RequestType.Get) {
+			httpRequest = new HttpGet();
+		}
+		else if (serviceRequest.getRequestType() == RequestType.Insert) {
+			httpRequest = new HttpPost();
+			if (serviceRequest.getRequestBody() != null) {
+				if (serviceRequest.getUseSecret()) {
+					addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + ", \"secret\":\""
+							+ ProxiConstants.INSERT_USER_SECRET + "\"}");
+				}
+				else {
+					addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + "}");
+				}
+			}
+		}
+		else if (serviceRequest.getRequestType() == RequestType.Update) {
+			httpRequest = new HttpPost();
+			if (serviceRequest.getRequestBody() != null) {
+				addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + "}");
+			}
+		}
+		else if (serviceRequest.getRequestType() == RequestType.Delete) {
+			httpRequest = new HttpDelete();
+		}
+		else if (serviceRequest.getRequestType() == RequestType.Method) {
+			httpRequest = new HttpPost();
+
+			/* Method parameters */
+			if (serviceRequest.getParameters() != null && serviceRequest.getParameters().size() != 0) {
+				if (jsonBody.toString().length() == 0) {
+					jsonBody.append("{");
+
+					for (String key : serviceRequest.getParameters().keySet()) {
+						if (serviceRequest.getParameters().get(key) != null) {
+							if (serviceRequest.getParameters().get(key) instanceof ArrayList<?>) {
+
+								if (key.equals("beaconLevels")) {
+									List<Integer> items = serviceRequest.getParameters().getIntegerArrayList(key);
+									jsonBody.append("\"" + key + "\":[");
+									for (Integer beaconLevel : items) {
+										jsonBody.append(String.valueOf(beaconLevel) + ",");
+									}
+									jsonBody = new StringBuilder(jsonBody.substring(0, jsonBody.length() - 1) + "],"); // $codepro.audit.disable stringConcatenationInLoop
+								}
+								else {
+									List<String> items = serviceRequest.getParameters().getStringArrayList(key);
+									jsonBody.append("\"" + key + "\":[");
+									for (String itemString : items) {
+										if (itemString.startsWith("object:")) {
+											jsonBody.append(itemString.substring(7) + ",");
+										}
+										else {
+											jsonBody.append("\"" + itemString + "\",");
+										}
+									}
+									jsonBody = new StringBuilder(jsonBody.substring(0, jsonBody.length() - 1) + "],"); // $codepro.audit.disable stringConcatenationInLoop
+								}
+							}
+							else if (serviceRequest.getParameters().get(key) instanceof String) {
+								String value = serviceRequest.getParameters().get(key).toString();
+								if (value.startsWith("object:")) {
+									jsonBody.append("\"" + key + "\":" + serviceRequest.getParameters().get(key).toString().substring(7) + ",");
+								}
+								else {
+									jsonBody.append("\"" + key + "\":\"" + serviceRequest.getParameters().get(key).toString() + "\",");
+								}
+							}
+							else {
+								jsonBody.append("\"" + key + "\":" + serviceRequest.getParameters().get(key).toString() + ",");
+							}
+						}
+					}
+					jsonBody = new StringBuilder(jsonBody.substring(0, jsonBody.length() - 1) + "}"); // $codepro.audit.disable stringConcatenationInLoop
+				}
+				addEntity((HttpEntityEnclosingRequestBase) httpRequest, jsonBody.toString());
+			}
+		}
+
+		/* Add headers and set the Uri */
+		addHeaders(httpRequest, serviceRequest);
+		query = serviceRequest.getQuery(); // $codepro.audit.disable variableDeclaredInLoop
+		String uriString = (query == null) ? serviceRequest.getUri() : serviceRequest.getUri() + query.queryString();
+
+		/* Add session info to uri if supplied */
+		String sessionInfo = sessionInfo(serviceRequest);
+		if (!sessionInfo.equals("")) {
+			if (uriString.contains("?")) {
+				uriString += "&" + sessionInfo;
+			}
+			else {
+				uriString += "?" + sessionInfo;
+			}
+		}
+
+		httpRequest.setURI(uriFromString(uriString));
+		return httpRequest;
 	}
 
 	// ----------------------------------------------------------------------------------------

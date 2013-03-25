@@ -1,7 +1,9 @@
 package com.aircandi.ui.widgets;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -97,7 +99,9 @@ public class CandiView extends RelativeLayout {
 			 * If it is the same entity and it hasn't changed then nothing to do
 			 */
 			if (!entity.synthetic) {
-				if (mEntity != null && entity.id.equals(mEntity.id) && entity.activityDate.longValue() == mEntityActivityDate.longValue()) {
+				if (mEntity != null
+						&& entity.id.equals(mEntity.id)
+						&& entity.activityDate.longValue() == mEntityActivityDate.longValue()) {
 					if (mEntity.links == null && entity.links == null) {
 						mEntity = entity;
 						showDistance(entity);
@@ -106,7 +110,9 @@ public class CandiView extends RelativeLayout {
 				}
 			}
 			else {
-				if (mEntity != null && entity.id != null && mEntity.id != null && entity.id.equals(mEntity.id)) {
+				if (mEntity != null
+						&& entity.id != null && mEntity.id != null
+						&& entity.id.equals(mEntity.id)) {
 					mEntity = entity;
 					showDistance(entity);
 					return;
@@ -182,6 +188,7 @@ public class CandiView extends RelativeLayout {
 				if (mCandiSources != null && !entity.synthetic) {
 
 					final List<Entity> entities = entity.getSourceEntities();
+					final Map<String, Object> sources = new HashMap<String, Object>();
 					synchronized (entities) {
 						if (entities.size() > 0) {
 
@@ -196,6 +203,9 @@ public class CandiView extends RelativeLayout {
 									if (entity.commentCount == null || entity.commentCount < 1) {
 										continue;
 									}
+								}
+								if (sourceEntity.source != null && sources.containsKey(sourceEntity.source.type)) {
+									continue;
 								}
 								if (sourceCount >= 5) {
 									break;
@@ -243,6 +253,9 @@ public class CandiView extends RelativeLayout {
 									view.setLayoutParams(params);
 									mCandiSources.addView(view);
 									sourceCount++;
+								}
+								if (sourceEntity.source != null) {
+									sources.put(sourceEntity.source.type, sourceEntity);
 								}
 							}
 							setVisibility(mCandiSources, View.VISIBLE);

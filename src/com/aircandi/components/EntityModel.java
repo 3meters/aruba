@@ -1572,6 +1572,7 @@ public class EntityModel {
 		source.intentSupport = false;
 		source.installDeclined = false;
 		sourceEntity.source = source;
+		sourceEntity.commentCount = entity.commentCount;
 
 		sourceEntity.parentId = entity.id;
 		upsertEntity(sourceEntity);

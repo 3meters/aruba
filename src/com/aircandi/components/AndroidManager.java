@@ -178,7 +178,7 @@ public class AndroidManager {
 		 * intent.setData(Uri.parse("fb://place/" + facebookId + ""));
 		 */
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-		intent.setData(Uri.parse("http://www.facebook.com/" + facebookId));
+		intent.setData(Uri.parse("http://m.facebook.com/" + facebookId));
 		context.startActivity(intent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}

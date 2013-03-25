@@ -698,19 +698,21 @@ public class CandiForm extends CandiActivity {
 			WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
 
 			TextView title = (TextView) view.findViewById(R.id.title);
-			TextView badge = (TextView) view.findViewById(R.id.badge);
+			TextView badgeUpper = (TextView) view.findViewById(R.id.badge_upper);
+			TextView badgeLower = (TextView) view.findViewById(R.id.badge_lower);
 			ImageView indicator = (ImageView) view.findViewById(R.id.indicator);
 
 			FontManager.getInstance().setTypefaceDefault(title);
-			FontManager.getInstance().setTypefaceDefault(badge);
+			FontManager.getInstance().setTypefaceDefault(badgeUpper);
 
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
 				indicator.setVisibility(View.GONE);
-				badge.setVisibility(View.GONE);
+				badgeUpper.setVisibility(View.GONE);
+				badgeLower.setVisibility(View.GONE);
 				if (entity.source.type.equals("comments")) {
 					if (entity.commentCount != null && entity.commentCount > 0) {
-						badge.setText(String.valueOf(entity.commentCount));
-						badge.setVisibility(View.VISIBLE);
+						badgeUpper.setText(String.valueOf(entity.commentCount));
+						badgeUpper.setVisibility(View.VISIBLE);
 					}
 				}
 				else {
@@ -722,6 +724,21 @@ public class CandiForm extends CandiActivity {
 							&& !entity.source.appInstalled()) {
 						/* Show hint */
 						indicator.setVisibility(View.VISIBLE);
+					}
+					if (!entity.source.icon.startsWith("/")) {
+						if (entity.source.type.equals(CandiConstants.TYPE_CANDI_SOURCE_FACEBOOK)) {
+							badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_dark);
+							if (mCommon.mThemeTone.equals("light")) {
+								badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_light);
+							}
+						}
+						else if (entity.source.type.equals(CandiConstants.TYPE_CANDI_SOURCE_TWITTER)) {
+							badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_dark);
+							if (mCommon.mThemeTone.equals("light")) {
+								badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_light);
+							}
+						}
+						badgeLower.setVisibility(View.VISIBLE);
 					}
 				}
 				title.setText(entity.name);

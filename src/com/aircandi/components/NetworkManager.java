@@ -3,7 +3,6 @@ package com.aircandi.components;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -23,7 +22,6 @@ import com.aircandi.beta.BuildConfig;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
 import com.aircandi.service.ServiceRequest;
-import com.aircandi.service.WalledGardenException;
 import com.aircandi.utilities.ImageUtils;
 
 /**
@@ -102,36 +100,17 @@ public class NetworkManager {
 			AircandiCommon.mNotificationManager.cancel(CandiConstants.NOTIFICATION_NETWORK);
 		}
 
-		/* Determine what kind of network connection we have */
-		checkConnectedState();
-
-		if (mConnectedState == ConnectedState.None) {
-			final Exception exception = new ConnectException();
-			final ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(null, exception);
-			serviceResponse = new ServiceResponse(ResponseCode.Failed, null, proxibaseException);
+		try {
+			/* Could be string, input stream, or array of bytes */
+			final Object response = ProxibaseService.getInstance().request(serviceRequest);
+			serviceResponse = new ServiceResponse(ResponseCode.Success, response, null);
 		}
-		else if (mConnectedState == ConnectedState.WalledGarden) {
-			final Exception exception = new WalledGardenException();
-			final ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(null, exception);
-			serviceResponse = new ServiceResponse(ResponseCode.Failed, null, proxibaseException);
-		}
-		else if (mConnectedState == ConnectedState.Normal) {
+		catch (ProxibaseServiceException exception) {
 			/*
-			 * We have a network connection so give it a try. Request processing
-			 * will retry using an exponential backoff scheme if needed and possible.
+			 * We got a service side error that either stopped us in our tracks or
+			 * we gave up after performing a series of retries.
 			 */
-			try {
-				/* Could be string, input stream, or array of bytes */
-				final Object response = ProxibaseService.getInstance().request(serviceRequest);
-				serviceResponse = new ServiceResponse(ResponseCode.Success, response, null);
-			}
-			catch (ProxibaseServiceException exception) {
-				/*
-				 * We got a service side error that either stopped us in our tracks or
-				 * we gave up after performing a series of retries.
-				 */
-				serviceResponse = new ServiceResponse(ResponseCode.Failed, null, exception);
-			}
+			serviceResponse = new ServiceResponse(ResponseCode.Failed, null, exception);
 		}
 		return serviceResponse;
 	}

@@ -277,7 +277,7 @@ public class ProfileForm extends FormActivity {
 	@SuppressWarnings("ucd")
 	public void onChangePictureButtonClick(View view) {
 
-		mCommon.showPictureSourcePicker(null);
+		mCommon.showPictureSourcePicker(null, null);
 		mImageRequestWebImageView = mImage;
 		mImageRequestListener = new RequestListener() {
 

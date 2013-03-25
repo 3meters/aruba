@@ -425,7 +425,7 @@ public class EntityForm extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onChangePictureButtonClick(View view) {
-		mCommon.showPictureSourcePicker(mEntityForForm.id);
+		mCommon.showPictureSourcePicker(mEntityForForm.id, null);
 		mImageRequestWebImageView = mImageViewPicture;
 		mImageRequestListener = new RequestListener() {
 
@@ -644,7 +644,7 @@ public class EntityForm extends FormActivity {
 
 						/* Return the id of the inserted entity in case the caller can use it */
 						final Intent intent = new Intent();
-						intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, ((Entity)result.data).id);
+						intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, ((Entity) result.data).id);
 						setResult(CandiConstants.RESULT_ENTITY_INSERTED, intent);
 					}
 				}
@@ -786,12 +786,14 @@ public class EntityForm extends FormActivity {
 		result = ProxiManager.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, bitmap, false);
 
 		/* Add picture entity if a new picture has been set for a place */
-		final Entity entity = (Entity) result.data;
-		if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntityForForm.photo != null) {
-			Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
-			pictureEntity.photo = entity.photo.clone();
-			pictureEntity.parentId = entity.id;
-			result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false);
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			final Entity entity = (Entity) result.data;
+			if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntityForForm.photo != null) {
+				Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
+				pictureEntity.photo = entity.photo.clone();
+				pictureEntity.parentId = entity.id;
+				result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false);
+			}
 		}
 		return result;
 	}
@@ -808,24 +810,26 @@ public class EntityForm extends FormActivity {
 		/* Something in the call caused us to lose the most recent picture. */
 		ModelResult result = ProxiManager.getInstance().getEntityModel().updateEntity(mEntityForForm, bitmap);
 
-		if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntityForForm.photo != null) {
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntityForForm.photo != null) {
 
-			entities = mEntityForForm.getChildren();
-			Boolean candiMatch = false;
-			for (Entity entity : entities) {
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-					if (entity.getPhoto().getUri().equals(mEntityForForm.getPhoto().getUri())) {
-						candiMatch = true;
-						break;
+				entities = mEntityForForm.getChildren();
+				Boolean candiMatch = false;
+				for (Entity entity : entities) {
+					if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
+						if (entity.getPhoto().getUri().equals(mEntityForForm.getPhoto().getUri())) {
+							candiMatch = true;
+							break;
+						}
 					}
 				}
-			}
 
-			if (!candiMatch) {
-				Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
-				pictureEntity.photo = mEntityForForm.photo.clone();
-				pictureEntity.parentId = mEntityForForm.id;
-				result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false);
+				if (!candiMatch) {
+					Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
+					pictureEntity.photo = mEntityForForm.photo.clone();
+					pictureEntity.parentId = mEntityForForm.id;
+					result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false);
+				}
 			}
 		}
 

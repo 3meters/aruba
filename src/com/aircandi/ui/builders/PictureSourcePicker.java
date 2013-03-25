@@ -34,6 +34,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 	private ListAdapter	mListAdapter;
 	private TextView	mTitle;
 	private String		mEntityId;
+	private String		mEntityType;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -48,48 +49,65 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mEntityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
+			mEntityType = extras.getString(CandiConstants.EXTRA_ENTITY_TYPE);
 		}
 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();
 
-		listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_search_light : R.drawable.ic_action_search_dark
-				, getString(R.string.dialog_picture_source_search), null, "search"));
-
-		listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_tiles_large_light : R.drawable.ic_action_tiles_large_dark
-				, getString(R.string.dialog_picture_source_gallery), null, "gallery"));
-
-		/* Only show the camera choice if there is one and there is a place to store the image */
-		if (AndroidManager.isIntentAvailable(this, MediaStore.ACTION_IMAGE_CAPTURE)) {
-			if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-				listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_camera_light : R.drawable.ic_action_camera_dark
-						, getString(R.string.dialog_picture_source_camera), null, "camera"));
+		if (mEntityType != null) {
+			if (mEntityType.equals(CandiConstants.TYPE_CANDI_SOURCE_FACEBOOK)) {
+				listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_facebook_light : R.drawable.ic_action_facebook_dark
+						, getString(R.string.dialog_picture_source_facebook), null, "facebook"));
 			}
+			else if (mEntityType.equals(CandiConstants.TYPE_CANDI_SOURCE_TWITTER)) {
+				listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_twitter_light : R.drawable.ic_action_twitter_dark
+						, getString(R.string.dialog_picture_source_twitter), null, "twitter"));
+			}
+			listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
+					, getString(R.string.dialog_picture_source_default), null, "default"));
 		}
+		else {
 
-		/* Add place photo option if this is a place entity */
-		if (mEntityId != null) {
-			final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
-			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				if (entity.place.provider != null && entity.place.provider.equals("foursquare")) {
-					listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
-							, getString(R.string.dialog_picture_source_place), null, "place"));
+			listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_search_light : R.drawable.ic_action_search_dark
+					, getString(R.string.dialog_picture_source_search), null, "search"));
+
+			listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_tiles_large_light : R.drawable.ic_action_tiles_large_dark
+					, getString(R.string.dialog_picture_source_gallery), null, "gallery"));
+
+			/* Only show the camera choice if there is one and there is a place to store the image */
+			if (AndroidManager.isIntentAvailable(this, MediaStore.ACTION_IMAGE_CAPTURE)) {
+				if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+					listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_camera_light : R.drawable.ic_action_camera_dark
+							, getString(R.string.dialog_picture_source_camera), null, "camera"));
 				}
-				else {
-					List<Entity> entities = entity.getChildren();
-					for (Entity child : entities) {
-						if (child.type.equals(CandiConstants.TYPE_CANDI_PICTURE) && child.photo != null) {
-							listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
-									, getString(R.string.dialog_picture_source_place), null, "place"));
-							break;
+			}
+
+			/* Add place photo option if this is a place entity */
+			if (mEntityId != null) {
+				final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+					if (entity.place.provider != null && entity.place.provider.equals("foursquare")) {
+						listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
+								, getString(R.string.dialog_picture_source_place), null, "place"));
+					}
+					else {
+						List<Entity> entities = entity.getChildren();
+						for (Entity child : entities) {
+							if (child.type.equals(CandiConstants.TYPE_CANDI_PICTURE) && child.photo != null) {
+								listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light
+										: R.drawable.ic_action_location_dark
+										, getString(R.string.dialog_picture_source_place), null, "place"));
+								break;
+							}
 						}
 					}
 				}
 			}
-		}
 
-		listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
-				, getString(R.string.dialog_picture_source_default), null, "default"));
+			listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
+					, getString(R.string.dialog_picture_source_default), null, "default"));
+		}
 
 		mTitle = (TextView) findViewById(R.id.title);
 		mTitle.setText(R.string.dialog_picture_source_title);

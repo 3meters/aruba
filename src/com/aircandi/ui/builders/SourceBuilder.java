@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,15 +20,20 @@ import android.widget.TextView;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
-import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.FontManager;
+import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
+import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.objects.Photo;
+import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Source;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
@@ -37,7 +43,7 @@ import com.aircandi.utilities.MiscUtils;
 public class SourceBuilder extends FormActivity {
 
 	private Source			mSource;
-	private Boolean			mEditing	= false;
+	private Boolean			mEditing		= false;
 
 	private WebImageView	mSourceIcon;
 	private Spinner			mSourceTypePicker;
@@ -47,8 +53,6 @@ public class SourceBuilder extends FormActivity {
 	private Integer			mSpinnerItem;
 
 	private List<String>	mSourceSuggestionStrings;
-
-	//private Entity			mEntity;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +83,20 @@ public class SourceBuilder extends FormActivity {
 		mSourceLabel = (EditText) findViewById(R.id.source_label);
 		mSourceId = (EditText) findViewById(R.id.source_id);
 		mSourceUrl = (EditText) findViewById(R.id.source_url);
+
+//		if (mSourceId != null) {
+//			mSourceId.addTextChangedListener(new SimpleTextWatcher() {
+//
+//				@Override
+//				public void afterTextChanged(Editable s) {
+//					if (mSource.id == null || !s.toString().equals(mSource.id)) {
+//						if (mPictureSource != null && !mPictureSource.equals("default")) {
+//							drawSourceIcon();
+//						}
+//					}
+//				}
+//			});
+//		}
 
 		mSpinnerItem = mCommon.mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
@@ -114,22 +132,11 @@ public class SourceBuilder extends FormActivity {
 		if (source.data == null) {
 			source.data = new HashMap<String, Object>();
 		}
-		source.data.put("origin", "user");
 
-		if (sourceType.equals("website")) {
-			source.icon = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "website.png";
-		}
-		else if (sourceType.equals("facebook")) {
-			source.icon = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "facebook.png";
-			source.packageName = "com.facebook.katana";
-		}
-		else if (sourceType.equals("twitter")) {
-			source.icon = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "twitter.png";
-			source.packageName = "com.twitter.android";
-		}
-		else if (sourceType.equals("email")) {
-			source.icon = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "email.png";
-		}
+		source.data.put("origin", "user");
+		source.icon = Source.getDefaultIcon(sourceType);
+		source.packageName = Source.getPackageName(sourceType);
+
 		return source;
 	}
 
@@ -145,6 +152,31 @@ public class SourceBuilder extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
+	public void onChangePictureButtonClick(View view) {
+
+		mCommon.showPictureSourcePicker(null, mSource.type);
+		mImageRequestWebImageView = mSourceIcon;
+		mImageRequestListener = new RequestListener() {
+
+			@Override
+			public void onComplete(Object response, Photo photo, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
+
+				final ServiceResponse serviceResponse = (ServiceResponse) response;
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					/* Could get set to null if we are using the default */
+					if (photo != null) {
+						mSource.photo = photo;
+					}
+					else if (imageUri != null) {
+						mSource.photo = new Photo(imageUri, null, null, null, PhotoSource.aircandi);
+					}
+					drawSourceIcon();
+				}
+			}
+		};
+	}
+
+	@SuppressWarnings("ucd")
 	public void onTestButtonClick(View view) {
 		doSourceTest();
 	}
@@ -157,55 +189,53 @@ public class SourceBuilder extends FormActivity {
 		}
 	}
 
-	private void gather() {
-		if (mEditing) {
-			mSource.label = mSourceLabel.getEditableText().toString();
-			mSource.id = mSourceId.getEditableText().toString();
-			mSource.url = mSourceUrl.getEditableText().toString();
-		}
-		else {
-			mSource.label = mSourceLabel.getEditableText().toString();
-			mSource.id = mSourceId.getEditableText().toString();
-			mSource.url = mSourceUrl.getEditableText().toString();
-		}
-		if (mSource.type.equals("website")) {
-			if (!mSource.url.startsWith("http://") && !mSource.url.startsWith("https://")) {
-				mSource.url = "http://" + mSource.url;
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+		if (resultCode == Activity.RESULT_OK) {
+			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
+				if (intent != null && intent.getExtras() != null) {
+					final Bundle extras = intent.getExtras();
+					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
+					if (pictureSource != null && !pictureSource.equals("")) {
+						if (pictureSource.equals("default")) {
+							usePictureDefault();
+						}
+						else {
+							gather(); 
+							if (mSource.id == null || mSource.id.equals("")) {
+								AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+										, null
+										, getResources().getString(pictureSource.equals("facebook") ? R.string.error_missing_source_id_facebook : R.string.error_missing_source_id_twitter)
+										, null
+										, this
+										, android.R.string.ok
+										, null, null, null, null);
+							}
+							else {
+								if (pictureSource.equals("facebook")) {
+									mSource.icon = "https://graph.facebook.com/" + mSource.id + "/picture?type=large";
+									drawSourceIcon();
+								}
+								else if (pictureSource.equals("twitter")) {
+									mSource.icon = "https://api.twitter.com/1/users/profile_image?screen_name=" + mSource.id + "&size=bigger";
+									drawSourceIcon();
+								}
+							}
+						}
+					}
+				}
+			}
+			else {
+				super.onActivityResult(requestCode, resultCode, intent);
 			}
 		}
 	}
 
-	@Override
-	protected Boolean isDialog() {
-		return false;
-	}
-
-	private void doSourceTest() {
-		gather();
-		if (mSource.type.equals("twitter")) {
-			AndroidManager.getInstance().callTwitterActivity(this, (mSource.id != null) ? mSource.id : mSource.url);
-		}
-		else if (mSource.type.equals("foursquare")) {
-			AndroidManager.getInstance().callFoursquareActivity(this, (mSource.id != null) ? mSource.id : mSource.url);
-		}
-		else if (mSource.type.equals("facebook")) {
-			AndroidManager.getInstance().callFacebookActivity(this, (mSource.id != null) ? mSource.id : mSource.url);
-		}
-		else if (mSource.type.equals("yelp")) {
-			AndroidManager.getInstance().callYelpActivity(this, mSource.id, mSource.url);
-		}
-		else if (mSource.type.equals("opentable")) {
-			AndroidManager.getInstance().callOpentableActivity(this, mSource.id, mSource.url);
-		}
-		else if (mSource.type.equals("website")) {
-			AndroidManager.getInstance().callBrowserActivity(this, (mSource.url != null) ? mSource.url : mSource.id);
-		}
-		else if (mSource.type.equals("email")) {
-			AndroidManager.getInstance().callSendToActivity(this, mSource.label, mSource.id, null, null);
-		}
-		else {
-			AndroidManager.getInstance().callGenericActivity(this, (mSource.url != null) ? mSource.url : mSource.id);
-		}
+	private void usePictureDefault() {
+		mSource.icon = Source.getDefaultIcon(mSource.type);
+		drawSourceIcon();
+		Tracker.sendEvent("ui_action", "set_source_picture_to_default", null, 0, Aircandi.getInstance().getUser());
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -257,6 +287,57 @@ public class SourceBuilder extends FormActivity {
 			return false;
 		}
 		return true;
+	}
+
+	private void gather() {
+		if (mEditing) {
+			mSource.label = mSourceLabel.getEditableText().toString();
+			mSource.id = mSourceId.getEditableText().toString();
+			mSource.url = mSourceUrl.getEditableText().toString();
+		}
+		else {
+			mSource.label = mSourceLabel.getEditableText().toString();
+			mSource.id = mSourceId.getEditableText().toString();
+			mSource.url = mSourceUrl.getEditableText().toString();
+		}
+		if (mSource.type.equals("website")) {
+			if (!mSource.url.startsWith("http://") && !mSource.url.startsWith("https://")) {
+				mSource.url = "http://" + mSource.url;
+			}
+		}
+	}
+
+	@Override
+	protected Boolean isDialog() {
+		return false;
+	}
+
+	private void doSourceTest() {
+		gather();
+		if (mSource.type.equals("twitter")) {
+			AndroidManager.getInstance().callTwitterActivity(this, (mSource.id != null) ? mSource.id : mSource.url);
+		}
+		else if (mSource.type.equals("foursquare")) {
+			AndroidManager.getInstance().callFoursquareActivity(this, (mSource.id != null) ? mSource.id : mSource.url);
+		}
+		else if (mSource.type.equals("facebook")) {
+			AndroidManager.getInstance().callFacebookActivity(this, (mSource.id != null) ? mSource.id : mSource.url);
+		}
+		else if (mSource.type.equals("yelp")) {
+			AndroidManager.getInstance().callYelpActivity(this, mSource.id, mSource.url);
+		}
+		else if (mSource.type.equals("opentable")) {
+			AndroidManager.getInstance().callOpentableActivity(this, mSource.id, mSource.url);
+		}
+		else if (mSource.type.equals("website")) {
+			AndroidManager.getInstance().callBrowserActivity(this, (mSource.url != null) ? mSource.url : mSource.id);
+		}
+		else if (mSource.type.equals("email")) {
+			AndroidManager.getInstance().callSendToActivity(this, mSource.label, mSource.id, null, null);
+		}
+		else {
+			AndroidManager.getInstance().callGenericActivity(this, (mSource.url != null) ? mSource.url : mSource.id);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

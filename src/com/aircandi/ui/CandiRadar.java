@@ -183,7 +183,7 @@ public class CandiRadar extends CandiActivity {
 		/* Adapter snapshots the items in mEntities */
 		mRadarAdapter = new RadarListAdapter(this, mEntities);
 		mList.getRefreshableView().setAdapter(mRadarAdapter);
-		
+
 		/* Refresh listener */
 		mList.setOnRefreshListener(new OnRefreshListener<ListView>() {
 
@@ -191,9 +191,9 @@ public class CandiRadar extends CandiActivity {
 			public void onRefresh(PullToRefreshBase<ListView> refreshView) {
 				doRefresh();
 			}
-			
-		});	
-		
+
+		});
+
 		mList.getLoadingLayoutProxy().setRefreshingLabel("scanning...");
 		mList.getLoadingLayoutProxy().setPullLabel("pull to scan...");
 		mList.getLoadingLayoutProxy().setReleaseLabel("release to scan...");
@@ -392,9 +392,7 @@ public class CandiRadar extends CandiActivity {
 				final List<Entity> entities = event.entities;
 				mRadarAdapter.setItems(entities);
 				mRadarAdapter.notifyDataSetChanged();
-				
-				/* Clear loading */
-				mList.onRefreshComplete();				
+				mList.onRefreshComplete();
 
 				/* Add some sparkle */
 				if (previousCount == 0 && entities.size() > 0) {
@@ -483,9 +481,17 @@ public class CandiRadar extends CandiActivity {
 				protected void onPostExecute(Object result) {
 					ConnectedState connectedState = (ConnectedState) result;
 					if (connectedState != ConnectedState.Normal) {
+						if (Aircandi.stopwatch4.isStarted()) {
+							Aircandi.stopwatch4.stop("Aircandi initialization finished: network problem");
+						}
 						mCommon.hideBusy(true);
+						mList.onRefreshComplete();
+
 						if (connectedState == ConnectedState.WalledGarden) {
 							mCommon.showAlertDialogSimple(null, getString(R.string.error_connection_walled_garden));
+						}
+						else if (connectedState == ConnectedState.None) {
+							mCommon.showAlertDialogSimple(null, getString(R.string.error_connection));
 						}
 					}
 				}
@@ -505,11 +511,9 @@ public class CandiRadar extends CandiActivity {
 	private void searchForPlacesByLocation() {
 		Aircandi.stopwatch2.start("Lock location");
 		LocationManager.getInstance().setLocationLocked(null);
+		mCommon.showBusy(R.string.progress_scanning_for_location, true);
 		LocationManager.getInstance().lockLocationBurst();
-		Location location = LocationManager.getInstance().getLastKnownLocation();
-		if (location != null) {
-			LocationManager.getInstance().setLocation(location);
-		}
+
 	}
 
 	// --------------------------------------------------------------------------------------------

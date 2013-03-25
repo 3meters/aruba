@@ -33,7 +33,7 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String				packageName;
 	@Expose
-	public Map<String, Object>	data; // treat as opaque but roundtrip
+	public Map<String, Object>	data;										// treat as opaque but roundtrip
 	@Expose
 	public Boolean				system;
 	@Expose
@@ -45,6 +45,7 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	public Boolean				custom;
 	public Boolean				intentSupport;
 	public Boolean				installDeclined;
+	public Photo				photo;
 
 	public Source() {}
 
@@ -74,7 +75,26 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 		else if (icon.toLowerCase(Locale.US).startsWith("resource:")) {
 			return icon;
 		}
-		return ProxiConstants.URL_PROXIBASE_SERVICE + icon;
+		else if (icon.toLowerCase(Locale.US).startsWith("/")) {
+			return ProxiConstants.URL_PROXIBASE_SERVICE + icon;
+		}
+		return icon;
+	}
+
+	public static String getDefaultIcon(String sourceType) {
+		String icon = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + sourceType + ".png";
+		return icon;
+	}
+
+	public static String getPackageName(String sourceType) {
+		String packageName = null;
+		if (sourceType.equals("facebook")) {
+			packageName = "com.facebook.katana";
+		}
+		else if (sourceType.equals("twitter")) {
+			packageName = "com.twitter.android";
+		}
+		return packageName;
 	}
 
 	public static class SortSourcesBySourcePosition implements Comparator<Source> {

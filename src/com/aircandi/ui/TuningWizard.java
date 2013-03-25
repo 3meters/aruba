@@ -228,10 +228,12 @@ public class TuningWizard extends FormActivity {
 			WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
 
 			TextView title = (TextView) view.findViewById(R.id.title);
-			TextView badge = (TextView) view.findViewById(R.id.badge);
+			TextView badgeUpper = (TextView) view.findViewById(R.id.badge_upper);
+			@SuppressWarnings("unused")
+			TextView badgeLower = (TextView) view.findViewById(R.id.badge_lower);
 
 			FontManager.getInstance().setTypefaceDefault(title);
-			FontManager.getInstance().setTypefaceDefault(badge);
+			FontManager.getInstance().setTypefaceDefault(badgeUpper);
 
 			if (entity.name != null && !entity.name.equals("")) {
 				title.setText(entity.name);
@@ -379,7 +381,7 @@ public class TuningWizard extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onChangePictureButtonClick(View view) {
-		mCommon.showPictureSourcePicker(mEntityForForm.id);
+		mCommon.showPictureSourcePicker(mEntityForForm.id, null);
 		mImageRequestWebImageView = mImageViewPicture;
 		mImageRequestListener = new RequestListener() {
 
