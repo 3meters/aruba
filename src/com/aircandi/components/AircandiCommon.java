@@ -1070,7 +1070,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 			/* Hide user edit menu item if not the current user */
 			MenuItem menuItem = menu.findItem(R.id.edit);
-			if (menuItem != null && !Aircandi.getInstance().getUser().id.equals(mUserId)) {
+			if (menuItem != null && Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().id.equals(mUserId)) {
 				menuItem.setVisible(false);
 			}
 		}
