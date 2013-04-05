@@ -34,7 +34,6 @@ import com.aircandi.utilities.MiscUtils;
 @SuppressWarnings("ucd")
 public class BitmapManager {
 
-	private static BitmapManager			singletonObject;
 	private DiskLruImageCache				mDiskLruCache;
 	private final Object					mDiskCacheLock		= new Object();
 	private boolean							mDiskCacheStarting	= true;
@@ -43,12 +42,14 @@ public class BitmapManager {
 	private final BitmapLoader				mBitmapLoader;
 
 	private final LruCache<String, Bitmap>	mMemoryCache;
+	private final Object					mMemoryCacheLock	= new Object();
 
-	public static synchronized BitmapManager getInstance() {
-		if (singletonObject == null) {
-			singletonObject = new BitmapManager();
-		}
-		return singletonObject;
+	private static class BitmapManagerHolder {
+		public static final BitmapManager	instance	= new BitmapManager();
+	}
+
+	public static BitmapManager getInstance() {
+		return BitmapManagerHolder.instance;
 	}
 
 	private BitmapManager() {
@@ -58,11 +59,11 @@ public class BitmapManager {
 		 * OutOfMemory exception.
 		 */
 		final int memClass = ((ActivityManager) Aircandi.applicationContext.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
-		Logger.d(this, "Device memory class: " + String.valueOf(memClass));
+		Logger.i(this, "Device memory class: " + String.valueOf(memClass));
 
 		/* Use 1/4th of the available memory for this memory cache. */
 		final int cacheSize = (memClass << 10 << 10) >> 2;
-		Logger.d(this, "Memory cache size: " + String.valueOf(cacheSize));
+		Logger.i(this, "Memory cache size: " + String.valueOf(cacheSize));
 
 		mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
 			@Override
@@ -111,7 +112,7 @@ public class BitmapManager {
 		}
 	}
 
-	public synchronized ServiceResponse fetchDrawable(final BitmapRequest bitmapRequest) {
+	public ServiceResponse fetchDrawable(final BitmapRequest bitmapRequest) {
 
 		final ServiceResponse serviceResponse = new ServiceResponse();
 		final String rawResourceName = bitmapRequest.getImageUri().substring(bitmapRequest.getImageUri().indexOf("resource:") + 9);
@@ -126,17 +127,22 @@ public class BitmapManager {
 
 		final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable",
 				Aircandi.getInstance().getPackageName());
+
 		String memCacheKey = String.valueOf(resourceId);
 		if (bitmapRequest.getImageSize() != null) {
 			memCacheKey += "." + String.valueOf(bitmapRequest.getImageSize());
 		}
-		final String memKeyHashed = MiscUtils.md5(memCacheKey);
-		Bitmap bitmap = mMemoryCache.get(memKeyHashed);
 
-		if (bitmap == null) {
-			bitmap = loadBitmapFromResourcesSampled(resourceId, bitmapRequest.getImageSize());
-			synchronized (mMemoryCache) {
-				mMemoryCache.put(memKeyHashed, bitmap);
+		Bitmap bitmap = null;
+		synchronized (mMemoryCacheLock) {
+			final String memKeyHashed = MiscUtils.md5(memCacheKey);
+			bitmap = mMemoryCache.get(memKeyHashed);
+
+			if (bitmap == null) {
+				bitmap = loadBitmapFromResourcesSampled(resourceId, bitmapRequest.getImageSize());
+				synchronized (mMemoryCache) {
+					mMemoryCache.put(memKeyHashed, bitmap);
+				}
 			}
 		}
 
@@ -160,7 +166,7 @@ public class BitmapManager {
 		return serviceResponse;
 	}
 
-	public synchronized ServiceResponse fetchBitmap(final BitmapRequest bitmapRequest) {
+	public ServiceResponse fetchBitmap(final BitmapRequest bitmapRequest) {
 
 		final ServiceResponse serviceResponse = new ServiceResponse();
 		final Bitmap bitmap = getBitmap(bitmapRequest.getImageUri(), bitmapRequest.getImageSize());
@@ -231,40 +237,40 @@ public class BitmapManager {
 		final String memKeyHashed = MiscUtils.md5(memCacheKey);
 		final String diskKeyHashed = MiscUtils.md5(diskCacheKey);
 
-		Bitmap bitmap = mMemoryCache.get(memKeyHashed);
-		if (bitmap != null) {
-			Logger.v(this, "Image request satisfied from MEMORY cache: " + key);
-			return bitmap;
-		}
-		else {
-			synchronized (mDiskCacheLock) {
-				/* Wait while disk cache is started from background thread */
-				while (mDiskCacheStarting) {
-					try {
-						mDiskCacheLock.wait();
-					}
-					catch (InterruptedException e) {} // $codepro.audit.disable emptyCatchClause
-				}
-				if (mDiskLruCache != null) {
-					if (mDiskLruCache.containsKey(diskKeyHashed)) {
-
-						/* Push to the mem cache */
-						final byte[] imageBytes = mDiskLruCache.getImageBytes(diskKeyHashed);
-
-						/* Scale if needed */
-						bitmap = bitmapForByteArraySampled(imageBytes, size, null);
-
-						if (bitmap != null) {
-							synchronized (mMemoryCache) {
-								mMemoryCache.put(memKeyHashed, bitmap);
-							}
-							Logger.v(this, "Image request satisfied from FILE cache: " + key);
-						}
-						return bitmap;
-					}
-				}
+		synchronized (mMemoryCacheLock) {
+			Bitmap bitmap = mMemoryCache.get(memKeyHashed);
+			if (bitmap != null) {
+				Logger.v(this, "Image request satisfied from MEMORY cache: " + key);
+				return bitmap;
 			}
-			return null;
+			else {
+				synchronized (mDiskCacheLock) {
+					/* Wait while disk cache is started from background thread */
+					while (mDiskCacheStarting) {
+						try {
+							mDiskCacheLock.wait();
+						}
+						catch (InterruptedException e) {} // $codepro.audit.disable emptyCatchClause
+					}
+					if (mDiskLruCache != null) {
+						if (mDiskLruCache.containsKey(diskKeyHashed)) {
+
+							/* Push to the mem cache */
+							final byte[] imageBytes = mDiskLruCache.getImageBytes(diskKeyHashed);
+
+							/* Scale if needed */
+							bitmap = bitmapForByteArraySampled(imageBytes, size, null);
+
+							if (bitmap != null) {
+								mMemoryCache.put(memKeyHashed, bitmap);
+								Logger.v(this, "Image request satisfied from FILE cache: " + key);
+							}
+							return bitmap;
+						}
+					}
+				}
+				return null;
+			}
 		}
 	}
 

@@ -27,8 +27,8 @@ import com.aircandi.components.ProxiManager;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.user.RegisterForm;
@@ -115,9 +115,9 @@ public class SplashForm extends SherlockActivity {
 
 		if (jsonUser != null && jsonSession != null) {
 			Logger.i(this, "Auto sign in...");
-			final User user = (User) ProxibaseService.convertJsonToObjectInternalSmart(jsonUser, ServiceDataType.User);
+			final User user = (User) HttpService.convertJsonToObjectInternalSmart(jsonUser, ServiceDataType.User);
 			if (user != null) {
-				user.session = (Session) ProxibaseService.convertJsonToObjectInternalSmart(jsonSession, ServiceDataType.Session);
+				user.session = (Session) HttpService.convertJsonToObjectInternalSmart(jsonSession, ServiceDataType.Session);
 				if (user.session != null) {
 					Aircandi.getInstance().setUser(user);
 					Tracker.startNewSession(Aircandi.getInstance().getUser());

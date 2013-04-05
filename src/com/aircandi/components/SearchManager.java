@@ -16,13 +16,12 @@ import android.provider.Browser;
 @SuppressWarnings("ucd")
 public class SearchManager {
 
-	private static SearchManager	singletonObject;
+	private static class SearchManagerHolder {
+		public static final SearchManager	instance	= new SearchManager();
+	}
 
-	public static synchronized SearchManager getInstance() {
-		if (singletonObject == null) {
-			singletonObject = new SearchManager();
-		}
-		return singletonObject;
+	public static SearchManager getInstance() {
+		return SearchManagerHolder.instance;
 	}
 
 	/**
@@ -30,8 +29,7 @@ public class SearchManager {
 	 */
 	private SearchManager() {}
 
-	public void setContext(Context context) {
-	}
+	public void setContext(Context context) {}
 
 	public List<SearchItem> getBookmarks(ContentResolver contentResolver) {
 
@@ -55,7 +53,7 @@ public class SearchManager {
 
 		searchItems = new ArrayList<SearchItem>();
 		Boolean succeeded = cursor.moveToFirst();
-		byte[] data = null;		
+		byte[] data = null;
 		while (succeeded) {
 			SearchItem searchItem = new SearchItem();
 			searchItem.type = SearchItemType.Bookmarks;

@@ -7,18 +7,18 @@ import com.aircandi.Aircandi;
 
 public class FontManager {
 
-	private static FontManager	singletonObject;
-	private static Typeface		fontRobotoThin;
-	private static Typeface		fontRobotoLight;
-	private static Typeface		fontRobotoRegular;
-	private static Typeface		fontRobotoCondensed;
-	private static Typeface		fontRobotoBoldCondensed;
+	private static Typeface	fontRobotoThin;
+	private static Typeface	fontRobotoLight;
+	private static Typeface	fontRobotoRegular;
+	private static Typeface	fontRobotoCondensed;
+	private static Typeface	fontRobotoBoldCondensed;
 
-	public static synchronized FontManager getInstance() {
-		if (singletonObject == null) {
-			singletonObject = new FontManager();
-		}
-		return singletonObject;
+	private static class FontManagerHolder {
+		public static final FontManager	instance	= new FontManager();
+	}
+
+	public static FontManager getInstance() {
+		return FontManagerHolder.instance;
 	}
 
 	private void initialize() {

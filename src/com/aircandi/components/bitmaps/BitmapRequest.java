@@ -5,7 +5,7 @@ import java.lang.ref.WeakReference;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
-import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.HttpService.RequestListener;
 
 public class BitmapRequest {
 

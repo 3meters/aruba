@@ -37,8 +37,8 @@ import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.User;
@@ -433,7 +433,7 @@ public class ProfileForm extends FormActivity {
 						/*
 						 * We also need to update the user that has been persisted for auto sign in.
 						 */
-						final String jsonUser = ProxibaseService.convertObjectToJsonSmart(mUser, true, false);
+						final String jsonUser = HttpService.convertObjectToJsonSmart(mUser, true, false);
 						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER, jsonUser);
 						Aircandi.settingsEditor.commit();
 

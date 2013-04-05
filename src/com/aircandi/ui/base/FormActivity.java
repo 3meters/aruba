@@ -34,9 +34,9 @@ import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.SplashForm;
 import com.aircandi.ui.builders.PicturePicker;
@@ -166,7 +166,7 @@ public abstract class FormActivity extends SherlockActivity {
 					final String imageTitle = extras.getString(CandiConstants.EXTRA_URI_TITLE);
 					final String imageDescription = extras.getString(CandiConstants.EXTRA_URI_DESCRIPTION);
 					final String jsonPhoto = extras.getString(CandiConstants.EXTRA_PHOTO);
-					final Photo photo = (Photo) ProxibaseService.convertJsonToObjectInternalSmart(jsonPhoto, ServiceDataType.Photo);
+					final Photo photo = (Photo) HttpService.convertJsonToObjectInternalSmart(jsonPhoto, ServiceDataType.Photo);
 
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
 							.setFromUri(photo.getUri())
@@ -228,7 +228,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 					final Bundle extras = intent.getExtras();
 					final String jsonPhoto = extras.getString(CandiConstants.EXTRA_PHOTO);
-					final Photo photo = (Photo) ProxibaseService.convertJsonToObjectInternalSmart(jsonPhoto, ServiceDataType.Photo);
+					final Photo photo = (Photo) HttpService.convertJsonToObjectInternalSmart(jsonPhoto, ServiceDataType.Photo);
 
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
 							.setFromUri(photo.getUri())

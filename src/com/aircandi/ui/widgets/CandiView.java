@@ -102,11 +102,9 @@ public class CandiView extends RelativeLayout {
 				if (mEntity != null
 						&& entity.id.equals(mEntity.id)
 						&& entity.activityDate.longValue() == mEntityActivityDate.longValue()) {
-					if (mEntity.links == null && entity.links == null) {
-						mEntity = entity;
-						showDistance(entity);
-						return;
-					}
+					mEntity = entity;
+					showDistance(entity);
+					return;
 				}
 			}
 			else {

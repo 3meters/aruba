@@ -16,18 +16,18 @@ package com.aircandi.service;
  * has much more information available for callers to appropriately deal with
  * different types of errors that can occur.
  * 
- * @see ProxibaseServiceException
+ * @see HttpServiceException
  */
 @SuppressWarnings("ucd")
-public class ProxibaseClientException extends RuntimeException {
+public class HttpClientException extends RuntimeException {
 
 	private static final long	serialVersionUID	= 1L;
 
-	public ProxibaseClientException(String message) {
+	public HttpClientException(String message) {
 		super(message);
 	}
 
-	public ProxibaseClientException(String message, Throwable t) {
+	public HttpClientException(String message, Throwable t) {
 		super(message, t);
 	}
 }

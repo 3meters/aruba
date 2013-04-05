@@ -11,6 +11,7 @@ import java.util.Map;
 public class Document extends ServiceEntryBase implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 694133954499515095L;
+	public static final String	collectionId		= "documents";
 
 	public Document() {}
 
@@ -25,6 +26,6 @@ public class Document extends ServiceEntryBase implements Cloneable, Serializabl
 
 	@Override
 	public String getCollection() {
-		return "documents";
+		return collectionId;
 	}
 }

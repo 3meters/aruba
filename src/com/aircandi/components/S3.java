@@ -13,8 +13,8 @@ import android.util.Log;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseServiceException;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpServiceException;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -32,10 +32,8 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
  * import com.amazonaws.services.s3.model.CannedAccessControlList;
  * import com.amazonaws.services.s3.model.ObjectMetadata;
  */
-@SuppressWarnings("ucd")
 public class S3 {
 
-	private static AmazonS3		s3			= null;
 	//	private static ObjectListing	objListing	= null;
 	public static final String	BUCKET_NAME	= "_bucket_name";
 	public static final String	OBJECT_NAME	= "_object_name";
@@ -51,17 +49,17 @@ public class S3 {
 		}
 	}
 
-	public static AmazonS3 getInstance() {
-		if (s3 == null) {
-			s3 = new AmazonS3Client(Aircandi.awsCredentials);
-		}
-
-		return s3;
+	private static class AmazonS3Holder {
+		public static final AmazonS3	instance	= new AmazonS3Client(Aircandi.awsCredentials);
 	}
-	
+
+	public static AmazonS3 getInstance() {
+		return AmazonS3Holder.instance;
+	}
+
 	/* Jayma: Added routines */
 
-	public static void putImage(String imageKey, Bitmap bitmap, Integer quality) throws ProxibaseServiceException {
+	public static void putImage(String imageKey, Bitmap bitmap, Integer quality) throws HttpServiceException {
 		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
 		final byte[] bitmapBytes = outputStream.toByteArray();
@@ -75,10 +73,10 @@ public class S3 {
 			S3.getInstance().setObjectAcl(CandiConstants.S3_BUCKET_IMAGES, imageKey, CannedAccessControlList.PublicRead);
 		}
 		catch (final AmazonServiceException exception) {
-			throw ProxibaseService.makeProxibaseServiceException(null, exception);
+			throw HttpService.makeHttpServiceException(null, null, exception);
 		}
 		catch (final AmazonClientException exception) {
-			throw ProxibaseService.makeProxibaseServiceException(null, exception);
+			throw HttpService.makeHttpServiceException(null, null, exception);
 		}
 		finally {
 			try {
@@ -86,19 +84,19 @@ public class S3 {
 				inputStream.close();
 			}
 			catch (IOException exception) {
-				throw ProxibaseService.makeProxibaseServiceException(null, exception);
+				throw HttpService.makeHttpServiceException(null, null, exception);
 			}
 		}
 	}
 
 	/**
-	 * Push image byte array to S3. 
+	 * Push image byte array to S3.
 	 * 
 	 * @param imageKey
 	 * @param bitmapBytes
-	 * @throws ProxibaseServiceException
+	 * @throws HttpServiceException
 	 */
-	public static void putImageByteArray(String imageKey, byte[] bitmapBytes, String imageFormat) throws ProxibaseServiceException {
+	public static void putImageByteArray(String imageKey, byte[] bitmapBytes, String imageFormat) throws HttpServiceException {
 		final ByteArrayInputStream inputStream = new ByteArrayInputStream(bitmapBytes);
 		final ObjectMetadata metadata = new ObjectMetadata();
 		metadata.setContentLength(bitmapBytes.length);
@@ -109,21 +107,21 @@ public class S3 {
 			S3.getInstance().setObjectAcl(CandiConstants.S3_BUCKET_IMAGES, imageKey, CannedAccessControlList.PublicRead);
 		}
 		catch (final AmazonServiceException exception) {
-			throw ProxibaseService.makeProxibaseServiceException(null, exception);
+			throw HttpService.makeHttpServiceException(null, null, exception);
 		}
 		catch (final AmazonClientException exception) {
-			throw ProxibaseService.makeProxibaseServiceException(null, exception);
+			throw HttpService.makeHttpServiceException(null, null, exception);
 		}
 		finally {
 			try {
 				inputStream.close();
 			}
 			catch (IOException exception) {
-				throw ProxibaseService.makeProxibaseServiceException(null, exception);
+				throw HttpService.makeHttpServiceException(null, null, exception);
 			}
 		}
 	}
-	
+
 	//	public static void deleteImage(String imageKey) throws ProxibaseServiceException {
 	//
 	//		/* If the image is stored with S3 then it will be deleted */

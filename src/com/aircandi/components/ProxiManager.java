@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.BroadcastReceiver;
@@ -24,17 +24,15 @@ import android.os.Bundle;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
-import com.aircandi.PlacesConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
-import com.aircandi.service.ProxibaseServiceException;
-import com.aircandi.service.Query;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.RequestType;
+import com.aircandi.service.HttpService.ResponseFormat;
+import com.aircandi.service.HttpService.ServiceDataType;
+import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
@@ -43,15 +41,12 @@ import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.ServiceData;
-import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.User;
-import com.aircandi.ui.CandiRadar;
 import com.aircandi.utilities.DateUtils;
 import com.aircandi.utilities.ImageUtils;
 
 public class ProxiManager {
 
-	private static ProxiManager			singletonObject;
 	private Context						mContext;
 	final EntityModel					mEntityModel			= new EntityModel(this);
 	private final AtomicBoolean			mScanRequestActive		= new AtomicBoolean(false);
@@ -64,14 +59,15 @@ public class ProxiManager {
 	private static final WifiScanResult	mWifiMassenaLowerWeak	= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower_weak", -100, true);
 	private static final WifiScanResult	mWifiEmpty				= new WifiScanResult("aa:aa:bb:bb:cc:cc", "test_empty", -50, true);
 
-	public static synchronized ProxiManager getInstance() {
-		if (singletonObject == null) {
-			singletonObject = new ProxiManager();
-		}
-		return singletonObject;
+	private ProxiManager() {}
+
+	private static class ProxiManagerHolder {
+		public static final ProxiManager	instance	= new ProxiManager();
 	}
 
-	private ProxiManager() {}
+	public static ProxiManager getInstance() {
+		return ProxiManagerHolder.instance;
+	}
 
 	public void initialize() {
 		if (!Aircandi.getInstance().isUsingEmulator()) {
@@ -169,7 +165,7 @@ public class ProxiManager {
 	// Public entry points for service calls
 	// --------------------------------------------------------------------------------------------
 
-	public ServiceResponse getEntitiesForBeacons() {
+	public synchronized ServiceResponse getEntitiesForBeacons() {
 		/*
 		 * All current beacons ids are sent to the service. Previously discovered beacons are included in separate
 		 * array along with a their freshness date.
@@ -232,7 +228,7 @@ public class ProxiManager {
 		final Observation observation = LocationManager.getInstance().getObservationLocked();
 		if (observation != null) {
 			parameters.putString("observation"
-					, "object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
+					, "object:" + HttpService.convertObjectToJsonSmart(observation, true, true));
 		}
 
 		parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
@@ -259,31 +255,36 @@ public class ProxiManager {
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
 
-			synchronized (this) {
+			/* FIXME: Checks to help find null pointer bug */
+			if (serviceData == null) {
+				throw new RuntimeException("ServiceData object is null");
+			}
+			else if (serviceData.data == null) {
+				throw new RuntimeException("ServiceData.data property is null");
+			}
 
-				final List<Entity> entities = (List<Entity>) serviceData.data;
-				Aircandi.stopwatch1.segmentTime("Entities for beacons: objects deserialized");
+			final List<Entity> entities = (List<Entity>) serviceData.data;
+			Aircandi.stopwatch1.segmentTime("Entities for beacons: objects deserialized");
 
-				/*
-				 * Make sure we don't have duplicates keyed on sourceId because
-				 * getPlacesNearLocation could have already completed.
-				 */
-				synchronized (mEntityModel.mEntityCache) {
-					for (Entity entity : entities) {
-						if (entity.place != null) {
-							if (mEntityModel.mEntityCache.containsKey(entity.place.id)) {
-								mEntityModel.mEntityCache.remove(entity.place.id);
-							}
+			/*
+			 * Make sure we don't have duplicates keyed on sourceId because
+			 * getPlacesNearLocation could have already completed.
+			 */
+			synchronized (mEntityModel.mEntityCache) {
+				for (Entity entity : entities) {
+					if (entity.place != null) {
+						if (mEntityModel.mEntityCache.containsKey(entity.place.getProvider().id)) {
+							mEntityModel.mEntityCache.remove(entity.place.getProvider().id);
 						}
 					}
 				}
-
-				/* Merge entities into data model */
-				mEntityModel.upsertEntities(entities);
 			}
+
+			/* Merge entities into data model */
+			mEntityModel.upsertEntities(entities);
 
 			mEntityModel.setLastBeaconRefreshDate(serviceData.date.longValue());
 			manageEntityVisibility();
@@ -311,8 +312,8 @@ public class ProxiManager {
 		 */
 		final List<String> excludePlaceIds = new ArrayList<String>();
 		for (Entity entity : mEntityModel.getAircandiPlaces()) {
-			if (!entity.place.provider.equals("user")) {
-				excludePlaceIds.add(entity.place.id);
+			if (!entity.place.getProvider().type.equals("user")) {
+				excludePlaceIds.add(entity.place.getProvider().id);
 			}
 		}
 
@@ -342,52 +343,66 @@ public class ProxiManager {
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
+
+			/* FIXME: Checks to help find null pointer bug */
+			if (serviceData == null) {
+				throw new RuntimeException("ServiceData object is null");
+			}
+			else if (serviceData.data == null) {
+				throw new RuntimeException("ServiceData.data property is null");
+			}
+
 			Float maxDistance = 0f;
 
-			synchronized (this) {
-
-				/* Do a bit of fixup */
-				final List<Entity> entities = (List<Entity>) serviceData.data;
-				for (Entity entity : entities) {
-					/* No id means it's a synthetic */
-					if (entity.id == null) {
-						entity.id = entity.place.id;
-						entity.modifiedDate = DateUtils.nowDate().getTime();
-						entity.synthetic = true;
-					}
-					else {
-						entity.synthetic = false;
-					}
+			/* Do a bit of fixup */
+			final List<Entity> entities = (List<Entity>) serviceData.data;
+			for (Entity entity : entities) {
+				/* No id means it's a synthetic */
+				if (entity.id == null) {
+					entity.id = entity.place.getProvider().id;
+					entity.modifiedDate = DateUtils.nowDate().getTime();
+					entity.synthetic = true;
 				}
-
-				/* Places locked in by proximity trump places locked in by location */
-				final List<Entity> proximityPlaces = mEntityModel.getProximityPlaces();
-				for (int i = entities.size() - 1; i >= 0; i--) {
-					for (Entity entity : proximityPlaces) {
-						if (entity.id.equals(entities.get(i).id)) {
-							entities.remove(i);
-						}
-						else if (!entity.place.provider.equals("user")) {
-							if (entity.place.id.equals(entities.get(i).id)) {
-								entities.remove(i);
-							}
-						}
-					}
+				else {
+					entity.synthetic = false;
 				}
-
-				/* Find the place with the maximum distance */
-				for (Entity entity : entities) {
-					float distance = entity.getDistance(); // In meters
-					if (distance > maxDistance) {
-						maxDistance = distance;
-					}
-				}
-
-				mEntityModel.removeSyntheticEntities();
-				mEntityModel.upsertEntities(entities);
 			}
+
+			/* Places locked in by proximity trump places locked in by location */
+			final List<Entity> proximityPlaces = mEntityModel.getProximityPlaces();
+
+			Iterator<Entity> iterProximityPlaces = proximityPlaces.iterator();
+			Iterator<Entity> iterLocationPlaces = entities.iterator();
+
+			while (iterLocationPlaces.hasNext()) {
+				Entity locPlace = iterLocationPlaces.next();
+
+				while (iterProximityPlaces.hasNext()) {
+					Entity proxPlace = iterProximityPlaces.next();
+
+					if (proxPlace.id.equals(locPlace.id)) {
+						iterLocationPlaces.remove();
+					}
+					else if (!proxPlace.place.getProvider().type.equals("user")) {
+						if (proxPlace.place.getProvider().id.equals(locPlace.id)) {
+							iterLocationPlaces.remove();
+						}
+					}
+				}
+			}
+
+			/* Find the place with the maximum distance */
+			for (Entity entity : entities) {
+				float distance = entity.getDistance(); // In meters
+				if (distance > maxDistance) {
+					maxDistance = distance;
+				}
+			}
+
+			mEntityModel.removeSyntheticEntities();
+			mEntityModel.upsertEntities(entities);
 
 			final List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
 
@@ -491,23 +506,6 @@ public class ProxiManager {
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
 
-	public Boolean updateCheckNeeded() {
-		Boolean doUpdateCheck = false;
-		if (Aircandi.lastApplicationUpdateCheckDate == null) {
-			doUpdateCheck = true;
-			Logger.v(this, "Update check needed: first check");
-		}
-		else if ((DateUtils.nowDate().getTime() - Aircandi.lastApplicationUpdateCheckDate.longValue()) > CandiConstants.INTERVAL_UPDATE_CHECK) {
-			doUpdateCheck = true;
-			Logger.v(this, "Update check needed: past internal");
-		}
-		else {
-			final String interval = DateUtils.timeSince(Aircandi.lastApplicationUpdateCheckDate.longValue(), DateUtils.nowDate().getTime());
-			Logger.v(this, "No update check needed: Last check " + interval);
-		}
-		return doUpdateCheck;
-	}
-
 	public Boolean refreshNeeded(Location activeLocation) {
 		if (mEntityModel.getLastBeaconRefreshDate() != null) {
 			final Long interval = DateUtils.nowDate().getTime() - mEntityModel.getLastBeaconRefreshDate().longValue();
@@ -517,72 +515,16 @@ public class ProxiManager {
 			}
 		}
 
-		final Location lastKnownLocation = LocationManager.getInstance().getLastKnownLocation();
-		if (lastKnownLocation != null) {
-			final Boolean hasMoved = LocationManager.hasMoved(lastKnownLocation, activeLocation, PlacesConstants.DIST_ONE_HUNDRED_METERS);
-			if (hasMoved) {
-				Logger.v(this, "Refresh needed: moved location");
-				return true;
-			}
-		}
+//		final Location lastKnownLocation = LocationManager.getInstance().getLastKnownLocation();
+//		if (lastKnownLocation != null) {
+//			final Boolean hasMoved = LocationManager.hasMoved(lastKnownLocation, activeLocation, PlacesConstants.DIST_ONE_HUNDRED_METERS);
+//			if (hasMoved) {
+//				Logger.v(this, "Refresh needed: moved location");
+//				return true;
+//			}
+//		}
 
-		final String interval = DateUtils.timeSince(Aircandi.lastApplicationUpdateCheckDate.longValue(), DateUtils.nowDate().getTime());
-		Logger.v(this, "No update check needed: Last check " + interval);
 		return false;
-	}
-
-	public ModelResult checkForUpdate() {
-
-		Logger.v(this, "Checking for update");
-		final ModelResult result = new ModelResult();
-
-		Aircandi.applicationUpdateNeeded = false;
-		Aircandi.applicationUpdateRequired = false;
-		final Query query = new Query("documents").filter("{\"type\":\"version\",\"name\":\"aircandi\"}");
-
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
-				.setRequestType(RequestType.Get)
-				.setQuery(query)
-				.setSuppressUI(true)
-				.setResponseFormat(ResponseFormat.Json);
-
-		/*
-		 * This causes the user session expiration window to get bumped
-		 * if we are within a week of expiration.
-		 */
-		if (Aircandi.getInstance().getUser() != null) {
-			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
-		}
-
-		result.serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceEntry serviceEntry = (ServiceEntry) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.ServiceEntry).data;
-			final Map<String, Object> map = serviceEntry.data;
-			final Boolean enabled = (Boolean) map.get("enabled");
-			final String versionName = (String) map.get("versionName");
-
-			final String currentVersionName = Aircandi.getVersionName(mContext, CandiRadar.class);
-
-			if (enabled && !currentVersionName.equals(versionName)) {
-				Logger.i(ProxiManager.this, "Update check: update needed");
-				Aircandi.applicationUpdateNeeded = true;
-
-				final String updateUri = (String) map.get("updateUri");
-				final Boolean updateRequired = (Boolean) map.get("updateRequired");
-
-				Aircandi.applicationUpdateUri = (updateUri != null) ? updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;
-				if (updateRequired) {
-					Aircandi.applicationUpdateRequired = true;
-					Logger.i(ProxiManager.this, "Update check: update required");
-				}
-			}
-			Aircandi.lastApplicationUpdateCheckDate = DateUtils.nowDate().getTime();
-		}
-		return result;
 	}
 
 	public List<Beacon> getStrongestBeacons(int max) {
@@ -618,7 +560,7 @@ public class ProxiManager {
 				text.append(line);
 			}
 			final String jsonEntity = text.toString();
-			final Entity entity = (Entity) ProxibaseService.convertJsonToObjectInternalSmart(jsonEntity, ServiceDataType.Entity);
+			final Entity entity = (Entity) HttpService.convertJsonToObjectInternalSmart(jsonEntity, ServiceDataType.Entity);
 			return entity;
 		}
 		catch (IOException exception) {
@@ -663,7 +605,7 @@ public class ProxiManager {
 				user.photo = new Photo(imageKey, null, bitmap.getWidth(), bitmap.getHeight(), PhotoSource.aircandi);
 			}
 		}
-		catch (ProxibaseServiceException exception) {
+		catch (HttpServiceException exception) {
 			return new ServiceResponse(ResponseCode.Failed, null, exception);
 		}
 

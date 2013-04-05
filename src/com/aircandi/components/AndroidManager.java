@@ -26,19 +26,18 @@ import com.aircandi.utilities.AnimUtils.TransitionType;
 @SuppressWarnings("ucd")
 public class AndroidManager {
 
-	public static final int			MEDIA_TYPE_IMAGE	= 1;
-	public static final int			MEDIA_TYPE_VIDEO	= 2;
-
-	private static AndroidManager	singletonObject;
-
-	public static synchronized AndroidManager getInstance() {
-		if (singletonObject == null) {
-			singletonObject = new AndroidManager();
-		}
-		return singletonObject;
-	}
+	public static final int	MEDIA_TYPE_IMAGE	= 1;
+	public static final int	MEDIA_TYPE_VIDEO	= 2;
 
 	private AndroidManager() {}
+
+	private static class AndroidManagerHolder {
+		public static final AndroidManager	instance	= new AndroidManager();
+	}
+
+	public static AndroidManager getInstance() {
+		return AndroidManagerHolder.instance;
+	}
 
 	public String getPublicName(String packageName) {
 
@@ -102,7 +101,7 @@ public class AndroidManager {
 		context.startActivity(searchAddress);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
-	
+
 	public void callMapLocalActivity(Context context, String latitude, String longitude, String label) {
 		final String uri = "google.local:q="
 				+ latitude
@@ -112,7 +111,7 @@ public class AndroidManager {
 		context.startActivity(searchAddress);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
-	
+
 	public void callDialerActivity(Context context, String phoneNumber) {
 		final String number = "tel:" + phoneNumber.trim();
 		final Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(number));

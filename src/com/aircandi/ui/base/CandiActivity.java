@@ -19,7 +19,7 @@ import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.Logger;
-import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.ui.SplashForm;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;

@@ -29,7 +29,7 @@ import com.aircandi.service.SerializedName;
 @SuppressWarnings("ucd")
 public abstract class ServiceEntryBase implements Cloneable, Serializable {
 
-	private static final long		serialVersionUID	= 5341986472204947191L;
+	private static final long	serialVersionUID	= 5341986472204947191L;
 
 	/*
 	 * Annotation syntax:
@@ -37,57 +37,61 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 	 * @Expose (serialize = false, deserialize = false)
 	 * 
 	 * @SerializedName("_nametoserialize")
+	 * 
+	 * These annotations are only used when serializing. Each
+	 * object has a setPropertiesFromMap method that handles how properties
+	 * are deserialized.
 	 */
 	@Expose
 	@SerializedName("_id")
-	public String					id;
+	public String				id;
 
 	@Expose
-	public String					name;
+	public String				name;
 
 	@Expose(serialize = false, deserialize = true)
-	public String					namelc;
+	public String				namelc;
 
 	@Expose
-	public String					type;
+	public String				type;
 
 	/* Property bag */
 
 	@Expose
-	public Map<String,Object>	data;
+	public Map<String, Object>	data;
 
 	/* User ids */
 
 	@Expose(serialize = false, deserialize = true)
 	@SerializedName("_owner")
-	public String					ownerId;
+	public String				ownerId;
 
 	@Expose(serialize = false, deserialize = true)
 	@SerializedName("_creator")
-	public String					creatorId;
+	public String				creatorId;
 
 	@Expose(serialize = false, deserialize = true)
 	@SerializedName("_modifier")
-	public String					modifierId;
+	public String				modifierId;
 
 	/* Dates */
 
 	@Expose(serialize = false, deserialize = true)
-	public Number					createdDate;
+	public Number				createdDate;
 
 	@Expose(serialize = false, deserialize = true)
-	public Number					modifiedDate;
+	public Number				modifiedDate;
 
 	/* Users (client) */
 
 	@Expose(serialize = false, deserialize = true)
-	public User						owner;
+	public User					owner;
 
 	@Expose(serialize = false, deserialize = true)
-	public User						creator;
+	public User					creator;
 
 	@Expose(serialize = false, deserialize = true)
-	public User						modifier;
+	public User					modifier;
 
 	protected ServiceEntryBase() {}
 
@@ -134,21 +138,21 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 		 */
 		toEntry.name = fromEntry.name;
 		toEntry.type = fromEntry.type;
-		
+
 		toEntry.ownerId = fromEntry.ownerId;
 		toEntry.owner = fromEntry.owner;
-		
+
 		toEntry.modifierId = fromEntry.modifierId;
 		toEntry.modifier = fromEntry.modifier;
 		toEntry.modifiedDate = fromEntry.modifiedDate;
-		
+
 		toEntry.creatorId = fromEntry.creatorId;
 		toEntry.creator = fromEntry.creator;
 		toEntry.createdDate = fromEntry.createdDate;
 	}
 
-	public Map<String,Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
-		final Map<String,Object> map = new HashMap<String, Object>();
+	public Map<String, Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
+		final Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
 			Class<?> cls = this.getClass();

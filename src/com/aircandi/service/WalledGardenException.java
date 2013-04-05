@@ -18,7 +18,7 @@ import java.net.ConnectException;
  * has much more information available for callers to appropriately deal with
  * different types of errors that can occur.
  * 
- * @see ProxibaseServiceException
+ * @see HttpServiceException
  */
 @SuppressWarnings("ucd")
 public class WalledGardenException extends ConnectException {

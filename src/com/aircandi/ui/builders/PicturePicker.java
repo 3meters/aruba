@@ -55,15 +55,16 @@ import com.aircandi.components.ProxiManager;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
 import com.aircandi.components.bitmaps.ImageResult;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.RequestType;
+import com.aircandi.service.HttpService.ResponseFormat;
+import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
+import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.utilities.AnimUtils;
@@ -90,8 +91,7 @@ public class PicturePicker extends FormActivity {
 	private LayoutInflater			mInflater;
 	private String					mTitleOptional;
 	private Boolean					mPlacePhotoMode	= false;
-	private String					mProvider;
-	private String					mProviderId;
+	private Provider				mProvider;
 	private Integer					mImageWidthPixels;
 	private Integer					mImageMarginPixels;
 
@@ -120,8 +120,7 @@ public class PicturePicker extends FormActivity {
 
 		if (mPlacePhotoMode) {
 			mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
-			mProvider = mEntity.place.provider;
-			mProviderId = mEntity.place.id;
+			mProvider = mEntity.place.getProvider();
 			((ViewGroup) findViewById(R.id.search_group)).setVisibility(View.GONE);
 		}
 		else {
@@ -197,7 +196,7 @@ public class PicturePicker extends FormActivity {
 
 					final Intent intent = new Intent();
 					intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mTitleOptional);
-					final String jsonPhoto = ProxibaseService.convertObjectToJsonSmart(photo, false, true);
+					final String jsonPhoto = HttpService.convertObjectToJsonSmart(photo, false, true);
 					intent.putExtra(CandiConstants.EXTRA_PHOTO, jsonPhoto);
 					setResult(Activity.RESULT_OK, intent);
 					finish();
@@ -252,7 +251,7 @@ public class PicturePicker extends FormActivity {
 
 		serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
-		final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart((String) serviceResponse.data, ServiceDataType.ImageResult);
+		final ServiceData serviceData = HttpService.convertJsonToObjectsSmart((String) serviceResponse.data, ServiceDataType.ImageResult);
 		final List<ImageResult> images = (ArrayList<ImageResult>) serviceData.data;
 		serviceResponse.data = images;
 
@@ -260,7 +259,7 @@ public class PicturePicker extends FormActivity {
 	}
 
 	private ServiceResponse loadPlaceImages(long count, long offset) {
-		final ModelResult result = ProxiManager.getInstance().getEntityModel().getPlacePhotos(mProvider, mProviderId, count, offset);
+		final ModelResult result = ProxiManager.getInstance().getEntityModel().getPlacePhotos(mProvider, count, offset);
 		return result.serviceResponse;
 	}
 
@@ -345,7 +344,7 @@ public class PicturePicker extends FormActivity {
 			ServiceResponse serviceResponse = new ServiceResponse();
 			if (mPlacePhotoMode) {
 
-				if (mEntity.place.provider != null && mEntity.place.provider.equals("foursquare")) {
+				if (mEntity.place.getProvider().type != null && mEntity.place.getProvider().type.equals("foursquare")) {
 					serviceResponse = loadPlaceImages(PAGE_SIZE, mOffset);
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						final List<Photo> photos = (ArrayList<Photo>) serviceResponse.data;

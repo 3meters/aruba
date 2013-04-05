@@ -31,6 +31,8 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String				icon;
 	@Expose
+	public Photo				photo;
+	@Expose
 	public String				packageName;
 	@Expose
 	public Map<String, Object>	data;										// treat as opaque but roundtrip
@@ -45,7 +47,6 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	public Boolean				custom;
 	public Boolean				intentSupport;
 	public Boolean				installDeclined;
-	public Photo				photo;
 
 	public Source() {}
 
@@ -65,6 +66,9 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 		source.icon = (String) map.get("icon");
 		source.packageName = (String) map.get("packageName");
 		source.data = (HashMap<String, Object>) map.get("data");
+		if (map.get("photo") != null) {
+			source.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
+		}
 		return source;
 	}
 

@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -37,6 +38,7 @@ import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.LocationChangedEvent;
 import com.aircandi.components.LocationLockedEvent;
 import com.aircandi.components.LocationManager;
+import com.aircandi.components.LocationTimeoutEvent;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ConnectedState;
@@ -44,19 +46,18 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.PlacesNearLocationFinishedEvent;
 import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.ProxiManager.ScanReason;
 import com.aircandi.components.QueryWifiScanReceivedEvent;
 import com.aircandi.components.RadarListAdapter;
 import com.aircandi.components.Tracker;
-import com.aircandi.components.WifiChangedEvent;
 import com.aircandi.components.bitmaps.BitmapManager;
-import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.DateUtils;
+import com.aircandi.utilities.ImageUtils;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
@@ -101,23 +102,23 @@ import com.squareup.otto.Subscribe;
 
 public class CandiRadar extends CandiActivity {
 
-	private final Handler			mHandler			= new Handler();
+	private final Handler			mHandler				= new Handler();
 
 	private Number					mEntityModelRefreshDate;
 	private Number					mEntityModelActivityDate;
 	private Number					mEntityModelBeaconDate;
-	private Integer					mWifiState			= WifiManager.WIFI_STATE_UNKNOWN;
+	private Integer					mEntityModelWifiState	= WifiManager.WIFI_STATE_UNKNOWN;
+	private Number					mPauseDate;
 
 	private PullToRefreshListView	mList;
 
 	private SoundPool				mSoundPool;
 	private int						mNewCandiSoundId;
-	private Boolean					mInitialized		= false;
+	private Boolean					mInitialized			= false;
 
-	private final List<Entity>		mEntities			= new ArrayList<Entity>();
+	private final List<Entity>		mEntities				= new ArrayList<Entity>();
 	private RadarListAdapter		mRadarAdapter;
-	private Boolean					mFreshWindow		= false;
-	private Boolean					mUpdateCheckNeeded	= false;
+	private Boolean					mFreshWindow			= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -140,19 +141,7 @@ public class CandiRadar extends CandiActivity {
 			}
 
 			initialize();
-
-			/*
-			 * We alert that wifi isn't enabled. If the user end up enabling wifi,
-			 * we will get that event and refresh radar with beacon support.
-			 */
-			if (NetworkManager.getInstance().isWifiTethered()
-					|| (!NetworkManager.getInstance().isWifiEnabled() && !Aircandi.usingEmulator)) {
-
-				showWifiAlertDialog(NetworkManager.getInstance().isWifiTethered()
-						? R.string.alert_wifi_tethered
-						: R.string.alert_wifi_disabled
-						, null);
-			}
+			tetherAlert();
 		}
 	}
 
@@ -189,14 +178,14 @@ public class CandiRadar extends CandiActivity {
 
 			@Override
 			public void onRefresh(PullToRefreshBase<ListView> refreshView) {
-				doRefresh();
+				searchForPlaces();
 			}
 
 		});
 
-		mList.getLoadingLayoutProxy().setRefreshingLabel("scanning...");
-		mList.getLoadingLayoutProxy().setPullLabel("pull to scan...");
-		mList.getLoadingLayoutProxy().setReleaseLabel("release to scan...");
+		mList.getLoadingLayoutProxy().setPullLabel(getString(R.string.refresh_label_pull));
+		mList.getLoadingLayoutProxy().setReleaseLabel(getString(R.string.refresh_label_release));
+		mList.getLoadingLayoutProxy().setRefreshingLabel(getString(R.string.refresh_scanning_for_location));
 		mList.getLoadingLayoutProxy().setLoadingDrawable(null);
 		mList.getLoadingLayoutProxy().setTextTypeface(FontManager.getFontRobotoRegular());
 
@@ -208,7 +197,7 @@ public class CandiRadar extends CandiActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Event bus routines
+	// Event bus routines: beacons
 	// --------------------------------------------------------------------------------------------
 
 	@Subscribe
@@ -277,6 +266,31 @@ public class CandiRadar extends CandiActivity {
 				Aircandi.stopwatch1.stop("Search for places by beacon complete");
 				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "entities_for_beacons", null, Aircandi.getInstance().getUser());
 				Logger.d(CandiRadar.this, "Entities for beacons finished event: ** done **");
+				mList.getLoadingLayoutProxy().setRefreshingLabel(getString(R.string.refresh_scanning_for_location));
+				mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
+			}
+		});
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Event bus routines: location
+	// --------------------------------------------------------------------------------------------
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onLocationTimeout(final LocationTimeoutEvent event) {
+		Aircandi.stopwatch2.stop("Location fix attempt aborted: timeout");
+		mHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				Logger.d(CandiRadar.this, "Location fix attempt aborted: timeout: ** done **");
+				if (LocationManager.getInstance().getLocationLocked() == null) {
+					/* We only show toast if we timeout without getting any location fix */
+					ImageUtils.showToastNotification(getString(R.string.error_location_poor), Toast.LENGTH_SHORT);
+				}
+				mCommon.hideBusy(true);
+				mList.onRefreshComplete();
 			}
 		});
 	}
@@ -369,9 +383,14 @@ public class CandiRadar extends CandiActivity {
 			public void run() {
 				Logger.d(CandiRadar.this, "Places near location finished event: ** done **");
 				mCommon.hideBusy(true);
+				mList.onRefreshComplete();
 			}
 		});
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Event bus routines: general
+	// --------------------------------------------------------------------------------------------
 
 	@Subscribe
 	@SuppressWarnings("ucd")
@@ -392,7 +411,6 @@ public class CandiRadar extends CandiActivity {
 				final List<Entity> entities = event.entities;
 				mRadarAdapter.setItems(entities);
 				mRadarAdapter.notifyDataSetChanged();
-				mList.onRefreshComplete();
 
 				/* Add some sparkle */
 				if (previousCount == 0 && entities.size() > 0) {
@@ -414,24 +432,8 @@ public class CandiRadar extends CandiActivity {
 
 	}
 
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onWifiChanged(final WifiChangedEvent event) {
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				final Integer wifiState = event.wifiState;
-				if (wifiState == WifiManager.WIFI_STATE_ENABLED || wifiState == WifiManager.WIFI_STATE_DISABLED) {
-					Logger.d(this, "Wifi state change, starting place search");
-					searchForPlaces();
-				}
-			}
-		});
-	}
-
 	// --------------------------------------------------------------------------------------------
-	// Entity routines
+	// Search routines
 	// --------------------------------------------------------------------------------------------
 
 	public void doRefresh() {
@@ -440,7 +442,7 @@ public class CandiRadar extends CandiActivity {
 		 */
 		Logger.d(this, "Starting refresh");
 		Tracker.sendEvent("ui_action", "refresh_radar", null, 0, Aircandi.getInstance().getUser());
-		searchForPlaces();
+		mList.setRefreshing();
 	}
 
 	private void searchForPlaces() {
@@ -501,7 +503,7 @@ public class CandiRadar extends CandiActivity {
 
 	private void searchForPlacesByBeacon() {
 		Aircandi.stopwatch1.start("Search for places by beacon");
-		mWifiState = NetworkManager.getInstance().getWifiState();
+		mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
 		if (NetworkManager.getInstance().isWifiEnabled()) {
 			ProxiManager.getInstance().getEntityModel().clearBeacons();
 			ProxiManager.getInstance().scanForWifi(ScanReason.query);
@@ -511,7 +513,6 @@ public class CandiRadar extends CandiActivity {
 	private void searchForPlacesByLocation() {
 		Aircandi.stopwatch2.start("Lock location");
 		LocationManager.getInstance().setLocationLocked(null);
-		mCommon.showBusy(R.string.progress_scanning_for_location, true);
 		LocationManager.getInstance().lockLocationBurst();
 
 	}
@@ -552,46 +553,20 @@ public class CandiRadar extends CandiActivity {
 		});
 	}
 
-	private Boolean handleUpdateChecks(final RequestListener listener) {
+	private void tetherAlert() {
+		/*
+		 * We alert that wifi isn't enabled. If the user ends up enabling wifi,
+		 * we will get that event and refresh radar with beacon support.
+		 */
+		if (NetworkManager.getInstance().isWifiTethered()
+				|| (!NetworkManager.getInstance().isWifiEnabled() && !Aircandi.usingEmulator)) {
 
-		/* Update check */
-		final Boolean updateCheckNeeded = ProxiManager.getInstance().updateCheckNeeded();
-		if (updateCheckNeeded) {
-
-			new AsyncTask() {
-
-				@Override
-				protected Object doInBackground(Object... params) {
-					Thread.currentThread().setName("CheckForUpdate");
-					final ModelResult result = ProxiManager.getInstance().checkForUpdate();
-					return result;
-				}
-
-				@Override
-				protected void onPostExecute(Object response) {
-					final ModelResult result = (ModelResult) response;
-					if (result.serviceResponse.responseCode == ResponseCode.Success) {
-						if (Aircandi.applicationUpdateNeeded) {
-							invalidateOptionsMenu();
-							showUpdateAlert(listener);
-						}
-						else {
-							listener.onComplete(false);
-						}
-					}
-					else {
-						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CheckUpdate, CandiRadar.this);
-					}
-				}
-			}.execute();
+			showWifiAlertDialog(NetworkManager.getInstance().isWifiTethered()
+					? R.string.alert_wifi_tethered
+					: R.string.alert_wifi_disabled
+					, null);
 		}
-
-		return updateCheckNeeded;
 	}
-
-	// --------------------------------------------------------------------------------------------
-	// Location routines
-	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
 	// System callbacks
@@ -653,6 +628,7 @@ public class CandiRadar extends CandiActivity {
 
 		/* Kill busy */
 		mCommon.hideBusy(true);
+		mList.onRefreshComplete();
 
 		Logger.d(this, "CandiRadarActivity stopped");
 		if (CandiConstants.DEBUG_TRACE) {
@@ -670,6 +646,7 @@ public class CandiRadar extends CandiActivity {
 		 * loses focus but the activity is still active.
 		 */
 		mCommon.stopScanService();
+		mPauseDate = DateUtils.nowDate().getTime();
 
 		super.onPause();
 	}
@@ -701,41 +678,36 @@ public class CandiRadar extends CandiActivity {
 
 		if (!mInitialized) return;
 
-		if (hasFocus && (mFreshWindow || mUpdateCheckNeeded)) {
-			mUpdateCheckNeeded = false;
-			if (Aircandi.applicationUpdateRequired) {
-				showUpdateAlert(null);
-			}
-			else {
-				/* Check for update */
-				if (NetworkManager.getInstance().getConnectedState() == ConnectedState.Normal) {
-					mUpdateCheckNeeded = handleUpdateChecks(new RequestListener() {
+		if (hasFocus && mFreshWindow) {
 
-						/* Never gets called if we don't have a good network connection */
-						@Override
-						public void onComplete(Object dialogDisplayed) {
-							/*
-							 * We don't do anything right now because window focus returning
-							 * when dismissing the update dialog will restart the logic
-							 * to trigger data updates.
-							 */
-							if (!(Boolean) dialogDisplayed) {
-								manageData();
-							}
-						}
-					});
-
-					if (!mUpdateCheckNeeded) {
-						manageData();
-					}
+			if (mPauseDate != null) {
+				final Long interval = DateUtils.nowDate().getTime() - mPauseDate.longValue();
+				if (interval > CandiConstants.INTERVAL_TETHER_ALERT) {
+					tetherAlert();
 				}
 			}
+
+			manageData();
 			mFreshWindow = false;
 		}
 	}
 
 	private void manageData() {
-
+		/*
+		 * Cases that trigger a search
+		 * 
+		 * - First time radar is run
+		 * - Preference change
+		 * - Didn't complete location fix before user switched away from radar
+		 * - While away, user enabled wifi
+		 * - Beacons we used for last fix have changed
+		 * - Beacon fix is thirty minutes old or more
+		 * 
+		 * Cases that trigger a ui refresh
+		 * 
+		 * - Preference change
+		 * - EntityModel has changed since last search
+		 */
 		final EntityModel entityModel = ProxiManager.getInstance().getEntityModel();
 		if (mEntityModelActivityDate == null) {
 			/*
@@ -743,7 +715,7 @@ public class CandiRadar extends CandiActivity {
 			 * we have never completed even the first search for entities.
 			 */
 			Logger.d(this, "Start first place search");
-			searchForPlaces();
+			mList.setRefreshing();
 		}
 		else if (mPrefChangeNewSearchNeeded) {
 			/*
@@ -751,7 +723,7 @@ public class CandiRadar extends CandiActivity {
 			 */
 			Logger.d(this, "Start place search because of preference change");
 			mPrefChangeNewSearchNeeded = false;
-			searchForPlaces();
+			mList.setRefreshing();
 		}
 		else if (mPrefChangeRefreshUiNeeded) {
 			/*
@@ -776,21 +748,36 @@ public class CandiRadar extends CandiActivity {
 		}
 		else if (ProxiManager.getInstance().refreshNeeded(LocationManager.getInstance().getLocationLocked())) {
 			/*
-			 * We check to see if it's been awhile since the last search or if we
-			 * can determin the user has moved.
+			 * We check to see if it's been awhile since the last search.
 			 */
-			Logger.d(this, "Start place search because of staleness or location change");
-			searchForPlaces();
+			Logger.d(this, "Start place search because of staleness");
+			mList.setRefreshing();
 		}
-		else if (mWifiState != null
-				&& NetworkManager.getInstance().getWifiState() != null
-				&& !mWifiState.equals(NetworkManager.getInstance().getWifiState())) {
+		else if (NetworkManager.getInstance().getWifiState() == WifiManager.WIFI_STATE_DISABLED
+				&& mEntityModelWifiState == WifiManager.WIFI_STATE_ENABLED) {
 			/*
-			 * Changes in wifi state have a big effect on what we can show
-			 * for a search.
+			 * Wifi has been disabled since our last search
 			 */
-			Logger.d(this, "Start place search because wifi state has changed");
-			searchForPlaces();
+			Integer wifiApState = NetworkManager.getInstance().getWifiApState();
+			if (wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED
+					|| wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED + 10) {
+				Logger.d(this, "Wifi Ap enabled, clearing beacons");
+				ImageUtils.showToastNotification("Hotspot or tethering enabled", Toast.LENGTH_SHORT);
+			}
+			else {
+				ImageUtils.showToastNotification("Wifi disabled", Toast.LENGTH_SHORT);
+			}
+			ProxiManager.getInstance().getEntityModel().getWifiList().clear();
+			ProxiManager.getInstance().getEntityModel().clearBeacons();
+			LocationManager.getInstance().setLocationLocked(null);
+		}
+		else if (NetworkManager.getInstance().getWifiState() == WifiManager.WIFI_STATE_ENABLED
+				&& mEntityModelWifiState == WifiManager.WIFI_STATE_DISABLED) {
+			/*
+			 * Wifi has been enabled since our last search
+			 */
+			ImageUtils.showToastNotification("Wifi enabled", Toast.LENGTH_SHORT);
+			mList.setRefreshing();
 		}
 		else if ((entityModel.getLastBeaconLockedDate() != null && mEntityModelBeaconDate != null)
 				&& (entityModel.getLastBeaconLockedDate().longValue() > mEntityModelBeaconDate.longValue())) {

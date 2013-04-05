@@ -11,6 +11,7 @@ import com.aircandi.service.Expose;
 public class Session extends ServiceEntryBase {
 
 	private static final long	serialVersionUID	= 127428776257201066L;
+	public static final String	collectionId		= "sessions";
 
 	@Expose
 	public String				key;
@@ -35,7 +36,7 @@ public class Session extends ServiceEntryBase {
 
 	@Override
 	public String getCollection() {
-		return "sessions";
+		return collectionId;
 	}
 
 }

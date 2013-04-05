@@ -1,7 +1,10 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -25,6 +28,8 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	/* Can come from foursquare or our own custom places */
 
 	@Expose
+	public List<Provider>		providers;
+	@Expose
 	public Contact				contact;
 	@Expose
 	public Location				location;
@@ -37,6 +42,9 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	public Place clone() {
 		try {
 			final Place place = (Place) super.clone();
+			if (providers != null) {
+				place.providers = (List<Provider>) ((ArrayList) providers).clone();
+			}
 			if (location != null) {
 				place.location = location.clone();
 			}
@@ -60,6 +68,14 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		place.provider = (String) map.get("provider");
 		place.id = (String) map.get("id");
 
+		if (map.get("providers") != null) {
+			place.providers = new ArrayList<Provider>();
+			final List<LinkedHashMap<String, Object>> sourceMaps = (List<LinkedHashMap<String, Object>>) map.get("providers");
+			for (Map<String, Object> sourceMap : sourceMaps) {
+				place.providers.add(Provider.setPropertiesFromMap(new Provider(), sourceMap));
+			}
+		}
+
 		if (map.get("location") != null) {
 			place.location = Location.setPropertiesFromMap(new Location(), (HashMap<String, Object>) map.get("location"));
 		}
@@ -73,6 +89,22 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		}
 
 		return place;
+	}
+
+	public Provider getProvider() {
+		if (providers != null && providers.size() > 0) {
+			return providers.get(0);
+		}
+		else {
+			return new Provider(this.id, this.provider) ;
+		}
+	}
+	
+	public void setProvider(Provider provider) {
+		this.id = provider.id;
+		this.provider = provider.type;
+		this.providers = new ArrayList<Provider>();
+		this.providers.add(provider);
 	}
 
 	public Contact getContact() {

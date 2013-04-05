@@ -19,8 +19,8 @@ import android.widget.Toast;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.BuildConfig;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseServiceException;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.utilities.ImageUtils;
 
@@ -30,28 +30,38 @@ import com.aircandi.utilities.ImageUtils;
 
 public class NetworkManager {
 
-	private static NetworkManager			singletonObject;
-
 	/* monitor platform changes */
 	private IntentFilter					mNetworkStateChangedFilter;
 	@SuppressWarnings("unused")
 	private BroadcastReceiver				mNetworkStateIntentReceiver;
 
 	private Context							mApplicationContext;
-	private final WifiStateChangedReceiver	mWifiStateChangedReceiver	= new WifiStateChangedReceiver();
+	private final WifiStateChangedReceiver	mWifiStateChangedReceiver		= new WifiStateChangedReceiver();
 	private Integer							mWifiState;
+	private Integer							mWifiApState;
 	private WifiManager						mWifiManager;
 	private ConnectivityManager				mConnectivityManager;
-	private ConnectedState					mConnectedState				= ConnectedState.Normal;
+	private ConnectedState					mConnectedState					= ConnectedState.Normal;
 
-	public static synchronized NetworkManager getInstance() {
-		if (singletonObject == null) {
-			singletonObject = new NetworkManager();
-		}
-		return singletonObject;
-	}
+	public static final String				EXTRA_WIFI_AP_STATE				= "wifi_state";
+	public static final String				WIFI_AP_STATE_CHANGED_ACTION	= "android.net.wifi.WIFI_AP_STATE_CHANGED";
+
+	public static final int					WIFI_AP_STATE_DISABLING			= 0;
+	public static final int					WIFI_AP_STATE_DISABLED			= 1;
+	public static final int					WIFI_AP_STATE_ENABLING			= 2;
+	public static final int					WIFI_AP_STATE_ENABLED			= 3;
+	public static final int					WIFI_AP_STATE_FAILED			= 4;
 
 	private NetworkManager() {}
+
+	private static class NetworkManagerHolder {
+		public static final NetworkManager	instance	= new NetworkManager();
+	}
+
+	public static NetworkManager getInstance() {
+		return NetworkManagerHolder.instance;
+
+	}
 
 	public void setContext(Context applicationContext) {
 		mApplicationContext = applicationContext;
@@ -60,14 +70,18 @@ public class NetworkManager {
 	public void initialize() {
 		mWifiManager = (WifiManager) mApplicationContext.getSystemService(Context.WIFI_SERVICE);
 		mConnectivityManager = (ConnectivityManager) mApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-		mApplicationContext.registerReceiver(mWifiStateChangedReceiver, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
 
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+		intentFilter.addAction(WIFI_AP_STATE_CHANGED_ACTION);
+		mApplicationContext.registerReceiver(mWifiStateChangedReceiver, intentFilter);
 		/*
 		 * Enables registration for changes in network status from http stack
 		 */
 		mNetworkStateChangedFilter = new IntentFilter();
 		mNetworkStateChangedFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 		mNetworkStateIntentReceiver = new BroadcastReceiver() {
+
 			@Override
 			public void onReceive(final Context context, final Intent intent) {
 				if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
@@ -102,10 +116,10 @@ public class NetworkManager {
 
 		try {
 			/* Could be string, input stream, or array of bytes */
-			final Object response = ProxibaseService.getInstance().request(serviceRequest);
+			final Object response = HttpService.getInstance().request(serviceRequest);
 			serviceResponse = new ServiceResponse(ResponseCode.Success, response, null);
 		}
-		catch (ProxibaseServiceException exception) {
+		catch (HttpServiceException exception) {
 			/*
 			 * We got a service side error that either stopped us in our tracks or
 			 * we gave up after performing a series of retries.
@@ -155,7 +169,7 @@ public class NetworkManager {
 		return mConnectedState;
 	}
 
-	private boolean isConnected() {
+	public boolean isConnected() {
 		if (mApplicationContext != null) {
 			if (mConnectivityManager != null) {
 				final NetworkInfo[] info = mConnectivityManager.getAllNetworkInfo();
@@ -294,10 +308,10 @@ public class NetworkManager {
 		return mWifiState;
 	}
 
-	private void setWifiState(Integer wifiState) {
-		mWifiState = wifiState;
+	public Integer getWifiApState() {
+		return mWifiApState;
 	}
-
+	
 	public ConnectedState getConnectedState() {
 		return mConnectedState;
 	}
@@ -308,44 +322,27 @@ public class NetworkManager {
 		public void onReceive(final Context context, Intent intent) {
 
 			/* This is on the main UI thread */
-			setWifiState(intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN));
-
-			if (getWifiState() == WifiManager.WIFI_STATE_ENABLED) {
-				Logger.d(this, "Wifi state enabled");
+			String action = intent.getAction();
+			if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+				mWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
 			}
-			else if (getWifiState() == WifiManager.WIFI_STATE_ENABLING) {
-				Logger.d(this, "Wifi state enabling");
+			else if (action.equals(WIFI_AP_STATE_CHANGED_ACTION)) {
+				mWifiApState = intent.getIntExtra(EXTRA_WIFI_AP_STATE, WifiManager.WIFI_STATE_UNKNOWN);
 			}
-			else {
-				switch (getWifiState()) {
-					case WifiManager.WIFI_STATE_DISABLED:
-						Logger.d(this, "Wifi state disabled");
-						break;
-					case WifiManager.WIFI_STATE_DISABLING:
-						Logger.d(this, "Wifi state disabling");
-						break;
-					case WifiManager.WIFI_STATE_UNKNOWN:
-						Logger.d(this, "Wifi state unknown");
-						break;
-					default:
-						return;
-				}
-			}
-			BusProvider.getInstance().post(new WifiChangedEvent(getWifiState()));
 		}
 	}
 
 	@SuppressWarnings("ucd")
 	public static class ServiceResponse {
 
-		public Object						data;
-		public ResponseCode					responseCode	= ResponseCode.Success;
+		public Object				data;
+		public ResponseCode			responseCode	= ResponseCode.Success;
 
-		public ProxibaseServiceException	exception;
+		public HttpServiceException	exception;
 
 		public ServiceResponse() {}
 
-		public ServiceResponse(ResponseCode resultCode, Object data, ProxibaseServiceException exception) {
+		public ServiceResponse(ResponseCode resultCode, Object data, HttpServiceException exception) {
 			responseCode = resultCode;
 			this.data = data;
 			this.exception = exception;

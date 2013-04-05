@@ -32,8 +32,9 @@ import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.SourceListAdapter;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.ServiceDataType;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Source;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.BounceListView;
@@ -48,6 +49,8 @@ public class SourcesBuilder extends FormActivity {
 	private TextView			mMessage;
 	private final List<Source>	mSystemSources	= new ArrayList<Source>();
 	private final List<Source>	mActiveSources	= new ArrayList<Source>();
+	private String				mEntityId;
+	private Entity				mEntity;
 	private Source				mSourceEditing;
 	private List<String>		mJsonSourcesOriginal;
 
@@ -75,10 +78,14 @@ public class SourcesBuilder extends FormActivity {
 				mJsonSourcesOriginal = jsonSources;
 				List<Source> sources = new ArrayList<Source>();
 				for (String jsonSource : jsonSources) {
-					Source source = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
+					Source source = (Source) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 					sources.add(source);
 				}
 				splitSources(sources);
+			}
+			mEntityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
+			if (mEntityId != null) {
+				mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
 			}
 		}
 
@@ -135,9 +142,7 @@ public class SourcesBuilder extends FormActivity {
 	public void onSuggestLinksButtonClick(View view) {
 		/* Go get source suggestions again */
 		List<Source> sources = mergeSources();
-		if (sources.size() > 0) {
-			loadSourceSuggestions(sources, true);
-		}
+		loadSourceSuggestions(sources, true, mEntity);
 	}
 
 	@SuppressWarnings("ucd")
@@ -194,7 +199,7 @@ public class SourcesBuilder extends FormActivity {
 		final Intent intent = new Intent(this, SourceBuilder.class);
 		final CheckBox check = (CheckBox) ((View) view.getParent()).findViewById(R.id.check);
 		mSourceEditing = (Source) check.getTag();
-		final String jsonSource = ProxibaseService.convertObjectToJsonSmart(mSourceEditing, false, true);
+		final String jsonSource = HttpService.convertObjectToJsonSmart(mSourceEditing, false, true);
 		intent.putExtra(CandiConstants.EXTRA_SOURCE, jsonSource);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCE_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
@@ -209,7 +214,7 @@ public class SourcesBuilder extends FormActivity {
 					final Bundle extras = intent.getExtras();
 					final String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
 					if (jsonSource != null) {
-						final Source sourceUpdated = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
+						final Source sourceUpdated = (Source) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 						if (sourceUpdated != null) {
 							/* Copy changes */
 							mSourceEditing.label = sourceUpdated.label;
@@ -226,7 +231,7 @@ public class SourcesBuilder extends FormActivity {
 					final Bundle extras = intent.getExtras();
 					final String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
 					if (jsonSource != null) {
-						final Source sourceNew = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
+						final Source sourceNew = (Source) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 						if (sourceNew != null) {
 							sourceNew.checked = false;
 							mActiveSources.add(sourceNew);
@@ -362,7 +367,7 @@ public class SourcesBuilder extends FormActivity {
 		dialog.setCanceledOnTouchOutside(false);
 	}
 
-	private void loadSourceSuggestions(final List<Source> sources, final Boolean autoInsert) {
+	private void loadSourceSuggestions(final List<Source> sources, final Boolean autoInsert, final Entity entity) {
 		new AsyncTask() {
 
 			@Override
@@ -374,7 +379,7 @@ public class SourcesBuilder extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LoadSourceSuggestions");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().getSourceSuggestions(sources);
+				ModelResult result = ProxiManager.getInstance().getEntityModel().getSourceSuggestions(sources, entity);
 				return result;
 			}
 
@@ -422,7 +427,7 @@ public class SourcesBuilder extends FormActivity {
 		List<Source> sources = mergeSources();
 
 		for (Source source : sources) {
-			sourceStrings.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
+			sourceStrings.add(HttpService.convertObjectToJsonSmart(source, true, true));
 		}
 
 		intent.putStringArrayListExtra(CandiConstants.EXTRA_SOURCES, (ArrayList<String>) sourceStrings);
@@ -438,7 +443,7 @@ public class SourcesBuilder extends FormActivity {
 
 		final List<String> jsonSources = new ArrayList<String>();
 		for (Source source : sources) {
-			jsonSources.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
+			jsonSources.add(HttpService.convertObjectToJsonSmart(source, true, true));
 		}
 
 		if (mJsonSourcesOriginal == null) {

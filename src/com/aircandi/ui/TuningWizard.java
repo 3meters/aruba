@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.Locale;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -47,9 +50,10 @@ import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
@@ -78,6 +82,7 @@ public class TuningWizard extends FormActivity {
 	private Boolean			mTuningInProcess		= false;
 	private Boolean			mUntuning				= false;
 	private List<Entity>	mAddedCandi				= new ArrayList<Entity>();
+	private Boolean			mDirty					= false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -179,7 +184,7 @@ public class TuningWizard extends FormActivity {
 					final FlowLayout flow = (FlowLayout) findViewById(R.id.flow_candi);
 					drawCandi(this, flow, mAddedCandi.size() > getResources().getInteger(R.integer.candi_flow_limit)
 							? mAddedCandi.subList(0, getResources().getInteger(R.integer.candi_flow_limit))
-							: mAddedCandi, R.layout.temp_place_candi_item);
+							: mAddedCandi, R.layout.temp_tuning_candi_item);
 
 					setVisibility(findViewById(R.id.section_candi), View.VISIBLE);
 				}
@@ -374,9 +379,14 @@ public class TuningWizard extends FormActivity {
 
 	@Override
 	public void onBackPressed() {
-		setResult(Activity.RESULT_CANCELED);
-		finish();
-		AnimUtils.doOverridePendingTransition(TuningWizard.this, TransitionType.FormToPage);
+		if (isDirty()) {
+			confirmDirtyExit();
+		}
+		else {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			AnimUtils.doOverridePendingTransition(TuningWizard.this, TransitionType.FormToPage);
+		}
 	}
 
 	@SuppressWarnings("ucd")
@@ -397,6 +407,7 @@ public class TuningWizard extends FormActivity {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 
+					mDirty = true;
 					mEntityBitmapLocalOnly = bitmapLocalOnly;
 					/* Could get set to null if we are using the default */
 					mEntityBitmap = imageBitmap;
@@ -407,15 +418,9 @@ public class TuningWizard extends FormActivity {
 						mEntityForForm.photo = new Photo(imageUri, null, null, null, PhotoSource.aircandi);
 					}
 					drawImage(mEntityForForm);
-					doSave();
 				}
 			}
 		};
-	}
-
-	@SuppressWarnings("ucd")
-	public void onSavePictureButtonClick(View view) {
-		doSave();
 	}
 
 	@SuppressWarnings("ucd")
@@ -463,6 +468,26 @@ public class TuningWizard extends FormActivity {
 				tuneProximity();
 			}
 		}
+	}
+
+	public void onCandiClick(View view) {
+		final Entity entity = (Entity) view.getTag();
+
+		final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
+				.setCommandType(CommandType.View)
+				.setEntityId(entity.id)
+				.setParentEntityId(entity.parentId)
+				.setEntityType(entity.type);
+
+		if (entity.parentId != null) {
+			intentBuilder.setCollectionId(entity.getParent().id);
+		}
+
+		final Intent intent = intentBuilder.create();
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+		startActivity(intent);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
 	}
 
 	@SuppressWarnings("ucd")
@@ -603,12 +628,48 @@ public class TuningWizard extends FormActivity {
 			protected void onPostExecute(Object response) {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				mCommon.hideBusy(true);
-				if (serviceResponse.responseCode != ResponseCode.Success) {
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					setResult(Activity.RESULT_OK);
+					finish();
+					AnimUtils.doOverridePendingTransition(TuningWizard.this, TransitionType.FormToPage);
+				}
+				else {
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, TuningWizard.this);
 				}
 			}
 
 		}.execute();
+	}
+
+	private Boolean isDirty() {
+		return mDirty;
+	}
+
+	private void confirmDirtyExit() {
+		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
+				, getResources().getString(R.string.alert_tuning_dirty_exit_title)
+				, getResources().getString(R.string.alert_tuning_dirty_exit_message)
+				, null
+				, TuningWizard.this
+				, R.string.alert_dirty_save
+				, android.R.string.cancel
+				, R.string.alert_dirty_discard
+				, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							doSave();
+						}
+						else if (which == Dialog.BUTTON_NEUTRAL) {
+							setResult(Activity.RESULT_CANCELED);
+							finish();
+							AnimUtils.doOverridePendingTransition(TuningWizard.this, TransitionType.FormToPage);
+						}
+					}
+				}
+				, null);
+		dialog.setCanceledOnTouchOutside(false);
 	}
 
 	private void tuneProximity() {
@@ -631,8 +692,15 @@ public class TuningWizard extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("TrackEntityProximity");
+
+				String actionType = "proximity";
+				final Boolean hasActiveProximityLink = mEntityForForm.hasActiveProximityLink();
+				if (!hasActiveProximityLink) {
+					actionType = "proximity_first";
+				}
+
 				final ModelResult result = ProxiManager.getInstance().getEntityModel()
-						.trackEntity(mEntityForForm, beacons, primaryBeacon, "proximity", mUntuning);
+						.trackEntity(mEntityForForm, beacons, primaryBeacon, actionType, mUntuning);
 				return result;
 			}
 
@@ -694,6 +762,9 @@ public class TuningWizard extends FormActivity {
 	}
 
 	private Entity makeEntity(String type) {
+		if (type == null) {
+			throw new IllegalArgumentException("TuningWizard.makeEntity(): type parameter is null");
+		}
 		final Entity entity = new Entity();
 		entity.signalFence = -100.0f;
 		entity.enabled = true;
@@ -702,9 +773,7 @@ public class TuningWizard extends FormActivity {
 		entity.visibility = Visibility.Public.toString().toLowerCase(Locale.US);
 		entity.type = type;
 		if (type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			entity.getPlace().provider = "user";
-			entity.getPlace().id = Aircandi.getInstance().getUser().id;
-			entity.locked = false;
+			entity.getPlace().setProvider(new Provider(Aircandi.getInstance().getUser().id, "user"));
 		}
 		return entity;
 	}
@@ -716,9 +785,14 @@ public class TuningWizard extends FormActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.accept) {
-			setResult(Activity.RESULT_OK);
-			finish();
-			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
+			if (isDirty()) {
+				doSave();
+			}
+			else {
+				setResult(Activity.RESULT_OK);
+				finish();
+				AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
+			}
 			return true;
 		}
 

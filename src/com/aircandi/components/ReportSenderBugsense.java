@@ -7,6 +7,9 @@ import org.acra.collector.CrashReportData;
 import org.acra.sender.HttpPostSender;
 import org.acra.sender.ReportSenderException;
 
+import com.aircandi.Aircandi;
+import com.aircandi.CandiConstants;
+
 public class ReportSenderBugsense extends HttpPostSender {
 
 	public ReportSenderBugsense(String formUri, Map<ReportField, String> mapping) {
@@ -14,23 +17,35 @@ public class ReportSenderBugsense extends HttpPostSender {
 	}
 
 	@Override
-	public void send(CrashReportData arg0) throws ReportSenderException {
+	public void send(CrashReportData report) throws ReportSenderException {
+		
+		StringBuilder custom = new StringBuilder();
 		/*
 		 * These are null if we show the dialog to the user because there
 		 * is enough time for the needed services to become unavailable.
 		 */
 		Boolean wifiEnabled = NetworkManager.getInstance().isWifiEnabled();
-		Integer networkTypeId = NetworkManager.getInstance().getNetworkTypeId();
-
-		StringBuilder custom = new StringBuilder();
 		custom.append("Custom_Wifi_Enabled=" + String.valueOf(wifiEnabled) + "\n");
 
+		Integer networkTypeId = NetworkManager.getInstance().getNetworkTypeId();
 		if (networkTypeId != null) {
 			custom.append("Custom_Data_Network_Type=" + getNetworkTypeLabel(networkTypeId) + "\n");
 		}
 
-		arg0.put(ReportField.CUSTOM_DATA, custom.toString());
-		super.send(arg0);
+		/* Current location */
+		if (LocationManager.getInstance().getLocationLocked() != null) {
+			Double latitude = LocationManager.getInstance().getLocationLocked().getLatitude();
+			Double longitude = LocationManager.getInstance().getLocationLocked().getLongitude();
+			custom.append("Custom_Location=" + String.valueOf(latitude) + "," + String.valueOf(longitude) + "\n");
+		}
+		
+		/* Current search radius */
+		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
+				CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
+		custom.append("Custom_Radius_Meters=" + String.valueOf(searchRangeMeters) + "\n");
+
+		report.put(ReportField.CUSTOM_DATA, custom.toString());
+		super.send(report);
 	}
 
 	private String getNetworkTypeLabel(Integer networkTypeId) {

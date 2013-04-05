@@ -87,7 +87,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 			if (mEntityId != null) {
 				final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					if (entity.place.provider != null && entity.place.provider.equals("foursquare")) {
+					if (entity.place.getProvider().type != null && entity.place.getProvider().type.equals("foursquare")) {
 						listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
 								, getString(R.string.dialog_picture_source_place), null, "place"));
 					}

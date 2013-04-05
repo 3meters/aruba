@@ -278,14 +278,30 @@ public class CandiUser extends CandiActivity {
 			final StringBuilder statString = new StringBuilder(500);
 
 			int tuneCount = 0;
+			int tuneFirstCount = 0;
+			int editCount = 0;
+			int editFirstCount = 0;
+			
 			for (Stat stat : user.stats) {
-				if (stat.type.equals("link_proximity")) {
+				if (stat.type.startsWith("link_proximity")) {
+					tuneCount += stat.countBy.intValue();
+					if (stat.type.startsWith("link_proximity_first")) {
+						tuneFirstCount += stat.countBy.intValue();
+					}
+				}
+				
+				if (stat.type.startsWith("update_entity")) {
+					editCount += stat.countBy.intValue();
+					if (stat.type.contains("_first")) {
+						editFirstCount += stat.countBy.intValue();
+					}
+				}
+				
+				if (stat.type.equals("entity_proximity")) {
 					tuneCount += stat.countBy.intValue();
 				}
-				else if (stat.type.equals("entity_proximity")) {
-					tuneCount += stat.countBy.intValue();
-				}
-				else if (stat.type.equals("insert_entity_place_custom")) {
+				
+				if (stat.type.equals("insert_entity_place_custom")) {
 					statString.append("Places created: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 				else if (stat.type.equals("insert_entity_picture")) {
@@ -294,15 +310,30 @@ public class CandiUser extends CandiActivity {
 				else if (stat.type.equals("insert_entity_post")) {
 					statString.append("Posts created: " + String.valueOf(stat.countBy) + "<br/>");
 				}
-				else if (stat.type.equals("insert_entity_place_linked")) {
+				else if (stat.type.startsWith("update_entity_place")) {
+					statString.append("Places edited: " + String.valueOf(stat.countBy) + "<br/>");
+				}
+				else if (stat.type.startsWith("update_entity")) {
 					statString.append("Places discovered first: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 			}
 
+			if (editCount > 0) {
+				statString.append("Places edited: " + String.valueOf(editCount) + "<br/>");
+			}
+
+			if (editFirstCount > 0) {
+				statString.append("Places edited first: " + String.valueOf(editFirstCount) + "<br/>");
+			}
+			
 			if (tuneCount > 0) {
 				statString.append("Places tuned: " + String.valueOf(tuneCount) + "<br/>");
 			}
 
+			if (tuneFirstCount > 0) {
+				statString.append("Places tuned first: " + String.valueOf(tuneFirstCount) + "<br/>");
+			}
+			
 			stats.setText(Html.fromHtml(statString.toString()));
 			setVisibility(stats, View.VISIBLE);
 			setVisibility(findViewById(R.id.section_stats), View.VISIBLE);

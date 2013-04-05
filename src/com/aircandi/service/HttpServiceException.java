@@ -12,23 +12,24 @@ package com.aircandi.service;
  * request was invalid, or the service encountered an error on the server side while processing it.
  */
 @SuppressWarnings("ucd")
-public class ProxibaseServiceException extends ProxibaseClientException {
+public class HttpServiceException extends HttpClientException {
 
 	private static final long	serialVersionUID	= 1L;
 	private ErrorCode			mErrorCode			= ErrorCode.AircandiServiceException;
 	private ErrorType			mErrorType			= ErrorType.Unknown;
-	private float				mHttpStatusCode;
+	private Float				mHttpStatusCode;
+	private Float				mHttpStatusCodeService;
 	private String				mResponseMessage;
 
-	public ProxibaseServiceException(String message) {
+	public HttpServiceException(String message) {
 		this(message, ErrorType.Unknown, ErrorCode.AircandiServiceException);
 	}
 
-	public ProxibaseServiceException(String message, ErrorType errorType, ErrorCode errorCode) {
+	public HttpServiceException(String message, ErrorType errorType, ErrorCode errorCode) {
 		this(message, errorType, errorCode, null);
 	}
 
-	public ProxibaseServiceException(String message, ErrorType errorType, ErrorCode errorCode, Exception exceptionForCause) {
+	public HttpServiceException(String message, ErrorType errorType, ErrorCode errorCode, Exception exceptionForCause) {
 		super(message, exceptionForCause);
 		mErrorCode = errorCode;
 		mErrorType = errorType;
@@ -54,10 +55,6 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 		mHttpStatusCode = httpStatusCode;
 	}
 
-	public float getHttpStatusCode() {
-		return mHttpStatusCode;
-	}
-
 	public void setResponseMessage(String responseMessage) {
 		mResponseMessage = responseMessage;
 	}
@@ -77,6 +74,14 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 		return "Http Status Code: " + mHttpStatusCode + ", "
 				+ "Proxi Error Code: " + mErrorCode + ", "
 				+ "Proxi Error Message: " + getMessage();
+	}
+
+	public void setHttpStatusCodeService(Float httpStatusCodeService) {
+		mHttpStatusCodeService = httpStatusCodeService;
+	}
+
+	public Float getStatusCode() {
+		return  mHttpStatusCodeService != null ? mHttpStatusCodeService : mHttpStatusCode;
 	}
 
 	@SuppressWarnings("ucd")

@@ -47,9 +47,9 @@ import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
@@ -59,6 +59,7 @@ import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
+import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.FormActivity;
@@ -181,6 +182,9 @@ public class EntityForm extends FormActivity {
 	}
 
 	private Entity makeEntity(String type) {
+		if (type == null) {
+			throw new IllegalArgumentException("EntityForm.makeEntity(): type parameter is null");
+		}
 		final Entity entity = new Entity();
 		entity.signalFence = -100.0f;
 		entity.enabled = true;
@@ -189,9 +193,7 @@ public class EntityForm extends FormActivity {
 		entity.visibility = Visibility.Public.toString().toLowerCase(Locale.US);
 		entity.type = type;
 		if (type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			entity.getPlace().provider = "user";
-			entity.getPlace().id = Aircandi.getInstance().getUser().id;
-			entity.locked = false;
+			entity.getPlace().setProvider(new Provider(Aircandi.getInstance().getUser().id, "user"));
 		}
 		return entity;
 	}
@@ -265,21 +267,25 @@ public class EntityForm extends FormActivity {
 					&& !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					if (entity.place.provider.equals("user")) {
+					if (entity.place.getProvider().type.equals("user")) {
 						creator.setLabel(getString(R.string.candi_label_user_created_by));
+						creator.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
+						setVisibility(creator, View.VISIBLE);
 					}
-					else {
-						creator.setLabel(getString(R.string.candi_label_user_discovered_by));
-					}
-				}
-				else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-					creator.setLabel(getString(R.string.candi_label_user_posted_by));
 				}
 				else {
-					creator.setLabel(getString(R.string.candi_label_user_created_by));
+					if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
+						creator.setLabel(getString(R.string.candi_label_user_added_by));
+					}
+					else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+						creator.setLabel(getString(R.string.candi_label_user_posted_by));
+					}
+					else {
+						creator.setLabel(getString(R.string.candi_label_user_created_by));
+					}
+					creator.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
+					setVisibility(creator, View.VISIBLE);
 				}
-				creator.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
-				setVisibility(creator, View.VISIBLE);
 			}
 
 			/* Editor block */
@@ -455,7 +461,7 @@ public class EntityForm extends FormActivity {
 	public void onAddressBuilderClick(View view) {
 		final Intent intent = new Intent(this, AddressBuilder.class);
 		if (mEntityForForm.getPlace().location != null) {
-			final String jsonAddress = ProxibaseService.convertObjectToJsonSmart(mEntityForForm.place.location, false, true);
+			final String jsonAddress = HttpService.convertObjectToJsonSmart(mEntityForForm.place.location, false, true);
 			intent.putExtra(CandiConstants.EXTRA_ADDRESS, jsonAddress);
 		}
 		if (mEntityForForm.getPlace().contact != null && mEntityForForm.getPlace().contact.phone != null) {
@@ -469,7 +475,7 @@ public class EntityForm extends FormActivity {
 	public void onCategoryBuilderClick(View view) {
 		final Intent intent = new Intent(this, CategoryBuilder.class);
 		if (mEntityForForm.getPlace().category != null) {
-			final String jsonCategory = ProxibaseService.convertObjectToJsonSmart(mEntityForForm.getPlace().category, false, true);
+			final String jsonCategory = HttpService.convertObjectToJsonSmart(mEntityForForm.getPlace().category, false, true);
 			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CATEGORY_EDIT);
@@ -484,10 +490,15 @@ public class EntityForm extends FormActivity {
 		if (mEntityForForm.sources != null && mEntityForForm.sources.size() > 0) {
 			final List<String> sourceStrings = new ArrayList<String>();
 			for (Source source : mEntityForForm.sources) {
-				sourceStrings.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
+				sourceStrings.add(HttpService.convertObjectToJsonSmart(source, true, true));
 			}
 			intent.putStringArrayListExtra(CandiConstants.EXTRA_SOURCES, (ArrayList<String>) sourceStrings);
 		}
+		
+		if (mEntityForForm.id != null) {
+			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntityForForm.id);
+		}
+		
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCES_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
@@ -513,7 +524,7 @@ public class EntityForm extends FormActivity {
 
 					final String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
 					if (jsonAddress != null) {
-						final Location locationUpdated = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
+						final Location locationUpdated = (Location) HttpService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
 						mEntityForForm.getPlace().location = locationUpdated;
 						((BuilderButton) findViewById(R.id.address)).setText(mEntityForForm.place.location.address);
 					}
@@ -524,7 +535,7 @@ public class EntityForm extends FormActivity {
 					final Bundle extras = intent.getExtras();
 					final String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
 					if (jsonCategory != null) {
-						final Category categoryUpdated = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
+						final Category categoryUpdated = (Category) HttpService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 						if (categoryUpdated != null) {
 							mDirty = true;
 							mEntityForForm.getPlace().category = categoryUpdated;
@@ -540,7 +551,7 @@ public class EntityForm extends FormActivity {
 					final List<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
 					final List<Source> sources = new ArrayList<Source>();
 					for (String jsonSource : jsonSources) {
-						Source source = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
+						Source source = (Source) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 						sources.add(source);
 					}
 					mDirty = true;
@@ -764,8 +775,8 @@ public class EntityForm extends FormActivity {
 			 * Set location info if this is a place entity
 			 */
 			if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				mEntityForForm.getPlace().provider = "user";
-				mEntityForForm.getPlace().id = Aircandi.getInstance().getUser().id;
+				
+				mEntityForForm.getPlace().setProvider(new Provider(Aircandi.getInstance().getUser().id, "user"));
 				/*
 				 * We add location info as a consistent feature
 				 */

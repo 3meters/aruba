@@ -31,8 +31,8 @@ public final class ProxiConstants {
 	public static final String	INSERT_USER_SECRET									= "larissa";																																	//$NON-NLS-1$
 	public static final String	ADMIN_USER_ID										= "0001.000000.00000.000.000000";																												//$NON-NLS-1$
 
-	public static final String	_URL_PROXIBASE_SERVICE								= "http://ariseditions.com:8080";																												// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE								= "https://api.aircandi.com";																													//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE								= "http://ariseditions.com:8080";																												// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
+	public static final String	_URL_PROXIBASE_SERVICE								= "https://api.aircandi.com";																													//$NON-NLS-1$
 
 	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS			= "/img/sources/";																																//$NON-NLS-1$
 	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES			= "/img/categories/foursquare/";																												//$NON-NLS-1$
@@ -53,7 +53,7 @@ public final class ProxiConstants {
 	public static final String	USER_AGENT_DESKTOP									= "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16";					//$NON-NLS-1$
 	public static final String	USER_AGENT_NEXUS_S									= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";	//$NON-NLS-1$
 
-	public static final int		USER_ENTITY_LIMIT									= 25;
+	public static final int		USER_ENTITY_LIMIT									= 100;
 	public static final int		RADAR_ENTITY_LIMIT									= 50;
 	public static final int		RADAR_PLACES_LIMIT									= 50;
 	public static final int		RADAR_CHILDENTITY_LIMIT								= 20;

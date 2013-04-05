@@ -24,8 +24,8 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.FormActivity;
@@ -132,7 +132,7 @@ public class SignInForm extends FormActivity {
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						final String jsonResponse = (String) result.serviceResponse.data;
-						final ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);
+						final ServiceData serviceData = HttpService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);
 						final User user = serviceData.user;
 						user.session = serviceData.session;
 						Logger.i(this, "User signed in: " + user.name + " (" + user.id + ")");
@@ -145,8 +145,8 @@ public class SignInForm extends FormActivity {
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
-						final String jsonUser = ProxibaseService.convertObjectToJsonSmart(user, false, true);
-						final String jsonSession = ProxibaseService.convertObjectToJsonSmart(user.session, false, true);
+						final String jsonUser = HttpService.convertObjectToJsonSmart(user, false, true);
+						final String jsonSession = HttpService.convertObjectToJsonSmart(user.session, false, true);
 
 						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER, jsonUser);
 						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER_SESSION, jsonSession);

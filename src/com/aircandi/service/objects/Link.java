@@ -13,6 +13,7 @@ import com.aircandi.service.SerializedName;
 public class Link extends ServiceEntryBase {
 
 	private static final long	serialVersionUID	= 8839291281700760437L;
+	public static final String	collectionId		= "links";
 
 	@Expose
 	@SerializedName("_from")
@@ -67,7 +68,7 @@ public class Link extends ServiceEntryBase {
 
 	@Override
 	public String getCollection() {
-		return "links";
+		return collectionId;
 	}
 
 	@SuppressWarnings("ucd")

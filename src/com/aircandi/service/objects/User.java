@@ -14,9 +14,8 @@ import com.aircandi.service.Expose;
 @SuppressWarnings("ucd")
 public class User extends ServiceEntryBase {
 
-	/* syntax: @Expose (serialize = false, deserialize = false) */
-
 	private static final long	serialVersionUID	= 127428776257201065L;
+	public static final String	collectionId		= "users";
 
 	@Expose
 	public String				email;										// Required
@@ -43,10 +42,10 @@ public class User extends ServiceEntryBase {
 	public String				twitterId;
 	@Expose(serialize = false, deserialize = true)
 	public String				googleId;
-	
+
 	@Expose(serialize = false, deserialize = true)
 	public String				authSource;
-	
+
 	@Expose(serialize = false, deserialize = true)
 	public String				oauthId;
 	@Expose(serialize = false, deserialize = true)
@@ -55,7 +54,7 @@ public class User extends ServiceEntryBase {
 	public String				oauthSecret;
 	@Expose(serialize = false, deserialize = true)
 	public String				oauthData;
-	
+
 	@Expose(serialize = false, deserialize = true)
 	public Number				lastSignedInDate;
 	@Expose(serialize = false, deserialize = true)
@@ -65,7 +64,7 @@ public class User extends ServiceEntryBase {
 
 	@Expose(serialize = false, deserialize = true)
 	public List<Stat>			stats;
-	
+
 	public Session				session;
 	public String				firstName;
 	public String				lastName;
@@ -121,7 +120,7 @@ public class User extends ServiceEntryBase {
 		if (map.get("stats") != null) {
 			user.stats = new ArrayList<Stat>();
 			final List<LinkedHashMap<String, Object>> statMaps = (List<LinkedHashMap<String, Object>>) map.get("stats");
-			for (Map<String,Object> statMap : statMaps) {
+			for (Map<String, Object> statMap : statMaps) {
 				user.stats.add(Stat.setPropertiesFromMap(new Stat(), statMap));
 			}
 		}
@@ -150,6 +149,6 @@ public class User extends ServiceEntryBase {
 
 	@Override
 	public String getCollection() {
-		return "users";
+		return collectionId;
 	}
 }

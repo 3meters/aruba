@@ -13,8 +13,8 @@ import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.Location;
 import com.aircandi.ui.base.FormActivity;
 
@@ -38,7 +38,7 @@ public class AddressBuilder extends FormActivity {
 			mPhone = extras.getString(CandiConstants.EXTRA_PHONE);
 			final String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
 			if (jsonAddress != null) {
-				mLocation = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
+				mLocation = (Location) HttpService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
 			}
 		}
 
@@ -133,7 +133,7 @@ public class AddressBuilder extends FormActivity {
 		final Intent intent = new Intent();
 		intent.putExtra(CandiConstants.EXTRA_PHONE, mPhone);
 		if (mLocation != null) {
-			final String jsonAddress = ProxibaseService.convertObjectToJsonSmart(mLocation, false, true);
+			final String jsonAddress = HttpService.convertObjectToJsonSmart(mLocation, false, true);
 			intent.putExtra(CandiConstants.EXTRA_ADDRESS, jsonAddress);
 		}
 		setResult(Activity.RESULT_OK, intent);

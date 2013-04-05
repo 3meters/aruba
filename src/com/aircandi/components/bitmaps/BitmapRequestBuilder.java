@@ -1,7 +1,7 @@
 package com.aircandi.components.bitmaps;
 
 import com.aircandi.ProxiConstants;
-import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.HttpService.RequestListener;
 
 public class BitmapRequestBuilder {
 

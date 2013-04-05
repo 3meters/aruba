@@ -50,7 +50,6 @@ import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Photo;
@@ -72,12 +71,10 @@ public class CandiForm extends CandiActivity {
 	private ScrollView				mScrollView;
 	private ViewGroup				mContentView;
 	private ViewGroup				mCandiForm;
-	private CandiView				mCandiView;
 	private Entity					mEntity;
 	private Number					mEntityModelRefreshDate;
 	private Number					mEntityModelActivityDate;
 	private Boolean					mUpsize;
-	private Boolean					mTracked			= false;
 	private static Resources		mResources;
 	private final PackageReceiver	mPackageReceiver	= new PackageReceiver();
 
@@ -107,7 +104,6 @@ public class CandiForm extends CandiActivity {
 
 		mCandiForm = (ViewGroup) body.findViewById(R.id.candi_form);
 		mScrollView = (ScrollView) body.findViewById(R.id.scroll_view);
-		mCandiView = (CandiView) body.findViewById(R.id.candi_view);
 		mResources = getResources();
 
 		mContentView.addView(body, 0);
@@ -159,22 +155,10 @@ public class CandiForm extends CandiActivity {
 						draw();
 						if (mUpsize) {
 							mUpsize = false;
-							mTracked = true;
 							upsize();
 						}
-						else {
-							if (!mTracked) {
-								mTracked = true;
-								if (mEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-									track();
-								}
-							}
-							mCommon.hideBusy(true);
-						}
 					}
-					else {
-						mCommon.hideBusy(true);
-					}
+					mCommon.hideBusy(true);
 				}
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
@@ -185,34 +169,12 @@ public class CandiForm extends CandiActivity {
 		}.execute();
 	}
 
-	private void track() {
-		/*
-		 * By not passing any beacons, a "browse_entity" action will be logged
-		 * but we are not creating any browse links. Also not sending beacons means
-		 * no modifications for the local cache and place rank scores.
-		 */
-		new AsyncTask() {
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("TrackEntityBrowse");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().trackEntity(mEntity, null, null, "browse", false);
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object result) {
-				final Integer placeRankScore = mEntity.getPlaceRankScore();
-				mCandiView.getPlaceRankScore().setText(String.valueOf(placeRankScore));
-			}
-
-		}.execute();
-	}
-
 	private void upsize() {
-
-		final List<Beacon> beacons = ProxiManager.getInstance().getStrongestBeacons(5);
-		final Beacon primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
+		
+		/*
+		 * Upsized places do not automatically link to nearby beacons because
+		 * the browsing action isn't enough of an indicator of proximity.
+		 */
 
 		new AsyncTask() {
 
@@ -225,7 +187,7 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("UpsizeSynthetic");
-				final ModelResult result = ProxiManager.getInstance().upsizeSynthetic(mEntity, beacons, primaryBeacon);
+				final ModelResult result = ProxiManager.getInstance().upsizeSynthetic(mEntity, null, null);
 				return result;
 			}
 
@@ -621,26 +583,30 @@ public class CandiForm extends CandiActivity {
 		/* Creator block */
 
 		setVisibility(creator, View.GONE);
-		if (creator != null && entity.creator != null && !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+		if (creator != null 
+				&& entity.creator != null 
+				&& !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+			
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				if (entity.place.provider.equals("user")) {
+				if (entity.place.getProvider().type.equals("user")) {
 					creator.setLabel(getString(R.string.candi_label_user_created_by));
+					creator.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
+					setVisibility(creator, View.VISIBLE);
 				}
-				else {
-					creator.setLabel(getString(R.string.candi_label_user_discovered_by));
-				}
-			}
-			else if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-				creator.setLabel(getString(R.string.candi_label_user_added_by));
-			}
-			else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-				creator.setLabel(getString(R.string.candi_label_user_posted_by));
 			}
 			else {
-				creator.setLabel(getString(R.string.candi_label_user_created_by));
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
+					creator.setLabel(getString(R.string.candi_label_user_added_by));
+				}
+				else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+					creator.setLabel(getString(R.string.candi_label_user_posted_by));
+				}
+				else {
+					creator.setLabel(getString(R.string.candi_label_user_created_by));
+				}
+				creator.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
+				setVisibility(creator, View.VISIBLE);
 			}
-			creator.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
-			setVisibility(creator, View.VISIBLE);
 		}
 
 		/* Editor block */

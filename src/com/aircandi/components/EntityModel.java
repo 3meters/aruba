@@ -21,10 +21,10 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiManager.ArrayListType;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.ProxiManager.WifiScanResult;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.RequestType;
+import com.aircandi.service.HttpService.ResponseFormat;
+import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Beacon.BeaconType;
@@ -37,88 +37,41 @@ import com.aircandi.service.objects.Link.LinkType;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
+import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.ServiceData;
+import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateUtils;
 
 public class EntityModel {
 
-	private final ProxiManager			mEntityModel;
-	final Map<String, Entity>			mEntityCache		= new HashMap<String, Entity>();
-	final Map<String, User>				mUserCache			= new HashMap<String, User>();
-	private final List<Beacon>			mBeacons			= new ArrayList<Beacon>();
-	private List<Photo>					mPhotos				= new ArrayList<Photo>();
-	private List<Category>				mCategories			= new ArrayList<Category>();
-	private final Map<String, Source>	mSourceMeta			= new HashMap<String, Source>();
-	private List<WifiScanResult>		mWifiList			= new ArrayList<WifiScanResult>();
+	private final ProxiManager			mProxiManager;
+	final Map<String, Entity>			mEntityCache		= Collections.synchronizedMap(new HashMap<String, Entity>());
+	final Map<String, User>				mUserCache			= Collections.synchronizedMap(new HashMap<String, User>());
+	private final List<Beacon>			mBeacons			= Collections.synchronizedList(new ArrayList<Beacon>());
+	private List<Photo>					mPhotos				= Collections.synchronizedList(new ArrayList<Photo>());
+	private List<Category>				mCategories			= Collections.synchronizedList(new ArrayList<Category>());
+	private final Map<String, Source>	mSourceMeta			= Collections.synchronizedMap(new HashMap<String, Source>());
+	private List<WifiScanResult>		mWifiList			= Collections.synchronizedList(new ArrayList<WifiScanResult>());
 
 	private Number						mLastActivityDate	= DateUtils.nowDate().getTime();
 	private Number						mLastRefreshDate;
 	private Number						mLastBeaconLockedDate;
 
 	public EntityModel(ProxiManager proxiManager) {
-		mEntityModel = proxiManager;
+		mProxiManager = proxiManager;
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Combo service/cache queries
 	// --------------------------------------------------------------------------------------------
 
-	public ModelResult getUserEntities(String userId, Boolean refresh, Integer limit) {
-		final List<Entity> entities = new ArrayList<Entity>();
-		final ModelResult result = new ProxiManager.ModelResult();
-
-		if (refresh) {
-
-			final Bundle parameters = new Bundle();
-			parameters.putString("userId", userId);
-			parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
-			parameters.putString("fields", "object:{\"entities\":{},\"comments\":{},\"children\":{},\"parents\":{}}");
-			parameters.putString("options", "object:{\"limit\":"
-					+ String.valueOf(limit)
-					+ ",\"skip\":0"
-					+ ",\"sort\":{\"modifiedDate\":-1} "
-					+ ",\"children\":{\"limit\":"
-					+ String.valueOf(ProxiConstants.RADAR_CHILDENTITY_LIMIT)
-					+ ",\"skip\":0"
-					+ ",\"sort\":{\"modifiedDate\":-1}}"
-					+ "}");
-
-			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForUser")
-					.setRequestType(RequestType.Method)
-					.setParameters(parameters)
-					.setResponseFormat(ResponseFormat.Json);
-
-			result.serviceResponse = mEntityModel.dispatch(serviceRequest);
-
-			if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-				final String jsonResponse = (String) result.serviceResponse.data;
-				final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
-				entities.addAll((List<Entity>) serviceData.data);
-				upsertEntities(entities);
-				result.data = getCacheUserEntities(userId);
-			}
-		}
-		else {
-			result.data = getCacheUserEntities(userId);
-		}
-		return result;
-	}
-
-	/**
-	 * Retrieves entity from cache if available otherwise downloads the entity from the service. If refresh is true
-	 * then bypasses the cache and downloads from the service.
-	 * 
-	 * @param entityId
-	 * @param refresh
-	 * @param jsonEagerLoad
-	 * @param jsonOptions
-	 * @return
-	 */
 	public ModelResult getEntity(String entityId, Boolean refresh, String jsonEagerLoad, String jsonOptions) {
+		/*
+		 * Retrieves entity from cache if available otherwise downloads the entity from the service. If refresh is true
+		 * then bypasses the cache and downloads from the service.
+		 */
 		final List<String> entityIds = new ArrayList<String>();
 		entityIds.add(entityId);
 		final ModelResult result = getEntities(entityIds, refresh, jsonEagerLoad, jsonOptions);
@@ -169,11 +122,11 @@ public class EntityModel {
 					.setParameters(parameters)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				final String jsonResponse = (String) result.serviceResponse.data;
-				final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+				final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 				final List<Entity> fetchedEntities = (List<Entity>) serviceData.data;
 
 				/* Remove any links to beacons not currently visible */
@@ -220,10 +173,10 @@ public class EntityModel {
 					.setResponseFormat(ResponseFormat.Json)
 					.setSession(Aircandi.getInstance().getUser().session);
 
-			result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				final String jsonResponse = (String) result.serviceResponse.data;
-				User user = (User) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User).data;
+				User user = (User) HttpService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User).data;
 				mUserCache.put(userId, user);
 			}
 		}
@@ -231,6 +184,53 @@ public class EntityModel {
 		result.serviceResponse.data = mUserCache.get(userId);
 		return result;
 	}
+
+	public ModelResult getUserEntities(String userId, Boolean refresh, Integer limit) {
+		final List<Entity> entities = new ArrayList<Entity>();
+		final ModelResult result = new ProxiManager.ModelResult();
+
+		if (refresh) {
+
+			final Bundle parameters = new Bundle();
+			parameters.putString("userId", userId);
+			parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
+			parameters.putString("fields", "object:{\"entities\":{},\"comments\":{},\"children\":{},\"parents\":{}}");
+			parameters.putString("options", "object:{\"limit\":"
+					+ String.valueOf(limit)
+					+ ",\"skip\":0"
+					+ ",\"sort\":{\"modifiedDate\":-1} "
+					+ ",\"children\":{\"limit\":"
+					+ String.valueOf(ProxiConstants.RADAR_CHILDENTITY_LIMIT)
+					+ ",\"skip\":0"
+					+ ",\"sort\":{\"modifiedDate\":-1}}"
+					+ "}");
+
+			final ServiceRequest serviceRequest = new ServiceRequest()
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForUser")
+					.setRequestType(RequestType.Method)
+					.setParameters(parameters)
+					.setResponseFormat(ResponseFormat.Json);
+
+			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+
+			if (result.serviceResponse.responseCode == ResponseCode.Success) {
+
+				final String jsonResponse = (String) result.serviceResponse.data;
+				final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+				entities.addAll((List<Entity>) serviceData.data);
+				upsertEntities(entities);
+				result.data = getCacheUserEntities(userId);
+			}
+		}
+		else {
+			result.data = getCacheUserEntities(userId);
+		}
+		return result;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Service queries
+	// --------------------------------------------------------------------------------------------
 
 	public synchronized ModelResult loadCategories() {
 
@@ -245,22 +245,18 @@ public class EntityModel {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
 
-		result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Category);
+			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Category);
 			mCategories = (List<Category>) serviceData.data;
 			result.serviceResponse.data = mCategories;
 		}
 		return result;
 	}
 
-	public ModelResult getSourceSuggestions(List<Source> sources) {
-
-		if (sources == null || sources.size() == 0) {
-			throw new IllegalArgumentException("sources parameter for getSourceSuggestions is null or size = 0");
-		}
+	public ModelResult getSourceSuggestions(List<Source> sources, Entity entity) {
 
 		final ModelResult result = new ProxiManager.ModelResult();
 
@@ -268,10 +264,23 @@ public class EntityModel {
 		parameters.putInt("timeout", ProxiConstants.SOURCE_SUGGESTIONS_TIMEOUT);
 		final List<String> sourceStrings = new ArrayList<String>();
 		for (Source source : sources) {
-			sourceStrings.add("object:" + ProxibaseService.convertObjectToJsonSmart(source, true, true));
+			sourceStrings.add("object:" + HttpService.convertObjectToJsonSmart(source, true, true));
 		}
-
 		parameters.putStringArrayList("sources", (ArrayList<String>) sourceStrings);
+
+		if (entity != null) {
+			StringBuilder placeString = new StringBuilder();
+			Provider provider = entity.place.getProvider();
+			placeString.append("object:{\"id\":\"" + provider.id + "\",\"provider\":\"" + provider.type + "\"");
+			if (entity.name != null) {
+				placeString.append(",\"name\":\"" + entity.name + "\"");
+			}
+			if (entity.place.contact != null && entity.place.contact.phone != null) {
+				placeString.append(",\"phone\":\"" + entity.place.contact.phone + "\"");
+			}
+			placeString.append("}");
+			parameters.putString("place", placeString.toString());
+		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_SOURCES + "suggest")
@@ -279,22 +288,22 @@ public class EntityModel {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
 
-		result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Source);
+			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Source);
 			result.serviceResponse.data = serviceData.data;
 		}
 		return result;
 	}
 
-	public ModelResult getPlacePhotos(String provider, String id, long count, long offset) {
+	public ModelResult getPlacePhotos(Provider provider, long count, long offset) {
 		final ModelResult result = new ProxiManager.ModelResult();
 
 		final Bundle parameters = new Bundle();
-		parameters.putString("provider", provider);
-		parameters.putString("id", id);
+		parameters.putString("provider", provider.type);
+		parameters.putString("id", provider.id);
 		parameters.putLong("limit", count);
 		parameters.putLong("skip", offset);
 
@@ -304,11 +313,11 @@ public class EntityModel {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
 
-		result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Photo);
+			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Photo);
 			final List<Photo> photos = (List<Photo>) serviceData.data;
 			result.serviceResponse.data = photos;
 		}
@@ -316,9 +325,398 @@ public class EntityModel {
 
 	}
 
+	public ModelResult getDocumentId(String collection) {
+
+		final ModelResult result = new ModelResult();
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + collection + "/genId")
+				.setRequestType(RequestType.Get)
+				.setSuppressUI(true)
+				.setResponseFormat(ResponseFormat.Json);
+
+		result.serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			final String jsonResponse = (String) result.serviceResponse.data;
+			final ServiceEntry serviceEntry = (ServiceEntry) HttpService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.ServiceEntry).data;
+			result.serviceResponse.data = serviceEntry.id;
+		}
+		return result;
+	}
+
 	// --------------------------------------------------------------------------------------------
-	// Combo service/cache updates
+	// User updates
 	// --------------------------------------------------------------------------------------------
+
+	public ModelResult signin(String email, String password) {
+		final ModelResult result = new ProxiManager.ModelResult();
+
+		final Bundle parameters = new Bundle();
+		parameters.putString("user", "object:{"
+				+ "\"email\":\"" + email + "\","
+				+ "\"password\":\"" + password + "\""
+				+ "}");
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signin")
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
+				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setRetry(false)
+				.setResponseFormat(ResponseFormat.Json);
+
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+		return result;
+
+	}
+
+	@SuppressWarnings("ucd")
+	public ModelResult signout() {
+		final ModelResult result = new ProxiManager.ModelResult();
+
+		final User user = Aircandi.getInstance().getUser();
+		if (user.session != null) {
+			/*
+			 * We use a short timeout with no retry because failure doesn't
+			 * really hurt anything.
+			 */
+			final ServiceRequest serviceRequest = new ServiceRequest()
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signout")
+					.setRequestType(RequestType.Get)
+					.setSession(user.session)
+					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_QUERIES)
+					.setRetry(false)
+					.setResponseFormat(ResponseFormat.Json);
+
+			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+		}
+
+		return result;
+	}
+
+	public ModelResult updatePassword(String userId, String passwordOld, String passwordNew) {
+		final ModelResult result = new ProxiManager.ModelResult();
+
+		final Bundle parameters = new Bundle();
+		parameters.putString("user", "object:{"
+				+ "\"_id\":\"" + userId + "\","
+				+ "\"oldPassword\":\"" + passwordOld + "\","
+				+ "\"newPassword\":\"" + passwordNew + "\""
+				+ "}");
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "changepw")
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
+				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setRetry(false)
+				.setSession(Aircandi.getInstance().getUser().session)
+				.setResponseFormat(ResponseFormat.Json);
+
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+
+		return result;
+	}
+
+	public ModelResult insertUser(User user, Bitmap bitmap) {
+
+		/* Pre-fetch an id so a failed request can be retried */
+		final ModelResult result = ProxiManager.getInstance().getEntityModel().getDocumentId(User.collectionId);
+
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+
+			user.id = (String) result.serviceResponse.data;
+			ServiceRequest serviceRequest = new ServiceRequest()
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "create")
+					.setRequestType(RequestType.Insert)
+					.setRequestBody(HttpService.convertObjectToJsonSmart(user, true, true))
+					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+					.setRetry(false)
+					.setUseSecret(true)
+					.setResponseFormat(ResponseFormat.Json);
+
+			/* Insert user. */
+			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+
+			if (result.serviceResponse.responseCode == ResponseCode.Success) {
+
+				String jsonResponse = (String) result.serviceResponse.data;
+				ServiceData serviceData = HttpService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);
+				user = serviceData.user;
+				user.session = serviceData.session;
+				/*
+				 * Put image to S3 if we have one. Handles setting up the photo
+				 * object on user
+				 */
+				if (bitmap != null && !bitmap.isRecycled()) {
+					result.serviceResponse = mProxiManager.storeImageAtS3(null, user, bitmap);
+				}
+
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					/*
+					 * Update user to capture the uri for the image we saved.
+					 */
+					serviceRequest = new ServiceRequest()
+							.setUri(user.getEntryUri())
+							.setRequestType(RequestType.Update)
+							.setRequestBody(HttpService.convertObjectToJsonSmart(user, true, true))
+							.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+							.setRetry(false)
+							.setSession(user.session)
+							.setResponseFormat(ResponseFormat.Json);
+
+					/* Doing an update so we don't need anything back */
+					result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
+						jsonResponse = (String) result.serviceResponse.data;
+						serviceData = HttpService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User);
+						final User insertedUser = (User) serviceData.data;
+						insertedUser.session = user.session;
+						result.data = insertedUser;
+					}
+				}
+			}
+
+		}
+
+		return result;
+	}
+
+	public ModelResult updateUser(User user, Bitmap bitmap, Boolean cacheOnly) {
+		final ModelResult result = new ProxiManager.ModelResult();
+
+		if (!cacheOnly) {
+			/*
+			 * TODO: We are going with a garbage collection scheme for orphaned images. We
+			 * need to use an extended property on S3 items that is set to a date when
+			 * collection is ok. This allows downloaded entities to keep working even if
+			 * an image for entity has changed.
+			 */
+
+			/*
+			 * Put image to S3 if we have a new one. Handles updating the photo
+			 * object on user
+			 */
+			if (bitmap != null && !bitmap.isRecycled()) {
+				result.serviceResponse = mProxiManager.storeImageAtS3(null, user, bitmap);
+			}
+
+			if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				/*
+				 * Service handles modifiedId and modifiedDate based
+				 * on the session info passed with request.
+				 */
+				final ServiceRequest serviceRequest = new ServiceRequest()
+						.setUri(user.getEntryUri())
+						.setRequestType(RequestType.Update)
+						.setRequestBody(HttpService.convertObjectToJsonSmart(user, true, false))
+						.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+						.setRetry(false)
+						.setSession(Aircandi.getInstance().getUser().session)
+						.setResponseFormat(ResponseFormat.Json);
+
+				result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+				updateUser(user);
+			}
+		}
+		else {
+			/*
+			 * entity.creator is what we show for entity authors. To make the entity model consistent
+			 * with this update to the profile we walk all the entities and update where creator.id
+			 * equals the signed in user.
+			 */
+			updateUser(user);
+		}
+		return result;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Entity updates
+	// --------------------------------------------------------------------------------------------
+
+	public ModelResult insertEntity(Entity entity, List<Beacon> beacons, Beacon primaryBeacon, Bitmap bitmap, Boolean cacheOnly) {
+		/*
+		 * Inserts the entity in the entity service collection and Links are created to all the included beacons. The
+		 * inserted entity is retrieved from the service and pushed into the local cache. The cached entity is returned
+		 * in the data property of the result object.
+		 * 
+		 * @return a ModelResult object. The data property includes the just inserted entity.
+		 */
+		/*
+		 * This is the only place we use the children property
+		 * set when deserializing from the service. After this
+		 * all references to the children are dynamically assembled
+		 * in the getChildren method on entities.
+		 */
+		ModelResult result = new ModelResult();
+
+		if (!cacheOnly) {
+			Logger.i(this, "Inserting entity: " + entity.name);
+
+			/* Pre-fetch an id so a failed request can be retried */
+			result = ProxiManager.getInstance().getEntityModel().getDocumentId(Entity.collectionId);
+
+			if (result.serviceResponse.responseCode == ResponseCode.Success) {
+
+				entity.id = (String) result.serviceResponse.data;
+				/*
+				 * Upload image to S3 as needed
+				 */
+				if (bitmap != null) {
+					result.serviceResponse = mProxiManager.storeImageAtS3(entity, null, bitmap);
+				}
+
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+
+					/* Construct entity, link, and observation */
+					final Bundle parameters = new Bundle();
+
+					/* Primary beacon id */
+					if (primaryBeacon != null) {
+						parameters.putString("primaryBeaconId", primaryBeacon.id);
+					}
+
+					if (beacons != null && beacons.size() > 0) {
+						/*
+						 * Linking to beacons
+						 */
+						final List<String> beaconStrings = new ArrayList<String>();
+
+						for (Beacon beacon : beacons) {
+							Observation observation = LocationManager.getInstance().getObservationLocked();
+							if (observation != null) {
+
+								beacon.latitude = observation.latitude;
+								beacon.longitude = observation.longitude;
+
+								if (observation.altitude != null) {
+									beacon.altitude = observation.altitude;
+								}
+								if (observation.accuracy != null) {
+									beacon.accuracy = observation.accuracy;
+								}
+								if (observation.bearing != null) {
+									beacon.bearing = observation.bearing;
+								}
+								if (observation.speed != null) {
+									beacon.speed = observation.speed;
+								}
+							}
+
+							beacon.beaconType = BeaconType.Fixed.name().toLowerCase(Locale.US);
+							beacon.locked = false;
+							beaconStrings.add("object:" + HttpService.convertObjectToJsonSmart(beacon, true, true));
+						}
+						parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
+					}
+					else if (entity.parentId != null) {
+						/*
+						 * Linking to another entity
+						 */
+						parameters.putString("parentId", entity.parentId);
+					}
+
+					/* Observation: only used as data package for the action that gets logged. */
+					final Observation observation = LocationManager.getInstance().getObservationLocked();
+					if (observation != null) {
+						parameters.putString("observation",
+								"object:" + HttpService.convertObjectToJsonSmart(observation, true, true));
+					}
+
+					/* Sources configuration */
+					if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+						parameters.putBoolean("suggestSources", true);
+						parameters.putInt("suggestTimeout", 10000);
+					}
+
+					/* Entity */
+					parameters.putString("entity", "object:" + HttpService.convertObjectToJsonSmart(entity, true, true));
+
+					final ServiceRequest serviceRequest = new ServiceRequest()
+							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity")
+							.setRequestType(RequestType.Method)
+							.setParameters(parameters)
+							.setSession(Aircandi.getInstance().getUser().session)
+							.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+							.setRetry(false)
+							.setResponseFormat(ResponseFormat.Json);
+
+					result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+				}
+
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+
+					final String jsonResponse = (String) result.serviceResponse.data;
+					final ServiceData serviceData = HttpService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.Entity);
+
+					final Entity insertedEntity = (Entity) serviceData.data;
+
+					/* We want to retain the parent relationship */
+					if (entity.parentId != null) {
+						insertedEntity.parentId = entity.parentId;
+					}
+
+					upsertEntity(insertedEntity);
+					result.data = insertedEntity;
+				}
+			}
+		}
+		else {
+			upsertEntity(entity);
+		}
+
+		return result;
+	}
+
+	public ModelResult updateEntity(Entity entity, Bitmap bitmap) {
+		final ModelResult result = new ProxiManager.ModelResult();
+
+		/* Upload new images to S3 as needed. */
+		if (bitmap != null) {
+			result.serviceResponse = mProxiManager.storeImageAtS3(entity, null, bitmap);
+		}
+
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			Logger.i(this, "Updating entity: " + entity.name);
+
+			/*
+			 * Construct entity, link, and observation
+			 * 
+			 * Note: A property will be removed from the document if it is set to null. The routine
+			 * to convert objects to json takes a parameter to ignore or serialize props set to null.
+			 * For now, I have special case code to ensure that photo is seriallized as null even
+			 * if ignoreNulls = true.
+			 */
+			final Bundle parameters = new Bundle();
+			parameters.putBoolean("skipActivityDate", false);
+
+			if (entity.modifiedDate.longValue() != entity.createdDate.longValue()) {
+				parameters.putString("actionSuffix", "_first");
+			}
+
+			parameters.putString("entity", "object:" + HttpService.convertObjectToJsonSmart(entity, true, true));
+
+			final ServiceRequest serviceRequest = new ServiceRequest()
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity")
+					.setRequestType(RequestType.Method)
+					.setParameters(parameters)
+					.setSession(Aircandi.getInstance().getUser().session)
+					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+					.setRetry(false)
+					.setResponseFormat(ResponseFormat.Json);
+
+			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+		}
+
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			entity.activityDate = DateUtils.nowDate().getTime();
+			upsertEntity(entity);
+		}
+
+		return result;
+	}
 
 	@SuppressWarnings("ucd")
 	public ModelResult moveEntity(String entityId, String newParentId, Boolean toBeacon, Boolean cacheOnly) {
@@ -333,7 +731,7 @@ public class EntityModel {
 
 			link.toId = newParentId;
 			link.fromId = entity.id;
-			parameters.putString("link", "object:" + ProxibaseService.convertObjectToJsonSmart(link, true, true));
+			parameters.putString("link", "object:" + HttpService.convertObjectToJsonSmart(link, true, true));
 			parameters.putString("originalToId", (entity.parentId != null) ? entity.parentId : entity.getBeaconId());
 
 			if (link.toId == null || link.fromId == null || parameters.getString("originalToId") == null) {
@@ -349,7 +747,7 @@ public class EntityModel {
 					.setRetry(false)
 					.setSession(Aircandi.getInstance().getUser().session);
 
-			result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 		}
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -383,145 +781,12 @@ public class EntityModel {
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 		}
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			removeEntity(entityId);
 		}
-		return result;
-	}
-
-	/**
-	 * Inserts the entity in the entity service collection and Links are created to all the included beacons. The
-	 * inserted entity is retrieved from the service and pushed into the local cache. The cached entity is returned
-	 * in the data property of the result object.
-	 * 
-	 * @param entity
-	 * @param beacons
-	 * @param primaryBeacon
-	 * @param bitmap
-	 * @param cacheOnly
-	 * 
-	 * @return a ModelResult object. The data property includes the just inserted entity.
-	 */
-
-	public ModelResult insertEntity(Entity entity, List<Beacon> beacons, Beacon primaryBeacon, Bitmap bitmap, Boolean cacheOnly) {
-		final ModelResult result = new ProxiManager.ModelResult();
-		/*
-		 * This is the only place we use the children property
-		 * set when deserializing from the service. After this
-		 * all references to the children are dynamically assembled
-		 * in the getChildren method on entities.
-		 */
-
-		if (!cacheOnly) {
-			Logger.i(this, "Inserting entity: " + entity.name);
-			/*
-			 * Upload image to S3 as needed
-			 */
-			if (bitmap != null) {
-				result.serviceResponse = mEntityModel.storeImageAtS3(entity, null, bitmap);
-			}
-
-			if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-				/* Construct entity, link, and observation */
-				final Bundle parameters = new Bundle();
-
-				/* Primary beacon id */
-				if (primaryBeacon != null) {
-					parameters.putString("primaryBeaconId", primaryBeacon.id);
-				}
-
-				if (beacons != null && beacons.size() > 0) {
-					/*
-					 * Linking to beacons
-					 */
-					final List<String> beaconStrings = new ArrayList<String>();
-
-					for (Beacon beacon : beacons) {
-						Observation observation = LocationManager.getInstance().getObservationLocked();
-						if (observation != null) {
-
-							beacon.latitude = observation.latitude;
-							beacon.longitude = observation.longitude;
-
-							if (observation.altitude != null) {
-								beacon.altitude = observation.altitude;
-							}
-							if (observation.accuracy != null) {
-								beacon.accuracy = observation.accuracy;
-							}
-							if (observation.bearing != null) {
-								beacon.bearing = observation.bearing;
-							}
-							if (observation.speed != null) {
-								beacon.speed = observation.speed;
-							}
-						}
-
-						beacon.beaconType = BeaconType.Fixed.name().toLowerCase(Locale.US);
-						beacon.locked = false;
-						beaconStrings.add("object:" + ProxibaseService.convertObjectToJsonSmart(beacon, true, true));
-					}
-					parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
-				}
-				else if (entity.parentId != null) {
-					/*
-					 * Linking to another entity
-					 */
-					parameters.putString("parentId", entity.parentId);
-				}
-
-				/* Observation: only used as data package for the action that gets logged. */
-				final Observation observation = LocationManager.getInstance().getObservationLocked();
-				if (observation != null) {
-					parameters.putString("observation",
-							"object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
-				}
-
-				/* Sources configuration */
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					parameters.putBoolean("suggestSources", true);
-					parameters.putInt("suggestTimeout", 10000);
-				}
-
-				/* Entity */
-				parameters.putString("entity", "object:" + ProxibaseService.convertObjectToJsonSmart(entity, true, true));
-
-				final ServiceRequest serviceRequest = new ServiceRequest()
-						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity")
-						.setRequestType(RequestType.Method)
-						.setParameters(parameters)
-						.setSession(Aircandi.getInstance().getUser().session)
-						.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
-						.setRetry(false)
-						.setResponseFormat(ResponseFormat.Json);
-
-				result.serviceResponse = mEntityModel.dispatch(serviceRequest);
-			}
-
-			if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-				final String jsonResponse = (String) result.serviceResponse.data;
-				final ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.Entity);
-
-				final Entity insertedEntity = (Entity) serviceData.data;
-
-				/* We want to retain the parent relationship */
-				if (entity.parentId != null) {
-					insertedEntity.parentId = entity.parentId;
-				}
-
-				upsertEntity(insertedEntity);
-				result.data = insertedEntity;
-			}
-		}
-		else {
-			upsertEntity(entity);
-		}
-
 		return result;
 	}
 
@@ -566,7 +831,7 @@ public class EntityModel {
 
 				beacon.beaconType = BeaconType.Fixed.name().toLowerCase(Locale.US);
 				beacon.locked = false;
-				beaconStrings.add("object:" + ProxibaseService.convertObjectToJsonSmart(beacon, true, true));
+				beaconStrings.add("object:" + HttpService.convertObjectToJsonSmart(beacon, true, true));
 				beaconIds.add(beacon.id);
 			}
 
@@ -581,14 +846,13 @@ public class EntityModel {
 		/* Observation */
 		final Observation observation = LocationManager.getInstance().getObservationLocked();
 		if (observation != null) {
-			parameters.putString("observation",
-					"object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
+			parameters.putString("observation", "object:" + HttpService.convertObjectToJsonSmart(observation, true, true));
 		}
 
 		/* Entity */
 		parameters.putString("entityId", entity.id);
 
-		/* Action type */
+		/* Action type - proximity or proximity_first */
 		parameters.putString("actionType", actionType);
 
 		/* Method */
@@ -603,13 +867,13 @@ public class EntityModel {
 				.setRetry(false)
 				.setResponseFormat(ResponseFormat.Json);
 
-		result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 
 		/* Reproduce the service call effect locally */
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
-			entity.activityDate = DateUtils.nowDate().getTime(); // So place rank score gets updated
-			setLastActivityDate(DateUtils.nowDate().getTime());	 // So collections get resorted
+			//			entity.activityDate = DateUtils.nowDate().getTime(); // So place rank score gets updated
+			//			setLastActivityDate(DateUtils.nowDate().getTime());	 // So collections get resorted
 
 			if (beacons != null) {
 				for (Beacon beacon : beacons) {
@@ -630,7 +894,7 @@ public class EntityModel {
 					}
 					else {
 						link = new Link(beacon.id, entity.id);
-						link.type = actionType;
+						link.type = "proximity";
 						link.signal = beacon.level;
 						if (primary) {
 							if (link.tuneCount != null) {
@@ -653,56 +917,13 @@ public class EntityModel {
 		return result;
 	}
 
-	public ModelResult updateEntity(Entity entity, Bitmap bitmap) {
-		final ModelResult result = new ProxiManager.ModelResult();
-
-		/* Upload new images to S3 as needed. */
-		if (bitmap != null) {
-			result.serviceResponse = mEntityModel.storeImageAtS3(entity, null, bitmap);
-		}
-
-		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			Logger.i(this, "Updating entity: " + entity.name);
-
-			/*
-			 * Construct entity, link, and observation
-			 * 
-			 * Note: A property will be removed from the document if it is set to null. The routine
-			 * to convert objects to json takes a parameter to ignore or serialize props set to null.
-			 * For now, I have special case code to ensure that photo is seriallized as null even
-			 * if ignoreNulls = true.
-			 */
-			final Bundle parameters = new Bundle();
-			parameters.putBoolean("skipActivityDate", false);
-			parameters.putString("entity", "object:" + ProxibaseService.convertObjectToJsonSmart(entity, true, true));
-
-			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity")
-					.setRequestType(RequestType.Method)
-					.setParameters(parameters)
-					.setSession(Aircandi.getInstance().getUser().session)
-					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
-					.setRetry(false)
-					.setResponseFormat(ResponseFormat.Json);
-
-			result.serviceResponse = mEntityModel.dispatch(serviceRequest);
-		}
-
-		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			entity.activityDate = DateUtils.nowDate().getTime();
-			upsertEntity(entity);
-		}
-
-		return result;
-	}
-
 	public ModelResult insertComment(String entityId, Comment comment, Boolean cacheOnly) {
 		final ModelResult result = new ProxiManager.ModelResult();
 
 		if (!cacheOnly) {
 			final Bundle parameters = new Bundle();
 			parameters.putString("entityId", entityId);
-			parameters.putString("comment", "object:" + ProxibaseService.convertObjectToJsonSmart(comment, true, true));
+			parameters.putString("comment", "object:" + HttpService.convertObjectToJsonSmart(comment, true, true));
 
 			final ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertComment")
@@ -713,7 +934,7 @@ public class EntityModel {
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 		}
 
 		/*
@@ -727,250 +948,83 @@ public class EntityModel {
 		return result;
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Other updates
+	// --------------------------------------------------------------------------------------------
+
 	public ModelResult insertDocument(Document document) {
-		final ModelResult result = new ProxiManager.ModelResult();
 
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + document.getCollection())
-				.setRequestType(RequestType.Insert)
-				.setRequestBody(ProxibaseService.convertObjectToJsonSmart(document, true, true))
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
-				.setSession(Aircandi.getInstance().getUser().session)
-				.setResponseFormat(ResponseFormat.Json);
+		/* Pre-fetch an id so a failed request can be retried */
+		ModelResult result = ProxiManager.getInstance().getEntityModel().getDocumentId(Document.collectionId);
 
-		result.serviceResponse = mEntityModel.dispatch(serviceRequest);
-
-		return result;
-	}
-
-	public ModelResult signin(String email, String password) {
-		final ModelResult result = new ProxiManager.ModelResult();
-
-		final Bundle parameters = new Bundle();
-		parameters.putString("user", "object:{"
-				+ "\"email\":\"" + email + "\","
-				+ "\"password\":\"" + password + "\""
-				+ "}");
-
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signin")
-				.setRequestType(RequestType.Method)
-				.setParameters(parameters)
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
-				.setResponseFormat(ResponseFormat.Json);
-
-		result.serviceResponse = mEntityModel.dispatch(serviceRequest);
-		return result;
-
-	}
-
-	@SuppressWarnings("ucd")
-	public ModelResult signout() {
-		final ModelResult result = new ProxiManager.ModelResult();
-
-		final User user = Aircandi.getInstance().getUser();
-		if (user.session != null) {
-			/*
-			 * We use a short timeout with no retry because failure doesn't
-			 * really hurt anything.
-			 */
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			document.id = (String) result.serviceResponse.data;
 			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signout")
-					.setRequestType(RequestType.Get)
-					.setSession(user.session)
-					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_QUERIES)
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + document.getCollection())
+					.setRequestType(RequestType.Insert)
+					.setRequestBody(HttpService.convertObjectToJsonSmart(document, true, true))
+					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
 					.setRetry(false)
+					.setSession(Aircandi.getInstance().getUser().session)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 		}
-
-		return result;
-	}
-
-	public ModelResult updatePassword(String userId, String passwordOld, String passwordNew) {
-		final ModelResult result = new ProxiManager.ModelResult();
-
-		final Bundle parameters = new Bundle();
-		parameters.putString("user", "object:{"
-				+ "\"_id\":\"" + userId + "\","
-				+ "\"oldPassword\":\"" + passwordOld + "\","
-				+ "\"newPassword\":\"" + passwordNew + "\""
-				+ "}");
-
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "changepw")
-				.setRequestType(RequestType.Method)
-				.setParameters(parameters)
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
-				.setSession(Aircandi.getInstance().getUser().session)
-				.setResponseFormat(ResponseFormat.Json);
-
-		result.serviceResponse = mEntityModel.dispatch(serviceRequest);
 
 		return result;
 	}
 
 	@SuppressWarnings("ucd")
 	public ModelResult insertLink(Link link) {
-		final ModelResult result = new ProxiManager.ModelResult();
 
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + link.getCollection())
-				.setRequestType(RequestType.Insert)
-				.setRequestBody(ProxibaseService.convertObjectToJsonSmart(link, true, true))
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
-				.setResponseFormat(ResponseFormat.Json);
-
-		result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+		/* Pre-fetch an id so a failed request can be retried */
+		ModelResult result = ProxiManager.getInstance().getEntityModel().getDocumentId(Link.collectionId);
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.Link);
-			result.data = serviceData.data;
+			link.id = (String) result.serviceResponse.data;
+			final ServiceRequest serviceRequest = new ServiceRequest()
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + link.getCollection())
+					.setRequestType(RequestType.Insert)
+					.setRequestBody(HttpService.convertObjectToJsonSmart(link, true, true))
+					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+					.setRetry(false)
+					.setResponseFormat(ResponseFormat.Json);
+
+			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+
+			if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				final String jsonResponse = (String) result.serviceResponse.data;
+				final ServiceData serviceData = HttpService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.Link);
+				result.data = serviceData.data;
+			}
 		}
 
 		return result;
 	}
 
 	ModelResult insertBeacon(Beacon beacon) {
+		/*
+		 * We don't pre-fetch an id for beacons because the same beacon will always
+		 * be assigned the same id by the service.
+		 */
 		final ModelResult result = new ProxiManager.ModelResult();
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + beacon.getCollection())
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + Beacon.collectionId)
 				.setRequestType(RequestType.Insert)
-				.setRequestBody(ProxibaseService.convertObjectToJsonSmart(beacon, true, true))
+				.setRequestBody(HttpService.convertObjectToJsonSmart(beacon, true, true))
 				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
 				.setRetry(false)
 				.setResponseFormat(ResponseFormat.Json);
 
-		result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.Beacon);
+			final ServiceData serviceData = HttpService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.Beacon);
 			result.data = serviceData.data;
 		}
 
-		return result;
-	}
-
-	/**
-	 * Inserts a new user into the service.
-	 * 
-	 * @param user
-	 * @param bitmap
-	 * @return a ModelResult object. The data property includes the just inserted user.
-	 */
-
-	public ModelResult insertUser(User user, Bitmap bitmap) {
-		final ModelResult result = new ProxiManager.ModelResult();
-
-		ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "create")
-				.setRequestType(RequestType.Insert)
-				.setRequestBody(ProxibaseService.convertObjectToJsonSmart(user, true, true))
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
-				.setUseSecret(true)
-				.setResponseFormat(ResponseFormat.Json);
-
-		/*
-		 * Insert user.
-		 */
-		result.serviceResponse = mEntityModel.dispatch(serviceRequest);
-
-		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-			String jsonResponse = (String) result.serviceResponse.data;
-			ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);
-			user = serviceData.user;
-			user.session = serviceData.session;
-			/*
-			 * Put image to S3 if we have one. Handles setting up the photo
-			 * object on user
-			 */
-			if (bitmap != null && !bitmap.isRecycled()) {
-				result.serviceResponse = mEntityModel.storeImageAtS3(null, user, bitmap);
-			}
-
-			if (result.serviceResponse.responseCode == ResponseCode.Success) {
-				/*
-				 * Update user to capture the uri for the image we saved.
-				 */
-				serviceRequest = new ServiceRequest()
-						.setUri(user.getEntryUri())
-						.setRequestType(RequestType.Update)
-						.setRequestBody(ProxibaseService.convertObjectToJsonSmart(user, true, true))
-						.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
-						.setRetry(false)
-						.setSession(user.session)
-						.setResponseFormat(ResponseFormat.Json);
-
-				/* Doing an update so we don't need anything back */
-				result.serviceResponse = mEntityModel.dispatch(serviceRequest);
-
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					jsonResponse = (String) result.serviceResponse.data;
-					serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User);
-					final User insertedUser = (User) serviceData.data;
-					insertedUser.session = user.session;
-					result.data = insertedUser;
-				}
-			}
-		}
-		return result;
-	}
-
-	public ModelResult updateUser(User user, Bitmap bitmap, Boolean cacheOnly) {
-		final ModelResult result = new ProxiManager.ModelResult();
-
-		if (!cacheOnly) {
-			/*
-			 * TODO: We are going with a garbage collection scheme for orphaned images. We
-			 * need to use an extended property on S3 items that is set to a date when
-			 * collection is ok. This allows downloaded entities to keep working even if
-			 * an image for entity has changed.
-			 */
-
-			/*
-			 * Put image to S3 if we have a new one. Handles updating the photo
-			 * object on user
-			 */
-			if (bitmap != null && !bitmap.isRecycled()) {
-				result.serviceResponse = mEntityModel.storeImageAtS3(null, user, bitmap);
-			}
-
-			if (result.serviceResponse.responseCode == ResponseCode.Success) {
-				/*
-				 * Service handles modifiedId and modifiedDate based
-				 * on the session info passed with request.
-				 */
-				final ServiceRequest serviceRequest = new ServiceRequest()
-						.setUri(user.getEntryUri())
-						.setRequestType(RequestType.Update)
-						.setRequestBody(ProxibaseService.convertObjectToJsonSmart(user, true, false))
-						.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
-						.setRetry(false)
-						.setSession(Aircandi.getInstance().getUser().session)
-						.setResponseFormat(ResponseFormat.Json);
-
-				result.serviceResponse = mEntityModel.dispatch(serviceRequest);
-				updateUser(user);
-			}
-		}
-		else {
-			/*
-			 * entity.creator is what we show for entity authors. To make the entity model consistent
-			 * with this update to the profile we walk all the entities and update where creator.id
-			 * equals the signed in user.
-			 */
-			updateUser(user);
-		}
 		return result;
 	}
 
@@ -990,21 +1044,34 @@ public class EntityModel {
 				.setSession(Aircandi.getInstance().getUser().session)
 				.setResponseFormat(ResponseFormat.Json);
 
-		result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 		return result;
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Beacon routines
+	// Beacon cache
 	// --------------------------------------------------------------------------------------------
 
 	public void clearBeacons() {
-		synchronized (mEntityModel.mEntityModel.mBeacons) {
-			mEntityModel.mEntityModel.mBeacons.clear();
+		synchronized (mBeacons) {
+			mBeacons.clear();
 		}
 	}
 
-	void updateBeacons() {
+	public Collection<Beacon> getBeacons() {
+		return mBeacons;
+	}
+
+	public Beacon getBeacon(String beaconId) {
+		for (Beacon beacon : mBeacons) {
+			if (beacon.id.equals(beaconId)) {
+				return beacon;
+			}
+		}
+		return null;
+	}
+
+	public void updateBeacons() {
 		/*
 		 * Makes sure that the beacon collection is an accurate representation
 		 * of the latest wifi scan.
@@ -1025,31 +1092,18 @@ public class EntityModel {
 						, DateUtils.nowDate()
 						, scanResult.test);
 
-				mEntityModel.mEntityModel.upsertBeacon(beacon);
+				upsertBeacon(beacon);
 			}
 		}
 
 		/* Sort beacons by signal strength */
-		synchronized (mEntityModel.mEntityModel.mBeacons) {
-			Collections.sort(mEntityModel.mEntityModel.mBeacons, new Beacon.SortBeaconsBySignalLevel());
+		synchronized (mBeacons) {
+			Collections.sort(mBeacons, new Beacon.SortBeaconsBySignalLevel());
 		}
 
 		mLastBeaconLockedDate = DateUtils.nowDate().getTime();
 
 		BusProvider.getInstance().post(new BeaconsLockedEvent());
-	}
-
-	public Collection<Beacon> getBeacons() {
-		return mBeacons;
-	}
-
-	public Beacon getBeacon(String beaconId) {
-		for (Beacon beacon : mBeacons) {
-			if (beacon.id.equals(beaconId)) {
-				return beacon;
-			}
-		}
-		return null;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1446,7 +1500,7 @@ public class EntityModel {
 		 */
 		Entity original = entity;
 		synchronized (mEntityCache) {
-			final Entity entityOriginal = mEntityModel.mEntityModel.mEntityCache.get(entity.id);
+			final Entity entityOriginal = mEntityCache.get(entity.id);
 
 			/* Check to see if we have this entity keyed to the sourceId */
 			if (entityOriginal != null) {
@@ -1524,12 +1578,12 @@ public class EntityModel {
 							source.label = source.type;
 						}
 
-						if (!mEntityModel.mEntityModel.mSourceMeta.containsKey(source.type)) {
-							mEntityModel.mEntityModel.mSourceMeta.put(source.type, new Source(source.intentSupport, false));
+						if (!mSourceMeta.containsKey(source.type)) {
+							mSourceMeta.put(source.type, new Source(source.intentSupport, false));
 						}
 
 						/* We are getting duplicates which will have to be addressed on the service side */
-						Entity sourceEntity = mEntityModel.loadEntityFromResources(R.raw.source_entity);
+						Entity sourceEntity = mProxiManager.loadEntityFromResources(R.raw.source_entity);
 						if (sourceEntity != null) {
 							/* Transfers from source item */
 							sourceEntity.id = entity.id + "." + source.type + "." + String.valueOf(DateUtils.nowDate().getTime());
@@ -1561,7 +1615,7 @@ public class EntityModel {
 
 	private void addCommentSource(Entity entity, Integer position) {
 
-		final Entity sourceEntity = mEntityModel.loadEntityFromResources(R.raw.source_entity);
+		final Entity sourceEntity = mProxiManager.loadEntityFromResources(R.raw.source_entity);
 		sourceEntity.id = entity.id + ".comments";
 		sourceEntity.name = "comments";
 		final Source source = new Source();
@@ -1638,10 +1692,10 @@ public class EntityModel {
 		 * is associated with a beacon that isn't a radar hit.
 		 */
 		synchronized (mEntityCache) {
-			final Iterator iter = mEntityModel.mEntityModel.mEntityCache.keySet().iterator();
+			final Iterator iter = mEntityCache.keySet().iterator();
 			Entity entity = null;
 			while (iter.hasNext()) {
-				entity = mEntityModel.mEntityModel.mEntityCache.get(iter.next());
+				entity = mEntityCache.get(iter.next());
 				if (entity.parentId == null && entity.ownerId.equals(userId)) {
 					iter.remove();
 				}
@@ -1652,10 +1706,10 @@ public class EntityModel {
 
 	void removeSyntheticEntities() {
 		synchronized (mEntityCache) {
-			final Iterator iter = mEntityModel.mEntityModel.mEntityCache.keySet().iterator();
+			final Iterator iter = mEntityCache.keySet().iterator();
 			Entity entity = null;
 			while (iter.hasNext()) {
-				entity = mEntityModel.mEntityModel.mEntityCache.get(iter.next());
+				entity = mEntityCache.get(iter.next());
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
 						&& entity.synthetic) {
 					iter.remove();
@@ -1667,10 +1721,10 @@ public class EntityModel {
 
 	void removeBeaconEntities() {
 		synchronized (mEntityCache) {
-			final Iterator iter = mEntityModel.mEntityModel.mEntityCache.keySet().iterator();
+			final Iterator iter = mEntityCache.keySet().iterator();
 			Entity entity = null;
 			while (iter.hasNext()) {
-				entity = mEntityModel.mEntityModel.mEntityCache.get(iter.next());
+				entity = mEntityCache.get(iter.next());
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
 						&& !entity.synthetic
 						&& (entity.links != null && entity.links.size() > 0)) {
@@ -1684,10 +1738,10 @@ public class EntityModel {
 	@SuppressWarnings("ucd")
 	public void removeEntitiesForBeacon(String beaconId) {
 		synchronized (mEntityCache) {
-			final Iterator iter = mEntityModel.mEntityModel.mEntityCache.keySet().iterator();
+			final Iterator iter = mEntityCache.keySet().iterator();
 			Entity entity = null;
 			while (iter.hasNext()) {
-				entity = mEntityModel.mEntityModel.mEntityCache.get(iter.next());
+				entity = mEntityCache.get(iter.next());
 				if (entity.parentId == null
 						&& entity.getBeaconId() != null
 						&& entity.getBeaconId().equals(beaconId)) {
@@ -1725,10 +1779,10 @@ public class EntityModel {
 		 */
 		final Map<String, Entity> entities = new HashMap<String, Entity>();
 		synchronized (mEntityCache) {
-			final Iterator iter = mEntityModel.mEntityModel.mEntityCache.keySet().iterator();
+			final Iterator iter = mEntityCache.keySet().iterator();
 			Entity entity = null;
 			while (iter.hasNext()) {
-				entity = mEntityModel.mEntityModel.mEntityCache.get(iter.next());
+				entity = mEntityCache.get(iter.next());
 				if (!entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)
 						&& entity.parentId != null
 						&& entity.parentId.equals(entityId)) {
@@ -1747,10 +1801,10 @@ public class EntityModel {
 		 */
 		final Map<String, Entity> entities = new HashMap<String, Entity>();
 		synchronized (mEntityCache) {
-			final Iterator iter = mEntityModel.mEntityModel.mEntityCache.keySet().iterator();
+			final Iterator iter = mEntityCache.keySet().iterator();
 			Entity entity = null;
 			while (iter.hasNext()) {
-				entity = mEntityModel.mEntityModel.mEntityCache.get(iter.next());
+				entity = mEntityCache.get(iter.next());
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)
 						&& entity.parentId != null
 						&& entity.parentId.equals(entityId)) {

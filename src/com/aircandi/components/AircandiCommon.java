@@ -59,8 +59,8 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.ProxiManager.WifiScanResult;
-import com.aircandi.service.ProxibaseServiceException.ErrorCode;
-import com.aircandi.service.ProxibaseServiceException.ErrorType;
+import com.aircandi.service.HttpServiceException.ErrorCode;
+import com.aircandi.service.HttpServiceException.ErrorType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.User;
@@ -268,13 +268,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 	private void doBeaconIndicatorClick() {
 		if (mBeaconIndicator != null) {
 			final StringBuilder beaconMessage = new StringBuilder(500);
-			synchronized (ProxiManager.getInstance().getEntityModel().getWifiList()) {
+			List<WifiScanResult> wifiList = ProxiManager.getInstance().getEntityModel().getWifiList();
+			synchronized (wifiList) {
 				if (Aircandi.getInstance().getUser() != null
 						&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
 						&& Aircandi.getInstance().getUser().isDeveloper != null
 						&& Aircandi.getInstance().getUser().isDeveloper) {
 					if (Aircandi.wifiCount > 0) {
-						for (WifiScanResult wifi : ProxiManager.getInstance().getEntityModel().getWifiList()) {
+						for (WifiScanResult wifi : wifiList) {
 							if (!wifi.SSID.equals("candi_feed")) {
 								beaconMessage.append(wifi.SSID + ": (" + String.valueOf(wifi.level) + ") " + wifi.BSSID + System.getProperty("line.separator"));
 							}
@@ -506,7 +507,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		final ErrorType errorType = serviceResponse.exception.getErrorType();
 		final ErrorCode errorCode = serviceResponse.exception.getErrorCode();
 		final String errorMessage = serviceResponse.exception.getMessage();
-		final Float statusCode = serviceResponse.exception.getHttpStatusCode();
+		final Float statusCode = serviceResponse.exception.getStatusCode();
 
 		/* We always make sure the progress indicator has been stopped */
 		mActivity.runOnUiThread(new Runnable() {

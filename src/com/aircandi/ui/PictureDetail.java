@@ -32,7 +32,7 @@ import com.aircandi.components.ProxiManager;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.UserView;

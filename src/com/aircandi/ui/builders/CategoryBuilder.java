@@ -29,8 +29,8 @@ import com.aircandi.components.ProxiManager;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.FormActivity;
@@ -68,7 +68,7 @@ public class CategoryBuilder extends FormActivity {
 		if (extras != null) {
 			final String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
 			if (jsonCategory != null) {
-				mOriginalCategory = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
+				mOriginalCategory = (Category) HttpService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 			}
 		}
 		mImage = (WebImageView) findViewById(R.id.image);
@@ -144,7 +144,7 @@ public class CategoryBuilder extends FormActivity {
 			category.id = mSubSubCategory.id;
 			category.name = mSubSubCategory.name;
 			category.icon = mSubSubCategory.icon;
-			final String jsonCategory = ProxibaseService.convertObjectToJsonSmart(category, false, true);
+			final String jsonCategory = HttpService.convertObjectToJsonSmart(category, false, true);
 			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
 		else if (mSubCategory != null) {
@@ -152,7 +152,7 @@ public class CategoryBuilder extends FormActivity {
 			category.id = mSubCategory.id;
 			category.name = mSubCategory.name;
 			category.icon = mSubCategory.icon;
-			final String jsonCategory = ProxibaseService.convertObjectToJsonSmart(category, false, true);
+			final String jsonCategory = HttpService.convertObjectToJsonSmart(category, false, true);
 			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
 		setResult(Activity.RESULT_OK, intent);

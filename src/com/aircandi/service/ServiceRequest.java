@@ -4,9 +4,9 @@ import org.apache.commons.codec.binary.Base64;
 
 import android.os.Bundle;
 
-import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.HttpService.RequestType;
+import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.objects.Session;
 
 /**

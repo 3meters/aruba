@@ -17,7 +17,6 @@ import com.aircandi.utilities.DateUtils;
 @SuppressWarnings("ucd")
 public class LocationManager {
 
-	private static LocationManager				singletonObject;
 	public static Double						RADIUS_EARTH_MILES			= 3958.75;
 	public static Double						RADIUS_EARTH_KILOMETERS		= 6371.0;
 	public static final float					MetersToMilesConversion		= 0.000621371192237334f;
@@ -36,14 +35,15 @@ public class LocationManager {
 	protected PendingIntent						mLocationListenerPendingIntent;
 	private Runnable							mBurstTimeout;
 
-	public static synchronized LocationManager getInstance() {
-		if (singletonObject == null) {
-			singletonObject = new LocationManager();
-		}
-		return singletonObject;
+	private LocationManager() {}
+
+	private static class LocationManagerHolder {
+		public static final LocationManager	instance	= new LocationManager();
 	}
 
-	private LocationManager() {}
+	public static LocationManager getInstance() {
+		return LocationManagerHolder.instance;
+	}
 
 	public void initialize(Context applicationContext) {
 
@@ -61,10 +61,11 @@ public class LocationManager {
 			@Override
 			public void run() {
 				Logger.d(LocationManager.this, "Burst mode stopped: timed out");
+				Aircandi.mainThreadHandler.removeCallbacks(mBurstTimeout);
 				mLocationManager.removeUpdates(mLocationListenerPendingIntent);
 				mLocationModeBurstNetwork = false;
 				mLocationModeBurstGps = false;
-				Aircandi.mainThreadHandler.removeCallbacks(mBurstTimeout);
+				BusProvider.getInstance().post(new LocationTimeoutEvent());
 			}
 		};
 	}
@@ -223,16 +224,19 @@ public class LocationManager {
 					if (location.getProvider().equals("network") && mLocationModeBurstNetwork) {
 						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_NETWORK) {
 							Logger.d(this, "Network burst mode stopped: desired accuracy reached");
-							mLocationManager.removeUpdates(mLocationListenerPendingIntent);
 							if (mLocationModeBurstGps) {
+								mLocationManager.removeUpdates(mLocationListenerPendingIntent);
 								mLocationManager.requestLocationUpdates(android.location.LocationManager.GPS_PROVIDER, 0, 0, mLocationListenerPendingIntent);
+							}
+							else {
+								stopLocationBurst();							
 							}
 						}
 					}
 					else if (location.getProvider().equals("gps") && mLocationModeBurstGps) {
 						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_GPS) {
 							Logger.d(this, "Gps burst mode stopped: desired accuracy reached");
-							mLocationManager.removeUpdates(mLocationListenerPendingIntent);
+							stopLocationBurst();							
 						}
 					}
 				}

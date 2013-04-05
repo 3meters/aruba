@@ -25,6 +25,7 @@ import com.aircandi.service.objects.Link.LinkType;
 public class Entity extends ServiceEntryBase implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= -3902834532692561618L;
+	public static final String	collectionId		= "entities";
 
 	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 
@@ -252,6 +253,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		final Entity entity = synthetic.clone();
 		entity.id = null;
 		entity.locked = false;
+		entity.enabled = true;
 		if (synthetic.place.category != null) {
 			entity.subtitle = synthetic.place.category.name;
 		}
@@ -508,9 +510,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 									placeRankScore += 8;
 								}
 							}
-						}
-						else if (link.type.equals("browse")) {
-							placeRankScore += (link.tuneCount.intValue() * 1);
 						}
 					}
 				}

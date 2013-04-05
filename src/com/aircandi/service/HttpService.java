@@ -72,8 +72,8 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ConnectedState;
 import com.aircandi.components.bitmaps.ImageResult;
-import com.aircandi.service.ProxibaseServiceException.ErrorCode;
-import com.aircandi.service.ProxibaseServiceException.ErrorType;
+import com.aircandi.service.HttpServiceException.ErrorCode;
+import com.aircandi.service.HttpServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
@@ -119,9 +119,7 @@ import com.amazonaws.AmazonServiceException;
 /**
  * Implemented using singleton pattern. The private Constructor prevents any other class from instantiating.
  */
-public class ProxibaseService {
-
-	private static ProxibaseService			singletonObject;
+public class HttpService {
 
 	private final DefaultHttpClient			mHttpClient;
 	private final HttpParams				mHttpParams;
@@ -139,11 +137,12 @@ public class ProxibaseService {
 																	}
 																};
 
-	public static synchronized ProxibaseService getInstance() {
-		if (singletonObject == null) {
-			singletonObject = new ProxibaseService();
-		}
-		return singletonObject;
+	private static class HttpServiceHolder {
+		public static final HttpService	instance	= new HttpService();
+	}
+
+	public static HttpService getInstance() {
+		return HttpServiceHolder.instance;
 	}
 
 	@Override
@@ -151,7 +150,7 @@ public class ProxibaseService {
 		throw new CloneNotSupportedException();
 	}
 
-	private ProxibaseService() {
+	private HttpService() {
 
 		/* Connection settings */
 		mHttpParams = createHttpParams();
@@ -230,7 +229,7 @@ public class ProxibaseService {
 	// Public methods
 	// ----------------------------------------------------------------------------------------
 
-	public Object request(final ServiceRequest serviceRequest) throws ProxibaseServiceException {
+	public Object request(final ServiceRequest serviceRequest) throws HttpServiceException {
 
 		HttpRequestBase httpRequest = buildHttpRequest(serviceRequest);
 		HttpResponse httpResponse = null;
@@ -244,12 +243,12 @@ public class ProxibaseService {
 
 				if (connectedState == ConnectedState.None) {
 					final Exception exception = new ConnectException();
-					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, exception);
+					HttpServiceException proxibaseException = makeHttpServiceException(null, null, exception);
 					throw proxibaseException;
 				}
 				else if (connectedState == ConnectedState.WalledGarden) {
 					final Exception exception = new WalledGardenException();
-					final ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(null, exception);
+					final HttpServiceException proxibaseException = HttpService.makeHttpServiceException(null, null, exception);
 					throw proxibaseException;
 				}
 
@@ -297,18 +296,25 @@ public class ProxibaseService {
 					 */
 					String responseContent = convertStreamToString(httpResponse.getEntity().getContent());
 					Float httpStatusCode = (float) httpResponse.getStatusLine().getStatusCode();
+					Float httpStatusCodeService = null;
 					Logger.d(this, responseContent);
 
 					if (serviceRequest.getResponseFormat() == ResponseFormat.Json) {
-						ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(responseContent, ServiceDataType.None);
+						ServiceData serviceData = HttpService.convertJsonToObjectSmart(responseContent, ServiceDataType.None);
 						if (serviceData != null && serviceData.error != null && serviceData.error.code != null) {
-							httpStatusCode = serviceData.error.code.floatValue();
+							httpStatusCodeService = serviceData.error.code.floatValue();
 						}
 					}
 
-					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(httpStatusCode, null);
+					HttpServiceException proxibaseException = makeHttpServiceException(httpStatusCode, httpStatusCodeService, null);
 					proxibaseException.setResponseMessage(responseContent);
+
 					if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, proxibaseException, retryCount)) {
+						/*
+						 * If we got a duplicate error code back from the service, it could be because we tried
+						 * to double insert after a retry. In that case we want to eat the error and return success
+						 * to the caller. That means we also need to return the inserted entity.
+						 */
 						throw proxibaseException;
 					}
 				}
@@ -317,7 +323,7 @@ public class ProxibaseService {
 				/*
 				 * Can't recover from this with a retry.
 				 */
-				ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, e);
+				HttpServiceException proxibaseException = makeHttpServiceException(null, null, e);
 				throw proxibaseException;
 			}
 			catch (IOException e) {
@@ -330,7 +336,7 @@ public class ProxibaseService {
 				 * - UnknownHostException: hostname didn't exist in the dns system
 				 */
 				if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, e, retryCount)) {
-					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, e);
+					HttpServiceException proxibaseException = makeHttpServiceException(null, null, e);
 					throw proxibaseException;
 				}
 				else {
@@ -338,12 +344,12 @@ public class ProxibaseService {
 					ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
 					if (connectedState == ConnectedState.None) {
 						final Exception exception = new ConnectException();
-						ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, exception);
+						HttpServiceException proxibaseException = makeHttpServiceException(null, null, exception);
 						throw proxibaseException;
 					}
 					else if (connectedState == ConnectedState.WalledGarden) {
 						final Exception exception = new WalledGardenException();
-						final ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(null, exception);
+						final HttpServiceException proxibaseException = HttpService.makeHttpServiceException(null, null, exception);
 						throw proxibaseException;
 					}
 				}
@@ -407,16 +413,21 @@ public class ProxibaseService {
 								}
 								else {
 									List<String> items = serviceRequest.getParameters().getStringArrayList(key);
-									jsonBody.append("\"" + key + "\":[");
-									for (String itemString : items) {
-										if (itemString.startsWith("object:")) {
-											jsonBody.append(itemString.substring(7) + ",");
-										}
-										else {
-											jsonBody.append("\"" + itemString + "\",");
-										}
+									if (items.size() == 0) {
+										jsonBody.append("\"" + key + "\":[],");										
 									}
-									jsonBody = new StringBuilder(jsonBody.substring(0, jsonBody.length() - 1) + "],"); // $codepro.audit.disable stringConcatenationInLoop
+									else {
+										jsonBody.append("\"" + key + "\":[");
+										for (String itemString : items) {
+											if (itemString.startsWith("object:")) {
+												jsonBody.append(itemString.substring(7) + ",");
+											}
+											else {
+												jsonBody.append("\"" + itemString + "\",");
+											}
+										}
+										jsonBody = new StringBuilder(jsonBody.substring(0, jsonBody.length() - 1) + "],"); // $codepro.audit.disable stringConcatenationInLoop
+									}
 								}
 							}
 							else if (serviceRequest.getParameters().get(key) instanceof String) {
@@ -506,128 +517,126 @@ public class ProxibaseService {
 		return null;
 	}
 
-	public static ProxibaseServiceException makeProxibaseServiceException(Float httpStatusCode, Exception exception) {
+	public static HttpServiceException makeHttpServiceException(Float httpStatusCode, Float httpStatusCodeService, Exception exception) {
 		/*
 		 * This is the only code that creates ProxibaseServiceException objects.
 		 */
-		ProxibaseServiceException proxibaseException = null;
+		HttpServiceException httpException = null;
+		Float statusCode = httpStatusCodeService != null ? httpStatusCodeService : httpStatusCode;
 
 		if (exception != null) {
-			if (exception instanceof ClientProtocolException) { // derives from IOException
-				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
-						ErrorCode.ClientProtocolException, exception);
-				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+
+			String exceptionMessage = exception.getClass().getSimpleName() + ": " + exception.getMessage();
+
+			if (exception instanceof ClientProtocolException) { 		// derives from IOException
+				httpException = new HttpServiceException(exceptionMessage, ErrorType.Client, ErrorCode.ClientProtocolException, exception);
+				httpException.setResponseMessage(httpException.getMessage());
 			}
-			else if (exception instanceof WalledGardenException) { // derived from ConnectException
-				proxibaseException = new ProxibaseServiceException("Network connects to a walled garden", ErrorType.Client,
-						ErrorCode.WalledGardenException, exception);
-				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			else if (exception instanceof WalledGardenException) { 		// derived from ConnectException
+				httpException = new HttpServiceException("Network connects to a walled garden", ErrorType.Client, ErrorCode.WalledGardenException, exception);
+				httpException.setResponseMessage(httpException.getMessage());
 			}
-			else if (exception instanceof ConnectException) { // derives from SocketException
-				proxibaseException = new ProxibaseServiceException("Not connected to network", ErrorType.Client,
-						ErrorCode.ConnectionException, exception);
-				proxibaseException.setResponseMessage("Device is not connected to a network: "
+			else if (exception instanceof ConnectException) { 			// derives from SocketException
+				httpException = new HttpServiceException("Not connected to network", ErrorType.Client, ErrorCode.ConnectionException, exception);
+				httpException.setResponseMessage("Device is not connected to a network: "
 						+ String.valueOf(ProxiConstants.CONNECT_TRIES) + " tries over "
 						+ String.valueOf(ProxiConstants.CONNECT_WAIT * ProxiConstants.CONNECT_TRIES / 1000) + " second window");
 			}
-			else if (exception instanceof SocketException) { // derives from IOException
-				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
-						ErrorCode.SocketException, exception);
-				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			else if (exception instanceof SocketException) { 			// derives from IOException
+				httpException = new HttpServiceException(exceptionMessage, ErrorType.Client, ErrorCode.SocketException, exception);
+				httpException.setResponseMessage(httpException.getMessage());
 			}
-			else if (exception instanceof IOException) { // derives from Exception
-				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
-						ErrorCode.IOException, exception);
-				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			else if (exception instanceof IOException) { 				// derives from Exception
+				httpException = new HttpServiceException(exceptionMessage, ErrorType.Client, ErrorCode.IOException, exception);
+				httpException.setResponseMessage(httpException.getMessage());
 			}
-			else if (exception instanceof AmazonServiceException) { // derives from AmazonClientException
-				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
-						ErrorCode.AmazonServiceException, exception);
-				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			else if (exception instanceof AmazonServiceException) { 	// derives from AmazonClientException
+				httpException = new HttpServiceException(exceptionMessage, ErrorType.Client, ErrorCode.AmazonServiceException, exception);
+				httpException.setResponseMessage(httpException.getMessage());
 			}
-			else if (exception instanceof AmazonClientException) { // derives from RuntimeException
-				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
-						ErrorCode.AmazonClientException, exception);
-				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			else if (exception instanceof AmazonClientException) { 		// derives from RuntimeException
+				httpException = new HttpServiceException(exceptionMessage, ErrorType.Client, ErrorCode.AmazonClientException, exception);
+				httpException.setResponseMessage(httpException.getMessage());
 			}
 			else if (exception instanceof InterruptedException) {
-				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
-						ErrorCode.InterruptedException, exception);
-				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+				httpException = new HttpServiceException(exceptionMessage, ErrorType.Client, ErrorCode.InterruptedException, exception);
+				httpException.setResponseMessage(httpException.getMessage());
 			}
 		}
-		else if (httpStatusCode != null) {
-			if (httpStatusCode == HttpStatus.SC_NOT_FOUND) {
-				proxibaseException = new ProxibaseServiceException("Service or target not found");
-				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.NotFoundException);
+		else if (statusCode != null) {
+
+			if (statusCode == HttpStatus.SC_NOT_FOUND) {
+				httpException = new HttpServiceException("Service or target not found");
+				httpException.setErrorType(ErrorType.Service);
+				httpException.setErrorCode(ErrorCode.NotFoundException);
 			}
-			else if (httpStatusCode == HttpStatus.SC_UNAUTHORIZED) {
+			else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
 				/* missing, expired or invalid session */
-				proxibaseException = new ProxibaseServiceException("Unauthorized");
-				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.UnauthorizedException);
+				httpException = new HttpServiceException("Unauthorized");
+				httpException.setErrorType(ErrorType.Service);
+				httpException.setErrorCode(ErrorCode.UnauthorizedException);
 			}
-			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
-				proxibaseException = new ProxibaseServiceException("Unauthorized credentials");
-				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.SessionException);
+			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
+				httpException = new HttpServiceException("Unauthorized credentials");
+				httpException.setErrorType(ErrorType.Service);
+				httpException.setErrorCode(ErrorCode.SessionException);
 			}
-			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
-				proxibaseException = new ProxibaseServiceException("Expired session");
-				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.SessionException);
+			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
+				httpException = new HttpServiceException("Expired session");
+				httpException.setErrorType(ErrorType.Service);
+				httpException.setErrorCode(ErrorCode.SessionException);
 			}
-			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
-				proxibaseException = new ProxibaseServiceException("Unauthorized whitelist");
-				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.WhitelistException);
+			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
+				httpException = new HttpServiceException("Unauthorized whitelist");
+				httpException.setErrorType(ErrorType.Service);
+				httpException.setErrorCode(ErrorCode.WhitelistException);
 			}
-			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED) {
-				proxibaseException = new ProxibaseServiceException("Unauthorized unverified");
-				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.UnverifiedException);
+			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED) {
+				httpException = new HttpServiceException("Unauthorized unverified");
+				httpException.setErrorType(ErrorType.Service);
+				httpException.setErrorCode(ErrorCode.UnverifiedException);
 			}
-			else if (httpStatusCode == HttpStatus.SC_FORBIDDEN) {
+			else if (statusCode == HttpStatus.SC_FORBIDDEN) {
 				/* weak password, duplicate email */
-				proxibaseException = new ProxibaseServiceException("Forbidden");
-				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.ForbiddenException);
+				httpException = new HttpServiceException("Forbidden");
+				httpException.setErrorType(ErrorType.Service);
+				httpException.setErrorCode(ErrorCode.ForbiddenException);
 			}
-			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE) {
-				proxibaseException = new ProxibaseServiceException("Duplicate email");
-				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.DuplicateException);
+			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE) {
+				httpException = new HttpServiceException("Duplicate email");
+				httpException.setErrorType(ErrorType.Service);
+				httpException.setErrorCode(ErrorCode.DuplicateException);
 			}
-			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
-				proxibaseException = new ProxibaseServiceException("Weak password");
-				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.PasswordException);
+			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
+				httpException = new HttpServiceException("Weak password");
+				httpException.setErrorType(ErrorType.Service);
+				httpException.setErrorCode(ErrorCode.PasswordException);
 			}
-			else if (httpStatusCode == HttpStatus.SC_GATEWAY_TIMEOUT) {
+			else if (statusCode == HttpStatus.SC_GATEWAY_TIMEOUT) {
 				/* This can happen if service crashes during request */
-				proxibaseException = new ProxibaseServiceException("Gateway timeout");
-				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.GatewayTimeoutException);
+				httpException = new HttpServiceException("Gateway timeout");
+				httpException.setErrorType(ErrorType.Service);
+				httpException.setErrorCode(ErrorCode.GatewayTimeoutException);
 			}
-			else if (httpStatusCode == HttpStatus.SC_CONFLICT) {
-				proxibaseException = new ProxibaseServiceException("Duplicate key");
-				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.UpdateException);
+			else if (statusCode == HttpStatus.SC_CONFLICT) {
+				httpException = new HttpServiceException("Duplicate key");
+				httpException.setErrorType(ErrorType.Service);
+				httpException.setErrorCode(ErrorCode.UpdateException);
 			}
-			else if (httpStatusCode == HttpStatus.SC_REQUEST_TOO_LONG) {
-				proxibaseException = new ProxibaseServiceException("Request entity too large");
-				proxibaseException.setErrorType(ErrorType.Client);
-				proxibaseException.setErrorCode(ErrorCode.AircandiServiceException);
+			else if (statusCode == HttpStatus.SC_REQUEST_TOO_LONG) {
+				httpException = new HttpServiceException("Request entity too large");
+				httpException.setErrorType(ErrorType.Client);
+				httpException.setErrorCode(ErrorCode.AircandiServiceException);
 			}
 			else {
-				proxibaseException = new ProxibaseServiceException("Service error: Unknown status code: " + String.valueOf(httpStatusCode));
-				proxibaseException.setErrorType(ErrorType.Service);
-				proxibaseException.setErrorCode(ErrorCode.AircandiServiceException);
+				httpException = new HttpServiceException("Service error: Unknown status code: " + String.valueOf(httpStatusCode));
+				httpException.setErrorType(ErrorType.Service);
+				httpException.setErrorCode(ErrorCode.AircandiServiceException);
 			}
-			proxibaseException.setHttpStatusCode(httpStatusCode);
+			httpException.setHttpStatusCode(httpStatusCode);
+			httpException.setHttpStatusCodeService(httpStatusCodeService);
 		}
-		return proxibaseException;
+		return httpException;
 	}
 
 	private boolean isRequestSuccessful(HttpResponse response) {
@@ -674,8 +683,8 @@ public class ProxibaseService {
 			return true;
 		}
 
-		if (exception instanceof ProxibaseServiceException) {
-			final ProxibaseServiceException proxibaseException = (ProxibaseServiceException) exception;
+		if (exception instanceof HttpServiceException) {
+			final HttpServiceException proxibaseException = (HttpServiceException) exception;
 
 			/*
 			 * For 500 internal server errors and 503 service unavailable errors, we want to retry, but we need to use
@@ -684,16 +693,16 @@ public class ProxibaseService {
 			 * back to the user as an exception. We also retry 504 gateway timeout errors because this could have been
 			 * caused by service crash during the request and the service will be restarted.
 			 */
-			if (proxibaseException.getHttpStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR
-					|| proxibaseException.getHttpStatusCode() == HttpStatus.SC_SERVICE_UNAVAILABLE
-					|| proxibaseException.getHttpStatusCode() == HttpStatus.SC_GATEWAY_TIMEOUT) {
+			if (proxibaseException.getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR
+					|| proxibaseException.getStatusCode() == HttpStatus.SC_SERVICE_UNAVAILABLE
+					|| proxibaseException.getStatusCode() == HttpStatus.SC_GATEWAY_TIMEOUT) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private void pauseExponentially(int retries) throws ProxibaseClientException {
+	private void pauseExponentially(int retries) throws HttpClientException {
 		/*
 		 * Exponential sleep on failed request to avoid flooding a service with retries.
 		 */
@@ -708,7 +717,7 @@ public class ProxibaseService {
 		}
 		catch (InterruptedException exception) {
 			Logger.d(this, "Retry delay interrupted");
-			throw makeProxibaseServiceException(null, exception);
+			throw makeHttpServiceException(null, null, exception);
 		}
 	}
 
@@ -768,22 +777,22 @@ public class ProxibaseService {
 		}
 	}
 
-	private void addEntity(HttpEntityEnclosingRequestBase httpAction, String json) throws ProxibaseClientException {
+	private void addEntity(HttpEntityEnclosingRequestBase httpAction, String json) throws HttpClientException {
 		try {
 			httpAction.setEntity(new StringEntity(json, HTTP.UTF_8));
 		}
 		catch (UnsupportedEncodingException exception) {
-			throw new ProxibaseClientException(exception.getMessage(), exception);
+			throw new HttpClientException(exception.getMessage(), exception);
 		}
 	}
 
-	private URI uriFromString(String stringUri) throws ProxibaseClientException {
+	private URI uriFromString(String stringUri) throws HttpClientException {
 		final URI uri;
 		try {
 			uri = new URI(stringUri);
 		}
 		catch (URISyntaxException exception) {
-			throw new ProxibaseClientException(exception.getMessage(), exception);
+			throw new HttpClientException(exception.getMessage(), exception);
 		}
 		return uri;
 	}
@@ -888,9 +897,12 @@ public class ProxibaseService {
 			 * if the request could only expect to return a single object.
 			 */
 			if (serviceData.d != null) {
-				/* It's a bing query */
+
+				/* It's the results of a bing query */
 				rootMap = (LinkedHashMap<String, Object>) serviceData.d;
 				if (serviceDataType == ServiceDataType.ImageResult) {
+
+					/* Array of objects */
 					final List<LinkedHashMap<String, Object>> maps = (List<LinkedHashMap<String, Object>>) rootMap.get("results");
 					final List<Object> list = new ArrayList<Object>();
 					for (Map<String, Object> map : maps) {
@@ -906,14 +918,20 @@ public class ProxibaseService {
 				else {
 					List<LinkedHashMap<String, Object>> maps = null;
 					if (serviceData.data instanceof List) {
+
+						/* The data property is an array of objects */
 						maps = (List<LinkedHashMap<String, Object>>) serviceData.data;
 					}
 					else {
+
+						/* The data property is an object and we put it in an array */
 						final Map<String, Object> map = (LinkedHashMap<String, Object>) serviceData.data;
 						maps = new ArrayList<LinkedHashMap<String, Object>>();
 						maps.add((LinkedHashMap<String, Object>) map);
 					}
 					final List<Object> list = new ArrayList<Object>();
+
+					/* Decode each map into an object and add to an array */
 					for (Map<String, Object> map : maps) {
 						if (serviceDataType == ServiceDataType.ServiceEntry) {
 							list.add(ServiceEntry.setPropertiesFromMap(new ServiceEntry(), (HashMap) map));

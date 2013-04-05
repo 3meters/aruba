@@ -20,7 +20,7 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
-import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
 

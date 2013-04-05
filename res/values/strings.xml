@@ -76,7 +76,7 @@
     <string name="alert_wifi_tethered">Turn off hotspot tethering for best results using Aircandi.</string>
     <string name="alert_wifi_disabled">Enable wifi for best results using Aircandi.</string>
     <string name="alert_wifi_settings">Settings</string>
-    <string name="alert_wifi_cancel" tools:ignore="ButtonCase">cancel</string>
+    <string name="alert_wifi_cancel" tools:ignore="ButtonCase">Cancel</string>
     <string name="alert_deleted">deleted</string>
     <string name="alert_updated">saved</string>
     <string name="alert_inserted">saved</string>
@@ -102,7 +102,9 @@
     <string name="alert_feedback_dirty_exit_message">Do you want to send your feedback?</string>
     <string name="alert_sources_dirty_exit_title">Editing</string>
     <string name="alert_sources_dirty_exit_message">Do you want to save your editing changes?</string>
-
+    <string name="alert_tuning_dirty_exit_title">Tuning</string>
+    <string name="alert_tuning_dirty_exit_message">Do you want to save your banner selection?</string>
+    
     <!-- Alerts: confirm delete -->
 
     <string name="alert_entity_delete_title">Confirm delete</string>
@@ -114,6 +116,7 @@
 
     <!-- Errors -->
 
+    <string name="error_location_poor">Location service is poor or unavailable, retry later</string>
     <string name="error_signup_missmatched_passwords_title">Password</string>
     <string name="error_signup_missmatched_passwords_message">Passwords do not match</string>
     <string name="error_signup_email_taken">Email address is already being used.</string>
@@ -172,7 +175,13 @@
     <string name="progress_searching">Searching&#8230;</string>
     <string name="progress_signing_in">Signing in&#8230;</string>
     <string name="progress_signing_up">Creating&#8230;</string>
-    <string name="progress_scanning_for_location">Scanning for location&#8230;</string>
+    
+    <!-- Pull to refresh -->
+    
+    <string name="refresh_label_pull">Pull to scan&#8230;</string>
+    <string name="refresh_label_release">Release to scan&#8230;</string>
+    <string name="refresh_scanning">Scanning&#8230;</string>
+    <string name="refresh_scanning_for_location">Scanning for nearby places&#8230;</string>
     
     <!-- Splash -->
 

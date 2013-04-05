@@ -57,6 +57,7 @@ public final class CandiConstants {
 	public static final int		INTERVAL_CATEGORIES_DOWNLOAD		= TIME_ONE_MINUTE;
 	public static final int		INTERVAL_UPDATE_CHECK				= TIME_SIXTY_MINUTES;
 	public static final int		INTERVAL_REFRESH					= TIME_THIRTY_MINUTES;
+	public static final int		INTERVAL_TETHER_ALERT				= TIME_SIXTY_MINUTES * 12;
 
 	/* Ui */
 	public static final int		MAX_Y_OVERSCROLL_DISTANCE			= 50;

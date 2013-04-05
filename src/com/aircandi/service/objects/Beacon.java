@@ -19,6 +19,7 @@ import com.aircandi.service.Expose;
 public class Beacon extends ServiceEntryBase implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 694133954499515095L;
+	public static final String	collectionId		= "beacons";
 
 	@Expose
 	public String				ssid;
@@ -165,7 +166,7 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 
 	@Override
 	public String getCollection() {
-		return "beacons";
+		return collectionId;
 	}
 
 	public List<Entity> getEntities() {

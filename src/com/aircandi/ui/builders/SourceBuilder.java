@@ -29,9 +29,9 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Source;
@@ -69,7 +69,7 @@ public class SourceBuilder extends FormActivity {
 		if (extras != null) {
 			final String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
 			if (jsonSource != null) {
-				mSource = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
+				mSource = (Source) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 				mEditing = true;
 				mCommon.mActionBar.setTitle(R.string.dialog_source_builder_title_editing);
 			}
@@ -245,7 +245,7 @@ public class SourceBuilder extends FormActivity {
 	private void doSave() {
 		final Intent intent = new Intent();
 		if (mSource != null) {
-			final String jsonSource = ProxibaseService.convertObjectToJsonSmart(mSource, false, true);
+			final String jsonSource = HttpService.convertObjectToJsonSmart(mSource, false, true);
 			intent.putExtra(CandiConstants.EXTRA_SOURCE, jsonSource);
 		}
 		setResult(Activity.RESULT_OK, intent);
