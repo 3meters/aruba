@@ -3,7 +3,7 @@
     package="com.aircandi.beta"
     android:installLocation="auto"
     android:versionCode="26"
-    android:versionName="0.8.15" >
+    android:versionName="0.8.16" >
 
     <supports-screens
         android:anyDensity="true"
