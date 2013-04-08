@@ -1,6 +1,9 @@
 package com.aircandi.ui;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -12,6 +15,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -44,19 +48,26 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.components.ProxiManager.ArrayListType;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
+import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
+import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Photo;
+import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.CandiActivity;
+import com.aircandi.ui.builders.LinkPicker;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
@@ -151,6 +162,32 @@ public class CandiForm extends CandiActivity {
 						if (mCommon.mMenuItemAdd != null) {
 							mCommon.mMenuItemAdd.setVisible(canAdd());
 						}
+						
+						/* Action bar icon */
+						if (mEntity.place != null && mEntity.place.category != null) {
+							final BitmapRequest bitmapRequest = new BitmapRequest();
+							bitmapRequest.setImageUri(mEntity.place.category.iconUri());
+							bitmapRequest.setImageRequestor(this);
+							bitmapRequest.setRequestListener(new RequestListener() {
+
+								@Override
+								public void onComplete(Object response) {
+
+									final ServiceResponse serviceResponse = (ServiceResponse) response;
+									if (serviceResponse.responseCode == ResponseCode.Success) {
+										runOnUiThread(new Runnable() {
+
+											@Override
+											public void run() {
+												final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+												mCommon.mActionBar.setIcon(new BitmapDrawable(Aircandi.applicationContext.getResources(), imageResponse.bitmap));
+											}
+										});
+									}
+								}
+							});
+							BitmapManager.getInstance().masterFetch(bitmapRequest);
+						}
 
 						draw();
 						if (mUpsize) {
@@ -170,7 +207,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	private void upsize() {
-		
+
 		/*
 		 * Upsized places do not automatically link to nearby beacons because
 		 * the browsing action isn't enough of an indicator of proximity.
@@ -257,59 +294,53 @@ public class CandiForm extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onCandiClick(View view) {
+		List<Entity> entities = null;
 		final Entity entity = (Entity) view.getTag();
-		doCandiClick(entity);
+		TextView badgeUpper = (TextView) ((View) view.getParent()).findViewById(R.id.badge_upper);
+		if (badgeUpper != null) {
+			entities = (List<Entity>) badgeUpper.getTag();
+		}
+		doCandiClick(entity, entities);
 	}
 
-	private void doCandiClick(Entity entity) {
-		if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-			final Source meta = ProxiManager.getInstance().getEntityModel().getSourceMeta().get(entity.source.type);
+	private void doCandiClick(Entity entity, List<Entity> entities) {
+
+		if (entities != null && entities.size() > 1) {
+			Entity first = entities.get(0);
+			final Source meta = ProxiManager.getInstance().getEntityModel().getSourceMeta().get(first.source.type);
 			if (meta != null && !meta.installDeclined
 					&& meta.intentSupport
-					&& entity.source.appExists()
-					&& !entity.source.appInstalled()) {
+					&& first.source.appExists()
+					&& !first.source.appInstalled()) {
 				showInstallDialog(entity);
 			}
 			else {
-				Tracker.sendEvent("ui_action", "browse_source", entity.source.type, 0, Aircandi.getInstance().getUser());
-				if (entity.source.type.equals("twitter")) {
-					AndroidManager.getInstance().callTwitterActivity(this, (entity.source.id != null) ? entity.source.id : entity.source.url);
+				final Intent intent = new Intent(this, LinkPicker.class);
+				final List<String> entityStrings = new ArrayList<String>();
+				for (Entity sourceEntity : entities) {
+					entityStrings.add(HttpService.convertObjectToJsonSmart(sourceEntity, false, true));
 				}
-				else if (entity.source.type.equals("foursquare")) {
-					AndroidManager.getInstance().callFoursquareActivity(this, (entity.source.id != null) ? entity.source.id : entity.source.url);
-				}
-				else if (entity.source.type.equals("facebook")) {
-					AndroidManager.getInstance().callFacebookActivity(this, (entity.source.id != null) ? entity.source.id : entity.source.url);
-				}
-				else if (entity.source.type.equals("yelp")) {
-					AndroidManager.getInstance().callYelpActivity(this, entity.source.id, entity.source.url);
-				}
-				else if (entity.source.type.equals("opentable")) {
-					AndroidManager.getInstance().callOpentableActivity(this, entity.source.id, entity.source.url);
-				}
-				else if (entity.source.type.equals("website")) {
-					AndroidManager.getInstance().callBrowserActivity(this, (entity.source.url != null) ? entity.source.url : entity.source.id);
-				}
-				else if (entity.source.type.equals("email")) {
-					AndroidManager.getInstance().callSendToActivity(this, entity.source.label, entity.source.id, null, null);
-				}
-				else if (entity.source.type.equals("comments")) {
-					final IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
-					intentBuilder.setCommandType(CommandType.View)
-							.setEntityId(mEntity.id)
-							.setParentEntityId(mEntity.parentId)
-							.setCollectionId(mEntity.id);
-					final Intent intent = intentBuilder.create();
-					startActivity(intent);
-					AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
-				}
-				else {
-					AndroidManager.getInstance().callGenericActivity(this, (entity.source.url != null) ? entity.source.url : entity.source.id);
-				}
+				intent.putStringArrayListExtra(CandiConstants.EXTRA_ENTITIES, (ArrayList<String>) entityStrings);
+				startActivity(intent);
+				AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 			}
 		}
 		else {
-			mCommon.showCandiFormForEntity(entity, CandiForm.class);
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+				final Source meta = ProxiManager.getInstance().getEntityModel().getSourceMeta().get(entity.source.type);
+				if (meta != null && !meta.installDeclined
+						&& meta.intentSupport
+						&& entity.source.appExists()
+						&& !entity.source.appInstalled()) {
+					showInstallDialog(entity);
+				}
+				else {
+					mCommon.routeSourceEntity(entity, mEntity);
+				}
+			}
+			else {
+				mCommon.showCandiFormForEntity(entity, CandiForm.class);
+			}
 		}
 	}
 
@@ -317,7 +348,7 @@ public class CandiForm extends CandiActivity {
 	public void onImageClick(View view) {
 		Intent intent = null;
 		final Photo photo = mEntity.photo;
-		photo.setCreatedAt(mEntity.modifiedDate);
+		photo.setCreatedAt(mEntity.modifiedDate.longValue());
 		photo.setTitle(mEntity.name);
 		photo.setUser(mEntity.creator);
 		ProxiManager.getInstance().getEntityModel().getPhotos().clear();
@@ -583,10 +614,10 @@ public class CandiForm extends CandiActivity {
 		/* Creator block */
 
 		setVisibility(creator, View.GONE);
-		if (creator != null 
-				&& entity.creator != null 
+		if (creator != null
+				&& entity.creator != null
 				&& !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
-			
+
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 				if (entity.place.getProvider().type.equals("user")) {
 					creator.setLabel(getString(R.string.candi_label_user_created_by));
@@ -658,7 +689,28 @@ public class CandiForm extends CandiActivity {
 		/*
 		 * Insert views for entities that we don't already have a view for
 		 */
+		final Map<String, List<Entity>> sourceLists = new HashMap<String, List<Entity>>();
 		for (Entity entity : entities) {
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE) && entity.source != null) {
+				if (sourceLists.containsKey(entity.source.type)) {
+					sourceLists.get(entity.source.type).add(entity);
+				}
+				else {
+					List<Entity> sources = new ArrayList<Entity>();
+					sources.add(entity);
+					sourceLists.put(entity.source.type, sources);
+				}
+			}
+		}
+
+		final Map<String, Object> sources = new HashMap<String, Object>();
+		for (Entity entity : entities) {
+
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+				if (entity.source != null && sources.containsKey(entity.source.type)) {
+					continue;
+				}
+			}
 
 			View view = inflater.inflate(viewResId, null);
 			WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
@@ -668,7 +720,7 @@ public class CandiForm extends CandiActivity {
 			TextView badgeLower = (TextView) view.findViewById(R.id.badge_lower);
 			ImageView indicator = (ImageView) view.findViewById(R.id.indicator);
 
-			FontManager.getInstance().setTypefaceDefault(title);
+			FontManager.getInstance().setTypefaceRegular(title);
 			FontManager.getInstance().setTypefaceDefault(badgeUpper);
 
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
@@ -682,6 +734,16 @@ public class CandiForm extends CandiActivity {
 					}
 				}
 				else {
+					/* Show badge if there are multiples of the same type */
+					if (sourceLists.containsKey(entity.source.type)) {
+						Integer sourceCount = sourceLists.get(entity.source.type).size();
+						if (sourceCount > 1) {
+							badgeUpper.setTag(sourceLists.get(entity.source.type));
+							badgeUpper.setText(String.valueOf(sourceCount));
+							badgeUpper.setVisibility(View.VISIBLE);
+						}
+					}
+
 					/* Show hint if source has app that hasn't been installed */
 					final Source meta = ProxiManager.getInstance().getEntityModel().getSourceMeta().get(entity.source.type);
 					if (meta != null && !meta.installDeclined
@@ -691,23 +753,26 @@ public class CandiForm extends CandiActivity {
 						/* Show hint */
 						indicator.setVisibility(View.VISIBLE);
 					}
-					if (!entity.source.icon.startsWith("/")) {
-						if (entity.source.type.equals(CandiConstants.TYPE_CANDI_SOURCE_FACEBOOK)) {
+
+					/* Show hint if generic icon has been replaced with a custom one */
+					String photoSource = entity.source.getPhoto().getSourceName();
+					if (photoSource != null) {
+						if (photoSource.equals(PhotoSource.facebook)) {
 							badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_dark);
 							if (mCommon.mThemeTone.equals("light")) {
 								badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_light);
 							}
 						}
-						else if (entity.source.type.equals(CandiConstants.TYPE_CANDI_SOURCE_TWITTER)) {
+						else if (photoSource.equals(PhotoSource.twitter)) {
 							badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_dark);
 							if (mCommon.mThemeTone.equals("light")) {
 								badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_light);
 							}
 						}
-						badgeLower.setVisibility(View.VISIBLE);
 					}
+					badgeLower.setVisibility(View.VISIBLE);
 				}
-				title.setText(entity.name);
+				title.setText(entity.source.type);
 				title.setVisibility(View.VISIBLE);
 			}
 			else {
@@ -736,6 +801,12 @@ public class CandiForm extends CandiActivity {
 			webImageView.setLayoutParams(paramsImage);
 
 			layout.addView(view);
+
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+				if (entity.source != null) {
+					sources.put(entity.source.type, entity);
+				}
+			}
 		}
 	}
 
@@ -928,7 +999,7 @@ public class CandiForm extends CandiActivity {
 						else if (which == Dialog.BUTTON_NEGATIVE) {
 							final Source meta = ProxiManager.getInstance().getEntityModel().getSourceMeta().get(entity.source.type);
 							meta.installDeclined = true;
-							doCandiClick(entity);
+							doCandiClick(entity, null);
 							dialog.dismiss();
 						}
 					}

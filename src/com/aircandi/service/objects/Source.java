@@ -3,12 +3,12 @@ package com.aircandi.service.objects;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import com.aircandi.ProxiConstants;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.service.Expose;
+import com.aircandi.service.objects.Photo.PhotoSource;
 
 /**
  * @author Jayma
@@ -38,8 +38,6 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	public Map<String, Object>	data;										// treat as opaque but roundtrip
 	@Expose
 	public Boolean				system;
-	@Expose
-	public Boolean				hidden;
 
 	/* Client use only */
 	public Boolean				checked;
@@ -61,9 +59,7 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 		source.name = (String) map.get("name");
 		source.label = (String) map.get("label");
 		source.system = (Boolean) map.get("system");
-		source.hidden = (Boolean) map.get("hidden");
 		source.url = (String) map.get("url");
-		source.icon = (String) map.get("icon");
 		source.packageName = (String) map.get("packageName");
 		source.data = (HashMap<String, Object>) map.get("data");
 		if (map.get("photo") != null) {
@@ -73,16 +69,17 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public String getImageUri() {
-		if (icon == null) {
-			return null;
+		Photo photo = getPhoto();
+		return photo.getUri();
+	}
+
+	public Photo getPhoto() {
+		if (photo != null) {
+			return photo;
 		}
-		else if (icon.toLowerCase(Locale.US).startsWith("resource:")) {
-			return icon;
+		else {
+			return new Photo(getDefaultIcon(type), null, null, null, PhotoSource.assets);
 		}
-		else if (icon.toLowerCase(Locale.US).startsWith("/")) {
-			return ProxiConstants.URL_PROXIBASE_SERVICE + icon;
-		}
-		return icon;
 	}
 
 	public static String getDefaultIcon(String sourceType) {

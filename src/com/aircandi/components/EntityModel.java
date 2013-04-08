@@ -40,6 +40,7 @@ import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
+import com.aircandi.service.objects.ServiceEntryBase.UpdateScope;
 import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateUtils;
@@ -632,6 +633,18 @@ public class EntityModel {
 					}
 
 					/* Entity */
+					entity.updateScope = UpdateScope.Property;
+					if (entity.photo != null) {
+						entity.photo.updateScope = UpdateScope.Property;
+					}
+					if (entity.place != null) {
+						if (entity.place.contact != null) {
+							entity.place.contact.updateScope = UpdateScope.Property;
+						}
+						if (entity.place.location != null) {
+							entity.place.location.updateScope = UpdateScope.Property;
+						}
+					}
 					parameters.putString("entity", "object:" + HttpService.convertObjectToJsonSmart(entity, true, true));
 
 					final ServiceRequest serviceRequest = new ServiceRequest()
@@ -691,10 +704,6 @@ public class EntityModel {
 			 */
 			final Bundle parameters = new Bundle();
 			parameters.putBoolean("skipActivityDate", false);
-
-			if (entity.modifiedDate.longValue() != entity.createdDate.longValue()) {
-				parameters.putString("actionSuffix", "_first");
-			}
 
 			parameters.putString("entity", "object:" + HttpService.convertObjectToJsonSmart(entity, true, true));
 
@@ -1491,61 +1500,69 @@ public class EntityModel {
 		}
 	}
 
-	private Entity upsertEntity(Entity entity) {
+	private Entity upsertEntity(Entity freshEntity) {
 		/*
 		 * This is the only place we use the children property
 		 * set when deserializing from the service. After this
 		 * all references to the children are dynamically assembled
 		 * in the getChildren method on entities.
 		 */
-		Entity original = entity;
 		synchronized (mEntityCache) {
-			final Entity entityOriginal = mEntityCache.get(entity.id);
+
+			final Entity staleEntity = mEntityCache.get(freshEntity.id);
 
 			/* Check to see if we have this entity keyed to the sourceId */
-			if (entityOriginal != null) {
-				original = entityOriginal;
-				Entity.copyProperties(entity, entityOriginal);
+			if (staleEntity != null) {
+
+				Entity.copyProperties(freshEntity, staleEntity);
 				/*
 				 * We only do children work if the new entity has them.
 				 */
-				if (entity.children != null) {
-					/*
-					 * If entity and entityOriginal are the same object then there isn't
-					 * anything to do since the cache by definition is up-to-date.
-					 */
-					if (!entity.children.equals(entityOriginal.children)) {
+				if (freshEntity.children != null) {
+
+					synchronized (freshEntity.children) {
 
 						/* Removes all children except source entities */
-						final Map<String, Entity> removedChildren = removeChildren(entityOriginal.id);
-						entityOriginal.children.clear();
+						final Map<String, Entity> staleChildren = removeChildren(staleEntity.id);
 
-						for (Entity childEntity : entity.children) {
+						Iterator iter = freshEntity.children.iterator();
+						while (iter.hasNext()) {
+							Entity freshChild = (Entity) iter.next();
+							Entity staleChild = staleChildren.get(freshChild.id);
 
-							Entity removedChild = removedChildren.get(childEntity.id);
-							if (removedChild != null) {
-								Entity.copyProperties(childEntity, removedChild);
-								mEntityCache.put(childEntity.id, removedChild);
-								entityOriginal.children.add(removedChild);
+							if (staleChild != null) {
+								/* Copy property over stale child and put back into cache */
+								Entity.copyProperties(freshChild, staleChild);
+								mEntityCache.put(freshChild.id, staleChild);
 							}
 							else {
-								mEntityCache.put(childEntity.id, childEntity);
-								entityOriginal.children.add(childEntity);
+								mEntityCache.put(freshChild.id, freshChild);
 							}
 
-							removeSourceEntities(childEntity.id);
-							addCommentSource(childEntity, null);
+							removeSourceEntities(freshChild.id);
+							addCommentSource(freshChild, null);
 						}
+						freshEntity.children.clear();
+						freshEntity.children = null;
 					}
 				}
 			}
 			else {
-				mEntityCache.put(entity.id, entity);
-				if (entity.children != null) {
-					for (Entity childEntity : entity.children) {
-						mEntityCache.put(childEntity.id, childEntity);
-						removeSourceEntities(childEntity.id);
-						addCommentSource(childEntity, null);
+				mEntityCache.put(freshEntity.id, freshEntity);
+
+				if (freshEntity.children != null) {
+
+					synchronized (freshEntity.children) {
+						Iterator iter = freshEntity.children.iterator();
+						while (iter.hasNext()) {
+							Entity freshChild = (Entity) iter.next();
+							mEntityCache.put(freshChild.id, freshChild);
+							removeSourceEntities(freshChild.id);
+							addCommentSource(freshChild, null);
+
+						}
+						freshEntity.children.clear();
+						freshEntity.children = null;
 					}
 				}
 			}
@@ -1554,15 +1571,15 @@ public class EntityModel {
 		/* Create virtual candi for sources */
 
 		/* First remove any old stuff */
-		removeSourceEntities(entity.id);
+		removeSourceEntities(freshEntity.id);
 
 		Integer position = 0;
-		if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+		if (freshEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 
 			/* Add the current stuff */
-			if (entity.sources != null) {
-				for (Source source : entity.sources) {
-					if ((source.system == null || !source.system) && (source.hidden == null || !source.hidden)) {
+			if (freshEntity.sources != null) {
+				for (Source source : freshEntity.sources) {
+					if (source.system == null || !source.system) {
 						source.intentSupport = true;
 						if (source.type.equals("facebook")
 								|| source.type.equals("yahoolocal")
@@ -1574,10 +1591,6 @@ public class EntityModel {
 							source.intentSupport = false;
 						}
 
-						if (source.label == null) {
-							source.label = source.type;
-						}
-
 						if (!mSourceMeta.containsKey(source.type)) {
 							mSourceMeta.put(source.type, new Source(source.intentSupport, false));
 						}
@@ -1586,14 +1599,13 @@ public class EntityModel {
 						Entity sourceEntity = mProxiManager.loadEntityFromResources(R.raw.source_entity);
 						if (sourceEntity != null) {
 							/* Transfers from source item */
-							sourceEntity.id = entity.id + "." + source.type + "." + String.valueOf(DateUtils.nowDate().getTime());
-							sourceEntity.name = source.label;
-							if (source.icon != null) {
-								sourceEntity.photo = new Photo(source.icon, null, null, null, PhotoSource.external);
-							}
+							sourceEntity.id = freshEntity.id + "." + source.type + "." + String.valueOf(DateUtils.nowDate().getTime());
+							sourceEntity.name = source.name;
+							sourceEntity.subtitle = source.label;
+							sourceEntity.photo = source.getPhoto();
 							source.position = position;
 							sourceEntity.source = source;
-							sourceEntity.parentId = entity.id;
+							sourceEntity.parentId = freshEntity.id;
 							upsertEntity(sourceEntity);
 							position++;
 						}
@@ -1604,13 +1616,13 @@ public class EntityModel {
 
 		/* Add comment source */
 
-		if (!entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-			addCommentSource(entity, position);
+		if (!freshEntity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+			addCommentSource(freshEntity, position);
 		}
 
 		setLastActivityDate(DateUtils.nowDate().getTime());
 
-		return original;
+		return mEntityCache.get(freshEntity.id);
 	}
 
 	private void addCommentSource(Entity entity, Integer position) {
@@ -1620,7 +1632,7 @@ public class EntityModel {
 		sourceEntity.name = "comments";
 		final Source source = new Source();
 		source.label = "comments";
-		source.icon = "resource:img_post";
+		source.photo = new Photo("resource:img_post", null, null, null, PhotoSource.resource);
 		source.type = "comments";
 		source.position = (position != null) ? position : 0;
 		source.intentSupport = false;

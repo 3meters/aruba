@@ -2,6 +2,7 @@ package com.aircandi.service.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -45,8 +46,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	public Boolean				isCollection;
 	@Expose
 	public Boolean				locked;
-	@Expose
-	public Boolean				enabled;
 	@Expose
 	public String				visibility			= "public";
 	@Expose
@@ -175,11 +174,13 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			entity.commentCount = (Integer) map.get("commentCount");
 			entity.commentsMore = (Boolean) map.get("commentsMore");
 
-			entity.children = new ArrayList<Entity>();
 			if (map.get("children") != null) {
-				final List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("children");
-				for (Map<String, Object> childMap : childMaps) {
-					entity.children.add(Entity.setPropertiesFromMap(new Entity(), childMap));
+				entity.children = Collections.synchronizedList(new ArrayList<Entity>());
+				synchronized (entity.children) {
+					final List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("children");
+					for (Map<String, Object> childMap : childMaps) {
+						entity.children.add(Entity.setPropertiesFromMap(new Entity(), childMap));
+					}
 				}
 			}
 			entity.childCount = (Integer) map.get("childCount");
@@ -191,6 +192,11 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 			if (map.get("photo") != null) {
 				entity.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
+			}
+
+			/* This only get used for deserialization between activities */
+			if (map.get("source") != null) {
+				entity.source = Source.setPropertiesFromMap(new Source(), (HashMap<String, Object>) map.get("source"));
 			}
 
 			entity.parentId = (String) map.get("_parent");
@@ -253,7 +259,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		final Entity entity = synthetic.clone();
 		entity.id = null;
 		entity.locked = false;
-		entity.enabled = true;
 		if (synthetic.place.category != null) {
 			entity.subtitle = synthetic.place.category.name;
 		}
@@ -335,10 +340,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			}
 		}
 		else if (type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-			final String sourceImageUri = source.getImageUri();
-			if (sourceImageUri != null) {
-				imageUri = source.getImageUri();
-			}
+			imageUri = source.getPhoto().getUri();
 		}
 		else if (type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			if (photo != null) {

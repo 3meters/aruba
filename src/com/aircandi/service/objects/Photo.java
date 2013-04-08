@@ -112,8 +112,13 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 			}
 		}
 		if (imageUri != null && !imageUri.startsWith("resource:")) {
-			if (sourceName.equals(PhotoSource.aircandi)) {
-				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
+			if (sourceName != null) {
+				if (sourceName.equals(PhotoSource.aircandi)) {
+					imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
+				}
+				else if (sourceName.equals(PhotoSource.assets)) {
+					imageUri = ProxiConstants.URL_PROXIBASE_SERVICE + imageUri;
+				}
 			}
 		}
 		return imageUri;
@@ -172,9 +177,21 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		this.sourceName = sourceName;
 	}
 
+	public String getSuffix() {
+		return suffix;
+	}
+
+	public void setSuffix(String suffix) {
+		this.suffix = suffix;
+	}
+
 	public static class PhotoSource {
 		public static String	external	= "external";
 		public static String	aircandi	= "aircandi";
+		public static String	assets		= "assets";
 		public static String	foursquare	= "foursquare";
+		public static String	facebook	= "facebook";
+		public static String	twitter		= "twitter";
+		public static String	resource	= "resource";
 	}
 }

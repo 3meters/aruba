@@ -6,7 +6,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,13 +23,10 @@ import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
@@ -43,7 +39,7 @@ import com.aircandi.utilities.MiscUtils;
 public class SourceBuilder extends FormActivity {
 
 	private Source			mSource;
-	private Boolean			mEditing		= false;
+	private Boolean			mEditing	= false;
 
 	private WebImageView	mSourceIcon;
 	private Spinner			mSourceTypePicker;
@@ -71,7 +67,7 @@ public class SourceBuilder extends FormActivity {
 			if (jsonSource != null) {
 				mSource = (Source) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 				mEditing = true;
-				mCommon.mActionBar.setTitle(R.string.dialog_source_builder_title_editing);
+				mCommon.mActionBar.setTitle(mSource.name);
 			}
 			else {
 				mEditing = false;
@@ -83,20 +79,6 @@ public class SourceBuilder extends FormActivity {
 		mSourceLabel = (EditText) findViewById(R.id.source_label);
 		mSourceId = (EditText) findViewById(R.id.source_id);
 		mSourceUrl = (EditText) findViewById(R.id.source_url);
-
-//		if (mSourceId != null) {
-//			mSourceId.addTextChangedListener(new SimpleTextWatcher() {
-//
-//				@Override
-//				public void afterTextChanged(Editable s) {
-//					if (mSource.id == null || !s.toString().equals(mSource.id)) {
-//						if (mPictureSource != null && !mPictureSource.equals("default")) {
-//							drawSourceIcon();
-//						}
-//					}
-//				}
-//			});
-//		}
 
 		mSpinnerItem = mCommon.mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
@@ -134,7 +116,7 @@ public class SourceBuilder extends FormActivity {
 		}
 
 		source.data.put("origin", "user");
-		source.icon = Source.getDefaultIcon(sourceType);
+		source.photo = new Photo(Source.getDefaultIcon(sourceType), null, null, null, PhotoSource.assets);
 		source.packageName = Source.getPackageName(sourceType);
 
 		return source;
@@ -153,27 +135,7 @@ public class SourceBuilder extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onChangePictureButtonClick(View view) {
-
 		mCommon.showPictureSourcePicker(null, mSource.type);
-		mImageRequestWebImageView = mSourceIcon;
-		mImageRequestListener = new RequestListener() {
-
-			@Override
-			public void onComplete(Object response, Photo photo, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
-
-				final ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					/* Could get set to null if we are using the default */
-					if (photo != null) {
-						mSource.photo = photo;
-					}
-					else if (imageUri != null) {
-						mSource.photo = new Photo(imageUri, null, null, null, PhotoSource.aircandi);
-					}
-					drawSourceIcon();
-				}
-			}
-		};
 	}
 
 	@SuppressWarnings("ucd")
@@ -202,11 +164,16 @@ public class SourceBuilder extends FormActivity {
 							usePictureDefault();
 						}
 						else {
-							gather(); 
+							gather();
 							if (mSource.id == null || mSource.id.equals("")) {
-								AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
-										, null
-										, getResources().getString(pictureSource.equals("facebook") ? R.string.error_missing_source_id_facebook : R.string.error_missing_source_id_twitter)
+								AircandiCommon.showAlertDialog(
+										android.R.drawable.ic_dialog_alert
+										,
+										null
+										,
+										getResources().getString(
+												pictureSource.equals("facebook") ? R.string.error_missing_source_id_facebook
+														: R.string.error_missing_source_id_twitter)
 										, null
 										, this
 										, android.R.string.ok
@@ -214,11 +181,13 @@ public class SourceBuilder extends FormActivity {
 							}
 							else {
 								if (pictureSource.equals("facebook")) {
-									mSource.icon = "https://graph.facebook.com/" + mSource.id + "/picture?type=large";
+									mSource.photo = new Photo("https://graph.facebook.com/" + mSource.id + "/picture?type=large", null, null, null,
+											PhotoSource.facebook);
 									drawSourceIcon();
 								}
 								else if (pictureSource.equals("twitter")) {
-									mSource.icon = "https://api.twitter.com/1/users/profile_image?screen_name=" + mSource.id + "&size=bigger";
+									mSource.photo = new Photo("https://api.twitter.com/1/users/profile_image?screen_name=" + mSource.id + "&size=bigger", null,
+											null, null, PhotoSource.twitter);
 									drawSourceIcon();
 								}
 							}
@@ -233,7 +202,7 @@ public class SourceBuilder extends FormActivity {
 	}
 
 	private void usePictureDefault() {
-		mSource.icon = Source.getDefaultIcon(mSource.type);
+		mSource.photo = new Photo(Source.getDefaultIcon(mSource.type), null, null, null, PhotoSource.assets);
 		drawSourceIcon();
 		Tracker.sendEvent("ui_action", "set_source_picture_to_default", null, 0, Aircandi.getInstance().getUser());
 	}

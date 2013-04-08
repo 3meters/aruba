@@ -119,4 +119,11 @@ public class MiscUtils {
 	public static Boolean validWebUri(String webUri) {
 		return WEB_URL.matcher(webUri).matches();
 	}
+	
+	public static String emptyAsNull(String stringValue) {
+		if ("".equals(stringValue)) {
+			return null;
+		}
+		return stringValue;
+	}
 }

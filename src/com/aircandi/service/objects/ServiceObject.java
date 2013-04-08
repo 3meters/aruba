@@ -9,10 +9,12 @@ import java.util.Map;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
+import com.aircandi.service.objects.ServiceEntryBase.UpdateScope;
 
 public class ServiceObject implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 5341986472204947192L;
+	public UpdateScope			updateScope			= UpdateScope.Object;
 
 	/*
 	 * Annotation syntax:
@@ -58,7 +60,7 @@ public class ServiceObject implements Cloneable, Serializable {
 						map.put(name, childMap);
 					}
 					else {
-						if (value != null || (!excludeNulls)) {
+						if (value != null || updateScope == UpdateScope.Object || !excludeNulls) {
 							map.put(name, value);
 						}
 					}

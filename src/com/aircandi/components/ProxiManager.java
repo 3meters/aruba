@@ -312,6 +312,7 @@ public class ProxiManager {
 		 */
 		final List<String> excludePlaceIds = new ArrayList<String>();
 		for (Entity entity : mEntityModel.getAircandiPlaces()) {
+			excludePlaceIds.add(entity.id);
 			if (!entity.place.getProvider().type.equals("user")) {
 				excludePlaceIds.add(entity.place.getProvider().id);
 			}

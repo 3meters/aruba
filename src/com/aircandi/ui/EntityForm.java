@@ -70,6 +70,7 @@ import com.aircandi.ui.widgets.BuilderButton;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.MiscUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.ImageUtils;
 
@@ -187,7 +188,6 @@ public class EntityForm extends FormActivity {
 		}
 		final Entity entity = new Entity();
 		entity.signalFence = -100.0f;
-		entity.enabled = true;
 		entity.locked = false;
 		entity.isCollection = (type.equals(CandiConstants.TYPE_CANDI_PLACE));
 		entity.visibility = Visibility.Public.toString().toLowerCase(Locale.US);
@@ -388,9 +388,6 @@ public class EntityForm extends FormActivity {
 					if (source.system != null && source.system) {
 						continue;
 					}
-					if (source.hidden != null && source.hidden) {
-						continue;
-					}
 					View view = inflater.inflate(R.layout.temp_radar_candi_item, null);
 					WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
 					webImageView.setSizeHint(sizePixels);
@@ -494,11 +491,11 @@ public class EntityForm extends FormActivity {
 			}
 			intent.putStringArrayListExtra(CandiConstants.EXTRA_SOURCES, (ArrayList<String>) sourceStrings);
 		}
-		
+
 		if (mEntityForForm.id != null) {
 			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntityForForm.id);
 		}
-		
+
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCES_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
@@ -518,9 +515,11 @@ public class EntityForm extends FormActivity {
 					final Bundle extras = intent.getExtras();
 
 					String phone = extras.getString(CandiConstants.EXTRA_PHONE);
-					phone = phone.replaceAll("[^\\d.]", "");
-					mEntityForForm.getPlace().getContact().phone = phone;
-					mEntityForForm.getPlace().getContact().formattedPhone = PhoneNumberUtils.formatNumber(phone);
+					if (phone != null) {
+						phone = phone.replaceAll("[^\\d.]", "");
+						mEntityForForm.getPlace().getContact().phone = phone;
+						mEntityForForm.getPlace().getContact().formattedPhone = PhoneNumberUtils.formatNumber(phone);
+					}
 
 					final String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
 					if (jsonAddress != null) {
@@ -609,10 +608,10 @@ public class EntityForm extends FormActivity {
 
 	private void gather(Entity entity) {
 		if (findViewById(R.id.text_title) != null) {
-			entity.name = ((TextView) findViewById(R.id.text_title)).getText().toString().trim();
+			entity.name = MiscUtils.emptyAsNull(((TextView) findViewById(R.id.text_title)).getText().toString().trim());
 		}
 		if (findViewById(R.id.description) != null) {
-			entity.description = ((TextView) findViewById(R.id.description)).getText().toString().trim();
+			entity.description = MiscUtils.emptyAsNull(((TextView) findViewById(R.id.description)).getText().toString().trim());
 		}
 		if (findViewById(R.id.chk_locked) != null) {
 			entity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
@@ -628,20 +627,14 @@ public class EntityForm extends FormActivity {
 		new AsyncTask() {
 
 			@Override
-			protected void onPreExecute() {}
+			protected void onPreExecute() {
+				mCommon.showBusy(R.string.progress_saving, true);
+			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("InsertUpdateEntity");
 				ModelResult result = new ModelResult();
-
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						mCommon.showBusy(R.string.progress_saving, true);
-					}
-				});
 
 				if (mCommon.mCommandType == CommandType.New) {
 					/*
@@ -775,7 +768,7 @@ public class EntityForm extends FormActivity {
 			 * Set location info if this is a place entity
 			 */
 			if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				
+
 				mEntityForForm.getPlace().setProvider(new Provider(Aircandi.getInstance().getUser().id, "user"));
 				/*
 				 * We add location info as a consistent feature
@@ -903,7 +896,7 @@ public class EntityForm extends FormActivity {
 
 			MenuItem menuItem = menu.findItem(R.id.delete);
 			menuItem.setVisible(false);
-			if (mEntityForForm.ownerId != null
+			if (mEntityForForm.ownerId != null && Aircandi.getInstance().getUser() != null
 					&& (mEntityForForm.ownerId.equals(Aircandi.getInstance().getUser().id)
 					|| (Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
 							&& Aircandi.getInstance().getUser().isDeveloper != null

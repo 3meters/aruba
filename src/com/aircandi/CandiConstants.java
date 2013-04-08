@@ -20,6 +20,7 @@ public final class CandiConstants {
 	public static final String	EXTRA_ENTITY_ID						= "com.aircandi.EXTRA_ENTITY_ID";															//$NON-NLS-1$
 	public static final String	EXTRA_ENTITY_IS_ROOT				= "com.aircandi.EXTRA_ENTITY_IS_ROOT";														//$NON-NLS-1$
 	public static final String	EXTRA_ENTITY_TYPE					= "com.aircandi.EXTRA_ENTITY_TYPE";														//$NON-NLS-1$
+	public static final String	EXTRA_ENTITIES						= "com.aircandi.EXTRA_SOURCES";															//$NON-NLS-1$
 	public static final String	EXTRA_USER_ID						= "com.aircandi.EXTRA_USER_ID";															//$NON-NLS-1$
 	public static final String	EXTRA_URI							= "com.aircandi.EXTRA_URI";																//$NON-NLS-1$
 	public static final String	EXTRA_URI_TITLE						= "com.aircandi.EXTRA_URI_TITLE";															//$NON-NLS-1$

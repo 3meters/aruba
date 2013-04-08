@@ -767,7 +767,6 @@ public class TuningWizard extends FormActivity {
 		}
 		final Entity entity = new Entity();
 		entity.signalFence = -100.0f;
-		entity.enabled = true;
 		entity.locked = false;
 		entity.isCollection = (type.equals(CandiConstants.TYPE_CANDI_PLACE));
 		entity.visibility = Visibility.Public.toString().toLowerCase(Locale.US);

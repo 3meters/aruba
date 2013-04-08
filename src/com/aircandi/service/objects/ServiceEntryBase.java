@@ -93,6 +93,10 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	public User					modifier;
 
+	/* Local client only */
+
+	public UpdateScope			updateScope			= UpdateScope.Object;
+
 	protected ServiceEntryBase() {}
 
 	public String getEntryUri() {
@@ -181,30 +185,29 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 					}
 					Object value = f.get(this);
 
-					if (value instanceof ServiceObject) {
-						Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
-						map.put(name, childMap);
-					}
-					else if (value instanceof ArrayList) {
-						List<Object> list = new ArrayList<Object>();
-						for (Object obj : (ArrayList) value) {
-							if (obj instanceof ServiceObject) {
-								Map childMap = ((ServiceObject) obj).getHashMap(useAnnotations, excludeNulls);
-								list.add(childMap);
-							}
-							else {
-								if (obj != null || (!excludeNulls)) {
-									list.add(obj);
+					if (value != null || updateScope == UpdateScope.Object || !excludeNulls) {
+
+						if (value instanceof ServiceObject) {
+							Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
+							map.put(name, childMap);
+						}
+						else if (value instanceof ArrayList) {
+							List<Object> list = new ArrayList<Object>();
+							for (Object obj : (ArrayList) value) {
+
+								if (obj != null || updateScope == UpdateScope.Object || !excludeNulls) {
+									if (obj instanceof ServiceObject) {
+										Map childMap = ((ServiceObject) obj).getHashMap(useAnnotations, excludeNulls);
+										list.add(childMap);
+									}
+									else {
+										list.add(obj);
+									}
 								}
 							}
+							map.put(name, list);
 						}
-						map.put(name, list);
-					}
-					else {
-						if (name.equals("photo") && value == null) {
-							map.put(name, value);
-						}
-						else if (value != null || (!excludeNulls)) {
+						else {
 							map.put(name, value);
 						}
 					}
@@ -235,7 +238,7 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 						}
 					}
 					Object value = f.get(this);
-					if (value != null || (!excludeNulls)) {
+					if (value != null || updateScope == UpdateScope.Object || !excludeNulls) {
 						map.put(name, value);
 					}
 				}
@@ -252,5 +255,11 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 			}
 		}
 		return map;
+	}
+
+	public static enum UpdateScope {
+		Undefined,
+		Object,
+		Property
 	}
 }

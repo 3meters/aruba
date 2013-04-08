@@ -220,7 +220,7 @@ public class SourcesBuilder extends FormActivity {
 							mSourceEditing.label = sourceUpdated.label;
 							mSourceEditing.id = sourceUpdated.id;
 							mSourceEditing.url = sourceUpdated.url;
-							mSourceEditing.icon = sourceUpdated.icon;
+							mSourceEditing.photo = sourceUpdated.photo;
 							mList.invalidateViews();
 						}
 					}
@@ -395,9 +395,6 @@ public class SourcesBuilder extends FormActivity {
 							for (Source source : sourcesProcessed) {
 								if (source.label == null) {
 									source.label = source.type;
-								}
-								if (source.hidden != null) {
-									source.hidden = false;
 								}
 							}
 							int activeCountOld = mActiveSources.size();

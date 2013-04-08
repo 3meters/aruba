@@ -159,7 +159,7 @@ public class CandiUser extends CandiActivity {
 	public void onImageClick(View view) {
 		Intent intent = null;
 		final Photo photo = mUser.photo;
-		photo.setCreatedAt(mUser.photo.getCreatedAt());
+		photo.setCreatedAt(mUser.photo.getCreatedAt().longValue());
 		photo.setTitle(mUser.name);
 		photo.setUser(mUser);
 		ProxiManager.getInstance().getEntityModel().getPhotos().clear();

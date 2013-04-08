@@ -18,8 +18,6 @@ public class Contact extends ServiceObject implements Cloneable, Serializable {
 	public String				phone;
 	@Expose
 	public String				formattedPhone;
-	@Expose
-	public String				twitter;
 
 	public Contact() {}
 	
@@ -38,7 +36,6 @@ public class Contact extends ServiceObject implements Cloneable, Serializable {
 		
 		contact.phone = (String) map.get("phone");
 		contact.formattedPhone = (String) map.get("formattedPhone");
-		contact.twitter = (String) map.get("twitter");
 		
 		return contact;
 	}

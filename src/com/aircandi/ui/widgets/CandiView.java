@@ -185,17 +185,40 @@ public class CandiView extends RelativeLayout {
 				setVisibility(mCandiSources, View.GONE);
 				if (mCandiSources != null && !entity.synthetic) {
 
+					int sourceCount = 0;
+					mCandiSources.removeAllViews();
+					final int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
+					final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
+
+					if (entity.childCount > 0) {
+						View view = mInflater.inflate(R.layout.temp_radar_candi_item, null);
+						WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+						webImageView.setSizeHint(sizePixels);
+
+						String imageUri = "resource:ic_candi_dark";
+						webImageView.getImageView().setTag(imageUri);
+
+						BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
+						bitmapRequest.setImageSize(mCandiImage.getSizeHint());
+						bitmapRequest.setImageRequestor(webImageView.getImageView());
+						BitmapManager.getInstance().masterFetch(bitmapRequest);
+
+						LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
+						params.setMargins(marginPixels
+								, marginPixels
+								, marginPixels
+								, marginPixels);
+						view.setLayoutParams(params);
+						mCandiSources.addView(view);
+						sourceCount++;
+					}
+
 					final List<Entity> entities = entity.getSourceEntities();
 					final Map<String, Object> sources = new HashMap<String, Object>();
 					synchronized (entities) {
 						if (entities.size() > 0) {
 
-							mCandiSources.removeAllViews();
-							final int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
-							final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
-
 							/* We only show the first five */
-							int sourceCount = 0;
 							for (Entity sourceEntity : entities) {
 								if (sourceEntity.source != null && sourceEntity.source.type.equals("comments")) {
 									if (entity.commentCount == null || entity.commentCount < 1) {
@@ -225,6 +248,9 @@ public class CandiView extends RelativeLayout {
 										}
 										if (sourceEntity.source.type.equals("facebook")) {
 											imageUri = "resource:ic_facebook_dark";
+										}
+										if (sourceEntity.source.type.equals("foursquare")) {
+											imageUri = "resource:ic_foursquare_dark";
 										}
 										if (sourceEntity.source.type.equals("comments")) {
 											imageUri = "resource:ic_comments_dark";

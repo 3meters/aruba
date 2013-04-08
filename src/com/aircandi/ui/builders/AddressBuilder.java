@@ -17,6 +17,7 @@ import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.Location;
 import com.aircandi.ui.base.FormActivity;
+import com.aircandi.utilities.MiscUtils;
 
 public class AddressBuilder extends FormActivity {
 
@@ -99,12 +100,12 @@ public class AddressBuilder extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private void gather() {
-		mPhone = ((EditText) findViewById(R.id.phone)).getEditableText().toString();
-		mLocation.address = ((EditText) findViewById(R.id.address)).getEditableText().toString();
-		mLocation.crossStreet = ((EditText) findViewById(R.id.cross_street)).getEditableText().toString();
-		mLocation.city = ((EditText) findViewById(R.id.city)).getEditableText().toString();
-		mLocation.state = ((EditText) findViewById(R.id.state)).getEditableText().toString();
-		mLocation.postalCode = ((EditText) findViewById(R.id.zip_code)).getEditableText().toString();
+		mPhone = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.phone)).getEditableText().toString());
+		mLocation.address = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.address)).getEditableText().toString());
+		mLocation.crossStreet = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.cross_street)).getEditableText().toString());
+		mLocation.city = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.city)).getEditableText().toString());
+		mLocation.state = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.state)).getEditableText().toString());
+		mLocation.postalCode = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.zip_code)).getEditableText().toString());
 	}
 
 	@Override

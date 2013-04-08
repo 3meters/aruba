@@ -354,6 +354,45 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
+	public void routeSourceEntity(Entity sourceEntity, Entity hostEntity) {
+		
+		Tracker.sendEvent("ui_action", "browse_source", sourceEntity.source.type, 0, Aircandi.getInstance().getUser());
+		if (sourceEntity.source.type.equals("twitter")) {
+			AndroidManager.getInstance().callTwitterActivity(mActivity, (sourceEntity.source.id != null) ? sourceEntity.source.id : sourceEntity.source.url);
+		}
+		else if (sourceEntity.source.type.equals("foursquare")) {
+			AndroidManager.getInstance().callFoursquareActivity(mActivity, (sourceEntity.source.id != null) ? sourceEntity.source.id : sourceEntity.source.url);
+		}
+		else if (sourceEntity.source.type.equals("facebook")) {
+			AndroidManager.getInstance().callFacebookActivity(mActivity, (sourceEntity.source.id != null) ? sourceEntity.source.id : sourceEntity.source.url);
+		}
+		else if (sourceEntity.source.type.equals("yelp")) {
+			AndroidManager.getInstance().callYelpActivity(mActivity, sourceEntity.source.id, sourceEntity.source.url);
+		}
+		else if (sourceEntity.source.type.equals("opentable")) {
+			AndroidManager.getInstance().callOpentableActivity(mActivity, sourceEntity.source.id, sourceEntity.source.url);
+		}
+		else if (sourceEntity.source.type.equals("website")) {
+			AndroidManager.getInstance().callBrowserActivity(mActivity, (sourceEntity.source.url != null) ? sourceEntity.source.url : sourceEntity.source.id);
+		}
+		else if (sourceEntity.source.type.equals("email")) {
+			AndroidManager.getInstance().callSendToActivity(mActivity, sourceEntity.source.label, sourceEntity.source.id, null, null);
+		}
+		else if (sourceEntity.source.type.equals("comments")) {
+			final IntentBuilder intentBuilder = new IntentBuilder(mActivity, CommentList.class);
+			intentBuilder.setCommandType(CommandType.View)
+					.setEntityId(hostEntity.id)
+					.setParentEntityId(hostEntity.parentId)
+					.setCollectionId(hostEntity.id);
+			final Intent intent = intentBuilder.create();
+			mActivity.startActivity(intent);
+			AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToPage);
+		}
+		else {
+			AndroidManager.getInstance().callGenericActivity(mActivity, (sourceEntity.source.url != null) ? sourceEntity.source.url : sourceEntity.source.id);
+		}
+	}
+
 	public void showTemplatePicker(Boolean isRoot) {
 		/*
 		 * Dialogs
