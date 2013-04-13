@@ -1,5 +1,6 @@
 package com.aircandi.components;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
@@ -8,9 +9,14 @@ import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.ui.CandiForm;
+import com.aircandi.ui.CandiRadar;
+import com.aircandi.ui.CommentList;
 import com.google.android.gcm.GCMBaseIntentService;
 
 public class GCMIntentService extends GCMBaseIntentService {
+
+	public static Activity		currentActivity;
+	public static final Object	lock	= new Object();
 
 	public GCMIntentService() {
 		super(CandiConstants.SENDER_ID);
@@ -50,10 +56,71 @@ public class GCMIntentService extends GCMBaseIntentService {
 			Intent intent = intentBuilder.create();
 			airNotification.intent = intent;
 		}
-		
+
 		/* Stash in our queue */
 		NotificationManager.getInstance().getNotifications().add(airNotification);
-		
+
+		/* See if target is visible and refresh */
+		synchronized (lock) {
+			if (currentActivity != null) {
+				if (airNotification.type.equals("comment")) {
+					if (currentActivity.getClass() == CandiForm.class) {
+						final CandiForm activity = (CandiForm) currentActivity;
+						if (activity.getCommon().mEntityId.equals(airNotification.entity.id)) {
+							activity.runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									activity.getCommon().doRefreshClick();
+								}
+							});
+						}
+					}
+					else if (currentActivity.getClass() == CommentList.class) {
+						final CommentList activity = (CommentList) currentActivity;
+						if (activity.getCommon().mEntityId.equals(airNotification.entity.id)) {
+							activity.runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									activity.getCommon().doRefreshClick();
+								}
+							});
+						}
+					}
+				}
+				else if (airNotification.type.equals("entity_insert")) {
+					if (airNotification.entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+						if (currentActivity.getClass() == CandiRadar.class) {
+							final CandiRadar activity = (CandiRadar) currentActivity;
+							activity.runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									activity.getCommon().doRefreshClick();
+								}
+							});
+						}
+					}
+					else {
+						if (currentActivity.getClass() == CandiForm.class) {
+							final CandiForm activity = (CandiForm) currentActivity;
+							if (airNotification.entity.parentId != null) {
+								if (activity.getCommon().mEntityId.equals(airNotification.entity.parentId)) {
+									activity.runOnUiThread(new Runnable() {
+										@Override
+										public void run() {
+											activity.getCommon().doRefreshClick();
+										}
+									});
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		/* Pass to the cache */
+		ProxiManager.getInstance().getEntityModel().processNotification(airNotification);
+
 		/* Display */
 		NotificationManager.getInstance().showNotification(airNotification, context);
 	}

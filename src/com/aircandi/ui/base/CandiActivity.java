@@ -28,12 +28,12 @@ import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public abstract class CandiActivity extends SherlockActivity {
 
-	protected AircandiCommon	mCommon;
-	private AlertDialog			mUpdateAlertDialog;
-	private AlertDialog			mWifiAlertDialog;
-	protected Boolean			mPrefChangeNewSearchNeeded	= false;
-	protected Boolean			mPrefChangeRefreshUiNeeded	= false;
-	protected Boolean			mPrefChangeReloadNeeded		= false;
+	private AircandiCommon	mCommon;
+	private AlertDialog		mUpdateAlertDialog;
+	private AlertDialog		mWifiAlertDialog;
+	protected Boolean		mPrefChangeNewSearchNeeded	= false;
+	protected Boolean		mPrefChangeRefreshUiNeeded	= false;
+	protected Boolean		mPrefChangeReloadNeeded		= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -353,6 +353,14 @@ public abstract class CandiActivity extends SherlockActivity {
 	public void onAttachedToWindow() {
 		super.onAttachedToWindow();
 		mCommon.doAttachedToWindow();
+	}
+
+	public AircandiCommon getCommon() {
+		return mCommon;
+	}
+
+	public void setCommon(AircandiCommon common) {
+		mCommon = common;
 	}
 
 }

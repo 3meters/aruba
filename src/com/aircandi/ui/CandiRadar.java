@@ -245,8 +245,8 @@ public class CandiRadar extends CandiActivity {
 					protected void onPostExecute(Object result) {
 						final ServiceResponse serviceResponse = (ServiceResponse) result;
 						if (serviceResponse.responseCode != ResponseCode.Success) {
-							mCommon.handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
-							mCommon.hideBusy(true);
+							getCommon().handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
+							getCommon().hideBusy(true);
 						}
 					}
 
@@ -289,7 +289,7 @@ public class CandiRadar extends CandiActivity {
 					/* We only show toast if we timeout without getting any location fix */
 					ImageUtils.showToastNotification(getString(R.string.error_location_poor), Toast.LENGTH_SHORT);
 				}
-				mCommon.hideBusy(true);
+				getCommon().hideBusy(true);
 				mList.onRefreshComplete();
 			}
 		});
@@ -327,7 +327,7 @@ public class CandiRadar extends CandiActivity {
 					}
 
 					LocationManager.getInstance().setLocationLocked(locationCandidate);
-					mCommon.updateAccuracyIndicator(LocationManager.getInstance().getLocationLocked());
+					getCommon().updateAccuracyIndicator(LocationManager.getInstance().getLocationLocked());
 					BusProvider.getInstance().post(new LocationLockedEvent(LocationManager.getInstance().getLocationLocked()));
 
 					if (Aircandi.stopwatch2.isStarted()) {
@@ -338,7 +338,7 @@ public class CandiRadar extends CandiActivity {
 					final Observation observation = LocationManager.getInstance().getObservationLocked();
 					if (observation != null) {
 
-						mCommon.showBusy(true);
+						getCommon().showBusy(true);
 
 						new AsyncTask() {
 
@@ -357,15 +357,15 @@ public class CandiRadar extends CandiActivity {
 							protected void onPostExecute(Object result) {
 								final ServiceResponse serviceResponse = (ServiceResponse) result;
 								if (serviceResponse.responseCode != ResponseCode.Success) {
-									mCommon.handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
-									mCommon.hideBusy(true);
+									getCommon().handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
+									getCommon().hideBusy(true);
 								}
 							}
 
 						}.execute();
 					}
 					else {
-						mCommon.hideBusy(true);
+						getCommon().hideBusy(true);
 					}
 				}
 			}
@@ -382,7 +382,7 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void run() {
 				Logger.d(CandiRadar.this, "Places near location finished event: ** done **");
-				mCommon.hideBusy(true);
+				getCommon().hideBusy(true);
 				mList.onRefreshComplete();
 			}
 		});
@@ -457,7 +457,7 @@ public class CandiRadar extends CandiActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(true);
+					getCommon().showBusy(true);
 				}
 
 				@Override
@@ -486,14 +486,14 @@ public class CandiRadar extends CandiActivity {
 						if (Aircandi.stopwatch4.isStarted()) {
 							Aircandi.stopwatch4.stop("Aircandi initialization finished: network problem");
 						}
-						mCommon.hideBusy(true);
+						getCommon().hideBusy(true);
 						mList.onRefreshComplete();
 
 						if (connectedState == ConnectedState.WalledGarden) {
-							mCommon.showAlertDialogSimple(null, getString(R.string.error_connection_walled_garden));
+							getCommon().showAlertDialogSimple(null, getString(R.string.error_connection_walled_garden));
 						}
 						else if (connectedState == ConnectedState.None) {
-							mCommon.showAlertDialogSimple(null, getString(R.string.error_connection));
+							getCommon().showAlertDialogSimple(null, getString(R.string.error_connection));
 						}
 					}
 				}
@@ -605,7 +605,7 @@ public class CandiRadar extends CandiActivity {
 		enableEvents();
 
 		/* Reset the accuracy indicator */
-		mCommon.updateAccuracyIndicator(LocationManager.getInstance().getLocationLocked());
+		getCommon().updateAccuracyIndicator(LocationManager.getInstance().getLocationLocked());
 	}
 
 	@Override
@@ -627,7 +627,7 @@ public class CandiRadar extends CandiActivity {
 		}
 
 		/* Kill busy */
-		mCommon.hideBusy(true);
+		getCommon().hideBusy(true);
 		mList.onRefreshComplete();
 
 		Logger.d(this, "CandiRadarActivity stopped");
@@ -645,7 +645,7 @@ public class CandiRadar extends CandiActivity {
 		 * be followed by onStop if we are not visible. Does not fire if the activity window
 		 * loses focus but the activity is still active.
 		 */
-		mCommon.stopScanService();
+		getCommon().stopScanService();
 		mPauseDate = DateUtils.nowDate().getTime();
 
 		super.onPause();
@@ -668,7 +668,7 @@ public class CandiRadar extends CandiActivity {
 				&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
 				&& Aircandi.getInstance().getUser().isDeveloper != null
 				&& Aircandi.getInstance().getUser().isDeveloper) {
-			mCommon.startScanService(CandiConstants.INTERVAL_SCAN_WIFI);
+			getCommon().startScanService(CandiConstants.INTERVAL_SCAN_WIFI);
 		}
 	}
 
@@ -731,12 +731,12 @@ public class CandiRadar extends CandiActivity {
 			 */
 			Logger.d(this, "Refresh Ui because of preference change");
 			mPrefChangeRefreshUiNeeded = false;
-			mCommon.showBusy(true);
+			getCommon().showBusy(true);
 			invalidateOptionsMenu();
 			mRadarAdapter.getItems().clear();
 			mRadarAdapter.getItems().addAll(ProxiManager.getInstance().getEntityModel().getAllPlaces(false));
 			mRadarAdapter.notifyDataSetChanged();
-			mCommon.hideBusy(true);
+			getCommon().hideBusy(true);
 		}
 		else if (LocationManager.getInstance().getLocationLocked() == null) {
 			/*
@@ -811,12 +811,12 @@ public class CandiRadar extends CandiActivity {
 
 				@Override
 				public void run() {
-					mCommon.showBusy(true);
+					getCommon().showBusy(true);
 					invalidateOptionsMenu();
 					mRadarAdapter.getItems().clear();
 					mRadarAdapter.getItems().addAll(ProxiManager.getInstance().getEntityModel().getAllPlaces(false));
 					mRadarAdapter.notifyDataSetChanged();
-					mCommon.hideBusy(true);
+					getCommon().hideBusy(true);
 				}
 			}, 100);
 		}
@@ -850,19 +850,19 @@ public class CandiRadar extends CandiActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		mCommon.doCreateOptionsMenu(menu);
+		getCommon().doCreateOptionsMenu(menu);
 		return true;
 	}
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		mCommon.doPrepareOptionsMenu(menu);
+		getCommon().doPrepareOptionsMenu(menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		mCommon.doOptionsItemSelected(menuItem);
+		getCommon().doOptionsItemSelected(menuItem);
 		return true;
 	}
 

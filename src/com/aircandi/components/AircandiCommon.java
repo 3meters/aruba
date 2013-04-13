@@ -310,7 +310,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
-	private void doRefreshClick() {
+	public void doRefreshClick() {
 		/* Show busy indicator */
 		startActionbarBusyIndicator();
 
@@ -571,7 +571,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				airNotification.intent = intent;
 				airNotification.type = "network";
 				NotificationManager.getInstance().showNotification(airNotification, context);
-				
+
 				showAlertDialogSimple(null, mActivity.getString(R.string.error_connection));
 			}
 			else if (errorCode == ErrorCode.WalledGardenException) {
@@ -1337,6 +1337,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void doPause() {
 		BusProvider.getInstance().unregister(this);
+		synchronized (GCMIntentService.lock) {
+			GCMIntentService.currentActivity = null;
+		}
 	}
 
 	public void doStop() {
@@ -1349,6 +1352,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void doResume() {
 		BusProvider.getInstance().register(this);
+		synchronized (GCMIntentService.lock) {
+			GCMIntentService.currentActivity = mActivity;
+		}
 	}
 
 	public void doSaveInstanceState(Bundle savedInstanceState) {

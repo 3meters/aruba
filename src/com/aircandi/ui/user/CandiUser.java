@@ -82,23 +82,23 @@ public class CandiUser extends CandiActivity {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+		getCommon().mActionBar.setDisplayHomeAsUpEnabled(true);
 
 		new AsyncTask() {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(true);
+				getCommon().showBusy(true);
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetUser");
-				ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mCommon.mUserId, true);
+				ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(getCommon().mUserId, true);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					mUser = (User) result.serviceResponse.data;
 
-					result = ProxiManager.getInstance().getEntityModel().getUserEntities(mCommon.mUserId, true, ProxiConstants.USER_ENTITY_LIMIT);
+					result = ProxiManager.getInstance().getEntityModel().getUserEntities(getCommon().mUserId, true, ProxiConstants.USER_ENTITY_LIMIT);
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						mEntities = (List<Entity>) result.data;
 					}
@@ -113,13 +113,13 @@ public class CandiUser extends CandiActivity {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
 					mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
-					mCommon.mActionBar.setTitle(mUser.name);
+					getCommon().mActionBar.setTitle(mUser.name);
 					buildCandiUser(CandiUser.this, mUser);
 				}
 				else {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiUser);
+					getCommon().handleServiceError(result.serviceResponse, ServiceOperation.CandiUser);
 				}
-				mCommon.hideBusy(true);
+				getCommon().hideBusy(true);
 			}
 
 		}.execute();
@@ -181,14 +181,14 @@ public class CandiUser extends CandiActivity {
 			intentBuilder.setCommandType(CommandType.View)
 					.setArrayListType(ArrayListType.OwnedByUser)
 					.setEntityType(CandiConstants.TYPE_CANDI_PLACE)
-					.setUserId(mCommon.mUserId);
+					.setUserId(getCommon().mUserId);
 		}
 		else if (target.equals("candigrams")) {
 			intentBuilder = new IntentBuilder(this, CandiList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setArrayListType(ArrayListType.OwnedByUser)
 					.setEntityType(CandiConstants.TYPE_CANDI_CANDIGRAM)
-					.setUserId(mCommon.mUserId);
+					.setUserId(getCommon().mUserId);
 		}
 
 		Intent intent = intentBuilder.create();
@@ -507,12 +507,12 @@ public class CandiUser extends CandiActivity {
 
 		if (item.getItemId() == R.id.edit) {
 			Tracker.sendEvent("ui_action", "edit_user", null, 0, Aircandi.getInstance().getUser());
-			mCommon.doEditUserClick();
+			getCommon().doEditUserClick();
 			return true;
 		}
 
 		/* In case we add general menu items later */
-		mCommon.doOptionsItemSelected(item);
+		getCommon().doOptionsItemSelected(item);
 		return true;
 	}
 

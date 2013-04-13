@@ -320,7 +320,11 @@ public class ProfileForm extends FormActivity {
 					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
 						if (pictureSource.equals("search")) {
-							pictureSearch();
+							String defaultSearch = null;
+							if (mTextFullname != null) {
+								defaultSearch = MiscUtils.emptyAsNull(mTextFullname.getText().toString().trim());
+							}
+							pictureSearch(defaultSearch);
 						}
 						else if (pictureSource.equals("gallery")) {
 							pictureFromGallery();

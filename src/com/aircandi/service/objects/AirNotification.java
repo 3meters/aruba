@@ -19,6 +19,8 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	@Expose
 	public String				type;
 	@Expose
+	public String				subtype;
+	@Expose
 	public String				title;
 	@Expose
 	public String				subtitle;
@@ -46,6 +48,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 		notification.title = (String) map.get("title");
 		notification.subtitle = (String) map.get("subtitle");
 		notification.type = (String) map.get("type");
+		notification.subtype = (String) map.get("subtype");
 		notification.message = (String) map.get("message");
 		notification.sentDate = (Number) map.get("sentDate");
 

@@ -105,13 +105,13 @@ public class CandiForm extends CandiActivity {
 		mContentView = (ViewGroup) findViewById(R.id.candi_body);
 
 		Integer candiFormResId = R.layout.candi_form_base;
-		if (mCommon.mEntityType == null) {
-			mCommon.mEntityType = CandiConstants.TYPE_CANDI_PLACE;
+		if (getCommon().mEntityType == null) {
+			getCommon().mEntityType = CandiConstants.TYPE_CANDI_PLACE;
 		}
-		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
+		if (getCommon().mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
 			candiFormResId = R.layout.candi_form_post;
 		}
-		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+		else if (getCommon().mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			candiFormResId = R.layout.candi_form_place;
 		}
 
@@ -135,19 +135,19 @@ public class CandiForm extends CandiActivity {
 		 * Navigation setup for action bar icon and title
 		 */
 		Logger.d(this, "Binding candi form");
-		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+		getCommon().mActionBar.setDisplayHomeAsUpEnabled(true);
 
 		new AsyncTask() {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(true);
+				getCommon().showBusy(true);
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetEntity");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, null, null);
+				final ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(getCommon().mEntityId, refresh, null, null);
 				return result;
 			}
 
@@ -160,12 +160,12 @@ public class CandiForm extends CandiActivity {
 						mEntity = (Entity) result.data;
 						mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
 						mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
-						mCommon.mActionBar.setTitle(mEntity.name);
-						if (mCommon.mMenuItemEdit != null) {
-							mCommon.mMenuItemEdit.setVisible(canEdit());
+						getCommon().mActionBar.setTitle(mEntity.name);
+						if (getCommon().mMenuItemEdit != null) {
+							getCommon().mMenuItemEdit.setVisible(canEdit());
 						}
-						if (mCommon.mMenuItemAdd != null) {
-							mCommon.mMenuItemAdd.setVisible(canAdd());
+						if (getCommon().mMenuItemAdd != null) {
+							getCommon().mMenuItemAdd.setVisible(canAdd());
 						}
 
 						/* Action bar icon */
@@ -185,7 +185,7 @@ public class CandiForm extends CandiActivity {
 											@Override
 											public void run() {
 												final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-												mCommon.mActionBar.setIcon(new BitmapDrawable(Aircandi.applicationContext.getResources(), imageResponse.bitmap));
+												getCommon().mActionBar.setIcon(new BitmapDrawable(Aircandi.applicationContext.getResources(), imageResponse.bitmap));
 											}
 										});
 									}
@@ -200,11 +200,11 @@ public class CandiForm extends CandiActivity {
 							upsize();
 						}
 					}
-					mCommon.hideBusy(true);
+					getCommon().hideBusy(true);
 				}
 				else {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
-					mCommon.hideBusy(true);
+					getCommon().handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
+					getCommon().hideBusy(true);
 				}
 			}
 
@@ -222,8 +222,8 @@ public class CandiForm extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(true);
-				mCommon.startBusyIndicator();
+				getCommon().showBusy(true);
+				getCommon().startBusyIndicator();
 			}
 
 			@Override
@@ -236,14 +236,14 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
-				mCommon.hideBusy(true);
+				getCommon().hideBusy(true);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					final Entity upsizedEntity = (Entity) result.data;
-					mCommon.mEntityId = upsizedEntity.id;
+					getCommon().mEntityId = upsizedEntity.id;
 					bind(false);
 				}
 				else {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.Tuning);
+					getCommon().handleServiceError(result.serviceResponse, ServiceOperation.Tuning);
 				}
 			}
 		}.execute();
@@ -257,7 +257,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	private void draw() {
-		buildCandiForm(mEntity, mContentView, mCommon.mMenu, null, false);
+		buildCandiForm(mEntity, mContentView, getCommon().mMenu, null, false);
 		mCandiForm.setVisibility(View.VISIBLE);
 	}
 
@@ -340,11 +340,11 @@ public class CandiForm extends CandiActivity {
 					showInstallDialog(entity);
 				}
 				else {
-					mCommon.routeSourceEntity(entity, mEntity);
+					getCommon().routeSourceEntity(entity, mEntity);
 				}
 			}
 			else {
-				mCommon.showCandiFormForEntity(entity, CandiForm.class);
+				getCommon().showCandiFormForEntity(entity, CandiForm.class);
 			}
 		}
 	}
@@ -368,7 +368,7 @@ public class CandiForm extends CandiActivity {
 
 	public void onUserClick(View view) {
 		User user = (User) view.getTag();
-		mCommon.doUserClick(user);
+		getCommon().doUserClick(user);
 	}
 
 	public void onNewCandigramButtonClick(View view) {
@@ -381,7 +381,7 @@ public class CandiForm extends CandiActivity {
 			final IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
 					.setCommandType(CommandType.New)
 					.setEntityId(null)
-					.setParentEntityId(mCommon.mEntityId)
+					.setParentEntityId(getCommon().mEntityId)
 					.setEntityType(CandiConstants.TYPE_CANDI_PICTURE);
 
 			final Intent redirectIntent = intentBuilder.create();
@@ -467,7 +467,7 @@ public class CandiForm extends CandiActivity {
 						final IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
 								.setCommandType(CommandType.New)
 								.setEntityId(null)
-								.setParentEntityId(mCommon.mEntityId)
+								.setParentEntityId(getCommon().mEntityId)
 								.setEntityType(entityType);
 
 						final Intent redirectIntent = intentBuilder.create();
@@ -802,13 +802,13 @@ public class CandiForm extends CandiActivity {
 					if (photoSource != null) {
 						if (photoSource.equals(PhotoSource.facebook)) {
 							badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_dark);
-							if (mCommon.mThemeTone.equals("light")) {
+							if (getCommon().mThemeTone.equals("light")) {
 								badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_light);
 							}
 						}
 						else if (photoSource.equals(PhotoSource.twitter)) {
 							badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_dark);
-							if (mCommon.mThemeTone.equals("light")) {
+							if (getCommon().mThemeTone.equals("light")) {
 								badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_light);
 							}
 						}
@@ -899,9 +899,9 @@ public class CandiForm extends CandiActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		mCommon.doCreateOptionsMenu(menu);
-		mCommon.mMenuItemEdit.setVisible(canEdit());
-		mCommon.mMenuItemAdd.setVisible(canAdd());
+		getCommon().doCreateOptionsMenu(menu);
+		getCommon().mMenuItemEdit.setVisible(canEdit());
+		getCommon().mMenuItemAdd.setVisible(canAdd());
 		return true;
 	}
 
@@ -910,7 +910,7 @@ public class CandiForm extends CandiActivity {
 
 		if (item.getItemId() == R.id.edit) {
 			Tracker.sendEvent("ui_action", "edit_entity", null, 0, Aircandi.getInstance().getUser());
-			mCommon.doEditCandiClick();
+			getCommon().doEditCandiClick();
 			return true;
 		}
 		else if (item.getItemId() == R.id.add) {
@@ -919,7 +919,7 @@ public class CandiForm extends CandiActivity {
 		}
 
 		/* In case we add general menu items later */
-		mCommon.doOptionsItemSelected(item);
+		getCommon().doOptionsItemSelected(item);
 		return true;
 	}
 
@@ -1053,6 +1053,10 @@ public class CandiForm extends CandiActivity {
 
 	public Entity getEntity() {
 		return mEntity;
+	}
+
+	public void setEntity(Entity entity) {
+		mEntity = entity;
 	}
 
 	private class PackageReceiver extends BroadcastReceiver {

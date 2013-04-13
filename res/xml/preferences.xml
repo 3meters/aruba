@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="@string/pref_search_category_title" >
+    <PreferenceCategory android:title="@string/pref_general_category_title" >
         <ListPreference
             android:id="@+id/Pref_Search_Radius"
             android:defaultValue="8047"
@@ -13,8 +13,6 @@
             android:positiveButtonText="@string/pref_dialog_ok"
             android:summary="@string/pref_search_radius_summary"
             android:title="@string/pref_search_radius_title" />
-    </PreferenceCategory>
-    <PreferenceCategory android:title="@string/pref_general_category_title" >
         <ListPreference
             android:id="@+id/Pref_Theme"
             android:defaultValue="aircandi_theme_midnight"
@@ -27,12 +25,34 @@
             android:summary="@string/pref_theme_summary"
             android:title="@string/pref_theme_title" />
 
-        <CheckBoxPreference
-            android:id="@+id/Pref_Sound_Effects"
-            android:defaultValue="true"
-            android:key="Pref_Sound_Effects"
-            android:summary="@string/pref_sound_effects_summary"
-            android:title="@string/pref_sound_effects_title" />
+        <PreferenceScreen
+            android:key="Pref_Notifications_Screen"
+            android:title="Notifications" >
+            <CheckBoxPreference
+                android:id="@+id/Pref_Notifications_Comments"
+                android:defaultValue="true"
+                android:key="Pref_Notifications_Comments"
+                android:summary="@string/pref_notifications_comments_summary"
+                android:title="@string/pref_notifications_comments_title" />
+            <CheckBoxPreference
+                android:id="@+id/Pref_Notifications_Candigrams"
+                android:defaultValue="true"
+                android:key="Pref_Notifications_Candigrams"
+                android:summary="@string/pref_notifications_candigrams_summary"
+                android:title="@string/pref_notifications_candigrams_title" />
+            <CheckBoxPreference
+                android:id="@+id/Pref_Notifications_Nearby"
+                android:defaultValue="true"
+                android:key="Pref_Notifications_Nearby"
+                android:summary="@string/pref_notifications_nearby_summary"
+                android:title="@string/pref_notifications_nearby_title" />
+            <CheckBoxPreference
+                android:id="@+id/Pref_Sound_Effects"
+                android:defaultValue="true"
+                android:key="Pref_Sound_Effects"
+                android:summary="@string/pref_sound_effects_summary"
+                android:title="@string/pref_sound_effects_title" />
+        </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_reporting_category_title" >
         <CheckBoxPreference
@@ -41,18 +61,6 @@
             android:summaryOff="@string/pref_acra_disabled"
             android:summaryOn="@string/pref_acra_enabled"
             android:title="@string/pref_disable_acra" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="acra.syslog.enable"
-            android:summaryOff="@string/pref_acra_syslog_disabled"
-            android:summaryOn="@string/pref_acra_syslog_enabled"
-            android:title="@string/pref_acra_syslog" />
-
-        <EditTextPreference
-            android:key="acra.user.email"
-            android:summary="@string/pref_acra_user_email_summary"
-            android:title="@string/pref_acra_user_email" />
-
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="acra.alwaysaccept"

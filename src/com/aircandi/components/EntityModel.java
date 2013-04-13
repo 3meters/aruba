@@ -26,6 +26,7 @@ import com.aircandi.service.HttpService.RequestType;
 import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Beacon.BeaconType;
 import com.aircandi.service.objects.Category;
@@ -966,6 +967,9 @@ public class EntityModel {
 	// --------------------------------------------------------------------------------------------
 	// Other updates
 	// --------------------------------------------------------------------------------------------
+	
+	public void processNotification(AirNotification notification) {
+	}
 
 	public ModelResult registerDevice(Device device) {
 		ModelResult result = new ModelResult();

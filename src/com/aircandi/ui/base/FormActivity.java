@@ -308,9 +308,9 @@ public abstract class FormActivity extends SherlockActivity {
 		}
 	}
 
-	protected void pictureSearch() {
+	protected void pictureSearch(String defaultSearch) {
 		final Intent intent = new Intent(this, PicturePicker.class);
-		//intent.putExtra(CandiConstants.EXTRA_SEARCH_PHRASE, defaultSearch);
+		intent.putExtra(CandiConstants.EXTRA_SEARCH_PHRASE, defaultSearch);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}

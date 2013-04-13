@@ -63,6 +63,7 @@ import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.MiscUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.ImageUtils;
 import com.squareup.otto.Subscribe;
@@ -528,7 +529,11 @@ public class TuningWizard extends FormActivity {
 					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
 						if (pictureSource.equals("search")) {
-							pictureSearch();
+							String defaultSearch = null;
+							if (mEntityForForm != null) {
+								defaultSearch = MiscUtils.emptyAsNull(mEntityForForm.name.trim());
+							}
+							pictureSearch(defaultSearch);
 						}
 						else if (pictureSource.equals("gallery")) {
 							pictureFromGallery();

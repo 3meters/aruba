@@ -140,6 +140,24 @@ public class NotificationManager {
 		 * Small icon displays on left unless a large icon is specified
 		 * and then it moves to the right.
 		 */
+		if (airNotification.subtype.equals("nearby")) {
+			if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_NEARBY, CandiConstants.PREF_NOTIFICATIONS_NEARBY_DEFAULT)) {
+				return;
+			}
+		}
+		else if (airNotification.subtype.equals("owner")) {
+			if (airNotification.type.equals("comment")) {
+				if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_COMMENTS, CandiConstants.PREF_NOTIFICATIONS_COMMENTS_DEFAULT)) {
+					return;
+				}
+			}
+			else if (airNotification.type.equals("entity_insert")) {
+				if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_CANDIGRAMS, CandiConstants.PREF_NOTIFICATIONS_CANDIGRAMS_DEFAULT)) {
+					return;
+				}
+			}
+		}
+
 		final NotificationCompat.Builder builder = new NotificationCompat.Builder(Aircandi.applicationContext)
 				.setContentTitle(airNotification.title)
 				.setContentText(airNotification.subtitle)
