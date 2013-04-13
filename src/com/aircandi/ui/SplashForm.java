@@ -23,6 +23,7 @@ import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ConnectedState;
+import com.aircandi.components.NotificationManager;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
@@ -38,6 +39,7 @@ import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.android.gcm.GCMRegistrar;
 
 public class SplashForm extends SherlockActivity {
 
@@ -82,6 +84,16 @@ public class SplashForm extends SherlockActivity {
 		/* Connectivity monitoring */
 		NetworkManager.getInstance().setContext(getApplicationContext());
 		NetworkManager.getInstance().initialize();
+
+		/* Service notifications */
+		GCMRegistrar.checkDevice(this); 	// Does device support GCM
+		GCMRegistrar.checkManifest(this); 	// Is manifest setup correctly for GCM
+		String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
+		if (registrationId != null) {
+			NotificationManager.getInstance().unregisterDeviceWithAircandi(registrationId);
+			GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
+		}
+		NotificationManager.getInstance().registerDeviceWithGCM();
 
 		/* Proxibase sdk components */
 		ProxiManager.getInstance().setContext(getApplicationContext());

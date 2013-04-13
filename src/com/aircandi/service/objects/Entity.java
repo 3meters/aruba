@@ -329,20 +329,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 * Only posts and collections do not have photo objects
 		 */
 		String imageUri = "resource:img_placeholder_logo_bw";
-		if (type.equals(CandiConstants.TYPE_CANDI_POST)) {
-			if (creator != null) {
-				if (creator.getUserPhotoUri() != null && !creator.getUserPhotoUri().equals("")) {
-					imageUri = creator.getUserPhotoUri();
-				}
-			}
-			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
-				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
-			}
-		}
-		else if (type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-			imageUri = source.getPhoto().getUri();
-		}
-		else if (type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+		if (type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			if (photo != null) {
 				imageUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
 				if (imageUri == null) {
@@ -353,11 +340,24 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 				imageUri = place.category.iconUri();
 			}
 		}
+		else if (type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+			imageUri = source.getPhoto().getUri();
+		}
 		else {
 			if (photo != null) {
 				imageUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
 				if (imageUri == null) {
 					imageUri = photo.getUri();
+				}
+			}
+			else {
+				if (creator != null) {
+					if (creator.getUserPhotoUri() != null && !creator.getUserPhotoUri().equals("")) {
+						imageUri = creator.getUserPhotoUri();
+					}
+				}
+				if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
+					imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 				}
 			}
 		}

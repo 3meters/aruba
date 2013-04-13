@@ -1,11 +1,21 @@
 package com.aircandi.utilities;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import java.util.regex.Pattern;
 
+import android.content.Context;
+import android.os.Environment;
+import android.widget.Toast;
+
 import com.aircandi.beta.BuildConfig;
+import com.aircandi.components.Logger;
 
 public class MiscUtils {
 
@@ -119,11 +129,34 @@ public class MiscUtils {
 	public static Boolean validWebUri(String webUri) {
 		return WEB_URL.matcher(webUri).matches();
 	}
-	
+
 	public static String emptyAsNull(String stringValue) {
 		if ("".equals(stringValue)) {
 			return null;
 		}
 		return stringValue;
+	}
+
+	public static void writeStringToFile(String fileName, String data, Context context) {
+
+		File root = Environment.getExternalStorageDirectory();
+		File outDir = new File(root.getAbsolutePath() + File.separator + "aircandi");
+		if (!outDir.isDirectory()) {
+			outDir.mkdir();
+		}
+		try {
+			if (!outDir.isDirectory()) {
+				throw new IOException("Unable to create directory aircandi. Maybe the SD card is mounted?");
+			}
+			File outputFile = new File(outDir, fileName);
+			Writer writer = new BufferedWriter(new FileWriter(outputFile));
+			writer.write(data);
+			Logger.d(root, "Report successfully saved to: " + outputFile.getAbsolutePath());
+			ImageUtils.showToastNotification("Report successfully saved to: " + outputFile.getAbsolutePath(), Toast.LENGTH_LONG);
+			writer.close();
+		}
+		catch (IOException e) {
+			Logger.w(root, e.getMessage());
+		}
 	}
 }

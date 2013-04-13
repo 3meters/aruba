@@ -30,6 +30,7 @@ import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Beacon.BeaconType;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Comment;
+import com.aircandi.service.objects.Device;
 import com.aircandi.service.objects.Document;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link;
@@ -68,7 +69,7 @@ public class EntityModel {
 	// Combo service/cache queries
 	// --------------------------------------------------------------------------------------------
 
-	public ModelResult getEntity(String entityId, Boolean refresh, String jsonEagerLoad, String jsonOptions) {
+	public synchronized ModelResult getEntity(String entityId, Boolean refresh, String jsonEagerLoad, String jsonOptions) {
 		/*
 		 * Retrieves entity from cache if available otherwise downloads the entity from the service. If refresh is true
 		 * then bypasses the cache and downloads from the service.
@@ -83,7 +84,7 @@ public class EntityModel {
 		return result;
 	}
 
-	private ModelResult getEntities(List<String> entityIds, Boolean refresh, String jsonEagerLoad, String jsonOptions) {
+	private synchronized ModelResult getEntities(List<String> entityIds, Boolean refresh, String jsonEagerLoad, String jsonOptions) {
 		final ModelResult result = new ProxiManager.ModelResult();
 
 		final List<String> getEntityIds = new ArrayList<String>();
@@ -537,7 +538,7 @@ public class EntityModel {
 	// Entity updates
 	// --------------------------------------------------------------------------------------------
 
-	public ModelResult insertEntity(Entity entity, List<Beacon> beacons, Beacon primaryBeacon, Bitmap bitmap, Boolean cacheOnly) {
+	public ModelResult insertEntity(Entity entity, List<Beacon> beacons, Beacon primaryBeacon, Bitmap bitmap, Boolean cacheOnly, Boolean skipNotifications) {
 		/*
 		 * Inserts the entity in the entity service collection and Links are created to all the included beacons. The
 		 * inserted entity is retrieved from the service and pushed into the local cache. The cached entity is returned
@@ -573,6 +574,10 @@ public class EntityModel {
 
 					/* Construct entity, link, and observation */
 					final Bundle parameters = new Bundle();
+
+					if (skipNotifications != null) {
+						parameters.putBoolean("skipNotifications", skipNotifications);
+					}
 
 					/* Primary beacon id */
 					if (primaryBeacon != null) {
@@ -613,9 +618,7 @@ public class EntityModel {
 						parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
 					}
 					else if (entity.parentId != null) {
-						/*
-						 * Linking to another entity
-						 */
+						/* Linking to another entity */
 						parameters.putString("parentId", entity.parentId);
 					}
 
@@ -628,8 +631,11 @@ public class EntityModel {
 
 					/* Sources configuration */
 					if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-						parameters.putBoolean("suggestSources", true);
-						parameters.putInt("suggestTimeout", 10000);
+						if (!entity.place.getProvider().type.equals("user")
+								|| (entity.sources != null && entity.sources.size() > 0)) {
+							parameters.putBoolean("suggestSources", true);
+							parameters.putInt("suggestTimeout", 10000);
+						}
 					}
 
 					/* Entity */
@@ -960,6 +966,38 @@ public class EntityModel {
 	// --------------------------------------------------------------------------------------------
 	// Other updates
 	// --------------------------------------------------------------------------------------------
+
+	public ModelResult registerDevice(Device device) {
+		ModelResult result = new ModelResult();
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + Device.collectionId)
+				.setRequestType(RequestType.Insert)
+				.setRequestBody(HttpService.convertObjectToJsonSmart(device, true, true))
+				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setRetry(false)
+				.setSession(Aircandi.getInstance().getUser().session)
+				.setResponseFormat(ResponseFormat.Json);
+
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+		return result;
+	}
+
+	public ModelResult unregisterDevice(String registrationId) {
+		ModelResult result = new ModelResult();
+		final Bundle parameters = new Bundle();
+		parameters.putString("registrationId", registrationId);
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "unregisterDevice")
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
+				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setRetry(false)
+				.setResponseFormat(ResponseFormat.Json);
+
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+		return result;
+	}
 
 	public ModelResult insertDocument(Document document) {
 
@@ -1359,7 +1397,13 @@ public class EntityModel {
 		synchronized (mEntityCache) {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 				if (entry.getValue().ownerId != null && entry.getValue().ownerId.equals(userId)) {
-					if (entry.getValue().type.equals(type)) {
+					if (type.equals(CandiConstants.TYPE_CANDI_CANDIGRAM)) {
+						if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PICTURE)
+								|| entry.getValue().type.equals(CandiConstants.TYPE_CANDI_POST)) {
+							entities.add(entry.getValue());
+						}
+					}
+					else if (entry.getValue().type.equals(type)) {
 						entities.add(entry.getValue());
 					}
 				}

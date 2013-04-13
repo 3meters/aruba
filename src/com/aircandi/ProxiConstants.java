@@ -7,24 +7,24 @@ public final class ProxiConstants {
 	public static final int		TIMEOUT_SOCKET_QUERIES								= 2000;
 	public static final int		TIMEOUT_SOCKET_UPDATES								= 30000;
 	public static final int		TIMEOUT_CONNECTION									= 2000;
-	
+
 	public static String		WALLED_GARDEN_URI									= "http://clients3.google.com/generate_204";
 	public static final int		WALLED_GARDEN_SOCKET_TIMEOUT_MS						= 5000;
 
-	/* 
+	/*
 	 * Used when trying to verify that a network connection is available. The retries
 	 * are used to allow for the case where the connecting process is underway.
 	 */
 	public static int			CONNECT_TRIES										= 10;
 	public static int			CONNECT_WAIT										= 500;
-	
-	/* 
+
+	/*
 	 * When spotty connectivity causes timeouts, we retry using softer constraints.
 	 * We do not attempt retries if the call involved an update/insert/delete.
 	 */
 	public static final int		MAX_BACKOFF_IN_MILLISECONDS							= 5 * 1000;
 	public static final int		MAX_BACKOFF_RETRIES									= 6;
-	
+
 	public static final int		DEFAULT_MAX_CONNECTIONS								= 50;
 	public static final int		DEFAULT_CONNECTIONS_PER_ROUTE						= 20;
 

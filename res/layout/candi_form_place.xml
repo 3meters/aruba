@@ -74,6 +74,14 @@
                     android:layout="@layout/section_candi"
                     android:paddingLeft="8dp"
                     android:paddingRight="8dp" />
+
+                <Button
+                    android:id="@+id/button_new_candigram"
+                    style="@style/form_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="onNewCandigramButtonClick"
+                    android:text="@string/form_button_new_candigram" />
             </LinearLayout>
 
             <LinearLayout
@@ -92,7 +100,7 @@
                     android:layout_weight="1" >
 
                     <com.aircandi.ui.widgets.UserView
-                        android:id="@+id/edited_by"
+                        android:id="@+id/user_one"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginRight="2dp"
@@ -108,7 +116,7 @@
                     android:layout_weight="1" >
 
                     <com.aircandi.ui.widgets.UserView
-                        android:id="@+id/created_by"
+                        android:id="@+id/user_two"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="2dp"

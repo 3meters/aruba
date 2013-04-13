@@ -44,6 +44,7 @@ import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateUtils;
 import com.aircandi.utilities.ImageUtils;
+import com.google.android.gcm.GCMRegistrar;
 
 public class ProxiManager {
 
@@ -184,63 +185,61 @@ public class ProxiManager {
 		 * null then there was a network or service problem. The user got a toast notification from the service. We
 		 * are making synchronous calls inside an asynchronous thread.
 		 */
-
-		/* Construct string array of the beacon ids */
-		final List<String> beaconIds = new ArrayList<String>();
 		final Bundle parameters = new Bundle();
 		ServiceResponse serviceResponse = new ServiceResponse();
 
+		/* Construct string array of the beacon ids */
+		final List<String> beaconIds = new ArrayList<String>();
 		synchronized (mEntityModel.getBeacons()) {
-
 			for (Beacon beacon : mEntityModel.getBeacons()) {
 				beaconIds.add(beacon.id);
 			}
-
-			if (beaconIds.size() == 0) {
-				mEntityModel.removeBeaconEntities();
-				mEntityModel.setLastBeaconRefreshDate(DateUtils.nowDate().getTime());
-				final List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
-				BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
-				return serviceResponse;
-			}
-
-			/* Set method parameters */
-			if (beaconIds.size() > 0) {
-				parameters.putStringArrayList("beaconIdsNew", (ArrayList<String>) beaconIds);
-				final ArrayList<Integer> levels = new ArrayList<Integer>();
-				for (String beaconId : beaconIds) {
-					Beacon beacon = mEntityModel.getBeacon(beaconId);
-					levels.add(beacon.level.intValue());
-				}
-				parameters.putIntegerArrayList("beaconLevels", levels);
-			}
 		}
 
-		/* Only entities linked by proximity */
-		parameters.putString("linkType", "proximity");
-
-		/*
-		 * The observation is used two ways:
-		 * 1) To include entities that have loc info but are not linked to a beacon
-		 * 2) To update the location info for the new beacons if it is better than
-		 * what is already stored.
-		 */
-		final Observation observation = LocationManager.getInstance().getObservationLocked();
-		if (observation != null) {
-			parameters.putString("observation"
-					, "object:" + HttpService.convertObjectToJsonSmart(observation, true, true));
+		/* Add current registrationId */
+		String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
+		if (registrationId != null) {
+			parameters.putString("registrationId", registrationId);
 		}
 
-		parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
-		parameters.putString("options", "object:{\"limit\":"
-				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
-				+ ",\"skip\":0"
-				+ ",\"sort\":{\"modifiedDate\":-1} "
-				+ ",\"children\":{\"limit\":"
-				+ String.valueOf(ProxiConstants.RADAR_CHILDENTITY_LIMIT)
-				+ ",\"skip\":0"
-				+ ",\"sort\":{\"modifiedDate\":-1}}"
-				+ "}");
+		if (beaconIds.size() == 0) {
+			mEntityModel.removeBeaconEntities();
+		}
+		else {
+			parameters.putStringArrayList("beaconIdsNew", (ArrayList<String>) beaconIds);
+
+			final ArrayList<Integer> levels = new ArrayList<Integer>();
+			for (String beaconId : beaconIds) {
+				Beacon beacon = mEntityModel.getBeacon(beaconId);
+				levels.add(beacon.level.intValue());
+			}
+			parameters.putIntegerArrayList("beaconLevels", levels);
+
+			/* Only entities linked by proximity */
+			parameters.putString("linkType", "proximity");
+
+			/*
+			 * The observation is used two ways:
+			 * 1) To include entities that have loc info but are not linked to a beacon
+			 * 2) To update the location info for the new beacons if it is better than
+			 * what is already stored.
+			 */
+			final Observation observation = LocationManager.getInstance().getObservationLocked();
+			if (observation != null) {
+				parameters.putString("observation", "object:" + HttpService.convertObjectToJsonSmart(observation, true, true));
+			}
+
+			parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
+			parameters.putString("options", "object:{\"limit\":"
+					+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
+					+ ",\"skip\":0"
+					+ ",\"sort\":{\"modifiedDate\":-1} "
+					+ ",\"children\":{\"limit\":"
+					+ String.valueOf(ProxiConstants.RADAR_CHILDENTITY_LIMIT)
+					+ ",\"skip\":0"
+					+ ",\"sort\":{\"modifiedDate\":-1}}"
+					+ "}");
+		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForLocation")
@@ -258,36 +257,31 @@ public class ProxiManager {
 			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
 
-			/* FIXME: Checks to help find null pointer bug */
-			if (serviceData == null) {
-				throw new RuntimeException("ServiceData object is null");
-			}
-			else if (serviceData.data == null) {
-				throw new RuntimeException("ServiceData.data property is null");
-			}
-
 			final List<Entity> entities = (List<Entity>) serviceData.data;
 			Aircandi.stopwatch1.segmentTime("Entities for beacons: objects deserialized");
 
-			/*
-			 * Make sure we don't have duplicates keyed on sourceId because
-			 * getPlacesNearLocation could have already completed.
-			 */
-			synchronized (mEntityModel.mEntityCache) {
-				for (Entity entity : entities) {
-					if (entity.place != null) {
-						if (mEntityModel.mEntityCache.containsKey(entity.place.getProvider().id)) {
-							mEntityModel.mEntityCache.remove(entity.place.getProvider().id);
+			if (entities.size() > 0) {
+
+				/*
+				 * Make sure we don't have duplicates keyed on sourceId because
+				 * getPlacesNearLocation could have already completed.
+				 */
+				synchronized (mEntityModel.mEntityCache) {
+					for (Entity entity : entities) {
+						if (entity.place != null) {
+							if (mEntityModel.mEntityCache.containsKey(entity.place.getProvider().id)) {
+								mEntityModel.mEntityCache.remove(entity.place.getProvider().id);
+							}
 						}
 					}
 				}
+
+				/* Merge entities into data model */
+				mEntityModel.upsertEntities(entities);
+				manageEntityVisibility();
 			}
-
-			/* Merge entities into data model */
-			mEntityModel.upsertEntities(entities);
-
+			
 			mEntityModel.setLastBeaconRefreshDate(serviceData.date.longValue());
-			manageEntityVisibility();
 
 			/* All cached place entities that qualify based on current distance pref setting */
 			final List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
@@ -427,7 +421,8 @@ public class ProxiManager {
 				, beacons
 				, primaryBeacon
 				, entity.getPhoto().getBitmap()
-				, false);
+				, false
+				, null);
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			/*
@@ -516,14 +511,14 @@ public class ProxiManager {
 			}
 		}
 
-//		final Location lastKnownLocation = LocationManager.getInstance().getLastKnownLocation();
-//		if (lastKnownLocation != null) {
-//			final Boolean hasMoved = LocationManager.hasMoved(lastKnownLocation, activeLocation, PlacesConstants.DIST_ONE_HUNDRED_METERS);
-//			if (hasMoved) {
-//				Logger.v(this, "Refresh needed: moved location");
-//				return true;
-//			}
-//		}
+		//		final Location lastKnownLocation = LocationManager.getInstance().getLastKnownLocation();
+		//		if (lastKnownLocation != null) {
+		//			final Boolean hasMoved = LocationManager.hasMoved(lastKnownLocation, activeLocation, PlacesConstants.DIST_ONE_HUNDRED_METERS);
+		//			if (hasMoved) {
+		//				Logger.v(this, "Refresh needed: moved location");
+		//				return true;
+		//			}
+		//		}
 
 		return false;
 	}

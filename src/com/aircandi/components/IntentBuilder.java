@@ -17,6 +17,7 @@ public class IntentBuilder {
 	private String			mEntityType;
 	private CommandType		mCommandType;
 	private String			mUserId;
+	private Boolean			mForceRefresh;
 
 	private String			mMessage;
 	private ArrayListType	mArrayListType;
@@ -64,6 +65,10 @@ public class IntentBuilder {
 			intent.putExtra(CandiConstants.EXTRA_LIST_TYPE, mArrayListType.name());
 		}
 
+		if (mForceRefresh != null) {
+			intent.putExtra(CandiConstants.EXTRA_REFRESH_FORCE, mForceRefresh);
+		}
+		
 		return intent;
 	}
 
@@ -100,6 +105,15 @@ public class IntentBuilder {
 	@SuppressWarnings("ucd")
 	public IntentBuilder setArrayListType(ArrayListType arrayListType) {
 		mArrayListType = arrayListType;
+		return this;
+	}
+
+	public Boolean getForceRefresh() {
+		return mForceRefresh;
+	}
+
+	public IntentBuilder setForceRefresh(Boolean forceRefresh) {
+		mForceRefresh = forceRefresh;
 		return this;
 	}
 }

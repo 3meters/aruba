@@ -77,10 +77,12 @@ import com.aircandi.service.HttpServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
+import com.aircandi.service.objects.Device;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Location;
+import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Result;
 import com.aircandi.service.objects.ServiceData;
@@ -95,25 +97,45 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 
 /*
- * Http 1.1 Status Codes (subset) - 200: OK - 201: Created - 202: Accepted - 203: Non-authoritative information - 204:
- * Request fulfilled but no content returned (message body empty). - 3xx: Redirection - 400: Bad request. Malformed
- * syntax. - 401: Unauthorized. Request requires user authentication. - 403: Forbidden - 404: Not found - 405: Method
- * not allowed - 408: Request timeout - 415: Unsupported media type - 500: Internal server error - 503: Service
- * unavailable. Caused by temporary overloading or maintenance. Notes: - We get a 403 from amazon when trying to fetch
- * something from S3 that isn't there.
+ * Http 1.1 Status Codes (subset)
+ * 
+ * - 200: OK
+ * - 201: Created
+ * - 202: Accepted
+ * - 203: Non-authoritative information
+ * - 204: Request fulfilled but no content returned (message body empty).
+ * - 3xx: Redirection
+ * - 400: Bad request. Malformed syntax.
+ * - 401: Unauthorized. Request requires user authentication.
+ * - 403: Forbidden
+ * - 404: Not found
+ * - 405: Method not allowed
+ * - 408: Request timeout
+ * - 415: Unsupported media type
+ * - 500: Internal server error
+ * - 503: Service unavailable. Caused by temporary overloading or maintenance.
+ * 
+ * Notes:
+ * 
+ * - We get a 403 from amazon when trying to fetch something from S3 that isn't there.
  */
 
 /*
- * Timeouts - Connection timeout is the max time allowed to make initial connection with the remove server. - Socket
- * timeout is the max inactivity time allowed between two consecutive data packets. - AndroidHttpClient sets both to 60
- * seconds.
+ * Timeouts
+ * 
+ * - Connection timeout is the max time allowed to make initial connection with the remote server.
+ * - Sockettimeout is the max inactivity time allowed between two consecutive data packets.
+ * - AndroidHttpClient sets both to 60 seconds.
  */
 
 /*
- * Exceptions when executing HTTP methods using HttpClient - IOException: Generic transport exceptions (unreliable
- * connection, socket timeout, generally non-fatal. ClientProtocolException, SocketException and InterruptedIOException
- * are sub classes of IOException. - HttpException: Protocol exceptions. These tend to be fatal and suggest something
- * fundamental is wrong with the request such as a violation of the http protocol.
+ * Exceptions when executing HTTP methods using HttpClient
+ * 
+ * - IOException: Generic transport exceptions (unreliable connection, socket timeout, generally non-fatal.
+ * ClientProtocolException, SocketException and InterruptedIOException are sub classes of IOException.
+ * 
+ * - HttpException: Protocol exceptions. These tend to be fatal and suggest something fundamental is wrong with the
+ * request such as a violation of the http protocol.
  */
 
 /**
@@ -121,21 +143,8 @@ import com.amazonaws.AmazonServiceException;
  */
 public class HttpService {
 
-	private final DefaultHttpClient			mHttpClient;
-	private final HttpParams				mHttpParams;
-
-	private static final JSONParser			parser				= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
-	private static final ContainerFactory	containerFactory	= new ContainerFactory() {
-																	@Override
-																	public Map createObjectContainer() {
-																		return new LinkedHashMap();
-																	}
-
-																	@Override
-																	public List<Object> createArrayContainer() {
-																		return new ArrayList<Object>();
-																	}
-																};
+	private final DefaultHttpClient	mHttpClient;
+	private final HttpParams		mHttpParams;
 
 	private static class HttpServiceHolder {
 		public static final HttpService	instance	= new HttpService();
@@ -414,7 +423,7 @@ public class HttpService {
 								else {
 									List<String> items = serviceRequest.getParameters().getStringArrayList(key);
 									if (items.size() == 0) {
-										jsonBody.append("\"" + key + "\":[],");										
+										jsonBody.append("\"" + key + "\":[],");
 									}
 									else {
 										jsonBody.append("\"" + key + "\":[");
@@ -807,6 +816,7 @@ public class HttpService {
 			stringBuilder.append(line + System.getProperty("line.separator"));
 		}
 		bufferedReader.close();
+
 		return stringBuilder.toString();
 	}
 
@@ -835,6 +845,19 @@ public class HttpService {
 	public static Object convertJsonToObjectInternalSmart(String jsonString, ServiceDataType serviceDataType) {
 
 		try {
+			JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+			ContainerFactory containerFactory = new ContainerFactory() {
+				@Override
+				public Map createObjectContainer() {
+					return new LinkedHashMap();
+				}
+
+				@Override
+				public List<Object> createArrayContainer() {
+					return new ArrayList<Object>();
+				}
+			};
+
 			final Map<String, Object> rootMap = (LinkedHashMap<String, Object>) parser.parse(jsonString, containerFactory);
 			if (serviceDataType == ServiceDataType.User) {
 				return User.setPropertiesFromMap(new User(), rootMap);
@@ -860,6 +883,9 @@ public class HttpService {
 			else if (serviceDataType == ServiceDataType.Entity) {
 				return Entity.setPropertiesFromMap(new Entity(), (HashMap) rootMap);
 			}
+			else if (serviceDataType == ServiceDataType.AirNotification) {
+				return AirNotification.setPropertiesFromMap(new AirNotification(), (HashMap) rootMap);
+			}
 			else {
 				return rootMap;
 			}
@@ -872,7 +898,7 @@ public class HttpService {
 		return null;
 	}
 
-	public static ServiceData convertJsonToObjectSmart(String jsonString, ServiceDataType serviceDataType) {
+	public static ServiceData convertJsonToObjectSmart(final String jsonString, ServiceDataType serviceDataType) {
 
 		final ServiceData serviceData = convertJsonToObjectsSmart(jsonString, serviceDataType);
 		if (serviceData.data != null) {
@@ -886,12 +912,44 @@ public class HttpService {
 		return serviceData;
 	}
 
-	public static ServiceData convertJsonToObjectsSmart(String jsonString, ServiceDataType serviceDataType) {
+	public static ServiceData convertJsonToObjectsSmart(final String jsonString, final ServiceDataType serviceDataType) {
 
 		try {
-			Map<String, Object> rootMap = (LinkedHashMap<String, Object>) parser.parse(jsonString, containerFactory);
-			final ServiceData serviceData = ServiceData.setPropertiesFromMap(new ServiceData(), (HashMap) rootMap);
 
+			JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+			ContainerFactory containerFactory = new ContainerFactory() {
+				@Override
+				public Map createObjectContainer() {
+					return new LinkedHashMap();
+				}
+
+				@Override
+				public List<Object> createArrayContainer() {
+					return new ArrayList<Object>();
+				}
+			};
+
+			Map<String, Object> rootMap = (LinkedHashMap<String, Object>) parser.parse(jsonString, containerFactory);
+			ServiceData serviceData = convertMapToObjects(rootMap, serviceDataType);
+			return serviceData;
+		}
+		catch (ParseException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		catch (Exception e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	public static ServiceData convertMapToObjects(Map<String, Object> rootMap, final ServiceDataType serviceDataType) {
+
+		try {
+			ServiceData serviceData = ServiceData.setPropertiesFromMap(new ServiceData(), (HashMap) rootMap);
 			/*
 			 * The data property of ServiceData is always an array even
 			 * if the request could only expect to return a single object.
@@ -963,16 +1021,14 @@ public class HttpService {
 						else if (serviceDataType == ServiceDataType.Category) {
 							list.add(Category.setPropertiesFromMap(new Category(), (HashMap) map));
 						}
+						else if (serviceDataType == ServiceDataType.Device) {
+							list.add(Device.setPropertiesFromMap(new Device(), (HashMap) map));
+						}
 					}
 					serviceData.data = list;
 				}
 			}
 			return serviceData;
-		}
-		catch (ParseException e) {
-			if (BuildConfig.DEBUG) {
-				e.printStackTrace();
-			}
 		}
 		catch (ClassCastException e) {
 			/*
@@ -1032,6 +1088,7 @@ public class HttpService {
 		Stat,
 		ServiceEntry,
 		Source,
+		Device, AirNotification,
 	}
 
 	public static enum RequestType {

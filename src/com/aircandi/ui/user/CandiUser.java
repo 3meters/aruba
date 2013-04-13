@@ -183,18 +183,11 @@ public class CandiUser extends CandiActivity {
 					.setEntityType(CandiConstants.TYPE_CANDI_PLACE)
 					.setUserId(mCommon.mUserId);
 		}
-		else if (target.equals("posts")) {
+		else if (target.equals("candigrams")) {
 			intentBuilder = new IntentBuilder(this, CandiList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setArrayListType(ArrayListType.OwnedByUser)
-					.setEntityType(CandiConstants.TYPE_CANDI_POST)
-					.setUserId(mCommon.mUserId);
-		}
-		else if (target.equals("pictures")) {
-			intentBuilder = new IntentBuilder(this, CandiList.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setArrayListType(ArrayListType.OwnedByUser)
-					.setEntityType(CandiConstants.TYPE_CANDI_PICTURE)
+					.setEntityType(CandiConstants.TYPE_CANDI_CANDIGRAM)
 					.setUserId(mCommon.mUserId);
 		}
 
@@ -281,7 +274,8 @@ public class CandiUser extends CandiActivity {
 			int tuneFirstCount = 0;
 			int editCount = 0;
 			int editFirstCount = 0;
-			
+			int candigramCount = 0;
+
 			for (Stat stat : user.stats) {
 				if (stat.type.startsWith("link_proximity")) {
 					tuneCount += stat.countBy.intValue();
@@ -289,35 +283,36 @@ public class CandiUser extends CandiActivity {
 						tuneFirstCount += stat.countBy.intValue();
 					}
 				}
-				
+
 				if (stat.type.startsWith("update_entity")) {
 					editCount += stat.countBy.intValue();
 					if (stat.type.contains("_first")) {
 						editFirstCount += stat.countBy.intValue();
 					}
 				}
-				
+
 				if (stat.type.equals("entity_proximity")) {
 					tuneCount += stat.countBy.intValue();
 				}
-				
+
 				if (stat.type.equals("insert_entity_place_custom")) {
 					statString.append("Places created: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 				else if (stat.type.equals("insert_entity_picture")) {
-					statString.append("Pictures created: " + String.valueOf(stat.countBy) + "<br/>");
+					candigramCount += stat.countBy.intValue();
 				}
 				else if (stat.type.equals("insert_entity_post")) {
-					statString.append("Posts created: " + String.valueOf(stat.countBy) + "<br/>");
+					candigramCount += stat.countBy.intValue();
 				}
 				else if (stat.type.startsWith("update_entity_place")) {
 					statString.append("Places edited: " + String.valueOf(stat.countBy) + "<br/>");
 				}
-				else if (stat.type.startsWith("update_entity")) {
-					statString.append("Places discovered first: " + String.valueOf(stat.countBy) + "<br/>");
-				}
 			}
 
+			if (candigramCount > 0) {
+				statString.append("Candigrams created: " + String.valueOf(candigramCount) + "<br/>");
+			}
+			
 			if (editCount > 0) {
 				statString.append("Places edited: " + String.valueOf(editCount) + "<br/>");
 			}
@@ -325,7 +320,7 @@ public class CandiUser extends CandiActivity {
 			if (editFirstCount > 0) {
 				statString.append("Places edited first: " + String.valueOf(editFirstCount) + "<br/>");
 			}
-			
+
 			if (tuneCount > 0) {
 				statString.append("Places tuned: " + String.valueOf(tuneCount) + "<br/>");
 			}
@@ -333,7 +328,7 @@ public class CandiUser extends CandiActivity {
 			if (tuneFirstCount > 0) {
 				statString.append("Places tuned first: " + String.valueOf(tuneFirstCount) + "<br/>");
 			}
-			
+
 			stats.setText(Html.fromHtml(statString.toString()));
 			setVisibility(stats, View.VISIBLE);
 			setVisibility(findViewById(R.id.section_stats), View.VISIBLE);
@@ -341,18 +336,15 @@ public class CandiUser extends CandiActivity {
 
 		/* All non-source children */
 		List<Entity> places = new ArrayList<Entity>();
-		List<Entity> pictures = new ArrayList<Entity>();
-		List<Entity> posts = new ArrayList<Entity>();
+		List<Entity> candigrams = new ArrayList<Entity>();
 
 		for (Entity entity : mEntities) {
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 				places.add(entity);
 			}
-			else if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-				pictures.add(entity);
-			}
-			else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-				posts.add(entity);
+			else if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)
+					|| entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+				candigrams.add(entity);
 			}
 		}
 
@@ -362,22 +354,15 @@ public class CandiUser extends CandiActivity {
 				((ViewStub) findViewById(R.id.stub_candi_places)).inflate();
 			}
 		}
-		if (pictures.size() > 0) {
-			ViewStub stub = (ViewStub) findViewById(R.id.stub_candi_pictures);
+		if (candigrams.size() > 0) {
+			ViewStub stub = (ViewStub) findViewById(R.id.stub_candigrams);
 			if (stub != null) {
-				((ViewStub) findViewById(R.id.stub_candi_pictures)).inflate();
-			}
-		}
-		if (posts.size() > 0) {
-			ViewStub stub = (ViewStub) findViewById(R.id.stub_candi_posts);
-			if (stub != null) {
-				((ViewStub) findViewById(R.id.stub_candi_posts)).inflate();
+				((ViewStub) findViewById(R.id.stub_candigrams)).inflate();
 			}
 		}
 
 		setVisibility(findViewById(R.id.section_candi_places), View.GONE);
-		setVisibility(findViewById(R.id.section_candi_pictures), View.GONE);
-		setVisibility(findViewById(R.id.section_candi_posts), View.GONE);
+		setVisibility(findViewById(R.id.section_candigrams), View.GONE);
 
 		if (places.size() > 0) {
 			SectionLayout section = (SectionLayout) findViewById(R.id.section_candi_places).findViewById(R.id.section_layout_candi);
@@ -401,48 +386,27 @@ public class CandiUser extends CandiActivity {
 				setVisibility(findViewById(R.id.section_candi_places), View.VISIBLE);
 			}
 		}
-		if (pictures.size() > 0) {
-			SectionLayout section = (SectionLayout) findViewById(R.id.section_candi_pictures).findViewById(R.id.section_layout_candi);
+		
+		if (candigrams.size() > 0) {
+			SectionLayout section = (SectionLayout) findViewById(R.id.section_candigrams).findViewById(R.id.section_layout_candi);
 			if (section != null) {
-				section.setHeaderTitle(context.getString(R.string.candi_section_user_candi_pictures));
+				section.setHeaderTitle(context.getString(R.string.candi_section_user_candigrams));
 
-				if (pictures.size() > getResources().getInteger(R.integer.candi_flow_limit)) {
+				if (candigrams.size() > getResources().getInteger(R.integer.candi_flow_limit)) {
 					View footer = inflater.inflate(R.layout.temp_section_footer, null);
 					Button button = (Button) footer.findViewById(R.id.button_more);
 					FontManager.getInstance().setTypefaceDefault(button);
-					button.setText(R.string.candi_section_photos_more);
-					button.setTag("pictures");
+					button.setText(R.string.candi_section_candigrams_more);
+					button.setTag("candigrams");
 					section.setFooter(footer); // Replaces if there already is one.
 				}
 
-				FlowLayout flow = (FlowLayout) findViewById(R.id.section_candi_pictures).findViewById(R.id.flow_candi);
-				drawCandi(context, flow, pictures.size() > getResources().getInteger(R.integer.candi_flow_limit)
-						? pictures.subList(0, getResources().getInteger(R.integer.candi_flow_limit))
-						: pictures, R.layout.temp_place_candi_item);
+				FlowLayout flow = (FlowLayout) findViewById(R.id.section_candigrams).findViewById(R.id.flow_candi);
+				drawCandi(context, flow, candigrams.size() > getResources().getInteger(R.integer.candi_flow_limit)
+						? candigrams.subList(0, getResources().getInteger(R.integer.candi_flow_limit))
+						: candigrams, R.layout.temp_place_candi_item);
 
-				setVisibility(findViewById(R.id.section_candi_pictures), View.VISIBLE);
-			}
-		}
-		if (posts.size() > 0) {
-			SectionLayout section = (SectionLayout) findViewById(R.id.section_candi_posts).findViewById(R.id.section_layout_candi);
-			if (section != null) {
-				section.setHeaderTitle(context.getString(R.string.candi_section_user_candi_posts));
-
-				if (posts.size() > getResources().getInteger(R.integer.candi_flow_limit)) {
-					View footer = inflater.inflate(R.layout.temp_section_footer, null);
-					Button button = (Button) footer.findViewById(R.id.button_more);
-					FontManager.getInstance().setTypefaceDefault(button);
-					button.setText(R.string.candi_section_posts_more);
-					button.setTag("posts");
-					section.setFooter(footer); // Replaces if there already is one.
-				}
-
-				FlowLayout flow = (FlowLayout) findViewById(R.id.section_candi_posts).findViewById(R.id.flow_candi);
-				drawCandi(context, flow, posts.size() > getResources().getInteger(R.integer.candi_flow_limit)
-						? posts.subList(0, getResources().getInteger(R.integer.candi_flow_limit))
-						: posts, R.layout.temp_place_candi_item);
-
-				setVisibility(findViewById(R.id.section_candi_posts), View.VISIBLE);
+				setVisibility(findViewById(R.id.section_candigrams), View.VISIBLE);
 			}
 		}
 	}

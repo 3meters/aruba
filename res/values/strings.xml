@@ -11,7 +11,7 @@
 
     <string name="menu_beacons_item">Beacons</string>
     <string name="menu_add_custom_place_item">Add custom place</string>
-    <string name="menu_add_candi_item">Add candi</string>
+    <string name="menu_add_candi_item">Add candigram</string>
     <string name="menu_add_comment_item">Add comment</string>
     <string name="menu_refresh_item">Refresh</string>
     <string name="menu_edit_item">Edit</string>
@@ -66,7 +66,7 @@
 
     <!-- Alerts general -->
 
-    <string name="alert_entity_locked">This candi has been locked by the owner.</string>
+    <string name="alert_entity_locked">This candigram has been locked by the owner.</string>
     <string name="alert_upgrade_title">New Aircandi version</string>
     <string name="alert_upgrade_needed_body">A newer version of Aircandi is available. Please download and install as soon possible.\n</string>
     <string name="alert_upgrade_required_body">A newer version of Aircandi is required. Please download and install.\n</string>
@@ -109,7 +109,7 @@
 
     <string name="alert_entity_delete_title">Confirm delete</string>
     <string name="alert_place_delete_message_single">Are you sure you want to delete this place?</string>
-    <string name="alert_candi_delete_message_single">Are you sure you want to delete this candi?</string>
+    <string name="alert_candi_delete_message_single">Are you sure you want to delete this candigram?</string>
     <string name="alert_source_delete_title">Delete link</string>
     <string name="alert_source_delete_message_single">Are you sure you want to delete this link?</string>
     <string name="alert_source_delete_message_multiple">Are you sure you want to delete these links?</string>
@@ -209,7 +209,7 @@
     <!-- Dialogs -->
 
     <string name="dialog_about_copyright">copyright 3meters LLC 2010&#8211;2013</string>
-    <string name="dialog_template_picker_title">add some candi</string>
+    <string name="dialog_template_picker_title">add a candigram</string>
     <string name="dialog_address_builder_title">address</string>
     <string name="dialog_category_builder_title">category</string>
     <string name="dialog_source_builder_title_new">new link</string>
@@ -239,20 +239,17 @@
 
     <string name="candi_button_map">map</string>
     <string name="candi_button_more">more</string>
-    <string name="candi_section_photos_more">view all photos</string>
     <string name="candi_section_places_more">view all places</string>
-    <string name="candi_section_posts_more">view all posts</string>
-    <string name="candi_section_candi_more">view all candi</string>
+    <string name="candi_section_candigrams_more">view all candigrams</string>
     <string name="candi_button_tune">tune it!</string>
     <string name="candi_button_call">call</string>
-    <string name="candi_button_new">add candi</string>
+    <string name="candi_button_new">add candigram</string>
     <string name="candi_button_edit">edit</string>
     <string name="candi_button_polish">polish</string>
     <string name="candi_section_switchboard_place">place info</string>
-    <string name="candi_section_candi">candi</string>
+    <string name="candi_section_candi">candigrams</string>
     <string name="candi_section_user_candi_places">my places</string>
-    <string name="candi_section_user_candi_pictures">my pictures</string>
-    <string name="candi_section_user_candi_posts">my posts</string>
+    <string name="candi_section_user_candigrams">my candigrams</string>
     <string name="candi_label_user_created_by">created</string>
     <string name="candi_label_user_discovered_by">discovered</string>
     <string name="candi_label_user_added_by">added</string>
@@ -271,8 +268,8 @@
 
     <!-- Forms.titles -->
 
+    <string name="form_title_candigram">candigram</string>
     <string name="form_title_picture">picture</string>
-    <string name="form_title_post">post</string>
     <string name="form_title_place">place</string>
     <string name="form_title_profile">profile settings</string>
     <string name="form_title_password">change password</string>
@@ -296,6 +293,7 @@
 
     <string name="form_button_change_picture">select</string>
     <string name="form_button_save_picture">save</string>
+    <string name="form_button_new_candigram">add candigram</string>
     <string name="form_button_test_link">test</string>
     <string name="form_button_change_password">change password</string>
     <string name="form_button_sign_in">sign in</string>
@@ -308,7 +306,7 @@
     <string name="form_button_tuning_tune">i\'m here</string>
     <string name="form_button_tuning_untune">i\'m not here</string>
     <string name="form_button_tuning_tuned">thanks!</string>
-    <string name="form_button_tuning_add_candi">add candi</string>
+    <string name="form_button_tuning_add_candi">add candigram</string>
     <string name="form_button_tuning_edit">edit</string>
 
     <!-- Forms.labels -->
@@ -326,11 +324,11 @@
     <string name="form_label_do_not_track">browse in private</string>
     <string name="tuning_section_banner">great banner</string>
     <string name="tuning_section_tune">lock it in</string>
-    <string name="tuning_section_add_candi">add some candi</string>
+    <string name="tuning_section_add_candi">add a candigram</string>
     <string name="tuning_section_edit">advanced editing</string>
     <string name="form_label_tuning_banner">Is there a picture that would make a better banner for this place? Search, browse or use the camera.</string>
     <string name="form_label_tuning_tune">If you are currently at the place you are browsing, make Aircandi better by tuning the place for faster and more accurate discovery.</string>
-    <string name="form_label_tuning_add_candi">Add some candi and make your mark with a photo or post.</string>
+    <string name="form_label_tuning_add_candi">Add a candigram and make your mark.</string>
     <string name="form_label_tuning_edit">Update place details like the address or customize links.</string>
 
     <!-- Forms.hints -->

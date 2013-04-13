@@ -104,19 +104,10 @@
                 android:paddingRight="8dp" />
             
             <ViewStub
-                android:id="@+id/stub_candi_pictures"
+                android:id="@+id/stub_candigrams"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inflatedId="@+id/section_candi_pictures"
-                android:layout="@layout/section_user_candi"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp" />
-            
-            <ViewStub
-                android:id="@+id/stub_candi_posts"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inflatedId="@+id/section_candi_posts"
+                android:inflatedId="@+id/section_candigrams"
                 android:layout="@layout/section_user_candi"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp" />

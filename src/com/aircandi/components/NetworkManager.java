@@ -110,8 +110,8 @@ public class NetworkManager {
 		 * Don't assume this is being called from the UI thread.
 		 */
 		ServiceResponse serviceResponse = new ServiceResponse();
-		if (AircandiCommon.mNotificationManager != null) {
-			AircandiCommon.mNotificationManager.cancel(CandiConstants.NOTIFICATION_NETWORK);
+		if (NotificationManager.mNotificationManager != null) {
+			NotificationManager.mNotificationManager.cancel(CandiConstants.NOTIFICATION_NETWORK);
 		}
 
 		try {

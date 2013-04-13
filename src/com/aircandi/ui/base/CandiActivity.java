@@ -19,7 +19,9 @@ import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.Logger;
+import com.aircandi.components.NotificationManager;
 import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.objects.AirNotification;
 import com.aircandi.ui.SplashForm;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
@@ -88,11 +90,12 @@ public abstract class CandiActivity extends SherlockActivity {
 	private void showUpdateNotification() {
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
-		mCommon.showNotification(getString(R.string.alert_upgrade_title)
-				, getString(Aircandi.applicationUpdateRequired ? R.string.alert_upgrade_required_body : R.string.alert_upgrade_needed_body)
-				, this
-				, intent
-				, CandiConstants.NOTIFICATION_UPDATE);
+		AirNotification airNotification = new AirNotification();
+		airNotification.title = getString(R.string.alert_upgrade_title);
+		airNotification.subtitle = getString(Aircandi.applicationUpdateRequired ? R.string.alert_upgrade_required_body : R.string.alert_upgrade_needed_body);
+		airNotification.intent = intent;
+		airNotification.type = "update";
+		NotificationManager.getInstance().showNotification(airNotification, this);
 	}
 
 	private void showUpdateAlertDialog(final RequestListener listener) {

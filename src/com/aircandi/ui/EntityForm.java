@@ -70,9 +70,9 @@ import com.aircandi.ui.widgets.BuilderButton;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.MiscUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.MiscUtils;
 
 public class EntityForm extends FormActivity {
 
@@ -108,10 +108,10 @@ public class EntityForm extends FormActivity {
 			mCommon.mActionBar.setTitle(R.string.form_title_place);
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-			mCommon.mActionBar.setTitle(R.string.form_title_picture);
+			mCommon.mActionBar.setTitle(R.string.form_title_candigram);
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
-			mCommon.mActionBar.setTitle(R.string.form_title_post);
+			mCommon.mActionBar.setTitle(R.string.form_title_candigram);
 		}
 
 		mTitle = (TextView) findViewById(R.id.text_title);
@@ -787,7 +787,7 @@ public class EntityForm extends FormActivity {
 		if (mEntityBitmapLocalOnly) {
 			bitmap = null;
 		}
-		result = ProxiManager.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, bitmap, false);
+		result = ProxiManager.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, bitmap, false, null);
 
 		/* Add picture entity if a new picture has been set for a place */
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -796,7 +796,7 @@ public class EntityForm extends FormActivity {
 				Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
 				pictureEntity.photo = entity.photo.clone();
 				pictureEntity.parentId = entity.id;
-				result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false);
+				result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false, true);
 			}
 		}
 		return result;
@@ -832,7 +832,7 @@ public class EntityForm extends FormActivity {
 					Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
 					pictureEntity.photo = mEntityForForm.photo.clone();
 					pictureEntity.parentId = mEntityForForm.id;
-					result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false);
+					result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false, true);
 				}
 			}
 		}
@@ -947,7 +947,7 @@ public class EntityForm extends FormActivity {
 	@Override
 	protected int getLayoutID() {
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
-			return R.layout.post_form;
+			return R.layout.picture_form;
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
 			return R.layout.picture_form;

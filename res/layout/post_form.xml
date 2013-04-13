@@ -59,10 +59,10 @@
                         android:layout_weight="1" >
 
                         <com.aircandi.ui.widgets.UserView
-                            android:id="@+id/edited_by"
+                            android:id="@+id/created_by"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="2dp"
+                            android:layout_marginLeft="2dp"
                             aircandi:layout="@layout/widget_user_view_detailed"
                             android:background="?attr/backgroundButton"
                             android:clickable="true"
@@ -75,10 +75,10 @@
                         android:layout_weight="1" >
 
                         <com.aircandi.ui.widgets.UserView
-                            android:id="@+id/created_by"
+                            android:id="@+id/edited_by"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="2dp"
+                            android:layout_marginRight="2dp"
                             aircandi:layout="@layout/widget_user_view_detailed"
                             android:background="?attr/backgroundButton"
                             android:clickable="true"

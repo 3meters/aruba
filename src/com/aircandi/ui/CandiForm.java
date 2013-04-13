@@ -55,8 +55,8 @@ import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
+import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Entity;
@@ -86,6 +86,7 @@ public class CandiForm extends CandiActivity {
 	private Number					mEntityModelRefreshDate;
 	private Number					mEntityModelActivityDate;
 	private Boolean					mUpsize;
+	private Boolean					mForceRefresh		= false;
 	private static Resources		mResources;
 	private final PackageReceiver	mPackageReceiver	= new PackageReceiver();
 
@@ -95,7 +96,7 @@ public class CandiForm extends CandiActivity {
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		if (!isFinishing()) {
 			initialize();
-			bind(false);
+			bind(mForceRefresh);
 		}
 	}
 
@@ -104,6 +105,9 @@ public class CandiForm extends CandiActivity {
 		mContentView = (ViewGroup) findViewById(R.id.candi_body);
 
 		Integer candiFormResId = R.layout.candi_form_base;
+		if (mCommon.mEntityType == null) {
+			mCommon.mEntityType = CandiConstants.TYPE_CANDI_PLACE;
+		}
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
 			candiFormResId = R.layout.candi_form_post;
 		}
@@ -122,6 +126,7 @@ public class CandiForm extends CandiActivity {
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mUpsize = extras.getBoolean(CandiConstants.EXTRA_UPSIZE_SYNTHETIC);
+			mForceRefresh = extras.getBoolean(CandiConstants.EXTRA_REFRESH_FORCE);
 		}
 	}
 
@@ -162,7 +167,7 @@ public class CandiForm extends CandiActivity {
 						if (mCommon.mMenuItemAdd != null) {
 							mCommon.mMenuItemAdd.setVisible(canAdd());
 						}
-						
+
 						/* Action bar icon */
 						if (mEntity.place != null && mEntity.place.category != null) {
 							final BitmapRequest bitmapRequest = new BitmapRequest();
@@ -366,6 +371,32 @@ public class CandiForm extends CandiActivity {
 		mCommon.doUserClick(user);
 	}
 
+	public void onNewCandigramButtonClick(View view) {
+		doNewCandigramButtonClick();
+	}
+
+	public void doNewCandigramButtonClick() {
+		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
+			Tracker.sendEvent("ui_action", "add_candigram", null, 0, Aircandi.getInstance().getUser());
+			final IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
+					.setCommandType(CommandType.New)
+					.setEntityId(null)
+					.setParentEntityId(mCommon.mEntityId)
+					.setEntityType(CandiConstants.TYPE_CANDI_PICTURE);
+
+			final Intent redirectIntent = intentBuilder.create();
+			startActivity(redirectIntent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		}
+		else {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.alert_entity_locked)
+					, null
+					, this, android.R.string.ok, null, null, null, null);
+		}
+	}
+
 	@SuppressWarnings("ucd")
 	public void onNewCommentButtonClick(View view) {
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
@@ -491,8 +522,9 @@ public class CandiForm extends CandiActivity {
 
 		final TextView description = (TextView) layout.findViewById(R.id.candi_form_description);
 		final TextView address = (TextView) layout.findViewById(R.id.candi_form_address);
-		final UserView creator = (UserView) layout.findViewById(R.id.created_by);
-		final UserView editor = (UserView) layout.findViewById(R.id.edited_by);
+		final Button addCandigram = (Button) layout.findViewById(R.id.button_new_candigram);
+		final UserView user_one = (UserView) layout.findViewById(R.id.user_one);
+		final UserView user_two = (UserView) layout.findViewById(R.id.user_two);
 
 		if (candiView != null) {
 			/*
@@ -558,6 +590,9 @@ public class CandiForm extends CandiActivity {
 				setVisibility(layout.findViewById(R.id.section_layout_switchboard), View.VISIBLE);
 			}
 		}
+		
+		/* Candigram button */
+		FontManager.getInstance().setTypefaceDefault(addCandigram);		
 
 		/* All non-source children */
 		entities = entity.getChildren();
@@ -575,11 +610,15 @@ public class CandiForm extends CandiActivity {
 			if (section != null) {
 				section.getTextViewHeader().setText(getString(R.string.candi_section_candi));
 
-				if (entities.size() > R.integer.candi_flow_limit) {
+				if (entities.size() > getResources().getInteger(R.integer.candi_flow_limit)) {
+					setVisibility(layout.findViewById(R.id.button_new_candigram), View.GONE);
 					View footer = inflater.inflate(R.layout.temp_section_footer, null);
 					Button button = (Button) footer.findViewById(R.id.button_more);
+					Button buttonNewCandigram = (Button) footer.findViewById(R.id.button_footer_new_candigram);
 					FontManager.getInstance().setTypefaceDefault(button);
-					button.setText(R.string.candi_section_candi_more);
+					FontManager.getInstance().setTypefaceDefault(buttonNewCandigram);
+					buttonNewCandigram.setVisibility(View.VISIBLE);
+					button.setText(R.string.candi_section_candigrams_more);
 					button.setTag("candi");
 					section.setFooter(footer); // Replaces if there already is one.
 				}
@@ -613,41 +652,45 @@ public class CandiForm extends CandiActivity {
 
 		/* Creator block */
 
-		setVisibility(creator, View.GONE);
-		if (creator != null
+		setVisibility(user_one, View.GONE);
+		setVisibility(user_two, View.GONE);
+		UserView user = user_one;
+
+		if (user != null
 				&& entity.creator != null
 				&& !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 				if (entity.place.getProvider().type.equals("user")) {
-					creator.setLabel(getString(R.string.candi_label_user_created_by));
-					creator.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
-					setVisibility(creator, View.VISIBLE);
+					user.setLabel(getString(R.string.candi_label_user_created_by));
+					user.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
+					setVisibility(user, View.VISIBLE);
+					user = user_two;
 				}
 			}
 			else {
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-					creator.setLabel(getString(R.string.candi_label_user_added_by));
+					user.setLabel(getString(R.string.candi_label_user_added_by));
 				}
 				else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-					creator.setLabel(getString(R.string.candi_label_user_posted_by));
+					user.setLabel(getString(R.string.candi_label_user_posted_by));
 				}
 				else {
-					creator.setLabel(getString(R.string.candi_label_user_created_by));
+					user.setLabel(getString(R.string.candi_label_user_created_by));
 				}
-				creator.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
-				setVisibility(creator, View.VISIBLE);
+				user.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
+				setVisibility(user_one, View.VISIBLE);
+				user = user_two;
 			}
 		}
 
 		/* Editor block */
 
-		setVisibility(editor, View.GONE);
-		if (editor != null && entity.modifier != null && !entity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+		if (user != null && entity.modifier != null && !entity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 			if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
-				editor.setLabel(getString(R.string.candi_label_user_edited_by));
-				editor.bindToAuthor(entity.modifier, entity.modifiedDate.longValue(), null);
-				setVisibility(editor, View.VISIBLE);
+				user.setLabel(getString(R.string.candi_label_user_edited_by));
+				user.bindToAuthor(entity.modifier, entity.modifiedDate.longValue(), null);
+				setVisibility(user, View.VISIBLE);
 			}
 		}
 
@@ -871,17 +914,7 @@ public class CandiForm extends CandiActivity {
 			return true;
 		}
 		else if (item.getItemId() == R.id.add) {
-			Tracker.sendEvent("ui_action", "add_candi", null, 0, Aircandi.getInstance().getUser());
-			if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
-				mCommon.showTemplatePicker(false);
-			}
-			else {
-				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
-						, null
-						, getResources().getString(R.string.alert_entity_locked)
-						, null
-						, this, android.R.string.ok, null, null, null, null);
-			}
+			doNewCandigramButtonClick();
 			return true;
 		}
 

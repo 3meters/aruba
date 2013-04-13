@@ -81,7 +81,7 @@
             </com.aircandi.ui.widgets.SectionLayout>
 
             <com.aircandi.ui.widgets.UserView
-                android:id="@+id/created_by"
+                android:id="@+id/user_one"
                 android:layout_width="160dp"
                 android:layout_height="wrap_content"
                 aircandi:layout="@layout/widget_user_view_detailed"

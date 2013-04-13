@@ -53,11 +53,11 @@ import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
+import com.aircandi.service.objects.Provider;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
@@ -176,7 +176,7 @@ public class TuningWizard extends FormActivity {
 						View footer = inflater.inflate(R.layout.temp_section_footer, null);
 						Button button = (Button) footer.findViewById(R.id.button_more);
 						FontManager.getInstance().setTypefaceDefault(button);
-						button.setText(R.string.candi_section_candi_more);
+						button.setText(R.string.candi_section_candigrams_more);
 						button.setTag("candi");
 						section.setFooter(footer); // Replaces if there already is one.
 					}
@@ -754,7 +754,7 @@ public class TuningWizard extends FormActivity {
 				Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
 				pictureEntity.photo = mEntityForForm.photo.clone();
 				pictureEntity.parentId = mEntityForForm.id;
-				result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false);
+				result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false, true);
 			}
 		}
 

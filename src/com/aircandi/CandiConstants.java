@@ -14,6 +14,7 @@ public final class CandiConstants {
 	public static final boolean	TRACKING_ENABLED					= true;
 
 	public static final String	APP_NAME							= "Aircandi";																				//$NON-NLS-1$
+	public static final String	SENDER_ID							= "657673071389";																			// google Api project number for aircandi
 
 	/* Activity parameters */
 	public static final String	EXTRA_PARENT_ENTITY_ID				= "com.aircandi.EXTRA_PARENT_ENTITY_ID";													//$NON-NLS-1$
@@ -40,6 +41,7 @@ public final class CandiConstants {
 	public static final String	EXTRA_UPSIZE_SYNTHETIC				= "com.aircandi.EXTRA_UPSIZE_SYNTHETIC";													//$NON-NLS-1$
 	public static final String	EXTRA_PAGING_ENABLED				= "com.aircandi.EXTRA_PAGING_ENABLED";														//$NON-NLS-1$
 	public static final String	EXTRA_PHOTO							= "com.aircandi.EXTRA_PHOTO";																//$NON-NLS-1$
+	public static final String	EXTRA_REFRESH_FORCE					= "com.aircandi.EXTRA_REFRESH_FORCE";														//$NON-NLS-1$
 
 	public static final int		MILLS_PER_SECOND					= 1000;
 	public static final int		TIME_ONE_SECOND						= MILLS_PER_SECOND * 1;
@@ -91,6 +93,7 @@ public final class CandiConstants {
 	public static final String	URL_AIRCANDI_TERMS					= "https://aircandi.com/pages/terms.html";													//$NON-NLS-1$
 	public static final String	S3_BUCKET_IMAGES					= "aircandi-images";																		// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
 
+	public static final String	TYPE_CANDI_CANDIGRAM				= "com.aircandi.candi.candigram";															//$NON-NLS-1$
 	public static final String	TYPE_CANDI_POST						= "com.aircandi.candi.post";																//$NON-NLS-1$
 	public static final String	TYPE_CANDI_PICTURE					= "com.aircandi.candi.picture";															//$NON-NLS-1$
 	public static final String	TYPE_CANDI_PLACE					= "com.aircandi.candi.place";																//$NON-NLS-1$
@@ -139,7 +142,9 @@ public final class CandiConstants {
 	public static final int		RESULT_USER_SIGNED_IN				= 400;
 
 	public static final int		NOTIFICATION_NETWORK				= 1000;
-	public static final int		NOTIFICATION_UPDATE					= 2000;
+	public static final int		NOTIFICATION_UPDATE_AIRCANDI		= 2000;
+	public static final int		NOTIFICATION_COMMENT				= 3000;
+	public static final int		NOTIFICATION_CANDI_ADDED			= 4000;
 
 	public static final boolean	SUPPORTS_ECLAIR						= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ECLAIR;
 	public static final boolean	SUPPORTS_FROYO						= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO;

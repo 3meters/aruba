@@ -1,16 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:paddingTop="5dp"
     android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:orientation="horizontal"
+    android:paddingTop="5dp" >
 
-    <Button
-        android:id="@+id/button_more"
-        style="@style/form_button"
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="onMoreButtonClick"
-        android:text="@string/candi_button_more" />
+        android:layout_weight="1" >
+
+        <Button
+            android:id="@+id/button_more"
+            style="@style/form_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="2dp"
+            android:onClick="onMoreButtonClick"
+            android:text="@string/candi_button_more" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" >
+
+        <Button
+            android:id="@+id/button_footer_new_candigram"
+            style="@style/form_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:onClick="onNewCandigramButtonClick"
+            android:text="@string/form_button_new_candigram"
+            android:visibility="gone" />
+    </FrameLayout>
 
 </LinearLayout>

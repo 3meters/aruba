@@ -12,8 +12,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.app.Service;
@@ -39,7 +37,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.BadTokenException;
 import android.widget.FrameLayout;
-import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -61,6 +58,7 @@ import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.ProxiManager.WifiScanResult;
 import com.aircandi.service.HttpServiceException.ErrorCode;
 import com.aircandi.service.HttpServiceException.ErrorType;
+import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.User;
@@ -81,14 +79,13 @@ import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.DateUtils;
 import com.aircandi.utilities.ImageUtils;
+import com.google.android.gcm.GCMRegistrar;
 import com.squareup.otto.Subscribe;
 
 public class AircandiCommon implements ActionBar.TabListener {
 
 	private final Context		mContext;
 	private final Activity		mActivity;
-
-	static NotificationManager	mNotificationManager;
 
 	/* Parameters */
 	public CommandType			mCommandType;
@@ -142,7 +139,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void initialize() {
 
-		mNotificationManager = (NotificationManager) mContext.getSystemService(Service.NOTIFICATION_SERVICE);
+		/* Make sure we have successfully registered this device with aircandi service */
+		com.aircandi.components.NotificationManager.getInstance().registerDeviceWithAircandi();
 
 		Logger.i(this, "Activity created: " + mPageName);
 
@@ -355,7 +353,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// --------------------------------------------------------------------------------------------
 
 	public void routeSourceEntity(Entity sourceEntity, Entity hostEntity) {
-		
+
 		Tracker.sendEvent("ui_action", "browse_source", sourceEntity.source.type, 0, Aircandi.getInstance().getUser());
 		if (sourceEntity.source.type.equals("twitter")) {
 			AndroidManager.getInstance().callTwitterActivity(mActivity, (sourceEntity.source.id != null) ? sourceEntity.source.id : sourceEntity.source.url);
@@ -567,8 +565,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 				 * We don't have a network connection.
 				 */
 				final Intent intent = new Intent(mContext, CandiRadar.class);
-				showNotification(mActivity.getString(R.string.error_connection_title), mActivity.getString(R.string.error_connection_notification), context,
-						intent, CandiConstants.NOTIFICATION_NETWORK);
+				AirNotification airNotification = new AirNotification();
+				airNotification.title = mActivity.getString(R.string.error_connection_title);
+				airNotification.subtitle = mActivity.getString(R.string.error_connection_notification);
+				airNotification.intent = intent;
+				airNotification.type = "network";
+				NotificationManager.getInstance().showNotification(airNotification, context);
+				
 				showAlertDialogSimple(null, mActivity.getString(R.string.error_connection));
 			}
 			else if (errorCode == ErrorCode.WalledGardenException) {
@@ -851,7 +854,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 						Tracker.stopSession(Aircandi.getInstance().getUser());
 
 						/* Clear the user and session that is tied into auto-signin */
+						com.aircandi.components.NotificationManager.getInstance().unregisterDeviceWithAircandi(
+								GCMRegistrar.getRegistrationId(Aircandi.applicationContext));
 						Aircandi.getInstance().setUser(null);
+
 						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER, null);
 						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER_SESSION, null);
 						Aircandi.settingsEditor.commit();
@@ -1017,26 +1023,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (progress != null) {
 			progress.setVisibility(View.GONE);
 		}
-	}
-
-	public void showNotification(String title, String message, Context context, Intent intent, int notificationType) {
-		@SuppressWarnings("deprecation")
-		final Notification note = new Notification(R.drawable.ic_stat_notification
-				, title
-				, System.currentTimeMillis());
-
-		final RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification);
-		contentView.setImageViewResource(R.id.image, R.drawable.ic_launcher);
-		contentView.setTextViewText(R.id.title, title);
-		contentView.setTextViewText(R.id.text, message);
-		note.contentView = contentView;
-
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		final PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
-		note.contentIntent = pendingIntent;
-
-		mNotificationManager.notify(notificationType, note);
 	}
 
 	@SuppressLint("NewApi")
