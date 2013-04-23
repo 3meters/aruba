@@ -168,7 +168,7 @@ public class AddressBuilder extends FormActivity {
 	}
 
 	@Override
-	protected int getLayoutID() {
+	protected int getLayoutId() {
 		return R.layout.builder_address;
 	}
 }

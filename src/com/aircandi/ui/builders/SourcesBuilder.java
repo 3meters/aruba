@@ -507,7 +507,7 @@ public class SourcesBuilder extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected int getLayoutID() {
+	protected int getLayoutId() {
 		return R.layout.builder_sources;
 	}
 }

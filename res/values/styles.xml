@@ -76,6 +76,15 @@
         <item name="android:cropToPadding">true</item>
     </style>
 
+    <style name="balloon">
+        <item name="android:textAppearance">@style/app_text_appearance_medium</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:maxWidth">200dp</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:background">?attr/backgroundBalloon</item>
+    </style>
+
     <style name="bullet">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">?attr/textColorBullet</item>
@@ -103,7 +112,7 @@
         <item name="android:paddingRight">@dimen/dialog_body_padding</item>
         <item name="android:paddingTop">@dimen/dialog_body_padding_top</item>
     </style>
-    
+
     <!-- Edit forms -->
 
     <style name="form_title" parent="android:Widget.TextView">
@@ -135,8 +144,6 @@
         <item name="android:gravity">center</item>
         <item name="android:minWidth">90dp</item>
         <item name="android:maxWidth">200dp</item>
-        <item name="android:minHeight">48dp</item>
-        <item name="android:maxHeight">48dp</item>
         <item name="android:background">?attr/backgroundButton</item>
         <item name="android:textColor">?attr/textColorButtonLink</item>
     </style>

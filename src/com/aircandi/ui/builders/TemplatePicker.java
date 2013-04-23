@@ -120,7 +120,7 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 	}
 
 	@Override
-	protected int getLayoutID() {
+	protected int getLayoutId() {
 		return R.layout.picker_template;
 	}
 }

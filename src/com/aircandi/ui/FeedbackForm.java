@@ -217,7 +217,7 @@ public class FeedbackForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected int getLayoutID() {
+	protected int getLayoutId() {
 		return R.layout.feedback_form;
 	}
 }

@@ -14,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
+        android:paddingBottom="@dimen/form_field_height"
         android:background="?attr/backgroundCandi"
         android:fillViewport="true" >
 
@@ -74,14 +75,6 @@
                     android:layout="@layout/section_candi"
                     android:paddingLeft="8dp"
                     android:paddingRight="8dp" />
-
-                <Button
-                    android:id="@+id/button_new_candigram"
-                    style="@style/form_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:onClick="onNewCandigramButtonClick"
-                    android:text="@string/form_button_new_candigram" />
             </LinearLayout>
 
             <LinearLayout
@@ -128,5 +121,28 @@
             </LinearLayout>
         </RelativeLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
+
+    <LinearLayout
+        android:id="@+id/footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:background="?attr/backgroundActionBar" >
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?attr/ruleColor" />
+
+        <Button
+            android:id="@+id/button_add_candigram"
+            style="@style/form_button_borderless"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/form_field_height"
+            android:onClick="onAddCandigramButtonClick"
+            android:text="@string/candi_button_add_candigram"
+            android:textColor="?attr/textColorButtonLink" />
+    </LinearLayout>
 
 </RelativeLayout>

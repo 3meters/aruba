@@ -10,14 +10,13 @@
     <!-- Menus -->
 
     <string name="menu_beacons_item">Beacons</string>
-    <string name="menu_add_custom_place_item">Add custom place</string>
-    <string name="menu_add_candi_item">Add candigram</string>
     <string name="menu_add_comment_item">Add comment</string>
     <string name="menu_refresh_item">Refresh</string>
     <string name="menu_edit_item">Edit</string>
     <string name="menu_profile_item">Profile</string>
     <string name="menu_home_item">Home</string>
     <string name="menu_settings_item">Settings</string>
+    <string name="menu_help_item">Help</string>
     <string name="menu_feedback_item">Feedback</string>
     <string name="menu_update_item">Update</string>
     <string name="menu_signout_item">Sign out</string>
@@ -122,9 +121,8 @@
     <string name="alert_source_delete_message_single">Are you sure you want to delete this link?</string>
     <string name="alert_source_delete_message_multiple">Are you sure you want to delete these links?</string>
 
-    <!-- Errors -->
+    <!-- Errors: network -->
 
-    <string name="error_location_poor">Location service is poor or unavailable, retry later</string>
     <string name="error_signup_missmatched_passwords_title">Password</string>
     <string name="error_signup_missmatched_passwords_message">Passwords do not match</string>
     <string name="error_signup_email_taken">Email address is already being used.</string>
@@ -132,19 +130,6 @@
     <string name="error_change_password_unauthorized">Old password is invalid.</string>
     <string name="error_whitelist_unauthorized">This is an invitation-only beta. Only invited users are able to register user accounts.</string>
     <string name="error_unverified_unauthorized">The email address for the account has not been verified.</string>
-    <string name="error_connection_title">Aircandi disconnected</string>
-    <string name="error_connection">Check network connection and retry</string>
-    <string name="error_connection_notification">Touch to retry network connection</string>
-    <string name="error_connection_poor">Network connection is poor or service is unavailable, retry later</string>
-    <string name="error_connection_walled_garden">You need to sign in to enable internet access</string>
-    <string name="error_client_request_socket_error">Resource has moved or been deleted</string>
-    <string name="error_client_unknown_host">The website you entered can\'t be found.</string>
-    <string name="error_client_request_error">Aircandi request error</string>
-    <string name="error_client_request_not_found">Resource not found</string>
-    <string name="error_service_unauthorized">Unauthorized request</string>
-    <string name="error_service_forbidden">Requested operation is not valid</string>
-    <string name="error_service_gateway_timeout">Did not receive timely response from service</string>
-    <string name="error_service_unknown">Unknown service error</string>
     <string name="error_signin_invalid_signin">Wrong email and password combination.</string>
     <string name="error_invalid_email">Email address is invalid.</string>
     <string name="error_session_expired_title">Session expired</string>
@@ -162,6 +147,30 @@
     <string name="error_missing_message">Enter a message.</string>
     <string name="error_missing_source_id_facebook">Enter a Facebook user id and then select picture again.</string>
     <string name="error_missing_source_id_twitter">Enter a Twitter user id and then select picture again.</string>
+    
+    <!-- Errors: network or location -->
+    
+    <string name="error_location_poor">Location service is poor or unavailable, retry later</string>
+    
+    <!-- Errors: connectivity -->
+    
+    <string name="error_connection_walled_garden">You need to sign in to enable internet access</string>
+    <string name="error_connection_none">Check network connection and retry</string>
+    <string name="error_connection_none_notification_title">Aircandi disconnected</string>
+    <string name="error_connection_none_notification_message">Touch to retry network connection</string>
+    <string name="error_connection_poor">Network connection is poor, retry later</string>
+    <string name="error_service_unavailable">Service is unavailable, retry later</string>
+    <string name="error_connection_no_response">Service is not responding, retry later</string>
+    
+    <string name="error_client_request_socket_error">Resource has moved or been deleted</string>
+    <string name="error_client_unknown_host">The website you entered can\'t be found.</string>
+    <string name="error_client_request_error">Aircandi request error</string>
+    <string name="error_client_request_not_found">Resource not found</string>
+    <string name="error_service_unauthorized">Unauthorized request</string>
+    <string name="error_service_forbidden">Requested operation is not valid</string>
+    <string name="error_service_gateway_timeout">Did not receive timely response from service</string>
+    <string name="error_service_unknown">Unknown service error</string>
+    
     
     <!-- Toast -->
 
@@ -213,7 +222,8 @@
 
     <string name="radar_section_places">tuned</string>
     <string name="radar_section_synthetics">nearby</string>
-
+    <string name="radar_button_add_place">add place</string>
+    
     <!-- Dialogs -->
 
     <string name="dialog_about_copyright">copyright 3meters LLC 2010&#8211;2013</string>
@@ -251,9 +261,9 @@
     <string name="candi_section_candigrams_more">view all candigrams</string>
     <string name="candi_button_tune">tune it!</string>
     <string name="candi_button_call">call</string>
-    <string name="candi_button_new">add candigram</string>
     <string name="candi_button_edit">edit</string>
     <string name="candi_button_polish">polish</string>
+    <string name="candi_button_add_candigram">add candigram</string>
     <string name="candi_section_switchboard_place">place info</string>
     <string name="candi_section_candi">candigrams</string>
     <string name="candi_section_user_candi_places">my places</string>
@@ -268,7 +278,7 @@
 
     <string name="candi_button_comment">comment</string>
     <string name="comment_button_comment_first">start the conversation</string>
-
+    
     <!-- Splash -->
 
     <string name="splash_button_signin">sign in</string>
@@ -316,6 +326,7 @@
     <string name="form_button_tuning_tuned">thanks!</string>
     <string name="form_button_tuning_add_candi">add candigram</string>
     <string name="form_button_tuning_edit">edit</string>
+    
 
     <!-- Forms.labels -->
 

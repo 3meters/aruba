@@ -42,6 +42,7 @@ public final class CandiConstants {
 	public static final String	EXTRA_PAGING_ENABLED					= "com.aircandi.EXTRA_PAGING_ENABLED";														//$NON-NLS-1$
 	public static final String	EXTRA_PHOTO								= "com.aircandi.EXTRA_PHOTO";																//$NON-NLS-1$
 	public static final String	EXTRA_REFRESH_FORCE						= "com.aircandi.EXTRA_REFRESH_FORCE";														//$NON-NLS-1$
+	public static final String	EXTRA_HELP_ID							= "com.aircandi.EXTRA_HELP_ID";															//$NON-NLS-1$
 
 	public static final int		MILLS_PER_SECOND						= 1000;
 	public static final int		TIME_ONE_SECOND							= MILLS_PER_SECOND * 1;
@@ -174,6 +175,8 @@ public final class CandiConstants {
 	public static final String	SETTING_USER_SESSION					= "Setting_User_Session";
 	public static final String	SETTING_PICTURE_SEARCH					= "Setting_Picture_Search";
 	public static final String	SETTING_LAST_EMAIL						= "Setting_Last_Email";
+	public static final String	SETTING_RUN_ONCE_HELP_RADAR				= "Setting_Run_Once_Help_Radar";
+	public static final String	SETTING_RUN_ONCE_HELP_CANDI_PLACE		= "Setting_Run_Once_Help_Candi_Place";
 
 	/* Defaults */
 	public static final String	PREF_THEME_DEFAULT						= "aircandi_theme_midnight";

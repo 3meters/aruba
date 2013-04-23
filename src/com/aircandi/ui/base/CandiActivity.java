@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,12 +29,12 @@ import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public abstract class CandiActivity extends SherlockActivity {
 
-	private AircandiCommon	mCommon;
-	private AlertDialog		mUpdateAlertDialog;
-	private AlertDialog		mWifiAlertDialog;
-	protected Boolean		mPrefChangeNewSearchNeeded	= false;
-	protected Boolean		mPrefChangeRefreshUiNeeded	= false;
-	protected Boolean		mPrefChangeReloadNeeded		= false;
+	protected AircandiCommon	mCommon;
+	private AlertDialog			mUpdateAlertDialog;
+	private AlertDialog			mWifiAlertDialog;
+	protected Boolean			mPrefChangeNewSearchNeeded	= false;
+	protected Boolean			mPrefChangeRefreshUiNeeded	= false;
+	protected Boolean			mPrefChangeReloadNeeded		= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -51,9 +52,10 @@ public abstract class CandiActivity extends SherlockActivity {
 		}
 		else {
 			mCommon = new AircandiCommon(this, savedInstanceState);
-			mCommon.setTheme(null, false);
+			mCommon.setTheme(getThemeId(), isDialog(), isTransparent());
 			mCommon.unpackIntent();
-			setContentView(getLayoutId());
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+			super.setContentView(getLayoutId());
 			super.onCreate(savedInstanceState);
 			mCommon.initialize();
 		}
@@ -269,6 +271,26 @@ public abstract class CandiActivity extends SherlockActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// UI routines
+	// --------------------------------------------------------------------------------------------
+
+	protected Integer getThemeId() {
+		return null;
+	}
+
+	protected Boolean isDialog() {
+		return false;
+	}
+
+	protected Boolean isTransparent() {
+		return false;
+	}
+
+	protected int getLayoutId() {
+		return 0;
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
 
@@ -335,10 +357,6 @@ public abstract class CandiActivity extends SherlockActivity {
 		super.onPause();
 	}
 
-	protected int getLayoutId() {
-		return 0;
-	}
-
 	@Override
 	protected void onDestroy() {
 		/* This activity gets destroyed everytime we leave using back or finish(). */
@@ -358,9 +376,4 @@ public abstract class CandiActivity extends SherlockActivity {
 	public AircandiCommon getCommon() {
 		return mCommon;
 	}
-
-	public void setCommon(AircandiCommon common) {
-		mCommon = common;
-	}
-
 }

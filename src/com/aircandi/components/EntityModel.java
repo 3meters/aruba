@@ -95,6 +95,9 @@ public class EntityModel {
 			if (refresh || entity == null) {
 				getEntityIds.add(entityId);
 			}
+			else if (entity.childCount != null && entity.getChildren().size() < entity.childCount) {
+				getEntityIds.add(entityId);
+			}
 		}
 
 		if (getEntityIds.size() > 0) {
@@ -379,7 +382,7 @@ public class EntityModel {
 		final ModelResult result = new ProxiManager.ModelResult();
 
 		final User user = Aircandi.getInstance().getUser();
-		if (user.session != null) {
+		if (user != null && user.session != null) {
 			/*
 			 * We use a short timeout with no retry because failure doesn't
 			 * really hurt anything.
@@ -532,6 +535,19 @@ public class EntityModel {
 			 */
 			updateUser(user);
 		}
+		return result;
+	}
+
+	public ModelResult checkSession() {
+		ModelResult result = new ModelResult();
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "checkSession")
+				.setRequestType(RequestType.Get)
+				.setResponseFormat(ResponseFormat.Json)
+				.setSession(Aircandi.getInstance().getUser().session);
+
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 		return result;
 	}
 
@@ -967,12 +983,12 @@ public class EntityModel {
 	// --------------------------------------------------------------------------------------------
 	// Other updates
 	// --------------------------------------------------------------------------------------------
-	
-	public void processNotification(AirNotification notification) {
-	}
+
+	public void processNotification(AirNotification notification) {}
 
 	public ModelResult registerDevice(Device device) {
 		ModelResult result = new ModelResult();
+
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + Device.collectionId)
 				.setRequestType(RequestType.Insert)

@@ -360,7 +360,7 @@ public class RegisterForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected int getLayoutID() {
+	protected int getLayoutId() {
 		return R.layout.register_form;
 	}
 }

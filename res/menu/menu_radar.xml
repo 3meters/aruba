@@ -14,11 +14,11 @@
         android:showAsAction="always"
         android:title="@string/menu_refresh_item"/>
     <item
-        android:id="@+id/add_custom_place"
-        android:icon="?attr/iconAdd"
+        android:id="@+id/help"
+        android:icon="?attr/iconHelp"
         android:orderInCategory="1"
         android:showAsAction="always"
-        android:title="@string/menu_add_custom_place_item"/>
+        android:title="@string/menu_help_item"/>
     <item
         android:id="@+id/profile"
         android:orderInCategory="1"

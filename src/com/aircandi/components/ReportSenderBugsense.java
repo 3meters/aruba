@@ -9,6 +9,7 @@ import org.acra.sender.ReportSenderException;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
+import com.aircandi.service.objects.User;
 
 public class ReportSenderBugsense extends HttpPostSender {
 
@@ -30,6 +31,13 @@ public class ReportSenderBugsense extends HttpPostSender {
 		Integer networkTypeId = NetworkManager.getInstance().getNetworkTypeId();
 		if (networkTypeId != null) {
 			custom.append("Custom_Data_Network_Type=" + getNetworkTypeLabel(networkTypeId) + "\n");
+		}
+		
+		/* User id and name */
+		User user = Aircandi.getInstance().getUser();
+		if (user != null) {
+			custom.append("Custom_User_Id=" + user.id + "\n");
+			custom.append("Custom_User_Name=" + user.name + "\n");
 		}
 
 		/* Current location */

@@ -256,18 +256,37 @@ public class ProxiManager {
 			final String jsonResponse = (String) serviceResponse.data;
 			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
-
-			final List<Entity> entities = (List<Entity>) serviceData.data;
+			
 			Aircandi.stopwatch1.segmentTime("Entities for beacons: objects deserialized");
+			
+			/*
+			 * Remove any beacon entities from the cache that didn't come
+			 * back in the query.
+			 */
+			final List<Entity> entitiesAfter = (List<Entity>) serviceData.data;
+			final List<Entity> entitiesBefore = mEntityModel.getProximityPlaces();
+			for (Entity entityBefore : entitiesBefore) {
+				Boolean entityDeleted = true;
+				for (Entity entityAfter : entitiesAfter) {
+					if (entityAfter.id.equals(entityBefore.id)) {
+						entityDeleted = false;
+						break;
+					}
+				}
+				if (entityDeleted) {
+					mEntityModel.removeEntity(entityBefore.id);
+				}
+			}
 
-			if (entities.size() > 0) {
+			//mEntityModel.removeBeaconEntities();
+			if (entitiesAfter.size() > 0) {
 
 				/*
 				 * Make sure we don't have duplicates keyed on sourceId because
 				 * getPlacesNearLocation could have already completed.
 				 */
 				synchronized (mEntityModel.mEntityCache) {
-					for (Entity entity : entities) {
+					for (Entity entity : entitiesAfter) {
 						if (entity.place != null) {
 							if (mEntityModel.mEntityCache.containsKey(entity.place.getProvider().id)) {
 								mEntityModel.mEntityCache.remove(entity.place.getProvider().id);
@@ -277,10 +296,10 @@ public class ProxiManager {
 				}
 
 				/* Merge entities into data model */
-				mEntityModel.upsertEntities(entities);
+				mEntityModel.upsertEntities(entitiesAfter);
 				manageEntityVisibility();
 			}
-			
+
 			mEntityModel.setLastBeaconRefreshDate(serviceData.date.longValue());
 
 			/* All cached place entities that qualify based on current distance pref setting */

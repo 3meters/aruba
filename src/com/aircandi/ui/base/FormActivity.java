@@ -5,6 +5,7 @@ import java.io.File;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -76,9 +77,10 @@ public abstract class FormActivity extends SherlockActivity {
 			 */
 			mCommon = new AircandiCommon(this, savedInstanceState);
 			mCommon.unpackIntent();
-			mCommon.setTheme(null, isDialog());
+			mCommon.setTheme(getThemeId(), isDialog(), isTransparent());
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			super.onCreate(savedInstanceState);
-			super.setContentView(this.getLayoutID());
+			super.setContentView(this.getLayoutId());
 			mCommon.initialize();
 		}
 	}
@@ -332,6 +334,18 @@ public abstract class FormActivity extends SherlockActivity {
 		return false;
 	}
 
+	protected Boolean isTransparent() {
+		return false;
+	}
+
+	protected Integer getThemeId() {
+		return null;
+	}
+
+	protected int getLayoutId() {
+		return 0;
+	}
+
 	protected static void setVisibility(View view, Integer visibility) {
 		if (view != null) {
 			view.setVisibility(visibility);
@@ -415,10 +429,6 @@ public abstract class FormActivity extends SherlockActivity {
 	protected void onStart() {
 		super.onStart();
 		mCommon.doStart();
-	}
-
-	protected int getLayoutID() {
-		return 0;
 	}
 
 	// --------------------------------------------------------------------------------------------

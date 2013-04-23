@@ -239,7 +239,7 @@ public class PictureDetail extends FormActivity {
 	}
 
 	@Override
-	protected int getLayoutID() {
+	protected int getLayoutId() {
 		return R.layout.picture_detail;
 	}
 }

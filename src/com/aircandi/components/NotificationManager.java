@@ -29,6 +29,7 @@ import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Device;
 import com.aircandi.service.objects.ServiceData;
+import com.aircandi.service.objects.ServiceEntryBase.UpdateScope;
 import com.aircandi.ui.CandiRadar;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -85,6 +86,7 @@ public class NotificationManager {
 					device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, CandiRadar.class);
 					device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, CandiRadar.class);
 
+					device.updateScope = UpdateScope.Property;
 					ModelResult result = ProxiManager.getInstance().getEntityModel().registerDevice(device);
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -118,9 +120,11 @@ public class NotificationManager {
 						GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
 					}
 					else {
-						if (result.serviceResponse.exception.getStatusCode() == (float) HttpStatus.SC_NOT_FOUND) {
-							Logger.i(this, "GCM: Device already unregistered with Aircandi notification service");
-							GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
+						if (result.serviceResponse.exception != null && result.serviceResponse.exception.getStatusCode() != null) {
+							if (result.serviceResponse.exception.getStatusCode() == (float) HttpStatus.SC_NOT_FOUND) {
+								Logger.i(this, "GCM: Device already unregistered with Aircandi notification service");
+								GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
+							}
 						}
 						else {
 							/* TODO: What should we do if unregister fails? */
@@ -140,20 +144,22 @@ public class NotificationManager {
 		 * Small icon displays on left unless a large icon is specified
 		 * and then it moves to the right.
 		 */
-		if (airNotification.subtype.equals("nearby")) {
-			if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_NEARBY, CandiConstants.PREF_NOTIFICATIONS_NEARBY_DEFAULT)) {
-				return;
-			}
-		}
-		else if (airNotification.subtype.equals("owner")) {
-			if (airNotification.type.equals("comment")) {
-				if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_COMMENTS, CandiConstants.PREF_NOTIFICATIONS_COMMENTS_DEFAULT)) {
+		if (airNotification.subtype != null) {
+			if (airNotification.subtype.equals("nearby")) {
+				if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_NEARBY, CandiConstants.PREF_NOTIFICATIONS_NEARBY_DEFAULT)) {
 					return;
 				}
 			}
-			else if (airNotification.type.equals("entity_insert")) {
-				if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_CANDIGRAMS, CandiConstants.PREF_NOTIFICATIONS_CANDIGRAMS_DEFAULT)) {
-					return;
+			else if (airNotification.subtype.equals("owner")) {
+				if (airNotification.type.equals("comment")) {
+					if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_COMMENTS, CandiConstants.PREF_NOTIFICATIONS_COMMENTS_DEFAULT)) {
+						return;
+					}
+				}
+				else if (airNotification.type.equals("entity_insert")) {
+					if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_CANDIGRAMS, CandiConstants.PREF_NOTIFICATIONS_CANDIGRAMS_DEFAULT)) {
+						return;
+					}
 				}
 			}
 		}
@@ -177,8 +183,10 @@ public class NotificationManager {
 
 		airNotification.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		airNotification.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		final PendingIntent pendingIntent = PendingIntent
-				.getActivity(Aircandi.applicationContext, 0, airNotification.intent, PendingIntent.FLAG_CANCEL_CURRENT);
+		final PendingIntent pendingIntent = PendingIntent.getActivity(Aircandi.applicationContext
+				, 0
+				, airNotification.intent
+				, PendingIntent.FLAG_CANCEL_CURRENT);
 
 		if (airNotification.user != null) {
 

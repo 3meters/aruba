@@ -22,6 +22,10 @@ package com.aircandi.service;
 public class HttpClientException extends RuntimeException {
 
 	private static final long	serialVersionUID	= 1L;
+	
+	public HttpClientException() {
+		super();
+	}
 
 	public HttpClientException(String message) {
 		super(message);

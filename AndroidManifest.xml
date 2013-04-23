@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi.beta"
     android:installLocation="auto"
-    android:versionCode="30"
-    android:versionName="0.8.17" >
+    android:versionCode="32"
+    android:versionName="0.8.19" >
 
     <supports-screens
         android:anyDensity="true"
@@ -39,7 +39,6 @@
     <!-- Needed to trigger a wifi scan -->
 
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
         android:name="com.aircandi.Aircandi"
@@ -70,7 +69,7 @@
                 <category android:name="com.aircandi.components" />
             </intent-filter>
         </receiver>
-        
+
         <!-- Activities -->
 
         <activity
@@ -117,6 +116,13 @@
             android:name="com.aircandi.ui.TuningWizard"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_tune"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="com.aircandi.ui.CandiHelp"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/aircandi_theme_midnight_transparent"
+            android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
@@ -257,7 +263,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
     <uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS" />
-    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
     -->
 
 </manifest>

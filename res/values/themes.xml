@@ -17,7 +17,7 @@
 		- Tabbar tone
 		- Set window background
 		- Select right set of drawables based on the theme tone.
-		- Custom line and text colors in pages, forms, buttons.
+		- Custom line and text colors in pages, forms, buttons.
     -->
 
     <style name="aircandi_theme_dark" parent="Theme.Sherlock">
@@ -57,6 +57,8 @@
         <!-- Backgrounds -->
 
         <item name="backgroundButton">@drawable/selector_button_dark</item>
+        <item name="backgroundBalloon">@drawable/bg_balloon_dark</item>
+        <item name="backgroundHelp">@color/background_help_dark</item>
         <item name="backgroundCandi">@android:color/transparent</item>
         <item name="backgroundForm">@color/background_dark</item>
         <item name="backgroundPictureFramed">@drawable/bg_image_framed_dark</item>
@@ -100,6 +102,7 @@
         <item name="iconSuggest">@drawable/ic_action_bulb_dark</item>
         <item name="iconStarOn">@drawable/ic_action_star_10_dark</item>
         <item name="iconStarOff">@drawable/ic_action_star_0_dark</item>
+        <item name="iconHelp">@drawable/ic_action_help_dark</item>
 
         <!-- Actionbar Sherlock -->
 
@@ -110,7 +113,10 @@
         <item name="android:actionBarStyle">@style/actionbar_dark</item>
         <item name="android:actionBarTabBarStyle">@style/actionbar_tabbar_dark</item>
         <item name="android:actionModeBackground">?attr/backgroundActionBar</item>
-    </style>
+        
+        <!-- ShowcaseView -->
+        
+	</style>
 
     <style name="aircandi_theme_light" parent="Theme.Sherlock.Light">
         <item name="themeTone">light</item>
@@ -132,6 +138,7 @@
 
         <!-- Dialogs -->
 
+
         <!--
         <item name="android:alertDialogTheme">@style/Theme.Sherlock.Light.Dialog</item>
         <item name="android:dialogTheme">@android:style/Theme.Holo.Light.Dialog</item>
@@ -139,8 +146,9 @@
         <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_holo</item>
         <item name="dialogTitleDecorLayout">@layout/dialog_title_holo</item>
         <item name="alertDialogCenterButtons">false</item>
-        <item name="alertDialogIcon">@android:drawable/ic_dialog_alert_holo_light</item>
+        <item name="alertDialogIcon">@android:drawable/ic_dialog_alert_holo_light</item>
         -->
+
 
         <!-- Text and line colors -->
 
@@ -161,6 +169,8 @@
         <!-- Drawables and backgrounds -->
 
         <item name="backgroundButton">@drawable/selector_button_light</item>
+        <item name="backgroundBalloon">@drawable/bg_balloon_light</item>
+        <item name="backgroundHelp">@color/background_help_light</item>
         <item name="backgroundCandi">@android:color/transparent</item>
         <item name="backgroundForm">@color/background_light</item>
         <item name="backgroundPictureFramed">@drawable/bg_image_framed_light</item>
@@ -204,6 +214,7 @@
         <item name="iconSuggest">@drawable/ic_action_bulb_light</item>
         <item name="iconStarOn">@drawable/ic_action_star_10_light</item>
         <item name="iconStarOff">@drawable/ic_action_star_0_light</item>
+        <item name="iconHelp">@drawable/ic_action_help_light</item>
 
         <!-- Actionbar Sherlock -->
 
@@ -228,6 +239,20 @@
 
     <style name="aircandi_theme_snow" parent="aircandi_theme_light" />
 
+    <!-- Translucent theme versions -->
+
+    <style name="aircandi_theme_midnight_transparent" parent="aircandi_theme_midnight">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <style name="aircandi_theme_snow_transparent" parent="aircandi_theme_snow">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+    
     <!-- Dialog Themes -->
 
     <style name="aircandi_theme_dialog_dark" parent="Theme.Sherlock.Dialog">
@@ -290,5 +315,6 @@
         <item name="actionBarItemBackground">@drawable/abs__item_background_holo_light</item>
         <item name="actionBarSize">@dimen/abs__action_bar_default_height</item>
     </style>
+
 
 </resources>

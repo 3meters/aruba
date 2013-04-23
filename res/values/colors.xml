@@ -4,7 +4,8 @@
     <!--
 	   	Theme Colors
 	   	- light suffix means a theme where backgrounds are generally light in tone. 
-	   	- dark suffix means a theme where backgrounds are generally dark in tone.    -->
+	   	- dark suffix means a theme where backgrounds are generally dark in tone.
+    -->
 
     <color name="progress_start">#ffffd300</color>
     <color name="progress_end">#ffffd300</color>
@@ -31,13 +32,28 @@
     <color name="background_button_end_dark">@color/gray_80_pcnt</color>
     <color name="stroke_button_dark">@color/gray_75_pcnt</color>
     <color name="button_pressed">@color/accent_blue</color>
-    
+
     <!-- Buttons light -->
-    
+
     <color name="background_button_light">@color/gray_20_pcnt</color>
     <color name="background_button_start_light">@color/gray_05_pcnt</color>
     <color name="background_button_end_light">@color/gray_10_pcnt</color>
     <color name="stroke_button_light">@color/gray_25_pcnt</color>
+
+    <!-- Balloons dark -->
+
+    <color name="background_balloon_dark">@color/gray_80_pcnt</color>
+    <color name="background_balloon_start_dark">@color/brand_pink_darker</color>
+    <color name="background_balloon_end_dark">@color/brand_pink_darker</color>
+    <color name="stroke_balloon_dark">@color/brand_pink</color>
+    <color name="ballon_pressed">@color/accent_blue</color>
+
+    <!-- Balloons light -->
+
+    <color name="background_balloon_light">@color/gray_20_pcnt</color>
+    <color name="background_balloon_start_light">@color/gray_05_pcnt</color>
+    <color name="background_balloon_end_light">@color/gray_10_pcnt</color>
+    <color name="stroke_balloon_light">@color/gray_25_pcnt</color>
 
     <!-- Backgrounds -->
 
@@ -46,9 +62,9 @@
     <color name="background_picture_detail">#ff282828</color>
     <color name="background_progress_dark">#99000000</color>
     <color name="background_progress_light">#ccffffff</color>
-    
+    <color name="background_help_dark">#66000000</color>
+    <color name="background_help_light">#66000000</color>
     <color name="image_pressed">@color/accent_blue</color>
-    
     <color name="drop_start">#66000000</color>
     <color name="drop_end">#00000000</color>
 
@@ -60,6 +76,7 @@
     <color name="overlay_center">#88000000</color>
     <color name="overlay_end">#aa000000</color>
     <color name="overlay_photo_detail">#66000000</color>
+    <color name="overlay_help">#aa000000</color>
 
     <!-- Darken bars: mostly transparent -->
 
@@ -96,7 +113,7 @@
     <color name="gray_90_pcnt">#ff191919</color>
     <color name="gray_95_pcnt">#ff0c0c0c</color>
     <color name="gray_100_pcnt">#ff000000</color>
-    
+
     <!-- Aircandi branding colors HSV: 300,50,60 -->
 
     <color name="brand_pink">#ffb45eb4</color>
@@ -148,7 +165,7 @@
     <color name="accent_blue_dark_mute">#ff48a8bd</color>
     <color name="accent_blue_dark_mute_semi">#6648a8bd</color>
     <color name="holo_blue_light">#8833b5e5</color>
-    
+
     <!-- Accent gray -->
 
     <color name="accent_gray">#ffaaaaaa</color>

@@ -58,6 +58,7 @@ public class SplashForm extends SherlockActivity {
 		}
 
 		signinAuto();
+		
 		if (!isFinishing()) {
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 			setContentView(R.layout.splash);
@@ -178,7 +179,7 @@ public class SplashForm extends SherlockActivity {
 
 		}
 	}
-
+	
 	private void startGetAWSCredentials() {
 		final Thread t = new Thread() {
 

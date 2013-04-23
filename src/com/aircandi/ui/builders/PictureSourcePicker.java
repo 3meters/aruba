@@ -178,7 +178,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 	}
 
 	@Override
-	protected int getLayoutID() {
+	protected int getLayoutId() {
 		return R.layout.picker_picture_source;
 	}
 }

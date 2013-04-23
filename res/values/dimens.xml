@@ -23,17 +23,24 @@
     <dimen name="form_body_padding_top">10dp</dimen>
     <dimen name="form_field_height">48dp</dimen>
 
+    <!-- Buttons -->
+    
     <item name="combo_button_drawable_scale" format="float" type="dimen">0.9</item>
     <item name="combo_button_drawable_large_scale" format="float" type="dimen">0.6</item>
 
     <dimen name="action_button_min_width">56dp</dimen>
-    
     <dimen name="form_button_stroke_width">1px</dimen>
     <dimen name="form_button_corner_radius">0dp</dimen>
     <dimen name="form_button_padding">3dp</dimen>
+
+    <!-- Balloons -->
+
+    <dimen name="form_balloon_stroke_width">1px</dimen>
+    <dimen name="form_balloon_corner_radius">5dp</dimen>
+    <dimen name="form_balloon_padding">3dp</dimen>
     
     <!-- Dialogs -->
-    
+
     <dimen name="dialog_body_padding">10dp</dimen>
     <dimen name="dialog_body_padding_top">15dp</dimen>
 

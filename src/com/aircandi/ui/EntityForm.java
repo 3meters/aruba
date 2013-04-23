@@ -682,7 +682,7 @@ public class EntityForm extends FormActivity {
 					AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, EntityForm.this);
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave);
 				}
 			}
 
@@ -882,7 +882,7 @@ public class EntityForm extends FormActivity {
 					AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPageAfterDelete);
 				}
 				else {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiDelete, EntityForm.this);
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiDelete);
 				}
 			}
 
@@ -949,7 +949,7 @@ public class EntityForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected int getLayoutID() {
+	protected int getLayoutId() {
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
 			return R.layout.picture_form;
 		}

@@ -63,9 +63,9 @@ import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.MiscUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.MiscUtils;
 import com.squareup.otto.Subscribe;
 
 public class TuningWizard extends FormActivity {
@@ -639,7 +639,7 @@ public class TuningWizard extends FormActivity {
 					AnimUtils.doOverridePendingTransition(TuningWizard.this, TransitionType.FormToPage);
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, TuningWizard.this);
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave);
 				}
 			}
 
@@ -847,7 +847,7 @@ public class TuningWizard extends FormActivity {
 	}
 
 	@Override
-	protected int getLayoutID() {
+	protected int getLayoutId() {
 		return R.layout.tuning_wizard;
 	}
 }

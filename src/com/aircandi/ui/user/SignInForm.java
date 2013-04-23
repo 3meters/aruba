@@ -194,7 +194,7 @@ public class SignInForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected int getLayoutID() {
+	protected int getLayoutId() {
 		return R.layout.signin_form;
 	}
 }

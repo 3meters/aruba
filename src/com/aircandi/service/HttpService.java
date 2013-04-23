@@ -72,9 +72,9 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ConnectedState;
 import com.aircandi.components.bitmaps.ImageResult;
-import com.aircandi.service.HttpServiceException.ErrorCode;
 import com.aircandi.service.HttpServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;
+import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Device;
@@ -82,7 +82,6 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Location;
-import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Result;
 import com.aircandi.service.objects.ServiceData;
@@ -93,8 +92,6 @@ import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
 
 /*
  * Http 1.1 Status Codes (subset)
@@ -251,13 +248,11 @@ public class HttpService {
 				ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
 
 				if (connectedState == ConnectedState.None) {
-					final Exception exception = new ConnectException();
-					HttpServiceException proxibaseException = makeHttpServiceException(null, null, exception);
+					final HttpServiceException proxibaseException = makeHttpServiceException(null, null, new ConnectException());
 					throw proxibaseException;
 				}
 				else if (connectedState == ConnectedState.WalledGarden) {
-					final Exception exception = new WalledGardenException();
-					final HttpServiceException proxibaseException = HttpService.makeHttpServiceException(null, null, exception);
+					final HttpServiceException proxibaseException = HttpService.makeHttpServiceException(null, null, new WalledGardenException());
 					throw proxibaseException;
 				}
 
@@ -279,12 +274,15 @@ public class HttpService {
 
 				retryCount++;
 				long startTime = System.nanoTime();
-				httpResponse = mHttpClient.execute(httpRequest);
-				long bytesDownloaded = (httpResponse.getEntity() != null) ? httpResponse.getEntity().getContentLength() : 0;
-				logDownload(startTime, System.nanoTime() - startTime, bytesDownloaded, httpRequest.getURI().toString());
 
-				/* Check the response status code and handle anything that isn't a possible valid success code. */
+				httpResponse = mHttpClient.execute(httpRequest);
+
 				if (isRequestSuccessful(httpResponse)) {
+					/*
+					 * Any 2.XX status code is considered success.
+					 */
+					long bytesDownloaded = (httpResponse.getEntity() != null) ? httpResponse.getEntity().getContentLength() : 0;
+					logDownload(startTime, System.nanoTime() - startTime, bytesDownloaded, httpRequest.getURI().toString());
 					return handleResponse(httpRequest, httpResponse, serviceRequest.getResponseFormat(), serviceRequest.getRequestListener());
 				}
 				else if (isTemporaryRedirect(httpResponse)) {
@@ -304,11 +302,15 @@ public class HttpService {
 					 * decide if makes sense to retry.
 					 */
 					String responseContent = convertStreamToString(httpResponse.getEntity().getContent());
+
 					Float httpStatusCode = (float) httpResponse.getStatusLine().getStatusCode();
 					Float httpStatusCodeService = null;
 					Logger.d(this, responseContent);
 
 					if (serviceRequest.getResponseFormat() == ResponseFormat.Json) {
+						/*
+						 * We think anything json is coming from the Aircandi service.
+						 */
 						ServiceData serviceData = HttpService.convertJsonToObjectSmart(responseContent, ServiceDataType.None);
 						if (serviceData != null && serviceData.error != null && serviceData.error.code != null) {
 							httpStatusCodeService = serviceData.error.code.floatValue();
@@ -316,7 +318,6 @@ public class HttpService {
 					}
 
 					HttpServiceException proxibaseException = makeHttpServiceException(httpStatusCode, httpStatusCodeService, null);
-					proxibaseException.setResponseMessage(responseContent);
 
 					if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, proxibaseException, retryCount)) {
 						/*
@@ -328,37 +329,38 @@ public class HttpService {
 					}
 				}
 			}
-			catch (ClientProtocolException e) {
-				/*
-				 * Can't recover from this with a retry.
-				 */
-				HttpServiceException proxibaseException = makeHttpServiceException(null, null, e);
-				throw proxibaseException;
-			}
 			catch (IOException e) {
 				/*
 				 * This could be any of these:
-				 * - ConnectTimeoutException: timeout expired trying to connect to service
-				 * - SocketTimeoutException: timeout expired on a socket
-				 * - SocketException: thrown during socket creation or setting options
-				 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
+				 * 
+				 * Primaries:
 				 * - UnknownHostException: hostname didn't exist in the dns system
+				 * - ConnectTimeoutException: timeout expired trying to connect to service
+				 * - SocketException: thrown during socket creation or setting options
+				 * - SocketTimeoutException: timeout expired on a socket waiting for data
+				 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
+				 * 
+				 * Secondaries
+				 * - Zillions
 				 */
 				if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, e, retryCount)) {
-					HttpServiceException proxibaseException = makeHttpServiceException(null, null, e);
+
+					final HttpServiceException proxibaseException = makeHttpServiceException(null, null, e);
 					throw proxibaseException;
+
 				}
 				else {
-					/* Ok to retry, check our connection again */
+					/*
+					 * Ok to retry, check our connection again
+					 */
 					ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
+					
 					if (connectedState == ConnectedState.None) {
-						final Exception exception = new ConnectException();
-						HttpServiceException proxibaseException = makeHttpServiceException(null, null, exception);
+						final HttpServiceException proxibaseException = makeHttpServiceException(null, null, new ConnectException());
 						throw proxibaseException;
 					}
 					else if (connectedState == ConnectedState.WalledGarden) {
-						final Exception exception = new WalledGardenException();
-						final HttpServiceException proxibaseException = HttpService.makeHttpServiceException(null, null, exception);
+						final HttpServiceException proxibaseException = HttpService.makeHttpServiceException(null, null, new WalledGardenException());
 						throw proxibaseException;
 					}
 				}
@@ -535,115 +537,71 @@ public class HttpService {
 
 		if (exception != null) {
 
-			String exceptionMessage = exception.getClass().getSimpleName() + ": " + exception.getMessage();
-
-			if (exception instanceof ClientProtocolException) { 		// derives from IOException
-				httpException = new HttpServiceException(exceptionMessage, ErrorType.Client, ErrorCode.ClientProtocolException, exception);
-				httpException.setResponseMessage(httpException.getMessage());
+			if (exception instanceof WalledGardenException) {
+				httpException = new HttpServiceException("Network connects to a walled garden", ErrorType.Client, exception, statusCode);
 			}
-			else if (exception instanceof WalledGardenException) { 		// derived from ConnectException
-				httpException = new HttpServiceException("Network connects to a walled garden", ErrorType.Client, ErrorCode.WalledGardenException, exception);
-				httpException.setResponseMessage(httpException.getMessage());
-			}
-			else if (exception instanceof ConnectException) { 			// derives from SocketException
-				httpException = new HttpServiceException("Not connected to network", ErrorType.Client, ErrorCode.ConnectionException, exception);
-				httpException.setResponseMessage("Device is not connected to a network: "
+			else if (exception instanceof SocketException) {
+				httpException = new HttpServiceException("Device is not connected to a network: "
 						+ String.valueOf(ProxiConstants.CONNECT_TRIES) + " tries over "
-						+ String.valueOf(ProxiConstants.CONNECT_WAIT * ProxiConstants.CONNECT_TRIES / 1000) + " second window");
+						+ String.valueOf(ProxiConstants.CONNECT_WAIT * ProxiConstants.CONNECT_TRIES / 1000) + " second window"
+						, ErrorType.Client
+						, exception
+						, statusCode);
 			}
-			else if (exception instanceof SocketException) { 			// derives from IOException
-				httpException = new HttpServiceException(exceptionMessage, ErrorType.Client, ErrorCode.SocketException, exception);
-				httpException.setResponseMessage(httpException.getMessage());
-			}
-			else if (exception instanceof IOException) { 				// derives from Exception
-				httpException = new HttpServiceException(exceptionMessage, ErrorType.Client, ErrorCode.IOException, exception);
-				httpException.setResponseMessage(httpException.getMessage());
-			}
-			else if (exception instanceof AmazonServiceException) { 	// derives from AmazonClientException
-				httpException = new HttpServiceException(exceptionMessage, ErrorType.Client, ErrorCode.AmazonServiceException, exception);
-				httpException.setResponseMessage(httpException.getMessage());
-			}
-			else if (exception instanceof AmazonClientException) { 		// derives from RuntimeException
-				httpException = new HttpServiceException(exceptionMessage, ErrorType.Client, ErrorCode.AmazonClientException, exception);
-				httpException.setResponseMessage(httpException.getMessage());
-			}
-			else if (exception instanceof InterruptedException) {
-				httpException = new HttpServiceException(exceptionMessage, ErrorType.Client, ErrorCode.InterruptedException, exception);
-				httpException.setResponseMessage(httpException.getMessage());
+			else {
+				httpException = new HttpServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage()
+						, ErrorType.Client
+						, exception
+						, statusCode);
 			}
 		}
 		else if (statusCode != null) {
 
 			if (statusCode == HttpStatus.SC_NOT_FOUND) {
-				httpException = new HttpServiceException("Service or target not found");
-				httpException.setErrorType(ErrorType.Service);
-				httpException.setErrorCode(ErrorCode.NotFoundException);
+				httpException = new HttpServiceException("Service or target not found", ErrorType.Service, new HttpServiceException.NotFoundException());
 			}
 			else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
 				/* missing, expired or invalid session */
-				httpException = new HttpServiceException("Unauthorized");
-				httpException.setErrorType(ErrorType.Service);
-				httpException.setErrorCode(ErrorCode.UnauthorizedException);
+				httpException = new HttpServiceException("Unauthorized", ErrorType.Service, new HttpServiceException.UnauthorizedException());
 			}
 			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
-				httpException = new HttpServiceException("Unauthorized credentials");
-				httpException.setErrorType(ErrorType.Service);
-				httpException.setErrorCode(ErrorCode.SessionException);
+				httpException = new HttpServiceException("Unauthorized credentials", ErrorType.Service, new HttpServiceException.SessionException());
 			}
 			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
-				httpException = new HttpServiceException("Expired session");
-				httpException.setErrorType(ErrorType.Service);
-				httpException.setErrorCode(ErrorCode.SessionException);
+				httpException = new HttpServiceException("Expired session", ErrorType.Service, new HttpServiceException.SessionException());
 			}
 			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
-				httpException = new HttpServiceException("Unauthorized whitelist");
-				httpException.setErrorType(ErrorType.Service);
-				httpException.setErrorCode(ErrorCode.WhitelistException);
+				httpException = new HttpServiceException("Unauthorized whitelist", ErrorType.Service, new HttpServiceException.UnauthorizedException());
 			}
 			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED) {
-				httpException = new HttpServiceException("Unauthorized unverified");
-				httpException.setErrorType(ErrorType.Service);
-				httpException.setErrorCode(ErrorCode.UnverifiedException);
+				httpException = new HttpServiceException("Unauthorized unverified", ErrorType.Service, new HttpServiceException.UnauthorizedException());
 			}
 			else if (statusCode == HttpStatus.SC_FORBIDDEN) {
 				/* weak password, duplicate email */
-				httpException = new HttpServiceException("Forbidden");
-				httpException.setErrorType(ErrorType.Service);
-				httpException.setErrorCode(ErrorCode.ForbiddenException);
+				httpException = new HttpServiceException("Forbidden", ErrorType.Service, new HttpServiceException.ForbiddenException());
 			}
 			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE) {
-				httpException = new HttpServiceException("Duplicate email");
-				httpException.setErrorType(ErrorType.Service);
-				httpException.setErrorCode(ErrorCode.DuplicateException);
+				httpException = new HttpServiceException("Duplicate email", ErrorType.Service, new HttpServiceException.DuplicateException());
 			}
 			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
-				httpException = new HttpServiceException("Weak password");
-				httpException.setErrorType(ErrorType.Service);
-				httpException.setErrorCode(ErrorCode.PasswordException);
+				httpException = new HttpServiceException("Weak password", ErrorType.Service, new HttpServiceException.PasswordException());
 			}
 			else if (statusCode == HttpStatus.SC_GATEWAY_TIMEOUT) {
 				/* This can happen if service crashes during request */
-				httpException = new HttpServiceException("Gateway timeout");
-				httpException.setErrorType(ErrorType.Service);
-				httpException.setErrorCode(ErrorCode.GatewayTimeoutException);
+				httpException = new HttpServiceException("Gateway timeout", ErrorType.Service, new HttpServiceException.GatewayTimeoutException());
 			}
 			else if (statusCode == HttpStatus.SC_CONFLICT) {
-				httpException = new HttpServiceException("Duplicate key");
-				httpException.setErrorType(ErrorType.Service);
-				httpException.setErrorCode(ErrorCode.UpdateException);
+				httpException = new HttpServiceException("Duplicate key", ErrorType.Service, new HttpServiceException.DuplicateException());
 			}
 			else if (statusCode == HttpStatus.SC_REQUEST_TOO_LONG) {
-				httpException = new HttpServiceException("Request entity too large");
-				httpException.setErrorType(ErrorType.Client);
-				httpException.setErrorCode(ErrorCode.AircandiServiceException);
+				httpException = new HttpServiceException("Request entity too large", ErrorType.Service, new HttpServiceException.AircandiServiceException());
 			}
 			else {
-				httpException = new HttpServiceException("Service error: Unknown status code: " + String.valueOf(httpStatusCode));
-				httpException.setErrorType(ErrorType.Service);
-				httpException.setErrorCode(ErrorCode.AircandiServiceException);
+				httpException = new HttpServiceException("Service error: Unknown status code: " + String.valueOf(httpStatusCode)
+						, ErrorType.Service
+						, new HttpServiceException.AircandiServiceException());
 			}
-			httpException.setHttpStatusCode(httpStatusCode);
-			httpException.setHttpStatusCodeService(httpStatusCodeService);
+			httpException.setStatusCode(statusCode);
 		}
 		return httpException;
 	}
@@ -676,8 +634,22 @@ public class HttpService {
 			}
 		}
 
-		if (exception instanceof NoHttpResponseException
-				|| exception instanceof SocketTimeoutException) {
+		if (exception instanceof ClientProtocolException) {
+			/*
+			 * Can't recover from this with a retry.
+			 */
+			return false;
+		}
+
+		if (exception instanceof NoHttpResponseException) {
+			Logger.d(this, "Retrying on " + exception.getClass().getName() + ": " + exception.getMessage());
+			return true;
+		}
+
+		if (exception instanceof SocketTimeoutException) {
+			/*
+			 * We timed out waiting for data. Could be a poor connection or the service could be down.
+			 */
 			Logger.d(this, "Retrying on " + exception.getClass().getName() + ": " + exception.getMessage());
 			return true;
 		}

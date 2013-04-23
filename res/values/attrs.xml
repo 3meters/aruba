@@ -22,6 +22,8 @@
         <attr name="textColorCandiViewSynthetic" format="color|reference" />
         <attr name="textOutlineRadar" format="boolean" />
         <attr name="backgroundButton" format="color|reference" />
+        <attr name="backgroundBalloon" format="color|reference" />
+        <attr name="backgroundHelp" format="color|reference" />
         <attr name="backgroundCandi" format="color|reference" />
         <attr name="backgroundForm" format="color|reference" />
         <attr name="backgroundProgress" format="string" />
@@ -63,6 +65,7 @@
 		<attr name="iconSuggest" format="reference" />
 		<attr name="iconStarOn" format="reference" />
 		<attr name="iconStarOff" format="reference" />
+		<attr name="iconHelp" format="reference" />
 	</declare-styleable>
     <declare-styleable name="CandiView">
         <attr name="layout" />

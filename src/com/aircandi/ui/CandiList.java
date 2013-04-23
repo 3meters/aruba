@@ -54,33 +54,33 @@ public class CandiList extends CandiActivity {
 		 * Navigation setup for action bar icon and title
 		 */
 		if (mArrayListType == ArrayListType.InCollection) {
-			final Entity collection = ProxiManager.getInstance().getEntityModel().getCacheEntity(getCommon().mCollectionId);
-			getCommon().mActionBar.setDisplayHomeAsUpEnabled(true);
-			getCommon().mActionBar.setTitle(collection.name);
+			final Entity collection = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mCollectionId);
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+			mCommon.mActionBar.setTitle(collection.name);
 		}
 		else if (mArrayListType == ArrayListType.Collections) {
-			getCommon().mActionBar.setDisplayHomeAsUpEnabled(false);
-			getCommon().mActionBar.setHomeButtonEnabled(false);
-			getCommon().mActionBar.setTitle(getString(R.string.name_entity_list_type_collection));
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
+			mCommon.mActionBar.setHomeButtonEnabled(false);
+			mCommon.mActionBar.setTitle(getString(R.string.name_entity_list_type_collection));
 		}
 		else if (mArrayListType == ArrayListType.OwnedByUser) {
-			getCommon().mActionBar.setDisplayHomeAsUpEnabled(true);
-			getCommon().mActionBar.setHomeButtonEnabled(true);
-			if (getCommon().mUserId != null) {
-				ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(getCommon().mUserId, false);
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+			mCommon.mActionBar.setHomeButtonEnabled(true);
+			if (mCommon.mUserId != null) {
+				ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mCommon.mUserId, false);
 				User user = (User) result.serviceResponse.data;
-				getCommon().mActionBar.setTitle(user.name);
+				mCommon.mActionBar.setTitle(user.name);
 			}
 		}
 		else if (mArrayListType == ArrayListType.TunedPlaces) {
-			getCommon().mActionBar.setDisplayHomeAsUpEnabled(false);
-			getCommon().mActionBar.setHomeButtonEnabled(false);
-			getCommon().mActionBar.setTitle(getString(R.string.radar_section_places));
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
+			mCommon.mActionBar.setHomeButtonEnabled(false);
+			mCommon.mActionBar.setTitle(getString(R.string.radar_section_places));
 		}
 		else if (mArrayListType == ArrayListType.SyntheticPlaces) {
-			getCommon().mActionBar.setDisplayHomeAsUpEnabled(false);
-			getCommon().mActionBar.setHomeButtonEnabled(false);
-			getCommon().mActionBar.setTitle(getString(R.string.radar_section_synthetics));
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
+			mCommon.mActionBar.setHomeButtonEnabled(false);
+			mCommon.mActionBar.setTitle(getString(R.string.radar_section_synthetics));
 		}
 	}
 
@@ -100,21 +100,21 @@ public class CandiList extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				getCommon().showBusy(true);
+				mCommon.showBusy(true);
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetEntities");
 				ModelResult result = new ModelResult();
-				if (getCommon().mEntityType != null && getCommon().mUserId != null) {
-					result.data = ProxiManager.getInstance().getEntityModel().getCacheUserEntities(getCommon().mUserId, getCommon().mEntityType);
+				if (mCommon.mEntityType != null && mCommon.mUserId != null) {
+					result.data = ProxiManager.getInstance().getEntityModel().getCacheUserEntities(mCommon.mUserId, mCommon.mEntityType);
 				}
 				else {
 					result = ProxiManager.getInstance().getEntityModel().getEntitiesByListType(mArrayListType
 							, refresh
-							, getCommon().mCollectionId
-							, getCommon().mUserId
+							, mCommon.mCollectionId
+							, mCommon.mUserId
 							, ProxiConstants.RADAR_ENTITY_LIMIT);
 				}
 				return result;
@@ -128,7 +128,7 @@ public class CandiList extends CandiActivity {
 					 * Check to see if we got anything back. If not then we want to move up the tree.
 					 */
 					if (result.data == null || ((ArrayList<Entity>) result.data).size() == 0) {
-						getCommon().hideBusy(true);
+						mCommon.hideBusy(true);
 						onBackPressed();
 					}
 					else {
@@ -141,9 +141,9 @@ public class CandiList extends CandiActivity {
 					}
 				}
 				else {
-					getCommon().handleServiceError(result.serviceResponse, ServiceOperation.CandiList);
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiList);
 				}
-				getCommon().hideBusy(true);
+				mCommon.hideBusy(true);
 			}
 
 		}.execute();
@@ -174,7 +174,7 @@ public class CandiList extends CandiActivity {
 			}
 		}
 		else {
-			getCommon().showCandiFormForEntity(entity, CandiForm.class);
+			mCommon.showCandiFormForEntity(entity, CandiForm.class);
 		}
 	}
 

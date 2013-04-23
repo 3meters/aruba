@@ -8,27 +8,33 @@
         android:id="@+id/radar_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/footer"
         android:background="?attr/backgroundCandi"
         android:cacheColorHint="#00000000"
         android:divider="@null"
         android:padding="3dp" />
 
-    <!--
-    <ProgressBar
-        android:id="@+id/progress"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="35dp"
-        android:background="?attr/backgroundProgress"
-        android:padding="10dp" />
-    <ProgressBar
-        android:id="@+id/progress"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_below="@+id/radar_list"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="35dp" />
-    -->
+    <LinearLayout
+        android:id="@+id/footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="?attr/backgroundActionBar"
+        android:orientation="vertical" >
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?attr/ruleColor" />
+
+        <Button
+            android:id="@+id/button_add_place"
+            style="@style/form_button_borderless"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/form_field_height"
+            android:onClick="onAddPlaceButtonClick"
+            android:text="@string/radar_button_add_place"
+            android:textColor="?attr/textColorButtonLink" />
+    </LinearLayout>
 
 </RelativeLayout>

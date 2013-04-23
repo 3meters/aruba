@@ -15,32 +15,29 @@ package com.aircandi.service;
 public class HttpServiceException extends HttpClientException {
 
 	private static final long	serialVersionUID	= 1L;
-	private ErrorCode			mErrorCode			= ErrorCode.AircandiServiceException;
 	private ErrorType			mErrorType			= ErrorType.Unknown;
-	private Float				mHttpStatusCode;
-	private Float				mHttpStatusCodeService;
-	private String				mResponseMessage;
+	private Float				mStatusCode;
+	private Exception			mInnerException;
 
 	public HttpServiceException(String message) {
-		this(message, ErrorType.Unknown, ErrorCode.AircandiServiceException);
+		this(message, ErrorType.Unknown);
 	}
 
-	public HttpServiceException(String message, ErrorType errorType, ErrorCode errorCode) {
-		this(message, errorType, errorCode, null);
+	public HttpServiceException(String message, ErrorType errorType) {
+		this(message, errorType, null);
 	}
 
-	public HttpServiceException(String message, ErrorType errorType, ErrorCode errorCode, Exception exceptionForCause) {
+	public HttpServiceException(String message, ErrorType errorType, Exception exceptionForCause) {
 		super(message, exceptionForCause);
-		mErrorCode = errorCode;
+		mInnerException = exceptionForCause;
 		mErrorType = errorType;
 	}
 
-	public void setErrorCode(ErrorCode errorCode) {
-		mErrorCode = errorCode;
-	}
-
-	public ErrorCode getErrorCode() {
-		return mErrorCode;
+	public HttpServiceException(String message, ErrorType errorType, Exception exceptionForCause, Float statusCode) {
+		super(message, exceptionForCause);
+		mInnerException = exceptionForCause;
+		mErrorType = errorType;
+		mStatusCode = statusCode;
 	}
 
 	public void setErrorType(ErrorType errorType) {
@@ -51,66 +48,16 @@ public class HttpServiceException extends HttpClientException {
 		return mErrorType;
 	}
 
-	public void setHttpStatusCode(float httpStatusCode) {
-		mHttpStatusCode = httpStatusCode;
-	}
-
-	public void setResponseMessage(String responseMessage) {
-		mResponseMessage = responseMessage;
-	}
-
-	public String getResponseMessage() {
-		return mResponseMessage;
-	}
-
-	/**
-	 * Returns a string summary of the details of this exception including the
-	 * HTTP status code, Proxi request ID, Proxi error code and error message.
-	 * 
-	 * @see java.lang.Throwable#toString()
-	 */
-	@Override
-	public String toString() {
-		return "Http Status Code: " + mHttpStatusCode + ", "
-				+ "Proxi Error Code: " + mErrorCode + ", "
-				+ "Proxi Error Message: " + getMessage();
-	}
-
-	public void setHttpStatusCodeService(Float httpStatusCodeService) {
-		mHttpStatusCodeService = httpStatusCodeService;
+	public void setStatusCode(float statusCode) {
+		mStatusCode = statusCode;
 	}
 
 	public Float getStatusCode() {
-		return  mHttpStatusCodeService != null ? mHttpStatusCodeService : mHttpStatusCode;
+		return mStatusCode;
 	}
 
-	@SuppressWarnings("ucd")
-	public static enum ErrorCode {
-		URISyntaxException,
-		IOException,
-		ClientProtocolException,
-		ConnectionException,
-		WalledGardenException,
-		UnsupportedEncodingException,
-		IllegalStateException,
-		AircandiServiceException,
-		AmazonServiceException,
-		AmazonClientException,
-		NotFoundException,
-		UnauthorizedException,
-		UpdateException,
-		RejectedExecutionException,
-		InterruptedException,
-		UnknownHostException,
-		UnknownException,
-		ForbiddenException,
-		DuplicateException,
-		SessionException,
-		PasswordException,
-		GatewayTimeoutException,
-		SocketException,
-		WhitelistException,
-		UnverifiedException
+	public Exception getInnerException() {
+		return mInnerException;
 	}
 
 	/**
@@ -137,4 +84,39 @@ public class HttpServiceException extends HttpClientException {
 		Unknown
 	}
 
+	public static class NotFoundException extends RuntimeException {
+		private static final long	serialVersionUID	= 4547766119289288452L;
+	}
+
+	public static class UnauthorizedException extends RuntimeException {
+		private static final long	serialVersionUID	= -6925534025164860340L;
+	}
+
+	public static class SessionException extends RuntimeException {
+		private static final long	serialVersionUID	= -127555462863603660L;
+	}
+
+	public static class ForbiddenException extends RuntimeException {
+		private static final long	serialVersionUID	= -1916399848421176931L;
+	}
+
+	public static class DuplicateException extends RuntimeException {
+		private static final long	serialVersionUID	= -4233932252195294079L;
+	}
+
+	public static class PasswordException extends RuntimeException {
+		private static final long	serialVersionUID	= 3558926785824409259L;
+	}
+
+	public static class GatewayTimeoutException extends RuntimeException {
+		private static final long	serialVersionUID	= -8228623746732379029L;
+	}
+
+	public static class UpdateException extends RuntimeException {
+		private static final long	serialVersionUID	= 3288778010235251672L;
+	}
+
+	public static class AircandiServiceException extends RuntimeException {
+		private static final long	serialVersionUID	= -713258658623534414L;
+	}
 }

@@ -71,9 +71,9 @@ public class CommentList extends CandiActivity {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(getCommon().mEntityId);
-		getCommon().mActionBar.setTitle(entity.name);
-		getCommon().mActionBar.setDisplayHomeAsUpEnabled(true);
+		final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+		mCommon.mActionBar.setTitle(entity.name);
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
 	private void bind(final Boolean refresh) {
@@ -82,7 +82,7 @@ public class CommentList extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				getCommon().showBusy(true);
+				mCommon.showBusy(true);
 			}
 
 			@Override
@@ -92,7 +92,7 @@ public class CommentList extends CandiActivity {
 				 * Just get the comments without updating the entity in the cache
 				 */
 				final String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(getCommon().mEntityId, refresh, jsonEagerLoad, null);
+				final ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, jsonEagerLoad, null);
 				return result;
 			}
 
@@ -102,12 +102,12 @@ public class CommentList extends CandiActivity {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					if (result.data != null) {
-						getCommon().mEntity = (Entity) result.data;
+						mCommon.mEntity = (Entity) result.data;
 
-						if (getCommon().mEntity.comments != null && getCommon().mEntity.comments.size() > 0) {
+						if (mCommon.mEntity.comments != null && mCommon.mEntity.comments.size() > 0) {
 							mButtonNewComment.setVisibility(View.GONE);
-							mComments = getCommon().mEntity.comments;
-							mMore = getCommon().mEntity.commentsMore;
+							mComments = mCommon.mEntity.comments;
+							mMore = mCommon.mEntity.commentsMore;
 							Collections.sort(mComments, new Comment.SortCommentsByDate());
 							mListView.setAdapter(new EndlessCommentAdapter(mComments));
 						}
@@ -117,9 +117,9 @@ public class CommentList extends CandiActivity {
 					}
 				}
 				else {
-					getCommon().handleServiceError(result.serviceResponse, ServiceOperation.CommentBrowse);
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CommentBrowse);
 				}
-				getCommon().hideBusy(true);
+				mCommon.hideBusy(true);
 			}
 
 		}.execute();
@@ -141,7 +141,7 @@ public class CommentList extends CandiActivity {
 				+ ",\"skip\":" + String.valueOf(mComments.size())
 				+ "}}";
 
-		final ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(getCommon().mEntityId, true, jsonEagerLoad, jsonOptions);
+		final ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, true, jsonEagerLoad, jsonOptions);
 		return result;
 	}
 
@@ -159,7 +159,7 @@ public class CommentList extends CandiActivity {
 		 */
 		final IntentBuilder intentBuilder = new IntentBuilder(this, CommentForm.class);
 		intentBuilder.setEntityId(null);
-		intentBuilder.setParentEntityId(getCommon().mEntityId);
+		intentBuilder.setParentEntityId(mCommon.mEntityId);
 		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, CandiConstants.ACTIVITY_COMMENT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
@@ -214,7 +214,7 @@ public class CommentList extends CandiActivity {
 					}
 				}
 				else {
-					getCommon().handleServiceError(result.serviceResponse, ServiceOperation.CommentBrowse);
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CommentBrowse);
 				}
 			}
 			return false;

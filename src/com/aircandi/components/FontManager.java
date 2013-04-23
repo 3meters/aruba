@@ -9,6 +9,7 @@ public class FontManager {
 
 	private static Typeface	fontRobotoThin;
 	private static Typeface	fontRobotoLight;
+	private static Typeface	fontRobotoLightItalic;
 	private static Typeface	fontRobotoRegular;
 	private static Typeface	fontRobotoCondensed;
 	private static Typeface	fontRobotoBoldCondensed;
@@ -24,6 +25,7 @@ public class FontManager {
 	private void initialize() {
 		fontRobotoThin = Typeface.createFromAsset(Aircandi.applicationContext.getAssets(), "Roboto-Thin.ttf");
 		fontRobotoLight = Typeface.createFromAsset(Aircandi.applicationContext.getAssets(), "Roboto-Light.ttf");
+		fontRobotoLightItalic = Typeface.createFromAsset(Aircandi.applicationContext.getAssets(), "Roboto-LightItalic.ttf");
 		fontRobotoRegular = Typeface.createFromAsset(Aircandi.applicationContext.getAssets(), "Roboto-Regular.ttf");
 		fontRobotoCondensed = Typeface.createFromAsset(Aircandi.applicationContext.getAssets(), "Roboto-Condensed.ttf");
 		fontRobotoBoldCondensed = Typeface.createFromAsset(Aircandi.applicationContext.getAssets(), "Roboto-BoldCondensed.ttf");
@@ -39,6 +41,12 @@ public class FontManager {
 	public void setTypefaceLight(TextView view) {
 		if (view != null) {
 			view.setTypeface(getFontRobotoLight());
+		}
+	}
+
+	public void setTypefaceLightItalic(TextView view) {
+		if (view != null) {
+			view.setTypeface(fontRobotoLightItalic);
 		}
 	}
 

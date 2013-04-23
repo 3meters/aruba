@@ -105,13 +105,13 @@ public class CandiForm extends CandiActivity {
 		mContentView = (ViewGroup) findViewById(R.id.candi_body);
 
 		Integer candiFormResId = R.layout.candi_form_base;
-		if (getCommon().mEntityType == null) {
-			getCommon().mEntityType = CandiConstants.TYPE_CANDI_PLACE;
+		if (mCommon.mEntityType == null) {
+			mCommon.mEntityType = CandiConstants.TYPE_CANDI_PLACE;
 		}
-		if (getCommon().mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
+		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
 			candiFormResId = R.layout.candi_form_post;
 		}
-		else if (getCommon().mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			candiFormResId = R.layout.candi_form_place;
 		}
 
@@ -128,6 +128,7 @@ public class CandiForm extends CandiActivity {
 			mUpsize = extras.getBoolean(CandiConstants.EXTRA_UPSIZE_SYNTHETIC);
 			mForceRefresh = extras.getBoolean(CandiConstants.EXTRA_REFRESH_FORCE);
 		}
+
 	}
 
 	private void bind(final Boolean refresh) {
@@ -135,19 +136,19 @@ public class CandiForm extends CandiActivity {
 		 * Navigation setup for action bar icon and title
 		 */
 		Logger.d(this, "Binding candi form");
-		getCommon().mActionBar.setDisplayHomeAsUpEnabled(true);
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 
 		new AsyncTask() {
 
 			@Override
 			protected void onPreExecute() {
-				getCommon().showBusy(true);
+				mCommon.showBusy(true);
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetEntity");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(getCommon().mEntityId, refresh, null, null);
+				final ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, null, null);
 				return result;
 			}
 
@@ -160,12 +161,13 @@ public class CandiForm extends CandiActivity {
 						mEntity = (Entity) result.data;
 						mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
 						mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
-						getCommon().mActionBar.setTitle(mEntity.name);
-						if (getCommon().mMenuItemEdit != null) {
-							getCommon().mMenuItemEdit.setVisible(canEdit());
+						mCommon.mActionBar.setTitle(mEntity.name);
+						if (mCommon.mMenuItemEdit != null) {
+							mCommon.mMenuItemEdit.setVisible(canEdit());
 						}
-						if (getCommon().mMenuItemAdd != null) {
-							getCommon().mMenuItemAdd.setVisible(canAdd());
+						View view = findViewById(R.id.button_add_candigram);
+						if (view != null) {
+							view.setVisibility(canAdd() ? View.VISIBLE : View.GONE);
 						}
 
 						/* Action bar icon */
@@ -185,7 +187,7 @@ public class CandiForm extends CandiActivity {
 											@Override
 											public void run() {
 												final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-												getCommon().mActionBar.setIcon(new BitmapDrawable(Aircandi.applicationContext.getResources(), imageResponse.bitmap));
+												mCommon.mActionBar.setIcon(new BitmapDrawable(Aircandi.applicationContext.getResources(), imageResponse.bitmap));
 											}
 										});
 									}
@@ -200,11 +202,20 @@ public class CandiForm extends CandiActivity {
 							upsize();
 						}
 					}
-					getCommon().hideBusy(true);
+					mCommon.hideBusy(true);
+
+					/* Run help if it hasn't been run yet */
+					if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+						final Boolean runOnceHelp = Aircandi.settings.getBoolean(CandiConstants.SETTING_RUN_ONCE_HELP_CANDI_PLACE, false);
+						if (!runOnceHelp) {
+							mCommon.doHelpClick();
+							return;
+						}
+					}
 				}
 				else {
-					getCommon().handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
-					getCommon().hideBusy(true);
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
+					mCommon.hideBusy(true);
 				}
 			}
 
@@ -222,8 +233,8 @@ public class CandiForm extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				getCommon().showBusy(true);
-				getCommon().startBusyIndicator();
+				mCommon.showBusy(true);
+				mCommon.startBusyIndicator();
 			}
 
 			@Override
@@ -236,14 +247,14 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
-				getCommon().hideBusy(true);
+				mCommon.hideBusy(true);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					final Entity upsizedEntity = (Entity) result.data;
-					getCommon().mEntityId = upsizedEntity.id;
+					mCommon.mEntityId = upsizedEntity.id;
 					bind(false);
 				}
 				else {
-					getCommon().handleServiceError(result.serviceResponse, ServiceOperation.Tuning);
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.Tuning);
 				}
 			}
 		}.execute();
@@ -257,7 +268,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	private void draw() {
-		buildCandiForm(mEntity, mContentView, getCommon().mMenu, null, false);
+		buildCandiForm(mEntity, mContentView, mCommon.mMenu, null, false);
 		mCandiForm.setVisibility(View.VISIBLE);
 	}
 
@@ -340,11 +351,11 @@ public class CandiForm extends CandiActivity {
 					showInstallDialog(entity);
 				}
 				else {
-					getCommon().routeSourceEntity(entity, mEntity);
+					mCommon.routeSourceEntity(entity, mEntity);
 				}
 			}
 			else {
-				getCommon().showCandiFormForEntity(entity, CandiForm.class);
+				mCommon.showCandiFormForEntity(entity, CandiForm.class);
 			}
 		}
 	}
@@ -368,20 +379,20 @@ public class CandiForm extends CandiActivity {
 
 	public void onUserClick(View view) {
 		User user = (User) view.getTag();
-		getCommon().doUserClick(user);
+		mCommon.doUserClick(user);
 	}
 
-	public void onNewCandigramButtonClick(View view) {
-		doNewCandigramButtonClick();
+	public void onAddCandigramButtonClick(View view) {
+		doAddCandigram();
 	}
 
-	public void doNewCandigramButtonClick() {
+	public void doAddCandigram() {
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 			Tracker.sendEvent("ui_action", "add_candigram", null, 0, Aircandi.getInstance().getUser());
 			final IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
 					.setCommandType(CommandType.New)
 					.setEntityId(null)
-					.setParentEntityId(getCommon().mEntityId)
+					.setParentEntityId(mCommon.mEntityId)
 					.setEntityType(CandiConstants.TYPE_CANDI_PICTURE);
 
 			final Intent redirectIntent = intentBuilder.create();
@@ -467,7 +478,7 @@ public class CandiForm extends CandiActivity {
 						final IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
 								.setCommandType(CommandType.New)
 								.setEntityId(null)
-								.setParentEntityId(getCommon().mEntityId)
+								.setParentEntityId(mCommon.mEntityId)
 								.setEntityType(entityType);
 
 						final Intent redirectIntent = intentBuilder.create();
@@ -522,7 +533,7 @@ public class CandiForm extends CandiActivity {
 
 		final TextView description = (TextView) layout.findViewById(R.id.candi_form_description);
 		final TextView address = (TextView) layout.findViewById(R.id.candi_form_address);
-		final Button addCandigram = (Button) layout.findViewById(R.id.button_new_candigram);
+		final Button addCandigram = (Button) layout.findViewById(R.id.button_add_candigram);
 		final UserView user_one = (UserView) layout.findViewById(R.id.user_one);
 		final UserView user_two = (UserView) layout.findViewById(R.id.user_two);
 
@@ -590,9 +601,9 @@ public class CandiForm extends CandiActivity {
 				setVisibility(layout.findViewById(R.id.section_layout_switchboard), View.VISIBLE);
 			}
 		}
-		
+
 		/* Candigram button */
-		FontManager.getInstance().setTypefaceDefault(addCandigram);		
+		FontManager.getInstance().setTypefaceDefault(addCandigram);
 
 		/* All non-source children */
 		entities = entity.getChildren();
@@ -611,13 +622,9 @@ public class CandiForm extends CandiActivity {
 				section.getTextViewHeader().setText(getString(R.string.candi_section_candi));
 
 				if (entities.size() > getResources().getInteger(R.integer.candi_flow_limit)) {
-					setVisibility(layout.findViewById(R.id.button_new_candigram), View.GONE);
 					View footer = inflater.inflate(R.layout.temp_section_footer, null);
 					Button button = (Button) footer.findViewById(R.id.button_more);
-					Button buttonNewCandigram = (Button) footer.findViewById(R.id.button_footer_new_candigram);
 					FontManager.getInstance().setTypefaceDefault(button);
-					FontManager.getInstance().setTypefaceDefault(buttonNewCandigram);
-					buttonNewCandigram.setVisibility(View.VISIBLE);
 					button.setText(R.string.candi_section_candigrams_more);
 					button.setTag("candi");
 					section.setFooter(footer); // Replaces if there already is one.
@@ -802,13 +809,13 @@ public class CandiForm extends CandiActivity {
 					if (photoSource != null) {
 						if (photoSource.equals(PhotoSource.facebook)) {
 							badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_dark);
-							if (getCommon().mThemeTone.equals("light")) {
+							if (mCommon.mThemeTone.equals("light")) {
 								badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_light);
 							}
 						}
 						else if (photoSource.equals(PhotoSource.twitter)) {
 							badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_dark);
-							if (getCommon().mThemeTone.equals("light")) {
+							if (mCommon.mThemeTone.equals("light")) {
 								badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_light);
 							}
 						}
@@ -899,9 +906,12 @@ public class CandiForm extends CandiActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getCommon().doCreateOptionsMenu(menu);
-		getCommon().mMenuItemEdit.setVisible(canEdit());
-		getCommon().mMenuItemAdd.setVisible(canAdd());
+		mCommon.doCreateOptionsMenu(menu);
+		mCommon.mMenuItemEdit.setVisible(canEdit());
+		View view = findViewById(R.id.button_add_candigram);
+		if (view != null) {
+			findViewById(R.id.button_add_candigram).setVisibility(canAdd() ? View.VISIBLE : View.GONE);
+		}
 		return true;
 	}
 
@@ -910,16 +920,12 @@ public class CandiForm extends CandiActivity {
 
 		if (item.getItemId() == R.id.edit) {
 			Tracker.sendEvent("ui_action", "edit_entity", null, 0, Aircandi.getInstance().getUser());
-			getCommon().doEditCandiClick();
-			return true;
-		}
-		else if (item.getItemId() == R.id.add) {
-			doNewCandigramButtonClick();
+			mCommon.doEditCandiClick();
 			return true;
 		}
 
 		/* In case we add general menu items later */
-		getCommon().doOptionsItemSelected(item);
+		mCommon.doOptionsItemSelected(item);
 		return true;
 	}
 

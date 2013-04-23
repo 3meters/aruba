@@ -306,7 +306,7 @@ public class PicturePicker extends FormActivity {
 	}
 
 	@Override
-	protected int getLayoutID() {
+	protected int getLayoutId() {
 		return R.layout.picker_picture;
 	}
 
