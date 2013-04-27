@@ -580,8 +580,8 @@ public class HttpService {
 				/* weak password, duplicate email */
 				httpException = new HttpServiceException("Forbidden", ErrorType.Service, new HttpServiceException.ForbiddenException());
 			}
-			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE) {
-				httpException = new HttpServiceException("Duplicate email", ErrorType.Service, new HttpServiceException.DuplicateException());
+			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
+				httpException = new HttpServiceException("Duplicate", ErrorType.Service, new HttpServiceException.DuplicateException());
 			}
 			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
 				httpException = new HttpServiceException("Weak password", ErrorType.Service, new HttpServiceException.PasswordException());

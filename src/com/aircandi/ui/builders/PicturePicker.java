@@ -239,7 +239,7 @@ public class PicturePicker extends FormActivity {
 
 		final String bingUrl = ProxiConstants.URL_PROXIBASE_SEARCH_IMAGES
 				+ "?Query=" + query
-				+ "&Market=%27en-US%27&Adult=%27Moderate%27&ImageFilters=%27size%3alarge%27"
+				+ "&Market=%27en-US%27&Adult=%27Strict%27&ImageFilters=%27size%3alarge%27"
 				+ "&$top=" + String.valueOf(count)
 				+ "&$skip=" + String.valueOf(offset)
 				+ "&$format=Json";

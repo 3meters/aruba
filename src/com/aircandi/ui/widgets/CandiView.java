@@ -75,6 +75,7 @@ public class CandiView extends RelativeLayout {
 	}
 
 	private void initialize() {
+		
 		mInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mLayout = (ViewGroup) mInflater.inflate(mLayoutId, this, true);
 
@@ -215,18 +216,32 @@ public class CandiView extends RelativeLayout {
 
 					final List<Entity> entities = entity.getSourceEntities();
 					final Map<String, Object> sources = new HashMap<String, Object>();
+					
 					synchronized (entities) {
 						if (entities.size() > 0) {
 
 							/* We only show the first five */
 							for (Entity sourceEntity : entities) {
-								if (sourceEntity.source != null && sourceEntity.source.type.equals("comments")) {
-									if (entity.commentCount == null || entity.commentCount < 1) {
+								if (sourceEntity.source != null) {
+									
+									/* Only show comments if there is one */
+									if (sourceEntity.source.type.equals("comments")) {
+										if (entity.commentCount == null || entity.commentCount < 1) {
+											continue;
+										}
+									}
+									
+									/* Only show likes if there are some */
+									if (sourceEntity.source.type.equals("likes")) {
+										if (entity.likeCount == null || entity.likeCount < 1) {
+											continue;
+										}
+									}
+									
+									/* Only show each type once */
+									if (sources.containsKey(sourceEntity.source.type)) {
 										continue;
 									}
-								}
-								if (sourceEntity.source != null && sources.containsKey(sourceEntity.source.type)) {
-									continue;
 								}
 								if (sourceCount >= 5) {
 									break;
@@ -254,6 +269,9 @@ public class CandiView extends RelativeLayout {
 										}
 										if (sourceEntity.source.type.equals("comments")) {
 											imageUri = "resource:ic_comments_dark";
+										}
+										if (sourceEntity.source.type.equals("likes")) {
+											imageUri = "resource:ic_like_holo_dark";
 										}
 										if (sourceEntity.source.type.equals("twitter")) {
 											imageUri = "resource:ic_twitter_dark";

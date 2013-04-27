@@ -257,6 +257,12 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 		return map;
 	}
 
+	/**
+	 * Object: All properties are serialized including nulls.
+	 * Property: Only non-null properties are serialized.
+	 * @author Jayma
+	 *
+	 */
 	public static enum UpdateScope {
 		Undefined,
 		Object,

@@ -467,6 +467,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 			mActivity.startActivity(intent);
 			AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToPage);
 		}
+		else if (sourceEntity.source.type.equals("likes")) {
+			/*
+			 * We don't do anything right now. Goal is to show a form with
+			 * more detail on the likes.
+			 */
+		}
 		else {
 			AndroidManager.getInstance().callGenericActivity(mActivity, (sourceEntity.source.url != null) ? sourceEntity.source.url : sourceEntity.source.id);
 		}
@@ -656,7 +662,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
 						message = mActivity.getString(R.string.error_signup_password_weak);
 					}
-					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE) {
+					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
 						message = mActivity.getString(R.string.error_signup_email_taken);
 					}
 					else {

@@ -117,6 +117,10 @@ public final class CandiConstants {
 	public static final String	TYPE_CANDI_SOURCE_GOOGLEPLACE			= "googleplace";																			//$NON-NLS-1$
 	public static final String	TYPE_CANDI_SOURCE_INSTAGRAM				= "instagram";																				//$NON-NLS-1$
 
+	public static final String	TYPE_LINK_PROXIMITY						= "proximity";																				//$NON-NLS-1$
+	public static final String	TYPE_LINK_CONTENT						= "content";																				//$NON-NLS-1$
+	public static final String	TYPE_LINK_LIKE							= "like";																					//$NON-NLS-1$
+
 	public static final int		ACTIVITY_MARKET							= 200;
 	public static final int		ACTIVITY_PICTURE_PICK_DEVICE			= 300;
 	public static final int		ACTIVITY_PICTURE_SEARCH					= 305;

@@ -44,6 +44,13 @@
     <string name="pref_sound_effects_summary">Play sound notifications and effects</string>
     <string name="pref_sound_effects_title">Sounds</string>
     
+    <!-- Help -->
+
+    <string name="help_radar_browse_places">Tap a place tile to browse candigrams and place info</string>
+    <string name="help_radar_add_places">Tap to create custom places</string>
+    <string name="help_candi_tune_places">Tune places to make them better</string>
+    <string name="help_candi_add_candigrams">Start some fun by adding candigrams</string>
+    
     <!-- Prefs: notifications -->
     
     <string name="pref_notifications_comments_title">Notify about comments</string>
@@ -96,7 +103,7 @@
     <string name="alert_send_password_title">forgot password</string>
     <string name="alert_send_password_message">A message has been sent to your email address with your current password.</string>
     <string name="alert_feedback_sent">Thank you for the feedback!</string>
-
+    
     <!-- Alerts: confirm dirty -->
 
     <string name="alert_dirty_save">Save</string>
@@ -179,7 +186,8 @@
     <string name="toast_source_no_links">No new links found.</string>
     <string name="toast_source_linked">Found additional link.</string>
     <string name="toast_sources_linked">Found additional links.</string>
-
+    <string name="toast_like_duplicate">You have already liked this.</string>
+    
     <!-- UI General -->
 
     <string name="progress_signing_out">Signing out&#8230;</string>
@@ -261,6 +269,7 @@
     <string name="candi_section_candigrams_more">view all candigrams</string>
     <string name="candi_button_tune">tune it!</string>
     <string name="candi_button_call">call</string>
+    <string name="candi_button_like">like it!</string>
     <string name="candi_button_edit">edit</string>
     <string name="candi_button_polish">polish</string>
     <string name="candi_button_add_candigram">add candigram</string>

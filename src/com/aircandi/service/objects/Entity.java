@@ -49,7 +49,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	@Expose
 	public String				visibility			= "public";
 	@Expose
-	public List<Comment>		comments;
+	public List<Comment>		comments = new ArrayList<Comment>();
 	@Expose
 	public List<Source>			sources;
 
@@ -80,6 +80,9 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	@Expose(serialize = false, deserialize = true)
 	public Boolean				commentsMore;
 
+	@Expose(serialize = false, deserialize = true)
+	public Integer				likeCount;
+	
 	/*
 	 * For client use only
 	 */
@@ -186,6 +189,8 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			entity.childCount = (Integer) map.get("childCount");
 			entity.childrenMore = (Boolean) map.get("childrenMore");
 
+			entity.likeCount = (Integer) map.get("likeCount");
+			
 			if (map.get("place") != null) {
 				entity.place = Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("place"));
 			}
@@ -236,6 +241,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		to.links = from.links;
 
 		to.childCount = from.childCount;
+		to.likeCount = from.likeCount;
 		to.comments = from.comments;
 		to.commentCount = from.commentCount;
 		to.commentsMore = from.commentsMore;

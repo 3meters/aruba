@@ -8,29 +8,14 @@
     android:clickable="true"
     android:onClick="onHelpClick" >
 
-    <LinearLayout
-        android:id="@+id/candi_tune_places"
+    <TextView
+        android:id="@+id/text_candi_tune_places"
+        style="@style/balloon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="50dp"
-        android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/text_candi_tune_places"
-            style="@style/balloon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tune places to make them better" />
-
-        <View
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
-            android:layout_marginRight="45dp"
-            android:background="@drawable/ic_action_arrow_bottom_dark" />
-    </LinearLayout>
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        android:text="@string/help_candi_tune_places" />
 
     <LinearLayout
         android:id="@+id/candi_add_candigrams"
@@ -45,7 +30,7 @@
             style="@style/balloon"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:text="Start some fun by adding candigrams" />
+            android:text="@string/help_candi_add_candigrams" />
 
         <View
             android:layout_width="30dp"

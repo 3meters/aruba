@@ -35,8 +35,8 @@
 
     <!-- Balloons -->
 
-    <dimen name="form_balloon_stroke_width">1px</dimen>
-    <dimen name="form_balloon_corner_radius">5dp</dimen>
+    <dimen name="form_balloon_stroke_width">0px</dimen>
+    <dimen name="form_balloon_corner_radius">0dp</dimen>
     <dimen name="form_balloon_padding">3dp</dimen>
     
     <!-- Dialogs -->

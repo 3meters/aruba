@@ -4,17 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="48dp"
+    android:background="?attr/backgroundHelp"
     android:clickable="true"
-    android:onClick="onHelpClick"
-    android:background="?attr/backgroundHelp" >
+    android:onClick="onHelpClick" >
 
     <TextView
         android:id="@+id/text_radar_browse_places"
         style="@style/balloon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Tap a place tile to browse candigrams and place info" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        android:text="@string/help_radar_browse_places" />
 
     <LinearLayout
         android:id="@+id/radar_add_places"
@@ -29,7 +30,7 @@
             style="@style/balloon"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:text="Tap to create custom places" />
+            android:text="@string/help_radar_add_places" />
 
         <View
             android:layout_width="30dp"

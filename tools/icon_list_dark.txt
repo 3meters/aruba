@@ -16,6 +16,7 @@ ic_action_dontlike_dark.png
 ic_action_edit_dark.png
 ic_action_facebook_dark.png
 ic_action_help_dark.png
+ic_action_heart_dark.png
 ic_action_info_dark.png
 ic_action_key_dark.png
 ic_action_like_dark.png

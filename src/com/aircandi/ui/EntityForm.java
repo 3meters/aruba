@@ -807,6 +807,7 @@ public class EntityForm extends FormActivity {
 	}
 
 	private ModelResult updateEntityAtService() {
+		
 		Tracker.sendEvent("ui_action", "entity_update", mEntityForForm.type, 0, Aircandi.getInstance().getUser());
 		Bitmap bitmap = mEntityBitmap;
 		if (mEntityBitmapLocalOnly) {
@@ -819,6 +820,9 @@ public class EntityForm extends FormActivity {
 		ModelResult result = ProxiManager.getInstance().getEntityModel().updateEntity(mEntityForForm, bitmap);
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			/*
+			 * If photo changed, add a child picture entity if we don't already have it.
+			 */
 			if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntityForForm.photo != null) {
 
 				entities = mEntityForForm.getChildren();

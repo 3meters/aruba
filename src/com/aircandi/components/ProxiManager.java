@@ -229,7 +229,7 @@ public class ProxiManager {
 				parameters.putString("observation", "object:" + HttpService.convertObjectToJsonSmart(observation, true, true));
 			}
 
-			parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
+			parameters.putString("eagerLoad", "object:{\"children\":false,\"parents\":false,\"comments\":false}");
 			parameters.putString("options", "object:{\"limit\":"
 					+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
 					+ ",\"skip\":0"

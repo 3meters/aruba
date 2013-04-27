@@ -103,7 +103,8 @@
         <item name="iconStarOn">@drawable/ic_action_star_10_dark</item>
         <item name="iconStarOff">@drawable/ic_action_star_0_dark</item>
         <item name="iconHelp">@drawable/ic_action_help_dark</item>
-
+        <item name="iconLike">@drawable/ic_action_heart_dark</item>
+        
         <!-- Actionbar Sherlock -->
 
         <item name="actionBarStyle">@style/actionbar_dark</item>
@@ -136,19 +137,14 @@
         <item name="candiFormTitleStyle">@style/candi_form_title</item>
         <item name="candiListTitleStyle">@style/candi_list_title</item>
 
-        <!-- Dialogs -->
-
-
-        <!--
+        <!-- Dialogs 
         <item name="android:alertDialogTheme">@style/Theme.Sherlock.Light.Dialog</item>
         <item name="android:dialogTheme">@android:style/Theme.Holo.Light.Dialog</item>
         <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_holo</item>
         <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_holo</item>
         <item name="dialogTitleDecorLayout">@layout/dialog_title_holo</item>
         <item name="alertDialogCenterButtons">false</item>
-        <item name="alertDialogIcon">@android:drawable/ic_dialog_alert_holo_light</item>
-        -->
-
+        <item name="alertDialogIcon">@android:drawable/ic_dialog_alert_holo_light</item>        -->
 
         <!-- Text and line colors -->
 
@@ -215,7 +211,8 @@
         <item name="iconStarOn">@drawable/ic_action_star_10_light</item>
         <item name="iconStarOff">@drawable/ic_action_star_0_light</item>
         <item name="iconHelp">@drawable/ic_action_help_light</item>
-
+        <item name="iconLike">@drawable/ic_action_heart_light</item>
+        
         <!-- Actionbar Sherlock -->
 
         <item name="actionBarStyle">@style/actionbar_light</item>

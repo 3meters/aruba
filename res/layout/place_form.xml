@@ -70,7 +70,7 @@
                     android:layout_marginLeft="-4dp"
                     android:layout_weight="0"
                     android:hint="@string/form_place_title_hint"
-                    android:inputType="textNoSuggestions" />
+                    android:inputType="textCapWords|textNoSuggestions" />
 
                 <com.aircandi.ui.widgets.BuilderButton
                     android:id="@+id/address"
@@ -120,7 +120,7 @@
                     android:layout_weight="0"
                     android:gravity="top"
                     android:hint="@string/form_description_hint"
-                    android:inputType="textMultiLine|textAutoCorrect"
+                    android:inputType="textCapSentences|textMultiLine|textAutoCorrect"
                     android:minLines="5" />
 
                 <LinearLayout
@@ -140,7 +140,7 @@
                             android:id="@+id/created_by"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="2dp"
+                            android:layout_marginRight="2dp"
                             aircandi:layout="@layout/widget_user_view_detailed"
                             android:background="?attr/backgroundButton"
                             android:clickable="true"
@@ -156,7 +156,7 @@
                             android:id="@+id/edited_by"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="2dp"
+                            android:layout_marginLeft="2dp"
                             aircandi:layout="@layout/widget_user_view_detailed"
                             android:background="?attr/backgroundButton"
                             android:clickable="true"

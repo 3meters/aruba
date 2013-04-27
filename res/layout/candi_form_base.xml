@@ -80,14 +80,48 @@
                     android:layout_height="wrap_content" />
             </com.aircandi.ui.widgets.SectionLayout>
 
-            <com.aircandi.ui.widgets.UserView
-                android:id="@+id/user_one"
-                android:layout_width="160dp"
+            <LinearLayout
+                android:id="@+id/authoring_holder"
+                style="@style/form_content_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                aircandi:layout="@layout/widget_user_view_detailed"
-                android:background="?attr/backgroundButton"
-                android:clickable="true"
-                android:onClick="onUserClick" />
+                android:layout_alignParentBottom="true"
+                android:layout_below="@+id/body_holder"
+                android:gravity="bottom"
+                android:orientation="horizontal" >
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" >
+
+                    <com.aircandi.ui.widgets.UserView
+                        android:id="@+id/user_one"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="2dp"
+                        aircandi:layout="@layout/widget_user_view_detailed"
+                        android:background="?attr/backgroundButton"
+                        android:clickable="true"
+                        android:onClick="onUserClick" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" >
+
+                    <com.aircandi.ui.widgets.UserView
+                        android:id="@+id/user_two"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="2dp"
+                        aircandi:layout="@layout/widget_user_view_detailed"
+                        android:background="?attr/backgroundButton"
+                        android:clickable="true"
+                        android:onClick="onUserClick" />
+                </FrameLayout>
+            </LinearLayout>
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
 

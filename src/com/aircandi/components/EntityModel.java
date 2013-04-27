@@ -95,9 +95,6 @@ public class EntityModel {
 			if (refresh || entity == null) {
 				getEntityIds.add(entityId);
 			}
-			else if (entity.childCount != null && entity.getChildren().size() < entity.childCount) {
-				getEntityIds.add(entityId);
-			}
 		}
 
 		if (getEntityIds.size() > 0) {
@@ -200,7 +197,6 @@ public class EntityModel {
 			final Bundle parameters = new Bundle();
 			parameters.putString("userId", userId);
 			parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
-			parameters.putString("fields", "object:{\"entities\":{},\"comments\":{},\"children\":{},\"parents\":{}}");
 			parameters.putString("options", "object:{\"limit\":"
 					+ String.valueOf(limit)
 					+ ",\"skip\":0"
@@ -727,6 +723,20 @@ public class EntityModel {
 			 */
 			final Bundle parameters = new Bundle();
 			parameters.putBoolean("skipActivityDate", false);
+			
+			/* Entity */
+			entity.updateScope = UpdateScope.Object;
+			if (entity.photo != null) {
+				entity.photo.updateScope = UpdateScope.Property;
+			}
+			if (entity.place != null) {
+				if (entity.place.contact != null) {
+					entity.place.contact.updateScope = UpdateScope.Property;
+				}
+				if (entity.place.location != null) {
+					entity.place.location.updateScope = UpdateScope.Property;
+				}
+			}			
 
 			parameters.putString("entity", "object:" + HttpService.convertObjectToJsonSmart(entity, true, true));
 
@@ -974,7 +984,26 @@ public class EntityModel {
 		 * keeping the same instance.
 		 */
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			insertComment(entityId, comment);
+			insertCommentCache(entityId, comment);
+		}
+
+		return result;
+	}
+
+	public ModelResult likeEntity(String entityId) {
+
+		Link link = new Link(entityId, Aircandi.getInstance().getUser().id);
+		link.type = CandiConstants.TYPE_LINK_LIKE;
+		ModelResult result = insertLink(link);
+		/*
+		 * We update the cache directly instead of refreshing from the service
+		 */
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			/*
+			 * Fail could be because of ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
+			 * prevents any user from liking the same entity more than once.
+			 */
+			likeEntityCache(entityId);
 		}
 
 		return result;
@@ -1054,6 +1083,7 @@ public class EntityModel {
 					.setRequestType(RequestType.Insert)
 					.setRequestBody(HttpService.convertObjectToJsonSmart(link, true, true))
 					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+					.setSession(Aircandi.getInstance().getUser().session)
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
@@ -1529,7 +1559,7 @@ public class EntityModel {
 	// Entity cache modification routines
 	// --------------------------------------------------------------------------------------------
 
-	private void insertComment(String entityId, Comment comment) {
+	private void insertCommentCache(String entityId, Comment comment) {
 		final Entity entity = getCacheEntity(entityId);
 		if (entity != null) {
 			if (entity.comments == null) {
@@ -1540,6 +1570,17 @@ public class EntityModel {
 				entity.commentCount = 0;
 			}
 			entity.commentCount++;
+			setLastActivityDate(DateUtils.nowDate().getTime());
+		}
+	}
+
+	private void likeEntityCache(String entityId) {
+		final Entity entity = getCacheEntity(entityId);
+		if (entity != null) {
+			if (entity.likeCount == null) {
+				entity.likeCount = 0;
+			}
+			entity.likeCount++;
 			setLastActivityDate(DateUtils.nowDate().getTime());
 		}
 	}
@@ -1604,7 +1645,8 @@ public class EntityModel {
 							}
 
 							removeSourceEntities(freshChild.id);
-							addCommentSource(freshChild, null);
+							addCommentSource(freshChild, 0);
+							addLikesSource(freshChild, 1);
 						}
 						freshEntity.children.clear();
 						freshEntity.children = null;
@@ -1621,9 +1663,10 @@ public class EntityModel {
 						while (iter.hasNext()) {
 							Entity freshChild = (Entity) iter.next();
 							mEntityCache.put(freshChild.id, freshChild);
+							
 							removeSourceEntities(freshChild.id);
-							addCommentSource(freshChild, null);
-
+							addCommentSource(freshChild, 0);
+							addLikesSource(freshChild, 1);
 						}
 						freshEntity.children.clear();
 						freshEntity.children = null;
@@ -1682,6 +1725,7 @@ public class EntityModel {
 
 		if (!freshEntity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
 			addCommentSource(freshEntity, position);
+			addLikesSource(freshEntity, position + 1);
 		}
 
 		setLastActivityDate(DateUtils.nowDate().getTime());
@@ -1703,6 +1747,25 @@ public class EntityModel {
 		source.installDeclined = false;
 		sourceEntity.source = source;
 		sourceEntity.commentCount = entity.commentCount;
+
+		sourceEntity.parentId = entity.id;
+		upsertEntity(sourceEntity);
+	}
+
+	private void addLikesSource(Entity entity, Integer position) {
+
+		final Entity sourceEntity = mProxiManager.loadEntityFromResources(R.raw.source_entity);
+		sourceEntity.id = entity.id + ".likes";
+		sourceEntity.name = "likes";
+		final Source source = new Source();
+		source.label = "likes";
+		source.photo = new Photo("resource:img_like", null, null, null, PhotoSource.resource);
+		source.type = "likes";
+		source.position = (position != null) ? position : 0;
+		source.intentSupport = false;
+		source.installDeclined = false;
+		sourceEntity.source = source;
+		sourceEntity.likeCount = entity.likeCount;
 
 		sourceEntity.parentId = entity.id;
 		upsertEntity(sourceEntity);

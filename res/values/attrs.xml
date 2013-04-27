@@ -66,6 +66,7 @@
 		<attr name="iconStarOn" format="reference" />
 		<attr name="iconStarOff" format="reference" />
 		<attr name="iconHelp" format="reference" />
+		<attr name="iconLike" format="reference" />
 	</declare-styleable>
     <declare-styleable name="CandiView">
         <attr name="layout" />

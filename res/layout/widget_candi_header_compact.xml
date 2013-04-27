@@ -1,24 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingBottom="10dp" >
 
-    <TextView
-        android:id="@+id/candi_form_title"
-        style="?attr/candiFormTitleStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/dummy_title" />
-
-    <TextView
-        android:id="@+id/candi_form_subtitle"
-        style="@style/candi_form_subtitle"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="7dp"
-        android:layout_marginLeft="3dp"
-        android:text="@string/dummy_tags" />
+        android:layout_marginBottom="10dp"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/candi_form_title"
+            style="?attr/candiFormTitleStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dummy_title" />
+
+        <TextView
+            android:id="@+id/candi_form_subtitle"
+            style="@style/candi_form_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:text="@string/dummy_tags" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal" >
+
+        <com.aircandi.ui.widgets.ComboButton
+            android:id="@+id/button_like"
+            style="@style/form_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="3dp"
+            aircandi:drawableScale="@dimen/combo_button_drawable_scale"
+            android:drawablePadding="5dp"
+            android:drawableTop="?attr/iconLike"
+            android:onClick="onLikeButtonClick"
+            android:text="@string/candi_button_like" />
+    </LinearLayout>
 
 </LinearLayout>

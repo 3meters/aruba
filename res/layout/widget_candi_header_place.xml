@@ -21,24 +21,24 @@
             style="@style/form_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="3dp"
             aircandi:drawableScale="@dimen/combo_button_drawable_large_scale"
             android:drawablePadding="5dp"
             android:drawableTop="?attr/iconTune"
-            android:layout_marginRight="3dp"
             android:onClick="onTuneButtonClick"
             android:text="@string/candi_button_tune" />
 
         <com.aircandi.ui.widgets.ComboButton
-            android:id="@+id/button_call"
+            android:id="@+id/button_like"
             style="@style/form_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="3dp"
             aircandi:drawableScale="@dimen/combo_button_drawable_scale"
             android:drawablePadding="5dp"
-            android:layout_marginRight="3dp"
-            android:drawableTop="?attr/iconCall"
-            android:onClick="onCallButtonClick"
-            android:text="@string/candi_button_call" />
+            android:drawableTop="?attr/iconLike"
+            android:onClick="onLikeButtonClick"
+            android:text="@string/candi_button_like" />
 
         <com.aircandi.ui.widgets.ComboButton
             android:id="@+id/button_map"
@@ -57,6 +57,7 @@
         style="@style/candi_form_section"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
         aircandi:layoutHeader="@layout/temp_section_header"
         android:orientation="vertical" >
 
