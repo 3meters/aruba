@@ -138,13 +138,10 @@
     </style>
 
     <style name="form_button">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:paddingLeft">8dp</item>
-        <item name="android:paddingRight">8dp</item>
-        <item name="android:gravity">center</item>
-        <item name="android:minWidth">90dp</item>
-        <item name="android:maxWidth">200dp</item>
+        <item name="android:paddingLeft">@dimen/form_button_padding</item>
+        <item name="android:paddingRight">@dimen/form_button_padding</item>
         <item name="android:background">?attr/backgroundButton</item>
+        <item name="android:textAppearance">@style/app_text_appearance_small</item>
         <item name="android:textColor">?attr/textColorButtonLink</item>
     </style>
 

@@ -700,7 +700,7 @@ public class TuningWizard extends FormActivity {
 
 				String actionType = "proximity";
 				final Boolean hasActiveProximityLink = mEntityForForm.hasActiveProximityLink();
-				if (!hasActiveProximityLink) {
+				if (!hasActiveProximityLink && primaryBeacon != null) {
 					actionType = "proximity_first";
 				}
 

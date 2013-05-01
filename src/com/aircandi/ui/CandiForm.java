@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -69,6 +70,7 @@ import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.builders.LinkPicker;
 import com.aircandi.ui.widgets.CandiView;
+import com.aircandi.ui.widgets.ComboButton;
 import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
 import com.aircandi.ui.widgets.UserView;
@@ -311,7 +313,15 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LikeEntity");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().likeEntity(mEntity.id);
+				ModelResult result = new ModelResult();
+				if (!mEntity.liked) {
+					Tracker.sendEvent("ui_action", "like_entity", null, 0, Aircandi.getInstance().getUser());
+					result = ProxiManager.getInstance().getEntityModel().verbSomething(Aircandi.getInstance().getUser().id, mEntity.id, "like", "like");
+				}
+				else {
+					Tracker.sendEvent("ui_action", "unlike_entity", null, 0, Aircandi.getInstance().getUser());
+					result = ProxiManager.getInstance().getEntityModel().unverbSomething(Aircandi.getInstance().getUser().id, mEntity.id, "like", "unlike");
+				}
 				return result;
 			}
 
@@ -328,6 +338,44 @@ public class CandiForm extends CandiActivity {
 						ImageUtils.showToastNotification(getString(R.string.toast_like_duplicate), Toast.LENGTH_SHORT);
 					}
 					else {
+						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
+					}
+				}
+			}
+		}.execute();
+
+	}
+
+	@SuppressWarnings("ucd")
+	public void onWatchButtonClick(View view) {
+
+		new AsyncTask() {
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("WatchEntity");
+				ModelResult result = new ModelResult();
+				if (!mEntity.watched) {
+					Tracker.sendEvent("ui_action", "watch_entity", null, 0, Aircandi.getInstance().getUser());
+					result = ProxiManager.getInstance().getEntityModel().verbSomething(Aircandi.getInstance().getUser().id, mEntity.id, "watch", "watch");
+				}
+				else {
+					Tracker.sendEvent("ui_action", "unwatch_entity", null, 0, Aircandi.getInstance().getUser());
+					result = ProxiManager.getInstance().getEntityModel().unverbSomething(Aircandi.getInstance().getUser().id, mEntity.id, "watch", "unwatch");
+				}
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ModelResult result = (ModelResult) response;
+				setSupportProgressBarIndeterminateVisibility(false);
+				mCommon.hideBusy(true);
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					bind(false);
+				}
+				else {
+					if (result.serviceResponse.exception.getStatusCode() != ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
 						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
 					}
 				}
@@ -700,9 +748,11 @@ public class CandiForm extends CandiActivity {
 					addressBlock += "<br/>" + place.contact.formattedPhone;
 				}
 
-				address.setText(Html.fromHtml(addressBlock));
-				FontManager.getInstance().setTypefaceDefault(address);
-				setVisibility(address, View.VISIBLE);
+				if (!"".equals(addressBlock)) {
+					address.setText(Html.fromHtml(addressBlock));
+					FontManager.getInstance().setTypefaceDefault(address);
+					setVisibility(address, View.VISIBLE);
+				}
 			}
 		}
 
@@ -719,7 +769,7 @@ public class CandiForm extends CandiActivity {
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 				if (entity.place.getProvider().type.equals("user")) {
 					user.setLabel(getString(R.string.candi_label_user_created_by));
-					user.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
+					user.bindToUser(entity.creator, entity.createdDate.longValue(), entity.locked);
 					setVisibility(user, View.VISIBLE);
 					user = user_two;
 				}
@@ -734,7 +784,7 @@ public class CandiForm extends CandiActivity {
 				else {
 					user.setLabel(getString(R.string.candi_label_user_created_by));
 				}
-				user.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
+				user.bindToUser(entity.creator, entity.createdDate.longValue(), entity.locked);
 				setVisibility(user_one, View.VISIBLE);
 				user = user_two;
 			}
@@ -745,7 +795,7 @@ public class CandiForm extends CandiActivity {
 		if (user != null && entity.modifier != null && !entity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 			if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
 				user.setLabel(getString(R.string.candi_label_user_edited_by));
-				user.bindToAuthor(entity.modifier, entity.modifiedDate.longValue(), null);
+				user.bindToUser(entity.modifier, entity.modifiedDate.longValue(), null);
 				setVisibility(user, View.VISIBLE);
 			}
 		}
@@ -812,6 +862,9 @@ public class CandiForm extends CandiActivity {
 				if (entity.source.type.equals("likes") && (mEntity.likeCount == null || mEntity.likeCount == 0)) {
 					continue;
 				}
+				if (entity.source.type.equals("watchers") && (mEntity.watchCount == null || mEntity.watchCount == 0)) {
+					continue;
+				}
 			}
 
 			View view = inflater.inflate(viewResId, null);
@@ -838,6 +891,12 @@ public class CandiForm extends CandiActivity {
 				else if (entity.source.type.equals("likes")) {
 					if (mEntity.likeCount != null && mEntity.likeCount > 0) {
 						badgeUpper.setText(String.valueOf(mEntity.likeCount));
+						badgeUpper.setVisibility(View.VISIBLE);
+					}
+				}
+				else if (entity.source.type.equals("watchers")) {
+					if (mEntity.watchCount != null && mEntity.watchCount > 0) {
+						badgeUpper.setText(String.valueOf(mEntity.watchCount));
 						badgeUpper.setVisibility(View.VISIBLE);
 					}
 				}
@@ -923,9 +982,46 @@ public class CandiForm extends CandiActivity {
 		setVisibility(layout.findViewById(R.id.button_map), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_tune), View.GONE);
 
-		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_map));
-		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_like));
-		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_tune));
+		ComboButton watched = (ComboButton) layout.findViewById(R.id.button_watch);
+		if (watched != null) {
+			if (entity.watched != null && entity.watched) {
+				final int color = Aircandi.getInstance().getResources().getColor(R.color.brand_pink_lighter);
+				watched.setLabel(getString(R.string.candi_button_unwatch));
+				watched.setDrawableId(R.drawable.ic_action_show_dark);
+				watched.setAlpha(1);
+				watched.getImageIcon().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+			}
+			else {
+				watched.setLabel(getString(R.string.candi_button_watch));
+				watched.getImageIcon().setColorFilter(null);
+				if (mCommon.mThemeTone.equals("dark")) {
+					watched.setDrawableId(R.drawable.ic_action_show_dark);
+				}
+				else {
+					watched.setDrawableId(R.drawable.ic_action_show_light);
+				}
+			}
+		}
+
+		ComboButton liked = (ComboButton) layout.findViewById(R.id.button_like);
+		if (liked != null) {
+			if (entity.liked != null && entity.liked) {
+				final int color = Aircandi.getInstance().getResources().getColor(R.color.accent_red);
+				liked.setLabel(getString(R.string.candi_button_unlike));
+				liked.setDrawableId(R.drawable.ic_action_heart_dark);
+				liked.getImageIcon().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+			}
+			else {
+				liked.setLabel(getString(R.string.candi_button_like));
+				liked.getImageIcon().setColorFilter(null);
+				if (mCommon.mThemeTone.equals("dark")) {
+					liked.setDrawableId(R.drawable.ic_action_heart_dark);
+				}
+				else {
+					liked.setDrawableId(R.drawable.ic_action_heart_light);
+				}
+			}
+		}
 
 		if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 

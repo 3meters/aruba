@@ -37,14 +37,14 @@
         <com.aircandi.ui.widgets.ComboButton
             android:id="@+id/button_like"
             style="@style/form_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/form_button_width_min"
+            android:layout_height="@dimen/form_button_height"
             android:layout_marginRight="3dp"
-            aircandi:drawableScale="@dimen/combo_button_drawable_scale"
-            android:drawablePadding="5dp"
-            android:drawableTop="?attr/iconLike"
-            android:onClick="onLikeButtonClick"
-            android:text="@string/candi_button_like" />
+            aircandi:drawable="?attr/iconLike"
+            aircandi:label="@string/candi_button_like"
+            android:minWidth="@dimen/form_button_width_min"
+            android:onClick="onLikeButtonClick" />
+
     </LinearLayout>
 
 </LinearLayout>

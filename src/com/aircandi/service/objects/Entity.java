@@ -37,8 +37,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	@Expose
 	public String				description;
 	@Expose
-	public Photo				photo;
-	@Expose
 	public Place				place;
 	@Expose
 	public Number				signalFence			= -100.0f;
@@ -49,15 +47,14 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	@Expose
 	public String				visibility			= "public";
 	@Expose
-	public List<Comment>		comments = new ArrayList<Comment>();
+	public List<Comment>		comments			= new ArrayList<Comment>();
 	@Expose
 	public List<Source>			sources;
+	@Expose
+	public Photo				photo;
 
 	@Expose(serialize = false, deserialize = true)
 	public List<Link>			links;
-
-	@Expose(serialize = false, deserialize = true)
-	public Number				activityDate;
 
 	/* Synthetic service fields */
 
@@ -80,9 +77,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	@Expose(serialize = false, deserialize = true)
 	public Boolean				commentsMore;
 
-	@Expose(serialize = false, deserialize = true)
-	public Integer				likeCount;
-	
 	/*
 	 * For client use only
 	 */
@@ -189,12 +183,10 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			entity.childCount = (Integer) map.get("childCount");
 			entity.childrenMore = (Boolean) map.get("childrenMore");
 
-			entity.likeCount = (Integer) map.get("likeCount");
-			
 			if (map.get("place") != null) {
 				entity.place = Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("place"));
 			}
-
+			
 			if (map.get("photo") != null) {
 				entity.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
 			}
@@ -205,8 +197,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			}
 
 			entity.parentId = (String) map.get("_parent");
-
-			entity.activityDate = (Number) map.get("activityDate");
 		}
 
 		return entity;
@@ -232,22 +222,19 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		to.parentId = from.parentId;
 
 		to.place = from.place;
-		to.photo = from.photo;
 		to.locked = from.locked;
 		to.isCollection = from.isCollection;
 		to.signalFence = from.signalFence;
 		to.visibility = from.visibility;
 
 		to.links = from.links;
+		to.photo = from.photo;
 
 		to.childCount = from.childCount;
-		to.likeCount = from.likeCount;
 		to.comments = from.comments;
 		to.commentCount = from.commentCount;
 		to.commentsMore = from.commentsMore;
 		to.sources = from.sources;
-
-		to.activityDate = from.activityDate;
 	}
 
 	@Override
@@ -633,4 +620,20 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			}
 		}
 	}
+
+	public static class SortEntitiesByWatchedDate implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity item1, Entity item2) {
+
+			if (item1.watchedDate.longValue() < item2.watchedDate.longValue()) {
+				return 1;
+			}
+			else if (item1.watchedDate.longValue() == item2.watchedDate.longValue()) {
+				return 0;
+			}
+			return -1;
+		}
+	}
+
 }

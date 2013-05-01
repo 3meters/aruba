@@ -30,7 +30,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.location.Location;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -74,6 +73,7 @@ import com.aircandi.ui.CandiForm;
 import com.aircandi.ui.CandiHelp;
 import com.aircandi.ui.CandiList;
 import com.aircandi.ui.CandiRadar;
+import com.aircandi.ui.CandiWatch;
 import com.aircandi.ui.CommentForm;
 import com.aircandi.ui.CommentList;
 import com.aircandi.ui.EntityForm;
@@ -248,25 +248,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
-	private void doInfoClick() {
-		final String title = mActivity.getString(R.string.alert_about_title);
-		final String message = mActivity.getString(R.string.alert_about_label_version) + " "
-				+ Aircandi.getVersionName(mContext, CandiRadar.class) + System.getProperty("line.separator")
-				+ mActivity.getString(R.string.alert_about_label_code) + " "
-				+ String.valueOf(Aircandi.getVersionCode(mContext, CandiRadar.class)) + System.getProperty("line.separator")
-				+ mActivity.getString(R.string.dialog_about_copyright);
-		AircandiCommon.showAlertDialog(R.drawable.ic_launcher
-				, title
-				, message
-				, null
-				, mActivity, android.R.string.ok, null, null, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {}
-				}, null);
-		Tracker.sendEvent("ui_action", "open_dialog", "about", 0, Aircandi.getInstance().getUser());
-
-	}
-
 	public void doAttachedToWindow() {
 		final Window window = mActivity.getWindow();
 		window.setFormat(PixelFormat.RGBA_8888);
@@ -355,6 +336,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 			mActivity.startActivity(intent);
 			AnimUtils.doOverridePendingTransition(mActivity, TransitionType.RadarToPage);
 		}
+	}
+
+	public void doWatchingClick() {
+		Intent intent = new Intent(mActivity, CandiWatch.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		mActivity.startActivity(intent);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.RadarToPage);
 	}
 
 	public void doHelpClick() {
@@ -471,6 +460,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 			/*
 			 * We don't do anything right now. Goal is to show a form with
 			 * more detail on the likes.
+			 */
+		}
+		else if (sourceEntity.source.type.equals("watchers")) {
+			/*
+			 * We don't do anything right now. Goal is to show a form with
+			 * more detail on the watchers.
 			 */
 		}
 		else {
@@ -1120,13 +1115,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (mPageName.equals("CandiRadar")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_radar, menu);
 
-			/* Show update menuitem if one is needed */
-			MenuItem menuItem = menu.findItem(R.id.update);
-			if (menuItem != null) {
-				if (!Aircandi.applicationUpdateNeeded) {
-					menuItem.setVisible(false);
-				}
-			}
 			/* Beacon indicator */
 			mMenuItemBeacons = menu.findItem(R.id.beacons);
 			if (mMenuItemBeacons != null) {
@@ -1252,18 +1240,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 				Tracker.sendEvent("ui_action", "signout_user", null, 0, Aircandi.getInstance().getUser());
 				signout();
 				return;
-			case R.id.update:
-				Logger.d(this, "Update menu item: navigating to install page");
-				intent = new Intent(android.content.Intent.ACTION_VIEW);
-				intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
-				mActivity.startActivity(intent);
-				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToSource);
-				return;
 			case R.id.feedback:
 				doFeedbackClick();
 				return;
 			case R.id.profile:
 				doUserClick(Aircandi.getInstance().getUser());
+				return;
+			case R.id.watching:
+				doWatchingClick();
 				return;
 			case R.id.help:
 				doHelpClick();
@@ -1283,9 +1267,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 				mActivity.setResult(Activity.RESULT_CANCELED);
 				mActivity.finish();
 				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.FormToPage);
-				return;
-			case R.id.about:
-				doInfoClick();
 				return;
 			default:
 				return;

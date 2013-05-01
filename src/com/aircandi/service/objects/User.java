@@ -1,6 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,9 +33,9 @@ public class User extends ServiceEntryBase {
 	@Expose
 	public Boolean				doNotTrack;
 	@Expose
-	public Photo				photo;
-	@Expose
 	public String				password;
+	@Expose
+	public Photo				photo;
 
 	@Expose(serialize = false, deserialize = true)
 	public String				facebookId;
@@ -95,9 +96,12 @@ public class User extends ServiceEntryBase {
 		user.ownerId = (String) ((map.get("_owner") != null) ? map.get("_owner") : map.get("ownerId"));
 		user.creatorId = (String) ((map.get("_creator") != null) ? map.get("_creator") : map.get("creatorId"));
 		user.modifierId = (String) ((map.get("_modifier") != null) ? map.get("_modifier") : map.get("modifierId"));
+		user.watcherId = (String) ((map.get("_watcher") != null) ? map.get("_watcher") : map.get("watcherId"));
 
 		user.createdDate = (Number) map.get("createdDate");
 		user.modifiedDate = (Number) map.get("modifiedDate");
+		user.activityDate = (Number) map.get("activityDate");
+		user.watchedDate = (Number) map.get("watchedDate");
 
 		user.name = (String) map.get("name");
 		user.firstName = (String) map.get("firstName");
@@ -113,6 +117,7 @@ public class User extends ServiceEntryBase {
 		user.lastSignedInDate = (Number) map.get("lastSignedInDate");
 		user.validationDate = (Number) map.get("validationDate");
 		user.validationNotifyDate = (Number) map.get("validationNotifyDate");
+		
 		if (map.get("photo") != null) {
 			user.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
 		}
@@ -124,6 +129,11 @@ public class User extends ServiceEntryBase {
 				user.stats.add(Stat.setPropertiesFromMap(new Stat(), statMap));
 			}
 		}
+
+		user.likeCount = (Integer) map.get("likeCount");
+		user.liked = (Boolean) map.get("liked");
+		user.watchCount = (Integer) map.get("watchCount");
+		user.watched = (Boolean) map.get("watched");
 
 		return user;
 	}
@@ -151,4 +161,20 @@ public class User extends ServiceEntryBase {
 	public String getCollection() {
 		return collectionId;
 	}
+
+	public static class SortUsersByWatchedDate implements Comparator<User> {
+
+		@Override
+		public int compare(User user1, User user2) {
+
+			if (user1.watchedDate.longValue() < user2.watchedDate.longValue()) {
+				return 1;
+			}
+			else if (user1.watchedDate.longValue() == user2.watchedDate.longValue()) {
+				return 0;
+			}
+			return -1;
+		}
+	}
+
 }

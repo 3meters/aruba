@@ -14,6 +14,7 @@
     <string name="menu_refresh_item">Refresh</string>
     <string name="menu_edit_item">Edit</string>
     <string name="menu_profile_item">Profile</string>
+    <string name="menu_watching_item">Watching</string>
     <string name="menu_home_item">Home</string>
     <string name="menu_settings_item">Settings</string>
     <string name="menu_help_item">Help</string>
@@ -267,9 +268,13 @@
     <string name="candi_button_more">more</string>
     <string name="candi_section_places_more">view all places</string>
     <string name="candi_section_candigrams_more">view all candigrams</string>
-    <string name="candi_button_tune">tune it!</string>
+    <string name="candi_section_users_more">view all users</string>
+    <string name="candi_button_tune">tune</string>
     <string name="candi_button_call">call</string>
-    <string name="candi_button_like">like it!</string>
+    <string name="candi_button_like">like</string>
+    <string name="candi_button_unlike">liked</string>
+    <string name="candi_button_watch">watch</string>
+    <string name="candi_button_unwatch">watching</string>
     <string name="candi_button_edit">edit</string>
     <string name="candi_button_polish">polish</string>
     <string name="candi_button_add_candigram">add candigram</string>
@@ -277,6 +282,10 @@
     <string name="candi_section_candi">candigrams</string>
     <string name="candi_section_user_candi_places">my places</string>
     <string name="candi_section_user_candigrams">my candigrams</string>
+    
+    <string name="candi_section_watching_places">watched places</string>
+    <string name="candi_section_watching_users">watched users</string>
+    
     <string name="candi_label_user_created_by">created</string>
     <string name="candi_label_user_discovered_by">discovered</string>
     <string name="candi_label_user_added_by">added</string>
@@ -295,6 +304,7 @@
 
     <!-- Forms.titles -->
 
+    <string name="form_title_watching">watching</string>
     <string name="form_title_candigram">candigram</string>
     <string name="form_title_picture">picture</string>
     <string name="form_title_place">place</string>

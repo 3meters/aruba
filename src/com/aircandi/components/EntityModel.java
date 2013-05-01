@@ -42,6 +42,7 @@ import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
+import com.aircandi.service.objects.ServiceEntryBase;
 import com.aircandi.service.objects.ServiceEntryBase.UpdateScope;
 import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.User;
@@ -125,6 +126,10 @@ public class EntityModel {
 					.setParameters(parameters)
 					.setResponseFormat(ResponseFormat.Json);
 
+			if (Aircandi.getInstance().getUser() != null) {
+				serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+			}
+
 			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -166,11 +171,14 @@ public class EntityModel {
 
 		if (refresh) {
 
+			final List<String> userIds = new ArrayList<String>();
+			userIds.add(userId);
+
 			final Bundle parameters = new Bundle();
-			parameters.putString("userId", userId);
+			parameters.putStringArrayList("userIds", (ArrayList<String>) userIds);
 
 			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getUser")
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getUsers")
 					.setRequestType(RequestType.Method)
 					.setParameters(parameters)
 					.setResponseFormat(ResponseFormat.Json)
@@ -213,6 +221,10 @@ public class EntityModel {
 					.setParameters(parameters)
 					.setResponseFormat(ResponseFormat.Json);
 
+			if (Aircandi.getInstance().getUser() != null) {
+				serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+			}
+
 			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -226,6 +238,65 @@ public class EntityModel {
 		}
 		else {
 			result.data = getCacheUserEntities(userId);
+		}
+		return result;
+	}
+
+	public ModelResult getUserWatched(String userId, String collectionType, Boolean refresh, Integer limit) {
+		final ModelResult result = new ProxiManager.ModelResult();
+
+		if (refresh) {
+
+			final Bundle parameters = new Bundle();
+			parameters.putString("userId", userId);
+			parameters.putString("collectionId", ServiceEntry.getIdFromType(collectionType));
+			parameters.putString("eagerLoad", "object:{\"children\":false,\"parents\":false,\"comments\":false}");
+			parameters.putString("options", "object:{\"limit\":"
+					+ String.valueOf(limit)
+					+ ",\"skip\":0"
+					+ ",\"sort\":{\"modifiedDate\":-1}}");
+
+			final ServiceRequest serviceRequest = new ServiceRequest()
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getWatchedForUser")
+					.setRequestType(RequestType.Method)
+					.setParameters(parameters)
+					.setResponseFormat(ResponseFormat.Json);
+
+			if (Aircandi.getInstance().getUser() != null) {
+				serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+			}
+
+			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+
+			if (result.serviceResponse.responseCode == ResponseCode.Success) {
+
+				final String jsonResponse = (String) result.serviceResponse.data;
+
+				if (collectionType.equals("entities")) {
+					final List<Entity> entities = new ArrayList<Entity>();
+					final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+					entities.addAll((List<Entity>) serviceData.data);
+					upsertEntities(entities);
+					result.data = getCacheUserWatchedEntities(userId);
+				}
+				else if (collectionType.equals("users")) {
+					final List<User> users = new ArrayList<User>();
+					final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.User);
+					users.addAll((List<User>) serviceData.data);
+					for (User user : users) {
+						mUserCache.put(user.id, user);
+					}
+					result.data = getCacheUserWatchedUsers(userId);
+				}
+			}
+		}
+		else {
+			if (collectionType.equals("entities")) {
+				result.data = getCacheUserWatchedEntities(userId);
+			}
+			else if (collectionType.equals("users")) {
+				result.data = getCacheUserWatchedUsers(userId);
+			}
 		}
 		return result;
 	}
@@ -723,7 +794,7 @@ public class EntityModel {
 			 */
 			final Bundle parameters = new Bundle();
 			parameters.putBoolean("skipActivityDate", false);
-			
+
 			/* Entity */
 			entity.updateScope = UpdateScope.Object;
 			if (entity.photo != null) {
@@ -736,7 +807,7 @@ public class EntityModel {
 				if (entity.place.location != null) {
 					entity.place.location.updateScope = UpdateScope.Property;
 				}
-			}			
+			}
 
 			parameters.putString("entity", "object:" + HttpService.convertObjectToJsonSmart(entity, true, true));
 
@@ -895,7 +966,9 @@ public class EntityModel {
 		parameters.putString("entityId", entity.id);
 
 		/* Action type - proximity or proximity_first */
-		parameters.putString("actionType", actionType);
+		if (!untuning) {
+			parameters.putString("actionType", actionType);
+		}
 
 		/* Method */
 		String methodName = untuning ? "untrackEntity" : "trackEntity";
@@ -990,11 +1063,25 @@ public class EntityModel {
 		return result;
 	}
 
-	public ModelResult likeEntity(String entityId) {
+	public ModelResult verbSomething(String fromId, String toId, String verb, String actionType) {
+		final ModelResult result = new ProxiManager.ModelResult();
 
-		Link link = new Link(entityId, Aircandi.getInstance().getUser().id);
-		link.type = CandiConstants.TYPE_LINK_LIKE;
-		ModelResult result = insertLink(link);
+		final Bundle parameters = new Bundle();
+		parameters.putString("fromId", fromId);
+		parameters.putString("toId", toId);
+		parameters.putString("verb", verb);
+		parameters.putString("actionType", actionType);
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertVerbLink")
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
+				.setSession(Aircandi.getInstance().getUser().session)
+				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setRetry(false)
+				.setResponseFormat(ResponseFormat.Json);
+
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
 		/*
 		 * We update the cache directly instead of refreshing from the service
 		 */
@@ -1003,7 +1090,40 @@ public class EntityModel {
 			 * Fail could be because of ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
 			 * prevents any user from liking the same entity more than once.
 			 */
-			likeEntityCache(entityId);
+			verbSomethingCache(toId, verb);
+		}
+
+		return result;
+	}
+
+	public ModelResult unverbSomething(String fromId, String toId, String verb, String actionType) {
+		final ModelResult result = new ProxiManager.ModelResult();
+
+		final Bundle parameters = new Bundle();
+		parameters.putString("fromId", fromId);
+		parameters.putString("toId", toId);
+		parameters.putString("verb", verb);
+		parameters.putString("actionType", actionType);
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteVerbLink")
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
+				.setSession(Aircandi.getInstance().getUser().session)
+				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setRetry(false)
+				.setResponseFormat(ResponseFormat.Json);
+
+		result.serviceResponse = mProxiManager.dispatch(serviceRequest);
+		/*
+		 * We update the cache directly instead of refreshing from the service
+		 */
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			/*
+			 * Fail could be because of ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
+			 * prevents any user from liking the same entity more than once.
+			 */
+			unverbSomethingCache(toId, verb);
 		}
 
 		return result;
@@ -1463,6 +1583,32 @@ public class EntityModel {
 		return entities;
 	}
 
+	public List<Entity> getCacheUserWatchedEntities(String userId) {
+		final List<Entity> entities = new ArrayList<Entity>();
+		synchronized (mEntityCache) {
+			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+				if (entry.getValue().watcherId != null && entry.getValue().watcherId.equals(userId)) {
+					entities.add(entry.getValue());
+				}
+			}
+		}
+		Collections.sort(entities, new Entity.SortEntitiesByWatchedDate());
+		return entities;
+	}
+
+	public List<User> getCacheUserWatchedUsers(String userId) {
+		final List<User> users = new ArrayList<User>();
+		synchronized (mUserCache) {
+			for (Entry<String, User> entry : mUserCache.entrySet()) {
+				if (entry.getValue().watcherId != null && entry.getValue().watcherId.equals(userId)) {
+					users.add(entry.getValue());
+				}
+			}
+		}
+		Collections.sort(users, new User.SortUsersByWatchedDate());
+		return users;
+	}
+
 	public List<Entity> getBeaconEntities(String beaconId) {
 		final List<Entity> entities = new ArrayList<Entity>();
 		synchronized (mEntityCache) {
@@ -1483,6 +1629,12 @@ public class EntityModel {
 	}
 
 	@SuppressWarnings("ucd")
+	public User getCacheUser(String userId) {
+		synchronized (mUserCache) {
+			return mUserCache.get(userId);
+		}
+	}
+
 	public List<Entity> getCacheEntities(List<String> entityIds) {
 		final List<Entity> entities = new ArrayList<Entity>();
 		synchronized (mEntityCache) {
@@ -1570,18 +1722,70 @@ public class EntityModel {
 				entity.commentCount = 0;
 			}
 			entity.commentCount++;
-			setLastActivityDate(DateUtils.nowDate().getTime());
+			Long time = DateUtils.nowDate().getTime();
+			entity.activityDate = time;
+			setLastActivityDate(time);
 		}
 	}
 
-	private void likeEntityCache(String entityId) {
-		final Entity entity = getCacheEntity(entityId);
-		if (entity != null) {
-			if (entity.likeCount == null) {
-				entity.likeCount = 0;
+	private void verbSomethingCache(String toId, String verb) {
+		ServiceEntryBase entry = null;
+
+		if (ServiceEntry.getTypeFromId(toId) == "entities") {
+			entry = getCacheEntity(toId);
+		}
+		else if (ServiceEntry.getTypeFromId(toId) == "users") {
+			entry = getCacheUser(toId);
+		}
+
+		if (entry != null) {
+			Long time = DateUtils.nowDate().getTime();
+			if (verb.equals("like")) {
+				entry.liked = true;
+				if (entry.likeCount == null) {
+					entry.likeCount = 0;
+				}
+				entry.likeCount++;
 			}
-			entity.likeCount++;
-			setLastActivityDate(DateUtils.nowDate().getTime());
+			else if (verb.equals("watch")) {
+				entry.watched = true;
+				entry.watcherId = Aircandi.getInstance().getUser().id;
+				entry.watchedDate = time;
+				if (entry.watchCount == null) {
+					entry.watchCount = 0;
+				}
+				entry.watchCount++;
+			}
+			entry.activityDate = time;
+			setLastActivityDate(time);
+		}
+	}
+
+	private void unverbSomethingCache(String toId, String verb) {
+
+		ServiceEntryBase entry = null;
+
+		if (ServiceEntry.getTypeFromId(toId) == "entities") {
+			entry = getCacheEntity(toId);
+		}
+		else if (ServiceEntry.getTypeFromId(toId) == "users") {
+			entry = getCacheUser(toId);
+		}
+
+		if (entry != null) {
+			if (verb.equals("like")) {
+				entry.liked = false;
+				entry.likeCount--;
+			}
+			else if (verb.equals("watch")) {
+				entry.watched = false;
+				entry.watcherId = null;
+				entry.watchedDate = null;
+				entry.watchCount--;
+			}
+			Long time = DateUtils.nowDate().getTime();
+			entry.activityDate = time;
+			setLastActivityDate(time);
 		}
 	}
 
@@ -1647,6 +1851,7 @@ public class EntityModel {
 							removeSourceEntities(freshChild.id);
 							addCommentSource(freshChild, 0);
 							addLikesSource(freshChild, 1);
+							addWatchersSource(freshChild, 2);
 						}
 						freshEntity.children.clear();
 						freshEntity.children = null;
@@ -1663,10 +1868,11 @@ public class EntityModel {
 						while (iter.hasNext()) {
 							Entity freshChild = (Entity) iter.next();
 							mEntityCache.put(freshChild.id, freshChild);
-							
+
 							removeSourceEntities(freshChild.id);
 							addCommentSource(freshChild, 0);
 							addLikesSource(freshChild, 1);
+							addWatchersSource(freshChild, 2);
 						}
 						freshEntity.children.clear();
 						freshEntity.children = null;
@@ -1726,6 +1932,7 @@ public class EntityModel {
 		if (!freshEntity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
 			addCommentSource(freshEntity, position);
 			addLikesSource(freshEntity, position + 1);
+			addWatchersSource(freshEntity, position + 2);
 		}
 
 		setLastActivityDate(DateUtils.nowDate().getTime());
@@ -1766,6 +1973,25 @@ public class EntityModel {
 		source.installDeclined = false;
 		sourceEntity.source = source;
 		sourceEntity.likeCount = entity.likeCount;
+
+		sourceEntity.parentId = entity.id;
+		upsertEntity(sourceEntity);
+	}
+
+	private void addWatchersSource(Entity entity, Integer position) {
+
+		final Entity sourceEntity = mProxiManager.loadEntityFromResources(R.raw.source_entity);
+		sourceEntity.id = entity.id + ".watchers";
+		sourceEntity.name = "watching";
+		final Source source = new Source();
+		source.label = "watching";
+		source.photo = new Photo("resource:img_watch", null, null, null, PhotoSource.resource);
+		source.type = "watchers";
+		source.position = (position != null) ? position : 0;
+		source.intentSupport = false;
+		source.installDeclined = false;
+		sourceEntity.source = source;
+		sourceEntity.watchCount = entity.watchCount;
 
 		sourceEntity.parentId = entity.id;
 		upsertEntity(sourceEntity);

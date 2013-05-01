@@ -82,7 +82,6 @@
 
             <LinearLayout
                 android:id="@+id/authoring_holder"
-                style="@style/form_content_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"

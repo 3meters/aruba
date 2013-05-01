@@ -48,12 +48,11 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 
 	@Expose
 	public String				name;
+	@Expose
+	public String				type;
 
 	@Expose(serialize = false, deserialize = true)
 	public String				namelc;
-
-	@Expose
-	public String				type;
 
 	/* Property bag */
 
@@ -93,6 +92,28 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	public User					modifier;
 
+	@Expose(serialize = false, deserialize = true)
+	public Number				activityDate;
+
+	@Expose(serialize = false, deserialize = true)
+	public Integer				likeCount;
+
+	@Expose(serialize = false, deserialize = true)
+	public Boolean				liked;
+
+	@Expose(serialize = false, deserialize = true)
+	public Integer				watchCount;
+
+	@Expose(serialize = false, deserialize = true)
+	public Boolean				watched;
+
+	@Expose(serialize = false, deserialize = true)
+	@SerializedName("_watcher")
+	public String				watcherId;									/* Used to connect to watcher */
+
+	@Expose(serialize = false, deserialize = true)
+	public Number				watchedDate;
+
 	/* Local client only */
 
 	public UpdateScope			updateScope			= UpdateScope.Object;
@@ -118,10 +139,18 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 		entry.ownerId = (String) ((map.get("_owner") != null) ? map.get("_owner") : map.get("ownerId"));
 		entry.creatorId = (String) ((map.get("_creator") != null) ? map.get("_creator") : map.get("creatorId"));
 		entry.modifierId = (String) ((map.get("_modifier") != null) ? map.get("_modifier") : map.get("modifierId"));
+		entry.watcherId = (String) ((map.get("_watcher") != null) ? map.get("_watcher") : map.get("watcherId"));
 
 		entry.createdDate = (Number) map.get("createdDate");
 		entry.modifiedDate = (Number) map.get("modifiedDate");
+		entry.activityDate = (Number) map.get("activityDate");
+		entry.watchedDate = (Number) map.get("watchedDate");
 		entry.type = (String) map.get("type");
+
+		entry.likeCount = (Integer) map.get("likeCount");
+		entry.liked = (Boolean) map.get("liked");
+		entry.watchCount = (Integer) map.get("watchCount");
+		entry.watched = (Boolean) map.get("watched");
 
 		if (map.get("creator") != null) {
 			entry.creator = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"));
@@ -143,6 +172,9 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 		toEntry.name = fromEntry.name;
 		toEntry.type = fromEntry.type;
 
+		toEntry.likeCount = fromEntry.likeCount;
+		toEntry.liked = fromEntry.liked;
+
 		toEntry.ownerId = fromEntry.ownerId;
 		toEntry.owner = fromEntry.owner;
 
@@ -150,9 +182,17 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 		toEntry.modifier = fromEntry.modifier;
 		toEntry.modifiedDate = fromEntry.modifiedDate;
 
+		toEntry.watcherId = fromEntry.watcherId;
+		toEntry.watchedDate = fromEntry.watchedDate;
+		toEntry.watchCount = fromEntry.watchCount;
+		toEntry.watched = fromEntry.watched;
+
 		toEntry.creatorId = fromEntry.creatorId;
 		toEntry.creator = fromEntry.creator;
 		toEntry.createdDate = fromEntry.createdDate;
+
+
+		toEntry.activityDate = fromEntry.activityDate;
 	}
 
 	public Map<String, Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
@@ -183,6 +223,7 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 							name = annotation.value();
 						}
 					}
+					
 					Object value = f.get(this);
 
 					if (value != null || updateScope == UpdateScope.Object || !excludeNulls) {
@@ -237,9 +278,34 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 							name = annotation.value();
 						}
 					}
+					
 					Object value = f.get(this);
+					
 					if (value != null || updateScope == UpdateScope.Object || !excludeNulls) {
-						map.put(name, value);
+						
+						if (value instanceof ServiceObject) {
+							Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
+							map.put(name, childMap);
+						}
+						else if (value instanceof ArrayList) {
+							List<Object> list = new ArrayList<Object>();
+							for (Object obj : (ArrayList) value) {
+
+								if (obj != null || updateScope == UpdateScope.Object || !excludeNulls) {
+									if (obj instanceof ServiceObject) {
+										Map childMap = ((ServiceObject) obj).getHashMap(useAnnotations, excludeNulls);
+										list.add(childMap);
+									}
+									else {
+										list.add(obj);
+									}
+								}
+							}
+							map.put(name, list);
+						}
+						else {
+							map.put(name, value);
+						}
 					}
 				}
 			}
@@ -260,8 +326,9 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 	/**
 	 * Object: All properties are serialized including nulls.
 	 * Property: Only non-null properties are serialized.
+	 * 
 	 * @author Jayma
-	 *
+	 * 
 	 */
 	public static enum UpdateScope {
 		Undefined,

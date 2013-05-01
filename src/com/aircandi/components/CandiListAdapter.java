@@ -150,7 +150,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 
 			setVisibility(holder.user, View.GONE);
 			if (holder.user != null && entity.creator != null && !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
-				holder.user.bindToAuthor(entity.creator, entity.modifiedDate.longValue(), entity.locked);
+				holder.user.bindToUser(entity.creator, entity.modifiedDate.longValue(), entity.locked);
 				setVisibility(holder.user, View.VISIBLE);
 			}
 

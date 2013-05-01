@@ -17,8 +17,7 @@
 		- Tabbar tone
 		- Set window background
 		- Select right set of drawables based on the theme tone.
-		- Custom line and text colors in pages, forms, buttons.
-    -->
+		- Custom line and text colors in pages, forms, buttons.    -->
 
     <style name="aircandi_theme_dark" parent="Theme.Sherlock">
         <item name="themeTone">dark</item>
@@ -76,7 +75,7 @@
         <item name="iconMore">@drawable/ic_action_more_dark</item>
         <item name="iconLocked">@drawable/ic_action_lock_closed_dark</item>
         <item name="iconNewCandi">@drawable/ic_action_new_candi_dark</item>
-        <item name="iconTune">@drawable/ic_launcher</item>
+        <item name="iconTune">@drawable/ic_logo_holo_dark</item>
         <item name="iconDelete">@drawable/ic_action_trash_dark</item>
         <item name="iconAdd">@drawable/ic_action_add_dark</item>
         <item name="iconMoveUp">@drawable/ic_action_arrow_top_dark</item>
@@ -104,6 +103,7 @@
         <item name="iconStarOff">@drawable/ic_action_star_0_dark</item>
         <item name="iconHelp">@drawable/ic_action_help_dark</item>
         <item name="iconLike">@drawable/ic_action_heart_dark</item>
+        <item name="iconWatch">@drawable/ic_action_show_dark</item>
         
         <!-- Actionbar Sherlock -->
 
@@ -184,7 +184,7 @@
         <item name="iconMore">@drawable/ic_action_more_light</item>
         <item name="iconLocked">@drawable/ic_action_lock_closed_light</item>
         <item name="iconNewCandi">@drawable/ic_action_new_candi_light</item>
-        <item name="iconTune">@drawable/ic_launcher</item>
+        <item name="iconTune">@drawable/ic_logo_holo_light</item>
         <item name="iconDelete">@drawable/ic_action_trash_light</item>
         <item name="iconAdd">@drawable/ic_action_add_light</item>
         <item name="iconMoveUp">@drawable/ic_action_arrow_top_light</item>
@@ -212,6 +212,7 @@
         <item name="iconStarOff">@drawable/ic_action_star_0_light</item>
         <item name="iconHelp">@drawable/ic_action_help_light</item>
         <item name="iconLike">@drawable/ic_action_heart_light</item>
+        <item name="iconWatch">@drawable/ic_action_show_light</item>
         
         <!-- Actionbar Sherlock -->
 

@@ -3,7 +3,9 @@ package com.aircandi.service.objects;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.aircandi.beta.BuildConfig;
@@ -28,7 +30,7 @@ public class ServiceObject implements Cloneable, Serializable {
 		final Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			final Class<?> cls = this.getClass();
+			Class<?> cls = this.getClass();
 			final Field[] fields = cls.getDeclaredFields();
 			for (Field f : fields) {
 				if (!Modifier.isStatic(f.getModifiers())
@@ -55,14 +57,61 @@ public class ServiceObject implements Cloneable, Serializable {
 
 					Object value = f.get(this);
 
-					if (value instanceof ServiceObject) {
-						Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
-						map.put(name, childMap);
-					}
-					else {
-						if (value != null || updateScope == UpdateScope.Object || !excludeNulls) {
+					if (value != null || updateScope == UpdateScope.Object || !excludeNulls) {
+
+						if (value instanceof ServiceObject) {
+							Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
+							map.put(name, childMap);
+						}
+						else if (value instanceof ArrayList) {
+							List<Object> list = new ArrayList<Object>();
+							for (Object obj : (ArrayList) value) {
+
+								if (obj != null || updateScope == UpdateScope.Object || !excludeNulls) {
+									if (obj instanceof ServiceObject) {
+										Map childMap = ((ServiceObject) obj).getHashMap(useAnnotations, excludeNulls);
+										list.add(childMap);
+									}
+									else {
+										list.add(obj);
+									}
+								}
+							}
+							map.put(name, list);
+						}
+						else {
 							map.put(name, value);
 						}
+					}
+				}
+			}
+
+			cls = this.getClass().getSuperclass();
+			final Field[] fieldsSuper = cls.getDeclaredFields();
+			for (Field f : fieldsSuper) {
+				if (!Modifier.isStatic(f.getModifiers())
+						&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {
+					if (useAnnotations) {
+						if (!f.isAnnotationPresent(Expose.class)) {
+							continue;
+						}
+						else {
+							Expose annotation = f.getAnnotation(Expose.class);
+							if (!annotation.serialize()) {
+								continue;
+							}
+						}
+					}
+					String name = f.getName();
+					if (useAnnotations) {
+						if (f.isAnnotationPresent(SerializedName.class)) {
+							SerializedName annotation = f.getAnnotation(SerializedName.class);
+							name = annotation.value();
+						}
+					}
+					Object value = f.get(this);
+					if (value != null || updateScope == UpdateScope.Object || !excludeNulls) {
+						map.put(name, value);
 					}
 				}
 			}

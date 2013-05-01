@@ -121,7 +121,7 @@ public class PictureDetail extends FormActivity {
 		/* Author block */
 		setVisibility(user, View.GONE);
 		if (photo.getUser() != null) {
-			user.bindToAuthor(photo.getUser(), photo.getCreatedAt().longValue(), false);
+			user.bindToUser(photo.getUser(), photo.getCreatedAt().longValue(), false);
 			setVisibility(user, View.VISIBLE);
 		}
 

@@ -1,5 +1,6 @@
 package com.aircandi.ui;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -11,6 +12,7 @@ import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.Tracker;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
@@ -103,6 +105,38 @@ public class Preferences extends SherlockPreferenceActivity {
 				}
 			});
 		}
+
+		/* Listen for about click */
+		pref = findPreference("Pref_About");
+		if (pref != null) {
+			pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+
+				@Override
+				public boolean onPreferenceClick(Preference preference) {
+					doInfoClick();
+					return true;
+				}
+			});
+		}
+	}
+
+	private void doInfoClick() {
+		final String title = getString(R.string.alert_about_title);
+		final String message = getString(R.string.alert_about_label_version) + " "
+				+ Aircandi.getVersionName(this, CandiRadar.class) + System.getProperty("line.separator")
+				+ getString(R.string.alert_about_label_code) + " "
+				+ String.valueOf(Aircandi.getVersionCode(this, CandiRadar.class)) + System.getProperty("line.separator")
+				+ getString(R.string.dialog_about_copyright);
+		AircandiCommon.showAlertDialog(R.drawable.ic_launcher
+				, title
+				, message
+				, null
+				, this, android.R.string.ok, null, null, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {}
+				}, null);
+		Tracker.sendEvent("ui_action", "open_dialog", "about", 0, Aircandi.getInstance().getUser());
+
 	}
 
 	@Override

@@ -24,18 +24,48 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:layout_marginLeft="2dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="0dp"
                 android:gravity="left"
                 android:orientation="horizontal" >
 
                 <com.aircandi.ui.widgets.WebImageView
                     android:id="@+id/image"
-                    android:layout_width="@dimen/image_medium"
-                    android:layout_height="@dimen/image_medium"
+                    android:layout_width="@dimen/form_button_width_min"
+                    android:layout_height="@dimen/form_button_width_min"
                     aircandi:layout="@layout/widget_webimageview_framed"
-                    aircandi:sizeHint="@dimen/image_medium"
+                    aircandi:sizeHint="@dimen/form_button_width_min"
                     android:scaleType="centerCrop" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal" >
+
+                <com.aircandi.ui.widgets.ComboButton
+                    android:id="@+id/button_like"
+                    style="@style/form_button"
+                    android:layout_width="@dimen/form_button_width_min"
+                    android:layout_height="@dimen/form_button_height"
+                    android:layout_marginRight="3dp"
+                    aircandi:drawable="?attr/iconLike"
+                    aircandi:label="@string/candi_button_like"
+                    android:minWidth="@dimen/form_button_width_min"
+                    android:onClick="onLikeButtonClick"
+                    android:visibility="gone" />
+
+                <com.aircandi.ui.widgets.ComboButton
+                    android:id="@+id/button_watch"
+                    style="@style/form_button"
+                    android:layout_width="@dimen/form_button_width_min"
+                    android:layout_height="@dimen/form_button_height"
+                    aircandi:drawable="?attr/iconWatch"
+                    aircandi:label="@string/candi_button_watch"
+                    android:minWidth="@dimen/form_button_width_min"
+                    android:onClick="onWatchButtonClick"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <com.aircandi.ui.widgets.SectionLayout
@@ -93,7 +123,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </com.aircandi.ui.widgets.SectionLayout>
-            
+
             <ViewStub
                 android:id="@+id/stub_candi_places"
                 android:layout_width="match_parent"
@@ -102,7 +132,7 @@
                 android:layout="@layout/section_user_candi"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp" />
-            
+
             <ViewStub
                 android:id="@+id/stub_candigrams"
                 android:layout_width="match_parent"
@@ -111,8 +141,7 @@
                 android:layout="@layout/section_user_candi"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp" />
-            
-            </LinearLayout>
+        </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
 
     <ProgressBar

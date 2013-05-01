@@ -75,7 +75,7 @@ public class CandiView extends RelativeLayout {
 	}
 
 	private void initialize() {
-		
+
 		mInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mLayout = (ViewGroup) mInflater.inflate(mLayoutId, this, true);
 
@@ -191,6 +191,7 @@ public class CandiView extends RelativeLayout {
 					final int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
 					final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
 
+					/* Candigram indicator always goes first */
 					if (entity.childCount > 0) {
 						View view = mInflater.inflate(R.layout.temp_radar_candi_item, null);
 						WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
@@ -216,34 +217,41 @@ public class CandiView extends RelativeLayout {
 
 					final List<Entity> entities = entity.getSourceEntities();
 					final Map<String, Object> sources = new HashMap<String, Object>();
-					
+
 					synchronized (entities) {
 						if (entities.size() > 0) {
 
 							/* We only show the first five */
 							for (Entity sourceEntity : entities) {
 								if (sourceEntity.source != null) {
-									
+
 									/* Only show comments if there is one */
 									if (sourceEntity.source.type.equals("comments")) {
 										if (entity.commentCount == null || entity.commentCount < 1) {
 											continue;
 										}
 									}
-									
+
 									/* Only show likes if there are some */
 									if (sourceEntity.source.type.equals("likes")) {
 										if (entity.likeCount == null || entity.likeCount < 1) {
 											continue;
 										}
 									}
-									
+
+									/* Only show watching if this user is */
+									if (sourceEntity.source.type.equals("watchers")) {
+										if (!entity.watched) {
+											continue;
+										}
+									}
+
 									/* Only show each type once */
 									if (sources.containsKey(sourceEntity.source.type)) {
 										continue;
 									}
 								}
-								if (sourceCount >= 5) {
+								if (sourceCount >= 6) {
 									break;
 								}
 								View view = mInflater.inflate(R.layout.temp_radar_candi_item, null);
@@ -273,6 +281,9 @@ public class CandiView extends RelativeLayout {
 										if (sourceEntity.source.type.equals("likes")) {
 											imageUri = "resource:ic_like_holo_dark";
 										}
+										if (sourceEntity.source.type.equals("watchers")) {
+											imageUri = "resource:ic_watched_holo_dark";
+										}
 										if (sourceEntity.source.type.equals("twitter")) {
 											imageUri = "resource:ic_twitter_dark";
 										}
@@ -280,21 +291,25 @@ public class CandiView extends RelativeLayout {
 											imageUri = "resource:ic_website_holo_dark";
 										}
 									}
-									webImageView.getImageView().setTag(imageUri);
-									BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
-									bitmapRequest.setImageSize(mCandiImage.getSizeHint());
-									bitmapRequest.setImageRequestor(webImageView.getImageView());
+									if (sourceEntity.source.type.equals("comments")
+											|| sourceEntity.source.type.equals("likes")
+											|| sourceEntity.source.type.equals("watchers")) {
+										webImageView.getImageView().setTag(imageUri);
+										BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
+										bitmapRequest.setImageSize(mCandiImage.getSizeHint());
+										bitmapRequest.setImageRequestor(webImageView.getImageView());
 
-									BitmapManager.getInstance().masterFetch(bitmapRequest);
+										BitmapManager.getInstance().masterFetch(bitmapRequest);
 
-									LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
-									params.setMargins(marginPixels
-											, marginPixels
-											, marginPixels
-											, marginPixels);
-									view.setLayoutParams(params);
-									mCandiSources.addView(view);
-									sourceCount++;
+										LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
+										params.setMargins(marginPixels
+												, marginPixels
+												, marginPixels
+												, marginPixels);
+										view.setLayoutParams(params);
+										mCandiSources.addView(view);
+										sourceCount++;
+									}
 								}
 								if (sourceEntity.source != null) {
 									sources.put(sourceEntity.source.type, sourceEntity);

@@ -53,6 +53,10 @@
                 android:summary="@string/pref_sound_effects_summary"
                 android:title="@string/pref_sound_effects_title" />
         </PreferenceScreen>
+
+        <Preference
+            android:key="Pref_About"
+            android:title="About" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_reporting_category_title" >
         <CheckBoxPreference

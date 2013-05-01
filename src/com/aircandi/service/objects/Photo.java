@@ -22,26 +22,24 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	private static final long	serialVersionUID	= 4979315562693226461L;
 
 	@Expose
-	protected String			prefix;
+	public String				prefix;
 	@Expose
-	protected String			suffix;
+	public String				suffix;
 	@Expose
-	protected Number			width;
+	public Number				width;
 	@Expose
-	protected Number			height;
+	public Number				height;
 	@Expose
-	protected String			sourceName;
+	public String				sourceName;
 	@Expose
-	protected Number			createdAt;
+	public Number				createdAt;
 
 	/* Only comes from foursquare */
 	@Expose(serialize = false, deserialize = true)
-	private User				user;
+	public User					user;
 
 	/* client only */
 	private String				title;
-	@SuppressWarnings("unused")
-	private String				description;
 	private Bitmap				bitmap;
 
 	public Photo() {}

@@ -5,14 +5,14 @@
     android:layout_height="wrap_content"
     android:paddingBottom="5dp"
     android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="5dp" >
+    android:paddingRight="10dp" >
 
     <LinearLayout
         android:id="@+id/action_block"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp"
         android:orientation="vertical" >
 
         <TextView
@@ -55,6 +55,7 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/action_block"
         android:layout_marginRight="5dp"
+        android:layout_marginBottom="5dp"
         aircandi:layout="@layout/widget_webimageview"
         aircandi:sizeHint="@dimen/image_extra_small"
         android:scaleType="centerCrop" />
@@ -82,6 +83,51 @@
             style="@style/candi_user"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/stats_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/candi_user_picture"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:id="@+id/image_liked"
+            android:layout_width="@dimen/image_badge_bug"
+            android:layout_height="@dimen/image_badge_bug"
+            android:layout_marginRight="5dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="?attr/iconLike" />
+
+        <TextView
+            android:id="@+id/like_count"
+            style="@style/candi_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:ellipsize="end"
+            android:maxLines="1" />
+
+        <ImageView
+            android:id="@+id/image_watched"
+            android:layout_width="@dimen/image_badge_bug"
+            android:layout_height="@dimen/image_badge_bug"
+            android:layout_marginRight="5dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="?attr/iconWatch" />
+
+        <TextView
+            android:id="@+id/watch_count"
+            style="@style/candi_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
             android:ellipsize="end"
             android:maxLines="1" />
     </LinearLayout>

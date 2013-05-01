@@ -67,9 +67,15 @@
 		<attr name="iconStarOff" format="reference" />
 		<attr name="iconHelp" format="reference" />
 		<attr name="iconLike" format="reference" />
+		<attr name="iconWatch" format="reference" />
 	</declare-styleable>
     <declare-styleable name="CandiView">
         <attr name="layout" />
+    </declare-styleable>
+    <declare-styleable name="ComboButton">
+        <attr name="layout" />
+        <attr name="drawable" format="reference" />
+        <attr name="label" format="string" />
     </declare-styleable>
     <declare-styleable name="AuthorLayout">
         <attr name="layout" />

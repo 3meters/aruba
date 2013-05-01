@@ -25,9 +25,13 @@ public class UserView extends RelativeLayout {
 	private ViewGroup		mBoundView;
 	private WebImageView	mImageUser;
 	private ImageView		mImageLocked;
+	private ImageView		mImageWatched;
+	private ImageView		mImageLiked;
 	private TextView		mTextName;
 	private TextView		mTextLocation;
 	private TextView		mTextLabel;
+	private TextView		mTextLikeCount;
+	private TextView		mTextWatchCount;
 	private String			mLabel;
 	private TextView		mTextTimeSince;
 	private User			mAuthor;
@@ -62,19 +66,25 @@ public class UserView extends RelativeLayout {
 			mTextLabel = (TextView) mBoundView.findViewById(R.id.candi_user_label);
 			mTextTimeSince = (TextView) mBoundView.findViewById(R.id.candi_user_timesince);
 			mImageLocked = (ImageView) mBoundView.findViewById(R.id.image_locked);
+			mImageWatched = (ImageView) mBoundView.findViewById(R.id.image_watched);
+			mImageLiked = (ImageView) mBoundView.findViewById(R.id.image_liked);
+			mTextLikeCount = (TextView) mBoundView.findViewById(R.id.like_count);
+			mTextWatchCount = (TextView) mBoundView.findViewById(R.id.watch_count);
 			FontManager.getInstance().setTypefaceDefault(mTextName);
 			FontManager.getInstance().setTypefaceDefault(mTextLocation);
 			FontManager.getInstance().setTypefaceDefault(mTextTimeSince);
 			FontManager.getInstance().setTypefaceDefault(mTextLabel);
+			FontManager.getInstance().setTypefaceDefault(mTextLikeCount);
+			FontManager.getInstance().setTypefaceDefault(mTextWatchCount);
 		}
 
 		this.removeAllViews();
 		this.addView(mBoundView);
 	}
 
-	public void bindToAuthor(User author, Long date, Boolean locked) {
-		mAuthor = author;
-		this.setTag(author);
+	public void bindToUser(User user, Long date, Boolean locked) {
+		mAuthor = user;
+		this.setTag(user);
 		if (mAuthor != null) {
 			if (mTextLabel != null) {
 				if (mLabel != null) {
@@ -126,6 +136,16 @@ public class UserView extends RelativeLayout {
 					mImageLocked.setVisibility(View.GONE);
 				}
 			}
+
+			if (mBoundView.findViewById(R.id.stats_group) != null) {
+				if (mImageWatched != null) {
+					mTextWatchCount.setText(String.valueOf(user.watchCount));
+				}
+				if (mImageLiked != null) {
+					mTextLikeCount.setText(String.valueOf(user.likeCount));
+				}
+			}
+
 		}
 	}
 

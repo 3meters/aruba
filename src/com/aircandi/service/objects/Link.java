@@ -24,7 +24,7 @@ public class Link extends ServiceEntryBase {
 	@Expose
 	public Number				signal;
 	@Expose
-	public Boolean				primary				= false;
+	public Boolean				primary;
 
 	@Expose(serialize = false, deserialize = true)
 	public String				fromCollectionId;

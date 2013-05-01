@@ -269,7 +269,7 @@ public class EntityForm extends FormActivity {
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 					if (entity.place.getProvider().type.equals("user")) {
 						creator.setLabel(getString(R.string.candi_label_user_created_by));
-						creator.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
+						creator.bindToUser(entity.creator, entity.createdDate.longValue(), entity.locked);
 						setVisibility(creator, View.VISIBLE);
 					}
 				}
@@ -283,7 +283,7 @@ public class EntityForm extends FormActivity {
 					else {
 						creator.setLabel(getString(R.string.candi_label_user_created_by));
 					}
-					creator.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
+					creator.bindToUser(entity.creator, entity.createdDate.longValue(), entity.locked);
 					setVisibility(creator, View.VISIBLE);
 				}
 			}
@@ -294,7 +294,7 @@ public class EntityForm extends FormActivity {
 			if (editor != null && entity.modifier != null && !entity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 				if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
 					editor.setLabel(getString(R.string.candi_label_user_edited_by));
-					editor.bindToAuthor(entity.modifier, entity.modifiedDate.longValue(), null);
+					editor.bindToUser(entity.modifier, entity.modifiedDate.longValue(), null);
 					setVisibility(editor, View.VISIBLE);
 				}
 			}
@@ -814,8 +814,6 @@ public class EntityForm extends FormActivity {
 			bitmap = null;
 		}
 
-		List<Entity> entities = mEntityForForm.getChildren();
-
 		/* Something in the call caused us to lose the most recent picture. */
 		ModelResult result = ProxiManager.getInstance().getEntityModel().updateEntity(mEntityForForm, bitmap);
 
@@ -825,11 +823,11 @@ public class EntityForm extends FormActivity {
 			 */
 			if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntityForForm.photo != null) {
 
-				entities = mEntityForForm.getChildren();
+				List<Entity> entities = mEntityForForm.getChildren();
 				Boolean candiMatch = false;
 				for (Entity entity : entities) {
 					if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-						if (entity.getPhoto().getUri().equals(mEntityForForm.getPhoto().getUri())) {
+						if (entity.getPhoto().getUri() != null && entity.getPhoto().getUri().equals(mEntityForForm.getPhoto().getUri())) {
 							candiMatch = true;
 							break;
 						}

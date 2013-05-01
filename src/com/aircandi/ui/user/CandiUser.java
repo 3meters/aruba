@@ -19,6 +19,7 @@ import android.view.ViewStub;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
@@ -45,6 +46,7 @@ import com.aircandi.ui.CandiForm;
 import com.aircandi.ui.CandiList;
 import com.aircandi.ui.PictureDetail;
 import com.aircandi.ui.base.CandiActivity;
+import com.aircandi.ui.widgets.ComboButton;
 import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
 import com.aircandi.ui.widgets.WebImageView;
@@ -133,6 +135,86 @@ public class CandiUser extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
+
+	@SuppressWarnings("ucd")
+	public void onLikeButtonClick(View view) {
+		Tracker.sendEvent("ui_action", "like_place", null, 0, Aircandi.getInstance().getUser());
+
+		new AsyncTask() {
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("LikeEntity");
+				ModelResult result = new ModelResult();
+				if (!mUser.liked) {
+					Tracker.sendEvent("ui_action", "like_entity", null, 0, Aircandi.getInstance().getUser());
+					result = ProxiManager.getInstance().getEntityModel().verbSomething(Aircandi.getInstance().getUser().id, mUser.id, "like", "like");
+				}
+				else {
+					Tracker.sendEvent("ui_action", "unlike_entity", null, 0, Aircandi.getInstance().getUser());
+					result = ProxiManager.getInstance().getEntityModel().unverbSomething(Aircandi.getInstance().getUser().id, mUser.id, "like", "unlike");
+				}
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ModelResult result = (ModelResult) response;
+				setSupportProgressBarIndeterminateVisibility(false);
+				mCommon.hideBusy(true);
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					bind(false);
+				}
+				else {
+					if (result.serviceResponse.exception.getStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
+						ImageUtils.showToastNotification(getString(R.string.toast_like_duplicate), Toast.LENGTH_SHORT);
+					}
+					else {
+						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
+					}
+				}
+			}
+		}.execute();
+
+	}
+
+	@SuppressWarnings("ucd")
+	public void onWatchButtonClick(View view) {
+
+		new AsyncTask() {
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("WatchEntity");
+				ModelResult result = new ModelResult();
+				if (!mUser.watched) {
+					Tracker.sendEvent("ui_action", "watch_entity", null, 0, Aircandi.getInstance().getUser());
+					result = ProxiManager.getInstance().getEntityModel().verbSomething(Aircandi.getInstance().getUser().id, mUser.id, "watch", "watch");
+				}
+				else {
+					Tracker.sendEvent("ui_action", "unwatch_entity", null, 0, Aircandi.getInstance().getUser());
+					result = ProxiManager.getInstance().getEntityModel().unverbSomething(Aircandi.getInstance().getUser().id, mUser.id, "watch", "unwatch");
+				}
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ModelResult result = (ModelResult) response;
+				setSupportProgressBarIndeterminateVisibility(false);
+				mCommon.hideBusy(true);
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					bind(false);
+				}
+				else {
+					if (result.serviceResponse.exception.getStatusCode() != ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
+						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
+					}
+				}
+			}
+		}.execute();
+
+	}
 
 	@SuppressWarnings("ucd")
 	public void onCandiClick(View view) {
@@ -231,6 +313,59 @@ public class CandiUser extends CandiActivity {
 			}
 		}
 
+		/* Buttons */
+
+		setVisibility(findViewById(R.id.button_map), View.GONE);
+		setVisibility(findViewById(R.id.button_tune), View.GONE);
+		setVisibility(findViewById(R.id.button_like), View.GONE);
+		setVisibility(findViewById(R.id.button_watch), View.GONE);
+
+		if (!user.id.equals(Aircandi.getInstance().getUser().id)) {
+
+			ComboButton watched = (ComboButton) findViewById(R.id.button_watch);
+			if (watched != null) {
+				if (user.watched) {
+					final int color = Aircandi.getInstance().getResources().getColor(R.color.brand_pink_lighter);
+					watched.setLabel(getString(R.string.candi_button_unwatch));
+					watched.setDrawableId(R.drawable.ic_action_show_dark);
+					watched.setAlpha(1);
+					watched.getImageIcon().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+				}
+				else {
+					watched.setLabel(getString(R.string.candi_button_watch));
+					watched.getImageIcon().setColorFilter(null);
+					if (mCommon.mThemeTone.equals("dark")) {
+						watched.setDrawableId(R.drawable.ic_action_show_dark);
+					}
+					else {
+						watched.setDrawableId(R.drawable.ic_action_show_light);
+					}
+				}
+				setVisibility(findViewById(R.id.button_watch), View.VISIBLE);
+			}
+
+			ComboButton liked = (ComboButton) findViewById(R.id.button_like);
+			if (liked != null) {
+				if (user.liked) {
+					final int color = Aircandi.getInstance().getResources().getColor(R.color.accent_red);
+					liked.setLabel(getString(R.string.candi_button_unlike));
+					liked.setDrawableId(R.drawable.ic_action_heart_dark);
+					liked.getImageIcon().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+				}
+				else {
+					liked.setLabel(getString(R.string.candi_button_like));
+					liked.getImageIcon().setColorFilter(null);
+					if (mCommon.mThemeTone.equals("dark")) {
+						liked.setDrawableId(R.drawable.ic_action_heart_dark);
+					}
+					else {
+						liked.setDrawableId(R.drawable.ic_action_heart_light);
+					}
+				}
+				setVisibility(findViewById(R.id.button_like), View.VISIBLE);
+			}
+		}
+
 		/* Description section */
 
 		setVisibility(findViewById(R.id.section_details), View.GONE);
@@ -267,8 +402,15 @@ public class CandiUser extends CandiActivity {
 
 		setVisibility(findViewById(R.id.section_stats), View.GONE);
 		setVisibility(stats, View.GONE);
+		final StringBuilder statString = new StringBuilder(500);
+		if (user.likeCount != null) {
+			statString.append("Likes: " + String.valueOf(user.likeCount) + "<br/>");
+		}
+		if (user.watchCount != null) {
+			statString.append("Watchers: " + String.valueOf(user.watchCount) + "<br/>");
+		}
+		
 		if (stats != null && user.stats != null && user.stats.size() > 0) {
-			final StringBuilder statString = new StringBuilder(500);
 
 			int tuneCount = 0;
 			int tuneFirstCount = 0;
@@ -312,7 +454,7 @@ public class CandiUser extends CandiActivity {
 			if (candigramCount > 0) {
 				statString.append("Candigrams created: " + String.valueOf(candigramCount) + "<br/>");
 			}
-			
+
 			if (editCount > 0) {
 				statString.append("Places edited: " + String.valueOf(editCount) + "<br/>");
 			}
@@ -386,7 +528,7 @@ public class CandiUser extends CandiActivity {
 				setVisibility(findViewById(R.id.section_candi_places), View.VISIBLE);
 			}
 		}
-		
+
 		if (candigrams.size() > 0) {
 			SectionLayout section = (SectionLayout) findViewById(R.id.section_candigrams).findViewById(R.id.section_layout_candi);
 			if (section != null) {

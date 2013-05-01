@@ -246,6 +246,10 @@ public class ProxiManager {
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
+		
+		if (Aircandi.getInstance().getUser() != null) {
+			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+		}
 
 		Aircandi.stopwatch1.segmentTime("Entities for beacons: service call started");
 		serviceResponse = dispatch(serviceRequest);
@@ -256,9 +260,9 @@ public class ProxiManager {
 			final String jsonResponse = (String) serviceResponse.data;
 			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
-			
+
 			Aircandi.stopwatch1.segmentTime("Entities for beacons: objects deserialized");
-			
+
 			/*
 			 * Remove any beacon entities from the cache that didn't come
 			 * back in the query.
@@ -351,6 +355,10 @@ public class ProxiManager {
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
+		
+		if (Aircandi.getInstance().getUser() != null) {
+			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+		}
 
 		serviceResponse = dispatch(serviceRequest);
 
