@@ -40,14 +40,14 @@ public class GCMIntentService extends GCMBaseIntentService {
 	@Override
 	protected void onMessage(Context context, Intent messageIntent) {
 		/*
-		 * Called when your server sends a message to GCM, and GCM delivers it to the device. If the message has a
+		 * Called when our server sends a message to GCM, and GCM delivers it to the device. If the message has a
 		 * payload, its contents are available as extras in the intent.
 		 */
 		String jsonNotification = messageIntent.getStringExtra("notification");
 		AirNotification airNotification = (AirNotification) HttpService.convertJsonToObjectInternalSmart(jsonNotification, ServiceDataType.AirNotification);
 
 		/* Build intent that can be used in association with the notification */
-		if (airNotification.type.equals("entity_insert") || airNotification.type.equals("comment")) {
+		if (airNotification.subject.equals("entity") || airNotification.subject.equals("comment")) {
 			final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
 					.setCommandType(CommandType.View)
 					.setEntityId(airNotification.entity.id)
@@ -63,7 +63,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		/* See if target is visible and refresh */
 		synchronized (lock) {
 			if (currentActivity != null) {
-				if (airNotification.type.equals("comment")) {
+				if (airNotification.subject.equals("comment")) {
 					if (currentActivity.getClass() == CandiForm.class) {
 						final CandiForm activity = (CandiForm) currentActivity;
 						if (activity.getCommon().mEntityId.equals(airNotification.entity.id)) {
@@ -87,7 +87,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 						}
 					}
 				}
-				else if (airNotification.type.equals("entity_insert")) {
+				else if (airNotification.subject.equals("entity")) {
 					if (airNotification.entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 						if (currentActivity.getClass() == CandiRadar.class) {
 							final CandiRadar activity = (CandiRadar) currentActivity;

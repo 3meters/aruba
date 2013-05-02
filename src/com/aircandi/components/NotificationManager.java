@@ -144,19 +144,19 @@ public class NotificationManager {
 		 * Small icon displays on left unless a large icon is specified
 		 * and then it moves to the right.
 		 */
-		if (airNotification.subtype != null) {
-			if (airNotification.subtype.equals("nearby")) {
+		if (airNotification.type != null) {
+			if (airNotification.type.equals("nearby")) {
 				if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_NEARBY, CandiConstants.PREF_NOTIFICATIONS_NEARBY_DEFAULT)) {
 					return;
 				}
 			}
-			else if (airNotification.subtype.equals("owner")) {
-				if (airNotification.type.equals("comment")) {
+			else if (airNotification.type.equals("watch")) {
+				if (airNotification.subject.equals("comment")) {
 					if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_COMMENTS, CandiConstants.PREF_NOTIFICATIONS_COMMENTS_DEFAULT)) {
 						return;
 					}
 				}
-				else if (airNotification.type.equals("entity_insert")) {
+				else if (airNotification.subject.equals("entity")) {
 					if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_CANDIGRAMS, CandiConstants.PREF_NOTIFICATIONS_CANDIGRAMS_DEFAULT)) {
 						return;
 					}
@@ -206,7 +206,7 @@ public class NotificationManager {
 						builder.setLargeIcon(imageResponse.bitmap);
 						Notification notification = builder.build();
 						notification.contentIntent = pendingIntent;
-						mNotificationManager.notify(airNotification.type, 0, notification);
+						mNotificationManager.notify(airNotification.subject, 0, notification);
 					}
 				}
 			});
@@ -215,7 +215,7 @@ public class NotificationManager {
 		else {
 			Notification notification = builder.build();
 			notification.contentIntent = pendingIntent;
-			mNotificationManager.notify(airNotification.type, 0, notification);
+			mNotificationManager.notify(airNotification.subject, 0, notification);
 		}
 
 	}

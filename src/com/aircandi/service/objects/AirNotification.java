@@ -17,9 +17,11 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	private static final long	serialVersionUID	= 4362288672244719448L;
 
 	@Expose
-	public String				type;
+	public String				subject;
 	@Expose
-	public String				subtype;
+	public String				action;
+	@Expose
+	public String				type;
 	@Expose
 	public String				title;
 	@Expose
@@ -48,7 +50,8 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 		notification.title = (String) map.get("title");
 		notification.subtitle = (String) map.get("subtitle");
 		notification.type = (String) map.get("type");
-		notification.subtype = (String) map.get("subtype");
+		notification.action = (String) map.get("action");
+		notification.subject = (String) map.get("subject");
 		notification.message = (String) map.get("message");
 		notification.sentDate = (Number) map.get("sentDate");
 

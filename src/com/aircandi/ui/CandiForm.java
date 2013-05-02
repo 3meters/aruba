@@ -157,7 +157,7 @@ public class CandiForm extends CandiActivity {
 				/*
 				 * We always force refresh if we are missing children or comments.
 				 */
-				if (entity.childCount != null && entity.getChildren().size() < entity.childCount) {
+				if (entity == null || (entity.childCount != null && entity.getChildren().size() < entity.childCount)) {
 					refresh = true;
 				}
 

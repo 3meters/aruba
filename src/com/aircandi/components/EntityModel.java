@@ -670,7 +670,7 @@ public class EntityModel {
 
 					if (beacons != null && beacons.size() > 0) {
 						/*
-						 * Linking to beacons
+						 * Linking to beacons or sending to support nearby notifications
 						 */
 						final List<String> beaconStrings = new ArrayList<String>();
 
@@ -701,7 +701,8 @@ public class EntityModel {
 						}
 						parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
 					}
-					else if (entity.parentId != null) {
+					
+					if (entity.parentId != null) {
 						/* Linking to another entity */
 						parameters.putString("parentId", entity.parentId);
 					}

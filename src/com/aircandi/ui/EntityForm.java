@@ -761,36 +761,31 @@ public class EntityForm extends FormActivity {
 			mEntityForForm.parentId = null;
 		}
 
-		if (mEntityForForm.parentId == null) {
-			/*
-			 * We are linking to a beacon so get the best and alert if none
-			 */
-			beacons = ProxiManager.getInstance().getStrongestBeacons(5);
-			primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
+		/* We always send beacons to support nearby notifications */
+		beacons = ProxiManager.getInstance().getStrongestBeacons(5);
+		primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
 
-			/*
-			 * Set location info if this is a place entity
-			 */
-			if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+		/*
+		 * Set location info if this is a place entity
+		 */
+		if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 
-				mEntityForForm.getPlace().setProvider(new Provider(Aircandi.getInstance().getUser().id, "user"));
-				/*
-				 * We add location info as a consistent feature
-				 */
-				final Observation observation = LocationManager.getInstance().getObservationLocked();
-				if (observation != null) {
-					mEntityForForm.place.location = new com.aircandi.service.objects.Location();
-					mEntityForForm.place.location.lat = observation.latitude;
-					mEntityForForm.place.location.lng = observation.longitude;
-				}
+			mEntityForForm.getPlace().setProvider(new Provider(Aircandi.getInstance().getUser().id, "user"));
+			/*
+			 * We add location info as a consistent feature
+			 */
+			final Observation observation = LocationManager.getInstance().getObservationLocked();
+			if (observation != null) {
+				mEntityForForm.place.location = new com.aircandi.service.objects.Location();
+				mEntityForForm.place.location.lat = observation.latitude;
+				mEntityForForm.place.location.lng = observation.longitude;
 			}
 		}
 
 		Tracker.sendEvent("ui_action", "entity_insert", mEntityForForm.type, 0, Aircandi.getInstance().getUser());
 		Bitmap bitmap = mEntityBitmap;
-		if (mEntityBitmapLocalOnly) {
-			bitmap = null;
-		}
+		if (mEntityBitmapLocalOnly) bitmap = null;
+
 		result = ProxiManager.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, bitmap, false, null);
 
 		/* Add picture entity if a new picture has been set for a place */
@@ -807,7 +802,7 @@ public class EntityForm extends FormActivity {
 	}
 
 	private ModelResult updateEntityAtService() {
-		
+
 		Tracker.sendEvent("ui_action", "entity_update", mEntityForForm.type, 0, Aircandi.getInstance().getUser());
 		Bitmap bitmap = mEntityBitmap;
 		if (mEntityBitmapLocalOnly) {
