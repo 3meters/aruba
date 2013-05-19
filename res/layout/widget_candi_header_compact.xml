@@ -45,6 +45,15 @@
             android:minWidth="@dimen/form_button_width_min"
             android:onClick="onLikeButtonClick" />
 
+        <com.aircandi.ui.widgets.ComboButton
+            android:id="@+id/button_watch"
+            style="@style/form_button"
+            android:layout_width="@dimen/form_button_width_min"
+            android:layout_height="@dimen/form_button_height"
+            aircandi:drawable="?attr/iconWatch"
+            aircandi:label="@string/candi_button_watch"
+            android:minWidth="@dimen/form_button_width_min"
+            android:onClick="onWatchButtonClick" />
     </LinearLayout>
 
 </LinearLayout>
