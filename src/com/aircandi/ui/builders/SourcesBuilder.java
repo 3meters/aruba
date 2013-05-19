@@ -300,7 +300,7 @@ public class SourcesBuilder extends FormActivity {
 					title.setText(source.label);
 				}
 				image.setTag(source);
-				final String imageUri = source.getImageUri();
+				final String imageUri = source.getPhoto().getUri();
 				BitmapRequest bitmapRequest = new BitmapRequest(imageUri, image.getImageView());
 				bitmapRequest.setImageSize(image.getSizeHint());
 				bitmapRequest.setImageRequestor(image.getImageView());

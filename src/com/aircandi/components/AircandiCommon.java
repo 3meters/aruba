@@ -412,6 +412,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 						ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
 						hideBusy(true);
 						final Intent intent = new Intent(mActivity, SplashForm.class);
+						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						mActivity.startActivity(intent);
 						mActivity.finish();
 						AnimUtils.doOverridePendingTransition(mActivity, TransitionType.FormToPage);
@@ -602,6 +603,17 @@ public class AircandiCommon implements ActionBar.TabListener {
 				 * Reached the service but request was invalid per service policy.
 				 */
 				ImageUtils.showToastNotification(mActivity.getString(R.string.error_service_gateway_timeout), Toast.LENGTH_SHORT);
+			}
+			else if (serviceResponse.exception.getInnerException() instanceof HttpServiceException.ClientVersionException) {
+				/*
+				 * Reached the service but a more current client version is required.
+				 */
+				Aircandi.applicationUpdateRequired = true;
+				final Intent intent = new Intent(mActivity, SplashForm.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				mActivity.startActivity(intent);
+				mActivity.finish();
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.FormToPage);
 			}
 			else {
 				String title = null;

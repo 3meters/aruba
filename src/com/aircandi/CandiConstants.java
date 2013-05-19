@@ -14,6 +14,7 @@ public final class CandiConstants {
 	public static final boolean	TRACKING_ENABLED						= true;
 
 	public static final String	APP_NAME								= "Aircandi";																				//$NON-NLS-1$
+	public static final String	APP_MARKET_URI							= "market://details?id=com.aircandi.beta&referrer=utm_source%3Daircandi_app";
 	public static final String	SENDER_ID								= "657673071389";																			// google Api project number for aircandi
 
 	/* Activity parameters */

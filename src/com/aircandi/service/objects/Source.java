@@ -29,8 +29,6 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String				url;
 	@Expose
-	public String				icon;
-	@Expose
 	public Photo				photo;
 	@Expose
 	public String				packageName;
@@ -66,11 +64,6 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 			source.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
 		}
 		return source;
-	}
-
-	public String getImageUri() {
-		Photo photo = getPhoto();
-		return photo.getUri();
 	}
 
 	public Photo getPhoto() {
@@ -119,5 +112,12 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	public Boolean appInstalled() {
 		final Boolean exists = AndroidManager.getInstance().doesPackageExist(packageName);
 		return exists;
+	}
+
+	public static class SourceType {
+		public static String	foursquare	= "foursquare";
+		public static String	facebook	= "facebook";
+		public static String	twitter		= "twitter";
+		public static String	website		= "website";
 	}
 }

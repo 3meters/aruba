@@ -3,7 +3,11 @@ package com.aircandi.ui;
 import java.io.InputStream;
 import java.util.Properties;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,6 +21,7 @@ import com.actionbarsherlock.view.Window;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
+import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
@@ -53,16 +58,22 @@ public class SplashForm extends SherlockActivity {
 
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-		if (Aircandi.firstStartApp) {
-			initializeApp();
+		if (!Aircandi.applicationUpdateRequired) {
+			if (Aircandi.firstStartApp) {
+				initializeApp();
+			}
+
+			signinAuto();
 		}
 
-		signinAuto();
-		
 		if (!isFinishing()) {
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 			setContentView(R.layout.splash);
 			initialize();
+
+			if (Aircandi.applicationUpdateRequired) {
+				updateRequired();
+			}
 		}
 	}
 
@@ -147,6 +158,60 @@ public class SplashForm extends SherlockActivity {
 		finish();
 	}
 
+	private void updateRequired() {
+		showUpdateDialog();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Dialogs
+	// --------------------------------------------------------------------------------------------
+
+	private void showUpdateDialog() {
+
+		final AlertDialog updateDialog = AircandiCommon.showAlertDialog(null
+				, getString(R.string.dialog_update_title)
+				, getString(R.string.dialog_update_message)
+				, null
+				, this
+				, R.string.dialog_update_ok
+				, R.string.dialog_update_cancel
+				, null
+				, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							try {
+								Tracker.sendEvent("ui_action", "update_aircandi", "com.aircandi.beta", 0, Aircandi.getInstance().getUser());
+								Logger.d(this, "Update: navigating to market install/update page");
+								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(CandiConstants.APP_MARKET_URI));
+								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+								intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+								startActivity(intent);
+							}
+							catch (Exception e) {
+								/*
+								 * In case the market app isn't installed on the phone
+								 */
+								Logger.d(this, "Install: navigating to play website install page");
+								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://play.google.com/store/apps/details?id="
+										+ "com.aircandi.beta&referrer=utm_source%3Dcom.aircandi"));
+								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+								startActivityForResult(intent, CandiConstants.ACTIVITY_MARKET);
+							}
+							dialog.dismiss();
+							AnimUtils.doOverridePendingTransition(SplashForm.this, TransitionType.PageToForm);
+						}
+						else if (which == Dialog.BUTTON_NEGATIVE) {
+							dialog.dismiss();
+						}
+					}
+				}
+				, null);
+		updateDialog.setCanceledOnTouchOutside(false);
+		updateDialog.show();
+	}
+
 	private void loadCategories() {
 		if (NetworkManager.getInstance().getConnectedState() == ConnectedState.Normal) {
 			new AsyncTask() {
@@ -179,7 +244,7 @@ public class SplashForm extends SherlockActivity {
 
 		}
 	}
-	
+
 	private void startGetAWSCredentials() {
 		final Thread t = new Thread() {
 
@@ -219,6 +284,11 @@ public class SplashForm extends SherlockActivity {
 
 	@SuppressWarnings("ucd")
 	public void onSigninButtonClick(View view) {
+		if (Aircandi.applicationUpdateRequired) {
+			updateRequired();
+			return;
+		}
+
 		final IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
 		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
@@ -227,6 +297,11 @@ public class SplashForm extends SherlockActivity {
 
 	@SuppressWarnings("ucd")
 	public void onSignupButtonClick(View view) {
+		if (Aircandi.applicationUpdateRequired) {
+			updateRequired();
+			return;
+		}
+
 		final IntentBuilder intentBuilder = new IntentBuilder(this, RegisterForm.class);
 		intentBuilder.setCommandType(CommandType.New);
 		final Intent intent = intentBuilder.create();

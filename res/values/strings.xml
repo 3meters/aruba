@@ -179,6 +179,9 @@
     <string name="error_service_gateway_timeout">Did not receive timely response from service</string>
     <string name="error_service_unknown">Unknown service error</string>
     
+    <!-- Errors: client version -->
+    
+    <string name="error_client_version">Please update to the lastest version of Aircandi.</string>
     
     <!-- Toast -->
 
@@ -258,6 +261,11 @@
     <string name="dialog_install_cancel">no thanks</string>
     <string name="dialog_install_toast_package_installed">has been installed. Tap the link to launch.</string>
 
+    <string name="dialog_update_title">Update available</string>
+    <string name="dialog_update_message">Please update to the latest version of Aircandi.</string>
+    <string name="dialog_update_ok">update</string>
+    <string name="dialog_update_cancel">no thanks</string>
+    
     <!-- CandiList -->
 
     <string name="name_entity_list_type_collection">collections</string>

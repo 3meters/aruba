@@ -33,6 +33,8 @@ public class ServiceData {
 	public Session		session;
 	@Expose
 	public Number		time;
+	@Expose
+	public Number		androidMinimumVersion;
 
 	public ServiceData() {}
 
@@ -56,6 +58,7 @@ public class ServiceData {
 			serviceData.session = Session.setPropertiesFromMap(new Session(), (HashMap<String, Object>) map.get("session"));
 		}
 		serviceData.time = (Number) map.get("time");
+		serviceData.androidMinimumVersion = (Number) map.get("androidMinimumVersion");
 
 		return serviceData;
 	}

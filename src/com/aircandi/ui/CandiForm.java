@@ -63,9 +63,9 @@ import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Photo;
-import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Source;
+import com.aircandi.service.objects.Source.SourceType;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.builders.LinkPicker;
@@ -153,9 +153,9 @@ public class CandiForm extends CandiActivity {
 
 				Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 				Boolean refresh = refreshProposed;
-
 				/*
-				 * We always force refresh if we are missing children or comments.
+				 * We always force refresh if we are missing children or comments. Won't have an effect
+				 * if this is still a synthetic place.
 				 */
 				if (entity == null || (entity.childCount != null && entity.getChildren().size() < entity.childCount)) {
 					refresh = true;
@@ -236,12 +236,10 @@ public class CandiForm extends CandiActivity {
 	}
 
 	private void upsize() {
-
 		/*
 		 * Upsized places do not automatically link to nearby beacons because
 		 * the browsing action isn't enough of an indicator of proximity.
 		 */
-
 		new AsyncTask() {
 
 			@Override
@@ -700,7 +698,7 @@ public class CandiForm extends CandiActivity {
 		}
 
 		/* Candigram button */
-		FontManager.getInstance().setTypefaceDefault(addCandigram);
+		FontManager.getInstance().setTypefaceRegular(addCandigram);
 
 		/* All non-source children */
 		entities = entity.getChildren();
@@ -922,18 +920,29 @@ public class CandiForm extends CandiActivity {
 					}
 
 					/* Show hint if generic icon has been replaced with a custom one */
-					String photoSource = entity.source.getPhoto().getSourceName();
-					if (photoSource != null) {
-						if (photoSource.equals(PhotoSource.facebook)) {
+					if (entity.source.photo != null) {
+						if (entity.source.type.equals(SourceType.facebook)) {
 							badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_dark);
 							if (mCommon.mThemeTone.equals("light")) {
 								badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_light);
 							}
 						}
-						else if (photoSource.equals(PhotoSource.twitter)) {
+						else if (entity.source.type.equals(SourceType.twitter)) {
 							badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_dark);
 							if (mCommon.mThemeTone.equals("light")) {
 								badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_light);
+							}
+						}
+						else if (entity.source.type.equals(SourceType.website)) {
+							badgeLower.setBackgroundResource(R.drawable.ic_action_website_dark);
+							if (mCommon.mThemeTone.equals("light")) {
+								badgeLower.setBackgroundResource(R.drawable.ic_action_website_light);
+							}
+						}
+						else if (entity.source.type.equals(SourceType.foursquare)) {
+							badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
+							if (mCommon.mThemeTone.equals("light")) {
+								badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
 							}
 						}
 					}
@@ -981,6 +990,15 @@ public class CandiForm extends CandiActivity {
 
 		setVisibility(layout.findViewById(R.id.button_map), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_tune), View.GONE);
+
+		if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && entity.synthetic) {
+			setVisibility(layout.findViewById(R.id.button_like), View.GONE);
+			setVisibility(layout.findViewById(R.id.button_watch), View.GONE);
+		}
+		else {
+			setVisibility(layout.findViewById(R.id.button_like), View.VISIBLE);
+			setVisibility(layout.findViewById(R.id.button_watch), View.VISIBLE);
+		}
 
 		ComboButton watched = (ComboButton) layout.findViewById(R.id.button_watch);
 		if (watched != null) {
@@ -1031,7 +1049,7 @@ public class CandiForm extends CandiActivity {
 				setVisibility(layout.findViewById(R.id.button_map), View.VISIBLE);
 			}
 
-			if (entity.place != null) {
+			if (entity.place != null && !entity.synthetic) {
 				setVisibility(layout.findViewById(R.id.button_tune), View.VISIBLE);
 			}
 

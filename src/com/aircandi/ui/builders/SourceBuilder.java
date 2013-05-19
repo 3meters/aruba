@@ -123,7 +123,7 @@ public class SourceBuilder extends FormActivity {
 	}
 
 	private void drawSourceIcon() {
-		final String imageUri = mSource.getImageUri();
+		final String imageUri = mSource.getPhoto().getUri();
 		final BitmapRequestBuilder builder = new BitmapRequestBuilder(mSourceIcon).setImageUri(imageUri);
 		final BitmapRequest bitmapRequest = builder.create();
 		mSourceIcon.setBitmapRequest(bitmapRequest);

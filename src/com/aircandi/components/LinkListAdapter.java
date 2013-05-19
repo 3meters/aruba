@@ -87,7 +87,7 @@ public class LinkListAdapter extends ArrayAdapter<Entity> implements Filterable 
 				 * by the internal image view to null before doing the work
 				 * to satisfy the new request.
 				 */
-				final String imageUri = sourceEntity.source.getImageUri();
+				final String imageUri = sourceEntity.source.getPhoto().getUri();
 
 				/* Don't do anything if the image is already set to the one we want */
 				if (holder.image.getImageUri() == null || !holder.image.getImageUri().equals(imageUri)) {

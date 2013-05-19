@@ -2,7 +2,6 @@
 package com.aircandi;
 
 import org.acra.ACRA;
-import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 
@@ -24,7 +23,6 @@ import com.aircandi.components.Stopwatch;
 import com.aircandi.service.objects.User;
 import com.amazonaws.auth.BasicAWSCredentials;
 
-@SuppressWarnings("unused")
 @ReportsCrashes(formUri = "http://www.bugsense.com/api/acra?api_key=342354ad"
 		, formKey = ""
 //		, customReportContent = {

@@ -1895,6 +1895,7 @@ public class EntityModel {
 				for (Source source : freshEntity.sources) {
 					if (source.system == null || !source.system) {
 						source.intentSupport = true;
+						
 						if (source.type.equals("facebook")
 								|| source.type.equals("yahoolocal")
 								|| source.type.equals("citysearch")

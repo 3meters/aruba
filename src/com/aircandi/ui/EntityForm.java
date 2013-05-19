@@ -392,7 +392,7 @@ public class EntityForm extends FormActivity {
 					WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
 					webImageView.setSizeHint(sizePixels);
 
-					String imageUri = source.getImageUri();
+					String imageUri = source.getPhoto().getUri();
 					BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
 					BitmapRequest imageRequest = builder.create();
 					webImageView.setBitmapRequest(imageRequest);

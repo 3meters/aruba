@@ -106,9 +106,10 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 				imageUri = prefix + String.valueOf(width.intValue()) + "x" + String.valueOf(height.intValue()) + suffix;
 			}
 			else {
-				imageUri = prefix + suffix;
+				imageUri = getSizedUri(250, 250);
 			}
 		}
+
 		if (imageUri != null && !imageUri.startsWith("resource:")) {
 			if (sourceName != null) {
 				if (sourceName.equals(PhotoSource.aircandi)) {
@@ -191,5 +192,6 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		public static String	facebook	= "facebook";
 		public static String	twitter		= "twitter";
 		public static String	resource	= "resource";
+		public static String	website		= "website";
 	}
 }

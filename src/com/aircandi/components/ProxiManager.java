@@ -344,7 +344,7 @@ public class ProxiManager {
 		parameters.putString("provider", placeProvider);
 		parameters.putFloat("latitude", observation.latitude.floatValue());
 		parameters.putFloat("longitude", observation.longitude.floatValue());
-		parameters.putInt("limit", ProxiConstants.RADAR_PLACES_LIMIT);
+		parameters.putInt("limit", 50);
 
 		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
 				CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));

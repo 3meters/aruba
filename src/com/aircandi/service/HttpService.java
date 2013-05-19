@@ -66,6 +66,7 @@ import org.apache.http.protocol.HttpContext;
 
 import android.graphics.Bitmap;
 
+import com.aircandi.Aircandi;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.Logger;
@@ -92,6 +93,7 @@ import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.CandiRadar;
 
 /*
  * Http 1.1 Status Codes (subset)
@@ -283,7 +285,25 @@ public class HttpService {
 					 */
 					long bytesDownloaded = (httpResponse.getEntity() != null) ? httpResponse.getEntity().getContentLength() : 0;
 					logDownload(startTime, System.nanoTime() - startTime, bytesDownloaded, httpRequest.getURI().toString());
-					return handleResponse(httpRequest, httpResponse, serviceRequest.getResponseFormat(), serviceRequest.getRequestListener());
+					Object response = handleResponse(httpRequest, httpResponse, serviceRequest.getResponseFormat(), serviceRequest.getRequestListener());
+
+					/* Check for valid client version even if the call was successful */
+					if (serviceRequest.getResponseFormat() == ResponseFormat.Json) {
+						/*
+						 * We think anything json is coming from the Aircandi service.
+						 */
+						ServiceData serviceData = HttpService.convertJsonToObjectSmart((String) response, ServiceDataType.None);
+						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, CandiRadar.class);
+						if (serviceData != null) {
+							if (serviceData.androidMinimumVersion.intValue() > clientVersionCode) {
+								HttpServiceException exception = new HttpServiceException("Invalid client version", ErrorType.Service,
+										new HttpServiceException.ClientVersionException());
+								throw exception;
+							}
+						}
+					}
+
+					return response;
 				}
 				else if (isTemporaryRedirect(httpResponse)) {
 					/*
@@ -312,8 +332,16 @@ public class HttpService {
 						 * We think anything json is coming from the Aircandi service.
 						 */
 						ServiceData serviceData = HttpService.convertJsonToObjectSmart(responseContent, ServiceDataType.None);
-						if (serviceData != null && serviceData.error != null && serviceData.error.code != null) {
-							httpStatusCodeService = serviceData.error.code.floatValue();
+						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, CandiRadar.class);
+						if (serviceData != null) {
+							if (serviceData.androidMinimumVersion.intValue() > clientVersionCode) {
+								HttpServiceException exception = new HttpServiceException("Invalid client version", ErrorType.Service,
+										new HttpServiceException.ClientVersionException());
+								throw exception;
+							}
+							else if (serviceData.error != null && serviceData.error.code != null) {
+								httpStatusCodeService = serviceData.error.code.floatValue();
+							}
 						}
 					}
 
@@ -354,7 +382,7 @@ public class HttpService {
 					 * Ok to retry, check our connection again
 					 */
 					ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
-					
+
 					if (connectedState == ConnectedState.None) {
 						final HttpServiceException proxibaseException = makeHttpServiceException(null, null, new ConnectException());
 						throw proxibaseException;

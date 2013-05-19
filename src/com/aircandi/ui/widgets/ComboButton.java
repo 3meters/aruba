@@ -53,7 +53,7 @@ public class ComboButton extends RelativeLayout {
 		mLayout = (ViewGroup) mInflater.inflate(mLayoutId, this, true);
 		mTextLabel = (TextView) mLayout.findViewById(R.id.label);
 		mImageIcon = (ImageView) mLayout.findViewById(R.id.icon);
-		FontManager.getInstance().setTypefaceDefault(mTextLabel);
+		FontManager.getInstance().setTypefaceRegular(mTextLabel);
 	}
 
 	private void draw() {

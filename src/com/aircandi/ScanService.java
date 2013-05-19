@@ -12,6 +12,8 @@ import com.aircandi.components.ProxiManager.ScanReason;
 
 public class ScanService extends Service {
 
+	private ScanTask	mScanTask;
+
 	/**
 	 * Simply return null, since our Service will not be communicating with
 	 * any other components. It just does its work silently.
@@ -28,12 +30,16 @@ public class ScanService extends Service {
 	 */
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		mScanTask = new ScanTask();
 		handleIntent(intent);
 		return START_NOT_STICKY;
 	}
 
 	private void handleIntent(Intent intent) {
-		new ScanTask().execute();
+		if (mScanTask.getStatus().equals(AsyncTask.Status.FINISHED)
+				|| mScanTask.getStatus().equals(AsyncTask.Status.PENDING)) {
+			mScanTask.execute();
+		}
 	}
 
 	private class ScanTask extends AsyncTask<Void, Void, Void> {

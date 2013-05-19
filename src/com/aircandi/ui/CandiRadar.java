@@ -173,7 +173,7 @@ public class CandiRadar extends CandiActivity {
 			}
 		});
 
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_add_place));
+		FontManager.getInstance().setTypefaceRegular((TextView) findViewById(R.id.button_add_place));
 
 		/* Adapter snapshots the items in mEntities */
 		mRadarAdapter = new RadarListAdapter(this, mEntities);
