@@ -17,25 +17,25 @@
         android:orientation="horizontal" >
 
         <com.aircandi.ui.widgets.ComboButton
-            android:id="@+id/button_tune"
-            style="@style/form_button"
-            android:layout_width="@dimen/form_button_width_min"
-            android:layout_height="@dimen/form_button_height"
-            android:layout_marginRight="3dp"
-            aircandi:drawable="?attr/iconTune"
-            aircandi:label="@string/candi_button_tune"
-            android:minWidth="@dimen/form_button_width_min"
-            android:onClick="onTuneButtonClick" />
-
-        <com.aircandi.ui.widgets.ComboButton
             android:id="@+id/button_map"
             style="@style/form_button"
             android:layout_width="@dimen/form_button_width_min"
             android:layout_height="@dimen/form_button_height"
+            android:layout_marginRight="3dp"
             aircandi:drawable="?attr/iconMap"
             aircandi:label="@string/candi_button_map"
             android:minWidth="@dimen/form_button_width_min"
             android:onClick="onMapButtonClick" />
+
+        <com.aircandi.ui.widgets.ComboButton
+            android:id="@+id/button_tune"
+            style="@style/form_button"
+            android:layout_width="@dimen/form_button_width_min"
+            android:layout_height="@dimen/form_button_height"
+            aircandi:drawable="?attr/iconTune"
+            aircandi:label="@string/candi_button_tune"
+            android:minWidth="@dimen/form_button_width_min"
+            android:onClick="onTuneButtonClick" />
     </LinearLayout>
 
     <LinearLayout
