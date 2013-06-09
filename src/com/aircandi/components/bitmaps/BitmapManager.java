@@ -21,7 +21,7 @@ import android.util.TypedValue;
 import android.widget.ImageView;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -324,7 +324,7 @@ public class BitmapManager {
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		options.inPurgeable = true;
-		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
+		options.inPreferredConfig = Constants.IMAGE_CONFIG_DEFAULT;
 
 		BitmapFactory.decodeResource(Aircandi.applicationContext.getResources(), resourceId, options);
 
@@ -364,7 +364,7 @@ public class BitmapManager {
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		options.inPurgeable = true;
-		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
+		options.inPreferredConfig = Constants.IMAGE_CONFIG_DEFAULT;
 
 		/* Initial decode is just to get the bitmap dimensions */
 		BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
@@ -380,8 +380,8 @@ public class BitmapManager {
 		}
 		else {
 			final int imageMemorySize = ImageUtils.getImageMemorySize(height, width, true);
-			if (imageMemorySize > CandiConstants.IMAGE_MEMORY_BYTES_MAX) {
-				scale = Math.round(((float) imageMemorySize / (float) CandiConstants.IMAGE_MEMORY_BYTES_MAX) / 2f);
+			if (imageMemorySize > Constants.IMAGE_MEMORY_BYTES_MAX) {
+				scale = Math.round(((float) imageMemorySize / (float) Constants.IMAGE_MEMORY_BYTES_MAX) / 2f);
 			}
 		}
 
@@ -415,7 +415,7 @@ public class BitmapManager {
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		options.inPurgeable = true;
-		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
+		options.inPreferredConfig = Constants.IMAGE_CONFIG_DEFAULT;
 
 		/* Initial decode is just to get the bitmap dimensions */
 		BitmapFactory.decodeFile(imageFile.getPath(), options);
@@ -431,8 +431,8 @@ public class BitmapManager {
 		}
 		else {
 			final int imageMemorySize = ImageUtils.getImageMemorySize(height, width, true);
-			if (imageMemorySize > CandiConstants.IMAGE_MEMORY_BYTES_MAX) {
-				scale = Math.round(((float) imageMemorySize / (float) CandiConstants.IMAGE_MEMORY_BYTES_MAX) / 2f);
+			if (imageMemorySize > Constants.IMAGE_MEMORY_BYTES_MAX) {
+				scale = Math.round(((float) imageMemorySize / (float) Constants.IMAGE_MEMORY_BYTES_MAX) / 2f);
 			}
 		}
 

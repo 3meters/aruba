@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * @author Jayma
  */
-public class ServiceEntry extends ServiceEntryBase {
+public class ServiceEntry extends ServiceBase {
 
 	private static final long	serialVersionUID	= -4468666434251114969L;
 
@@ -13,7 +13,7 @@ public class ServiceEntry extends ServiceEntryBase {
 
 	public static ServiceEntry setPropertiesFromMap(ServiceEntry serviceEntry, Map map) {
 
-		serviceEntry = (ServiceEntry) ServiceEntryBase.setPropertiesFromMap(serviceEntry, map);
+		serviceEntry = (ServiceEntry) ServiceBase.setPropertiesFromMap(serviceEntry, map);
 		return serviceEntry;
 	}
 

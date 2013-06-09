@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Window;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.Exceptions;
@@ -61,8 +61,8 @@ public class PictureDetail extends FormActivity {
 	private void initialize() {
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			mImageUri = extras.getString(CandiConstants.EXTRA_URI);
-			mPagingEnabled = extras.getBoolean(CandiConstants.EXTRA_PAGING_ENABLED, false);
+			mImageUri = extras.getString(Constants.EXTRA_URI);
+			mPagingEnabled = extras.getBoolean(Constants.EXTRA_PAGING_ENABLED, false);
 		}
 
 		setSupportProgressBarIndeterminateVisibility(true);

@@ -22,7 +22,7 @@ import android.widget.ViewFlipper;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -206,7 +206,7 @@ public class ProfileForm extends FormActivity {
 
 					/* We got fresh user data but we want to hook up the old session. */
 					mUser.session = Aircandi.getInstance().getUser().session;
-					mImageUriOriginal = mUser.getUserPhotoUri();
+					mImageUriOriginal = mUser.getPhotoUri();
 
 					mCommon.hideBusy(true);
 					draw();
@@ -225,7 +225,7 @@ public class ProfileForm extends FormActivity {
 		mTextFullname.setText(mUser.name);
 		mTextBio.setText(mUser.bio);
 		mTextLink.setText(mUser.webUri);
-		mTextLocation.setText(mUser.location);
+		mTextLocation.setText(mUser.area);
 		mTextEmail.setText(mUser.email);
 		if (mUser.doNotTrack == null) {
 			mUser.doNotTrack = false;
@@ -252,7 +252,7 @@ public class ProfileForm extends FormActivity {
 			}
 			else {
 				final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImage);
-				builder.setImageUri(user.getUserPhotoUri());
+				builder.setImageUri(user.getPhotoUri());
 				final BitmapRequest imageRequest = builder.create();
 				mImage.setBitmapRequest(imageRequest);
 			}
@@ -314,10 +314,10 @@ public class ProfileForm extends FormActivity {
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
 		if (resultCode == Activity.RESULT_OK) {
-			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
+			if (requestCode == Constants.ACTIVITY_PICTURE_SOURCE_PICK) {
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
+					final String pictureSource = extras.getString(Constants.EXTRA_PICTURE_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
 						if (pictureSource.equals("search")) {
 							String defaultSearch = null;
@@ -400,7 +400,7 @@ public class ProfileForm extends FormActivity {
 			mUser.email = mTextEmail.getText().toString().trim();
 			mUser.name = mTextFullname.getText().toString().trim();
 			mUser.bio = mTextBio.getText().toString().trim();
-			mUser.location = mTextLocation.getText().toString().trim();
+			mUser.area = mTextLocation.getText().toString().trim();
 			mUser.webUri = mTextLink.getText().toString().trim();
 			mUser.doNotTrack = mCheckBrowseInPrivate.isChecked();
 
@@ -438,11 +438,11 @@ public class ProfileForm extends FormActivity {
 						 * We also need to update the user that has been persisted for auto sign in.
 						 */
 						final String jsonUser = HttpService.convertObjectToJsonSmart(mUser, true, false);
-						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER, jsonUser);
+						Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
 						Aircandi.settingsEditor.commit();
 
 						ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-						setResult(CandiConstants.RESULT_PROFILE_UPDATED);
+						setResult(Constants.RESULT_PROFILE_UPDATED);
 						finish();
 					}
 					else {

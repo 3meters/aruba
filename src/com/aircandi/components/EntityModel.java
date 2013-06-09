@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -14,7 +13,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -27,24 +26,23 @@ import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.AirNotification;
+import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Beacon;
-import com.aircandi.service.objects.Beacon.BeaconType;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Device;
 import com.aircandi.service.objects.Document;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link;
-import com.aircandi.service.objects.Link.LinkType;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
+import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Provider;
+import com.aircandi.service.objects.ServiceBase;
+import com.aircandi.service.objects.ServiceBase.UpdateScope;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
-import com.aircandi.service.objects.ServiceEntryBase;
-import com.aircandi.service.objects.ServiceEntryBase.UpdateScope;
-import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateUtils;
 
@@ -56,7 +54,7 @@ public class EntityModel {
 	private final List<Beacon>			mBeacons			= Collections.synchronizedList(new ArrayList<Beacon>());
 	private List<Photo>					mPhotos				= Collections.synchronizedList(new ArrayList<Photo>());
 	private List<Category>				mCategories			= Collections.synchronizedList(new ArrayList<Category>());
-	private final Map<String, Source>	mSourceMeta			= Collections.synchronizedMap(new HashMap<String, Source>());
+	private final Map<String, Applink>	mApplinkMeta			= Collections.synchronizedMap(new HashMap<String, Applink>());
 	private List<WifiScanResult>		mWifiList			= Collections.synchronizedList(new ArrayList<WifiScanResult>());
 
 	private Number						mLastActivityDate	= DateUtils.nowDate().getTime();
@@ -140,11 +138,11 @@ public class EntityModel {
 				/* Remove any links to beacons not currently visible */
 				Beacon beacon = null;
 				for (Entity entity : fetchedEntities) {
-					if (entity.links != null) {
-						for (int i = entity.links.size() - 1; i >= 0; i--) {
-							beacon = getBeacon(entity.links.get(i).toId);
+					if (entity.linksOut != null) {
+						for (int i = entity.linksOut.size() - 1; i >= 0; i--) {
+							beacon = getBeacon(entity.linksOut.get(i).toId);
 							if (beacon == null) {
-								entity.links.remove(i);
+								entity.linksOut.remove(i);
 							}
 						}
 					}
@@ -313,7 +311,7 @@ public class EntityModel {
 		parameters.putString("source", "foursquare");
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getPlaceCategories")
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_PLACES + "getCategories")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
@@ -329,27 +327,27 @@ public class EntityModel {
 		return result;
 	}
 
-	public ModelResult getSourceSuggestions(List<Source> sources, Entity entity) {
+	public ModelResult getApplinkSuggestions(List<Entity> applinks, Place entity) {
 
 		final ModelResult result = new ProxiManager.ModelResult();
 
 		final Bundle parameters = new Bundle();
 		parameters.putInt("timeout", ProxiConstants.SOURCE_SUGGESTIONS_TIMEOUT);
 		final List<String> sourceStrings = new ArrayList<String>();
-		for (Source source : sources) {
-			sourceStrings.add("object:" + HttpService.convertObjectToJsonSmart(source, true, true));
+		for (Entity applink : applinks) {
+			sourceStrings.add("object:" + HttpService.convertObjectToJsonSmart(applink, true, true));
 		}
 		parameters.putStringArrayList("sources", (ArrayList<String>) sourceStrings);
 
 		if (entity != null) {
 			StringBuilder placeString = new StringBuilder();
-			Provider provider = entity.place.getProvider();
+			Provider provider = entity.getProvider();
 			placeString.append("object:{\"id\":\"" + provider.id + "\",\"provider\":\"" + provider.type + "\"");
 			if (entity.name != null) {
 				placeString.append(",\"name\":\"" + entity.name + "\"");
 			}
-			if (entity.place.contact != null && entity.place.contact.phone != null) {
-				placeString.append(",\"phone\":\"" + entity.place.contact.phone + "\"");
+			if (entity.phone != null) {
+				placeString.append(",\"phone\":\"" + entity.phone + "\"");
 			}
 			placeString.append("}");
 			parameters.putString("place", placeString.toString());
@@ -365,7 +363,7 @@ public class EntityModel {
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Source);
+			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Applink);
 			result.serviceResponse.data = serviceData.data;
 		}
 		return result;
@@ -500,6 +498,12 @@ public class EntityModel {
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 			user.id = (String) result.serviceResponse.data;
+
+			user.updateScope = UpdateScope.Property;
+			if (user.photo != null) {
+				user.photo.updateScope = UpdateScope.Property;
+			}
+
 			ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "create")
 					.setRequestType(RequestType.Insert)
@@ -581,6 +585,11 @@ public class EntityModel {
 				 * Service handles modifiedId and modifiedDate based
 				 * on the session info passed with request.
 				 */
+				user.updateScope = UpdateScope.Object;
+				if (user.photo != null) {
+					user.photo.updateScope = UpdateScope.Property;
+				}
+
 				final ServiceRequest serviceRequest = new ServiceRequest()
 						.setUri(user.getEntryUri())
 						.setRequestType(RequestType.Update)
@@ -642,7 +651,7 @@ public class EntityModel {
 			Logger.i(this, "Inserting entity: " + entity.name);
 
 			/* Pre-fetch an id so a failed request can be retried */
-			result = ProxiManager.getInstance().getEntityModel().getDocumentId(Entity.collectionId);
+			result = ProxiManager.getInstance().getEntityModel().getDocumentId(entity.getCollection());
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
@@ -678,33 +687,33 @@ public class EntityModel {
 							Observation observation = LocationManager.getInstance().getObservationLocked();
 							if (observation != null) {
 
-								beacon.latitude = observation.latitude;
-								beacon.longitude = observation.longitude;
+								beacon.location.lat = observation.latitude;
+								beacon.location.lng = observation.longitude;
 
 								if (observation.altitude != null) {
-									beacon.altitude = observation.altitude;
+									beacon.location.altitude = observation.altitude;
 								}
 								if (observation.accuracy != null) {
-									beacon.accuracy = observation.accuracy;
+									beacon.location.accuracy = observation.accuracy;
 								}
 								if (observation.bearing != null) {
-									beacon.bearing = observation.bearing;
+									beacon.location.bearing = observation.bearing;
 								}
 								if (observation.speed != null) {
-									beacon.speed = observation.speed;
+									beacon.location.speed = observation.speed;
 								}
 							}
 
-							beacon.beaconType = BeaconType.Fixed.name().toLowerCase(Locale.US);
+							beacon.type = Constants.TYPE_BEACON_FIXED;
 							beacon.locked = false;
 							beaconStrings.add("object:" + HttpService.convertObjectToJsonSmart(beacon, true, true));
 						}
 						parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
 					}
-					
-					if (entity.parentId != null) {
+
+					if (entity.toId != null) {
 						/* Linking to another entity */
-						parameters.putString("parentId", entity.parentId);
+						parameters.putString("parentId", entity.toId);
 					}
 
 					/* Observation: only used as data package for the action that gets logged. */
@@ -714,12 +723,18 @@ public class EntityModel {
 								"object:" + HttpService.convertObjectToJsonSmart(observation, true, true));
 					}
 
-					/* Sources configuration */
-					if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-						if (!entity.place.getProvider().type.equals("user")
-								|| (entity.sources != null && entity.sources.size() > 0)) {
-							parameters.putBoolean("suggestSources", true);
-							parameters.putInt("suggestTimeout", 10000);
+					if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+						Place place = (Place) entity;
+
+						/* Sources configuration */
+						if (!place.getProvider().type.equals("aircandi")) {
+							parameters.putBoolean("insertApplinks", true);
+							parameters.putInt("applinksTimeout", 10000);
+						}
+
+						/* Provider id if this is a custom place */
+						if (place.provider.aircandi != null) {
+							place.provider.aircandi = entity.id;
 						}
 					}
 
@@ -728,14 +743,19 @@ public class EntityModel {
 					if (entity.photo != null) {
 						entity.photo.updateScope = UpdateScope.Property;
 					}
-					if (entity.place != null) {
-						if (entity.place.contact != null) {
-							entity.place.contact.updateScope = UpdateScope.Property;
+					if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+						Place place = (Place) entity;
+						if (place.category != null) {
+							place.category.updateScope = UpdateScope.Property;
+							if (place.category.photo != null) {
+								place.category.photo.updateScope = UpdateScope.Property;
+							}
 						}
-						if (entity.place.location != null) {
-							entity.place.location.updateScope = UpdateScope.Property;
+						if (place.provider != null) {
+							place.provider.updateScope = UpdateScope.Property;
 						}
 					}
+
 					parameters.putString("entity", "object:" + HttpService.convertObjectToJsonSmart(entity, true, true));
 
 					final ServiceRequest serviceRequest = new ServiceRequest()
@@ -758,8 +778,8 @@ public class EntityModel {
 					final Entity insertedEntity = (Entity) serviceData.data;
 
 					/* We want to retain the parent relationship */
-					if (entity.parentId != null) {
-						insertedEntity.parentId = entity.parentId;
+					if (entity.toId != null) {
+						insertedEntity.toId = entity.toId;
 					}
 
 					upsertEntity(insertedEntity);
@@ -801,12 +821,17 @@ public class EntityModel {
 			if (entity.photo != null) {
 				entity.photo.updateScope = UpdateScope.Property;
 			}
-			if (entity.place != null) {
-				if (entity.place.contact != null) {
-					entity.place.contact.updateScope = UpdateScope.Property;
+			if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				Place place = (Place) entity;
+				place.updateScope = UpdateScope.Property;
+				if (place.category != null) {
+					place.category.updateScope = UpdateScope.Property;
+					if (place.category.photo != null) {
+						place.category.photo.updateScope = UpdateScope.Property;
+					}
 				}
-				if (entity.place.location != null) {
-					entity.place.location.updateScope = UpdateScope.Property;
+				if (place.provider != null) {
+					place.provider.updateScope = UpdateScope.Property;
 				}
 			}
 
@@ -827,45 +852,6 @@ public class EntityModel {
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			entity.activityDate = DateUtils.nowDate().getTime();
 			upsertEntity(entity);
-		}
-
-		return result;
-	}
-
-	@SuppressWarnings("ucd")
-	public ModelResult moveEntity(String entityId, String newParentId, Boolean toBeacon, Boolean cacheOnly) {
-
-		final ModelResult result = new ProxiManager.ModelResult();
-
-		if (!cacheOnly) {
-			final Entity entity = getCacheEntity(entityId);
-
-			final Link link = new Link();
-			final Bundle parameters = new Bundle();
-
-			link.toId = newParentId;
-			link.fromId = entity.id;
-			parameters.putString("link", "object:" + HttpService.convertObjectToJsonSmart(link, true, true));
-			parameters.putString("originalToId", (entity.parentId != null) ? entity.parentId : entity.getBeaconId());
-
-			if (link.toId == null || link.fromId == null || parameters.getString("originalToId") == null) {
-				throw new IllegalArgumentException("moveEntity: missing id for link update");
-			}
-
-			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateLink")
-					.setRequestType(RequestType.Method)
-					.setResponseFormat(ResponseFormat.Json)
-					.setParameters(parameters)
-					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
-					.setRetry(false)
-					.setSession(Aircandi.getInstance().getUser().session);
-
-			result.serviceResponse = mProxiManager.dispatch(serviceRequest);
-		}
-
-		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			moveEntity(entityId, !toBeacon ? newParentId : null, toBeacon ? newParentId : null);
 		}
 
 		return result;
@@ -925,25 +911,25 @@ public class EntityModel {
 					Observation observation = LocationManager.getInstance().getObservationLocked();
 					if (observation != null) {
 
-						beacon.latitude = observation.latitude;
-						beacon.longitude = observation.longitude;
+						beacon.location.lat = observation.latitude;
+						beacon.location.lng = observation.longitude;
 
 						if (observation.altitude != null) {
-							beacon.altitude = observation.altitude;
+							beacon.location.altitude = observation.altitude;
 						}
 						if (observation.accuracy != null) {
-							beacon.accuracy = observation.accuracy;
+							beacon.location.accuracy = observation.accuracy;
 						}
 						if (observation.bearing != null) {
-							beacon.bearing = observation.bearing;
+							beacon.location.bearing = observation.bearing;
 						}
 						if (observation.speed != null) {
-							beacon.speed = observation.speed;
+							beacon.location.speed = observation.speed;
 						}
 					}
 				}
 
-				beacon.beaconType = BeaconType.Fixed.name().toLowerCase(Locale.US);
+				beacon.type = Constants.TYPE_BEACON_FIXED;
 				beacon.locked = false;
 				beaconStrings.add("object:" + HttpService.convertObjectToJsonSmart(beacon, true, true));
 				beaconIds.add(beacon.id);
@@ -994,7 +980,7 @@ public class EntityModel {
 			if (beacons != null) {
 				for (Beacon beacon : beacons) {
 					Boolean primary = (primaryBeacon != null && primaryBeacon.id.equals(beacon.id));
-					Link link = entity.getLink(beacon, actionType);
+					Link link = entity.getOutLinkByType(Constants.TYPE_LINK_PROXIMITY, beacon.id);
 					if (link != null) {
 						if (primary) {
 							if (link.tuneCount != null) {
@@ -1003,15 +989,15 @@ public class EntityModel {
 							else {
 								link.tuneCount = 1;
 							}
-							if (!link.primary) {
-								link.primary = true;
+							if (!link.proximity.primary) {
+								link.proximity.primary = true;
 							}
 						}
 					}
 					else {
 						link = new Link(beacon.id, entity.id);
 						link.type = "proximity";
-						link.signal = beacon.level;
+						link.proximity.signal = beacon.signal;
 						if (primary) {
 							if (link.tuneCount != null) {
 								link.tuneCount = link.tuneCount.intValue() + 1;
@@ -1019,12 +1005,12 @@ public class EntityModel {
 							else {
 								link.tuneCount = 1;
 							}
-							link.primary = true;
+							link.proximity.primary = true;
 						}
-						if (entity.links == null) {
-							entity.links = new ArrayList<Link>();
+						if (entity.linksOut == null) {
+							entity.linksOut = new ArrayList<Link>();
 						}
-						entity.links.add(link);
+						entity.linksOut.add(link);
 					}
 				}
 			}
@@ -1058,7 +1044,7 @@ public class EntityModel {
 		 * keeping the same instance.
 		 */
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			insertCommentCache(entityId, comment);
+			//insertCommentCache(entityId, comment);
 		}
 
 		return result;
@@ -1307,7 +1293,6 @@ public class EntityModel {
 						, scanResult.SSID
 						, scanResult.SSID
 						, scanResult.level
-						, DateUtils.nowDate()
 						, scanResult.test);
 
 				upsertBeacon(beacon);
@@ -1346,7 +1331,7 @@ public class EntityModel {
 			result.data = getCollectionEntities();
 		}
 		else if (arrayListType == ArrayListType.InCollection) {
-			result.data = getChildEntities(collectionId);
+			result.data = getChildEntities(collectionId, Constants.TYPE_LINK_ANY);
 		}
 		return result;
 	}
@@ -1358,25 +1343,25 @@ public class EntityModel {
 	 * @return
 	 */
 
-	public List<Entity> getAllPlaces(Boolean includeHidden) {
+	public List<? extends Entity> getAllPlaces(Boolean includeHidden) {
 		/*
 		 * This is the one case where refresh scenarios have been
 		 * handled outside of this method.
 		 */
 		final List<Entity> entities = new ArrayList<Entity>();
-		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
-				CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
+		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Constants.PREF_SEARCH_RADIUS,
+				Constants.PREF_SEARCH_RADIUS_DEFAULT));
 
 		synchronized (mEntityCache) {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					Entity entity = entry.getValue();
+				if (entry.getValue().schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					Place entity = (Place) entry.getValue();
 					if (includeHidden || !entity.hidden) {
 
 						/* Must do this to cache the distance before sorting */
 						Float distance = entity.getDistance();
 
-						Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
+						Beacon beacon = entity.getActiveBeacon(Constants.TYPE_LINK_PROXIMITY);
 						if (beacon != null) {
 							entities.add(entity);
 						}
@@ -1391,12 +1376,12 @@ public class EntityModel {
 			}
 		}
 
-		Collections.sort(entities, new Entity.SortEntitiesByProximityAndDistance());
+		Collections.sort(entities, new Place.SortEntitiesByProximityAndDistance());
 		return entities.size() > ProxiConstants.RADAR_PLACES_LIMIT ? entities.subList(0, ProxiConstants.RADAR_PLACES_LIMIT) : entities;
 	}
 
 	public Float getMaxPlaceDistance() {
-		final List<Entity> places = getAllPlaces(true); // refreshes distance calculation
+		final List<Entity> places = (List<Entity>) getAllPlaces(true); // refreshes distance calculation
 		Float maxDistance = 0f;
 		for (Entity entity : places) {
 			if (entity.distance > maxDistance) {
@@ -1413,28 +1398,28 @@ public class EntityModel {
 	 * @return
 	 */
 
-	public List<Entity> getAircandiPlaces() {
+	public List<? extends Entity> getAircandiPlaces() {
 		/*
 		 * This is the one case where refresh scenarios have been
 		 * handled outside of this method.
 		 */
 		final List<Entity> entities = new ArrayList<Entity>();
-		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
-				CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
+		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Constants.PREF_SEARCH_RADIUS,
+				Constants.PREF_SEARCH_RADIUS_DEFAULT));
 
 		synchronized (mEntityCache) {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					Entity entity = entry.getValue();
+				if (entry.getValue().schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					Place entity = (Place) entry.getValue();
 					if (!entity.synthetic) {
-						Beacon beacon = entity.getActiveBeaconPrimary(LinkType.proximity.name());
+						Beacon beacon = entity.getActiveBeaconPrimaryOnly(Constants.TYPE_LINK_PROXIMITY);
 						/* Must do this to cache the distance before sorting */
 						Float distance = entity.getDistance();
 						if (beacon != null) {
 							entities.add(entity);
 						}
 						else {
-							beacon = entity.getActiveBeaconPrimary(LinkType.browse.name());
+							beacon = entity.getActiveBeaconPrimaryOnly(Constants.TYPE_LINK_PROXIMITY);
 							/*
 							 * Entities that were first found by beacon hang around and could
 							 * later be visible via location if we continue with this approach.
@@ -1452,22 +1437,22 @@ public class EntityModel {
 				}
 			}
 		}
-		Collections.sort(entities, new Entity.SortEntitiesByProximityAndDistance());
+		Collections.sort(entities, new Place.SortEntitiesByProximityAndDistance());
 		return entities;
 	}
 
-	public List<Entity> getProximityPlaces() {
+	public List<? extends Entity> getProximityPlaces() {
 		/*
 		 * This is the one case where refresh scenarios have been
 		 * handled outside of this method.
 		 */
-		final List<Entity> entities = new ArrayList<Entity>();
+		final List<Place> entities = new ArrayList<Place>();
 
 		synchronized (mEntityCache) {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					Entity entity = entry.getValue();
-					Beacon beacon = entity.getActiveBeaconPrimary(LinkType.proximity.name());
+				if (entry.getValue().schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					Place entity = (Place) entry.getValue();
+					Beacon beacon = entity.getActiveBeaconPrimaryOnly(Constants.TYPE_LINK_PROXIMITY);
 					if (beacon != null) {
 						entities.add(entity);
 					}
@@ -1477,20 +1462,20 @@ public class EntityModel {
 		return entities;
 	}
 
-	public List<Entity> getCollectionEntities() {
+	public List<? extends Entity> getCollectionEntities() {
 		/*
 		 * This is the one case where refresh scenarios have been
 		 * handled outside of this method.
 		 */
 		final List<Entity> entities = new ArrayList<Entity>();
-		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
-				CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
+		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Constants.PREF_SEARCH_RADIUS,
+				Constants.PREF_SEARCH_RADIUS_DEFAULT));
 		synchronized (mEntityCache) {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().isCollection) {
-					Entity entity = entry.getValue();
+				if (entry.getValue().schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					Place entity = (Place) entry.getValue();
 					if (!entity.hidden && !entity.synthetic) {
-						Beacon beacon = entity.getActiveBeaconPrimary(LinkType.proximity.name());
+						Beacon beacon = entity.getActiveBeaconPrimaryOnly(Constants.TYPE_LINK_PROXIMITY);
 						/* Must do this to cache the distance before sorting */
 						Float distance = entity.getDistance();
 						if (beacon != null) {
@@ -1514,25 +1499,25 @@ public class EntityModel {
 				}
 			}
 		}
-		Collections.sort(entities, new Entity.SortEntitiesByProximityAndDistance());
+		Collections.sort(entities, new Place.SortEntitiesByProximityAndDistance());
 		return entities;
 	}
 
-	public List<Entity> getRadarSynthetics() {
+	public List<? extends Entity> getRadarSynthetics() {
 		/*
 		 * This is the one case where refresh scenarios have been
 		 * handled outside of this method.
 		 */
 		final List<Entity> entities = new ArrayList<Entity>();
-		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
-				CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
+		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Constants.PREF_SEARCH_RADIUS,
+				Constants.PREF_SEARCH_RADIUS_DEFAULT));
 		synchronized (mEntityCache) {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					Entity entity = entry.getValue();
+				if (entry.getValue().schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					Place entity = (Place) entry.getValue();
 					if (!entity.hidden && entity.synthetic) {
 						Float distance = entity.getDistance();
-						Beacon beacon = entity.getActiveBeaconPrimary(LinkType.proximity.name());
+						Beacon beacon = entity.getActiveBeaconPrimaryOnly(Constants.TYPE_LINK_PROXIMITY);
 						if (beacon != null) {
 							entities.add(entity);
 						}
@@ -1546,7 +1531,7 @@ public class EntityModel {
 				}
 			}
 		}
-		Collections.sort(entities, new Entity.SortEntitiesByProximityAndDistance());
+		Collections.sort(entities, new Place.SortEntitiesByProximityAndDistance());
 		return entities;
 	}
 
@@ -1568,11 +1553,8 @@ public class EntityModel {
 		synchronized (mEntityCache) {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 				if (entry.getValue().ownerId != null && entry.getValue().ownerId.equals(userId)) {
-					if (type.equals(CandiConstants.TYPE_CANDI_CANDIGRAM)) {
-						if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PICTURE)
-								|| entry.getValue().type.equals(CandiConstants.TYPE_CANDI_POST)) {
-							entities.add(entry.getValue());
-						}
+					if (type.equals(Constants.SCHEMA_ENTITY_POST)) {
+						entities.add(entry.getValue());
 					}
 					else if (entry.getValue().type.equals(type)) {
 						entities.add(entry.getValue());
@@ -1606,21 +1588,8 @@ public class EntityModel {
 				}
 			}
 		}
-		Collections.sort(users, new User.SortUsersByWatchedDate());
+		Collections.sort(users, new Entity.SortEntitiesByWatchedDate());
 		return users;
-	}
-
-	public List<Entity> getBeaconEntities(String beaconId) {
-		final List<Entity> entities = new ArrayList<Entity>();
-		synchronized (mEntityCache) {
-			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().getBeaconId() != null && entry.getValue().getBeaconId().equals(beaconId)) {
-					entities.add(entry.getValue());
-				}
-			}
-		}
-		Collections.sort((List<Entity>) entities, new Entity.SortEntitiesByModifiedDate());
-		return entities;
 	}
 
 	public Entity getCacheEntity(String entityId) {
@@ -1649,34 +1618,18 @@ public class EntityModel {
 		return entities;
 	}
 
-	public List<Entity> getChildEntities(String entityId) {
+	public List<Entity> getChildEntities(String entityId, String linkType) {
 		final List<Entity> entities = new ArrayList<Entity>();
 		synchronized (mEntityCache) {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (!entry.getValue().type.equals(CandiConstants.TYPE_CANDI_SOURCE)
-						&& entry.getValue().parentId != null
-						&& entry.getValue().parentId.equals(entityId)) {
-					entities.add(entry.getValue());
+				if (entry.getValue().toId != null && entry.getValue().toId.equals(entityId)) {
+					if (linkType.equals(Constants.TYPE_LINK_ANY) || entry.getValue().type.equals(linkType)) {
+						entities.add(entry.getValue());
+					}
 				}
 			}
 		}
 		Collections.sort(entities, new Entity.SortEntitiesByModifiedDate());
-		return entities;
-	}
-
-	public List<Entity> getSourceEntities(String entityId) {
-		final List<Entity> entities = new ArrayList<Entity>();
-		synchronized (mEntityCache) {
-			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_SOURCE)
-						&& (entry.getValue().source.system == null || !entry.getValue().source.system)
-						&& entry.getValue().parentId != null
-						&& entry.getValue().parentId.equals(entityId)) {
-					entities.add(entry.getValue());
-				}
-			}
-		}
-		Collections.sort(entities, new Entity.SortEntitiesBySourcePosition());
 		return entities;
 	}
 
@@ -1712,59 +1665,40 @@ public class EntityModel {
 	// Entity cache modification routines
 	// --------------------------------------------------------------------------------------------
 
-	private void insertCommentCache(String entityId, Comment comment) {
-		final Entity entity = getCacheEntity(entityId);
-		if (entity != null) {
-			if (entity.comments == null) {
-				entity.comments = new ArrayList<Comment>();
-			}
-			entity.comments.add(0, comment);
-			if (entity.commentCount == null) {
-				entity.commentCount = 0;
-			}
-			entity.commentCount++;
-			Long time = DateUtils.nowDate().getTime();
-			entity.activityDate = time;
-			setLastActivityDate(time);
-		}
-	}
-
 	private void verbSomethingCache(String toId, String verb) {
-		ServiceEntryBase entry = null;
+		Entity entity = null;
 
 		if (ServiceEntry.getTypeFromId(toId) == "entities") {
-			entry = getCacheEntity(toId);
+			entity = getCacheEntity(toId);
 		}
 		else if (ServiceEntry.getTypeFromId(toId) == "users") {
-			entry = getCacheUser(toId);
+			entity = getCacheUser(toId);
 		}
 
-		if (entry != null) {
+		if (entity != null) {
 			Long time = DateUtils.nowDate().getTime();
 			if (verb.equals("like")) {
-				entry.liked = true;
-				if (entry.likeCount == null) {
-					entry.likeCount = 0;
-				}
-				entry.likeCount++;
+				/*
+				 * Add item to linksIn
+				 * Add or increment linksInCounts
+				 */
 			}
 			else if (verb.equals("watch")) {
-				entry.watched = true;
-				entry.watcherId = Aircandi.getInstance().getUser().id;
-				entry.watchedDate = time;
-				if (entry.watchCount == null) {
-					entry.watchCount = 0;
-				}
-				entry.watchCount++;
+				/*
+				 * Add item to linksIn
+				 * Add or increment linksInCounts
+				 * Set watchedDate
+				 */
+				entity.watchedDate = time;
 			}
-			entry.activityDate = time;
+			entity.activityDate = time;
 			setLastActivityDate(time);
 		}
 	}
 
 	private void unverbSomethingCache(String toId, String verb) {
 
-		ServiceEntryBase entry = null;
+		ServiceBase entry = null;
 
 		if (ServiceEntry.getTypeFromId(toId) == "entities") {
 			entry = getCacheEntity(toId);
@@ -1775,14 +1709,18 @@ public class EntityModel {
 
 		if (entry != null) {
 			if (verb.equals("like")) {
-				entry.liked = false;
-				entry.likeCount--;
+				/*
+				 * Remove item to linksIn
+				 * Remove or decrement linksInCounts
+				 */
 			}
 			else if (verb.equals("watch")) {
-				entry.watched = false;
+				/*
+				 * Remove item to linksIn
+				 * Remove or decrement linksInCounts
+				 */
 				entry.watcherId = null;
 				entry.watchedDate = null;
-				entry.watchCount--;
 			}
 			Long time = DateUtils.nowDate().getTime();
 			entry.activityDate = time;
@@ -1795,7 +1733,7 @@ public class EntityModel {
 
 			final Beacon beaconOriginal = getBeacon(beacon.id);
 			if (beaconOriginal != null) {
-				Beacon.copyProperties(beacon, beaconOriginal);
+				Beacon.copyFields(beacon, beaconOriginal);
 			}
 			else {
 				mBeacons.add(beacon);
@@ -1824,25 +1762,25 @@ public class EntityModel {
 			/* Check to see if we have this entity keyed to the sourceId */
 			if (staleEntity != null) {
 
-				Entity.copyProperties(freshEntity, staleEntity);
+				Entity.copyFields(freshEntity, staleEntity);
 				/*
 				 * We only do children work if the new entity has them.
 				 */
-				if (freshEntity.children != null) {
+				if (freshEntity.entities != null) {
 
-					synchronized (freshEntity.children) {
+					synchronized (freshEntity.entities) {
 
 						/* Removes all children except source entities */
 						final Map<String, Entity> staleChildren = removeChildren(staleEntity.id);
 
-						Iterator iter = freshEntity.children.iterator();
+						Iterator iter = freshEntity.entities.iterator();
 						while (iter.hasNext()) {
 							Entity freshChild = (Entity) iter.next();
 							Entity staleChild = staleChildren.get(freshChild.id);
 
 							if (staleChild != null) {
 								/* Copy property over stale child and put back into cache */
-								Entity.copyProperties(freshChild, staleChild);
+								Entity.copyFields(freshChild, staleChild);
 								mEntityCache.put(freshChild.id, staleChild);
 							}
 							else {
@@ -1850,33 +1788,35 @@ public class EntityModel {
 							}
 
 							removeSourceEntities(freshChild.id);
-							addCommentSource(freshChild, 0);
-							addLikesSource(freshChild, 1);
-							addWatchersSource(freshChild, 2);
+							addApplink(freshChild, 0, "comment", "comments", "resource:img_post", freshEntity.getInCount(Constants.TYPE_LINK_COMMENT));
+							addApplink(freshChild, 1, "like", "likes", "resource:img_like", freshEntity.getInCount(Constants.TYPE_LINK_LIKE));
+							addApplink(freshChild, 2, "watch", "watching", "resource:img_watch", freshEntity.getInCount(Constants.TYPE_LINK_WATCH));
 						}
-						freshEntity.children.clear();
-						freshEntity.children = null;
+						freshEntity.entities.clear();
+						freshEntity.entities = null;
 					}
 				}
 			}
 			else {
 				mEntityCache.put(freshEntity.id, freshEntity);
 
-				if (freshEntity.children != null) {
+				if (freshEntity.entities != null) {
 
-					synchronized (freshEntity.children) {
-						Iterator iter = freshEntity.children.iterator();
+					synchronized (freshEntity.entities) {
+						Iterator iter = freshEntity.entities.iterator();
 						while (iter.hasNext()) {
 							Entity freshChild = (Entity) iter.next();
 							mEntityCache.put(freshChild.id, freshChild);
 
 							removeSourceEntities(freshChild.id);
-							addCommentSource(freshChild, 0);
-							addLikesSource(freshChild, 1);
-							addWatchersSource(freshChild, 2);
+							
+							addApplink(freshChild, 0, "map", "map", "resource:img_post", null);
+							addApplink(freshChild, 1, "comment", "comments", "resource:img_post", freshEntity.getInCount(Constants.TYPE_LINK_COMMENT));
+							addApplink(freshChild, 2, "like", "likes", "resource:img_like", freshEntity.getInCount(Constants.TYPE_LINK_LIKE));
+							addApplink(freshChild, 3, "watch", "watching", "resource:img_watch", freshEntity.getInCount(Constants.TYPE_LINK_WATCH));
 						}
-						freshEntity.children.clear();
-						freshEntity.children = null;
+						freshEntity.entities.clear();
+						freshEntity.entities = null;
 					}
 				}
 			}
@@ -1888,53 +1828,28 @@ public class EntityModel {
 		removeSourceEntities(freshEntity.id);
 
 		Integer position = 0;
-		if (freshEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+		if (freshEntity.type.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 
 			/* Add the current stuff */
-			if (freshEntity.sources != null) {
-				for (Source source : freshEntity.sources) {
-					if (source.system == null || !source.system) {
-						source.intentSupport = true;
-						
-						if (source.type.equals("facebook")
-								|| source.type.equals("yahoolocal")
-								|| source.type.equals("citysearch")
-								|| source.type.equals("citygrid")
-								|| source.type.equals("urbanspoon")
-								|| source.type.equals("opentable")
-								|| source.type.equals("openmenu")) {
-							source.intentSupport = false;
-						}
-
-						if (!mSourceMeta.containsKey(source.type)) {
-							mSourceMeta.put(source.type, new Source(source.intentSupport, false));
-						}
-
-						/* We are getting duplicates which will have to be addressed on the service side */
-						Entity sourceEntity = mProxiManager.loadEntityFromResources(R.raw.source_entity);
-						if (sourceEntity != null) {
-							/* Transfers from source item */
-							sourceEntity.id = freshEntity.id + "." + source.type + "." + String.valueOf(DateUtils.nowDate().getTime());
-							sourceEntity.name = source.name;
-							sourceEntity.subtitle = source.label;
-							sourceEntity.photo = source.getPhoto();
-							source.position = position;
-							sourceEntity.source = source;
-							sourceEntity.parentId = freshEntity.id;
-							upsertEntity(sourceEntity);
-							position++;
-						}
-					}
+			
+			/*
+			 * Look for place.entities and push into cache.
+			 * Set id property: sourceEntity.id = freshEntity.id + "." + source.type + "." + String.valueOf(DateUtils.nowDate().getTime());
+			 * Set position
+			 */
+			if (freshEntity.entities != null) {
+				for (@SuppressWarnings("unused") Entity entity : freshEntity.entities) {
 				}
 			}
 		}
 
-		/* Add comment source */
+		/* Add synthetic sources */
 
-		if (!freshEntity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-			addCommentSource(freshEntity, position);
-			addLikesSource(freshEntity, position + 1);
-			addWatchersSource(freshEntity, position + 2);
+		if (freshEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			addApplink(freshEntity, position, "map", "map", "resource:img_post", null);
+			addApplink(freshEntity, position++, "comment", "comments", "resource:img_post", freshEntity.getInCount(Constants.TYPE_LINK_COMMENT));
+			addApplink(freshEntity, position++, "like", "likes", "resource:img_like", freshEntity.getInCount(Constants.TYPE_LINK_LIKE));
+			addApplink(freshEntity, position++, "watch", "watching", "resource:img_watch", freshEntity.getInCount(Constants.TYPE_LINK_WATCH));
 		}
 
 		setLastActivityDate(DateUtils.nowDate().getTime());
@@ -1942,61 +1857,20 @@ public class EntityModel {
 		return mEntityCache.get(freshEntity.id);
 	}
 
-	private void addCommentSource(Entity entity, Integer position) {
+	private void addApplink(Entity entity, Integer position, String type, String name, String image, Integer count) {
 
-		final Entity sourceEntity = mProxiManager.loadEntityFromResources(R.raw.source_entity);
-		sourceEntity.id = entity.id + ".comments";
-		sourceEntity.name = "comments";
-		final Source source = new Source();
-		source.label = "comments";
-		source.photo = new Photo("resource:img_post", null, null, null, PhotoSource.resource);
-		source.type = "comments";
-		source.position = (position != null) ? position : 0;
-		source.intentSupport = false;
-		source.installDeclined = false;
-		sourceEntity.source = source;
-		sourceEntity.commentCount = entity.commentCount;
+		final Applink applink = (Applink) mProxiManager.loadEntityFromResources(R.raw.applink_entity);
+		applink.id = entity.id + "." + type;
+		applink.name = name;
+		applink.photo = new Photo(image, null, null, null, PhotoSource.resource);
+		applink.type = type;
+		applink.position = (position != null) ? position : 0;
+		applink.intentSupport = false;
+		applink.installDeclined = false;
+		applink.count = count;
 
-		sourceEntity.parentId = entity.id;
-		upsertEntity(sourceEntity);
-	}
-
-	private void addLikesSource(Entity entity, Integer position) {
-
-		final Entity sourceEntity = mProxiManager.loadEntityFromResources(R.raw.source_entity);
-		sourceEntity.id = entity.id + ".likes";
-		sourceEntity.name = "likes";
-		final Source source = new Source();
-		source.label = "likes";
-		source.photo = new Photo("resource:img_like", null, null, null, PhotoSource.resource);
-		source.type = "likes";
-		source.position = (position != null) ? position : 0;
-		source.intentSupport = false;
-		source.installDeclined = false;
-		sourceEntity.source = source;
-		sourceEntity.likeCount = entity.likeCount;
-
-		sourceEntity.parentId = entity.id;
-		upsertEntity(sourceEntity);
-	}
-
-	private void addWatchersSource(Entity entity, Integer position) {
-
-		final Entity sourceEntity = mProxiManager.loadEntityFromResources(R.raw.source_entity);
-		sourceEntity.id = entity.id + ".watchers";
-		sourceEntity.name = "watching";
-		final Source source = new Source();
-		source.label = "watching";
-		source.photo = new Photo("resource:img_watch", null, null, null, PhotoSource.resource);
-		source.type = "watchers";
-		source.position = (position != null) ? position : 0;
-		source.intentSupport = false;
-		source.installDeclined = false;
-		sourceEntity.source = source;
-		sourceEntity.watchCount = entity.watchCount;
-
-		sourceEntity.parentId = entity.id;
-		upsertEntity(sourceEntity);
+		applink.toId = entity.id;
+		upsertEntity(applink);
 	}
 
 	private void updateUser(User user) {
@@ -2046,12 +1920,6 @@ public class EntityModel {
 		setLastActivityDate(DateUtils.nowDate().getTime());
 	}
 
-	private void moveEntity(String moveEntityId, String parentId, String beaconId) {
-		final Entity entity = getCacheEntity(moveEntityId);
-		entity.parentId = parentId;
-		setLastActivityDate(DateUtils.nowDate().getTime());
-	}
-
 	@SuppressWarnings("ucd")
 	public void removeEntitiesForUser(String userId) {
 		/*
@@ -2063,7 +1931,7 @@ public class EntityModel {
 			Entity entity = null;
 			while (iter.hasNext()) {
 				entity = mEntityCache.get(iter.next());
-				if (entity.parentId == null && entity.ownerId.equals(userId)) {
+				if (entity.toId == null && entity.ownerId.equals(userId)) {
 					iter.remove();
 				}
 			}
@@ -2077,8 +1945,8 @@ public class EntityModel {
 			Entity entity = null;
 			while (iter.hasNext()) {
 				entity = mEntityCache.get(iter.next());
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
-						&& entity.synthetic) {
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)
+						&& ((Place)entity).synthetic) {
 					iter.remove();
 				}
 			}
@@ -2092,26 +1960,9 @@ public class EntityModel {
 			Entity entity = null;
 			while (iter.hasNext()) {
 				entity = mEntityCache.get(iter.next());
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
-						&& !entity.synthetic
-						&& (entity.links != null && entity.links.size() > 0)) {
-					iter.remove();
-				}
-			}
-		}
-		setLastActivityDate(DateUtils.nowDate().getTime());
-	}
-
-	@SuppressWarnings("ucd")
-	public void removeEntitiesForBeacon(String beaconId) {
-		synchronized (mEntityCache) {
-			final Iterator iter = mEntityCache.keySet().iterator();
-			Entity entity = null;
-			while (iter.hasNext()) {
-				entity = mEntityCache.get(iter.next());
-				if (entity.parentId == null
-						&& entity.getBeaconId() != null
-						&& entity.getBeaconId().equals(beaconId)) {
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)
+						&& !((Place)entity).synthetic
+						&& (entity.linksOut != null && entity.linksOut.size() > 0)) {
 					iter.remove();
 				}
 			}
@@ -2150,9 +2001,9 @@ public class EntityModel {
 			Entity entity = null;
 			while (iter.hasNext()) {
 				entity = mEntityCache.get(iter.next());
-				if (!entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)
-						&& entity.parentId != null
-						&& entity.parentId.equals(entityId)) {
+				if (!entity.type.equals(Constants.SCHEMA_ENTITY_APPLINK)
+						&& entity.toId != null
+						&& entity.toId.equals(entityId)) {
 					entities.put(entity.id, entity);
 					iter.remove();
 				}
@@ -2172,9 +2023,9 @@ public class EntityModel {
 			Entity entity = null;
 			while (iter.hasNext()) {
 				entity = mEntityCache.get(iter.next());
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)
-						&& entity.parentId != null
-						&& entity.parentId.equals(entityId)) {
+				if (entity.type.equals(Constants.SCHEMA_ENTITY_APPLINK)
+						&& entity.toId != null
+						&& entity.toId.equals(entityId)) {
 					entities.put(entity.id, entity);
 					iter.remove();
 				}
@@ -2215,8 +2066,8 @@ public class EntityModel {
 		return mCategories;
 	}
 
-	public Map<String, Source> getSourceMeta() {
-		return mSourceMeta;
+	public Map<String, Applink> getApplinkMeta() {
+		return mApplinkMeta;
 	}
 
 	public Number getLastBeaconLockedDate() {

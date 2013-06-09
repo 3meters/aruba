@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
@@ -107,7 +108,7 @@ public class UserView extends RelativeLayout {
 			}
 
 			if (mTextLocation != null && mAuthor.location != null && !mAuthor.location.equals("")) {
-				mTextLocation.setText(Html.fromHtml(mAuthor.location));
+				mTextLocation.setText(Html.fromHtml(mAuthor.area));
 			}
 
 			if (mTextTimeSince != null) {
@@ -120,9 +121,9 @@ public class UserView extends RelativeLayout {
 			}
 
 			if (mImageUser != null) {
-				if (mAuthor.getUserPhotoUri() != null && mAuthor.getUserPhotoUri().length() != 0) {
+				if (mAuthor.getPhotoUri() != null && mAuthor.getPhotoUri().length() != 0) {
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
-					builder.setFromUri(mAuthor.getUserPhotoUri());
+					builder.setFromUri(mAuthor.getPhotoUri());
 					final BitmapRequest imageRequest = builder.create();
 					mImageUser.setBitmapRequest(imageRequest);
 				}
@@ -139,10 +140,10 @@ public class UserView extends RelativeLayout {
 
 			if (mBoundView.findViewById(R.id.stats_group) != null) {
 				if (mImageWatched != null) {
-					mTextWatchCount.setText(String.valueOf(user.watchCount));
+					mTextWatchCount.setText(String.valueOf(user.getInCount(Constants.TYPE_LINK_WATCH)));
 				}
 				if (mImageLiked != null) {
-					mTextLikeCount.setText(String.valueOf(user.likeCount));
+					mTextLikeCount.setText(String.valueOf(user.getInCount(Constants.TYPE_LINK_LIKE)));
 				}
 			}
 
@@ -172,9 +173,9 @@ public class UserView extends RelativeLayout {
 				}
 			}
 			if (mImageUser != null) {
-				if (mUser.getUserPhotoUri() != null && mUser.getUserPhotoUri().length() != 0) {
+				if (mUser.getPhotoUri() != null && mUser.getPhotoUri().length() != 0) {
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
-					builder.setFromUri(mUser.getUserPhotoUri());
+					builder.setFromUri(mUser.getPhotoUri());
 					final BitmapRequest imageRequest = builder.create();
 					mImageUser.setBitmapRequest(imageRequest);
 				}

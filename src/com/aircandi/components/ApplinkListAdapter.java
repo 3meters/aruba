@@ -15,19 +15,20 @@ import android.widget.TextView;
 import com.aircandi.beta.R;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.service.objects.Source;
+import com.aircandi.service.objects.Applink;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.widgets.WebImageView;
 
-public class SourceListAdapter extends ArrayAdapter<Source> implements Filterable {
+public class ApplinkListAdapter extends ArrayAdapter<Entity> implements Filterable {
 
 	private final LayoutInflater	mInflater;
 	private Integer					mItemLayoutId	= R.layout.temp_listitem_sources_builder;
-	private final List<Source>		mListItems;
+	private final List<Entity>		mListItems;
 
-	public SourceListAdapter(Context context, List<Source> sources, Integer itemLayoutId) {
-		super(context, 0, sources);
+	public ApplinkListAdapter(Context context, List<Entity> applinks, Integer itemLayoutId) {
+		super(context, 0, applinks);
 
-		mListItems = sources;
+		mListItems = applinks;
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		if (itemLayoutId != null) {
@@ -39,7 +40,7 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = convertView;
 		final ViewHolder holder;
-		final Source itemData = mListItems.get(position);
+		final Entity itemData = mListItems.get(position);
 
 		if (view == null) {
 			view = mInflater.inflate(mItemLayoutId, null);
@@ -55,8 +56,8 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 					@Override
 					public void onClick(View view) {
 						final CheckBox checkBox = (CheckBox) view;
-						final Source source = (Source) checkBox.getTag();
-						source.checked = checkBox.isChecked();
+						final Entity applink = (Entity) checkBox.getTag();
+						applink.checked = checkBox.isChecked();
 					}
 				});
 			}
@@ -71,7 +72,7 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 		}
 
 		if (itemData != null) {
-			final Source source = itemData;
+			final Applink source = (Applink) itemData;
 
 			setVisibility(holder.check, View.GONE);
 			if (holder.check != null && source.checked != null) {
@@ -81,8 +82,8 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 			}
 
 			setVisibility(holder.label, View.GONE);
-			if (holder.label != null && source.label != null && source.label.length() > 0) {
-				holder.label.setText(source.label);
+			if (holder.label != null && source.name != null && source.name.length() > 0) {
+				holder.label.setText(source.name);
 				setVisibility(holder.label, View.VISIBLE);
 			}
 
@@ -109,7 +110,7 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 				 * by the internal image view to null before doing the work
 				 * to satisfy the new request.
 				 */
-				final String imageUri = source.getPhoto().getUri();
+				final String imageUri = source.getPhotoUri();
 
 				/* Don't do anything if the image is already set to the one we want */
 				if (holder.image.getImageUri() == null || !holder.image.getImageUri().equals(imageUri)) {
@@ -124,7 +125,7 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 	}
 
 	@Override
-	public Source getItem(int position) {
+	public Entity getItem(int position) {
 		return mListItems.get(position);
 	}
 

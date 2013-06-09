@@ -5,7 +5,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.widget.GridView;
 
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 
 @SuppressWarnings("ucd")
 public class BounceGridView extends GridView {
@@ -38,7 +38,7 @@ public class BounceGridView extends GridView {
 		 */
 		final DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
 		final float density = metrics.density;
-		mMaxYOverscrollDistance = (int) (density * CandiConstants.MAX_Y_OVERSCROLL_DISTANCE);
+		mMaxYOverscrollDistance = (int) (density * Constants.MAX_Y_OVERSCROLL_DISTANCE);
 	}
 
 	@Override

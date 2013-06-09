@@ -8,7 +8,7 @@ import org.acra.sender.HttpPostSender;
 import org.acra.sender.ReportSenderException;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.service.objects.User;
 
 public class ReportSenderBugsense extends HttpPostSender {
@@ -48,8 +48,8 @@ public class ReportSenderBugsense extends HttpPostSender {
 		}
 		
 		/* Current search radius */
-		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
-				CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
+		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Constants.PREF_SEARCH_RADIUS,
+				Constants.PREF_SEARCH_RADIUS_DEFAULT));
 		custom.append("Custom_Radius_Meters=" + String.valueOf(searchRangeMeters) + "\n");
 
 		report.put(ReportField.CUSTOM_DATA, custom.toString());

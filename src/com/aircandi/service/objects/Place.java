@@ -1,126 +1,185 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import android.telephony.PhoneNumberUtils;
+
 import com.aircandi.Aircandi;
 import com.aircandi.beta.R;
+import com.aircandi.components.LocationManager;
+import com.aircandi.service.Copy;
 import com.aircandi.service.Expose;
 
 /**
  * @author Jayma
  */
 @SuppressWarnings("ucd")
-public class Place extends ServiceObject implements Cloneable, Serializable {
+public class Place extends Entity implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= -3599862145425838670L;
+	public static final String	collectionId		= "places";
 
 	@Expose
-	public String				provider;
+	public String				address;
 	@Expose
-	public String				id;
-
-	/* Can come from foursquare or our own custom places */
-
+	public String				city;
 	@Expose
-	public List<Provider>		providers;
+	public String				region;
 	@Expose
-	public Contact				contact;
+	public String				country;
 	@Expose
-	public Location				location;
+	public String				postalCode;
+	@Expose
+	public String				phone;
+	@Expose
+	public ProviderMap			provider;
 	@Expose
 	public Category				category;
 
+	@Copy(exclude = true)
+	public Boolean				synthetic			= false;
+	
 	public Place() {}
 
-	@Override
-	public Place clone() {
-		try {
-			final Place place = (Place) super.clone();
-			if (providers != null) {
-				place.providers = (List<Provider>) ((ArrayList) providers).clone();
-			}
-			if (location != null) {
-				place.location = location.clone();
-			}
-			if (contact != null) {
-				place.contact = contact.clone();
-			}
-			if (category != null) {
-				place.category = category.clone();
-			}
-			return place;
+	// --------------------------------------------------------------------------------------------
+	// Set and get
+	// --------------------------------------------------------------------------------------------	
+
+	public static Place upsizeFromSynthetic(Place synthetic) {
+		/*
+		 * Sythetic entity created from foursquare data
+		 * 
+		 * We make a copy so these changes don't effect the synthetic entity
+		 * in the entity model in case we keep it because of a failure.
+		 */
+		final Place entity = synthetic.clone();
+		entity.id = null;
+		entity.locked = false;
+		if (synthetic.category != null) {
+			entity.subtitle = synthetic.category.name;
 		}
-		catch (final CloneNotSupportedException ex) {
-			throw new AssertionError();
-		}
+		return entity;
 	}
 
-	public static Place setPropertiesFromMap(Place place, Map map) {
-		/*
-		 * Properties involved with editing are copied from one entity to another.
-		 */
-		place.provider = (String) map.get("provider");
-		place.id = (String) map.get("id");
+	@Override
+	public String getPhotoUri() {
 
-		if (map.get("providers") != null) {
-			place.providers = new ArrayList<Provider>();
-			final List<LinkedHashMap<String, Object>> sourceMaps = (List<LinkedHashMap<String, Object>>) map.get("providers");
-			for (Map<String, Object> sourceMap : sourceMaps) {
-				place.providers.add(Provider.setPropertiesFromMap(new Provider(), sourceMap));
+		/*
+		 * If a special preview photo is available, we use it otherwise
+		 * we use the standard photo.
+		 * 
+		 * Only posts and collections do not have photo objects
+		 */
+		String imageUri = "resource:img_placeholder_logo_bw";
+		if (photo != null) {
+			imageUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
+			if (imageUri == null) {
+				imageUri = photo.getUri();
 			}
 		}
-
-		if (map.get("location") != null) {
-			place.location = Location.setPropertiesFromMap(new Location(), (HashMap<String, Object>) map.get("location"));
+		else if (category != null) {
+			imageUri = category.photo.getUri();
 		}
 
-		if (map.get("contact") != null) {
-			place.contact = Contact.setPropertiesFromMap(new Contact(), (HashMap<String, Object>) map.get("contact"));
-		}
+		return imageUri;
+	}
 
-		if (map.get("category") != null) {
-			place.category = Category.setPropertiesFromMap(new Category(), (HashMap<String, Object>) map.get("category"));
+	public Link getLink(Beacon beacon, String linkType) {
+		if (linksOut != null) {
+			for (Link link : linksOut) {
+				if (link.toId.equals(beacon.id) && link.type.equals(linkType)) {
+					return link;
+				}
+			}
 		}
+		return null;
+	}
 
-		return place;
+	public String getBeaconId() {
+		final Link link = getActiveLink("proximity", true);
+		if (link != null) {
+			return link.toId;
+		}
+		return null;
+	}
+
+	public Float getDistance() {
+		distance = -1f;
+		final Beacon beacon = getActiveBeaconPrimaryOnly("proximity");
+		if (beacon != null) {
+			distance = beacon.getDistance();
+		}
+		else {
+			final GeoLocation location = getLocation();
+			if (location != null) {
+				final Observation observation = LocationManager.getInstance().getObservationLocked();
+				if (observation != null) {
+					
+					Float distanceByLocation = 0f;
+					
+					final android.location.Location locationObserved = new android.location.Location(observation.provider);
+					locationObserved.setLatitude(observation.latitude.doubleValue());
+					locationObserved.setLongitude(observation.longitude.doubleValue());
+
+					final android.location.Location locationPlace = new android.location.Location("place");
+					locationPlace.setLatitude(location.lat.doubleValue());
+					locationPlace.setLongitude(location.lng.doubleValue());
+
+					distanceByLocation = locationObserved.distanceTo(locationPlace);
+
+					distance = distanceByLocation;
+				}
+			}
+		}
+		return distance;
 	}
 
 	public Provider getProvider() {
-		if (providers != null && providers.size() > 0) {
-			return providers.get(0);
+		if (provider.aircandi != null) {
+			return new Provider(provider.aircandi, "aircandi");
 		}
-		else {
-			return new Provider(this.id, this.provider) ;
+		else if (provider.foursquare != null) {
+			return new Provider(provider.foursquare, "foursquare");
 		}
+		else if (provider.google != null) {
+			return new Provider(provider.google, "google");
+		}
+		else if (provider.factual != null) {
+			return new Provider(provider.factual, "factual");
+		}
+		return null;
+	}
+
+	public String getAddressBlock() {
+		String addressBlock = "";
+		if (address != null && !address.equals("")) {
+			addressBlock = address + "<br/>";
+		}
+
+		if (city != null && region != null && !city.equals("") && !region.equals("")) {
+			addressBlock += city + ", " + region;
+		}
+		else if (city != null && !city.equals("")) {
+			addressBlock += city;
+		}
+		else if (region != null && !region.equals("")) {
+			addressBlock += region;
+		}
+
+		if (postalCode != null && !postalCode.equals("")) {
+			addressBlock += " " + postalCode;
+		}
+		return addressBlock;
+	}
+
+	public String getFormattedPhone() {
+		return PhoneNumberUtils.formatNumber(phone);
 	}
 	
-	public void setProvider(Provider provider) {
-		this.id = provider.id;
-		this.provider = provider.type;
-		this.providers = new ArrayList<Provider>();
-		this.providers.add(provider);
-	}
-
-	public Contact getContact() {
-		if (contact == null) {
-			contact = new Contact();
-		}
-		return contact;
-	}
-
-	public Location getLocation() {
-		if (location == null) {
-			location = new Location();
-		}
-		return location;
-	}
-
 	public static Integer getCategoryColorResId(String categoryName, Boolean dark, Boolean mute, Boolean semi) {
 		int colorResId = R.color.accent_gray;
 		if (semi) {
@@ -267,4 +326,104 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		}
 		return Aircandi.getInstance().getResources().getColor(colorResId);
 	}
+
+	@Override
+	public String getCollection() {
+		return collectionId;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Copy and serialization
+	// --------------------------------------------------------------------------------------------
+
+	public static Place setPropertiesFromMap(Place entity, Map map) {
+		/*
+		 * Properties involved with editing are copied from one entity to another.
+		 */
+		entity = (Place) Entity.setPropertiesFromMap(entity, map);
+
+		entity.address = (String) map.get("address");
+		entity.city = (String) map.get("city");
+		entity.region = (String) map.get("region");
+		entity.country = (String) map.get("country");
+		entity.postalCode = (String) map.get("postalCode");
+		entity.phone = (String) map.get("phone");
+
+		if (map.get("location") != null) {
+			entity.location = GeoLocation.setPropertiesFromMap(new GeoLocation(), (HashMap<String, Object>) map.get("location"));
+		}
+
+		if (map.get("provider") != null) {
+			entity.provider = ProviderMap.setPropertiesFromMap(new ProviderMap(), (HashMap<String, Object>) map.get("provider"));
+		}
+
+		if (map.get("category") != null) {
+			entity.category = Category.setPropertiesFromMap(new Category(), (HashMap<String, Object>) map.get("category"));
+		}
+
+		return entity;
+	}
+
+	@Override
+	public Place clone() {
+		final Place place = (Place) super.clone();
+		if (location != null) {
+			place.location = location.clone();
+		}
+		if (provider != null) {
+			place.provider = provider.clone();
+		}
+		if (category != null) {
+			place.category = category.clone();
+		}
+		return place;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Inner classes
+	// --------------------------------------------------------------------------------------------
+
+	public static class SortEntitiesByProximityAndDistance implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity entity1, Entity entity2) {
+
+			if (entity1.hasActiveProximityLink() && !entity2.hasActiveProximityLink()) {
+				return -1;
+			}
+			else if (entity2.hasActiveProximityLink() && !entity1.hasActiveProximityLink()) {
+				return 1;
+			}
+			else {
+				if (entity1.distance < entity2.distance.intValue()) {
+					return -1;
+				}
+				else if (entity1.distance.intValue() > entity2.distance.intValue()) {
+					return 1;
+				}
+				else {
+					return 0;
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("ucd")
+	public static class SortEntitiesByDistance implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity entity1, Entity entity2) {
+
+			if (entity1.distance < entity2.distance.intValue()) {
+				return -1;
+			}
+			else if (entity1.distance.intValue() > entity2.distance.intValue()) {
+				return 1;
+			}
+			else {
+				return 0;
+			}
+		}
+	}
+
 }

@@ -2,7 +2,7 @@ package com.aircandi.components;
 
 import android.util.Log;
 
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 
 @SuppressWarnings("ucd")
 public class Logger {
@@ -47,19 +47,19 @@ public class Logger {
 			task = "[" + Thread.currentThread().getName() + "]: " + taskContext.getClass().getSimpleName() + ": ";
 		}
 		if (logLevel == LogLevel.Error) {
-			Log.e(CandiConstants.APP_NAME, task + msgFormat, t);
+			Log.e(Constants.APP_NAME, task + msgFormat, t);
 		}
 		else if (logLevel == LogLevel.Warning) {
-			Log.w(CandiConstants.APP_NAME, task + msgFormat, t);
+			Log.w(Constants.APP_NAME, task + msgFormat, t);
 		}
 		else if (logLevel == LogLevel.Info) {
-			Log.i(CandiConstants.APP_NAME, task + msgFormat, t);
+			Log.i(Constants.APP_NAME, task + msgFormat, t);
 		}
 		else if (logLevel == LogLevel.Debug) {
-			Log.d(CandiConstants.APP_NAME, task + msgFormat, t);
+			Log.d(Constants.APP_NAME, task + msgFormat, t);
 		}
 		else if (logLevel == LogLevel.Verbose) {
-			Log.v(CandiConstants.APP_NAME, task + msgFormat, t);
+			Log.v(Constants.APP_NAME, task + msgFormat, t);
 		}
 	}
 
@@ -72,13 +72,13 @@ public class Logger {
 	 * statistics-gathering server.
 	 */
 	public static void e(Object taskContext, String msgFormat) {
-		if (CandiConstants.LOG_LEVEL <= Log.ERROR) {
+		if (Constants.LOG_LEVEL <= Log.ERROR) {
 			Log(LogLevel.Error, taskContext, msgFormat);
 		}
 	}
 
 	public static void e(Object taskContext, String msgFormat, Throwable t) {
-		if (CandiConstants.LOG_LEVEL <= Log.ERROR) {
+		if (Constants.LOG_LEVEL <= Log.ERROR) {
 			Log(LogLevel.Error, taskContext, msgFormat, t);
 		}
 	}
@@ -92,13 +92,13 @@ public class Logger {
 	 * also be considered for reporting to a statistics-gathering server.
 	 */
 	public static void w(Object taskContext, String msgFormat) {
-		if (CandiConstants.LOG_LEVEL <= Log.WARN) {
+		if (Constants.LOG_LEVEL <= Log.WARN) {
 			Log(LogLevel.Warning, taskContext, msgFormat);
 		}
 	}
 
 	public static void w(Object taskContext, String msgFormat, Throwable t) {
-		if (CandiConstants.LOG_LEVEL <= Log.WARN) {
+		if (Constants.LOG_LEVEL <= Log.WARN) {
 			Log(LogLevel.Warning, taskContext, msgFormat, t);
 		}
 	}
@@ -111,13 +111,13 @@ public class Logger {
 	 * domain (to avoid duplicate logging by non-authoritative components). This level is always logged.
 	 */
 	public static void i(Object taskContext, String msgFormat) {
-		if (CandiConstants.LOG_LEVEL <= Log.INFO) {
+		if (Constants.LOG_LEVEL <= Log.INFO) {
 			Log(LogLevel.Info, taskContext, msgFormat);
 		}
 	}
 
 	public static void i(Object taskContext, String msgFormat, Throwable t) {
-		if (CandiConstants.LOG_LEVEL <= Log.INFO) {
+		if (Constants.LOG_LEVEL <= Log.INFO) {
 			Log(LogLevel.Info, taskContext, msgFormat, t);
 		}
 	}
@@ -130,13 +130,13 @@ public class Logger {
 	 * using verbose logging.
 	 */
 	public static void d(Object taskContext, String msgFormat) {
-		if (CandiConstants.LOG_LEVEL <= Log.DEBUG) {
+		if (Constants.LOG_LEVEL <= Log.DEBUG) {
 			Log(LogLevel.Debug, taskContext, msgFormat);
 		}
 	}
 
 	public static void d(Object taskContext, String msgFormat, Throwable t) {
-		if (CandiConstants.LOG_LEVEL <= Log.DEBUG) {
+		if (Constants.LOG_LEVEL <= Log.DEBUG) {
 			Log(LogLevel.Debug, taskContext, msgFormat, t);
 		}
 	}
@@ -146,13 +146,13 @@ public class Logger {
 	 * This level of logging should be used for everything else. This level will only be logged on debug builds.
 	 */
 	public static void v(Object taskContext, String msgFormat) {
-		if (CandiConstants.LOG_LEVEL <= Log.VERBOSE) {
+		if (Constants.LOG_LEVEL <= Log.VERBOSE) {
 			Log(LogLevel.Verbose, taskContext, msgFormat);
 		}
 	}
 
 	public static void v(Object taskContext, String msgFormat, Throwable t) {
-		if (CandiConstants.LOG_LEVEL <= Log.VERBOSE) {
+		if (Constants.LOG_LEVEL <= Log.VERBOSE) {
 			Log(LogLevel.Verbose, taskContext, msgFormat, t);
 		}
 	}

@@ -15,8 +15,8 @@ import android.widget.TextView;
 import com.aircandi.beta.R;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
+import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Source;
 import com.aircandi.ui.widgets.WebImageView;
 
 public class LinkListAdapter extends ArrayAdapter<Entity> implements Filterable {
@@ -56,7 +56,7 @@ public class LinkListAdapter extends ArrayAdapter<Entity> implements Filterable 
 					@Override
 					public void onClick(View view) {
 						final CheckBox checkBox = (CheckBox) view;
-						final Source source = (Source) checkBox.getTag();
+						final Applink source = (Applink) checkBox.getTag();
 						source.checked = checkBox.isChecked();
 					}
 				});
@@ -75,8 +75,8 @@ public class LinkListAdapter extends ArrayAdapter<Entity> implements Filterable 
 			final Entity sourceEntity = itemData;
 
 			setVisibility(holder.label, View.GONE);
-			if (holder.label != null && sourceEntity.source.name != null && sourceEntity.source.name.length() > 0) {
-				holder.label.setText(sourceEntity.source.name);
+			if (holder.label != null && sourceEntity.name != null && sourceEntity.name.length() > 0) {
+				holder.label.setText(sourceEntity.name);
 				setVisibility(holder.label, View.VISIBLE);
 			}
 
@@ -87,7 +87,7 @@ public class LinkListAdapter extends ArrayAdapter<Entity> implements Filterable 
 				 * by the internal image view to null before doing the work
 				 * to satisfy the new request.
 				 */
-				final String imageUri = sourceEntity.source.getPhoto().getUri();
+				final String imageUri = sourceEntity.getPhotoUri();
 
 				/* Don't do anything if the image is already set to the one we want */
 				if (holder.image.getImageUri() == null || !holder.image.getImageUri().equals(imageUri)) {

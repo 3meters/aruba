@@ -19,7 +19,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.bitmaps.BitmapRequest;
@@ -35,12 +35,12 @@ import com.aircandi.utilities.ImageUtils;
 
 public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable {
 
-	private final Object	mLock			= new Object();
+	private final Object			mLock			= new Object();
 	private final LayoutInflater	mInflater;
-	private Integer			mItemLayoutId	= R.layout.temp_listitem_candi;
-	private List<Entity>	mListItems;
-	private CandiFilter		mCandiFilter;
-	private int				mScrollState	= CandiScrollManager.SCROLL_STATE_IDLE;
+	private Integer					mItemLayoutId	= R.layout.temp_listitem_candi;
+	private List<Entity>			mListItems;
+	private CandiFilter				mCandiFilter;
+	private int						mScrollState	= CandiScrollManager.SCROLL_STATE_IDLE;
 
 	public CandiListAdapter(Context context, List<Entity> entities, Integer itemLayoutId) {
 		super(context, 0, entities);
@@ -112,15 +112,16 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			}
 
 			setVisibility(holder.subtitle, View.GONE);
-			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+			if (entity.type.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				Place place = (Place) entity;
 				if (holder.subtitle != null) {
-					if (entity.subtitle != null) {
-						holder.subtitle.setText(entity.subtitle);
+					if (place.subtitle != null) {
+						holder.subtitle.setText(place.subtitle);
 						setVisibility(holder.subtitle, View.VISIBLE);
 					}
 					else {
-						if (entity.place.category != null) {
-							holder.subtitle.setText(Html.fromHtml(entity.place.category.name));
+						if (place.category != null) {
+							holder.subtitle.setText(Html.fromHtml(place.category.name));
 							setVisibility(holder.subtitle, View.VISIBLE);
 						}
 					}
@@ -142,10 +143,13 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 
 			/* Comments */
 			setVisibility(holder.comments, View.GONE);
-			if (holder.comments != null && entity.commentCount != null && entity.commentCount > 0) {
-				holder.comments.setText(String.valueOf(entity.commentCount) + ((entity.commentCount == 1) ? " Comment" : " Comments"));
-				holder.comments.setTag(entity);
-				setVisibility(holder.comments, View.VISIBLE);
+			if (holder.comments != null) {
+				Integer commentCount = entity.getInCount(Constants.TYPE_LINK_COMMENT);
+				if (commentCount != null && commentCount > 0) {
+					holder.comments.setText(String.valueOf(commentCount) + ((commentCount == 1) ? " Comment" : " Comments"));
+					holder.comments.setTag(entity);
+					setVisibility(holder.comments, View.VISIBLE);
+				}
 			}
 
 			setVisibility(holder.user, View.GONE);
@@ -161,11 +165,11 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 				 * by the internal image view to null before doing the work
 				 * to satisfy the new request.
 				 */
-				if (entity.getPhoto().getBitmap() != null) {
-					ImageUtils.showImageInImageView(entity.getPhoto().getBitmap(), holder.image.getImageView(), true, AnimUtils.fadeInMedium());
+				if (entity.photo != null && entity.photo.getBitmap() != null) {
+					ImageUtils.showImageInImageView(entity.photo.getBitmap(), holder.image.getImageView(), true, AnimUtils.fadeInMedium());
 				}
 				else {
-					final String imageUri = entity.getEntityPhotoUri();
+					final String imageUri = entity.getPhotoUri();
 
 					/* Don't do anything if the image is already set to the one we want */
 					if (holder.image.getImageUri() == null || !holder.image.getImageUri().equals(imageUri)) {
@@ -176,12 +180,15 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 						final BitmapRequest imageRequest = builder.create();
 
 						holder.imageUri = imageUri;
-						if (entity.synthetic) {
-							final int color = Place.getCategoryColor((entity.place.category != null) ? entity.place.category.name : null, true, true, false);
-							holder.image.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-						}
-						else {
-							holder.image.getImageView().clearColorFilter();
+						if (entity.type.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+							Place place = (Place) entity;
+							if (place.synthetic) {
+								final int color = Place.getCategoryColor((place.category != null) ? place.category.name : null, true, true, false);
+								holder.image.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+							}
+							else {
+								holder.image.getImageView().clearColorFilter();
+							}
 						}
 
 						holder.image.setBitmapRequest(imageRequest);

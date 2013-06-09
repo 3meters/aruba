@@ -21,7 +21,7 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -66,7 +66,7 @@ public class CategoryBuilder extends FormActivity {
 	private void initialize() {
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			final String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
+			final String jsonCategory = extras.getString(Constants.EXTRA_CATEGORY);
 			if (jsonCategory != null) {
 				mOriginalCategory = (Category) HttpService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 			}
@@ -75,10 +75,10 @@ public class CategoryBuilder extends FormActivity {
 		mSpinnerCategory = (Spinner) findViewById(R.id.category);
 		mSpinnerSubCategory = (Spinner) findViewById(R.id.sub_category);
 		mSpinnerSubSubCategory = (Spinner) findViewById(R.id.sub_sub_category);
-		
+
 		mSpinnerItem = mCommon.mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
-		
-		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);		
+
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		mCommon.mActionBar.setTitle(R.string.dialog_category_builder_title);
 
 		if (ProxiManager.getInstance().getEntityModel().getCategories().size() == 0) {
@@ -143,17 +143,17 @@ public class CategoryBuilder extends FormActivity {
 			final Category category = new Category();
 			category.id = mSubSubCategory.id;
 			category.name = mSubSubCategory.name;
-			category.icon = mSubSubCategory.icon;
+			category.photo = mSubSubCategory.photo;
 			final String jsonCategory = HttpService.convertObjectToJsonSmart(category, false, true);
-			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
+			intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
 		}
 		else if (mSubCategory != null) {
 			final Category category = new Category();
 			category.id = mSubCategory.id;
 			category.name = mSubCategory.name;
-			category.icon = mSubCategory.icon;
+			category.photo = mSubCategory.photo;
 			final String jsonCategory = HttpService.convertObjectToJsonSmart(category, false, true);
-			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
+			intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
 		}
 		setResult(Activity.RESULT_OK, intent);
 		finish();
@@ -238,18 +238,18 @@ public class CategoryBuilder extends FormActivity {
 
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				
+
 				if (mCommon.mThemeTone.equals("dark")) {
 					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
-						((TextView)parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));   				
+						((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));
 					}
 				}
 
 				if (position < mCategories.size()) {
 
 					mCategory = mCategories.get(position);
-					if (mCategory.iconUri() != null) {
-						updateCustomImage(mCategory.iconUri(), mCategory);
+					if (mCategory.photo != null) {
+						updateCustomImage(mCategory.photo.getUri(), mCategory);
 					}
 
 					mSubCategory = null;
@@ -317,15 +317,15 @@ public class CategoryBuilder extends FormActivity {
 
 					if (mCommon.mThemeTone.equals("dark")) {
 						if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
-							((TextView)parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));   				
+							((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));
 						}
 					}
-					
+
 					/* Do nothing when the hint item is selected */
 					if (position < mCategory.categories.size()) {
 						mSubCategory = mCategory.categories.get(position);
-						if (mSubCategory.iconUri() != null) {
-							updateCustomImage(mSubCategory.iconUri(), mSubCategory);
+						if (mSubCategory.photo != null) {
+							updateCustomImage(mSubCategory.photo.getUri(), mSubCategory);
 						}
 
 						mSubSubCategory = null;
@@ -391,15 +391,15 @@ public class CategoryBuilder extends FormActivity {
 
 					if (mCommon.mThemeTone.equals("dark")) {
 						if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
-							((TextView)parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));   				
+							((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));
 						}
 					}
-					
+
 					/* Do nothing when the hint item is selected */
 					if (position < mSubCategory.categories.size()) {
 						mSubSubCategory = mSubCategory.categories.get(position);
-						if (mSubSubCategory.iconUri() != null) {
-							updateCustomImage(mSubSubCategory.iconUri(), mSubSubCategory);
+						if (mSubSubCategory.photo != null) {
+							updateCustomImage(mSubSubCategory.photo.getUri(), mSubSubCategory);
 						}
 					}
 				}

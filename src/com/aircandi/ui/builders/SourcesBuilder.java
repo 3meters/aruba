@@ -22,20 +22,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.MenuItem;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.ApplinkListAdapter;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.components.ProxiManager.ModelResult;
-import com.aircandi.components.SourceListAdapter;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ServiceDataType;
+import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Source;
+import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.BounceListView;
 import com.aircandi.ui.widgets.WebImageView;
@@ -47,12 +48,12 @@ public class SourcesBuilder extends FormActivity {
 
 	private BounceListView		mList;
 	private TextView			mMessage;
-	private final List<Source>	mSystemSources	= new ArrayList<Source>();
-	private final List<Source>	mActiveSources	= new ArrayList<Source>();
+	private final List<Entity>	mSystemApplinks	= new ArrayList<Entity>();
+	private final List<Entity>	mActiveApplinks	= new ArrayList<Entity>();
 	private String				mEntityId;
 	private Entity				mEntity;
-	private Source				mSourceEditing;
-	private List<String>		mJsonSourcesOriginal;
+	private Applink				mApplinkEditing;
+	private List<String>		mJsonApplinksOriginal;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -73,17 +74,17 @@ public class SourcesBuilder extends FormActivity {
 		/* We use this to access the source suggestions */
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			final List<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
-			if (jsonSources != null) {
-				mJsonSourcesOriginal = jsonSources;
-				List<Source> sources = new ArrayList<Source>();
-				for (String jsonSource : jsonSources) {
-					Source source = (Source) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
-					sources.add(source);
+			final List<String> jsonApplinks = extras.getStringArrayList(Constants.EXTRA_APPLINKS);
+			if (jsonApplinks != null) {
+				mJsonApplinksOriginal = jsonApplinks;
+				List<Applink> applinks = new ArrayList<Applink>();
+				for (String jsonApplink : jsonApplinks) {
+					Applink source = (Applink) HttpService.convertJsonToObjectInternalSmart(jsonApplink, ServiceDataType.Applink);
+					applinks.add(source);
 				}
-				splitSources(sources);
+				splitApplinks(applinks);
 			}
-			mEntityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
+			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
 			if (mEntityId != null) {
 				mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
 			}
@@ -97,7 +98,7 @@ public class SourcesBuilder extends FormActivity {
 
 	private void bind() {
 
-		if (mActiveSources.size() == 0) {
+		if (mActiveApplinks.size() == 0) {
 			mCommon.hideBusy(true); // visible by default
 			mMessage.setText(R.string.sources_builder_empty);
 			mMessage.setVisibility(View.VISIBLE);
@@ -105,13 +106,13 @@ public class SourcesBuilder extends FormActivity {
 		else {
 			mMessage.setVisibility(View.GONE);
 			Integer position = 0;
-			for (Source source : mActiveSources) {
+			for (Entity source : mActiveApplinks) {
 				source.checked = false;
 				source.position = position;
 				position++;
 			}
 		}
-		final SourceListAdapter adapter = new SourceListAdapter(this, mActiveSources, R.layout.temp_listitem_sources_builder);
+		final ApplinkListAdapter adapter = new ApplinkListAdapter(this, mActiveApplinks, R.layout.temp_listitem_sources_builder);
 		mList.setAdapter(adapter);
 	}
 
@@ -134,21 +135,21 @@ public class SourcesBuilder extends FormActivity {
 	public void onCheckedClick(View view) {
 		CheckBox check = (CheckBox) view.findViewById(R.id.check);
 		check.setChecked(!check.isChecked());
-		final Source source = (Source) check.getTag();
+		final Applink source = (Applink) check.getTag();
 		source.checked = check.isChecked();
 	}
 
 	@SuppressWarnings("ucd")
 	public void onSuggestLinksButtonClick(View view) {
 		/* Go get source suggestions again */
-		List<Source> sources = mergeSources();
-		loadSourceSuggestions(sources, true, mEntity);
+		List<Entity> applinks = mergeApplinks();
+		loadApplinkSuggestions(applinks, true, (Place) mEntity);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onDeleteButtonClick(View view) {
-		for (int i = mActiveSources.size() - 1; i >= 0; i--) {
-			if (mActiveSources.get(i).checked) {
+		for (int i = mActiveApplinks.size() - 1; i >= 0; i--) {
+			if (mActiveApplinks.get(i).checked) {
 				confirmSourceDelete();
 				return;
 			}
@@ -158,20 +159,20 @@ public class SourcesBuilder extends FormActivity {
 	@SuppressWarnings("ucd")
 	public void onAddButtonClick(View view) {
 		final Intent intent = new Intent(this, SourceBuilder.class);
-		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCE_NEW);
+		startActivityForResult(intent, Constants.ACTIVITY_SOURCE_NEW);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onMoveUpButtonClick(View view) {
-		for (int i = mActiveSources.size() - 1; i >= 0; i--) {
-			if (mActiveSources.get(i).checked) {
-				mActiveSources.get(i).position -= 2;
+		for (int i = mActiveApplinks.size() - 1; i >= 0; i--) {
+			if (mActiveApplinks.get(i).checked) {
+				mActiveApplinks.get(i).position -= 2;
 			}
 		}
-		Collections.sort(mActiveSources, new Source.SortSourcesBySourcePosition());
+		Collections.sort(mActiveApplinks, new Entity.SortEntitiesByPosition());
 		Integer position = 0;
-		for (Source source : mActiveSources) {
+		for (Entity source : mActiveApplinks) {
 			source.position = position;
 			position++;
 		}
@@ -180,14 +181,14 @@ public class SourcesBuilder extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onMoveDownButtonClick(View view) {
-		for (int i = mActiveSources.size() - 1; i >= 0; i--) {
-			if (mActiveSources.get(i).checked) {
-				mActiveSources.get(i).position += 2;
+		for (int i = mActiveApplinks.size() - 1; i >= 0; i--) {
+			if (mActiveApplinks.get(i).checked) {
+				mActiveApplinks.get(i).position += 2;
 			}
 		}
-		Collections.sort(mActiveSources, new Source.SortSourcesBySourcePosition());
+		Collections.sort(mActiveApplinks, new Entity.SortEntitiesByPosition());
 		Integer position = 0;
-		for (Source source : mActiveSources) {
+		for (Entity source : mActiveApplinks) {
 			source.position = position;
 			position++;
 		}
@@ -198,10 +199,10 @@ public class SourcesBuilder extends FormActivity {
 	public void onListItemClick(View view) {
 		final Intent intent = new Intent(this, SourceBuilder.class);
 		final CheckBox check = (CheckBox) ((View) view.getParent()).findViewById(R.id.check);
-		mSourceEditing = (Source) check.getTag();
-		final String jsonSource = HttpService.convertObjectToJsonSmart(mSourceEditing, false, true);
-		intent.putExtra(CandiConstants.EXTRA_SOURCE, jsonSource);
-		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCE_EDIT);
+		mApplinkEditing = (Applink) check.getTag();
+		final String jsonSource = HttpService.convertObjectToJsonSmart(mApplinkEditing, false, true);
+		intent.putExtra(Constants.EXTRA_SOURCE, jsonSource);
+		startActivityForResult(intent, Constants.ACTIVITY_SOURCE_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
@@ -209,36 +210,36 @@ public class SourcesBuilder extends FormActivity {
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
 		if (resultCode == Activity.RESULT_OK) {
-			if (requestCode == CandiConstants.ACTIVITY_SOURCE_EDIT) {
+			if (requestCode == Constants.ACTIVITY_SOURCE_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
+					final String jsonSource = extras.getString(Constants.EXTRA_SOURCE);
 					if (jsonSource != null) {
-						final Source sourceUpdated = (Source) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
+						final Applink sourceUpdated = (Applink) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Applink);
 						if (sourceUpdated != null) {
 							/* Copy changes */
-							mSourceEditing.label = sourceUpdated.label;
-							mSourceEditing.id = sourceUpdated.id;
-							mSourceEditing.url = sourceUpdated.url;
-							mSourceEditing.photo = sourceUpdated.photo;
+							mApplinkEditing.name = sourceUpdated.name;
+							mApplinkEditing.id = sourceUpdated.id;
+							mApplinkEditing.url = sourceUpdated.url;
+							mApplinkEditing.photo = sourceUpdated.photo;
 							mList.invalidateViews();
 						}
 					}
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_SOURCE_NEW) {
+			else if (requestCode == Constants.ACTIVITY_SOURCE_NEW) {
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
+					final String jsonSource = extras.getString(Constants.EXTRA_SOURCE);
 					if (jsonSource != null) {
-						final Source sourceNew = (Source) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
+						final Applink sourceNew = (Applink) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Applink);
 						if (sourceNew != null) {
 							sourceNew.checked = false;
-							mActiveSources.add(sourceNew);
+							mActiveApplinks.add(sourceNew);
 
 							/* Rebuild the position numbering */
 							Integer position = 0;
-							for (Source source : mActiveSources) {
+							for (Entity source : mActiveApplinks) {
 								source.position = position;
 								position++;
 							}
@@ -256,33 +257,33 @@ public class SourcesBuilder extends FormActivity {
 	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
 
-	private void splitSources(List<Source> sources) {
-		mActiveSources.clear();
-		mSystemSources.clear();
+	private void splitApplinks(List<Applink> applinks) {
+		mActiveApplinks.clear();
+		mSystemApplinks.clear();
 
-		for (Source source : sources) {
-			if (source.system != null && source.system) {
-				mSystemSources.add(source);
+		for (Applink applink : applinks) {
+			if (applink.system != null && applink.system) {
+				mSystemApplinks.add(applink);
 			}
 			else {
-				mActiveSources.add(source);
+				mActiveApplinks.add(applink);
 			}
 		}
 	}
 
-	private List<Source> mergeSources() {
-		List<Source> sources = new ArrayList<Source>();
-		sources.addAll(mSystemSources);
-		sources.addAll(mActiveSources);
-		return sources;
+	private List<Entity> mergeApplinks() {
+		List<Entity> applinks = new ArrayList<Entity>();
+		applinks.addAll(mSystemApplinks);
+		applinks.addAll(mActiveApplinks);
+		return applinks;
 	}
 
 	private void confirmSourceDelete() {
 
 		/* How many are we deleting? */
 		Integer deleteCount = 0;
-		for (int i = mActiveSources.size() - 1; i >= 0; i--) {
-			if (mActiveSources.get(i).checked) {
+		for (int i = mActiveApplinks.size() - 1; i >= 0; i--) {
+			if (mActiveApplinks.get(i).checked) {
 				deleteCount++;
 			}
 		}
@@ -291,16 +292,16 @@ public class SourcesBuilder extends FormActivity {
 		final ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.temp_delete_sources, null);
 		final TextView message = (TextView) customView.findViewById(R.id.message);
 		final LinearLayout list = (LinearLayout) customView.findViewById(R.id.list);
-		for (Source source : mActiveSources) {
-			if (source.checked) {
+		for (Entity applink : mActiveApplinks) {
+			if (applink.checked) {
 				View sourceView = inflater.inflate(R.layout.temp_listitem_delete_sources, null);
 				WebImageView image = (WebImageView) sourceView.findViewById(R.id.image);
 				TextView title = (TextView) sourceView.findViewById(R.id.title);
-				if (source.label != null) {
-					title.setText(source.label);
+				if (applink.name != null) {
+					title.setText(applink.name);
 				}
-				image.setTag(source);
-				final String imageUri = source.getPhoto().getUri();
+				image.setTag(applink);
+				final String imageUri = applink.getPhotoUri();
 				BitmapRequest bitmapRequest = new BitmapRequest(imageUri, image.getImageView());
 				bitmapRequest.setImageSize(image.getSizeHint());
 				bitmapRequest.setImageRequestor(image.getImageView());
@@ -327,9 +328,9 @@ public class SourcesBuilder extends FormActivity {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
-							for (int i = mActiveSources.size() - 1; i >= 0; i--) {
-								if (mActiveSources.get(i).checked) {
-									mActiveSources.remove(i);
+							for (int i = mActiveApplinks.size() - 1; i >= 0; i--) {
+								if (mActiveApplinks.get(i).checked) {
+									mActiveApplinks.remove(i);
 								}
 							}
 							mList.invalidateViews();
@@ -367,19 +368,19 @@ public class SourcesBuilder extends FormActivity {
 		dialog.setCanceledOnTouchOutside(false);
 	}
 
-	private void loadSourceSuggestions(final List<Source> sources, final Boolean autoInsert, final Entity entity) {
+	private void loadApplinkSuggestions(final List<Entity> applinks, final Boolean autoInsert, final Place entity) {
 		new AsyncTask() {
 
 			@Override
 			protected void onPreExecute() {
 				mCommon.showBusy(true);
-				mCommon.startBusyIndicator();
+				mCommon.startBodyBusyIndicator();
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LoadSourceSuggestions");
-				ModelResult result = ProxiManager.getInstance().getEntityModel().getSourceSuggestions(sources, entity);
+				ModelResult result = ProxiManager.getInstance().getEntityModel().getApplinkSuggestions(applinks, entity);
 				return result;
 			}
 
@@ -387,19 +388,19 @@ public class SourcesBuilder extends FormActivity {
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					final List<Source> sourcesProcessed = (List<Source>) result.serviceResponse.data;
+					final List<Applink> sourcesProcessed = (List<Applink>) result.serviceResponse.data;
 					if (autoInsert) {
 						if (sourcesProcessed.size() > 0) {
 
 							/* First make sure they have default captions */
-							for (Source source : sourcesProcessed) {
-								if (source.label == null) {
-									source.label = source.type;
+							for (Applink source : sourcesProcessed) {
+								if (source.name == null) {
+									source.name = source.type;
 								}
 							}
-							int activeCountOld = mActiveSources.size();
-							splitSources(sourcesProcessed);
-							int activeCountNew = mActiveSources.size();
+							int activeCountOld = mActiveApplinks.size();
+							splitApplinks(sourcesProcessed);
+							int activeCountNew = mActiveApplinks.size();
 							if (activeCountNew == activeCountOld) {
 								ImageUtils.showToastNotification(getResources().getString(R.string.toast_source_no_links), Toast.LENGTH_SHORT);
 							}
@@ -421,13 +422,13 @@ public class SourcesBuilder extends FormActivity {
 	private void gatherAndExit() {
 		final Intent intent = new Intent();
 		final List<String> sourceStrings = new ArrayList<String>();
-		List<Source> sources = mergeSources();
+		List<Entity> applinks = mergeApplinks();
 
-		for (Source source : sources) {
+		for (Entity source : applinks) {
 			sourceStrings.add(HttpService.convertObjectToJsonSmart(source, true, true));
 		}
 
-		intent.putStringArrayListExtra(CandiConstants.EXTRA_SOURCES, (ArrayList<String>) sourceStrings);
+		intent.putStringArrayListExtra(Constants.EXTRA_APPLINKS, (ArrayList<String>) sourceStrings);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
 		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
@@ -436,27 +437,27 @@ public class SourcesBuilder extends FormActivity {
 	private Boolean isDirty() {
 
 		/* Gather */
-		List<Source> sources = mergeSources();
+		List<Entity> applinks = mergeApplinks();
 
-		final List<String> jsonSources = new ArrayList<String>();
-		for (Source source : sources) {
-			jsonSources.add(HttpService.convertObjectToJsonSmart(source, true, true));
+		final List<String> jsonApplinks = new ArrayList<String>();
+		for (Entity applink : applinks) {
+			jsonApplinks.add(HttpService.convertObjectToJsonSmart(applink, true, true));
 		}
 
-		if (mJsonSourcesOriginal == null) {
-			if (jsonSources.size() > 0) {
+		if (mJsonApplinksOriginal == null) {
+			if (jsonApplinks.size() > 0) {
 				return true;
 			}
 		}
 		else {
 
-			if (jsonSources.size() != mJsonSourcesOriginal.size()) {
+			if (jsonApplinks.size() != mJsonApplinksOriginal.size()) {
 				return true;
 			}
 
 			int position = 0;
-			for (String jsonSource : jsonSources) {
-				if (!jsonSource.equals(mJsonSourcesOriginal.get(position))) {
+			for (String jsonApplink : jsonApplinks) {
+				if (!jsonApplink.equals(mJsonApplinksOriginal.get(position))) {
 					return true;
 				}
 				position++;

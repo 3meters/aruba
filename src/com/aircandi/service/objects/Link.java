@@ -1,5 +1,6 @@
 package com.aircandi.service.objects;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.aircandi.service.Expose;
@@ -10,21 +11,21 @@ import com.aircandi.service.SerializedName;
  */
 
 @SuppressWarnings("ucd")
-public class Link extends ServiceEntryBase {
+public class Link extends ServiceBase {
 
 	private static final long	serialVersionUID	= 8839291281700760437L;
 	public static final String	collectionId		= "links";
 
 	@Expose
-	@SerializedName("_from")
+	public String				schema;
+	@Expose
+	@SerializedName(name = "_from")
 	public String				fromId;
 	@Expose
-	@SerializedName("_to")
+	@SerializedName(name = "_to")
 	public String				toId;
 	@Expose
-	public Number				signal;
-	@Expose
-	public Boolean				primary;
+	public Proximity			proximity;
 
 	@Expose(serialize = false, deserialize = true)
 	public String				fromCollectionId;
@@ -40,41 +41,40 @@ public class Link extends ServiceEntryBase {
 		this.fromId = fromId;
 	}
 
-	@Override
-	public Link clone() {
-		try {
-			final Link link = (Link) super.clone();
-			return link;
-		}
-		catch (final CloneNotSupportedException ex) {
-			throw new AssertionError();
-		}
-	}
-
-	public static Link setPropertiesFromMap(Link link, Map map) {
-
-		link = (Link) ServiceEntryBase.setPropertiesFromMap(link, map);
-
-		link.fromId = (String) map.get("_from");
-		link.toId = (String) map.get("_to");
-		link.signal = (Number) map.get("signal");
-		link.primary = (Boolean) map.get("primary");
-
-		link.fromCollectionId = (String) map.get("fromCollectionId");
-		link.toCollectionId = (String) map.get("toCollectionId");
-		link.tuneCount = (Number) map.get("tuneCount");
-		return link;
-	}
+	// --------------------------------------------------------------------------------------------
+	// Set and get
+	// --------------------------------------------------------------------------------------------	
 
 	@Override
 	public String getCollection() {
 		return collectionId;
 	}
 
-	@SuppressWarnings("ucd")
-	public enum LinkType {
-		proximity,
-		browse,
-		content
+	// --------------------------------------------------------------------------------------------
+	// Copy and serialization
+	// --------------------------------------------------------------------------------------------
+
+	public static Link setPropertiesFromMap(Link link, Map map) {
+
+		link = (Link) ServiceBase.setPropertiesFromMap(link, map);
+
+		link.schema = (String) map.get("schema");
+		link.fromId = (String) map.get("_from");
+		link.toId = (String) map.get("_to");
+		link.fromCollectionId = (String) map.get("fromCollectionId");
+		link.toCollectionId = (String) map.get("toCollectionId");
+		link.tuneCount = (Number) map.get("tuneCount");
+
+		if (map.get("proximity") != null) {
+			link.proximity = Proximity.setPropertiesFromMap(new Proximity(), (HashMap<String, Object>) map.get("proximity"));
+		}
+
+		return link;
+	}
+
+	@Override
+	public Link clone() {
+		final Link link = (Link) super.clone();
+		return link;
 	}
 }

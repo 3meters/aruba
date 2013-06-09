@@ -11,7 +11,7 @@ import android.view.WindowManager;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.LinkListAdapter;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -22,10 +22,10 @@ import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.HttpService.ServiceDataType;
+import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
-import com.aircandi.service.objects.Source;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.BounceListView;
 import com.aircandi.utilities.AnimUtils;
@@ -34,7 +34,7 @@ import com.aircandi.utilities.AnimUtils.TransitionType;
 public class LinkPicker extends FormActivity {
 
 	private BounceListView		mList;
-	private final List<Entity>	mSourceEntities	= new ArrayList<Entity>();
+	private final List<Entity>	mApplinks	= new ArrayList<Entity>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -54,17 +54,17 @@ public class LinkPicker extends FormActivity {
 		/* We use this to access the source suggestions */
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			final List<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_ENTITIES);
-			if (jsonSources != null) {
-				for (String jsonSource : jsonSources) {
-					Entity entity = (Entity) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Entity);
-					mSourceEntities.add(entity);
+			final List<String> jsonApplinks = extras.getStringArrayList(Constants.EXTRA_ENTITIES);
+			if (jsonApplinks != null) {
+				for (String jsonApplink : jsonApplinks) {
+					Applink entity = (Applink) HttpService.convertJsonToObjectInternalSmart(jsonApplink, ServiceDataType.Applink);
+					mApplinks.add(entity);
 				}
 			}
 		}
-		if (mSourceEntities != null && mSourceEntities.size() > 0) {
-			mCommon.mActionBar.setTitle(mSourceEntities.get(0).source.type);
-			Photo photo = new Photo(Source.getDefaultIcon(mSourceEntities.get(0).source.type), null, null, null, PhotoSource.assets);
+		if (mApplinks != null && mApplinks.size() > 0) {
+			mCommon.mActionBar.setTitle(mApplinks.get(0).type);
+			Photo photo = new Photo(Applink.getDefaultIcon(mApplinks.get(0).type), null, null, null, PhotoSource.assets);
 			final BitmapRequest bitmapRequest = new BitmapRequest();
 			bitmapRequest.setImageUri(photo.getUri());
 			bitmapRequest.setImageRequestor(this);
@@ -92,7 +92,7 @@ public class LinkPicker extends FormActivity {
 	}
 
 	private void bind() {
-		final LinkListAdapter adapter = new LinkListAdapter(this, mSourceEntities, R.layout.temp_listitem_link_picker);
+		final LinkListAdapter adapter = new LinkListAdapter(this, mApplinks, R.layout.temp_listitem_link_picker);
 		mList.setAdapter(adapter);
 	}
 
@@ -110,8 +110,8 @@ public class LinkPicker extends FormActivity {
 	@SuppressWarnings("ucd")
 	public void onListItemClick(View view) {
 		View label = (View) view.findViewById(R.id.image);
-		Entity sourceEntity = (Entity) label.getTag();
-		mCommon.routeSourceEntity(sourceEntity, null);
+		Applink entity = (Applink) label.getTag();
+		mCommon.routeApplink(entity, null);
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -1,19 +1,18 @@
 package com.aircandi.service.objects;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.aircandi.ProxiConstants;
 import com.aircandi.service.Expose;
 
 /**
  * @author Jayma
  */
 @SuppressWarnings("ucd")
-public class User extends ServiceEntryBase {
+public class User extends Entity {
 
 	private static final long	serialVersionUID	= 127428776257201065L;
 	public static final String	collectionId		= "users";
@@ -23,19 +22,17 @@ public class User extends ServiceEntryBase {
 	@Expose
 	public String				role;
 	@Expose
-	public String				location;
+	public String				area;
 	@Expose
 	public String				bio;
 	@Expose
 	public String				webUri;
 	@Expose
-	public Boolean				isDeveloper;
+	public Boolean				developer;
 	@Expose
 	public Boolean				doNotTrack;
 	@Expose
 	public String				password;
-	@Expose
-	public Photo				photo;
 
 	@Expose(serialize = false, deserialize = true)
 	public String				facebookId;
@@ -72,88 +69,39 @@ public class User extends ServiceEntryBase {
 
 	public User() {}
 
+	// --------------------------------------------------------------------------------------------
+	// Set and get
+	// --------------------------------------------------------------------------------------------		
+
 	@Override
-	public User clone() {
-		try {
-			final User user = (User) super.clone();
-			if (stats != null) {
-				user.stats = (List<Stat>) ((ArrayList) stats).clone();
-			}
+	public String getPhotoUri() {
 
-			return user;
-		}
-		catch (final CloneNotSupportedException ex) {
-			throw new AssertionError();
-		}
-	}
-
-	public static User setPropertiesFromMap(User user, Map map) {
 		/*
-		 * These base properties are done here instead of calling ServiceEntry
-		 * because of a recursion problem.
+		 * If a special preview photo is available, we use it otherwise
+		 * we use the standard photo.
+		 * 
+		 * Only posts and collections do not have photo objects
 		 */
-		user.id = (String) ((map.get("_id") != null) ? map.get("_id") : map.get("id"));
-		user.ownerId = (String) ((map.get("_owner") != null) ? map.get("_owner") : map.get("ownerId"));
-		user.creatorId = (String) ((map.get("_creator") != null) ? map.get("_creator") : map.get("creatorId"));
-		user.modifierId = (String) ((map.get("_modifier") != null) ? map.get("_modifier") : map.get("modifierId"));
-		user.watcherId = (String) ((map.get("_watcher") != null) ? map.get("_watcher") : map.get("watcherId"));
-
-		user.createdDate = (Number) map.get("createdDate");
-		user.modifiedDate = (Number) map.get("modifiedDate");
-		user.activityDate = (Number) map.get("activityDate");
-		user.watchedDate = (Number) map.get("watchedDate");
-
-		user.name = (String) map.get("name");
-		user.firstName = (String) map.get("firstName");
-		user.lastName = (String) map.get("lastName");
-		user.location = (String) map.get("location");
-		user.email = (String) map.get("email");
-		user.role = (String) map.get("role");
-		user.bio = (String) map.get("bio");
-		user.webUri = (String) map.get("webUri");
-		user.isDeveloper = (Boolean) map.get("isDeveloper");
-		user.doNotTrack = (Boolean) map.get("doNotTrack");
-		user.password = (String) map.get("password");
-		user.lastSignedInDate = (Number) map.get("lastSignedInDate");
-		user.validationDate = (Number) map.get("validationDate");
-		user.validationNotifyDate = (Number) map.get("validationNotifyDate");
-		
-		if (map.get("photo") != null) {
-			user.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
-		}
-
-		if (map.get("stats") != null) {
-			user.stats = new ArrayList<Stat>();
-			final List<LinkedHashMap<String, Object>> statMaps = (List<LinkedHashMap<String, Object>>) map.get("stats");
-			for (Map<String, Object> statMap : statMaps) {
-				user.stats.add(Stat.setPropertiesFromMap(new Stat(), statMap));
-			}
-		}
-
-		user.likeCount = (Integer) map.get("likeCount");
-		user.liked = (Boolean) map.get("liked");
-		user.watchCount = (Integer) map.get("watchCount");
-		user.watched = (Boolean) map.get("watched");
-
-		return user;
-	}
-
-	public Photo getPhoto() {
-		return (photo != null) ? photo : new Photo();
-	}
-
-	public Photo getPhotoForSet() {
-		if (photo == null) {
-			photo = new Photo();
-		}
-		return photo;
-	}
-
-	public String getUserPhotoUri() {
 		String imageUri = "resource:img_placeholder_logo_bw";
 		if (photo != null) {
-			imageUri = photo.getUri();
+			imageUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
+			if (imageUri == null) {
+				imageUri = photo.getUri();
+			}
 		}
+		else {
+			if (creator != null) {
+				if (creator.getPhotoUri() != null && !creator.getPhotoUri().equals("")) {
+					imageUri = creator.getPhotoUri();
+				}
+			}
+			if (!imageUri.startsWith("http:")
+					&& !imageUri.startsWith("https:")
+					&& !imageUri.startsWith("resource:")) {
+				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
+			}
+		}
+
 		return imageUri;
 	}
 
@@ -162,19 +110,46 @@ public class User extends ServiceEntryBase {
 		return collectionId;
 	}
 
-	public static class SortUsersByWatchedDate implements Comparator<User> {
+	// --------------------------------------------------------------------------------------------
+	// Copy and serialization
+	// --------------------------------------------------------------------------------------------
 
-		@Override
-		public int compare(User user1, User user2) {
+	public static User setPropertiesFromMap(User entity, Map map) {
 
-			if (user1.watchedDate.longValue() < user2.watchedDate.longValue()) {
-				return 1;
+		synchronized (entity) {
+			entity = (User) Entity.setPropertiesFromMap(entity, map);
+
+			entity.area = (String) map.get("area");
+			entity.email = (String) map.get("email");
+			entity.role = (String) map.get("role");
+			entity.bio = (String) map.get("bio");
+			entity.webUri = (String) map.get("webUri");
+			entity.developer = (Boolean) map.get("developer");
+			entity.doNotTrack = (Boolean) map.get("doNotTrack");
+			entity.password = (String) map.get("password");
+			entity.lastSignedInDate = (Number) map.get("lastSignedInDate");
+			entity.validationDate = (Number) map.get("validationDate");
+			entity.validationNotifyDate = (Number) map.get("validationNotifyDate");
+
+			if (map.get("stats") != null) {
+				entity.stats = new ArrayList<Stat>();
+				final List<LinkedHashMap<String, Object>> statMaps = (List<LinkedHashMap<String, Object>>) map.get("stats");
+				for (Map<String, Object> statMap : statMaps) {
+					entity.stats.add(Stat.setPropertiesFromMap(new Stat(), statMap));
+				}
 			}
-			else if (user1.watchedDate.longValue() == user2.watchedDate.longValue()) {
-				return 0;
-			}
-			return -1;
 		}
+
+		return entity;
+	}
+
+	@Override
+	public User clone() {
+		final User user = (User) super.clone();
+		if (stats != null) {
+			user.stats = (List<Stat>) ((ArrayList) stats).clone();
+		}
+		return user;
 	}
 
 }

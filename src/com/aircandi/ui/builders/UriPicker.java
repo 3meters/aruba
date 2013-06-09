@@ -19,7 +19,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.FontManager;
@@ -65,8 +65,8 @@ public class UriPicker extends FormActivity {
 
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			mVerifyUri = extras.getBoolean(CandiConstants.EXTRA_VERIFY_URI, false);
-			mUri = extras.getString(CandiConstants.EXTRA_URI);
+			mVerifyUri = extras.getBoolean(Constants.EXTRA_VERIFY_URI, false);
+			mUri = extras.getString(Constants.EXTRA_URI);
 		}
 
 		mListView = (ListView) findViewById(R.id.form_list);
@@ -253,9 +253,9 @@ public class UriPicker extends FormActivity {
 							mCommon.hideBusy(true);
 
 							final Intent intent = new Intent();
-							intent.putExtra(CandiConstants.EXTRA_URI, mUri);
-							intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mUriTitle);
-							intent.putExtra(CandiConstants.EXTRA_URI_DESCRIPTION, mUriDescription);
+							intent.putExtra(Constants.EXTRA_URI, mUri);
+							intent.putExtra(Constants.EXTRA_URI_TITLE, mUriTitle);
+							intent.putExtra(Constants.EXTRA_URI_DESCRIPTION, mUriDescription);
 							setResult(Activity.RESULT_OK, intent);
 							finish();
 						}
@@ -267,9 +267,9 @@ public class UriPicker extends FormActivity {
 			}
 			else {
 				final Intent intent = new Intent();
-				intent.putExtra(CandiConstants.EXTRA_URI, mUri);
-				intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mUriTitle);
-				intent.putExtra(CandiConstants.EXTRA_URI_DESCRIPTION, mUriDescription);
+				intent.putExtra(Constants.EXTRA_URI, mUri);
+				intent.putExtra(Constants.EXTRA_URI_TITLE, mUriTitle);
+				intent.putExtra(Constants.EXTRA_URI_DESCRIPTION, mUriDescription);
 				setResult(Activity.RESULT_OK, intent);
 				finish();
 			}

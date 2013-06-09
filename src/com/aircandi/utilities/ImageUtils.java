@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 
 public class ImageUtils {
 
@@ -40,11 +40,11 @@ public class ImageUtils {
 
 	public static Bitmap ensureBitmapScaleForS3(Bitmap bitmap) {
 		Bitmap bitmapScaled = bitmap;
-		final Boolean scalingNeeded = (bitmap.getWidth() > CandiConstants.IMAGE_DIMENSION_MAX && bitmap.getHeight() > CandiConstants.IMAGE_DIMENSION_MAX);
+		final Boolean scalingNeeded = (bitmap.getWidth() > Constants.IMAGE_DIMENSION_MAX && bitmap.getHeight() > Constants.IMAGE_DIMENSION_MAX);
 		if (scalingNeeded) {
 
 			final Matrix matrix = new Matrix();
-			final float scalingRatio = Math.max((float) CandiConstants.IMAGE_DIMENSION_MAX / (float) bitmap.getWidth(), (float) CandiConstants.IMAGE_DIMENSION_MAX
+			final float scalingRatio = Math.max((float) Constants.IMAGE_DIMENSION_MAX / (float) bitmap.getWidth(), (float) Constants.IMAGE_DIMENSION_MAX
 					/ (float) bitmap.getHeight());
 			matrix.postScale(scalingRatio, scalingRatio);
 			/*

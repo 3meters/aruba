@@ -15,7 +15,7 @@ import android.os.AsyncTask;
 import android.support.v4.app.NotificationCompat;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -29,7 +29,7 @@ import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Device;
 import com.aircandi.service.objects.ServiceData;
-import com.aircandi.service.objects.ServiceEntryBase.UpdateScope;
+import com.aircandi.service.objects.ServiceBase.UpdateScope;
 import com.aircandi.ui.CandiRadar;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -59,7 +59,7 @@ public class NotificationManager {
 		 * and associated app version code are stored in shared prefs.
 		 */
 		if (!GCMRegistrar.isRegistered(Aircandi.applicationContext)) {
-			GCMRegistrar.register(Aircandi.applicationContext, CandiConstants.SENDER_ID);
+			GCMRegistrar.register(Aircandi.applicationContext, Constants.SENDER_ID);
 		}
 	}
 
@@ -146,18 +146,18 @@ public class NotificationManager {
 		 */
 		if (airNotification.type != null) {
 			if (airNotification.type.equals("nearby")) {
-				if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_NEARBY, CandiConstants.PREF_NOTIFICATIONS_NEARBY_DEFAULT)) {
+				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_NEARBY, Constants.PREF_NOTIFICATIONS_NEARBY_DEFAULT)) {
 					return;
 				}
 			}
 			else if (airNotification.type.equals("watch")) {
-				if (airNotification.subject.equals("comment")) {
-					if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_COMMENTS, CandiConstants.PREF_NOTIFICATIONS_COMMENTS_DEFAULT)) {
+				if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+					if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_COMMENTS, Constants.PREF_NOTIFICATIONS_COMMENTS_DEFAULT)) {
 						return;
 					}
 				}
-				else if (airNotification.subject.equals("entity")) {
-					if (!Aircandi.settings.getBoolean(CandiConstants.PREF_NOTIFICATIONS_CANDIGRAMS, CandiConstants.PREF_NOTIFICATIONS_CANDIGRAMS_DEFAULT)) {
+				else {
+					if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_POSTS, Constants.PREF_NOTIFICATIONS_POSTS_DEFAULT)) {
 						return;
 					}
 				}
@@ -191,7 +191,7 @@ public class NotificationManager {
 		if (airNotification.user != null) {
 
 			final BitmapRequest bitmapRequest = new BitmapRequest();
-			bitmapRequest.setImageUri(airNotification.user.getUserPhotoUri());
+			bitmapRequest.setImageUri(airNotification.user.getPhotoUri());
 			bitmapRequest.setImageRequestor(airNotification);
 			bitmapRequest.setImageSize((int) Aircandi.applicationContext.getResources().getDimension(android.R.dimen.notification_large_icon_width));
 			bitmapRequest.setRequestListener(new RequestListener() {
@@ -206,7 +206,7 @@ public class NotificationManager {
 						builder.setLargeIcon(imageResponse.bitmap);
 						Notification notification = builder.build();
 						notification.contentIntent = pendingIntent;
-						mNotificationManager.notify(airNotification.subject, 0, notification);
+						mNotificationManager.notify(airNotification.entity.schema, 0, notification);
 					}
 				}
 			});
@@ -215,7 +215,7 @@ public class NotificationManager {
 		else {
 			Notification notification = builder.build();
 			notification.contentIntent = pendingIntent;
-			mNotificationManager.notify(airNotification.subject, 0, notification);
+			mNotificationManager.notify(airNotification.entity.schema, 0, notification);
 		}
 
 	}

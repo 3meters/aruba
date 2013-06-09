@@ -23,7 +23,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.BeaconsLockedEvent;
@@ -54,6 +54,7 @@ import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
+import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
@@ -168,7 +169,7 @@ public class CandiRadar extends CandiActivity {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				final Entity entity = mRadarAdapter.getItems().get(position - 1);
+				final Place entity = (Place) mRadarAdapter.getItems().get(position - 1);
 				showCandiForm(entity, entity.synthetic);
 			}
 		});
@@ -441,7 +442,7 @@ public class CandiRadar extends CandiActivity {
 
 				/* Add some sparkle */
 				if (previousCount == 0 && entities.size() > 0) {
-					if (Aircandi.settings.getBoolean(CandiConstants.PREF_SOUND_EFFECTS, CandiConstants.PREF_SOUND_EFFECTS_DEFAULT)) {
+					if (Aircandi.settings.getBoolean(Constants.PREF_SOUND_EFFECTS, Constants.PREF_SOUND_EFFECTS_DEFAULT)) {
 						new AsyncTask() {
 
 							@Override
@@ -557,7 +558,7 @@ public class CandiRadar extends CandiActivity {
 			IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
 					.setCommandType(CommandType.New)
 					.setEntityId(null)
-					.setEntityType(CandiConstants.TYPE_CANDI_PLACE);
+					.setEntityType(Constants.SCHEMA_ENTITY_PLACE);
 
 			startActivity(intentBuilder.create());
 			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
@@ -569,16 +570,16 @@ public class CandiRadar extends CandiActivity {
 		final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
 				.setCommandType(CommandType.View)
 				.setEntityId(entity.id)
-				.setParentEntityId(entity.parentId)
+				.setParentEntityId(entity.toId)
 				.setEntityType(entity.type);
 
-		if (entity.parentId != null) {
+		if (entity.toId != null) {
 			intentBuilder.setCollectionId(entity.getParent().id);
 		}
 
 		final Intent intent = intentBuilder.create();
 		if (upsize) {
-			intent.putExtra(CandiConstants.EXTRA_UPSIZE_SYNTHETIC, true);
+			intent.putExtra(Constants.EXTRA_UPSIZE_SYNTHETIC, true);
 		}
 
 		startActivity(intent);
@@ -640,7 +641,7 @@ public class CandiRadar extends CandiActivity {
 			finish();
 		}
 
-		if (CandiConstants.DEBUG_TRACE) {
+		if (Constants.DEBUG_TRACE) {
 			Debug.startMethodTracing("aircandi", 100000000);
 		}
 
@@ -674,7 +675,7 @@ public class CandiRadar extends CandiActivity {
 		mList.onRefreshComplete();
 
 		Logger.d(this, "CandiRadarActivity stopped");
-		if (CandiConstants.DEBUG_TRACE) {
+		if (Constants.DEBUG_TRACE) {
 			Debug.stopMethodTracing();
 		}
 
@@ -708,17 +709,17 @@ public class CandiRadar extends CandiActivity {
 		mFreshWindow = true;
 		
 		/* Run help if it hasn't been run yet */
-		final Boolean runOnceHelp = Aircandi.settings.getBoolean(CandiConstants.SETTING_RUN_ONCE_HELP_RADAR, false);
+		final Boolean runOnceHelp = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, false);
 		if (!runOnceHelp) {
 			mCommon.doHelpClick();
 			return;
 		}
 
 		if (Aircandi.getInstance().getUser() != null
-				&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
-				&& Aircandi.getInstance().getUser().isDeveloper != null
-				&& Aircandi.getInstance().getUser().isDeveloper) {
-			mCommon.startScanService(CandiConstants.INTERVAL_SCAN_WIFI);
+				&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+				&& Aircandi.getInstance().getUser().developer != null
+				&& Aircandi.getInstance().getUser().developer) {
+			mCommon.startScanService(Constants.INTERVAL_SCAN_WIFI);
 		}
 	}
 
@@ -732,7 +733,7 @@ public class CandiRadar extends CandiActivity {
 
 			if (mPauseDate != null) {
 				final Long interval = DateUtils.nowDate().getTime() - mPauseDate.longValue();
-				if (interval > CandiConstants.INTERVAL_TETHER_ALERT) {
+				if (interval > Constants.INTERVAL_TETHER_ALERT) {
 					tetherAlert();
 				}
 			}

@@ -9,13 +9,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.aircandi.CandiConstants;
+import android.graphics.Bitmap;
+
+import com.aircandi.Aircandi;
+import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
-import com.aircandi.components.LocationManager;
 import com.aircandi.components.ProxiManager;
+import com.aircandi.service.Copy;
 import com.aircandi.service.Expose;
-import com.aircandi.service.SerializedName;
-import com.aircandi.service.objects.Link.LinkType;
 
 /**
  * Entity as described by the proxi protocol standards.
@@ -23,297 +24,71 @@ import com.aircandi.service.objects.Link.LinkType;
  * @author Jayma
  */
 @SuppressWarnings("ucd")
-public class Entity extends ServiceEntryBase implements Cloneable, Serializable {
+public abstract class Entity extends ServiceBase implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= -3902834532692561618L;
-	public static final String	collectionId		= "entities";
 
 	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 
 	/* Database fields */
 
 	@Expose
+	public String				schema;
+	@Expose
 	public String				subtitle;
 	@Expose
 	public String				description;
 	@Expose
-	public Place				place;
+	public Photo				photo;
+	@Expose
+	public GeoLocation			location;
 	@Expose
 	public Number				signalFence			= -100.0f;
-	@Expose
-	public Boolean				isCollection;
-	@Expose
-	public Boolean				locked;
-	@Expose
-	public String				visibility			= "public";
-	@Expose
-	public List<Comment>		comments			= new ArrayList<Comment>();
-	@Expose
-	public List<Source>			sources;
-	@Expose
-	public Photo				photo;
-
-	@Expose(serialize = false, deserialize = true)
-	public List<Link>			links;
 
 	/* Synthetic service fields */
 
 	@Expose(serialize = false, deserialize = true)
-	@SerializedName("_parent")
-	public String				parentId;										/* Used to connect beacon object */
+	public List<Link>			linksIn;
+	@Expose(serialize = false, deserialize = true)
+	public List<Link>			linksOut;
+	@Expose(serialize = false, deserialize = true)
+	public List<Count>			linksInCounts;
+	@Expose(serialize = false, deserialize = true)
+	public List<Count>			linksOutCounts;
 
 	@Expose(serialize = false, deserialize = true)
-	public List<Entity>			children;
+	@Copy(exclude = true)
+	public List<Entity>			entities;
 
 	@Expose(serialize = false, deserialize = true)
-	public Integer				childCount;
+	public String				toId;											// Used to find entities this entity is linked to
 
-	@Expose(serialize = false, deserialize = true)
-	public Boolean				childrenMore;
+	/* For client use only */
 
-	@Expose(serialize = false, deserialize = true)
-	public Integer				commentCount;
+	@Copy(exclude = true)
+	public Bitmap				imageBitmap;
 
-	@Expose(serialize = false, deserialize = true)
-	public Boolean				commentsMore;
+	/* These client props are all controlled by the parent in the case of child entities. */
 
-	/*
-	 * For client use only
-	 */
-
-	/* These are all controlled by the parent in the case of child entities. */
+	@Copy(exclude = true)
 	public Boolean				hidden				= false;
-	public Boolean				synthetic			= false;
-	public Boolean				checked				= false;
-
-	/* Used when this is a source entity */
-	public Source				source;
-
-	/* Cached for easier sorting */
+	@Copy(exclude = true)
 	public Float				distance;
+
+	/* List state */
+
+	@Copy(exclude = true)
+	public Boolean				checked				= false;
+	@Copy(exclude = true)
+	public Integer				position;
 
 	public Entity() {}
 
-	@Override
-	public Entity clone() {
-		try {
-			final Entity entity = (Entity) super.clone();
-			if (comments != null) {
-				entity.comments = (List<Comment>) ((ArrayList) comments).clone();
-			}
-			if (sources != null) {
-				entity.sources = (List<Source>) ((ArrayList) sources).clone();
-			}
-			if (links != null) {
-				entity.links = (List<Link>) ((ArrayList) links).clone();
-			}
-			if (owner != null) {
-				entity.owner = owner.clone();
-			}
-			if (creator != null) {
-				entity.creator = creator.clone();
-			}
-			if (modifier != null) {
-				entity.modifier = modifier.clone();
-			}
-			if (photo != null) {
-				entity.photo = photo.clone();
-			}
-			if (place != null) {
-				entity.place = place.clone();
-			}
-			return entity;
-		}
-		catch (final CloneNotSupportedException ex) {
-			throw new AssertionError();
-		}
-	}
+	// --------------------------------------------------------------------------------------------
+	// Set and get
+	// --------------------------------------------------------------------------------------------	
 
-	public static Entity setPropertiesFromMap(Entity entity, Map map) {
-		/*
-		 * Properties involved with editing are copied from one entity to another.
-		 */
-		synchronized (entity) {
-			entity = (Entity) ServiceEntryBase.setPropertiesFromMap(entity, map);
-
-			entity.name = (String) map.get("name");
-			entity.subtitle = (String) map.get("subtitle");
-			entity.description = (String) map.get("description");
-			entity.isCollection = (Boolean) map.get("isCollection");
-			entity.locked = (Boolean) map.get("locked");
-			entity.signalFence = (Number) map.get("signalFence");
-			entity.visibility = (String) map.get("visibility");
-
-			if (map.get("links") != null) {
-				entity.links = new ArrayList<Link>();
-				final List<LinkedHashMap<String, Object>> linkMaps = (List<LinkedHashMap<String, Object>>) map.get("links");
-				for (Map<String, Object> linkMap : linkMaps) {
-					entity.links.add(Link.setPropertiesFromMap(new Link(), linkMap));
-				}
-			}
-
-			if (map.get("sources") != null) {
-				entity.sources = new ArrayList<Source>();
-				final List<LinkedHashMap<String, Object>> sourceMaps = (List<LinkedHashMap<String, Object>>) map.get("sources");
-				for (Map<String, Object> sourceMap : sourceMaps) {
-					entity.sources.add(Source.setPropertiesFromMap(new Source(), sourceMap));
-				}
-			}
-
-			if (map.get("comments") != null) {
-				entity.comments = new ArrayList<Comment>();
-				final List<LinkedHashMap<String, Object>> commentMaps = (List<LinkedHashMap<String, Object>>) map.get("comments");
-				for (Map<String, Object> commentMap : commentMaps) {
-					entity.comments.add(Comment.setPropertiesFromMap(new Comment(), commentMap));
-				}
-			}
-
-			entity.commentCount = (Integer) map.get("commentCount");
-			entity.commentsMore = (Boolean) map.get("commentsMore");
-
-			if (map.get("children") != null) {
-				entity.children = Collections.synchronizedList(new ArrayList<Entity>());
-				synchronized (entity.children) {
-					final List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("children");
-					for (Map<String, Object> childMap : childMaps) {
-						entity.children.add(Entity.setPropertiesFromMap(new Entity(), childMap));
-					}
-				}
-			}
-			entity.childCount = (Integer) map.get("childCount");
-			entity.childrenMore = (Boolean) map.get("childrenMore");
-
-			if (map.get("place") != null) {
-				entity.place = Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("place"));
-			}
-			
-			if (map.get("photo") != null) {
-				entity.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
-			}
-
-			/* This only get used for deserialization between activities */
-			if (map.get("source") != null) {
-				entity.source = Source.setPropertiesFromMap(new Source(), (HashMap<String, Object>) map.get("source"));
-			}
-
-			entity.parentId = (String) map.get("_parent");
-		}
-
-		return entity;
-	}
-
-	public static void copyProperties(Entity from, Entity to) {
-		/*
-		 * Properties are copied from one entity to another.
-		 * 
-		 * Local state properties we intentionally don't overwrite:
-		 * 
-		 * - children
-		 * - hidden
-		 * - global
-		 * - rookie
-		 * - discoveryTime
-		 */
-		ServiceEntryBase.copyProperties(from, to);
-
-		to.subtitle = from.subtitle;
-		to.description = from.description;
-
-		to.parentId = from.parentId;
-
-		to.place = from.place;
-		to.locked = from.locked;
-		to.isCollection = from.isCollection;
-		to.signalFence = from.signalFence;
-		to.visibility = from.visibility;
-
-		to.links = from.links;
-		to.photo = from.photo;
-
-		to.childCount = from.childCount;
-		to.comments = from.comments;
-		to.commentCount = from.commentCount;
-		to.commentsMore = from.commentsMore;
-		to.sources = from.sources;
-	}
-
-	@Override
-	public String getCollection() {
-		return "entities";
-	}
-
-	public static Entity upsizeFromSynthetic(Entity synthetic) {
-		/*
-		 * Sythetic entity created from foursquare data
-		 * 
-		 * We make a copy so these changes don't effect the synthetic entity
-		 * in the entity model in case we keep it because of a failure.
-		 */
-		final Entity entity = synthetic.clone();
-		entity.id = null;
-		entity.locked = false;
-		if (synthetic.place.category != null) {
-			entity.subtitle = synthetic.place.category.name;
-		}
-		return entity;
-	}
-
-	public Photo getPhoto() {
-		return (photo != null) ? photo : new Photo();
-	}
-
-	public void setPhoto(Photo photo) {
-		this.photo = photo;
-	}
-
-	public GeoLocation getLocation() {
-		GeoLocation location = null;
-		final Entity parent = getParent();
-		if (parent != null) {
-			location = parent.getLocation();
-		}
-		else {
-			final Beacon beacon = getActiveBeaconPrimary("proximity");
-			if (beacon != null) {
-				location = beacon.getLocation();
-			}
-		}
-		if (location == null && place != null && place.location != null) {
-			location = new GeoLocation(place.location.lat.doubleValue(), place.location.lng.doubleValue());
-		}
-		return location;
-	}
-
-	public Float getDistance() {
-		distance = -1f;
-		final Beacon beacon = getActiveBeaconPrimary("proximity");
-		if (beacon != null) {
-			distance = beacon.getDistance();
-		}
-		else {
-			final GeoLocation location = getLocation();
-			if (location != null) {
-				final Observation observation = LocationManager.getInstance().getObservationLocked();
-				if (observation != null) {
-					Float distanceByLocation = 0f;
-					final android.location.Location locationObserved = new android.location.Location(observation.provider);
-					locationObserved.setLatitude(observation.latitude.doubleValue());
-					locationObserved.setLongitude(observation.longitude.doubleValue());
-
-					final android.location.Location locationPlace = new android.location.Location("place");
-					locationPlace.setLatitude(location.latitude.doubleValue());
-					locationPlace.setLongitude(location.longitude.doubleValue());
-
-					distanceByLocation = locationObserved.distanceTo(locationPlace);
-
-					distance = distanceByLocation;
-				}
-			}
-		}
-		return distance;
-	}
-
-	public String getEntityPhotoUri() {
+	public String getPhotoUri() {
 
 		/*
 		 * If a special preview photo is available, we use it otherwise
@@ -322,103 +97,48 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 * Only posts and collections do not have photo objects
 		 */
 		String imageUri = "resource:img_placeholder_logo_bw";
-		if (type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			if (photo != null) {
-				imageUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
-				if (imageUri == null) {
-					imageUri = photo.getUri();
-				}
+		if (photo != null) {
+			imageUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
+			if (imageUri == null) {
+				imageUri = photo.getUri();
 			}
-			else if (place != null && place.category != null) {
-				imageUri = place.category.iconUri();
-			}
-		}
-		else if (type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-			imageUri = source.getPhoto().getUri();
 		}
 		else {
-			if (photo != null) {
-				imageUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
-				if (imageUri == null) {
-					imageUri = photo.getUri();
+			if (creator != null) {
+				if (creator.getPhotoUri() != null && !creator.getPhotoUri().equals("")) {
+					imageUri = creator.getPhotoUri();
 				}
 			}
-			else {
-				if (creator != null) {
-					if (creator.getUserPhotoUri() != null && !creator.getUserPhotoUri().equals("")) {
-						imageUri = creator.getUserPhotoUri();
-					}
-				}
-				if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
-					imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
-				}
+			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
+				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 			}
 		}
 
 		return imageUri;
 	}
 
-	private Link getActiveLink(String linkType, Boolean primaryOnly) {
-		/*
-		 * If an entity has more than one viable link, we choose the one
-		 * using the following priority:
-		 * 
-		 * - strongest primary
-		 * - any primary
-		 * - any non-primary
-		 */
-		if (links != null) {
-			Link strongestLink = null;
-			Integer strongestLevel = -200;
-			for (Link link : links) {
-				if (link.type.equals(linkType)) {
-					if (link.primary != null && link.primary) {
-						Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
-						if (beacon != null && beacon.level.intValue() > strongestLevel) {
-							strongestLink = link;
-							strongestLevel = beacon.level.intValue();
-						}
-					}
-				}
-			}
-
-			if (strongestLink == null && !primaryOnly) {
-				for (Link link : links) {
-					if (link.type.equals(linkType)) {
-						Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
-						if (beacon != null && beacon.level.intValue() > strongestLevel) {
-							strongestLink = link;
-							strongestLevel = beacon.level.intValue();
-						}
-					}
-				}
-			}
-
-			return strongestLink;
+	public GeoLocation getLocation() {
+		GeoLocation loc = null;
+		final Beacon parent = (Beacon) getParent();
+		if (parent != null) {
+			loc = parent.location;
 		}
-		return null;
-	}
-
-	public List<Entity> getChildren() {
-		return ProxiManager.getInstance().getEntityModel().getChildEntities(id);
-	}
-
-	public List<Entity> getSourceEntities() {
-		return ProxiManager.getInstance().getEntityModel().getSourceEntities(id);
-	}
-
-	public Place getPlace() {
-		if (place == null) {
-			place = new Place();
+		else {
+			final Beacon beacon = getActiveBeaconPrimaryOnly("proximity");
+			if (beacon != null) {
+				loc = beacon.location;
+			}
 		}
-		return place;
+		if (loc == null
+				&& this.location != null
+				&& this.location.lat != null
+				&& this.location.lng != null) {
+			loc = new GeoLocation(this.location.lat.doubleValue(), this.location.lng.doubleValue());
+		}
+		return loc;
 	}
 
-	public Entity getParent() {
-		return ProxiManager.getInstance().getEntityModel().getCacheEntity(parentId);
-	}
-
-	public Beacon getActiveBeaconPrimary(String linkType) {
+	public Beacon getActiveBeaconPrimaryOnly(String linkType) {
 		final Link link = getActiveLink(linkType, true);
 		if (link != null) {
 			final Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
@@ -436,21 +156,92 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return null;
 	}
 
-	public Link getLink(Beacon beacon, String linkType) {
-		if (links != null) {
-			for (Link link : links) {
-				if (link.toId.equals(beacon.id) && link.type.equals(linkType)) {
-					return link;
+	public Link getActiveLink(String linkType, Boolean primaryOnly) {
+		/*
+		 * If an entity has more than one viable link, we choose the one
+		 * using the following priority:
+		 * 
+		 * - strongest primary
+		 * - any primary
+		 * - any non-primary
+		 */
+		if (linksOut != null) {
+			Link strongestLink = null;
+			Integer strongestLevel = -200;
+			for (Link link : linksOut) {
+				if (link.type.equals(linkType)) {
+					if (link.proximity != null && link.proximity.primary) {
+						Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
+						if (beacon != null && beacon.signal.intValue() > strongestLevel) {
+							strongestLink = link;
+							strongestLevel = beacon.signal.intValue();
+						}
+					}
 				}
 			}
+
+			if (strongestLink == null && !primaryOnly) {
+				for (Link link : linksOut) {
+					if (link.type.equals(linkType)) {
+						Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
+						if (beacon != null && beacon.signal.intValue() > strongestLevel) {
+							strongestLink = link;
+							strongestLevel = beacon.signal.intValue();
+						}
+					}
+				}
+			}
+
+			return strongestLink;
 		}
 		return null;
 	}
 
+	public List<? extends Entity> getChildrenByLinkType(String linkType) {
+		final List<Entity> entities = new ArrayList<Entity>();
+		for (Link link : linksIn) {
+			if (link.type.equals(linkType)) {
+				Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(link.fromId);
+				if (entity != null) {
+					entities.add(entity);
+				}
+			}
+		}
+		return entities;
+	}
+
+	public List<? extends Entity> getChildrenByLinkType(List<String> linkTypes) {
+		final List<Entity> entities = new ArrayList<Entity>();
+		for (Link link : linksIn) {
+			if (linkTypes.contains(link.type)) {
+				Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(link.fromId);
+				if (entity != null) {
+					entities.add(entity);
+				}
+			}
+		}
+		return entities;
+	}
+	
+	public List<Entity> getChildren() {
+		final List<Entity> entities = new ArrayList<Entity>();
+		for (Link link : linksIn) {
+			Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(link.fromId);
+			if (entity != null) {
+				entities.add(entity);
+			}
+		}
+		return entities;
+	}
+
+	public Entity getParent() {
+		return ProxiManager.getInstance().getEntityModel().getCacheEntity(toId);
+	}
+
 	public Boolean hasActiveProximityLink() {
-		if (links != null) {
-			for (Link link : links) {
-				if (link.primary && link.type.equals(LinkType.proximity.name())) {
+		if (linksOut != null) {
+			for (Link link : linksOut) {
+				if (link.proximity != null && link.type.equals("proximity")) {
 					Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
 					if (beacon != null) {
 						return true;
@@ -461,152 +252,176 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return false;
 	}
 
-	public Integer getPlaceRankScore() {
-		/*
-		 * Place entities can get high scores in the following ways:
-		 * 
-		 * 1) Proximity: they have been tagged as physically near/at a beacon we can currently see.
-		 * 2) Popular: they have been browsed a lot in range of a beacon we can currently see.
-		 * 
-		 * Inputs:
-		 * - How many primary links are there.
-		 * - Is the link a proximity or browse type.
-		 * - How many times has the link been 'voted' on.
-		 * - How close to a primary is the device. (signal level)
-		 * 
-		 * Only primary links get tuning points.
-		 * A place entity can have multiple primary links as it gets extended.
-		 */
-		Integer placeRankScore = 0;
-		if (links != null) {
-			for (Link link : links) {
-				/* Add points for being close to a primary */
-				if (link.primary) {
+	public Integer getInCount(String countType) {
+		Integer count = 0;
+		for (Count linkCount : linksInCounts) {
+			if (linkCount.type.equals(countType)) {
+				count = linkCount.count.intValue();
+				return count;
+			}
+		}
+		return count;
+	}
 
-					/* Bonus points for each tuned link */
-					if (link.tuneCount != null) {
-						if (link.type.equals("proximity")) {
-							placeRankScore += (link.tuneCount.intValue() * 5);
+	public Integer getInCount(List<String> countTypes) {
+		Integer count = 0;
+		for (Count linkCount : linksInCounts) {
+			if (countTypes.contains(linkCount.type)) {
+				count += linkCount.count.intValue();
+			}
+		}
+		return count;
+	}
+	
+	public Link getInLinkByType(String linkType, String fromId) {
+		for (Link link : linksIn) {
+			if (link.type.equals(linkType)) {
+				if (fromId == null || fromId.equals(link.fromId)) {
+					return link;
+				}
+			}
+		}
+		return null;
+	}
 
-							Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
-							if (beacon != null) {
-								int level = beacon.level.intValue();
+	public Link getOutLinkByType(String linkType, String toId) {
+		for (Link link : linksOut) {
+			if (link.type.equals(linkType)) {
+				if (toId == null || toId.equals(link.toId)) {
+					return link;
+				}
+			}
+		}
+		return null;
+	}
 
-								if (level <= -90) {
-									placeRankScore += 1;
-								}
-								else if (level <= -80) {
-									placeRankScore += 2;
-								}
-								else if (level <= -70) {
-									placeRankScore += 4;
-								}
-								else {
-									placeRankScore += 8;
-								}
-							}
+	public Boolean byAppUser(String linkType) {
+		for (Link link : linksIn) {
+			if (link.type.equals(linkType) && link.fromId.equals(Aircandi.getInstance().getUser().id)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Copy and serialization
+	// --------------------------------------------------------------------------------------------
+
+	public static Entity setPropertiesFromMap(Entity entity, Map map) {
+
+		synchronized (entity) {
+
+			entity = (Entity) ServiceBase.setPropertiesFromMap(entity, map);
+
+			entity.schema = (String) map.get("schema");
+			entity.subtitle = (String) map.get("subtitle");
+			entity.description = (String) map.get("description");
+			entity.signalFence = (Number) map.get("signalFence");
+			entity.toId = (String) map.get("_to");
+
+			if (map.get("photo") != null) {
+				entity.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
+			}
+
+			if (map.get("linksIn") != null) {
+				entity.linksIn = new ArrayList<Link>();
+				final List<LinkedHashMap<String, Object>> linkMaps = (List<LinkedHashMap<String, Object>>) map.get("linksIn");
+				for (Map<String, Object> linkMap : linkMaps) {
+					entity.linksIn.add(Link.setPropertiesFromMap(new Link(), linkMap));
+				}
+			}
+
+			if (map.get("linksOut") != null) {
+				entity.linksIn = new ArrayList<Link>();
+				final List<LinkedHashMap<String, Object>> linkMaps = (List<LinkedHashMap<String, Object>>) map.get("linksOut");
+				for (Map<String, Object> linkMap : linkMaps) {
+					entity.linksIn.add(Link.setPropertiesFromMap(new Link(), linkMap));
+				}
+			}
+
+			if (map.get("linksInCounts") != null) {
+				entity.linksInCounts = new ArrayList<Count>();
+				final List<LinkedHashMap<String, Object>> countMaps = (List<LinkedHashMap<String, Object>>) map.get("linksInCounts");
+				for (Map<String, Object> countMap : countMaps) {
+					entity.linksInCounts.add(Count.setPropertiesFromMap(new Count(), countMap));
+				}
+			}
+
+			if (map.get("linksOutCounts") != null) {
+				entity.linksOutCounts = new ArrayList<Count>();
+				final List<LinkedHashMap<String, Object>> countMaps = (List<LinkedHashMap<String, Object>>) map.get("linksOutCounts");
+				for (Map<String, Object> countMap : countMaps) {
+					entity.linksOutCounts.add(Count.setPropertiesFromMap(new Count(), countMap));
+				}
+			}
+
+			if (map.get("entities") != null) {
+				entity.entities = Collections.synchronizedList(new ArrayList<Entity>());
+				synchronized (entity.entities) {
+					final List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("entities");
+					for (Map<String, Object> childMap : childMaps) {
+						String schema = (String) childMap.get("schema");
+						if (schema.equals("place")) {
+							entity.entities.add(Place.setPropertiesFromMap(new Place(), childMap));
+						}
+						else if (schema.equals("beacon")) {
+							entity.entities.add(Beacon.setPropertiesFromMap(new Beacon(), childMap));
+						}
+						else if (schema.equals("post")) {
+							entity.entities.add(Post.setPropertiesFromMap(new Post(), childMap));
+						}
+						else if (schema.equals("applink")) {
+							entity.entities.add(Applink.setPropertiesFromMap(new Applink(), childMap));
+						}
+						else if (schema.equals("comment")) {
+							entity.entities.add(Comment.setPropertiesFromMap(new Comment(), childMap));
+						}
+						else if (schema.equals("user")) {
+							entity.entities.add(User.setPropertiesFromMap(new User(), childMap));
 						}
 					}
 				}
 			}
 		}
-		return placeRankScore;
+
+		return entity;
 	}
 
-	public Integer getPlaceRankImpact() {
-		final int placeRankScore = getPlaceRankScore();
-		return (placeRankScore >= 5) ? placeRankScore : 0;
-	}
-
-	public String getBeaconId() {
-		final Link link = getActiveLink("proximity", true);
-		if (link != null) {
-			return link.toId;
+	@Override
+	public Entity clone() {
+		final Entity entity = (Entity) super.clone();
+		if (linksIn != null) {
+			entity.linksIn = (List<Link>) ((ArrayList) linksIn).clone();
 		}
-		return null;
-	}
-
-	@SuppressWarnings("ucd")
-	public static enum Visibility {
-		Public,
-		Private
-	}
-
-	public static class SortEntitiesByProximityAndDistance implements Comparator<Entity> {
-
-		@Override
-		public int compare(Entity entity1, Entity entity2) {
-
-			if (entity1.hasActiveProximityLink() && !entity2.hasActiveProximityLink()) {
-				return -1;
-			}
-			else if (entity2.hasActiveProximityLink() && !entity1.hasActiveProximityLink()) {
-				return 1;
-			}
-			else {
-				if (entity1.distance < entity2.distance.intValue()) {
-					return -1;
-				}
-				else if (entity1.distance.intValue() > entity2.distance.intValue()) {
-					return 1;
-				}
-				else {
-					if (entity1.getPlaceRankScore() > entity2.getPlaceRankScore()) {
-						return -1;
-					}
-					else if (entity1.getPlaceRankScore() < entity2.getPlaceRankScore()) {
-						return 1;
-					}
-					else {
-						return 0;
-					}
-				}
-			}
+		if (linksOut != null) {
+			entity.linksOut = (List<Link>) ((ArrayList) linksOut).clone();
 		}
-	}
-
-	@SuppressWarnings("ucd")
-	public static class SortEntitiesByDistance implements Comparator<Entity> {
-
-		@Override
-		public int compare(Entity entity1, Entity entity2) {
-
-			if (entity1.distance < entity2.distance.intValue()) {
-				return -1;
-			}
-			else if (entity1.distance.intValue() > entity2.distance.intValue()) {
-				return 1;
-			}
-			else {
-				return 0;
-			}
+		if (linksInCounts != null) {
+			entity.linksInCounts = (List<Count>) ((ArrayList) linksInCounts).clone();
 		}
-	}
-
-	public static class SortEntitiesBySourcePosition implements Comparator<Entity> {
-
-		@Override
-		public int compare(Entity entity1, Entity entity2) {
-
-			if (entity1.source.position < entity2.source.position) {
-				return -1;
-			}
-			if (entity1.source.position.equals(entity2.source.position)) {
-				return 0;
-			}
-			return 1;
+		if (linksOutCounts != null) {
+			entity.linksOutCounts = (List<Count>) ((ArrayList) linksOutCounts).clone();
 		}
+		if (photo != null) {
+			entity.photo = photo.clone();
+		}
+		return entity;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Inner classes
+	// --------------------------------------------------------------------------------------------	
 
 	public static class SortEntitiesByModifiedDate implements Comparator<Entity> {
 
 		@Override
 		public int compare(Entity entity1, Entity entity2) {
 
-			if (!entity1.type.equals(CandiConstants.TYPE_CANDI_SOURCE) && entity2.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+			if (!entity1.type.equals(Constants.SCHEMA_ENTITY_APPLINK) && entity2.type.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 				return 1;
 			}
-			if (entity1.type.equals(CandiConstants.TYPE_CANDI_SOURCE) && !entity2.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+			if (entity1.type.equals(Constants.SCHEMA_ENTITY_APPLINK) && !entity2.type.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 				return -1;
 			}
 			else {
@@ -636,4 +451,17 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		}
 	}
 
+	public static class SortEntitiesByPosition implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity entity1, Entity entity2) {
+			if (entity1.position < entity2.position) {
+				return -1;
+			}
+			if (entity1.position.equals(entity2.position)) {
+				return 0;
+			}
+			return 1;
+		}
+	}
 }

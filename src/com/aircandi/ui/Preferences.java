@@ -9,7 +9,7 @@ import android.preference.Preference.OnPreferenceClickListener;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.Tracker;
@@ -31,7 +31,7 @@ public class Preferences extends SherlockPreferenceActivity {
 		 * Set theme.
 		 * TODO: Switch over to using the preferenceStyle attribute for the current theme.
 		 */
-		final String prefTheme = Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT);
+		final String prefTheme = Aircandi.settings.getString(Constants.PREF_THEME, Constants.PREF_THEME_DEFAULT);
 		if (prefTheme.equals("aircandi_theme_snow")) {
 			setTheme(R.style.aircandi_theme_light);
 		}
@@ -43,8 +43,8 @@ public class Preferences extends SherlockPreferenceActivity {
 
 		/* Load preferences layout */
 		if (Aircandi.getInstance().getUser() != null
-				&& Aircandi.getInstance().getUser().isDeveloper != null
-				&& Aircandi.getInstance().getUser().isDeveloper) {
+				&& Aircandi.getInstance().getUser().developer != null
+				&& Aircandi.getInstance().getUser().developer) {
 			addPreferencesFromResource(R.xml.preferences_dev);
 		}
 		else {
@@ -63,7 +63,7 @@ public class Preferences extends SherlockPreferenceActivity {
 
 				@Override
 				public boolean onPreferenceChange(Preference preference, Object newValue) {
-					Aircandi.settingsEditor.putString(CandiConstants.PREF_THEME, (String) newValue);
+					Aircandi.settingsEditor.putString(Constants.PREF_THEME, (String) newValue);
 					Aircandi.settingsEditor.commit();
 
 					final Intent intent = getIntent();

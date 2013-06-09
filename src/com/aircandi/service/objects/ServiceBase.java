@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.BuildConfig;
+import com.aircandi.service.Copy;
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
 
@@ -27,7 +28,7 @@ import com.aircandi.service.SerializedName;
  */
 
 @SuppressWarnings("ucd")
-public abstract class ServiceEntryBase implements Cloneable, Serializable {
+public abstract class ServiceBase implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 5341986472204947191L;
 
@@ -43,74 +44,63 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 	 * are deserialized.
 	 */
 	@Expose
-	@SerializedName("_id")
+	@SerializedName(name = "_id")
 	public String				id;
-
+	@Expose(serialize = false, deserialize = true)
+	public String				type;
+	@Expose
+	@SerializedName(name = "type", excludeNull = true)
+	public String				subtype;
 	@Expose
 	public String				name;
-	@Expose
-	public String				type;
-
 	@Expose(serialize = false, deserialize = true)
 	public String				namelc;
+	@Expose
+	public Boolean				enabled;
+	@Expose
+	public Boolean				locked;
+	@Expose
+	public Boolean				system;
 
-	/* Property bag */
+	/* Property bags */
 
 	@Expose
 	public Map<String, Object>	data;
+	@Expose
+	public Map<String, Object>	cdata;
 
 	/* User ids */
 
 	@Expose(serialize = false, deserialize = true)
-	@SerializedName("_owner")
+	@SerializedName(name = "_owner")
 	public String				ownerId;
-
 	@Expose(serialize = false, deserialize = true)
-	@SerializedName("_creator")
+	@SerializedName(name = "_creator")
 	public String				creatorId;
-
 	@Expose(serialize = false, deserialize = true)
-	@SerializedName("_modifier")
+	@SerializedName(name = "_modifier")
 	public String				modifierId;
 
 	/* Dates */
 
 	@Expose(serialize = false, deserialize = true)
 	public Number				createdDate;
-
 	@Expose(serialize = false, deserialize = true)
 	public Number				modifiedDate;
+	@Expose(serialize = false, deserialize = true)
+	public Number				activityDate;
 
 	/* Users (client) */
 
 	@Expose(serialize = false, deserialize = true)
 	public User					owner;
-
 	@Expose(serialize = false, deserialize = true)
 	public User					creator;
-
 	@Expose(serialize = false, deserialize = true)
 	public User					modifier;
-
 	@Expose(serialize = false, deserialize = true)
-	public Number				activityDate;
-
-	@Expose(serialize = false, deserialize = true)
-	public Integer				likeCount;
-
-	@Expose(serialize = false, deserialize = true)
-	public Boolean				liked;
-
-	@Expose(serialize = false, deserialize = true)
-	public Integer				watchCount;
-
-	@Expose(serialize = false, deserialize = true)
-	public Boolean				watched;
-
-	@Expose(serialize = false, deserialize = true)
-	@SerializedName("_watcher")
+	@SerializedName(name = "_watcher")
 	public String				watcherId;									/* Used to connect to watcher */
-
 	@Expose(serialize = false, deserialize = true)
 	public Number				watchedDate;
 
@@ -118,7 +108,11 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 
 	public UpdateScope			updateScope			= UpdateScope.Object;
 
-	protected ServiceEntryBase() {}
+	protected ServiceBase() {}
+
+	// --------------------------------------------------------------------------------------------
+	// Set and get
+	// --------------------------------------------------------------------------------------------	
 
 	public String getEntryUri() {
 		final String root = ProxiConstants.URL_PROXIBASE_SERVICE_REST;
@@ -129,72 +123,104 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 
 	public abstract String getCollection();
 
-	public static ServiceEntryBase setPropertiesFromMap(ServiceEntryBase entry, Map map) {
-		/*
-		 * Properties involved with editing are copied from one entity to another.
-		 */
-		entry.id = (String) ((map.get("_id") != null) ? map.get("_id") : map.get("id"));
-		entry.data = (HashMap<String, Object>) map.get("data");
+	// --------------------------------------------------------------------------------------------
+	// Copy and serialization
+	// --------------------------------------------------------------------------------------------
 
-		entry.ownerId = (String) ((map.get("_owner") != null) ? map.get("_owner") : map.get("ownerId"));
-		entry.creatorId = (String) ((map.get("_creator") != null) ? map.get("_creator") : map.get("creatorId"));
-		entry.modifierId = (String) ((map.get("_modifier") != null) ? map.get("_modifier") : map.get("modifierId"));
-		entry.watcherId = (String) ((map.get("_watcher") != null) ? map.get("_watcher") : map.get("watcherId"));
+	public static ServiceBase setPropertiesFromMap(ServiceBase base, Map map) {
 
-		entry.createdDate = (Number) map.get("createdDate");
-		entry.modifiedDate = (Number) map.get("modifiedDate");
-		entry.activityDate = (Number) map.get("activityDate");
-		entry.watchedDate = (Number) map.get("watchedDate");
-		entry.type = (String) map.get("type");
+		base.id = (String) ((map.get("_id") != null) ? map.get("_id") : map.get("id"));
+		base.name = (String) map.get("name");
+		base.type = (String) map.get("type");
+		base.subtype = (String) map.get("subtype");
+		base.enabled = (Boolean) map.get("enabled");
+		base.locked = (Boolean) map.get("locked");
+		base.system = (Boolean) map.get("system");
+		base.data = (HashMap<String, Object>) map.get("data");
+		base.cdata = (HashMap<String, Object>) map.get("cdata");
 
-		entry.likeCount = (Integer) map.get("likeCount");
-		entry.liked = (Boolean) map.get("liked");
-		entry.watchCount = (Integer) map.get("watchCount");
-		entry.watched = (Boolean) map.get("watched");
+		base.ownerId = (String) ((map.get("_owner") != null) ? map.get("_owner") : map.get("ownerId"));
+		base.creatorId = (String) ((map.get("_creator") != null) ? map.get("_creator") : map.get("creatorId"));
+		base.modifierId = (String) ((map.get("_modifier") != null) ? map.get("_modifier") : map.get("modifierId"));
+		base.watcherId = (String) ((map.get("_watcher") != null) ? map.get("_watcher") : map.get("watcherId"));
+
+		base.createdDate = (Number) map.get("createdDate");
+		base.modifiedDate = (Number) map.get("modifiedDate");
+		base.activityDate = (Number) map.get("activityDate");
+		base.watchedDate = (Number) map.get("watchedDate");
 
 		if (map.get("creator") != null) {
-			entry.creator = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"));
+			base.creator = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"));
 		}
 		if (map.get("owner") != null) {
-			entry.owner = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("owner"));
+			base.owner = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("owner"));
 		}
 		if (map.get("modifier") != null) {
-			entry.modifier = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("modifier"));
+			base.modifier = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("modifier"));
 		}
 
+		return base;
+	}
+
+	@Override
+	public ServiceBase clone() {
+		ServiceBase entry = null;
+		try {
+			entry = (ServiceBase) super.clone();
+			if (owner != null) {
+				entry.owner = owner.clone();
+			}
+			if (creator != null) {
+				entry.creator = creator.clone();
+			}
+			if (modifier != null) {
+				entry.modifier = modifier.clone();
+			}
+			if (data != null) {
+				entry.data = new HashMap(data);
+			}
+			if (cdata != null) {
+				entry.cdata = new HashMap(cdata);
+			}
+		}
+		catch (CloneNotSupportedException exception) {
+			exception.printStackTrace();
+		}
 		return entry;
 	}
 
-	public static void copyProperties(ServiceEntryBase fromEntry, ServiceEntryBase toEntry) {
-		/*
-		 * Properties are copied from one entity to another.
-		 */
-		toEntry.name = fromEntry.name;
-		toEntry.type = fromEntry.type;
+	public static <T> void copyFields(T target, T source) {
+		Class<?> clazz = source.getClass();
 
-		toEntry.likeCount = fromEntry.likeCount;
-		toEntry.liked = fromEntry.liked;
+		for (Field field : clazz.getFields()) {
 
-		toEntry.ownerId = fromEntry.ownerId;
-		toEntry.owner = fromEntry.owner;
+			if (field.isAnnotationPresent(Copy.class)) {
+				Copy annotation = field.getAnnotation(Copy.class);
+				if (!annotation.exclude()) {
+					continue;
+				}
+			}
 
-		toEntry.modifierId = fromEntry.modifierId;
-		toEntry.modifier = fromEntry.modifier;
-		toEntry.modifiedDate = fromEntry.modifiedDate;
-
-		toEntry.watcherId = fromEntry.watcherId;
-		toEntry.watchedDate = fromEntry.watchedDate;
-		toEntry.watchCount = fromEntry.watchCount;
-		toEntry.watched = fromEntry.watched;
-
-		toEntry.creatorId = fromEntry.creatorId;
-		toEntry.creator = fromEntry.creator;
-		toEntry.createdDate = fromEntry.createdDate;
-
-
-		toEntry.activityDate = fromEntry.activityDate;
+			try {
+				Object value = field.get(source);
+				field.set(target, value);
+			}
+			catch (IllegalArgumentException exception) {
+				exception.printStackTrace();
+			}
+			catch (IllegalAccessException exception) {
+				exception.printStackTrace();
+			}
+		}
 	}
 
+	/**
+	 * Use to generate a generic map from the typed object.
+	 * 
+	 * @param useAnnotations
+	 * @param excludeNulls
+	 * @return
+	 */
 	public Map<String, Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
 		final Map<String, Object> map = new HashMap<String, Object>();
 
@@ -217,16 +243,24 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 						}
 					}
 					String name = f.getName();
+
+					Boolean excludeNull = false;
 					if (useAnnotations) {
 						if (f.isAnnotationPresent(SerializedName.class)) {
 							SerializedName annotation = f.getAnnotation(SerializedName.class);
-							name = annotation.value();
+							name = annotation.name();
+							excludeNull = annotation.excludeNull();
 						}
 					}
-					
+
 					Object value = f.get(this);
 
-					if (value != null || updateScope == UpdateScope.Object || !excludeNulls) {
+					/* Exclude annotation always wins regardless of other settings */
+					if (value == null && !excludeNull) {
+						excludeNull = (updateScope == UpdateScope.Property || excludeNulls);
+					}
+
+					if (value != null || excludeNull) {
 
 						if (value instanceof ServiceObject) {
 							Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
@@ -272,17 +306,24 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 						}
 					}
 					String name = f.getName();
+
+					Boolean excludeNull = false;
 					if (useAnnotations) {
 						if (f.isAnnotationPresent(SerializedName.class)) {
 							SerializedName annotation = f.getAnnotation(SerializedName.class);
-							name = annotation.value();
+							name = annotation.name();
+							excludeNull = annotation.excludeNull();
 						}
 					}
-					
+
 					Object value = f.get(this);
-					
-					if (value != null || updateScope == UpdateScope.Object || !excludeNulls) {
-						
+
+					if (value == null && !excludeNull) {
+						excludeNull = (updateScope == UpdateScope.Property || excludeNulls);
+					}
+
+					if (value != null || excludeNull) {
+
 						if (value instanceof ServiceObject) {
 							Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
 							map.put(name, childMap);
@@ -323,9 +364,13 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 		return map;
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Inner classes
+	// --------------------------------------------------------------------------------------------
+
 	/**
-	 * Object: All properties are serialized including nulls.
-	 * Property: Only non-null properties are serialized.
+	 * Object: All properties are serialized including nulls.</br>
+	 * Property: Only non-null properties are serialized.</br>
 	 * 
 	 * @author Jayma
 	 * 

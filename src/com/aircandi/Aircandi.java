@@ -151,14 +151,14 @@ public class Aircandi extends Application {
 	}
 
 	public void snapshotPreferences() {
-		mPrefTheme = Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT);
-		mPrefSearchRadius = Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS, CandiConstants.PREF_SEARCH_RADIUS_DEFAULT);
-		mPrefEnableDev = Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT);
-		mPrefEntityFencing = Aircandi.settings.getBoolean(CandiConstants.PREF_ENTITY_FENCING, CandiConstants.PREF_ENTITY_FENCING_DEFAULT);
-		mPrefShowPlaceRankScore = Aircandi.settings.getBoolean(CandiConstants.PREF_SHOW_PLACE_RANK_SCORE, CandiConstants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT);
-		mPrefTestingBeacons = Aircandi.settings.getString(CandiConstants.PREF_TESTING_BEACONS, CandiConstants.PREF_TESTING_BEACONS_DEFAULT);
-		mPrefTestingLocation = Aircandi.settings.getString(CandiConstants.PREF_TESTING_LOCATION, CandiConstants.PREF_TESTING_LOCATION_DEFAULT);
-		mPrefTestingPlaceProvider = Aircandi.settings.getString(CandiConstants.PREF_TESTING_PLACE_PROVIDER, CandiConstants.PREF_TESTING_PLACE_PROVIDER_DEFAULT);
+		mPrefTheme = Aircandi.settings.getString(Constants.PREF_THEME, Constants.PREF_THEME_DEFAULT);
+		mPrefSearchRadius = Aircandi.settings.getString(Constants.PREF_SEARCH_RADIUS, Constants.PREF_SEARCH_RADIUS_DEFAULT);
+		mPrefEnableDev = Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT);
+		mPrefEntityFencing = Aircandi.settings.getBoolean(Constants.PREF_ENTITY_FENCING, Constants.PREF_ENTITY_FENCING_DEFAULT);
+		mPrefShowPlaceRankScore = Aircandi.settings.getBoolean(Constants.PREF_SHOW_PLACE_RANK_SCORE, Constants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT);
+		mPrefTestingBeacons = Aircandi.settings.getString(Constants.PREF_TESTING_BEACONS, Constants.PREF_TESTING_BEACONS_DEFAULT);
+		mPrefTestingLocation = Aircandi.settings.getString(Constants.PREF_TESTING_LOCATION, Constants.PREF_TESTING_LOCATION_DEFAULT);
+		mPrefTestingPlaceProvider = Aircandi.settings.getString(Constants.PREF_TESTING_PLACE_PROVIDER, Constants.PREF_TESTING_PLACE_PROVIDER_DEFAULT);
 	}
 
 	public static String getVersionName(Context context, Class cls) {

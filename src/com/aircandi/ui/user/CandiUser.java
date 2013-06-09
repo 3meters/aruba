@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -146,7 +146,7 @@ public class CandiUser extends CandiActivity {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LikeEntity");
 				ModelResult result = new ModelResult();
-				if (!mUser.liked) {
+				if (!mUser.byAppUser(Constants.TYPE_LINK_LIKE)) {
 					Tracker.sendEvent("ui_action", "like_entity", null, 0, Aircandi.getInstance().getUser());
 					result = ProxiManager.getInstance().getEntityModel().verbSomething(Aircandi.getInstance().getUser().id, mUser.id, "like", "like");
 				}
@@ -187,7 +187,7 @@ public class CandiUser extends CandiActivity {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("WatchEntity");
 				ModelResult result = new ModelResult();
-				if (!mUser.watched) {
+				if (!mUser.byAppUser(Constants.TYPE_LINK_WATCH)) {
 					Tracker.sendEvent("ui_action", "watch_entity", null, 0, Aircandi.getInstance().getUser());
 					result = ProxiManager.getInstance().getEntityModel().verbSomething(Aircandi.getInstance().getUser().id, mUser.id, "watch", "watch");
 				}
@@ -223,10 +223,10 @@ public class CandiUser extends CandiActivity {
 		final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
 				.setCommandType(CommandType.View)
 				.setEntityId(entity.id)
-				.setParentEntityId(entity.parentId)
+				.setParentEntityId(entity.toId)
 				.setEntityType(entity.type);
 
-		if (entity.parentId != null) {
+		if (entity.toId != null) {
 			intentBuilder.setCollectionId(entity.getParent().id);
 		}
 
@@ -247,7 +247,7 @@ public class CandiUser extends CandiActivity {
 		ProxiManager.getInstance().getEntityModel().getPhotos().clear();
 		ProxiManager.getInstance().getEntityModel().getPhotos().add(photo);
 		intent = new Intent(this, PictureDetail.class);
-		intent.putExtra(CandiConstants.EXTRA_URI, mUser.photo.getUri());
+		intent.putExtra(Constants.EXTRA_URI, mUser.photo.getUri());
 
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
@@ -262,14 +262,14 @@ public class CandiUser extends CandiActivity {
 			intentBuilder = new IntentBuilder(this, CandiList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setArrayListType(ArrayListType.OwnedByUser)
-					.setEntityType(CandiConstants.TYPE_CANDI_PLACE)
+					.setEntityType(Constants.SCHEMA_ENTITY_PLACE)
 					.setUserId(mCommon.mUserId);
 		}
 		else if (target.equals("candigrams")) {
 			intentBuilder = new IntentBuilder(this, CandiList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setArrayListType(ArrayListType.OwnedByUser)
-					.setEntityType(CandiConstants.TYPE_CANDI_CANDIGRAM)
+					.setEntityType(Constants.SCHEMA_ENTITY_POST)
 					.setUserId(mCommon.mUserId);
 		}
 
@@ -315,7 +315,6 @@ public class CandiUser extends CandiActivity {
 
 		/* Buttons */
 
-		setVisibility(findViewById(R.id.button_map), View.GONE);
 		setVisibility(findViewById(R.id.button_tune), View.GONE);
 		setVisibility(findViewById(R.id.button_like), View.GONE);
 		setVisibility(findViewById(R.id.button_watch), View.GONE);
@@ -324,7 +323,7 @@ public class CandiUser extends CandiActivity {
 
 			ComboButton watched = (ComboButton) findViewById(R.id.button_watch);
 			if (watched != null) {
-				if (user.watched) {
+				if (mUser.byAppUser(Constants.TYPE_LINK_WATCH)) {
 					final int color = Aircandi.getInstance().getResources().getColor(R.color.brand_pink_lighter);
 					watched.setLabel(getString(R.string.candi_button_unwatch));
 					watched.setDrawableId(R.drawable.ic_action_show_dark);
@@ -346,7 +345,7 @@ public class CandiUser extends CandiActivity {
 
 			ComboButton liked = (ComboButton) findViewById(R.id.button_like);
 			if (liked != null) {
-				if (user.liked) {
+				if (mUser.byAppUser(Constants.TYPE_LINK_LIKE)) {
 					final int color = Aircandi.getInstance().getResources().getColor(R.color.accent_red);
 					liked.setLabel(getString(R.string.candi_button_unlike));
 					liked.setDrawableId(R.drawable.ic_action_heart_dark);
@@ -379,7 +378,7 @@ public class CandiUser extends CandiActivity {
 
 		setVisibility(location, View.GONE);
 		if (location != null && user.location != null && !user.location.equals("")) {
-			location.setText(Html.fromHtml(user.location));
+			location.setText(Html.fromHtml(user.area));
 			setVisibility(location, View.VISIBLE);
 			setVisibility(findViewById(R.id.section_details), View.VISIBLE);
 		}
@@ -403,20 +402,21 @@ public class CandiUser extends CandiActivity {
 		setVisibility(findViewById(R.id.section_stats), View.GONE);
 		setVisibility(stats, View.GONE);
 		final StringBuilder statString = new StringBuilder(500);
-		if (user.likeCount != null) {
-			statString.append("Likes: " + String.valueOf(user.likeCount) + "<br/>");
+		if (user.getInCount(Constants.TYPE_LINK_LIKE) > 0) {
+			statString.append("Likes: " + String.valueOf(user.getInCount(Constants.TYPE_LINK_LIKE)) + "<br/>");
 		}
-		if (user.watchCount != null) {
-			statString.append("Watchers: " + String.valueOf(user.watchCount) + "<br/>");
+		if (user.getInCount(Constants.TYPE_LINK_WATCH) > 0) {
+			statString.append("Watchers: " + String.valueOf(user.getInCount(Constants.TYPE_LINK_WATCH)) + "<br/>");
 		}
-		
+
 		if (stats != null && user.stats != null && user.stats.size() > 0) {
 
 			int tuneCount = 0;
 			int tuneFirstCount = 0;
 			int editCount = 0;
 			int editFirstCount = 0;
-			int candigramCount = 0;
+			int contentCount = 0;
+			int commentCount = 0;
 
 			for (Stat stat : user.stats) {
 				if (stat.type.startsWith("link_proximity")) {
@@ -440,19 +440,23 @@ public class CandiUser extends CandiActivity {
 				if (stat.type.equals("insert_entity_place_custom")) {
 					statString.append("Places created: " + String.valueOf(stat.countBy) + "<br/>");
 				}
-				else if (stat.type.equals("insert_entity_picture")) {
-					candigramCount += stat.countBy.intValue();
+				else if (stat.type.equals("insert_entity_content")) {
+					contentCount += stat.countBy.intValue();
 				}
-				else if (stat.type.equals("insert_entity_post")) {
-					candigramCount += stat.countBy.intValue();
+				else if (stat.type.equals("insert_entity_comment")) {
+					commentCount += stat.countBy.intValue();
 				}
 				else if (stat.type.startsWith("update_entity_place")) {
 					statString.append("Places edited: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 			}
 
-			if (candigramCount > 0) {
-				statString.append("Candigrams created: " + String.valueOf(candigramCount) + "<br/>");
+			if (contentCount > 0) {
+				statString.append("Content created: " + String.valueOf(contentCount) + "<br/>");
+			}
+
+			if (commentCount > 0) {
+				statString.append("Comments: " + String.valueOf(commentCount) + "<br/>");
 			}
 
 			if (editCount > 0) {
@@ -481,11 +485,10 @@ public class CandiUser extends CandiActivity {
 		List<Entity> candigrams = new ArrayList<Entity>();
 
 		for (Entity entity : mEntities) {
-			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+			if (entity.type.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 				places.add(entity);
 			}
-			else if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)
-					|| entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+			else if (entity.type.equals(Constants.SCHEMA_ENTITY_POST)) {
 				candigrams.add(entity);
 			}
 		}
@@ -605,12 +608,13 @@ public class CandiUser extends CandiActivity {
 				title.setVisibility(View.GONE);
 			}
 
-			if (entity.photo == null && entity.place != null) {
+			if (entity.photo == null && entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				Place place = (Place) entity;
 				Boolean boostColor = !android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus 4");
-				int color = Place.getCategoryColor(entity.place.category != null ? entity.place.category.name : null, true, boostColor, false);
+				int color = Place.getCategoryColor(place.category != null ? place.category.name : null, true, boostColor, false);
 				webImageView.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 
-				int colorResId = Place.getCategoryColorResId(entity.place.category != null ? entity.place.category.name : null, true, boostColor, false);
+				int colorResId = Place.getCategoryColorResId(place.category != null ? place.category.name : null, true, boostColor, false);
 				if (view.findViewById(R.id.color_layer) != null) {
 					((View) view.findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
 					((View) view.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
@@ -620,7 +624,7 @@ public class CandiUser extends CandiActivity {
 				}
 			}
 
-			String imageUri = entity.getEntityPhotoUri();
+			String imageUri = entity.getPhotoUri();
 			if (imageUri != null) {
 				BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
 				BitmapRequest imageRequest = builder.create();

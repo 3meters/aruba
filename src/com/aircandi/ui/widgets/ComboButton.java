@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -57,8 +58,18 @@ public class ComboButton extends RelativeLayout {
 	}
 
 	private void draw() {
-		mImageIcon.setImageResource(mDrawableId);
-		mTextLabel.setText(mLabel);
+		if (mDrawableId != 0) {
+			mImageIcon.setImageResource(mDrawableId);
+		}
+		else {
+			mImageIcon.setVisibility(View.GONE);
+		}
+		if (mLabel != null) {
+			mTextLabel.setText(mLabel);
+		}
+		else {
+			mTextLabel.setVisibility(View.GONE);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

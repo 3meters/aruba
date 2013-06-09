@@ -19,13 +19,14 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.components.Template;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.FormActivity;
 
 public class PictureSourcePicker extends FormActivity implements OnItemClickListener {
@@ -48,19 +49,19 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			mEntityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
-			mEntityType = extras.getString(CandiConstants.EXTRA_ENTITY_TYPE);
+			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
+			mEntityType = extras.getString(Constants.EXTRA_ENTITY_TYPE);
 		}
 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();
 
 		if (mEntityType != null) {
-			if (mEntityType.equals(CandiConstants.TYPE_CANDI_SOURCE_FACEBOOK)) {
+			if (mEntityType.equals(Constants.TYPE_APPLINK_FACEBOOK)) {
 				listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_facebook_light : R.drawable.ic_action_facebook_dark
 						, getString(R.string.dialog_picture_source_facebook), null, "facebook"));
 			}
-			else if (mEntityType.equals(CandiConstants.TYPE_CANDI_SOURCE_TWITTER)) {
+			else if (mEntityType.equals(Constants.TYPE_APPLINK_TWITTER)) {
 				listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_twitter_light : R.drawable.ic_action_twitter_dark
 						, getString(R.string.dialog_picture_source_twitter), null, "twitter"));
 			}
@@ -86,15 +87,16 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 			/* Add place photo option if this is a place entity */
 			if (mEntityId != null) {
 				final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					if (entity.place.getProvider().type != null && entity.place.getProvider().type.equals("foursquare")) {
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					Place place = (Place) entity;
+					if (place.getProvider().type != null && place.getProvider().type.equals("foursquare")) {
 						listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
 								, getString(R.string.dialog_picture_source_place), null, "place"));
 					}
 					else {
-						List<Entity> entities = entity.getChildren();
-						for (Entity child : entities) {
-							if (child.type.equals(CandiConstants.TYPE_CANDI_PICTURE) && child.photo != null) {
+						List<Entity> entities = (List<Entity>) entity.getChildrenByLinkType(Constants.TYPE_LINK_POST);
+						for (Entity post : entities) {
+							if (post.photo != null) {
 								listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light
 										: R.drawable.ic_action_location_dark
 										, getString(R.string.dialog_picture_source_place), null, "place"));
@@ -129,7 +131,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		final Template template = (Template) view.getTag();
 		final Intent intent = new Intent();
-		intent.putExtra(CandiConstants.EXTRA_PICTURE_SOURCE, template.type);
+		intent.putExtra(Constants.EXTRA_PICTURE_SOURCE, template.type);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
 	}

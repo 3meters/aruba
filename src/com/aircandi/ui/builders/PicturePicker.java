@@ -40,7 +40,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.beta.R;
@@ -64,6 +64,7 @@ import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
+import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.base.FormActivity;
@@ -120,13 +121,13 @@ public class PicturePicker extends FormActivity {
 
 		if (mPlacePhotoMode) {
 			mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
-			mProvider = mEntity.place.getProvider();
+			mProvider = ((Place) mEntity).getProvider();
 			((ViewGroup) findViewById(R.id.search_group)).setVisibility(View.GONE);
 		}
 		else {
 			final Bundle extras = this.getIntent().getExtras();
 			if (extras != null) {
-				mDefaultSearch = extras.getString(CandiConstants.EXTRA_SEARCH_PHRASE);
+				mDefaultSearch = extras.getString(Constants.EXTRA_SEARCH_PHRASE);
 			}
 			mSearch = (EditText) findViewById(R.id.search_text);
 			mSearch.setOnKeyListener(new OnKeyListener() {
@@ -145,7 +146,7 @@ public class PicturePicker extends FormActivity {
 				mSearch.setText(mDefaultSearch);
 			}
 			else {
-				mSearch.setText(Aircandi.settings.getString(CandiConstants.SETTING_PICTURE_SEARCH, null));
+				mSearch.setText(Aircandi.settings.getString(Constants.SETTING_PICTURE_SEARCH, null));
 			}
 			mQuery = mSearch.getText().toString();
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.search_text));
@@ -195,9 +196,9 @@ public class PicturePicker extends FormActivity {
 					}
 
 					final Intent intent = new Intent();
-					intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mTitleOptional);
+					intent.putExtra(Constants.EXTRA_URI_TITLE, mTitleOptional);
 					final String jsonPhoto = HttpService.convertObjectToJsonSmart(photo, false, true);
-					intent.putExtra(CandiConstants.EXTRA_PHOTO, jsonPhoto);
+					intent.putExtra(Constants.EXTRA_PHOTO, jsonPhoto);
 					setResult(Activity.RESULT_OK, intent);
 					finish();
 				}
@@ -210,9 +211,9 @@ public class PicturePicker extends FormActivity {
 		 * First check to see if there are any candi picture children.
 		 */
 		if (mPlacePhotoMode && mEntity != null) {
-			List<Entity> entities = mEntity.getChildren();
+			List<Entity> entities = (List<Entity>) mEntity.getChildrenByLinkType(Constants.TYPE_LINK_POST);
 			for (Entity entity : entities) {
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE) && entity.photo != null) {
+				if (entity.photo != null) {
 					if (!entity.photo.getSourceName().equals(PhotoSource.foursquare)) {
 						ImageResult imageResult = entity.photo.getAsImageResult();
 						imageResult.setPhoto(entity.photo);
@@ -271,7 +272,7 @@ public class PicturePicker extends FormActivity {
 	public void onSearchClick(View view) {
 		mQuery = mSearch.getText().toString();
 		mMessage.setVisibility(View.VISIBLE);
-		Aircandi.settingsEditor.putString(CandiConstants.SETTING_PICTURE_SEARCH, mQuery);
+		Aircandi.settingsEditor.putString(Constants.SETTING_PICTURE_SEARCH, mQuery);
 		Aircandi.settingsEditor.commit();
 		mOffset = 0;
 		mTitleOptional = mQuery;
@@ -344,7 +345,8 @@ public class PicturePicker extends FormActivity {
 			ServiceResponse serviceResponse = new ServiceResponse();
 			if (mPlacePhotoMode) {
 
-				if (mEntity.place.getProvider().type != null && mEntity.place.getProvider().type.equals("foursquare")) {
+				Place place = (Place) mEntity;
+				if (place.getProvider().type != null && place.getProvider().type.equals("foursquare")) {
 					serviceResponse = loadPlaceImages(PAGE_SIZE, mOffset);
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						final List<Photo> photos = (ArrayList<Photo>) serviceResponse.data;

@@ -15,7 +15,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -72,8 +72,7 @@ public class CommentForm extends FormActivity {
 		 */
 		mComment = new Comment();
 		mComment.creatorId = Aircandi.getInstance().getUser().id;
-		mComment.location = Aircandi.getInstance().getUser().location;
-		mComment.imageUri = Aircandi.getInstance().getUser().getPhoto().getUri();
+		mComment.photo = Aircandi.getInstance().getUser().photo.clone();
 		mComment.name = Aircandi.getInstance().getUser().name;
 	}
 
@@ -185,7 +184,7 @@ public class CommentForm extends FormActivity {
 						Tracker.sendEvent("ui_action", "add_comment", null, 0, Aircandi.getInstance().getUser());
 						mCommon.hideBusy(true);
 						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
-						setResult(CandiConstants.RESULT_COMMENT_INSERTED);
+						setResult(Constants.RESULT_COMMENT_INSERTED);
 						finish();
 					}
 					else {

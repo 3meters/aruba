@@ -76,21 +76,22 @@ import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.HttpServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.AirNotification;
+import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
+import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Device;
-import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Link;
-import com.aircandi.service.objects.Location;
 import com.aircandi.service.objects.Photo;
+import com.aircandi.service.objects.Place;
+import com.aircandi.service.objects.Post;
 import com.aircandi.service.objects.Result;
+import com.aircandi.service.objects.ServiceBase;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
-import com.aircandi.service.objects.ServiceEntryBase;
 import com.aircandi.service.objects.ServiceObject;
 import com.aircandi.service.objects.Session;
-import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.CandiRadar;
@@ -290,11 +291,11 @@ public class HttpService {
 					/* Check for valid client version even if the call was successful */
 					if (serviceRequest.getResponseFormat() == ResponseFormat.Json) {
 						/*
-						 * We think anything json is coming from the Aircandi service.
+						 * We think anything json is coming from the Aircandi service (except Bing)
 						 */
 						ServiceData serviceData = HttpService.convertJsonToObjectSmart((String) response, ServiceDataType.None);
 						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, CandiRadar.class);
-						if (serviceData != null) {
+						if (serviceData != null && serviceData.androidMinimumVersion != null) {
 							if (serviceData.androidMinimumVersion.intValue() > clientVersionCode) {
 								HttpServiceException exception = new HttpServiceException("Invalid client version", ErrorType.Service,
 										new HttpServiceException.ClientVersionException());
@@ -334,7 +335,7 @@ public class HttpService {
 						ServiceData serviceData = HttpService.convertJsonToObjectSmart(responseContent, ServiceDataType.None);
 						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, CandiRadar.class);
 						if (serviceData != null) {
-							if (serviceData.androidMinimumVersion.intValue() > clientVersionCode) {
+							if (serviceData.androidMinimumVersion != null && serviceData.androidMinimumVersion.intValue() > clientVersionCode) {
 								HttpServiceException exception = new HttpServiceException("Invalid client version", ErrorType.Service,
 										new HttpServiceException.ClientVersionException());
 								throw exception;
@@ -865,14 +866,11 @@ public class HttpService {
 			else if (serviceDataType == ServiceDataType.Session) {
 				return Session.setPropertiesFromMap(new Session(), (HashMap) rootMap);
 			}
-			else if (serviceDataType == ServiceDataType.Location) {
-				return Location.setPropertiesFromMap(new Location(), (HashMap) rootMap);
-			}
 			else if (serviceDataType == ServiceDataType.Category) {
 				return Category.setPropertiesFromMap(new Category(), (HashMap) rootMap);
 			}
-			else if (serviceDataType == ServiceDataType.Source) {
-				return Source.setPropertiesFromMap(new Source(), (HashMap) rootMap);
+			else if (serviceDataType == ServiceDataType.Applink) {
+				return Applink.setPropertiesFromMap(new Applink(), (HashMap) rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.Photo) {
 				return Photo.setPropertiesFromMap(new Photo(), (HashMap) rootMap);
@@ -880,8 +878,17 @@ public class HttpService {
 			else if (serviceDataType == ServiceDataType.GeoLocation) {
 				return GeoLocation.setPropertiesFromMap(new GeoLocation(), (HashMap) rootMap);
 			}
-			else if (serviceDataType == ServiceDataType.Entity) {
-				return Entity.setPropertiesFromMap(new Entity(), (HashMap) rootMap);
+			else if (serviceDataType == ServiceDataType.Beacon) {
+				return Beacon.setPropertiesFromMap(new Beacon(), (HashMap) rootMap);
+			}
+			else if (serviceDataType == ServiceDataType.Place) {
+				return Place.setPropertiesFromMap(new Place(), (HashMap) rootMap);
+			}
+			else if (serviceDataType == ServiceDataType.Post) {
+				return Post.setPropertiesFromMap(new Post(), (HashMap) rootMap);
+			}
+			else if (serviceDataType == ServiceDataType.Comment) {
+				return Comment.setPropertiesFromMap(new Comment(), (HashMap) rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.AirNotification) {
 				return AirNotification.setPropertiesFromMap(new AirNotification(), (HashMap) rootMap);
@@ -994,17 +1001,26 @@ public class HttpService {
 						if (serviceDataType == ServiceDataType.ServiceEntry) {
 							list.add(ServiceEntry.setPropertiesFromMap(new ServiceEntry(), (HashMap) map));
 						}
-						else if (serviceDataType == ServiceDataType.Entity) {
-							list.add(Entity.setPropertiesFromMap(new Entity(), (HashMap) map));
+						else if (serviceDataType == ServiceDataType.User) {
+							list.add(User.setPropertiesFromMap(new User(), (HashMap) map));
 						}
 						else if (serviceDataType == ServiceDataType.Beacon) {
 							list.add(Beacon.setPropertiesFromMap(new Beacon(), (HashMap) map));
 						}
+						else if (serviceDataType == ServiceDataType.Place) {
+							list.add(Place.setPropertiesFromMap(new Place(), (HashMap) map));
+						}
+						else if (serviceDataType == ServiceDataType.Applink) {
+							list.add(Applink.setPropertiesFromMap(new Applink(), (HashMap) map));
+						}
+						else if (serviceDataType == ServiceDataType.Post) {
+							list.add(Post.setPropertiesFromMap(new Post(), (HashMap) map));
+						}
+						else if (serviceDataType == ServiceDataType.Comment) {
+							list.add(Comment.setPropertiesFromMap(new Comment(), (HashMap) map));
+						}
 						else if (serviceDataType == ServiceDataType.Link) {
 							list.add(Link.setPropertiesFromMap(new Link(), (HashMap) map));
-						}
-						else if (serviceDataType == ServiceDataType.User) {
-							list.add(User.setPropertiesFromMap(new User(), (HashMap) map));
 						}
 						else if (serviceDataType == ServiceDataType.ImageResult) {
 							list.add(ImageResult.setPropertiesFromMap(new ImageResult(), (HashMap) map));
@@ -1014,9 +1030,6 @@ public class HttpService {
 						}
 						else if (serviceDataType == ServiceDataType.Stat) {
 							list.add(Stat.setPropertiesFromMap(new Stat(), (HashMap) map));
-						}
-						else if (serviceDataType == ServiceDataType.Source) {
-							list.add(Source.setPropertiesFromMap(new Source(), (HashMap) map));
 						}
 						else if (serviceDataType == ServiceDataType.Category) {
 							list.add(Category.setPropertiesFromMap(new Category(), (HashMap) map));
@@ -1045,8 +1058,8 @@ public class HttpService {
 
 	public static String convertObjectToJsonSmart(Object object, Boolean useAnnotations, Boolean excludeNulls) {
 		String json = null;
-		if (object instanceof ServiceEntryBase) {
-			final Map map = ((ServiceEntryBase) object).getHashMap(useAnnotations, excludeNulls);
+		if (object instanceof ServiceBase) {
+			final Map map = ((ServiceBase) object).getHashMap(useAnnotations, excludeNulls);
 			json = JSONValue.toJSONString(map);
 		}
 		else if (object instanceof ServiceObject) {
@@ -1087,8 +1100,8 @@ public class HttpService {
 		Location,
 		Stat,
 		ServiceEntry,
-		Source,
-		Device, AirNotification,
+		Applink,
+		Device, AirNotification, Place, Post, Comment
 	}
 
 	public static enum RequestType {

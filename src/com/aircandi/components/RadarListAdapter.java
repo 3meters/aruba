@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 
 import com.aircandi.beta.R;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Place;
 import com.aircandi.ui.widgets.CandiView;
 
 public class RadarListAdapter extends ArrayAdapter<Entity> {
@@ -44,9 +45,9 @@ public class RadarListAdapter extends ArrayAdapter<Entity> {
 		}
 
 		if (itemData != null) {
-			final Entity entity = itemData;
+			final Place entity = (Place) itemData;
 			holder.data = entity;
-			holder.candiView.bindToEntity(entity);
+			holder.candiView.bindToPlace(entity);
 		}
 		return view;
 	}

@@ -41,6 +41,7 @@ public final class ProxiConstants {
 	public static final String	URL_PROXIBASE_SERVICE_USER						= URL_PROXIBASE_SERVICE + "/user/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_ADMIN						= URL_PROXIBASE_SERVICE + "/admin/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_METHOD					= URL_PROXIBASE_SERVICE + "/do/";																												//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_PLACES					= URL_PROXIBASE_SERVICE + "/places/";																												//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_SOURCES					= URL_PROXIBASE_SERVICE + "/sources/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_AUTH						= URL_PROXIBASE_SERVICE + "/auth/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS		= URL_PROXIBASE_SERVICE + PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS;																			//$NON-NLS-1$

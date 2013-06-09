@@ -18,7 +18,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -114,7 +114,7 @@ public class RegisterForm extends FormActivity {
 			}
 			else {
 				final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImage);
-				builder.setImageUri(user.getUserPhotoUri());
+				builder.setImageUri(user.getPhotoUri());
 				final BitmapRequest imageRequest = builder.create();
 				mImage.setBitmapRequest(imageRequest);
 			}
@@ -166,10 +166,10 @@ public class RegisterForm extends FormActivity {
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
 		if (resultCode == Activity.RESULT_OK) {
-			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
+			if (requestCode == Constants.ACTIVITY_PICTURE_SOURCE_PICK) {
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
+					final String pictureSource = extras.getString(Constants.EXTRA_PICTURE_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
 						if (pictureSource.equals("search")) {
 							String defaultSearch = null;
@@ -216,7 +216,7 @@ public class RegisterForm extends FormActivity {
 	private void doViewTerms() {
 		Tracker.sendEvent("ui_action", "view_terms", null, 0, Aircandi.getInstance().getUser());
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-		intent.setData(Uri.parse(CandiConstants.URL_AIRCANDI_TERMS));
+		intent.setData(Uri.parse(Constants.URL_AIRCANDI_TERMS));
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 
@@ -334,12 +334,12 @@ public class RegisterForm extends FormActivity {
 						final String jsonUser = HttpService.convertObjectToJsonSmart(insertedUser, false, true);
 						final String jsonSession = HttpService.convertObjectToJsonSmart(insertedUser.session, false, true);
 
-						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER, jsonUser);
-						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER_SESSION, jsonSession);
-						Aircandi.settingsEditor.putString(CandiConstants.SETTING_LAST_EMAIL, insertedUser.email);
+						Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
+						Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, jsonSession);
+						Aircandi.settingsEditor.putString(Constants.SETTING_LAST_EMAIL, insertedUser.email);
 						Aircandi.settingsEditor.commit();
 
-						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
+						setResult(Constants.RESULT_USER_SIGNED_IN);
 						finish();
 						AnimUtils.doOverridePendingTransition(RegisterForm.this, TransitionType.FormToPage);
 					}

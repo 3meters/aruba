@@ -19,7 +19,7 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Window;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.CommandType;
@@ -118,7 +118,7 @@ public class SplashForm extends SherlockActivity {
 			public void run() {
 				loadCategories();
 			}
-		}, CandiConstants.INTERVAL_CATEGORIES_DOWNLOAD);
+		}, Constants.INTERVAL_CATEGORIES_DOWNLOAD);
 
 		Aircandi.firstStartApp = false;
 	}
@@ -134,8 +134,8 @@ public class SplashForm extends SherlockActivity {
 
 	private void signinAuto() {
 
-		final String jsonUser = Aircandi.settings.getString(CandiConstants.SETTING_USER, null);
-		final String jsonSession = Aircandi.settings.getString(CandiConstants.SETTING_USER_SESSION, null);
+		final String jsonUser = Aircandi.settings.getString(Constants.SETTING_USER, null);
+		final String jsonSession = Aircandi.settings.getString(Constants.SETTING_USER_SESSION, null);
 
 		if (jsonUser != null && jsonSession != null) {
 			Logger.i(this, "Auto sign in...");
@@ -184,7 +184,7 @@ public class SplashForm extends SherlockActivity {
 							try {
 								Tracker.sendEvent("ui_action", "update_aircandi", "com.aircandi.beta", 0, Aircandi.getInstance().getUser());
 								Logger.d(this, "Update: navigating to market install/update page");
-								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(CandiConstants.APP_MARKET_URI));
+								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(Constants.APP_MARKET_URI));
 								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 								intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 								startActivity(intent);
@@ -197,7 +197,7 @@ public class SplashForm extends SherlockActivity {
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://play.google.com/store/apps/details?id="
 										+ "com.aircandi.beta&referrer=utm_source%3Dcom.aircandi"));
 								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-								startActivityForResult(intent, CandiConstants.ACTIVITY_MARKET);
+								startActivityForResult(intent, Constants.ACTIVITY_MARKET);
 							}
 							dialog.dismiss();
 							AnimUtils.doOverridePendingTransition(SplashForm.this, TransitionType.PageToForm);
@@ -240,7 +240,7 @@ public class SplashForm extends SherlockActivity {
 				public void run() {
 					loadCategories();
 				}
-			}, CandiConstants.INTERVAL_CATEGORIES_DOWNLOAD);
+			}, Constants.INTERVAL_CATEGORIES_DOWNLOAD);
 
 		}
 	}
@@ -291,7 +291,7 @@ public class SplashForm extends SherlockActivity {
 
 		final IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
 		final Intent intent = intentBuilder.create();
-		startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
+		startActivityForResult(intent, Constants.ACTIVITY_SIGNIN);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
@@ -305,14 +305,14 @@ public class SplashForm extends SherlockActivity {
 		final IntentBuilder intentBuilder = new IntentBuilder(this, RegisterForm.class);
 		intentBuilder.setCommandType(CommandType.New);
 		final Intent intent = intentBuilder.create();
-		startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
+		startActivityForResult(intent, Constants.ACTIVITY_SIGNIN);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		if (requestCode == CandiConstants.ACTIVITY_SIGNIN) {
-			if (resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
+		if (requestCode == Constants.ACTIVITY_SIGNIN) {
+			if (resultCode == Constants.RESULT_USER_SIGNED_IN) {
 				startMainApp();
 			}
 		}

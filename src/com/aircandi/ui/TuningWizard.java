@@ -29,7 +29,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -51,13 +51,14 @@ import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
-import com.aircandi.service.objects.Provider;
+import com.aircandi.service.objects.Post;
+import com.aircandi.service.objects.ProviderMap;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
@@ -248,7 +249,7 @@ public class TuningWizard extends FormActivity {
 				title.setVisibility(View.GONE);
 			}
 
-			String imageUri = entity.getEntityPhotoUri();
+			String imageUri = entity.getPhotoUri();
 			if (imageUri != null) {
 				BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
 				BitmapRequest imageRequest = builder.create();
@@ -285,15 +286,15 @@ public class TuningWizard extends FormActivity {
 				mImageViewPicture.setVisibility(View.VISIBLE);
 			}
 			else {
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					if (entity.photo == null && entity.place != null && entity.place.category != null) {
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					if (entity.photo == null &&  ((Place)entity).category != null) {
 
-						final int color = Place.getCategoryColor((entity.place.category != null)
-								? entity.place.category.name
+						final int color = Place.getCategoryColor((((Place)entity).category != null)
+								? ((Place)entity).category.name
 								: null, true, mMuteColor, false);
 
 						mImageViewPicture.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-						mColorResId = Place.getCategoryColorResId((entity.place != null && entity.place.category != null) ? entity.place.category.name : null,
+						mColorResId = Place.getCategoryColorResId((((Place)entity).category != null) ? ((Place)entity).category.name : null,
 								true, mMuteColor, false);
 
 						if (findViewById(R.id.color_layer) != null) {
@@ -307,7 +308,7 @@ public class TuningWizard extends FormActivity {
 					}
 				}
 
-				final String imageUri = entity.getEntityPhotoUri();
+				final String imageUri = entity.getPhotoUri();
 				final BitmapRequest bitmapRequest = new BitmapRequest(imageUri, mImageViewPicture.getImageView());
 				bitmapRequest.setImageSize(mImageViewPicture.getSizeHint());
 				bitmapRequest.setImageRequestor(mImageViewPicture.getImageView());
@@ -430,10 +431,10 @@ public class TuningWizard extends FormActivity {
 		final IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
 				.setCommandType(CommandType.Edit)
 				.setEntityId(mEntityForForm.id)
-				.setParentEntityId(mEntityForForm.parentId)
+				.setParentEntityId(mEntityForForm.toId)
 				.setEntityType(mEntityForForm.type);
 		final Intent intent = intentBuilder.create();
-		startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_EDIT);
+		startActivityForResult(intent, Constants.ACTIVITY_ENTITY_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
@@ -477,10 +478,10 @@ public class TuningWizard extends FormActivity {
 		final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
 				.setCommandType(CommandType.View)
 				.setEntityId(entity.id)
-				.setParentEntityId(entity.parentId)
+				.setParentEntityId(entity.toId)
 				.setEntityType(entity.type);
 
-		if (entity.parentId != null) {
+		if (entity.toId != null) {
 			intentBuilder.setCollectionId(entity.getParent().id);
 		}
 
@@ -510,12 +511,12 @@ public class TuningWizard extends FormActivity {
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
 		if (resultCode != Activity.RESULT_CANCELED) {
-			if (resultCode == CandiConstants.RESULT_ENTITY_INSERTED) {
-				if (requestCode == CandiConstants.ACTIVITY_ENTITY_INSERT) {
+			if (resultCode == Constants.RESULT_ENTITY_INSERTED) {
+				if (requestCode == Constants.ACTIVITY_ENTITY_INSERT) {
 					if (intent != null && intent.getExtras() != null) {
 
 						final Bundle extras = intent.getExtras();
-						final String entityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
+						final String entityId = extras.getString(Constants.EXTRA_ENTITY_ID);
 						final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(entityId);
 						mAddedCandi.add(entity);
 						draw();
@@ -523,10 +524,10 @@ public class TuningWizard extends FormActivity {
 					}
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
+			else if (requestCode == Constants.ACTIVITY_PICTURE_SOURCE_PICK) {
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
+					final String pictureSource = extras.getString(Constants.EXTRA_PICTURE_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
 						if (pictureSource.equals("search")) {
 							String defaultSearch = null;
@@ -550,11 +551,11 @@ public class TuningWizard extends FormActivity {
 					}
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_TEMPLATE_PICK) {
+			else if (requestCode == Constants.ACTIVITY_TEMPLATE_PICK) {
 				if (intent != null && intent.getExtras() != null) {
 
 					final Bundle extras = intent.getExtras();
-					final String entityType = extras.getString(CandiConstants.EXTRA_ENTITY_TYPE);
+					final String entityType = extras.getString(Constants.EXTRA_ENTITY_TYPE);
 					if (entityType != null && !entityType.equals("")) {
 
 						final IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
@@ -564,7 +565,7 @@ public class TuningWizard extends FormActivity {
 								.setEntityType(entityType);
 
 						final Intent redirectIntent = intentBuilder.create();
-						startActivityForResult(redirectIntent, CandiConstants.ACTIVITY_ENTITY_INSERT);
+						startActivityForResult(redirectIntent, Constants.ACTIVITY_ENTITY_INSERT);
 						AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 					}
 				}
@@ -624,7 +625,7 @@ public class TuningWizard extends FormActivity {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					toggleStarOn(R.id.image_star_banner);
 					ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-					setResult(CandiConstants.RESULT_ENTITY_UPDATED);
+					setResult(Constants.RESULT_ENTITY_UPDATED);
 				}
 				return result.serviceResponse;
 			}
@@ -742,13 +743,13 @@ public class TuningWizard extends FormActivity {
 		/* Something in the call caused us to lose the most recent picture. */
 		ModelResult result = ProxiManager.getInstance().getEntityModel().updateEntity(mEntityForForm, bitmap);
 
-		if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntityForForm.photo != null) {
+		if (mEntityForForm.type.equals(Constants.SCHEMA_ENTITY_PLACE) && mEntityForForm.photo != null) {
 
 			entities = mEntityForForm.getChildren();
 			Boolean candiMatch = false;
 			for (Entity entity : entities) {
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-					if (entity.getPhoto().getUri().equals(mEntityForForm.getPhoto().getUri())) {
+				if (entity.type.equals(Constants.SCHEMA_ENTITY_POST)) {
+					if (entity.getPhotoUri().equals(mEntityForForm.getPhotoUri())) {
 						candiMatch = true;
 						break;
 					}
@@ -756,9 +757,9 @@ public class TuningWizard extends FormActivity {
 			}
 
 			if (!candiMatch) {
-				Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
+				Entity pictureEntity = makeEntity(Constants.SCHEMA_ENTITY_POST);
 				pictureEntity.photo = mEntityForForm.photo.clone();
-				pictureEntity.parentId = mEntityForForm.id;
+				pictureEntity.toId = mEntityForForm.id;
 				result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false, true);
 			}
 		}
@@ -766,18 +767,28 @@ public class TuningWizard extends FormActivity {
 		return result;
 	}
 
-	private Entity makeEntity(String type) {
-		if (type == null) {
-			throw new IllegalArgumentException("TuningWizard.makeEntity(): type parameter is null");
+	private Entity makeEntity(String schema) {
+		if (schema == null) {
+			throw new IllegalArgumentException("EntityForm.makeEntity(): schema parameter is null");
 		}
-		final Entity entity = new Entity();
+		Entity entity = null;
+
+		if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			entity = new Place();
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+			entity = new Post();
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+			entity = new Applink();
+		}
+
+		entity.schema = schema;
 		entity.signalFence = -100.0f;
-		entity.locked = false;
-		entity.isCollection = (type.equals(CandiConstants.TYPE_CANDI_PLACE));
-		entity.visibility = Visibility.Public.toString().toLowerCase(Locale.US);
-		entity.type = type;
-		if (type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			entity.getPlace().setProvider(new Provider(Aircandi.getInstance().getUser().id, "user"));
+
+		if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			((Place) entity).provider = new ProviderMap();
+			((Place) entity).provider.aircandi = Aircandi.getInstance().getUser().id;
 		}
 		return entity;
 	}

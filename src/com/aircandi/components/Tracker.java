@@ -2,7 +2,7 @@ package com.aircandi.components;
 
 import android.app.Activity;
 
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.service.objects.User;
 import com.google.analytics.tracking.android.EasyTracker;
 
@@ -32,7 +32,7 @@ public class Tracker {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
+			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
 				EasyTracker.getTracker().sendEvent(category, action, target, value);
 			}
 		}
@@ -46,7 +46,7 @@ public class Tracker {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
+			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
 				EasyTracker.getTracker().sendView(viewName);
 			}
 		}
@@ -60,7 +60,7 @@ public class Tracker {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
+			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
 				EasyTracker.getTracker().sendTiming(category, timing, name, label);
 			}
 		}
@@ -71,7 +71,7 @@ public class Tracker {
 
 	public static void dispatch(User user) {
 		try {
-			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
+			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
 				EasyTracker.getInstance().dispatch();
 			}
 		}
@@ -82,7 +82,7 @@ public class Tracker {
 
 	public static void stopSession(User user) {
 		try {
-			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
+			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
 				EasyTracker.getTracker().setStartSession(false);
 			}
 		}
@@ -93,7 +93,7 @@ public class Tracker {
 
 	public static void startNewSession(User user) {
 		try {
-			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
+			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
 				EasyTracker.getTracker().setStartSession(true);
 			}
 		}
@@ -104,7 +104,7 @@ public class Tracker {
 
 	public static void activityStart(Activity activity, User user) {
 		try {
-			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
+			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
 				EasyTracker.getInstance().activityStart(activity);
 			}
 		}
@@ -115,7 +115,7 @@ public class Tracker {
 
 	public static void activityStop(Activity activity, User user) {
 		try {
-			if (CandiConstants.TRACKING_ENABLED && user != null && (user.isDeveloper == null || !user.isDeveloper)) {
+			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
 				EasyTracker.getInstance().activityStop(activity);
 			}
 		}

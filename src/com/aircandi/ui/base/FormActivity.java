@@ -20,7 +20,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
@@ -127,7 +127,7 @@ public abstract class FormActivity extends SherlockActivity {
 		 * decided to start an install or not.
 		 */
 		if (resultCode == Activity.RESULT_OK) {
-			if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE) {
+			if (requestCode == Constants.ACTIVITY_PICTURE_PICK_DEVICE) {
 
 				Tracker.sendEvent("ui_action", "select_picture_device", null, 0, Aircandi.getInstance().getUser());
 				final Uri imageUri = intent.getData();
@@ -145,7 +145,7 @@ public abstract class FormActivity extends SherlockActivity {
 							, false);
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
+			else if (requestCode == Constants.ACTIVITY_PICTURE_MAKE) {
 
 				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0, Aircandi.getInstance().getUser());
 				final Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
@@ -160,14 +160,14 @@ public abstract class FormActivity extends SherlockActivity {
 							, false);
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_SEARCH) {
+			else if (requestCode == Constants.ACTIVITY_PICTURE_SEARCH) {
 
 				Tracker.sendEvent("ui_action", "select_picture_search", null, 0, Aircandi.getInstance().getUser());
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String imageTitle = extras.getString(CandiConstants.EXTRA_URI_TITLE);
-					final String imageDescription = extras.getString(CandiConstants.EXTRA_URI_DESCRIPTION);
-					final String jsonPhoto = extras.getString(CandiConstants.EXTRA_PHOTO);
+					final String imageTitle = extras.getString(Constants.EXTRA_URI_TITLE);
+					final String imageDescription = extras.getString(Constants.EXTRA_URI_DESCRIPTION);
+					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
 					final Photo photo = (Photo) HttpService.convertJsonToObjectInternalSmart(jsonPhoto, ServiceDataType.Photo);
 
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
@@ -223,13 +223,13 @@ public abstract class FormActivity extends SherlockActivity {
 					}
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_PLACE) {
+			else if (requestCode == Constants.ACTIVITY_PICTURE_PICK_PLACE) {
 
 				Tracker.sendEvent("ui_action", "select_picture_place", null, 0, Aircandi.getInstance().getUser());
 				if (intent != null && intent.getExtras() != null) {
 
 					final Bundle extras = intent.getExtras();
-					final String jsonPhoto = extras.getString(CandiConstants.EXTRA_PHOTO);
+					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
 					final Photo photo = (Photo) HttpService.convertJsonToObjectInternalSmart(jsonPhoto, ServiceDataType.Photo);
 
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
@@ -290,11 +290,11 @@ public abstract class FormActivity extends SherlockActivity {
 		/*
 		 * We want to filter out remove images like the linked in from picasa.
 		 */
-		if (CandiConstants.SUPPORTS_HONEYCOMB) {
+		if (Constants.SUPPORTS_HONEYCOMB) {
 			intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
 		}
 		startActivityForResult(Intent.createChooser(intent, getString(R.string.chooser_gallery_title))
-				, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
+				, Constants.ACTIVITY_PICTURE_PICK_DEVICE);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToSource);
 	}
 
@@ -305,15 +305,15 @@ public abstract class FormActivity extends SherlockActivity {
 			mMediaFilePath = mMediaFile.getAbsolutePath();
 			mMediaFileUri = Uri.fromFile(mMediaFile);
 			intent.putExtra(MediaStore.EXTRA_OUTPUT, mMediaFileUri);
-			startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_MAKE);
+			startActivityForResult(intent, Constants.ACTIVITY_PICTURE_MAKE);
 			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToSource);
 		}
 	}
 
 	protected void pictureSearch(String defaultSearch) {
 		final Intent intent = new Intent(this, PicturePicker.class);
-		intent.putExtra(CandiConstants.EXTRA_SEARCH_PHRASE, defaultSearch);
-		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
+		intent.putExtra(Constants.EXTRA_SEARCH_PHRASE, defaultSearch);
+		startActivityForResult(intent, Constants.ACTIVITY_PICTURE_SEARCH);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
@@ -322,7 +322,7 @@ public abstract class FormActivity extends SherlockActivity {
 				.setCommandType(CommandType.View)
 				.setEntityId(entityId);
 		final Intent intent = intentBuilder.create();
-		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_PICK_PLACE);
+		startActivityForResult(intent, Constants.ACTIVITY_PICTURE_PICK_PLACE);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
@@ -383,7 +383,7 @@ public abstract class FormActivity extends SherlockActivity {
 		super.onResume();
 		mCommon.doResume();
 
-		if (!Aircandi.getInstance().getPrefTheme().equals(Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT))) {
+		if (!Aircandi.getInstance().getPrefTheme().equals(Aircandi.settings.getString(Constants.PREF_THEME, Constants.PREF_THEME_DEFAULT))) {
 			Logger.d(this, "Pref change: theme, restarting current activity");
 			Aircandi.getInstance().snapshotPreferences();
 			mCommon.reload();

@@ -10,19 +10,18 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.actionbarsherlock.view.MenuItem;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ServiceDataType;
-import com.aircandi.service.objects.Location;
+import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.utilities.MiscUtils;
 
 public class AddressBuilder extends FormActivity {
 
-	private Location	mLocation;
-	private String		mPhone;
+	private Place	mPlace;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -36,15 +35,14 @@ public class AddressBuilder extends FormActivity {
 	private void initialize() {
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			mPhone = extras.getString(CandiConstants.EXTRA_PHONE);
-			final String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
+			final String jsonAddress = extras.getString(Constants.EXTRA_PLACE);
 			if (jsonAddress != null) {
-				mLocation = (Location) HttpService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
+				mPlace = (Place) HttpService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Place);
 			}
 		}
 
-		if (mLocation == null) {
-			mLocation = new Location();
+		if (mPlace == null) {
+			mPlace = new Place();
 		}
 
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
@@ -75,23 +73,20 @@ public class AddressBuilder extends FormActivity {
 
 	private void draw() {
 		/* Author */
-		if (mLocation.address != null) {
-			((EditText) findViewById(R.id.address)).setText(mLocation.address);
+		if (mPlace.address != null) {
+			((EditText) findViewById(R.id.address)).setText(mPlace.address);
 		}
-		if (mLocation.crossStreet != null) {
-			((EditText) findViewById(R.id.cross_street)).setText(mLocation.crossStreet);
+		if (mPlace.city != null) {
+			((EditText) findViewById(R.id.city)).setText(mPlace.city);
 		}
-		if (mLocation.city != null) {
-			((EditText) findViewById(R.id.city)).setText(mLocation.city);
+		if (mPlace.region != null) {
+			((EditText) findViewById(R.id.state)).setText(mPlace.region);
 		}
-		if (mLocation.state != null) {
-			((EditText) findViewById(R.id.state)).setText(mLocation.state);
+		if (mPlace.postalCode != null) {
+			((EditText) findViewById(R.id.zip_code)).setText(mPlace.postalCode);
 		}
-		if (mLocation.postalCode != null) {
-			((EditText) findViewById(R.id.zip_code)).setText(mLocation.postalCode);
-		}
-		if (mPhone != null) {
-			((EditText) findViewById(R.id.phone)).setText(mPhone);
+		if (mPlace.phone != null) {
+			((EditText) findViewById(R.id.phone)).setText(mPlace.phone);
 		}
 	}
 
@@ -100,18 +95,17 @@ public class AddressBuilder extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private void gather() {
-		mPhone = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.phone)).getEditableText().toString());
-		mLocation.address = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.address)).getEditableText().toString());
-		mLocation.crossStreet = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.cross_street)).getEditableText().toString());
-		mLocation.city = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.city)).getEditableText().toString());
-		mLocation.state = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.state)).getEditableText().toString());
-		mLocation.postalCode = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.zip_code)).getEditableText().toString());
+		mPlace.phone = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.phone)).getEditableText().toString());
+		mPlace.address = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.address)).getEditableText().toString());
+		mPlace.city = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.city)).getEditableText().toString());
+		mPlace.region = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.state)).getEditableText().toString());
+		mPlace.postalCode = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.zip_code)).getEditableText().toString());
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
-		if (requestCode == CandiConstants.ACTIVITY_SIGNIN) {
+		if (requestCode == Constants.ACTIVITY_SIGNIN) {
 			if (resultCode == Activity.RESULT_CANCELED) {
 				setResult(resultCode);
 				finish();
@@ -132,10 +126,9 @@ public class AddressBuilder extends FormActivity {
 
 	private void doSave() {
 		final Intent intent = new Intent();
-		intent.putExtra(CandiConstants.EXTRA_PHONE, mPhone);
-		if (mLocation != null) {
-			final String jsonAddress = HttpService.convertObjectToJsonSmart(mLocation, false, true);
-			intent.putExtra(CandiConstants.EXTRA_ADDRESS, jsonAddress);
+		if (mPlace != null) {
+			final String jsonAddress = HttpService.convertObjectToJsonSmart(mPlace, false, true);
+			intent.putExtra(Constants.EXTRA_PLACE, jsonAddress);
 		}
 		setResult(Activity.RESULT_OK, intent);
 		finish();

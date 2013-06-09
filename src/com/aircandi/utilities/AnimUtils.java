@@ -55,6 +55,8 @@ public class AnimUtils {
 		PageToPage,
 		FormToPageAfterDelete,
 		PageToRadarAfterDelete,
+		PageToHelp,
+		HelpToPage,
 		None,
 	}
 
@@ -79,6 +81,9 @@ public class AnimUtils {
 		else if (transitionType == TransitionType.PageToSource) {
 			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.page_fade_zoom_out);
 		}
+		else if (transitionType == TransitionType.PageToHelp) {
+			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.page_fade_zoom_out);
+		}
 		/*
 		 * Jumping to and from forms
 		 */
@@ -98,7 +103,15 @@ public class AnimUtils {
 	}
 
 	@SuppressWarnings("ucd")
-	public static void doOverridePendingTransitionDefault(Activity activity, TransitionType transitionType) {}
+	public static void doOverridePendingTransitionDefault(Activity activity, TransitionType transitionType) {
+		if (transitionType == TransitionType.PageToHelp) {
+			activity.overridePendingTransition(R.anim.fade_in_short, R.anim.hold);
+		}
+		else if (transitionType == TransitionType.HelpToPage) {
+			activity.overridePendingTransition(R.anim.hold, R.anim.fade_out_short);
+		}
+		
+	}
 
 	@SuppressWarnings("ucd")
 	public static void doOverridePendingTransitionStackBottom(Activity activity, TransitionType transitionType) {

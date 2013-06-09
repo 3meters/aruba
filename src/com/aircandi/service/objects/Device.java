@@ -14,13 +14,13 @@ import com.aircandi.service.SerializedName;
  */
 
 @SuppressWarnings("ucd")
-public class Device extends ServiceEntryBase implements Cloneable, Serializable {
+public class Device extends ServiceBase implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 694133954499515095L;
 	public static final String	collectionId		= "devices";
 
 	@Expose
-	@SerializedName("_user")
+	@SerializedName(name = "_user")
 	public String				userId;
 	@Expose
 	public String				registrationId;
@@ -42,7 +42,7 @@ public class Device extends ServiceEntryBase implements Cloneable, Serializable 
 
 	public static Device setPropertiesFromMap(Device device, Map map) {
 
-		device = (Device) ServiceEntryBase.setPropertiesFromMap(device, map);
+		device = (Device) ServiceBase.setPropertiesFromMap(device, map);
 		device.userId = (String) map.get("_user");
 		device.registrationId = (String) map.get("registrationId");
 		device.clientVersionCode = (Number) map.get("clientVersionCode");

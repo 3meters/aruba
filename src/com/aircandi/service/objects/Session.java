@@ -8,7 +8,7 @@ import com.aircandi.service.Expose;
  * @author Jayma
  */
 @SuppressWarnings("ucd")
-public class Session extends ServiceEntryBase {
+public class Session extends ServiceBase {
 
 	private static final long	serialVersionUID	= 127428776257201066L;
 	public static final String	collectionId		= "sessions";
@@ -27,7 +27,7 @@ public class Session extends ServiceEntryBase {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		session = (Session) ServiceEntryBase.setPropertiesFromMap(session, map);
+		session = (Session) ServiceBase.setPropertiesFromMap(session, map);
 		session.key = (String) map.get("key");
 		session.expirationDate = (Number) map.get("expirationDate");
 

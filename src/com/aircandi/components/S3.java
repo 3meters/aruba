@@ -12,7 +12,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpServiceException;
 import com.amazonaws.AmazonClientException;
@@ -69,8 +69,8 @@ public class S3 {
 		metadata.setContentType("image/jpeg");
 
 		try {
-			S3.getInstance().putObject(CandiConstants.S3_BUCKET_IMAGES, imageKey, inputStream, metadata);
-			S3.getInstance().setObjectAcl(CandiConstants.S3_BUCKET_IMAGES, imageKey, CannedAccessControlList.PublicRead);
+			S3.getInstance().putObject(Constants.S3_BUCKET_IMAGES, imageKey, inputStream, metadata);
+			S3.getInstance().setObjectAcl(Constants.S3_BUCKET_IMAGES, imageKey, CannedAccessControlList.PublicRead);
 		}
 		catch (final AmazonServiceException exception) {
 			throw HttpService.makeHttpServiceException(null, null, exception);
@@ -103,8 +103,8 @@ public class S3 {
 		metadata.setContentType("image/" + imageFormat);
 
 		try {
-			S3.getInstance().putObject(CandiConstants.S3_BUCKET_IMAGES, imageKey, inputStream, metadata);
-			S3.getInstance().setObjectAcl(CandiConstants.S3_BUCKET_IMAGES, imageKey, CannedAccessControlList.PublicRead);
+			S3.getInstance().putObject(Constants.S3_BUCKET_IMAGES, imageKey, inputStream, metadata);
+			S3.getInstance().setObjectAcl(Constants.S3_BUCKET_IMAGES, imageKey, CannedAccessControlList.PublicRead);
 		}
 		catch (final AmazonServiceException exception) {
 			throw HttpService.makeHttpServiceException(null, null, exception);

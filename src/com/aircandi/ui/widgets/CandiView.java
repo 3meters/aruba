@@ -1,9 +1,6 @@
 package com.aircandi.ui.widgets;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -19,13 +16,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
@@ -36,7 +32,7 @@ public class CandiView extends RelativeLayout {
 	public static final int	HORIZONTAL	= 0;
 	public static final int	VERTICAL	= 1;
 
-	private Entity			mEntity;
+	private Place			mPlace;
 	private Number			mEntityActivityDate;
 	private Integer			mLayoutId;
 	private ViewGroup		mLayout;
@@ -48,7 +44,7 @@ public class CandiView extends RelativeLayout {
 	private TextView		mDistance;
 	private TextView		mPlaceRankScore;
 	private View			mCandiViewGroup;
-	private LinearLayout	mCandiSources;
+	private LinearLayout	mApplinks;
 	private LinearLayout	mTextGroup;
 
 	private Integer			mColorResId;
@@ -86,7 +82,7 @@ public class CandiView extends RelativeLayout {
 		mDistance = (TextView) mLayout.findViewById(R.id.candi_view_distance);
 		mPlaceRankScore = (TextView) mLayout.findViewById(R.id.candi_view_place_rank_score);
 		mCategoryImage = (ImageView) mLayout.findViewById(R.id.candi_view_subtitle_badge);
-		mCandiSources = (LinearLayout) mLayout.findViewById(R.id.candi_view_sources);
+		mApplinks = (LinearLayout) mLayout.findViewById(R.id.candi_view_sources);
 		mTextGroup = (LinearLayout) mLayout.findViewById(R.id.text_group);
 
 		FontManager.getInstance().setTypefaceRegular(mTitle);
@@ -94,26 +90,26 @@ public class CandiView extends RelativeLayout {
 		FontManager.getInstance().setTypefaceDefault(mDistance);
 	}
 
-	public void bindToEntity(Entity entity) {
-		synchronized (entity) {
+	public void bindToPlace(Place place) {
+		synchronized (place) {
 			/*
 			 * If it is the same entity and it hasn't changed then nothing to do
 			 */
-			if (!entity.synthetic) {
-				if (mEntity != null
-						&& entity.id.equals(mEntity.id)
-						&& entity.activityDate.longValue() == mEntityActivityDate.longValue()) {
-					mEntity = entity;
-					showDistance(entity);
+			if (!place.synthetic) {
+				if (mPlace != null
+						&& place.id.equals(mPlace.id)
+						&& place.activityDate.longValue() == mEntityActivityDate.longValue()) {
+					mPlace = place;
+					showDistance(place);
 					return;
 				}
 			}
 			else {
-				if (mEntity != null
-						&& entity.id != null && mEntity.id != null
-						&& entity.id.equals(mEntity.id)) {
-					mEntity = entity;
-					showDistance(entity);
+				if (mPlace != null
+						&& place.id != null && mPlace.id != null
+						&& place.id.equals(mPlace.id)) {
+					mPlace = place;
+					showDistance(place);
 					return;
 				}
 			}
@@ -123,10 +119,10 @@ public class CandiView extends RelativeLayout {
 				mCandiImage.getImageView().setImageDrawable(null);
 			}
 
-			mEntity = entity;
-			mEntityActivityDate = entity.activityDate;
+			mPlace = place;
+			mEntityActivityDate = place.activityDate;
 			mMuteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others
-			mColorResId = Place.getCategoryColorResId((mEntity.place.category != null) ? mEntity.place.category.name : null, true, mMuteColor, false);
+			mColorResId = Place.getCategoryColorResId((mPlace.category != null) ? mPlace.category.name : null, true, mMuteColor, false);
 
 			/* Primary candi image */
 
@@ -140,200 +136,99 @@ public class CandiView extends RelativeLayout {
 			}
 
 			setVisibility(mTitle, View.GONE);
-			if (mTitle != null && entity.name != null && !entity.name.equals("")) {
-				mTitle.setText(Html.fromHtml(entity.name));
+			if (mTitle != null && place.name != null && !place.name.equals("")) {
+				mTitle.setText(Html.fromHtml(place.name));
 				setVisibility(mTitle, View.VISIBLE);
 			}
 
 			setVisibility(mSubtitle, View.GONE);
-			if (mSubtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
-				mSubtitle.setText(Html.fromHtml(entity.subtitle.toUpperCase(Locale.US)));
+			if (mSubtitle != null && place.subtitle != null && !place.subtitle.equals("")) {
+				mSubtitle.setText(Html.fromHtml(place.subtitle.toUpperCase(Locale.US)));
 				setVisibility(mSubtitle, View.VISIBLE);
 			}
 
 			/* Place specific info */
-			if (entity.place != null) {
-				final Place place = entity.place;
 
-				/* We take over the subtitle field and use it for categories */
-				if (mSubtitle != null) {
-					setVisibility(mSubtitle, View.GONE);
-					if (place.category != null) {
-						mSubtitle.setText(Html.fromHtml(place.category.name.toUpperCase(Locale.US)));
-						setVisibility(mSubtitle, View.VISIBLE);
-					}
-				}
-
-				setVisibility(mCategoryImage, View.GONE);
-				if (mCategoryImage != null) {
-					if (entity.place.category != null) {
-						mCategoryImage.setTag(entity.place.category.iconUri());
-						final BitmapRequest bitmapRequest = new BitmapRequest(entity.place.category.iconUri(), mCategoryImage);
-						bitmapRequest.setImageRequestor(mCategoryImage);
-						bitmapRequest.setImageSize(ImageUtils.getRawPixels(this.getContext(), 50));
-						BitmapManager.getInstance().masterFetch(bitmapRequest);
-						mCategoryImage.setVisibility(View.VISIBLE);
-					}
-				}
-
-				if (mSubtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
-					mSubtitle.setText(Html.fromHtml(entity.subtitle.toUpperCase(Locale.US)));
+			/* We take over the subtitle field and use it for categories */
+			if (mSubtitle != null) {
+				setVisibility(mSubtitle, View.GONE);
+				if (place.category != null) {
+					mSubtitle.setText(Html.fromHtml(place.category.name.toUpperCase(Locale.US)));
 					setVisibility(mSubtitle, View.VISIBLE);
 				}
-
-				/* Sources */
-
-				setVisibility(mCandiSources, View.GONE);
-				if (mCandiSources != null && !entity.synthetic) {
-
-					int sourceCount = 0;
-					mCandiSources.removeAllViews();
-					final int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
-					final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
-
-					/* Candigram indicator always goes first */
-					if (entity.childCount > 0) {
-						View view = mInflater.inflate(R.layout.temp_radar_candi_item, null);
-						WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
-						webImageView.setSizeHint(sizePixels);
-
-						String imageUri = "resource:ic_candi_dark";
-						webImageView.getImageView().setTag(imageUri);
-
-						BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
-						bitmapRequest.setImageSize(mCandiImage.getSizeHint());
-						bitmapRequest.setImageRequestor(webImageView.getImageView());
-						BitmapManager.getInstance().masterFetch(bitmapRequest);
-
-						LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
-						params.setMargins(marginPixels
-								, marginPixels
-								, marginPixels
-								, marginPixels);
-						view.setLayoutParams(params);
-						mCandiSources.addView(view);
-						sourceCount++;
-					}
-
-					final List<Entity> entities = entity.getSourceEntities();
-					final Map<String, Object> sources = new HashMap<String, Object>();
-
-					synchronized (entities) {
-						if (entities.size() > 0) {
-
-							/* We only show the first five */
-							for (Entity sourceEntity : entities) {
-								if (sourceEntity.source != null) {
-
-									/* Only show comments if there is one */
-									if (sourceEntity.source.type.equals("comments")) {
-										if (entity.commentCount == null || entity.commentCount < 1) {
-											continue;
-										}
-									}
-
-									/* Only show likes if there are some */
-									if (sourceEntity.source.type.equals("likes")) {
-										if (entity.likeCount == null || entity.likeCount < 1) {
-											continue;
-										}
-									}
-
-									/* Only show watching if this user is */
-									if (sourceEntity.source.type.equals("watchers")) {
-										if (!entity.watched) {
-											continue;
-										}
-									}
-
-									/* Only show each type once */
-									if (sources.containsKey(sourceEntity.source.type)) {
-										continue;
-									}
-								}
-								if (sourceCount >= 6) {
-									break;
-								}
-								View view = mInflater.inflate(R.layout.temp_radar_candi_item, null);
-								WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
-								webImageView.setSizeHint(sizePixels);
-
-								String imageUri = sourceEntity.getEntityPhotoUri();
-								if (!imageUri.equals("resource:img_placeholder_logo_bw")) {
-									/*
-									 * TODO: temp fixup until I figure out what to do with icons that look bad against
-									 * color
-									 * backgrounds
-									 */
-									if (sourceEntity.source != null) {
-										if (sourceEntity.source.type.equals("yelp")) {
-											imageUri = "resource:ic_yelp_holo_dark";
-										}
-										if (sourceEntity.source.type.equals("facebook")) {
-											imageUri = "resource:ic_facebook_dark";
-										}
-										if (sourceEntity.source.type.equals("foursquare")) {
-											imageUri = "resource:ic_foursquare_dark";
-										}
-										if (sourceEntity.source.type.equals("comments")) {
-											imageUri = "resource:ic_comments_dark";
-										}
-										if (sourceEntity.source.type.equals("likes")) {
-											imageUri = "resource:ic_like_holo_dark";
-										}
-										if (sourceEntity.source.type.equals("watchers")) {
-											imageUri = "resource:ic_watched_holo_dark";
-										}
-										if (sourceEntity.source.type.equals("twitter")) {
-											imageUri = "resource:ic_twitter_dark";
-										}
-										if (sourceEntity.source.type.equals("website")) {
-											imageUri = "resource:ic_website_holo_dark";
-										}
-									}
-									if (sourceEntity.source.type.equals("comments")
-											|| sourceEntity.source.type.equals("likes")
-											|| sourceEntity.source.type.equals("watchers")) {
-										webImageView.getImageView().setTag(imageUri);
-										BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
-										bitmapRequest.setImageSize(mCandiImage.getSizeHint());
-										bitmapRequest.setImageRequestor(webImageView.getImageView());
-
-										BitmapManager.getInstance().masterFetch(bitmapRequest);
-
-										LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
-										params.setMargins(marginPixels
-												, marginPixels
-												, marginPixels
-												, marginPixels);
-										view.setLayoutParams(params);
-										mCandiSources.addView(view);
-										sourceCount++;
-									}
-								}
-								if (sourceEntity.source != null) {
-									sources.put(sourceEntity.source.type, sourceEntity);
-								}
-							}
-							setVisibility(mCandiSources, View.VISIBLE);
-						}
-					}
-
-				}
-				/* Distance */
-				showDistance(entity);
-
-				/* Place rank score - dev only */
-				setVisibility(mPlaceRankScore, View.GONE);
-				//			if (mPlaceRankScore != null
-				//					&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
-				//					&& Aircandi.settings.getBoolean(CandiConstants.PREF_SHOW_PLACE_RANK_SCORE, CandiConstants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT)) {
-				//				mPlaceRankScore.setText(String.valueOf(entity.getPlaceRankScore()));
-				//				setVisibility(mPlaceRankScore, View.VISIBLE);
-				//			}
-
 			}
+
+			setVisibility(mCategoryImage, View.GONE);
+			if (mCategoryImage != null) {
+				if (place.category != null) {
+					mCategoryImage.setTag(place.category.photo.getUri());
+					final BitmapRequest bitmapRequest = new BitmapRequest(place.category.photo.getUri(), mCategoryImage);
+					bitmapRequest.setImageRequestor(mCategoryImage);
+					bitmapRequest.setImageSize(ImageUtils.getRawPixels(this.getContext(), 50));
+					BitmapManager.getInstance().masterFetch(bitmapRequest);
+					mCategoryImage.setVisibility(View.VISIBLE);
+				}
+			}
+
+			if (mSubtitle != null && place.subtitle != null && !place.subtitle.equals("")) {
+				mSubtitle.setText(Html.fromHtml(place.subtitle.toUpperCase(Locale.US)));
+				setVisibility(mSubtitle, View.VISIBLE);
+			}
+
+			/* Sources */
+
+			setVisibility(mApplinks, View.GONE);
+			if (mApplinks != null && !place.synthetic) {
+
+				mApplinks.removeAllViews();
+				final int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
+				final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
+
+				/* Post indicator always goes first */
+				if (place.getInCount(Constants.TYPE_LINK_POST) > 0) {
+					addApplinkIndicator("resource:ic_candi_dark", sizePixels, marginPixels);
+				}
+
+				if (place.getInCount(Constants.TYPE_LINK_COMMENT) > 0) {
+					addApplinkIndicator("resource:ic_comments_dark", sizePixels, marginPixels);
+				}
+
+				if (place.getInCount(Constants.TYPE_LINK_LIKE) > 0) {
+					addApplinkIndicator("resource:ic_like_holo_dark", sizePixels, marginPixels);
+				}
+
+				if (place.getInCount(Constants.TYPE_LINK_WATCH) > 0) {
+					addApplinkIndicator("resource:ic_watched_holo_dark", sizePixels, marginPixels);
+				}
+				setVisibility(mApplinks, View.VISIBLE);
+			}
+
+			/* Distance */
+			showDistance(place);
 		}
+	}
+
+	private void addApplinkIndicator(String imageUri, Integer sizePixels, Integer marginPixels) {
+
+		View view = mInflater.inflate(R.layout.temp_radar_candi_item, null);
+		WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+		webImageView.setSizeHint(sizePixels);
+
+		webImageView.getImageView().setTag(imageUri);
+
+		BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
+		bitmapRequest.setImageSize(mCandiImage.getSizeHint());
+		bitmapRequest.setImageRequestor(webImageView.getImageView());
+		BitmapManager.getInstance().masterFetch(bitmapRequest);
+
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
+		params.setMargins(marginPixels
+				, marginPixels
+				, marginPixels
+				, marginPixels);
+		view.setLayoutParams(params);
+		mApplinks.addView(view);
+
 	}
 
 	private void drawImage() {
@@ -341,14 +236,14 @@ public class CandiView extends RelativeLayout {
 
 			/* Don't use gradient if we are not using a photo */
 			if (mTextGroup != null) {
-				mTextGroup.setBackgroundResource((mEntity.photo != null) ? R.drawable.overlay_picture : 0);
+				mTextGroup.setBackgroundResource((mPlace.photo != null) ? R.drawable.overlay_picture : 0);
 			}
 
-			if (mEntity.getPhoto().getBitmap() != null) {
+			if (mPlace.photo != null && mPlace.photo.getBitmap() != null) {
 				/*
 				 * If we are carrying around a bitmap then it should be used
 				 */
-				ImageUtils.showImageInImageView(mEntity.photo.getBitmap(), mCandiImage.getImageView(), true, AnimUtils.fadeInMedium());
+				ImageUtils.showImageInImageView(mPlace.photo.getBitmap(), mCandiImage.getImageView(), true, AnimUtils.fadeInMedium());
 			}
 			else {
 
@@ -359,7 +254,7 @@ public class CandiView extends RelativeLayout {
 				(mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
 
 				/* Go get the image for the entity regardless of type */
-				final String imageUri = mEntity.getEntityPhotoUri();
+				final String imageUri = mPlace.getPhotoUri();
 
 				if (imageUri != null) {
 
@@ -371,11 +266,11 @@ public class CandiView extends RelativeLayout {
 					else {
 
 						/* Tint the image if we are using the default treatment */
-						if (mEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-							if (mEntity.photo == null && mEntity.place != null && mEntity.place.category != null) {
+						if (mPlace.type.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+							if (mPlace.photo == null && mPlace.category != null) {
 
-								final int color = Place.getCategoryColor((mEntity.place.category != null)
-										? mEntity.place.category.name
+								final int color = Place.getCategoryColor((mPlace.category != null)
+										? mPlace.category.name
 										: null, true, mMuteColor, false);
 
 								mCandiImage.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
@@ -396,13 +291,13 @@ public class CandiView extends RelativeLayout {
 		}
 	}
 
-	public void showDistance(Entity entity) {
+	public void showDistance(Place place) {
 		setVisibility(mDistance, View.GONE);
 		if (mDistance != null) {
 
 			String info = "here";
-			final float distance = entity.getDistance(); // In meters
-			final String target = entity.hasActiveProximityLink() ? "B:" : "L:";
+			final float distance = place.getDistance(); // In meters
+			final String target = place.hasActiveProximityLink() ? "B:" : "L:";
 			/*
 			 * If distance = -1 then we don't have the location info
 			 * yet needed to correctly determine distance.
@@ -428,9 +323,9 @@ public class CandiView extends RelativeLayout {
 				}
 
 				if (Aircandi.getInstance().getUser() != null
-						&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
-						&& Aircandi.getInstance().getUser().isDeveloper != null
-						&& Aircandi.getInstance().getUser().isDeveloper) {
+						&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+						&& Aircandi.getInstance().getUser().developer != null
+						&& Aircandi.getInstance().getUser().developer) {
 					info = target + info;
 				}
 				else {
@@ -457,8 +352,8 @@ public class CandiView extends RelativeLayout {
 		}
 	}
 
-	public void setEntity(Entity entity) {
-		mEntity = entity;
+	public void setPlace(Place place) {
+		mPlace = place;
 	}
 
 	public void setLayoutId(Integer layoutId) {

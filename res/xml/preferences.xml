@@ -35,11 +35,11 @@
                 android:summary="@string/pref_notifications_comments_summary"
                 android:title="@string/pref_notifications_comments_title" />
             <CheckBoxPreference
-                android:id="@+id/Pref_Notifications_Candigrams"
+                android:id="@+id/Pref_Notifications_Posts"
                 android:defaultValue="true"
-                android:key="Pref_Notifications_Candigrams"
-                android:summary="@string/pref_notifications_candigrams_summary"
-                android:title="@string/pref_notifications_candigrams_title" />
+                android:key="Pref_Notifications_Posts"
+                android:summary="@string/Pref_Notifications_Posts_summary"
+                android:title="@string/Pref_Notifications_Posts_title" />
             <CheckBoxPreference
                 android:id="@+id/Pref_Notifications_Nearby"
                 android:defaultValue="true"

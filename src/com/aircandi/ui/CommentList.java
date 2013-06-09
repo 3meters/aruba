@@ -17,7 +17,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -31,6 +31,7 @@ import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -102,13 +103,11 @@ public class CommentList extends CandiActivity {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					if (result.data != null) {
-						mCommon.mEntity = (Entity) result.data;
+						mComments = (List<Comment>) result.data;
 
-						if (mCommon.mEntity.comments != null && mCommon.mEntity.comments.size() > 0) {
+						if (mComments.size() > 0) {
 							mButtonNewComment.setVisibility(View.GONE);
-							mComments = mCommon.mEntity.comments;
-							mMore = mCommon.mEntity.commentsMore;
-							Collections.sort(mComments, new Comment.SortCommentsByDate());
+							Collections.sort(mComments, new Entity.SortEntitiesByModifiedDate());
 							mListView.setAdapter(new EndlessCommentAdapter(mComments));
 						}
 						else {
@@ -161,13 +160,13 @@ public class CommentList extends CandiActivity {
 		intentBuilder.setEntityId(null);
 		intentBuilder.setParentEntityId(mCommon.mEntityId);
 		final Intent intent = intentBuilder.create();
-		startActivityForResult(intent, CandiConstants.ACTIVITY_COMMENT);
+		startActivityForResult(intent, Constants.ACTIVITY_COMMENT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		if (resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
+		if (resultCode == Constants.RESULT_COMMENT_INSERTED) {
 			bind(true);
 		}
 	}
@@ -201,11 +200,11 @@ public class CommentList extends CandiActivity {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					if (result.data != null) {
-						final Entity entity = (Entity) result.data;
+						final ServiceData serviceData = (ServiceData) result.data;
 
-						if (entity.comments != null) {
-							moreComments = entity.comments;
-							mMore = entity.commentsMore;
+						if (serviceData != null) {
+							moreComments = (List<Comment>) serviceData.data;
+							mMore = serviceData.more;
 						}
 
 						if (mMore) {
@@ -226,7 +225,7 @@ public class CommentList extends CandiActivity {
 			for (Comment comment : moreComments) {
 				list.add(comment);
 			}
-			list.sort(new Comment.SortCommentsByDate());			
+			list.sort(new Entity.SortEntitiesByModifiedDate());			
 			notifyDataSetChanged();
 		}
 	}
@@ -271,8 +270,8 @@ public class CommentList extends CandiActivity {
 				}
 
 				if (holder.itemAuthorLocation != null) {
-					if (comment.location != null && comment.location.length() > 0) {
-						holder.itemAuthorLocation.setText(comment.location);
+					if (comment.creator.area != null && comment.creator.area.length() > 0) {
+						holder.itemAuthorLocation.setText(comment.creator.area);
 					}
 					else {
 						holder.itemAuthorLocation.setVisibility(View.GONE);
@@ -300,13 +299,13 @@ public class CommentList extends CandiActivity {
 
 				if (holder.itemAuthorImage != null) {
 
-					final String imageUri = comment.imageUri;
+					final String imageUri = comment.getPhotoUri();
 					if (holder.itemAuthorImage.getImageUri() == null || !imageUri.equals(holder.itemAuthorImage.getImageUri())) {
 						/*
 						 * We are aggresive about recycling bitmaps when we can.
 						 */
-						if (comment.imageUri != null && comment.imageUri.length() != 0) {
-							final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemAuthorImage).setFromUri(comment.imageUri);
+						if (comment.getPhotoUri() != null && comment.getPhotoUri().length() != 0) {
+							final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemAuthorImage).setFromUri(comment.getPhotoUri());
 							final BitmapRequest imageRequest = builder.create();
 							holder.itemAuthorImage.setBitmapRequest(imageRequest);
 						}

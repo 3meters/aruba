@@ -13,19 +13,8 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="3dp"
+        android:layout_marginBottom="10dp"
         android:orientation="horizontal" >
-
-        <com.aircandi.ui.widgets.ComboButton
-            android:id="@+id/button_map"
-            style="@style/form_button"
-            android:layout_width="@dimen/form_button_width_min"
-            android:layout_height="@dimen/form_button_height"
-            android:layout_marginRight="3dp"
-            aircandi:drawable="?attr/iconMap"
-            aircandi:label="@string/candi_button_map"
-            android:minWidth="@dimen/form_button_width_min"
-            android:onClick="onMapButtonClick" />
 
         <com.aircandi.ui.widgets.ComboButton
             android:id="@+id/button_tune"
@@ -33,36 +22,27 @@
             android:layout_width="@dimen/form_button_width_min"
             android:layout_height="@dimen/form_button_height"
             aircandi:drawable="?attr/iconTune"
+            android:layout_marginRight="3dp"
             aircandi:label="@string/candi_button_tune"
             android:minWidth="@dimen/form_button_width_min"
             android:onClick="onTuneButtonClick" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:orientation="horizontal" >
-
-        <com.aircandi.ui.widgets.ComboButton
+        <com.aircandi.ui.widgets.ComboButton
             android:id="@+id/button_like"
             style="@style/form_button"
-            android:layout_width="@dimen/form_button_width_min"
+            android:layout_width="@dimen/form_button_height"
             android:layout_height="@dimen/form_button_height"
             android:layout_marginRight="3dp"
             aircandi:drawable="?attr/iconLike"
-            aircandi:label="@string/candi_button_like"
-            android:minWidth="@dimen/form_button_width_min"
+            android:minWidth="@dimen/form_button_height"
             android:onClick="onLikeButtonClick" />
 
         <com.aircandi.ui.widgets.ComboButton
             android:id="@+id/button_watch"
             style="@style/form_button"
-            android:layout_width="@dimen/form_button_width_min"
+            android:layout_width="@dimen/form_button_height"
             android:layout_height="@dimen/form_button_height"
             aircandi:drawable="?attr/iconWatch"
-            aircandi:label="@string/candi_button_watch"
-            android:minWidth="@dimen/form_button_width_min"
+            android:minWidth="@dimen/form_button_height"
             android:onClick="onWatchButtonClick" />
     </LinearLayout>
 

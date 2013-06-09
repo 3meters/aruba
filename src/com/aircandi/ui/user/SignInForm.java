@@ -14,7 +14,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -78,7 +78,7 @@ public class SignInForm extends FormActivity {
 		if (mCommon.mMessage != null) {
 			mTextMessage.setText(mCommon.mMessage);
 		}
-		final String email = Aircandi.settings.getString(CandiConstants.SETTING_LAST_EMAIL, null);
+		final String email = Aircandi.settings.getString(Constants.SETTING_LAST_EMAIL, null);
 		if (email != null) {
 			mTextEmail.setText(email);
 			mTextPassword.requestFocus();
@@ -148,12 +148,12 @@ public class SignInForm extends FormActivity {
 						final String jsonUser = HttpService.convertObjectToJsonSmart(user, false, true);
 						final String jsonSession = HttpService.convertObjectToJsonSmart(user.session, false, true);
 
-						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER, jsonUser);
-						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER_SESSION, jsonSession);
-						Aircandi.settingsEditor.putString(CandiConstants.SETTING_LAST_EMAIL, user.email);
+						Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
+						Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, jsonSession);
+						Aircandi.settingsEditor.putString(Constants.SETTING_LAST_EMAIL, user.email);
 						Aircandi.settingsEditor.commit();
 
-						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
+						setResult(Constants.RESULT_USER_SIGNED_IN);
 						finish();
 						AnimUtils.doOverridePendingTransition(SignInForm.this, TransitionType.FormToPage);
 					}

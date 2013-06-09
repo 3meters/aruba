@@ -17,7 +17,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.Template;
@@ -43,12 +43,10 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();
 		if (mCommon.mThemeTone.equals("dark")) {
-			listData.add(new Template(R.drawable.ic_action_picture_dark, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
-			listData.add(new Template(R.drawable.ic_action_edit_dark, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
+			listData.add(new Template(R.drawable.ic_action_picture_dark, getString(R.string.name_entity_type_picture), null, Constants.SCHEMA_ENTITY_POST));
 		}
 		else {
-			listData.add(new Template(R.drawable.ic_action_picture_light, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
-			listData.add(new Template(R.drawable.ic_action_edit_light, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
+			listData.add(new Template(R.drawable.ic_action_picture_light, getString(R.string.name_entity_type_picture), null, Constants.SCHEMA_ENTITY_POST));
 		}
 
 		mTitle = (TextView) findViewById(R.id.title);
@@ -71,7 +69,7 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		final Template template = (Template) view.getTag();
 		final Intent intent = new Intent();
-		intent.putExtra(CandiConstants.EXTRA_ENTITY_TYPE, template.type);
+		intent.putExtra(Constants.EXTRA_ENTITY_TYPE, template.type);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
 	}

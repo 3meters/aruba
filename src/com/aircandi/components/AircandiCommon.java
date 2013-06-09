@@ -53,7 +53,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.ScanService;
 import com.aircandi.beta.BuildConfig;
@@ -66,7 +66,9 @@ import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.HttpServiceException.ErrorType;
 import com.aircandi.service.WalledGardenException;
 import com.aircandi.service.objects.AirNotification;
+import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.CandiForm;
@@ -180,14 +182,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 		final Bundle extras = mActivity.getIntent().getExtras();
 		if (extras != null) {
 
-			mParentId = extras.getString(CandiConstants.EXTRA_PARENT_ENTITY_ID);
-			mEntityType = extras.getString(CandiConstants.EXTRA_ENTITY_TYPE);
-			mEntityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
-			mUserId = extras.getString(CandiConstants.EXTRA_USER_ID);
-			mMessage = extras.getString(CandiConstants.EXTRA_MESSAGE);
-			mCollectionId = extras.getString(CandiConstants.EXTRA_COLLECTION_ID);
+			mParentId = extras.getString(Constants.EXTRA_PARENT_ENTITY_ID);
+			mEntityType = extras.getString(Constants.EXTRA_ENTITY_TYPE);
+			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
+			mUserId = extras.getString(Constants.EXTRA_USER_ID);
+			mMessage = extras.getString(Constants.EXTRA_MESSAGE);
+			mCollectionId = extras.getString(Constants.EXTRA_COLLECTION_ID);
 
-			final String commandType = extras.getString(CandiConstants.EXTRA_COMMAND_TYPE);
+			final String commandType = extras.getString(Constants.EXTRA_COMMAND_TYPE);
 			if (commandType != null) {
 				mCommandType = CommandType.valueOf(commandType);
 			}
@@ -226,10 +228,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 		final IntentBuilder intentBuilder = new IntentBuilder(mActivity, EntityForm.class)
 				.setCommandType(CommandType.Edit)
 				.setEntityId(((CandiForm) mActivity).getEntity().id)
-				.setParentEntityId(((CandiForm) mActivity).getEntity().parentId)
+				.setParentEntityId(((CandiForm) mActivity).getEntity().toId)
 				.setEntityType(((CandiForm) mActivity).getEntity().type);
 		final Intent intent = intentBuilder.create();
-		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_EDIT);
+		mActivity.startActivityForResult(intent, Constants.ACTIVITY_ENTITY_EDIT);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
@@ -259,9 +261,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 			List<WifiScanResult> wifiList = ProxiManager.getInstance().getEntityModel().getWifiList();
 			synchronized (wifiList) {
 				if (Aircandi.getInstance().getUser() != null
-						&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
-						&& Aircandi.getInstance().getUser().isDeveloper != null
-						&& Aircandi.getInstance().getUser().isDeveloper) {
+						&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+						&& Aircandi.getInstance().getUser().developer != null
+						&& Aircandi.getInstance().getUser().developer) {
 					if (Aircandi.wifiCount > 0) {
 						for (WifiScanResult wifi : wifiList) {
 							if (!wifi.SSID.equals("candi_feed")) {
@@ -330,7 +332,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public void doUserClick(User user) {
 		if (user != null) {
 			Intent intent = new Intent(mActivity, CandiUser.class);
-			intent.putExtra(CandiConstants.EXTRA_USER_ID, user.id);
+			intent.putExtra(Constants.EXTRA_USER_ID, user.id);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 			mActivity.startActivity(intent);
@@ -349,13 +351,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public void doHelpClick() {
 		Intent intent = new Intent(mActivity, CandiHelp.class);
 		if (mPageName.equals("CandiRadar")) {
-			intent.putExtra(CandiConstants.EXTRA_HELP_ID, R.layout.help_radar);
+			intent.putExtra(Constants.EXTRA_HELP_ID, R.layout.help_radar);
 		}
-		else if (mPageName.equals("CandiForm") && mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			intent.putExtra(CandiConstants.EXTRA_HELP_ID, R.layout.help_candi_place);
+		else if (mPageName.equals("CandiForm") && mEntityType.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			intent.putExtra(Constants.EXTRA_HELP_ID, R.layout.help_candi_place);
 		}
 		mActivity.startActivity(intent);
-		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToHelp);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -401,8 +403,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 								GCMRegistrar.getRegistrationId(Aircandi.applicationContext));
 						Aircandi.getInstance().setUser(null);
 
-						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER, null);
-						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER_SESSION, null);
+						Aircandi.settingsEditor.putString(Constants.SETTING_USER, null);
+						Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, null);
 						Aircandi.settingsEditor.commit();
 
 						/* Make sure onPrepareOptionsMenu gets called */
@@ -423,54 +425,61 @@ public class AircandiCommon implements ActionBar.TabListener {
 		});
 	}
 
-	public void routeSourceEntity(Entity sourceEntity, Entity hostEntity) {
+	public void routeApplink(Applink applink, Entity hostEntity) {
 
-		Tracker.sendEvent("ui_action", "browse_source", sourceEntity.source.type, 0, Aircandi.getInstance().getUser());
-		if (sourceEntity.source.type.equals("twitter")) {
-			AndroidManager.getInstance().callTwitterActivity(mActivity, (sourceEntity.source.id != null) ? sourceEntity.source.id : sourceEntity.source.url);
+		Tracker.sendEvent("ui_action", "browse_source", applink.type, 0, Aircandi.getInstance().getUser());
+		if (applink.type.equals("twitter")) {
+			AndroidManager.getInstance().callTwitterActivity(mActivity, (applink.appId != null) ? applink.appId : applink.url);
 		}
-		else if (sourceEntity.source.type.equals("foursquare")) {
-			AndroidManager.getInstance().callFoursquareActivity(mActivity, (sourceEntity.source.id != null) ? sourceEntity.source.id : sourceEntity.source.url);
+		else if (applink.type.equals("foursquare")) {
+			AndroidManager.getInstance().callFoursquareActivity(mActivity, (applink.appId != null) ? applink.appId: applink.url);
 		}
-		else if (sourceEntity.source.type.equals("facebook")) {
-			AndroidManager.getInstance().callFacebookActivity(mActivity, (sourceEntity.source.id != null) ? sourceEntity.source.id : sourceEntity.source.url);
+		else if (applink.type.equals("facebook")) {
+			AndroidManager.getInstance().callFacebookActivity(mActivity, (applink.appId != null) ? applink.appId : applink.url);
 		}
-		else if (sourceEntity.source.type.equals("yelp")) {
-			AndroidManager.getInstance().callYelpActivity(mActivity, sourceEntity.source.id, sourceEntity.source.url);
+		else if (applink.type.equals("map")) {
+			Tracker.sendEvent("ui_action", "map_place", null, 0, Aircandi.getInstance().getUser());
+			final GeoLocation location = hostEntity.getLocation();
+			AndroidManager.getInstance().callMapActivity(mActivity, String.valueOf(location.lat.doubleValue())
+					, String.valueOf(location.lng.doubleValue())
+					, hostEntity.name);
 		}
-		else if (sourceEntity.source.type.equals("opentable")) {
-			AndroidManager.getInstance().callOpentableActivity(mActivity, sourceEntity.source.id, sourceEntity.source.url);
+		else if (applink.type.equals("yelp")) {
+			AndroidManager.getInstance().callYelpActivity(mActivity, applink.appId, applink.url);
 		}
-		else if (sourceEntity.source.type.equals("website")) {
-			AndroidManager.getInstance().callBrowserActivity(mActivity, (sourceEntity.source.url != null) ? sourceEntity.source.url : sourceEntity.source.id);
+		else if (applink.type.equals("opentable")) {
+			AndroidManager.getInstance().callOpentableActivity(mActivity, applink.appId, applink.url);
 		}
-		else if (sourceEntity.source.type.equals("email")) {
-			AndroidManager.getInstance().callSendToActivity(mActivity, sourceEntity.source.label, sourceEntity.source.id, null, null);
+		else if (applink.type.equals("website")) {
+			AndroidManager.getInstance().callBrowserActivity(mActivity, (applink.url != null) ? applink.url : applink.appId);
 		}
-		else if (sourceEntity.source.type.equals("comments")) {
+		else if (applink.type.equals("email")) {
+			AndroidManager.getInstance().callSendToActivity(mActivity, applink.name, applink.appId, null, null);
+		}
+		else if (applink.type.equals("comments")) {
 			final IntentBuilder intentBuilder = new IntentBuilder(mActivity, CommentList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setEntityId(hostEntity.id)
-					.setParentEntityId(hostEntity.parentId)
+					.setParentEntityId(hostEntity.toId)
 					.setCollectionId(hostEntity.id);
 			final Intent intent = intentBuilder.create();
 			mActivity.startActivity(intent);
 			AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToPage);
 		}
-		else if (sourceEntity.source.type.equals("likes")) {
+		else if (applink.type.equals("likes")) {
 			/*
 			 * We don't do anything right now. Goal is to show a form with
 			 * more detail on the likes.
 			 */
 		}
-		else if (sourceEntity.source.type.equals("watchers")) {
+		else if (applink.type.equals("watchers")) {
 			/*
 			 * We don't do anything right now. Goal is to show a form with
 			 * more detail on the watchers.
 			 */
 		}
 		else {
-			AndroidManager.getInstance().callGenericActivity(mActivity, (sourceEntity.source.url != null) ? sourceEntity.source.url : sourceEntity.source.id);
+			AndroidManager.getInstance().callGenericActivity(mActivity, (applink.url != null) ? applink.url : applink.appId);
 		}
 	}
 
@@ -727,20 +736,20 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * theme id to the dialog activity.
 		 */
 		final Intent intent = new Intent(mActivity, TemplatePicker.class);
-		intent.putExtra(CandiConstants.EXTRA_ENTITY_IS_ROOT, isRoot);
-		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_TEMPLATE_PICK);
+		intent.putExtra(Constants.EXTRA_ENTITY_IS_ROOT, isRoot);
+		mActivity.startActivityForResult(intent, Constants.ACTIVITY_TEMPLATE_PICK);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
 	public void showPictureSourcePicker(String entityId, String entityType) {
 		final Intent intent = new Intent(mActivity, PictureSourcePicker.class);
 		if (entityId != null) {
-			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, entityId);
+			intent.putExtra(Constants.EXTRA_ENTITY_ID, entityId);
 		}
 		if (entityType != null) {
-			intent.putExtra(CandiConstants.EXTRA_ENTITY_TYPE, entityType);
+			intent.putExtra(Constants.EXTRA_ENTITY_TYPE, entityType);
 		}
-		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK);
+		mActivity.startActivityForResult(intent, Constants.ACTIVITY_PICTURE_SOURCE_PICK);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
@@ -749,10 +758,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 		final IntentBuilder intentBuilder = new IntentBuilder(mActivity, clazz);
 		intentBuilder.setCommandType(CommandType.View)
 				.setEntityId(entity.id)
-				.setParentEntityId(entity.parentId)
+				.setParentEntityId(entity.toId)
 				.setEntityType(entity.type);
 
-		if (entity.parentId != null) {
+		if (entity.toId != null) {
 			intentBuilder.setCollectionId(entity.getParent().id);
 		}
 
@@ -921,8 +930,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 
 		/* Prevent dimming the background */
-		if (CandiConstants.SUPPORTS_ICE_CREAM_SANDWICH) {
-			alert.getWindow().setDimAmount(CandiConstants.DIALOGS_DIM_AMOUNT);
+		if (Constants.SUPPORTS_ICE_CREAM_SANDWICH) {
+			alert.getWindow().setDimAmount(Constants.DIALOGS_DIM_AMOUNT);
 		}
 
 		return alert;
@@ -950,7 +959,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void setTheme(Integer themeResId, Boolean isDialog, Boolean isTransparent) {
-		mPrefTheme = Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT);
+		mPrefTheme = Aircandi.settings.getString(Constants.PREF_THEME, Constants.PREF_THEME_DEFAULT);
 		mIsDialog = isDialog;
 		/*
 		 * ActionBarSherlock takes over the title area if version < 4.0 (Ice Cream Sandwich).
@@ -1018,7 +1027,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// --------------------------------------------------------------------------------------------
 
 	public void showBusy(Boolean reset) {
-
 		showBusy(null, reset);
 	}
 
@@ -1080,7 +1088,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		if (mBusyCount.get() <= 0 || force) {
 			stopActionbarBusyIndicator();
-			stopBusyIndicator();
+			stopBodyBusyIndicator();
 		}
 	}
 
@@ -1098,14 +1106,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
-	public void startBusyIndicator() {
+	public void startBodyBusyIndicator() {
 		final View progress = mActivity.findViewById(R.id.progress);
 		if (progress != null) {
 			progress.setVisibility(View.VISIBLE);
 		}
 	}
 
-	private void stopBusyIndicator() {
+	private void stopBodyBusyIndicator() {
 		final View progress = mActivity.findViewById(R.id.progress);
 		if (progress != null) {
 			progress.setVisibility(View.GONE);
@@ -1132,10 +1140,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 			if (mMenuItemBeacons != null) {
 
 				/* Only show beacon indicator if user is a developer */
-				if (!Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
+				if (!Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
 						|| Aircandi.getInstance().getUser() == null
-						|| Aircandi.getInstance().getUser().isDeveloper == null
-						|| !Aircandi.getInstance().getUser().isDeveloper) {
+						|| Aircandi.getInstance().getUser().developer == null
+						|| !Aircandi.getInstance().getUser().developer) {
 					mMenuItemBeacons.setVisible(false);
 				}
 				else {
@@ -1245,7 +1253,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToPage);
 				return;
 			case R.id.settings:
-				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);
+				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), Constants.ACTIVITY_PREFERENCES);
 				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 				return;
 			case R.id.signout:
@@ -1272,13 +1280,18 @@ public class AircandiCommon implements ActionBar.TabListener {
 				intentBuilder = new IntentBuilder(mActivity, CommentForm.class);
 				intentBuilder.setEntityId(null);
 				intentBuilder.setParentEntityId(mEntityId);
-				mActivity.startActivityForResult(intentBuilder.create(), CandiConstants.ACTIVITY_COMMENT);
+				mActivity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_COMMENT);
 				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 				return;
 			case R.id.cancel:
 				mActivity.setResult(Activity.RESULT_CANCELED);
 				mActivity.finish();
 				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.FormToPage);
+				return;
+			case R.id.cancel_help:
+				mActivity.setResult(Activity.RESULT_CANCELED);
+				mActivity.finish();
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.HelpToPage);
 				return;
 			default:
 				return;
@@ -1292,7 +1305,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	private void manageTabs() {
 		Logger.v(this, "Building tabs: " + mPageName);
 		if (mPageName.equals("ProfileForm")) {
-			addTabsToActionBar(this, CandiConstants.TABS_PROFILE_FORM_ID);
+			addTabsToActionBar(this, Constants.TABS_PROFILE_FORM_ID);
 		}
 		else if (mPageName.equals("EntityForm")) {
 			if (mEntityId != null) {
@@ -1300,13 +1313,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 				mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
 				if (mEntity != null) {
 					if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
-						addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);
+						addTabsToActionBar(this, Constants.TABS_ENTITY_FORM_ID);
 					}
 				}
 			}
 			else {
 				/* Making something new */
-				addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);
+				addTabsToActionBar(this, Constants.TABS_ENTITY_FORM_ID);
 			}
 		}
 	}
@@ -1315,7 +1328,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	{
 		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		if (tabsId == CandiConstants.TABS_ENTITY_FORM_ID) {
+		if (tabsId == Constants.TABS_ENTITY_FORM_ID) {
 
 			ActionBar.Tab tab = mActionBar.newTab();
 			tab.setText(R.string.form_tab_content);
@@ -1329,7 +1342,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			tab.setTabListener(tabListener);
 			mActionBar.addTab(tab, false);
 		}
-		else if (tabsId == CandiConstants.TABS_PROFILE_FORM_ID) {
+		else if (tabsId == Constants.TABS_PROFILE_FORM_ID) {
 
 			ActionBar.Tab tab = mActionBar.newTab();
 			tab.setText(R.string.profile_tab_profile);

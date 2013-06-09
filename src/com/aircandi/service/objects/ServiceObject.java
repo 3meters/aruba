@@ -11,7 +11,7 @@ import java.util.Map;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
-import com.aircandi.service.objects.ServiceEntryBase.UpdateScope;
+import com.aircandi.service.objects.ServiceBase.UpdateScope;
 
 public class ServiceObject implements Cloneable, Serializable {
 
@@ -47,17 +47,26 @@ public class ServiceObject implements Cloneable, Serializable {
 							}
 						}
 					}
+					
 					String name = f.getName();
+					
+					Boolean excludeNull = false;
 					if (useAnnotations) {
 						if (f.isAnnotationPresent(SerializedName.class)) {
 							SerializedName annotation = f.getAnnotation(SerializedName.class);
-							name = annotation.value();
+							name = annotation.name();
+							excludeNull = annotation.excludeNull();
 						}
 					}
-
+					
 					Object value = f.get(this);
+					
+					/* Exclude annotation always wins regardless of other settings */
+					if (value == null && !excludeNull) {
+						excludeNull = (updateScope == UpdateScope.Property || excludeNulls);
+					}
 
-					if (value != null || updateScope == UpdateScope.Object || !excludeNulls) {
+					if (value != null || excludeNull) {
 
 						if (value instanceof ServiceObject) {
 							Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
@@ -102,15 +111,25 @@ public class ServiceObject implements Cloneable, Serializable {
 							}
 						}
 					}
+					
 					String name = f.getName();
+					
+					Boolean excludeNull = false;
 					if (useAnnotations) {
 						if (f.isAnnotationPresent(SerializedName.class)) {
 							SerializedName annotation = f.getAnnotation(SerializedName.class);
-							name = annotation.value();
+							name = annotation.name();
+							excludeNull = annotation.excludeNull();
 						}
 					}
+					
 					Object value = f.get(this);
-					if (value != null || updateScope == UpdateScope.Object || !excludeNulls) {
+					
+					if (value == null && !excludeNull) {
+						excludeNull = (updateScope == UpdateScope.Property || excludeNulls);
+					}
+
+					if (value != null || excludeNull) {
 						map.put(name, value);
 					}
 				}

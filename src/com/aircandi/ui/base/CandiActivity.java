@@ -16,7 +16,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.Logger;
@@ -216,13 +216,13 @@ public abstract class CandiActivity extends SherlockActivity {
 
 		/* Common prefs */
 
-		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT))) {
+		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Constants.PREF_THEME, Constants.PREF_THEME_DEFAULT))) {
 			Logger.d(this, "Pref change: theme, restarting current activity");
 			mPrefChangeReloadNeeded = true;
 		}
 
 		if (!Aircandi.getInstance().getPrefSearchRadius()
-				.equals(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS, CandiConstants.PREF_SEARCH_RADIUS_DEFAULT))) {
+				.equals(Aircandi.settings.getString(Constants.PREF_SEARCH_RADIUS, Constants.PREF_SEARCH_RADIUS_DEFAULT))) {
 			mPrefChangeNewSearchNeeded = true;
 			Logger.d(this, "Pref change: search radius");
 		}
@@ -230,37 +230,37 @@ public abstract class CandiActivity extends SherlockActivity {
 		/* Dev prefs */
 
 		if (!Aircandi.getInstance().getPrefEnableDev()
-				.equals(Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT))) {
+				.equals(Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT))) {
 			mPrefChangeRefreshUiNeeded = true;
 			Logger.d(this, "Pref change: dev ui");
 		}
 
 		if (!Aircandi.getInstance().getPrefEntityFencing()
-				.equals(Aircandi.settings.getBoolean(CandiConstants.PREF_ENTITY_FENCING, CandiConstants.PREF_ENTITY_FENCING_DEFAULT))) {
+				.equals(Aircandi.settings.getBoolean(Constants.PREF_ENTITY_FENCING, Constants.PREF_ENTITY_FENCING_DEFAULT))) {
 			mPrefChangeNewSearchNeeded = true;
 			Logger.d(this, "Pref change: entity fencing");
 		}
 
-		if (!Aircandi.getInstance().getPrefShowPlaceRankScore().equals(Aircandi.settings.getBoolean(CandiConstants.PREF_SHOW_PLACE_RANK_SCORE,
-				CandiConstants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT))) {
+		if (!Aircandi.getInstance().getPrefShowPlaceRankScore().equals(Aircandi.settings.getBoolean(Constants.PREF_SHOW_PLACE_RANK_SCORE,
+				Constants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT))) {
 			mPrefChangeRefreshUiNeeded = true;
 			Logger.d(this, "Pref change: place rank score");
 		}
 
 		if (!Aircandi.getInstance().getPrefTestingBeacons()
-				.equals(Aircandi.settings.getString(CandiConstants.PREF_TESTING_BEACONS, CandiConstants.PREF_TESTING_BEACONS_DEFAULT))) {
+				.equals(Aircandi.settings.getString(Constants.PREF_TESTING_BEACONS, Constants.PREF_TESTING_BEACONS_DEFAULT))) {
 			mPrefChangeNewSearchNeeded = true;
 			Logger.d(this, "Pref change: testing beacons");
 		}
 
 		if (!Aircandi.getInstance().getPrefTestingLocation().equals(Aircandi.settings
-				.getString(CandiConstants.PREF_TESTING_LOCATION, CandiConstants.PREF_TESTING_LOCATION_DEFAULT))) {
+				.getString(Constants.PREF_TESTING_LOCATION, Constants.PREF_TESTING_LOCATION_DEFAULT))) {
 			mPrefChangeNewSearchNeeded = true;
 			Logger.d(this, "Pref change: testing location");
 		}
 
-		if (!Aircandi.getInstance().getPrefTestingPlaceProvider().equals(Aircandi.settings.getString(CandiConstants.PREF_TESTING_PLACE_PROVIDER,
-				CandiConstants.PREF_TESTING_PLACE_PROVIDER_DEFAULT))) {
+		if (!Aircandi.getInstance().getPrefTestingPlaceProvider().equals(Aircandi.settings.getString(Constants.PREF_TESTING_PLACE_PROVIDER,
+				Constants.PREF_TESTING_PLACE_PROVIDER_DEFAULT))) {
 			mPrefChangeNewSearchNeeded = true;
 			Logger.d(this, "Pref change: place provider");
 		}

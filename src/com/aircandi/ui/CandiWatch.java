@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -35,7 +35,7 @@ import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
-import com.aircandi.service.objects.ServiceEntryBase;
+import com.aircandi.service.objects.ServiceBase;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.user.CandiUser;
@@ -129,7 +129,7 @@ public class CandiWatch extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onCandiClick(View view) {
-		final ServiceEntryBase entry = (ServiceEntryBase) view.getTag();
+		final ServiceBase entry = (ServiceBase) view.getTag();
 		Intent intent = null;
 
 		if (entry instanceof Entity) {
@@ -138,10 +138,10 @@ public class CandiWatch extends CandiActivity {
 			final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
 					.setCommandType(CommandType.View)
 					.setEntityId(entity.id)
-					.setParentEntityId(entity.parentId)
+					.setParentEntityId(entity.toId)
 					.setEntityType(entity.type);
 
-			if (entity.parentId != null) {
+			if (entity.toId != null) {
 				intentBuilder.setCollectionId(entity.getParent().id);
 			}
 			intent = intentBuilder.create();
@@ -150,7 +150,7 @@ public class CandiWatch extends CandiActivity {
 		else if (entry instanceof User) {
 			User user = (User) entry;
 			intent = new Intent(this, CandiUser.class);
-			intent.putExtra(CandiConstants.EXTRA_USER_ID, user.id);
+			intent.putExtra(Constants.EXTRA_USER_ID, user.id);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		}
@@ -168,14 +168,14 @@ public class CandiWatch extends CandiActivity {
 			intentBuilder = new IntentBuilder(this, CandiList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setArrayListType(ArrayListType.OwnedByUser)
-					.setEntityType(CandiConstants.TYPE_CANDI_PLACE)
+					.setEntityType(Constants.SCHEMA_ENTITY_PLACE)
 					.setUserId(mCommon.mUserId);
 		}
 		else if (target.equals("candigrams")) {
 			intentBuilder = new IntentBuilder(this, CandiList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setArrayListType(ArrayListType.OwnedByUser)
-					.setEntityType(CandiConstants.TYPE_CANDI_CANDIGRAM)
+					.setEntityType(Constants.SCHEMA_ENTITY_POST)
 					.setUserId(mCommon.mUserId);
 		}
 
@@ -255,7 +255,7 @@ public class CandiWatch extends CandiActivity {
 		}
 	}
 
-	static private void drawCandi(Context context, FlowLayout layout, List<? extends ServiceEntryBase> entries, Integer viewResId) {
+	static private void drawCandi(Context context, FlowLayout layout, List<? extends ServiceBase> entries, Integer viewResId) {
 
 		layout.removeAllViews();
 		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -287,7 +287,7 @@ public class CandiWatch extends CandiActivity {
 		/*
 		 * Insert views for entities that we don't already have a view for
 		 */
-		for (ServiceEntryBase entry : entries) {
+		for (ServiceBase entry : entries) {
 
 			View view = inflater.inflate(viewResId, null);
 			WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
@@ -309,12 +309,12 @@ public class CandiWatch extends CandiActivity {
 
 			if (entry instanceof Entity) {
 				Entity entity = (Entity) entry;
-				if (entity.photo == null && entity.place != null) {
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE) && entity.photo == null) {
 					Boolean boostColor = !android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus 4");
-					int color = Place.getCategoryColor(entity.place.category != null ? entity.place.category.name : null, true, boostColor, false);
+					int color = Place.getCategoryColor(((Place)entity).category != null ? ((Place)entity).category.name : null, true, boostColor, false);
 					webImageView.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 
-					int colorResId = Place.getCategoryColorResId(entity.place.category != null ? entity.place.category.name : null, true, boostColor, false);
+					int colorResId = Place.getCategoryColorResId(((Place)entity).category != null ? ((Place)entity).category.name : null, true, boostColor, false);
 					if (view.findViewById(R.id.color_layer) != null) {
 						((View) view.findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
 						((View) view.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
@@ -323,7 +323,7 @@ public class CandiWatch extends CandiActivity {
 						webImageView.getImageView().setBackgroundResource(colorResId);
 					}
 				}
-				String imageUri = entity.getEntityPhotoUri();
+				String imageUri = entity.getPhotoUri();
 				if (imageUri != null) {
 					BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
 					BitmapRequest imageRequest = builder.create();
@@ -334,7 +334,7 @@ public class CandiWatch extends CandiActivity {
 			}
 			else if (entry instanceof User) {
 				User user = (User) entry;
-				String imageUri = user.getUserPhotoUri();
+				String imageUri = user.getPhotoUri();
 				if (imageUri != null) {
 					BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
 					BitmapRequest imageRequest = builder.create();

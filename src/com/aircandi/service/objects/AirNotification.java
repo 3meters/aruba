@@ -17,9 +17,11 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	private static final long	serialVersionUID	= 4362288672244719448L;
 
 	@Expose
-	public String				subject;
-	@Expose
 	public String				action;
+	@Expose
+	public Entity				entity;
+	@Expose
+	public User					user;
 	@Expose
 	public String				type;
 	@Expose
@@ -28,12 +30,6 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	public String				subtitle;
 	@Expose
 	public String				message;
-	@Expose
-	public Entity				entity;
-	@Expose
-	public Comment				comment;
-	@Expose
-	public User					user;
 	@Expose
 	public Number				sentDate;
 	
@@ -47,25 +43,40 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		notification.title = (String) map.get("title");
-		notification.subtitle = (String) map.get("subtitle");
-		notification.type = (String) map.get("type");
 		notification.action = (String) map.get("action");
-		notification.subject = (String) map.get("subject");
-		notification.message = (String) map.get("message");
-		notification.sentDate = (Number) map.get("sentDate");
-
+		
 		if (map.get("entity") != null) {
-			notification.entity = Entity.setPropertiesFromMap(new Entity(), (HashMap<String, Object>) map.get("entity"));
-		}
-
-		if (map.get("comment") != null) {
-			notification.comment = Comment.setPropertiesFromMap(new Comment(), (HashMap<String, Object>) map.get("comment"));
+			String type = (String) map.get("type");
+			if (type.equals("place")) {
+				notification.entity = Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("entity"));
+			}
+			else if (type.equals("beacon")) {
+				notification.entity = Beacon.setPropertiesFromMap(new Beacon(), (HashMap<String, Object>) map.get("entity"));
+			}
+			else if (type.equals("post")) {
+				notification.entity = Post.setPropertiesFromMap(new Post(), (HashMap<String, Object>) map.get("entity"));
+			}
+			else if (type.equals("applink")) {
+				notification.entity = Applink.setPropertiesFromMap(new Applink(), (HashMap<String, Object>) map.get("entity"));
+			}
+			else if (type.equals("comment")) {
+				notification.entity = Comment.setPropertiesFromMap(new Comment(), (HashMap<String, Object>) map.get("entity"));
+			}
+			else if (type.equals("user")) {
+				notification.entity = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("entity"));
+			}			
 		}
 
 		if (map.get("user") != null) {
 			notification.user = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
 		}
+		
+		notification.type = (String) map.get("type");
+		notification.title = (String) map.get("title");
+		notification.subtitle = (String) map.get("subtitle");
+		notification.message = (String) map.get("message");
+		notification.sentDate = (Number) map.get("sentDate");
+
 		return notification;
 	}
 

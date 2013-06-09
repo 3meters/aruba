@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AndroidManager;
@@ -28,9 +28,9 @@ import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ServiceDataType;
+import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
-import com.aircandi.service.objects.Source;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.MiscUtils;
@@ -38,7 +38,7 @@ import com.aircandi.utilities.MiscUtils;
 @SuppressWarnings("ucd")
 public class SourceBuilder extends FormActivity {
 
-	private Source			mSource;
+	private Applink			mApplink;
 	private Boolean			mEditing	= false;
 
 	private WebImageView	mSourceIcon;
@@ -63,11 +63,11 @@ public class SourceBuilder extends FormActivity {
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			final String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
+			final String jsonSource = extras.getString(Constants.EXTRA_SOURCE);
 			if (jsonSource != null) {
-				mSource = (Source) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
+				mApplink = (Applink) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Applink);
 				mEditing = true;
-				mCommon.mActionBar.setTitle(mSource.name);
+				mCommon.mActionBar.setTitle(mApplink.name);
 			}
 			else {
 				mEditing = false;
@@ -90,9 +90,9 @@ public class SourceBuilder extends FormActivity {
 
 	private void bind() {
 		if (mEditing) {
-			mSourceLabel.setText(mSource.label);
-			mSourceId.setText(mSource.id);
-			mSourceUrl.setText(mSource.url);
+			mSourceLabel.setText(mApplink.name);
+			mSourceId.setText(mApplink.id);
+			mSourceUrl.setText(mApplink.url);
 			drawSourceIcon();
 		}
 		else {
@@ -107,23 +107,22 @@ public class SourceBuilder extends FormActivity {
 		}
 	}
 
-	private Source buildCustomSource(String sourceType) {
-		final Source source = new Source();
+	private Applink buildCustomSource(String sourceType) {
+		final Applink applink = new Applink();
 
-		source.type = sourceType;
-		if (source.data == null) {
-			source.data = new HashMap<String, Object>();
+		applink.type = sourceType;
+		if (applink.data == null) {
+			applink.data = new HashMap<String, Object>();
 		}
 
-		source.data.put("origin", "user");
-		source.photo = new Photo(Source.getDefaultIcon(sourceType), null, null, null, PhotoSource.assets);
-		source.packageName = Source.getPackageName(sourceType);
+		applink.data.put("origin", "user");
+		applink.photo = new Photo(Applink.getDefaultIcon(sourceType), null, null, null, PhotoSource.assets);
 
-		return source;
+		return applink;
 	}
 
 	private void drawSourceIcon() {
-		final String imageUri = mSource.getPhoto().getUri();
+		final String imageUri = mApplink.getPhotoUri();
 		final BitmapRequestBuilder builder = new BitmapRequestBuilder(mSourceIcon).setImageUri(imageUri);
 		final BitmapRequest bitmapRequest = builder.create();
 		mSourceIcon.setBitmapRequest(bitmapRequest);
@@ -135,7 +134,7 @@ public class SourceBuilder extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onChangePictureButtonClick(View view) {
-		mCommon.showPictureSourcePicker(null, mSource.type);
+		mCommon.showPictureSourcePicker(null, mApplink.type);
 	}
 
 	@SuppressWarnings("ucd")
@@ -155,17 +154,17 @@ public class SourceBuilder extends FormActivity {
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
 		if (resultCode == Activity.RESULT_OK) {
-			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
+			if (requestCode == Constants.ACTIVITY_PICTURE_SOURCE_PICK) {
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
+					final String pictureSource = extras.getString(Constants.EXTRA_PICTURE_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
 						if (pictureSource.equals("default")) {
 							usePictureDefault();
 						}
 						else {
 							gather();
-							if (mSource.id == null || mSource.id.equals("")) {
+							if (mApplink.id == null || mApplink.id.equals("")) {
 								AircandiCommon.showAlertDialog(
 										android.R.drawable.ic_dialog_alert
 										,
@@ -181,12 +180,12 @@ public class SourceBuilder extends FormActivity {
 							}
 							else {
 								if (pictureSource.equals("facebook")) {
-									mSource.photo = new Photo("https://graph.facebook.com/" + mSource.id + "/picture?type=large", null, null, null,
+									mApplink.photo = new Photo("https://graph.facebook.com/" + mApplink.id + "/picture?type=large", null, null, null,
 											PhotoSource.facebook);
 									drawSourceIcon();
 								}
 								else if (pictureSource.equals("twitter")) {
-									mSource.photo = new Photo("https://api.twitter.com/1/users/profile_image?screen_name=" + mSource.id + "&size=bigger", null,
+									mApplink.photo = new Photo("https://api.twitter.com/1/users/profile_image?screen_name=" + mApplink.id + "&size=bigger", null,
 											null, null, PhotoSource.twitter);
 									drawSourceIcon();
 								}
@@ -202,7 +201,7 @@ public class SourceBuilder extends FormActivity {
 	}
 
 	private void usePictureDefault() {
-		mSource.photo = new Photo(Source.getDefaultIcon(mSource.type), null, null, null, PhotoSource.assets);
+		mApplink.photo = new Photo(Applink.getDefaultIcon(mApplink.type), null, null, null, PhotoSource.assets);
 		drawSourceIcon();
 		Tracker.sendEvent("ui_action", "set_source_picture_to_default", null, 0, Aircandi.getInstance().getUser());
 	}
@@ -213,9 +212,9 @@ public class SourceBuilder extends FormActivity {
 
 	private void doSave() {
 		final Intent intent = new Intent();
-		if (mSource != null) {
-			final String jsonSource = HttpService.convertObjectToJsonSmart(mSource, false, true);
-			intent.putExtra(CandiConstants.EXTRA_SOURCE, jsonSource);
+		if (mApplink != null) {
+			final String jsonSource = HttpService.convertObjectToJsonSmart(mApplink, false, true);
+			intent.putExtra(Constants.EXTRA_SOURCE, jsonSource);
 		}
 		setResult(Activity.RESULT_OK, intent);
 		finish();
@@ -260,18 +259,18 @@ public class SourceBuilder extends FormActivity {
 
 	private void gather() {
 		if (mEditing) {
-			mSource.label = mSourceLabel.getEditableText().toString();
-			mSource.id = mSourceId.getEditableText().toString();
-			mSource.url = mSourceUrl.getEditableText().toString();
+			mApplink.name = mSourceLabel.getEditableText().toString();
+			mApplink.id = mSourceId.getEditableText().toString();
+			mApplink.url = mSourceUrl.getEditableText().toString();
 		}
 		else {
-			mSource.label = mSourceLabel.getEditableText().toString();
-			mSource.id = mSourceId.getEditableText().toString();
-			mSource.url = mSourceUrl.getEditableText().toString();
+			mApplink.name = mSourceLabel.getEditableText().toString();
+			mApplink.id = mSourceId.getEditableText().toString();
+			mApplink.url = mSourceUrl.getEditableText().toString();
 		}
-		if (mSource.type.equals("website")) {
-			if (!mSource.url.startsWith("http://") && !mSource.url.startsWith("https://")) {
-				mSource.url = "http://" + mSource.url;
+		if (mApplink.type.equals("website")) {
+			if (!mApplink.url.startsWith("http://") && !mApplink.url.startsWith("https://")) {
+				mApplink.url = "http://" + mApplink.url;
 			}
 		}
 	}
@@ -283,29 +282,29 @@ public class SourceBuilder extends FormActivity {
 
 	private void doSourceTest() {
 		gather();
-		if (mSource.type.equals("twitter")) {
-			AndroidManager.getInstance().callTwitterActivity(this, (mSource.id != null) ? mSource.id : mSource.url);
+		if (mApplink.type.equals("twitter")) {
+			AndroidManager.getInstance().callTwitterActivity(this, (mApplink.id != null) ? mApplink.id : mApplink.url);
 		}
-		else if (mSource.type.equals("foursquare")) {
-			AndroidManager.getInstance().callFoursquareActivity(this, (mSource.id != null) ? mSource.id : mSource.url);
+		else if (mApplink.type.equals("foursquare")) {
+			AndroidManager.getInstance().callFoursquareActivity(this, (mApplink.id != null) ? mApplink.id : mApplink.url);
 		}
-		else if (mSource.type.equals("facebook")) {
-			AndroidManager.getInstance().callFacebookActivity(this, (mSource.id != null) ? mSource.id : mSource.url);
+		else if (mApplink.type.equals("facebook")) {
+			AndroidManager.getInstance().callFacebookActivity(this, (mApplink.id != null) ? mApplink.id : mApplink.url);
 		}
-		else if (mSource.type.equals("yelp")) {
-			AndroidManager.getInstance().callYelpActivity(this, mSource.id, mSource.url);
+		else if (mApplink.type.equals("yelp")) {
+			AndroidManager.getInstance().callYelpActivity(this, mApplink.id, mApplink.url);
 		}
-		else if (mSource.type.equals("opentable")) {
-			AndroidManager.getInstance().callOpentableActivity(this, mSource.id, mSource.url);
+		else if (mApplink.type.equals("opentable")) {
+			AndroidManager.getInstance().callOpentableActivity(this, mApplink.id, mApplink.url);
 		}
-		else if (mSource.type.equals("website")) {
-			AndroidManager.getInstance().callBrowserActivity(this, (mSource.url != null) ? mSource.url : mSource.id);
+		else if (mApplink.type.equals("website")) {
+			AndroidManager.getInstance().callBrowserActivity(this, (mApplink.url != null) ? mApplink.url : mApplink.id);
 		}
-		else if (mSource.type.equals("email")) {
-			AndroidManager.getInstance().callSendToActivity(this, mSource.label, mSource.id, null, null);
+		else if (mApplink.type.equals("email")) {
+			AndroidManager.getInstance().callSendToActivity(this, mApplink.name, mApplink.id, null, null);
 		}
 		else {
-			AndroidManager.getInstance().callGenericActivity(this, (mSource.url != null) ? mSource.url : mSource.id);
+			AndroidManager.getInstance().callGenericActivity(this, (mApplink.url != null) ? mApplink.url : mApplink.id);
 		}
 	}
 
@@ -391,16 +390,16 @@ public class SourceBuilder extends FormActivity {
 				if (position != parent.getCount()) {
 					if (position < mSourceSuggestionStrings.size()) {
 						final String sourceType = mSourceSuggestionStrings.get(position);
-						mSource = buildCustomSource(sourceType);
-						mSourceLabel.setText(mSource.label);
-						mSourceId.setText(mSource.id);
-						if (mSource.type.equals("website")) {
+						mApplink = buildCustomSource(sourceType);
+						mSourceLabel.setText(mApplink.name);
+						mSourceId.setText(mApplink.id);
+						if (mApplink.type.equals("website")) {
 							mSourceId.setVisibility(View.GONE);
 						}
 						else {
 							mSourceId.setVisibility(View.VISIBLE);
 						}
-						mSource.custom = true;
+						mApplink.custom = true;
 						drawSourceIcon();
 					}
 				}

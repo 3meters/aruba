@@ -14,7 +14,6 @@ import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,7 +29,7 @@ import android.widget.ViewFlipper;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
@@ -50,17 +49,16 @@ import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.HttpService.ServiceDataType;
+import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Entity.Visibility;
-import com.aircandi.service.objects.Location;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
-import com.aircandi.service.objects.Provider;
-import com.aircandi.service.objects.Source;
+import com.aircandi.service.objects.Post;
+import com.aircandi.service.objects.ProviderMap;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.builders.AddressBuilder;
@@ -104,13 +102,10 @@ public class EntityForm extends FormActivity {
 		 * Starting determining the users location if we are creating new candi. We are pulling
 		 * a single shot coarse location which is usually based on network location method.
 		 */
-		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+		if (mCommon.mEntityType.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			mCommon.mActionBar.setTitle(R.string.form_title_place);
 		}
-		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-			mCommon.mActionBar.setTitle(R.string.form_title_candigram);
-		}
-		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
+		else if (mCommon.mEntityType.equals(Constants.SCHEMA_ENTITY_POST)) {
 			mCommon.mActionBar.setTitle(R.string.form_title_candigram);
 		}
 
@@ -162,7 +157,7 @@ public class EntityForm extends FormActivity {
 		 * will set any additional properties beyond the base ones.
 		 */
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
-		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {}
+		if (mCommon.mEntityType.equals(Constants.SCHEMA_ENTITY_PLACE)) {}
 
 		if (mCommon.mCommandType == CommandType.New) {
 			mEntityForForm = makeEntity(mCommon.mEntityType);
@@ -182,18 +177,28 @@ public class EntityForm extends FormActivity {
 		}
 	}
 
-	private Entity makeEntity(String type) {
-		if (type == null) {
-			throw new IllegalArgumentException("EntityForm.makeEntity(): type parameter is null");
+	private Entity makeEntity(String schema) {
+		if (schema == null) {
+			throw new IllegalArgumentException("EntityForm.makeEntity(): schema parameter is null");
 		}
-		final Entity entity = new Entity();
+		Entity entity = null;
+
+		if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			entity = new Place();
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+			entity = new Post();
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+			entity = new Applink();
+		}
+
+		entity.schema = schema;
 		entity.signalFence = -100.0f;
-		entity.locked = false;
-		entity.isCollection = (type.equals(CandiConstants.TYPE_CANDI_PLACE));
-		entity.visibility = Visibility.Public.toString().toLowerCase(Locale.US);
-		entity.type = type;
-		if (type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			entity.getPlace().setProvider(new Provider(Aircandi.getInstance().getUser().id, "user"));
+
+		if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			((Place) entity).provider = new ProviderMap();
+			((Place) entity).provider.aircandi = Aircandi.getInstance().getUser().id;
 		}
 		return entity;
 	}
@@ -238,21 +243,20 @@ public class EntityForm extends FormActivity {
 			}
 
 			/* Place content */
-			if (entity.place != null) {
+			if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				Place place = (Place) entity;
 
-				drawSources(entity);
+				drawApplinks(place);
 
-				if (entity.place.location != null) {
-					if (findViewById(R.id.address) != null) {
-						final String addressBlock = entity.place.location.getAddressBlock();
-						if (!addressBlock.equals("")) {
-							((BuilderButton) findViewById(R.id.address)).setText(entity.place.location.address);
-						}
+				if (findViewById(R.id.address) != null) {
+					final String addressBlock = place.getAddressBlock();
+					if (!addressBlock.equals("")) {
+						((BuilderButton) findViewById(R.id.address)).setText(place.address);
 					}
 				}
-				if (entity.place.category != null) {
+				if (place.category != null) {
 					if (findViewById(R.id.category) != null) {
-						((BuilderButton) findViewById(R.id.category)).setText(entity.place.category.name);
+						((BuilderButton) findViewById(R.id.category)).setText(place.category.name);
 					}
 				}
 			}
@@ -266,23 +270,15 @@ public class EntityForm extends FormActivity {
 					&& entity.creator != null
 					&& !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					if (entity.place.getProvider().type.equals("user")) {
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					if (((Place) entity).getProvider().type.equals("aircandi")) {
 						creator.setLabel(getString(R.string.candi_label_user_created_by));
 						creator.bindToUser(entity.creator, entity.createdDate.longValue(), entity.locked);
 						setVisibility(creator, View.VISIBLE);
 					}
 				}
 				else {
-					if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-						creator.setLabel(getString(R.string.candi_label_user_added_by));
-					}
-					else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-						creator.setLabel(getString(R.string.candi_label_user_posted_by));
-					}
-					else {
-						creator.setLabel(getString(R.string.candi_label_user_created_by));
-					}
+					creator.setLabel(getString(R.string.candi_label_user_added_by));
 					creator.bindToUser(entity.creator, entity.createdDate.longValue(), entity.locked);
 					setVisibility(creator, View.VISIBLE);
 				}
@@ -303,9 +299,9 @@ public class EntityForm extends FormActivity {
 			setVisibility(findViewById(R.id.button_delete), View.GONE);
 			if (entity.ownerId != null
 					&& (entity.ownerId.equals(Aircandi.getInstance().getUser().id)
-					|| (Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
-							&& Aircandi.getInstance().getUser().isDeveloper != null
-							&& Aircandi.getInstance().getUser().isDeveloper))) {
+					|| (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+							&& Aircandi.getInstance().getUser().developer != null
+							&& Aircandi.getInstance().getUser().developer))) {
 				setVisibility(findViewById(R.id.button_delete), View.VISIBLE);
 			}
 		}
@@ -328,15 +324,16 @@ public class EntityForm extends FormActivity {
 				mImageViewPicture.setVisibility(View.VISIBLE);
 			}
 			else {
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					if (entity.photo == null && entity.place != null && entity.place.category != null) {
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					Place place = (Place) entity;
+					if (place.photo == null && place.category != null) {
 
-						final int color = Place.getCategoryColor((entity.place.category != null)
-								? entity.place.category.name
+						final int color = Place.getCategoryColor((place.category != null)
+								? place.category.name
 								: null, true, mMuteColor, false);
 
 						mImageViewPicture.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-						mColorResId = Place.getCategoryColorResId((entity.place != null && entity.place.category != null) ? entity.place.category.name : null,
+						mColorResId = Place.getCategoryColorResId(place.category != null ? place.category.name : null,
 								true, mMuteColor, false);
 
 						if (findViewById(R.id.color_layer) != null) {
@@ -350,7 +347,7 @@ public class EntityForm extends FormActivity {
 					}
 				}
 
-				final String imageUri = entity.getEntityPhotoUri();
+				final String imageUri = entity.getPhotoUri();
 				final BitmapRequest bitmapRequest = new BitmapRequest(imageUri, mImageViewPicture.getImageView());
 				bitmapRequest.setImageSize(mImageViewPicture.getSizeHint());
 				bitmapRequest.setImageRequestor(mImageViewPicture.getImageView());
@@ -360,14 +357,15 @@ public class EntityForm extends FormActivity {
 		}
 	}
 
-	private void drawSources(Entity entity) {
+	private void drawApplinks(Entity entity) {
 		if (findViewById(R.id.sources) != null) {
 			/*
 			 * We are expecting a builder button with a viewgroup to
 			 * hold a set of images.
 			 */
 			final BuilderButton button = (BuilderButton) findViewById(R.id.sources);
-			if (entity.sources == null || entity.sources.size() == 0) {
+			List<Applink> applinks = (List<Applink>) entity.getChildrenByLinkType(Constants.TYPE_LINK_APPLINK);
+			if (applinks.size() == 0) {
 				button.getTextView().setVisibility(View.VISIBLE);
 				button.getViewGroup().setVisibility(View.GONE);
 			}
@@ -380,19 +378,19 @@ public class EntityForm extends FormActivity {
 				final int marginPixels = ImageUtils.getRawPixels(this, 5);
 
 				/* We only show the first five */
-				int sourceCount = 0;
-				for (Source source : entity.sources) {
-					if (sourceCount >= 5) {
+				int applinkCount = 0;
+				for (Applink applink : applinks) {
+					if (applinkCount >= 5) {
 						break;
 					}
-					if (source.system != null && source.system) {
+					if (applink.system != null && applink.system) {
 						continue;
 					}
 					View view = inflater.inflate(R.layout.temp_radar_candi_item, null);
 					WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
 					webImageView.setSizeHint(sizePixels);
 
-					String imageUri = source.getPhoto().getUri();
+					String imageUri = applink.getPhotoUri();
 					BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
 					BitmapRequest imageRequest = builder.create();
 					webImageView.setBitmapRequest(imageRequest);
@@ -404,7 +402,7 @@ public class EntityForm extends FormActivity {
 							, marginPixels);
 					view.setLayoutParams(params);
 					button.getViewGroup().addView(view);
-					sourceCount++;
+					applinkCount++;
 				}
 			}
 		}
@@ -457,46 +455,43 @@ public class EntityForm extends FormActivity {
 	@SuppressWarnings("ucd")
 	public void onAddressBuilderClick(View view) {
 		final Intent intent = new Intent(this, AddressBuilder.class);
-		if (mEntityForForm.getPlace().location != null) {
-			final String jsonAddress = HttpService.convertObjectToJsonSmart(mEntityForForm.place.location, false, true);
-			intent.putExtra(CandiConstants.EXTRA_ADDRESS, jsonAddress);
-		}
-		if (mEntityForForm.getPlace().contact != null && mEntityForForm.getPlace().contact.phone != null) {
-			intent.putExtra(CandiConstants.EXTRA_PHONE, mEntityForForm.getPlace().contact.phone);
-		}
-		startActivityForResult(intent, CandiConstants.ACTIVITY_ADDRESS_EDIT);
+		final String jsonPlace = HttpService.convertObjectToJsonSmart(mEntityForForm, false, true);
+		intent.putExtra(Constants.EXTRA_PLACE, jsonPlace);
+		startActivityForResult(intent, Constants.ACTIVITY_ADDRESS_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onCategoryBuilderClick(View view) {
 		final Intent intent = new Intent(this, CategoryBuilder.class);
-		if (mEntityForForm.getPlace().category != null) {
-			final String jsonCategory = HttpService.convertObjectToJsonSmart(mEntityForForm.getPlace().category, false, true);
-			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
+		if (((Place) mEntityForForm).category != null) {
+			final String jsonCategory = HttpService.convertObjectToJsonSmart(((Place) mEntityForForm).category, false, true);
+			intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
 		}
-		startActivityForResult(intent, CandiConstants.ACTIVITY_CATEGORY_EDIT);
+		startActivityForResult(intent, Constants.ACTIVITY_CATEGORY_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")
-	public void onSourcesBuilderClick(View view) {
+	public void onApplinksBuilderClick(View view) {
 		final Intent intent = new Intent(this, SourcesBuilder.class);
 
 		/* Serialize the sources for the current entity */
-		if (mEntityForForm.sources != null && mEntityForForm.sources.size() > 0) {
-			final List<String> sourceStrings = new ArrayList<String>();
-			for (Source source : mEntityForForm.sources) {
-				sourceStrings.add(HttpService.convertObjectToJsonSmart(source, true, true));
+		List<Applink> applinks = (List<Applink>) mEntityForForm.getChildrenByLinkType(Constants.TYPE_LINK_APPLINK);
+		
+		if (applinks.size() > 0) {
+			final List<String> applinkStrings = new ArrayList<String>();
+			for (Applink applink : applinks) {
+				applinkStrings.add(HttpService.convertObjectToJsonSmart(applink, true, true));
 			}
-			intent.putStringArrayListExtra(CandiConstants.EXTRA_SOURCES, (ArrayList<String>) sourceStrings);
+			intent.putStringArrayListExtra(Constants.EXTRA_APPLINKS, (ArrayList<String>) applinkStrings);
 		}
 
 		if (mEntityForForm.id != null) {
-			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntityForForm.id);
+			intent.putExtra(Constants.EXTRA_ENTITY_ID, mEntityForForm.id);
 		}
 
-		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCES_EDIT);
+		startActivityForResult(intent, Constants.ACTIVITY_SOURCES_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
@@ -509,59 +504,57 @@ public class EntityForm extends FormActivity {
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
 		if (resultCode == Activity.RESULT_OK) {
-			if (requestCode == CandiConstants.ACTIVITY_ADDRESS_EDIT) {
+			if (requestCode == Constants.ACTIVITY_ADDRESS_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
 					mDirty = true;
 					final Bundle extras = intent.getExtras();
 
-					String phone = extras.getString(CandiConstants.EXTRA_PHONE);
-					if (phone != null) {
-						phone = phone.replaceAll("[^\\d.]", "");
-						mEntityForForm.getPlace().getContact().phone = phone;
-						mEntityForForm.getPlace().getContact().formattedPhone = PhoneNumberUtils.formatNumber(phone);
-					}
-
-					final String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
-					if (jsonAddress != null) {
-						final Location locationUpdated = (Location) HttpService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
-						mEntityForForm.getPlace().location = locationUpdated;
-						((BuilderButton) findViewById(R.id.address)).setText(mEntityForForm.place.location.address);
+					final String jsonPlace = extras.getString(Constants.EXTRA_PLACE);
+					if (jsonPlace != null) {
+						final Place placeUpdated = (Place) HttpService.convertJsonToObjectInternalSmart(jsonPlace, ServiceDataType.Place);
+						if (placeUpdated.phone != null) {
+							placeUpdated.phone = placeUpdated.phone.replaceAll("[^\\d.]", "");
+						}
+						mEntityForForm = placeUpdated;
+						((BuilderButton) findViewById(R.id.address)).setText(((Place)mEntityForForm).address);
 					}
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_CATEGORY_EDIT) {
+			else if (requestCode == Constants.ACTIVITY_CATEGORY_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
+					final String jsonCategory = extras.getString(Constants.EXTRA_CATEGORY);
 					if (jsonCategory != null) {
 						final Category categoryUpdated = (Category) HttpService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 						if (categoryUpdated != null) {
 							mDirty = true;
-							mEntityForForm.getPlace().category = categoryUpdated;
+							((Place)mEntityForForm).category = categoryUpdated;
 							((BuilderButton) findViewById(R.id.category)).setText(categoryUpdated.name);
 							drawImage(mEntityForForm);
 						}
 					}
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_SOURCES_EDIT) {
+			else if (requestCode == Constants.ACTIVITY_SOURCES_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final List<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
-					final List<Source> sources = new ArrayList<Source>();
-					for (String jsonSource : jsonSources) {
-						Source source = (Source) HttpService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
-						sources.add(source);
+					final List<String> jsonApplinks = extras.getStringArrayList(Constants.EXTRA_APPLINKS);
+					final List<Applink> applinks = new ArrayList<Applink>();
+					for (String jsonApplink : jsonApplinks) {
+						Applink applink = (Applink) HttpService.convertJsonToObjectInternalSmart(jsonApplink, ServiceDataType.Applink);
+						applinks.add(applink);
 					}
 					mDirty = true;
-					mEntityForForm.sources = sources;
-					drawSources(mEntityForForm);
+					/*
+					 * FIXME: update applinks in cache
+					 */
+					drawApplinks(mEntityForForm);
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
+			else if (requestCode == Constants.ACTIVITY_PICTURE_SOURCE_PICK) {
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
+					final String pictureSource = extras.getString(Constants.EXTRA_PICTURE_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
 						if (pictureSource.equals("search")) {
 							String defaultSearch = null;
@@ -652,8 +645,8 @@ public class EntityForm extends FormActivity {
 
 						/* Return the id of the inserted entity in case the caller can use it */
 						final Intent intent = new Intent();
-						intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, ((Entity) result.data).id);
-						setResult(CandiConstants.RESULT_ENTITY_INSERTED, intent);
+						intent.putExtra(Constants.EXTRA_ENTITY_ID, ((Entity) result.data).id);
+						setResult(Constants.RESULT_ENTITY_INSERTED, intent);
 					}
 				}
 				else if (mCommon.mCommandType == CommandType.Edit) {
@@ -667,7 +660,7 @@ public class EntityForm extends FormActivity {
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-						setResult(CandiConstants.RESULT_ENTITY_UPDATED);
+						setResult(Constants.RESULT_ENTITY_UPDATED);
 					}
 				}
 				return result.serviceResponse;
@@ -723,7 +716,7 @@ public class EntityForm extends FormActivity {
 	private void confirmDelete() {
 		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
 				, getResources().getString(R.string.alert_entity_delete_title)
-				, mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE)
+				, mEntityForForm.type.equals(Constants.SCHEMA_ENTITY_PLACE)
 						? getResources().getString(R.string.alert_place_delete_message_single)
 						: getResources().getString(R.string.alert_candi_delete_message_single)
 				, null
@@ -750,15 +743,18 @@ public class EntityForm extends FormActivity {
 		Beacon primaryBeacon = null;
 
 		/* If parent id then this is a child */
-		if (mEntityForForm.links != null) {
-			mEntityForForm.links.clear();
+		if (mEntityForForm.linksIn != null) {
+			mEntityForForm.linksIn.clear();
+		}
+		if (mEntityForForm.linksOut != null) {
+			mEntityForForm.linksOut.clear();
 		}
 
 		if (mCommon.mParentId != null) {
-			mEntityForForm.parentId = mCommon.mParentId;
+			mEntityForForm.toId = mCommon.mParentId;
 		}
 		else {
-			mEntityForForm.parentId = null;
+			mEntityForForm.toId = null;
 		}
 
 		/* We always send beacons to support nearby notifications */
@@ -768,17 +764,15 @@ public class EntityForm extends FormActivity {
 		/*
 		 * Set location info if this is a place entity
 		 */
-		if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-
-			mEntityForForm.getPlace().setProvider(new Provider(Aircandi.getInstance().getUser().id, "user"));
+		if (mEntityForForm.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			((Place)mEntityForForm).provider.aircandi = Aircandi.getInstance().getUser().id;
 			/*
 			 * We add location info as a consistent feature
 			 */
 			final Observation observation = LocationManager.getInstance().getObservationLocked();
 			if (observation != null) {
-				mEntityForForm.place.location = new com.aircandi.service.objects.Location();
-				mEntityForForm.place.location.lat = observation.latitude;
-				mEntityForForm.place.location.lng = observation.longitude;
+				((Place)mEntityForForm).location.lat = observation.latitude;
+				((Place)mEntityForForm).location.lng = observation.longitude;
 			}
 		}
 
@@ -791,10 +785,10 @@ public class EntityForm extends FormActivity {
 		/* Add picture entity if a new picture has been set for a place */
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final Entity entity = (Entity) result.data;
-			if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntityForForm.photo != null) {
-				Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
+			if (mEntityForForm.type.equals(Constants.SCHEMA_ENTITY_PLACE) && mEntityForForm.photo != null) {
+				Entity pictureEntity = makeEntity(Constants.SCHEMA_ENTITY_POST);
 				pictureEntity.photo = entity.photo.clone();
-				pictureEntity.parentId = entity.id;
+				pictureEntity.toId = entity.id;
 				result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false, true);
 			}
 		}
@@ -816,13 +810,13 @@ public class EntityForm extends FormActivity {
 			/*
 			 * If photo changed, add a child picture entity if we don't already have it.
 			 */
-			if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntityForForm.photo != null) {
+			if (mEntityForForm.type.equals(Constants.SCHEMA_ENTITY_PLACE) && mEntityForForm.photo != null) {
 
 				List<Entity> entities = mEntityForForm.getChildren();
 				Boolean candiMatch = false;
 				for (Entity entity : entities) {
-					if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-						if (entity.getPhoto().getUri() != null && entity.getPhoto().getUri().equals(mEntityForForm.getPhoto().getUri())) {
+					if (entity.schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+						if (entity.getPhotoUri() != null && entity.getPhotoUri().equals(mEntityForForm.getPhotoUri())) {
 							candiMatch = true;
 							break;
 						}
@@ -830,9 +824,9 @@ public class EntityForm extends FormActivity {
 				}
 
 				if (!candiMatch) {
-					Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
+					Entity pictureEntity = makeEntity(Constants.SCHEMA_ENTITY_POST);
 					pictureEntity.photo = mEntityForForm.photo.clone();
-					pictureEntity.parentId = mEntityForForm.id;
+					pictureEntity.toId = mEntityForForm.id;
 					result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false, true);
 				}
 			}
@@ -871,7 +865,7 @@ public class EntityForm extends FormActivity {
 
 					mCommon.hideBusy(true);
 					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
-					setResult(CandiConstants.RESULT_ENTITY_DELETED);
+					setResult(Constants.RESULT_ENTITY_DELETED);
 					/*
 					 * We either go back to a list or to radar.
 					 */
@@ -899,9 +893,9 @@ public class EntityForm extends FormActivity {
 			menuItem.setVisible(false);
 			if (mEntityForForm.ownerId != null && Aircandi.getInstance().getUser() != null
 					&& (mEntityForForm.ownerId.equals(Aircandi.getInstance().getUser().id)
-					|| (Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
-							&& Aircandi.getInstance().getUser().isDeveloper != null
-							&& Aircandi.getInstance().getUser().isDeveloper))) {
+					|| (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+							&& Aircandi.getInstance().getUser().developer != null
+							&& Aircandi.getInstance().getUser().developer))) {
 				menuItem.setVisible(true);
 			}
 		}
@@ -947,13 +941,10 @@ public class EntityForm extends FormActivity {
 
 	@Override
 	protected int getLayoutId() {
-		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
+		if (mCommon.mEntityType.equals(Constants.SCHEMA_ENTITY_POST)) {
 			return R.layout.picture_form;
 		}
-		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-			return R.layout.picture_form;
-		}
-		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+		else if (mCommon.mEntityType.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			return R.layout.place_form;
 		}
 		else {

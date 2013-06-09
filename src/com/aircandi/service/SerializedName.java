@@ -66,9 +66,21 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface SerializedName {
+	
+  /**
+   * If {@code true}, the field marked with this annotation is written out in the JSON while
+   * serializing. If {@code false}, the field marked with this annotation is skipped from the
+   * serialized output. Defaults to {@code true}.
+   * @since 1.4
+   */
+  public String name();
 
   /**
-   * @return the desired name of the field when it is serialized
+   * If {@code true}, the field marked with this annotation is deserialized from the JSON.
+   * If {@code false}, the field marked with this annotation is skipped during deserialization. 
+   * Defaults to {@code true}.
+   * @since 1.4
    */
-  String value();
+  public boolean excludeNull() default false;
+	
 }

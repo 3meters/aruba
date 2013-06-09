@@ -7,16 +7,16 @@ import com.aircandi.service.SerializedName;
  * @author Jayma
  */
 @SuppressWarnings("ucd")
-public class Observation extends ServiceEntryBase {
+public class Observation extends ServiceBase {
 
 	private static final long	serialVersionUID	= 5247954279209162831L;
 
 	@Expose
-	@SerializedName("_beacon")
+	@SerializedName(name = "_beacon")
 	public String				beaconId;
 
 	@Expose
-	@SerializedName("_entity")
+	@SerializedName(name = "_entity")
 	public String				entityId;
 
 	@Expose

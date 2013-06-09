@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.location.Location;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.PlacesConstants;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.utilities.DateUtils;
@@ -143,7 +143,7 @@ public class LocationManager {
 				observation.provider = "emulator_lucky";
 			}
 			else {
-				final String testingLocation = Aircandi.settings.getString(CandiConstants.PREF_TESTING_LOCATION, "natural");
+				final String testingLocation = Aircandi.settings.getString(Constants.PREF_TESTING_LOCATION, "natural");
 				if (ListPreferenceMultiSelect.contains("zoka", testingLocation, null)) {
 					observation = new Observation(47.6686489, -122.3320842); // zoka
 					observation.time = DateUtils.nowDate().getTime();
@@ -301,8 +301,8 @@ public class LocationManager {
 
 		/* Check whether the new location fix is newer or older */
 		final long timeDelta = locationToEvaluate.getTime() - currentBestLocation.getTime();
-		final boolean isSignificantlyNewer = timeDelta > CandiConstants.TIME_TWO_MINUTES;
-		final boolean isSignificantlyOlder = timeDelta < -CandiConstants.TIME_TWO_MINUTES;
+		final boolean isSignificantlyNewer = timeDelta > Constants.TIME_TWO_MINUTES;
+		final boolean isSignificantlyOlder = timeDelta < -Constants.TIME_TWO_MINUTES;
 		final boolean isNewer = timeDelta > 0;
 
 		/* Check if the old and new location are from the same provider */

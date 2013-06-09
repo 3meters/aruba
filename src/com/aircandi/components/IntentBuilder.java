@@ -3,7 +3,7 @@ package com.aircandi.components;
 import android.content.Context;
 import android.content.Intent;
 
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.components.ProxiManager.ArrayListType;
 
 
@@ -34,39 +34,39 @@ public class IntentBuilder {
 		final Intent intent = new Intent(mContext, mClass);
 
 		if (mEntityId != null) {
-			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntityId);
+			intent.putExtra(Constants.EXTRA_ENTITY_ID, mEntityId);
 		}
 
 		if (mCommandType != null) {
-			intent.putExtra(CandiConstants.EXTRA_COMMAND_TYPE, mCommandType.name());
+			intent.putExtra(Constants.EXTRA_COMMAND_TYPE, mCommandType.name());
 		}
 
 		if (mEntityType != null) {
-			intent.putExtra(CandiConstants.EXTRA_ENTITY_TYPE, mEntityType);
+			intent.putExtra(Constants.EXTRA_ENTITY_TYPE, mEntityType);
 		}
 
 		if (mParentEntityId != null) {
-			intent.putExtra(CandiConstants.EXTRA_PARENT_ENTITY_ID, mParentEntityId);
+			intent.putExtra(Constants.EXTRA_PARENT_ENTITY_ID, mParentEntityId);
 		}
 
 		if (mMessage != null) {
-			intent.putExtra(CandiConstants.EXTRA_MESSAGE, mMessage);
+			intent.putExtra(Constants.EXTRA_MESSAGE, mMessage);
 		}
 
 		if (mUserId != null) {
-			intent.putExtra(CandiConstants.EXTRA_USER_ID, mUserId);
+			intent.putExtra(Constants.EXTRA_USER_ID, mUserId);
 		}
 
 		if (mCollectionId != null) {
-			intent.putExtra(CandiConstants.EXTRA_COLLECTION_ID, mCollectionId);
+			intent.putExtra(Constants.EXTRA_COLLECTION_ID, mCollectionId);
 		}
 
 		if (mArrayListType != null) {
-			intent.putExtra(CandiConstants.EXTRA_LIST_TYPE, mArrayListType.name());
+			intent.putExtra(Constants.EXTRA_LIST_TYPE, mArrayListType.name());
 		}
 
 		if (mForceRefresh != null) {
-			intent.putExtra(CandiConstants.EXTRA_REFRESH_FORCE, mForceRefresh);
+			intent.putExtra(Constants.EXTRA_REFRESH_FORCE, mForceRefresh);
 		}
 		
 		return intent;

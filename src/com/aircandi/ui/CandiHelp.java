@@ -6,7 +6,7 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 import com.aircandi.ui.base.FormActivity;
@@ -46,14 +46,14 @@ public class CandiHelp extends FormActivity {
 	public void onHelpClick(View view) {
 		updateRunOnce();
 		finish();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.HelpToPage);
 	}
 
 	@Override
 	public void onBackPressed() {
 		updateRunOnce();
 		finish();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.HelpToPage);
 	}
 
 	@Override
@@ -74,16 +74,16 @@ public class CandiHelp extends FormActivity {
 	
 	private void updateRunOnce() {
 		if (mHelpResId == R.layout.help_radar) {
-			final Boolean runOnce = Aircandi.settings.getBoolean(CandiConstants.SETTING_RUN_ONCE_HELP_RADAR, false);
+			final Boolean runOnce = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, false);
 			if (!runOnce) {
-				Aircandi.settingsEditor.putBoolean(CandiConstants.SETTING_RUN_ONCE_HELP_RADAR, true);
+				Aircandi.settingsEditor.putBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, true);
 				Aircandi.settingsEditor.commit();					
 			}
 		}
 		else if (mHelpResId == R.layout.help_candi_place) {
-			final Boolean runOnce = Aircandi.settings.getBoolean(CandiConstants.SETTING_RUN_ONCE_HELP_CANDI_PLACE, false);
+			final Boolean runOnce = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_CANDI_PLACE, false);
 			if (!runOnce) {
-				Aircandi.settingsEditor.putBoolean(CandiConstants.SETTING_RUN_ONCE_HELP_CANDI_PLACE, true);
+				Aircandi.settingsEditor.putBoolean(Constants.SETTING_RUN_ONCE_HELP_CANDI_PLACE, true);
 				Aircandi.settingsEditor.commit();					
 			}
 		}
@@ -104,7 +104,7 @@ public class CandiHelp extends FormActivity {
 		if (mHelpResId == null) {
 			final Bundle extras = this.getIntent().getExtras();
 			if (extras != null) {
-				mHelpResId = extras.getInt(CandiConstants.EXTRA_HELP_ID);
+				mHelpResId = extras.getInt(Constants.EXTRA_HELP_ID);
 			}
 		}
 		return mHelpResId;

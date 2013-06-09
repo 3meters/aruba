@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
     xmlns:tools="http://schemas.android.com/tools" >
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_centerVertical="true" >
+        android:layout_centerInParent="true"
+        android:gravity="center" >
 
         <ImageView
             android:id="@+id/icon"
             android:layout_width="@dimen/image_combo_button"
             android:layout_height="@dimen/image_combo_button"
-            android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="4dp"
+            android:layout_marginRight="2dp"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter" />
 
@@ -24,10 +22,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_gravity="center_vertical"
-            android:layout_toRightOf="@+id/icon"
+            android:gravity="center_vertical"
+            android:layout_marginLeft="2dp"
             android:textAppearance="@style/app_text_appearance_small"
             android:textColor="?attr/textColorButtonLink" />
-    </RelativeLayout>
+    </LinearLayout>
 
 </merge>

@@ -118,6 +118,9 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 				else if (sourceName.equals(PhotoSource.assets)) {
 					imageUri = ProxiConstants.URL_PROXIBASE_SERVICE + imageUri;
 				}
+				else if (sourceName.equals(PhotoSource.assets_categories)) {
+					imageUri = ProxiConstants.URL_PROXIBASE_SERVICE + imageUri;
+				}
 			}
 		}
 		return imageUri;
@@ -185,13 +188,14 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public static class PhotoSource {
-		public static String	external	= "external";
-		public static String	aircandi	= "aircandi";
-		public static String	assets		= "assets";
-		public static String	foursquare	= "foursquare";
-		public static String	facebook	= "facebook";
-		public static String	twitter		= "twitter";
-		public static String	resource	= "resource";
-		public static String	website		= "website";
+		public static String	external			= "external";
+		public static String	aircandi			= "aircandi";
+		public static String	assets				= "assets";
+		public static String	assets_categories	= "assets.categories";
+		public static String	foursquare			= "foursquare";
+		public static String	facebook			= "facebook";
+		public static String	twitter				= "twitter";
+		public static String	resource			= "resource";
+		public static String	website				= "website";
 	}
 }

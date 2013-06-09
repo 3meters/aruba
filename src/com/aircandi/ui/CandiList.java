@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
+import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -24,6 +24,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.components.ProxiManager.ArrayListType;
 import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.CandiActivity;
@@ -88,7 +89,7 @@ public class CandiList extends CandiActivity {
 		mListView = (ListView) findViewById(R.id.list_candi);
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			mArrayListType = ArrayListType.valueOf(extras.getString(CandiConstants.EXTRA_LIST_TYPE));
+			mArrayListType = ArrayListType.valueOf(extras.getString(Constants.EXTRA_LIST_TYPE));
 		}
 		
 		
@@ -162,15 +163,16 @@ public class CandiList extends CandiActivity {
 	public void onListItemClick(View view) {
 		Logger.v(this, "List item clicked");
 		final Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
-		if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-			if (entity.source.type.equals("twitter")) {
-				AndroidManager.getInstance().callTwitterActivity(this, entity.source.id);
+		if (entity.type.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+			Applink applink = (Applink) entity;
+			if (applink.type.equals("twitter")) {
+				AndroidManager.getInstance().callTwitterActivity(this, applink.appId);
 			}
-			else if (entity.source.type.equals("facebook")) {
-				AndroidManager.getInstance().callFacebookActivity(this, entity.source.id);
+			else if (applink.type.equals("facebook")) {
+				AndroidManager.getInstance().callFacebookActivity(this, applink.appId);
 			}
-			else if (entity.source.type.equals("website")) {
-				AndroidManager.getInstance().callBrowserActivity(this, entity.source.id);
+			else if (applink.type.equals("website")) {
+				AndroidManager.getInstance().callBrowserActivity(this, applink.appId);
 			}
 		}
 		else {
@@ -181,12 +183,12 @@ public class CandiList extends CandiActivity {
 	@SuppressWarnings("ucd")
 	public void onCommentsClick(View view) {
 		final Entity entity = (Entity) view.getTag();
-		if (entity.commentCount > 0) {
+		if (entity.getInCount(Constants.TYPE_LINK_COMMENT) > 0) {
 
 			final IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setEntityId(entity.id)
-					.setParentEntityId(entity.parentId)
+					.setParentEntityId(entity.toId)
 					.setCollectionId(entity.id);
 
 			final Intent intent = intentBuilder.create();
@@ -198,7 +200,7 @@ public class CandiList extends CandiActivity {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
-		if (requestCode == CandiConstants.ACTIVITY_SIGNIN) {
+		if (requestCode == Constants.ACTIVITY_SIGNIN) {
 			if (resultCode == Activity.RESULT_CANCELED) {
 				setResult(resultCode);
 				finish();
