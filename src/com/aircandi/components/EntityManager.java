@@ -30,7 +30,7 @@ import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Comment;
-import com.aircandi.service.objects.CursorSettings;
+import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Device;
 import com.aircandi.service.objects.Document;
 import com.aircandi.service.objects.Entity;
@@ -131,7 +131,7 @@ public class EntityManager {
 		return result;
 	}
 
-	public synchronized ModelResult getEntitiesForEntity(String entityId, Boolean refresh, String[] linkTypes, CursorSettings cursorSettings,
+	public synchronized ModelResult getEntitiesForEntity(String entityId, Boolean refresh, String[] linkTypes, Cursor cursor,
 			LinkOptions linkOptions) {
 		final ModelResult result = new ProximityManager.ModelResult();
 

@@ -30,7 +30,7 @@ import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Comment;
-import com.aircandi.service.objects.CursorSettings;
+import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.base.CandiActivity;
@@ -43,7 +43,7 @@ public class CommentList extends CandiActivity {
 
 	private ListView			mListView;
 	private List<Comment>		mComments	= new ArrayList<Comment>();
-	private CursorSettings		mCursorSettings;
+	private Cursor				mCursorSettings;
 	private Button				mButtonNewComment;
 
 	private LayoutInflater		mInflater;
@@ -122,12 +122,12 @@ public class CommentList extends CandiActivity {
 	}
 
 	private ModelResult loadComments(Boolean refresh) {
-		
-		String[] linkTypes = {Constants.TYPE_LINK_COMMENT};
 
-		mCursorSettings = new CursorSettings()
+		String[] linkTypes = { Constants.TYPE_LINK_COMMENT };
+
+		mCursorSettings = new Cursor()
 				.setLimit(ProxiConstants.RADAR_COMMENT_LIMIT)
-				.setSort(new Comment().modifiedDate = -1)
+				.setSort("{ modifiedDate:-1 }")
 				.setSkip(0);
 
 		final ModelResult result = EntityManager.getInstance()
