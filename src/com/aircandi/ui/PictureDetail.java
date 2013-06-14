@@ -23,12 +23,12 @@ import com.actionbarsherlock.view.Window;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.PhotoPagerAdapter;
-import com.aircandi.components.ProxiManager;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
 import com.aircandi.components.bitmaps.BitmapRequest;
@@ -71,8 +71,8 @@ public class PictureDetail extends FormActivity {
 	}
 
 	private void bind() {
-		List<Photo> photos = ProxiManager.getInstance().getEntityModel().getPhotos();
-		final Photo photo = ProxiManager.getInstance().getEntityModel().getPhoto(mImageUri);
+		List<Photo> photos = EntityManager.getInstance().getPhotos();
+		final Photo photo = EntityManager.getInstance().getPhoto(mImageUri);
 		if (!mPagingEnabled) {
 			photos = new ArrayList<Photo>();
 			photos.add(photo);

@@ -19,7 +19,7 @@ import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
@@ -28,8 +28,8 @@ import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Device;
-import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceBase.UpdateScope;
+import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.CandiRadar;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -87,7 +87,7 @@ public class NotificationManager {
 					device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, CandiRadar.class);
 
 					device.updateScope = UpdateScope.Property;
-					ModelResult result = ProxiManager.getInstance().getEntityModel().registerDevice(device);
+					ModelResult result = EntityManager.getInstance().registerDevice(device);
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "GCM: Device registered with Aircandi notification service");
@@ -113,7 +113,7 @@ public class NotificationManager {
 				if (registrationId != null && registrationId.length() > 0) {
 
 					Logger.i(this, "GCM: Unregistering device with Aircandi notification service");
-					ModelResult result = ProxiManager.getInstance().getEntityModel().unregisterDevice(registrationId);
+					ModelResult result = EntityManager.getInstance().unregisterDevice(registrationId);
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "GCM: Device unregistered with Aircandi notification service");

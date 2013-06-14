@@ -97,14 +97,9 @@ public class UserView extends RelativeLayout {
 			}
 
 			if (mTextName != null) {
-				String authorName = mAuthor.name;
-				if (authorName == null) {
-					authorName = (mAuthor.firstName != null) ? mAuthor.firstName : "";
-					if (mAuthor.lastName != null) {
-						authorName += " " + mAuthor.lastName;
-					}
+				if (mAuthor.name != null) {
+					mTextName.setText(mAuthor.name);
 				}
-				mTextName.setText(authorName);
 			}
 
 			if (mTextLocation != null && mAuthor.location != null && !mAuthor.location.equals("")) {

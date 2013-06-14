@@ -102,6 +102,9 @@ public final class Constants {
 	public static final String	SCHEMA_ENTITY_BEACON				= "beacon";																				//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_USER					= "user";																					//$NON-NLS-1$
 	public static final String	SCHEMA_LINK							= "link";																					//$NON-NLS-1$
+	public static final String	SCHEMA_ANY							= "any";																					//$NON-NLS-1$
+
+	public static final String	TYPE_ANY							= "any";																					//$NON-NLS-1$
 
 	public static final String	TYPE_APPLINK_FACEBOOK				= "facebook";																				//$NON-NLS-1$
 	public static final String	TYPE_APPLINK_TWITTER				= "twitter";																				//$NON-NLS-1$
@@ -119,13 +122,11 @@ public final class Constants {
 	public static final String	TYPE_APPLINK_TRIPADVISOR			= "tripadvisor";																			//$NON-NLS-1$
 	public static final String	TYPE_APPLINK_GOOGLEPLACE			= "googleplace";																			//$NON-NLS-1$
 	public static final String	TYPE_APPLINK_INSTAGRAM				= "instagram";																				//$NON-NLS-1$
-	
-	public static final String	TYPE_APPLINK_MAP					= "map";																				//$NON-NLS-1$
-	public static final String	TYPE_APPLINK_LIKE					= "like";																				//$NON-NLS-1$
-	public static final String	TYPE_APPLINK_WATCH					= "watch";																				//$NON-NLS-1$
+
+	public static final String	TYPE_APPLINK_MAP					= "map";																					//$NON-NLS-1$
+	public static final String	TYPE_APPLINK_LIKE					= "like";																					//$NON-NLS-1$
+	public static final String	TYPE_APPLINK_WATCH					= "watch";																					//$NON-NLS-1$
 	public static final String	TYPE_APPLINK_COMMENT				= "comment";																				//$NON-NLS-1$
-	
-	public static final String	TYPE_APPLINK_ANY					= "any";																					//$NON-NLS-1$
 
 	public static final String	TYPE_LINK_PROXIMITY					= "proximity";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_LIKE						= "like";																					//$NON-NLS-1$
@@ -133,12 +134,10 @@ public final class Constants {
 	public static final String	TYPE_LINK_APPLINK					= "applink";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_COMMENT					= "comment";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_POST						= "post";																					//$NON-NLS-1$
-	public static final String	TYPE_LINK_ANY						= "any";																					//$NON-NLS-1$
 
 	public static final String	TYPE_BEACON_FIXED					= "fixed";																					//$NON-NLS-1$
 	public static final String	TYPE_BEACON_MOBILE					= "mobile";																				//$NON-NLS-1$
 	public static final String	TYPE_BEACON_TEMPORARY				= "temporary";																				//$NON-NLS-1$
-	public static final String	TYPE_BEACON_ANY						= "any";																					//$NON-NLS-1$
 
 	public static final int		ACTIVITY_MARKET						= 200;
 	public static final int		ACTIVITY_PICTURE_PICK_DEVICE		= 300;

@@ -60,16 +60,15 @@ import com.aircandi.beta.BuildConfig;
 import com.aircandi.beta.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProxiManager.ModelResult;
-import com.aircandi.components.ProxiManager.WifiScanResult;
+import com.aircandi.components.ProximityManager.ModelResult;
+import com.aircandi.components.ProximityManager.WifiScanResult;
 import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.HttpServiceException.ErrorType;
 import com.aircandi.service.WalledGardenException;
+import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.GeoLocation;
-import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.CandiForm;
 import com.aircandi.ui.CandiHelp;
@@ -102,7 +101,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public CommandType			mCommandType;
 	public String				mParentId;
 	public String				mEntityId;
-	public String				mEntityType;
+	public String				mEntitySchema;
 	public String				mMessage;
 	public Entity				mEntity;
 	public String				mUserId;
@@ -183,7 +182,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (extras != null) {
 
 			mParentId = extras.getString(Constants.EXTRA_PARENT_ENTITY_ID);
-			mEntityType = extras.getString(Constants.EXTRA_ENTITY_TYPE);
+			mEntitySchema = extras.getString(Constants.EXTRA_ENTITY_TYPE);
 			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
 			mUserId = extras.getString(Constants.EXTRA_USER_ID);
 			mMessage = extras.getString(Constants.EXTRA_MESSAGE);
@@ -258,7 +257,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	private void doBeaconIndicatorClick() {
 		if (mBeaconIndicator != null) {
 			final StringBuilder beaconMessage = new StringBuilder(500);
-			List<WifiScanResult> wifiList = ProxiManager.getInstance().getEntityModel().getWifiList();
+			List<WifiScanResult> wifiList = ProximityManager.getInstance().getWifiList();
 			synchronized (wifiList) {
 				if (Aircandi.getInstance().getUser() != null
 						&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
@@ -271,15 +270,15 @@ public class AircandiCommon implements ActionBar.TabListener {
 							}
 						}
 						beaconMessage.append(System.getProperty("line.separator"));
-						beaconMessage.append("Wifi fix: " + DateUtils.intervalSince(ProxiManager.getInstance().mLastWifiUpdate, DateUtils.nowDate()));
+						beaconMessage.append("Wifi fix: " + DateUtils.intervalSince(ProximityManager.getInstance().mLastWifiUpdate, DateUtils.nowDate()));
 					}
 
-					final Observation observation = LocationManager.getInstance().getObservationLocked();
-					if (observation != null) {
-						final Date fixDate = new Date(observation.time.longValue());
+					final Location location = LocationManager.getInstance().getLocationLocked();
+					if (location != null) {
+						final Date fixDate = new Date(location.getTime());
 						beaconMessage.append(System.getProperty("line.separator") + "Location fix: " + DateUtils.intervalSince(fixDate, DateUtils.nowDate()));
-						beaconMessage.append(System.getProperty("line.separator") + "Location accuracy: " + String.valueOf(observation.accuracy));
-						beaconMessage.append(System.getProperty("line.separator") + "Location provider: " + observation.provider);
+						beaconMessage.append(System.getProperty("line.separator") + "Location accuracy: " + String.valueOf(location.getAccuracy()));
+						beaconMessage.append(System.getProperty("line.separator") + "Location provider: " + location.getProvider());
 					}
 					else {
 						beaconMessage.append(System.getProperty("line.separator") + "Location fix: none");
@@ -353,7 +352,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (mPageName.equals("CandiRadar")) {
 			intent.putExtra(Constants.EXTRA_HELP_ID, R.layout.help_radar);
 		}
-		else if (mPageName.equals("CandiForm") && mEntityType.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+		else if (mPageName.equals("CandiForm") && mEntitySchema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			intent.putExtra(Constants.EXTRA_HELP_ID, R.layout.help_candi_place);
 		}
 		mActivity.startActivity(intent);
@@ -379,7 +378,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					@Override
 					protected Object doInBackground(Object... params) {
 						Thread.currentThread().setName("SignOut");
-						final ModelResult result = ProxiManager.getInstance().getEntityModel().signout();
+						final ModelResult result = EntityManager.getInstance().signout();
 						return result;
 					}
 
@@ -439,7 +438,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 		else if (applink.type.equals("map")) {
 			Tracker.sendEvent("ui_action", "map_place", null, 0, Aircandi.getInstance().getUser());
-			final GeoLocation location = hostEntity.getLocation();
+			final AirLocation location = hostEntity.getLocation();
 			AndroidManager.getInstance().callMapActivity(mActivity, String.valueOf(location.lat.doubleValue())
 					, String.valueOf(location.lng.doubleValue())
 					, hostEntity.name);
@@ -771,7 +770,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToPage);
 	}
 
-	public void updateAccuracyIndicator(final Location location) {
+	public void updateAccuracyIndicator() {
+		
+		final Location location = LocationManager.getInstance().getLocationLocked();
 
 		if (mAccuracyIndicator != null) {
 
@@ -1220,7 +1221,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					doRefreshClick();
 				}
 			});
-			updateAccuracyIndicator(LocationManager.getInstance().getLocationLocked());
+			updateAccuracyIndicator();
 		}
 
 		mMenu = menu;
@@ -1310,7 +1311,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		else if (mPageName.equals("EntityForm")) {
 			if (mEntityId != null) {
 				/* Editing */
-				mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
+				mEntity = EntityManager.getInstance().getEntity(mEntityId);
 				if (mEntity != null) {
 					if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
 						addTabsToActionBar(this, Constants.TABS_ENTITY_FORM_ID);

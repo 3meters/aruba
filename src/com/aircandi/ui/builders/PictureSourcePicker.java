@@ -22,10 +22,11 @@ import android.widget.TextView;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AndroidManager;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.ProxiManager;
 import com.aircandi.components.Template;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.FormActivity;
 
@@ -86,7 +87,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 			/* Add place photo option if this is a place entity */
 			if (mEntityId != null) {
-				final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
+				final Entity entity = EntityManager.getInstance().getEntity(mEntityId);
 				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 					Place place = (Place) entity;
 					if (place.getProvider().type != null && place.getProvider().type.equals("foursquare")) {
@@ -94,7 +95,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 								, getString(R.string.dialog_picture_source_place), null, "place"));
 					}
 					else {
-						List<Entity> entities = (List<Entity>) entity.getChildrenByLinkType(Constants.TYPE_LINK_POST);
+						List<Entity> entities = (List<Entity>) entity.getLinkedEntitiesByLinkType(Constants.TYPE_LINK_POST, null, Direction.in, false);
 						for (Entity post : entities) {
 							if (post.photo != null) {
 								listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light

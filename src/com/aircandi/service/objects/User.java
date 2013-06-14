@@ -17,6 +17,10 @@ public class User extends Entity {
 	private static final long	serialVersionUID	= 127428776257201065L;
 	public static final String	collectionId		= "users";
 
+	// --------------------------------------------------------------------------------------------
+	// Service fields
+	// --------------------------------------------------------------------------------------------
+
 	@Expose
 	public String				email;										// Required
 	@Expose
@@ -63,9 +67,11 @@ public class User extends Entity {
 	@Expose(serialize = false, deserialize = true)
 	public List<Stat>			stats;
 
+	// --------------------------------------------------------------------------------------------
+	// Client fields
+	// --------------------------------------------------------------------------------------------
+
 	public Session				session;
-	public String				firstName;
-	public String				lastName;
 
 	public User() {}
 
@@ -103,6 +109,11 @@ public class User extends Entity {
 		}
 
 		return imageUri;
+	}
+
+	@Override
+	public List<Applink> getApplinks() {
+		return new ArrayList<Applink>();
 	}
 
 	@Override

@@ -18,12 +18,13 @@ import com.aircandi.components.AndroidManager;
 import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.CommandType;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ArrayListType;
-import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProximityManager;
+import com.aircandi.components.ProximityManager.ArrayListType;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
@@ -55,20 +56,15 @@ public class CandiList extends CandiActivity {
 		 * Navigation setup for action bar icon and title
 		 */
 		if (mArrayListType == ArrayListType.InCollection) {
-			final Entity collection = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mCollectionId);
+			final Entity collection = EntityManager.getInstance().getEntity(mCommon.mCollectionId);
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 			mCommon.mActionBar.setTitle(collection.name);
-		}
-		else if (mArrayListType == ArrayListType.Collections) {
-			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
-			mCommon.mActionBar.setHomeButtonEnabled(false);
-			mCommon.mActionBar.setTitle(getString(R.string.name_entity_list_type_collection));
 		}
 		else if (mArrayListType == ArrayListType.OwnedByUser) {
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 			mCommon.mActionBar.setHomeButtonEnabled(true);
 			if (mCommon.mUserId != null) {
-				ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mCommon.mUserId, false);
+				ModelResult result = EntityManager.getInstance().getUser(mCommon.mUserId, false);
 				User user = (User) result.serviceResponse.data;
 				mCommon.mActionBar.setTitle(user.name);
 			}
@@ -108,11 +104,17 @@ public class CandiList extends CandiActivity {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetEntities");
 				ModelResult result = new ModelResult();
-				if (mCommon.mEntityType != null && mCommon.mUserId != null) {
-					result.data = ProxiManager.getInstance().getEntityModel().getCacheUserEntities(mCommon.mUserId, mCommon.mEntityType);
+				if (mCommon.mEntitySchema != null && mCommon.mUserId != null) {
+					result.data = EntityManager.getInstance().getEntityCache().getEntitiesByOwner(
+							mCommon.mUserId,
+							mCommon.mEntitySchema, 
+							Constants.TYPE_ANY, 
+							null, 
+							null,
+							null);				
 				}
 				else {
-					result = ProxiManager.getInstance().getEntityModel().getEntitiesByListType(mArrayListType
+					result = EntityManager.getInstance().getEntitiesByListType(mArrayListType
 							, refresh
 							, mCommon.mCollectionId
 							, mCommon.mUserId
@@ -133,8 +135,8 @@ public class CandiList extends CandiActivity {
 						onBackPressed();
 					}
 					else {
-						mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
-						mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
+						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
+						mEntityModelActivityDate = EntityManager.getInstance().getEntityCache().getLastActivityDate();
 						mEntityModelUser = Aircandi.getInstance().getUser();
 
 						final CandiListAdapter adapter = new CandiListAdapter(CandiList.this, (ArrayList<Entity>) result.data, R.layout.temp_listitem_candi);
@@ -236,8 +238,8 @@ public class CandiList extends CandiActivity {
 		 */
 		if (!isFinishing() && mEntityModelUser != null) {
 			if (!Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)
-					|| ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
-					|| ProxiManager.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+					|| ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()
+					|| EntityManager.getInstance().getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
 				bind(true);
 			}

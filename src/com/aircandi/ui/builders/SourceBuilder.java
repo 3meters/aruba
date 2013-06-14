@@ -399,7 +399,6 @@ public class SourceBuilder extends FormActivity {
 						else {
 							mSourceId.setVisibility(View.VISIBLE);
 						}
-						mApplink.custom = true;
 						drawSourceIcon();
 					}
 				}

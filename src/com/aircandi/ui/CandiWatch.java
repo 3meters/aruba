@@ -25,12 +25,13 @@ import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CommandType;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ArrayListType;
-import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProximityManager;
+import com.aircandi.components.ProximityManager.ArrayListType;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Entity;
@@ -87,13 +88,13 @@ public class CandiWatch extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetWatching");
-				ModelResult result = ProxiManager.getInstance().getEntityModel()
-						.getUserWatched(Aircandi.getInstance().getUser().id, "users", refresh, ProxiConstants.USER_WATCHING_USER_LIMIT);
+				ModelResult result = EntityManager.getInstance()
+						.getUserWatching(Aircandi.getInstance().getUser().id, "users", refresh, ProxiConstants.USER_WATCHING_USER_LIMIT);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					mUsers = (List<User>) result.data;
 
-					result = ProxiManager.getInstance().getEntityModel()
-							.getUserWatched(Aircandi.getInstance().getUser().id, "entities", refresh, ProxiConstants.USER_WATCHING_ENTITY_LIMIT);
+					result = EntityManager.getInstance()
+							.getUserWatching(Aircandi.getInstance().getUser().id, "entities", refresh, ProxiConstants.USER_WATCHING_ENTITY_LIMIT);
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						mEntities = (List<Entity>) result.data;
 					}
@@ -105,8 +106,8 @@ public class CandiWatch extends CandiActivity {
 			protected void onPostExecute(Object modelResult) {
 				final ModelResult result = (ModelResult) modelResult;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
-					mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
+					mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
+					mEntityModelActivityDate = EntityManager.getInstance().getEntityCache().getLastActivityDate();
 					buildCandiWatch(CandiWatch.this);
 				}
 				else {
@@ -387,14 +388,14 @@ public class CandiWatch extends CandiActivity {
 		 */
 		if (!isFinishing()) {
 			if (mEntityModelRefreshDate != null
-					&& ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate() != null
-					&& ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate().longValue() > mEntityModelRefreshDate.longValue()) {
+					&& ProximityManager.getInstance().getLastBeaconLoadDate() != null
+					&& ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()) {
 				invalidateOptionsMenu();
 				bind(true);
 			}
 			else if (mEntityModelActivityDate != null
-					&& ProxiManager.getInstance().getEntityModel().getLastActivityDate() != null
-					&& ProxiManager.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+					&& EntityManager.getInstance().getEntityCache().getLastActivityDate() != null
+					&& EntityManager.getInstance().getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
 				bind(true);
 			}

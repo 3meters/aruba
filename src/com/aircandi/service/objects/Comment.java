@@ -1,6 +1,8 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,6 +24,11 @@ public class Comment extends Entity implements Cloneable, Serializable {
 			entity = (Comment) Entity.setPropertiesFromMap(entity, map);
 		}
 		return entity;
+	}
+
+	@Override
+	public List<Applink> getApplinks() {
+		return new ArrayList<Applink>();
 	}
 
 	@Override

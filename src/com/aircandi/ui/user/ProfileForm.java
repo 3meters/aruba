@@ -27,13 +27,13 @@ import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CommandType;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
@@ -194,7 +194,7 @@ public class ProfileForm extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetUser");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mUser.id, true);
+				final ModelResult result = EntityManager.getInstance().getUser(mUser.id, true);
 				return result;
 			}
 
@@ -414,7 +414,7 @@ public class ProfileForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("UpdateUser");
-					final ModelResult result = ProxiManager.getInstance().getEntityModel().updateUser(mUser, mBitmap, false);
+					final ModelResult result = EntityManager.getInstance().updateUser(mUser, mBitmap, false);
 					return result;
 				}
 
@@ -430,7 +430,7 @@ public class ProfileForm extends FormActivity {
 						 * We treat updating the profile like a change to an entity in the entity model. This forces
 						 * UI to update itself and pickup the changes like a new profile name, picture, etc.
 						 */
-						ProxiManager.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
+						EntityManager.getInstance().getEntityCache().setLastActivityDate(DateUtils.nowDate().getTime());
 
 						/* Update the global user */
 						Aircandi.getInstance().setUser(mUser);

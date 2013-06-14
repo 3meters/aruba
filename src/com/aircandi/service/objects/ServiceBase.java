@@ -46,11 +46,10 @@ public abstract class ServiceBase implements Cloneable, Serializable {
 	@Expose
 	@SerializedName(name = "_id")
 	public String				id;
-	@Expose(serialize = false, deserialize = true)
-	public String				type;
 	@Expose
-	@SerializedName(name = "type", excludeNull = true)
-	public String				subtype;
+	public String				schema;
+	@Expose
+	public String				type;
 	@Expose
 	public String				name;
 	@Expose(serialize = false, deserialize = true)
@@ -90,7 +89,7 @@ public abstract class ServiceBase implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	public Number				activityDate;
 
-	/* Users (client) */
+	/* Users (synthesized for the client) */
 
 	@Expose(serialize = false, deserialize = true)
 	public User					owner;
@@ -98,11 +97,6 @@ public abstract class ServiceBase implements Cloneable, Serializable {
 	public User					creator;
 	@Expose(serialize = false, deserialize = true)
 	public User					modifier;
-	@Expose(serialize = false, deserialize = true)
-	@SerializedName(name = "_watcher")
-	public String				watcherId;									/* Used to connect to watcher */
-	@Expose(serialize = false, deserialize = true)
-	public Number				watchedDate;
 
 	/* Local client only */
 
@@ -122,7 +116,7 @@ public abstract class ServiceBase implements Cloneable, Serializable {
 	}
 
 	public abstract String getCollection();
-
+	
 	// --------------------------------------------------------------------------------------------
 	// Copy and serialization
 	// --------------------------------------------------------------------------------------------
@@ -131,8 +125,8 @@ public abstract class ServiceBase implements Cloneable, Serializable {
 
 		base.id = (String) ((map.get("_id") != null) ? map.get("_id") : map.get("id"));
 		base.name = (String) map.get("name");
+		base.schema = (String) map.get("schema");
 		base.type = (String) map.get("type");
-		base.subtype = (String) map.get("subtype");
 		base.enabled = (Boolean) map.get("enabled");
 		base.locked = (Boolean) map.get("locked");
 		base.system = (Boolean) map.get("system");
@@ -142,12 +136,10 @@ public abstract class ServiceBase implements Cloneable, Serializable {
 		base.ownerId = (String) ((map.get("_owner") != null) ? map.get("_owner") : map.get("ownerId"));
 		base.creatorId = (String) ((map.get("_creator") != null) ? map.get("_creator") : map.get("creatorId"));
 		base.modifierId = (String) ((map.get("_modifier") != null) ? map.get("_modifier") : map.get("modifierId"));
-		base.watcherId = (String) ((map.get("_watcher") != null) ? map.get("_watcher") : map.get("watcherId"));
 
 		base.createdDate = (Number) map.get("createdDate");
 		base.modifiedDate = (Number) map.get("modifiedDate");
 		base.activityDate = (Number) map.get("activityDate");
-		base.watchedDate = (Number) map.get("watchedDate");
 
 		if (map.get("creator") != null) {
 			base.creator = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"));

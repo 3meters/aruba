@@ -9,9 +9,8 @@ import java.util.Random;
 import android.telephony.PhoneNumberUtils;
 
 import com.aircandi.Aircandi;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.LocationManager;
-import com.aircandi.service.Copy;
 import com.aircandi.service.Expose;
 
 /**
@@ -22,6 +21,10 @@ public class Place extends Entity implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= -3599862145425838670L;
 	public static final String	collectionId		= "places";
+
+	// --------------------------------------------------------------------------------------------
+	// Service fields
+	// --------------------------------------------------------------------------------------------
 
 	@Expose
 	public String				address;
@@ -40,9 +43,10 @@ public class Place extends Entity implements Cloneable, Serializable {
 	@Expose
 	public Category				category;
 
-	@Copy(exclude = true)
-	public Boolean				synthetic			= false;
-	
+	// --------------------------------------------------------------------------------------------
+	// Client fields (none are transferred)
+	// --------------------------------------------------------------------------------------------
+
 	public Place() {}
 
 	// --------------------------------------------------------------------------------------------
@@ -100,42 +104,11 @@ public class Place extends Entity implements Cloneable, Serializable {
 	}
 
 	public String getBeaconId() {
-		final Link link = getActiveLink("proximity", true);
-		if (link != null) {
-			return link.toId;
+		final Beacon beacon = getActiveBeacon(Constants.TYPE_LINK_PROXIMITY, true);
+		if (beacon != null) {
+			return beacon.id;
 		}
 		return null;
-	}
-
-	public Float getDistance() {
-		distance = -1f;
-		final Beacon beacon = getActiveBeaconPrimaryOnly("proximity");
-		if (beacon != null) {
-			distance = beacon.getDistance();
-		}
-		else {
-			final GeoLocation location = getLocation();
-			if (location != null) {
-				final Observation observation = LocationManager.getInstance().getObservationLocked();
-				if (observation != null) {
-					
-					Float distanceByLocation = 0f;
-					
-					final android.location.Location locationObserved = new android.location.Location(observation.provider);
-					locationObserved.setLatitude(observation.latitude.doubleValue());
-					locationObserved.setLongitude(observation.longitude.doubleValue());
-
-					final android.location.Location locationPlace = new android.location.Location("place");
-					locationPlace.setLatitude(location.lat.doubleValue());
-					locationPlace.setLongitude(location.lng.doubleValue());
-
-					distanceByLocation = locationObserved.distanceTo(locationPlace);
-
-					distance = distanceByLocation;
-				}
-			}
-		}
-		return distance;
 	}
 
 	public Provider getProvider() {
@@ -179,7 +152,7 @@ public class Place extends Entity implements Cloneable, Serializable {
 	public String getFormattedPhone() {
 		return PhoneNumberUtils.formatNumber(phone);
 	}
-	
+
 	public static Integer getCategoryColorResId(String categoryName, Boolean dark, Boolean mute, Boolean semi) {
 		int colorResId = R.color.accent_gray;
 		if (semi) {
@@ -349,10 +322,6 @@ public class Place extends Entity implements Cloneable, Serializable {
 		entity.postalCode = (String) map.get("postalCode");
 		entity.phone = (String) map.get("phone");
 
-		if (map.get("location") != null) {
-			entity.location = GeoLocation.setPropertiesFromMap(new GeoLocation(), (HashMap<String, Object>) map.get("location"));
-		}
-
 		if (map.get("provider") != null) {
 			entity.provider = ProviderMap.setPropertiesFromMap(new ProviderMap(), (HashMap<String, Object>) map.get("provider"));
 		}
@@ -425,5 +394,4 @@ public class Place extends Entity implements Cloneable, Serializable {
 			}
 		}
 	}
-
 }

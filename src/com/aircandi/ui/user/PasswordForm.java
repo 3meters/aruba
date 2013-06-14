@@ -11,11 +11,11 @@ import com.aircandi.Aircandi;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.FormActivity;
@@ -73,8 +73,10 @@ public class PasswordForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("UpdatePassword");
-					final ModelResult result = ProxiManager.getInstance().getEntityModel()
-							.updatePassword(mUser.id, mTextPasswordOld.getText().toString(), mTextPassword.getText().toString());
+					final ModelResult result = EntityManager.getInstance().updatePassword(
+							mUser.id, 
+							mTextPasswordOld.getText().toString(), 
+							mTextPassword.getText().toString());
 					return result;
 				}
 

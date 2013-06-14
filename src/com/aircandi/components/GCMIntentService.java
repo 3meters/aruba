@@ -119,7 +119,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		}
 
 		/* Pass to the cache */
-		ProxiManager.getInstance().getEntityModel().processNotification(airNotification);
+		EntityManager.getInstance().processNotification(airNotification);
 
 		/* Display */
 		NotificationManager.getInstance().showNotification(airNotification, context);

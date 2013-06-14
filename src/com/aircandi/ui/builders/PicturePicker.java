@@ -46,13 +46,13 @@ import com.aircandi.beta.BuildConfig;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EndlessAdapter;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.HttpService;
@@ -62,6 +62,7 @@ import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
@@ -120,7 +121,7 @@ public class PicturePicker extends FormActivity {
 		}
 
 		if (mPlacePhotoMode) {
-			mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+			mEntity = EntityManager.getInstance().getEntity(mCommon.mEntityId);
 			mProvider = ((Place) mEntity).getProvider();
 			((ViewGroup) findViewById(R.id.search_group)).setVisibility(View.GONE);
 		}
@@ -211,7 +212,7 @@ public class PicturePicker extends FormActivity {
 		 * First check to see if there are any candi picture children.
 		 */
 		if (mPlacePhotoMode && mEntity != null) {
-			List<Entity> entities = (List<Entity>) mEntity.getChildrenByLinkType(Constants.TYPE_LINK_POST);
+			List<Entity> entities = (List<Entity>) mEntity.getLinkedEntitiesByLinkType(Constants.TYPE_LINK_POST, null, Direction.in, false);
 			for (Entity entity : entities) {
 				if (entity.photo != null) {
 					if (!entity.photo.getSourceName().equals(PhotoSource.foursquare)) {
@@ -260,7 +261,7 @@ public class PicturePicker extends FormActivity {
 	}
 
 	private ServiceResponse loadPlaceImages(long count, long offset) {
-		final ModelResult result = ProxiManager.getInstance().getEntityModel().getPlacePhotos(mProvider, count, offset);
+		final ModelResult result = EntityManager.getInstance().getPlacePhotos(mProvider, count, offset);
 		return result.serviceResponse;
 	}
 

@@ -9,14 +9,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.graphics.Bitmap;
-
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
-import com.aircandi.components.ProxiManager;
+import com.aircandi.components.EntityManager;
+import com.aircandi.components.LocationManager;
 import com.aircandi.service.Copy;
 import com.aircandi.service.Expose;
+import com.aircandi.service.objects.Link.Direction;
 
 /**
  * Entity as described by the proxi protocol standards.
@@ -28,12 +28,12 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	private static final long	serialVersionUID	= -3902834532692561618L;
 
-	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
+	// --------------------------------------------------------------------------------------------
+	// Service fields
+	// --------------------------------------------------------------------------------------------	
 
 	/* Database fields */
 
-	@Expose
-	public String				schema;
 	@Expose
 	public String				subtitle;
 	@Expose
@@ -41,11 +41,11 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	@Expose
 	public Photo				photo;
 	@Expose
-	public GeoLocation			location;
+	public AirLocation			location;
 	@Expose
 	public Number				signalFence			= -100.0f;
 
-	/* Synthetic service fields */
+	/* Synthetic fields */
 
 	@Expose(serialize = false, deserialize = true)
 	public List<Link>			linksIn;
@@ -63,30 +63,67 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	@Expose(serialize = false, deserialize = true)
 	public String				toId;											// Used to find entities this entity is linked to
 
-	/* For client use only */
+	// --------------------------------------------------------------------------------------------
+	// Client fields (none are transferred)
+	// --------------------------------------------------------------------------------------------	
 
-	@Copy(exclude = true)
-	public Bitmap				imageBitmap;
-
-	/* These client props are all controlled by the parent in the case of child entities. */
-
-	@Copy(exclude = true)
-	public Boolean				hidden				= false;
-	@Copy(exclude = true)
-	public Float				distance;
-
-	/* List state */
-
-	@Copy(exclude = true)
+	private Boolean				hidden				= false;
+	protected Float				distance;
 	public Boolean				checked				= false;
-	@Copy(exclude = true)
+	public Boolean				stale				= false;
 	public Integer				position;
+	public Boolean				synthetic			= false;					// Entity is not persisted with service
+	public String				tagPrimary;
+	public String				tagSecondary;
 
 	public Entity() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Set and get
-	// --------------------------------------------------------------------------------------------	
+	// --------------------------------------------------------------------------------------------
+
+	public Boolean isHidden() {
+		Boolean oldIsHidden = hidden;
+		this.hidden = false;
+		/*
+		 * Make it harder to fade out than it is to fade in. Entities are only New
+		 * for the first scan that discovers them.
+		 */
+		float signalThresholdFluid = signalFence.floatValue();
+		Beacon beacon = getActiveBeacon(Constants.TYPE_LINK_PROXIMITY, true);
+		if (beacon != null) {
+			if (!oldIsHidden) {
+				signalThresholdFluid = signalFence.floatValue() - 5;
+			}
+
+			/* Hide entities that are not within entity declared virtual range */
+			if (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+					&& Aircandi.settings.getBoolean(Constants.PREF_ENTITY_FENCING, Constants.PREF_ENTITY_FENCING_DEFAULT)
+					&& beacon.signal.intValue() < signalThresholdFluid) {
+				this.hidden = true;
+			}
+		}
+		return this.hidden;
+	}
+
+	public Float getDistance(Boolean refresh) {
+
+		if (refresh || distance == null) {
+			final Beacon beacon = getActiveBeacon(Constants.TYPE_LINK_PROXIMITY, true);
+			if (beacon != null) {
+				distance = beacon.getDistance(refresh);
+			}
+			else {
+				final AirLocation entityLocation = getLocation();
+				final AirLocation deviceLocation = LocationManager.getInstance().getAirLocationLocked();
+
+				if (entityLocation != null && deviceLocation != null) {
+					distance = deviceLocation.distanceTo(entityLocation);
+				}
+			}
+		}
+		return distance;
+	}
 
 	public String getPhotoUri() {
 
@@ -117,14 +154,14 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return imageUri;
 	}
 
-	public GeoLocation getLocation() {
-		GeoLocation loc = null;
+	public AirLocation getLocation() {
+		AirLocation loc = null;
 		final Beacon parent = (Beacon) getParent();
 		if (parent != null) {
 			loc = parent.location;
 		}
 		else {
-			final Beacon beacon = getActiveBeaconPrimaryOnly("proximity");
+			final Beacon beacon = getActiveBeacon(Constants.TYPE_LINK_PROXIMITY, true);
 			if (beacon != null) {
 				loc = beacon.location;
 			}
@@ -133,30 +170,12 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				&& this.location != null
 				&& this.location.lat != null
 				&& this.location.lng != null) {
-			loc = new GeoLocation(this.location.lat.doubleValue(), this.location.lng.doubleValue());
+			loc = new AirLocation(this.location.lat.doubleValue(), this.location.lng.doubleValue());
 		}
 		return loc;
 	}
 
-	public Beacon getActiveBeaconPrimaryOnly(String linkType) {
-		final Link link = getActiveLink(linkType, true);
-		if (link != null) {
-			final Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
-			return beacon;
-		}
-		return null;
-	}
-
-	public Beacon getActiveBeacon(String linkType) {
-		final Link link = getActiveLink(linkType, false);
-		if (link != null) {
-			final Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
-			return beacon;
-		}
-		return null;
-	}
-
-	public Link getActiveLink(String linkType, Boolean primaryOnly) {
+	public Beacon getActiveBeacon(String linkType, Boolean primaryOnly) {
 		/*
 		 * If an entity has more than one viable link, we choose the one
 		 * using the following priority:
@@ -165,13 +184,14 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		 * - any primary
 		 * - any non-primary
 		 */
+		Link activeLink = null;
 		if (linksOut != null) {
 			Link strongestLink = null;
 			Integer strongestLevel = -200;
 			for (Link link : linksOut) {
 				if (link.type.equals(linkType)) {
 					if (link.proximity != null && link.proximity.primary) {
-						Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
+						Beacon beacon = (Beacon) EntityManager.getInstance().getEntityCache().get(link.toId);
 						if (beacon != null && beacon.signal.intValue() > strongestLevel) {
 							strongestLink = link;
 							strongestLevel = beacon.signal.intValue();
@@ -183,7 +203,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			if (strongestLink == null && !primaryOnly) {
 				for (Link link : linksOut) {
 					if (link.type.equals(linkType)) {
-						Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
+						Beacon beacon = (Beacon) EntityManager.getInstance().getEntityCache().get(link.toId);
 						if (beacon != null && beacon.signal.intValue() > strongestLevel) {
 							strongestLink = link;
 							strongestLevel = beacon.signal.intValue();
@@ -191,58 +211,70 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					}
 				}
 			}
+			activeLink = strongestLink;
+		}
 
-			return strongestLink;
+		if (activeLink != null) {
+			Beacon beacon = (Beacon) EntityManager.getInstance().getEntityCache().get(activeLink.toId);
+			return beacon;
 		}
 		return null;
 	}
 
-	public List<? extends Entity> getChildrenByLinkType(String linkType) {
-		final List<Entity> entities = new ArrayList<Entity>();
-		for (Link link : linksIn) {
-			if (link.type.equals(linkType)) {
-				Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(link.fromId);
-				if (entity != null) {
-					entities.add(entity);
-				}
-			}
+	public List<? extends Entity> getLinkedEntitiesByLinkType(String linkType, List<String> schemas, Direction direction, Boolean traverse) {
+		List<String> linkTypes = null;
+		if (!linkType.equals(Constants.TYPE_ANY)) {
+			linkTypes = new ArrayList<String>();
+			linkTypes.add(linkType);
 		}
+		List<? extends Entity> entities = getLinkedEntitiesByLinkTypes(linkTypes, schemas, direction, traverse);
 		return entities;
 	}
 
-	public List<? extends Entity> getChildrenByLinkType(List<String> linkTypes) {
+	public List<? extends Entity> getLinkedEntitiesByLinkTypes(List<String> linkTypes, List<String> schemas, Direction direction, Boolean traverse) {
 		final List<Entity> entities = new ArrayList<Entity>();
-		for (Link link : linksIn) {
-			if (linkTypes.contains(link.type)) {
-				Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(link.fromId);
-				if (entity != null) {
-					entities.add(entity);
+		if (direction == Direction.in || direction == Direction.both) {
+			for (Link link : linksIn) {
+				if (linkTypes == null || linkTypes.contains(link.type)) {
+					Entity entity = EntityManager.getInstance().getEntity(link.fromId);
+					if (entity != null) {
+						if (traverse) {
+							entities.addAll(entity.getLinkedEntitiesByLinkTypes(linkTypes, schemas, Direction.in, traverse));
+						}
+						if (schemas == null || schemas.contains(entity.schema)) {
+							entities.add(entity);
+						}
+					}
 				}
 			}
 		}
-		return entities;
-	}
-	
-	public List<Entity> getChildren() {
-		final List<Entity> entities = new ArrayList<Entity>();
-		for (Link link : linksIn) {
-			Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(link.fromId);
-			if (entity != null) {
-				entities.add(entity);
+		if (direction == Direction.out || direction == Direction.both) {
+			for (Link link : linksOut) {
+				if (linkTypes == null || linkTypes.contains(link.type)) {
+					Entity entity = EntityManager.getInstance().getEntity(link.toId);
+					if (entity != null) {
+						if (traverse) {
+							entities.addAll(entity.getLinkedEntitiesByLinkTypes(linkTypes, schemas, Direction.out, traverse));
+						}
+						if (schemas == null || schemas.contains(entity.schema)) {
+							entities.add(entity);
+						}
+					}
+				}
 			}
 		}
 		return entities;
 	}
 
 	public Entity getParent() {
-		return ProxiManager.getInstance().getEntityModel().getCacheEntity(toId);
+		return EntityManager.getInstance().getEntity(toId);
 	}
 
 	public Boolean hasActiveProximityLink() {
 		if (linksOut != null) {
 			for (Link link : linksOut) {
 				if (link.proximity != null && link.type.equals("proximity")) {
-					Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
+					Beacon beacon = (Beacon) EntityManager.getInstance().getEntity(link.toId);
 					if (beacon != null) {
 						return true;
 					}
@@ -272,7 +304,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		}
 		return count;
 	}
-	
+
 	public Link getInLinkByType(String linkType, String fromId) {
 		for (Link link : linksIn) {
 			if (link.type.equals(linkType)) {
@@ -304,6 +336,15 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return false;
 	}
 
+	public List<Applink> getApplinks() {
+		List<Applink> applinks = new ArrayList<Applink>();
+		applinks.add(Applink.builder(this, "map", "map", "resource:img_post", null));
+		applinks.add(Applink.builder(this, "comment", "comments", "resource:img_post", this.getInCount(Constants.TYPE_LINK_COMMENT)));
+		applinks.add(Applink.builder(this, "like", "likes", "resource:img_like", this.getInCount(Constants.TYPE_LINK_LIKE)));
+		applinks.add(Applink.builder(this, "watch", "watching", "resource:img_watch", this.getInCount(Constants.TYPE_LINK_WATCH)));
+		return applinks;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Copy and serialization
 	// --------------------------------------------------------------------------------------------
@@ -314,7 +355,6 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 			entity = (Entity) ServiceBase.setPropertiesFromMap(entity, map);
 
-			entity.schema = (String) map.get("schema");
 			entity.subtitle = (String) map.get("subtitle");
 			entity.description = (String) map.get("description");
 			entity.signalFence = (Number) map.get("signalFence");
@@ -322,6 +362,10 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 			if (map.get("photo") != null) {
 				entity.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
+			}
+
+			if (map.get("location") != null) {
+				entity.location = AirLocation.setPropertiesFromMap(new AirLocation(), (HashMap<String, Object>) map.get("location"));
 			}
 
 			if (map.get("linksIn") != null) {
@@ -436,15 +480,15 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		}
 	}
 
-	public static class SortEntitiesByWatchedDate implements Comparator<Entity> {
+	public static class SortLinksByCreatedDate implements Comparator<Link> {
 
 		@Override
-		public int compare(Entity item1, Entity item2) {
+		public int compare(Link item1, Link item2) {
 
-			if (item1.watchedDate.longValue() < item2.watchedDate.longValue()) {
+			if (item1.createdDate.longValue() < item2.createdDate.longValue()) {
 				return 1;
 			}
-			else if (item1.watchedDate.longValue() == item2.watchedDate.longValue()) {
+			else if (item1.createdDate.longValue() == item2.createdDate.longValue()) {
 				return 0;
 			}
 			return -1;

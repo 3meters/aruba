@@ -16,15 +16,8 @@ import com.aircandi.service.objects.ServiceBase.UpdateScope;
 public class ServiceObject implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 5341986472204947192L;
-	public UpdateScope			updateScope			= UpdateScope.Object;
-
-	/*
-	 * Annotation syntax:
-	 * 
-	 * @Expose (serialize = false, deserialize = false)
-	 * 
-	 * @SerializedName("_nametoserialize")
-	 */
+	
+	public UpdateScope			updateScope			= UpdateScope.Property;
 
 	public Map<String, Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
 		final Map<String, Object> map = new HashMap<String, Object>();

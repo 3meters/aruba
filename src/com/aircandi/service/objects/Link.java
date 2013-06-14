@@ -77,4 +77,14 @@ public class Link extends ServiceBase {
 		final Link link = (Link) super.clone();
 		return link;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Inner classes
+	// --------------------------------------------------------------------------------------------	
+
+	public enum Direction {
+		in,
+		out,
+		both
+	}
 }

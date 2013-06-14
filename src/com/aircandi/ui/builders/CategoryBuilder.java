@@ -23,10 +23,10 @@ import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.HttpService;
@@ -81,11 +81,11 @@ public class CategoryBuilder extends FormActivity {
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		mCommon.mActionBar.setTitle(R.string.dialog_category_builder_title);
 
-		if (ProxiManager.getInstance().getEntityModel().getCategories().size() == 0) {
+		if (EntityManager.getInstance().getCategories().size() == 0) {
 			loadCategories();
 		}
 		else {
-			mCategories = ProxiManager.getInstance().getEntityModel().getCategories();
+			mCategories = EntityManager.getInstance().getCategories();
 			if (mCategories != null) {
 				if (mOriginalCategory != null) {
 					setCategoryIndexes();
@@ -101,7 +101,7 @@ public class CategoryBuilder extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LoadCategories");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().loadCategories();
+				final ModelResult result = EntityManager.getInstance().loadCategories();
 				return result;
 			}
 
@@ -109,7 +109,7 @@ public class CategoryBuilder extends FormActivity {
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					mCategories = ProxiManager.getInstance().getEntityModel().getCategories();
+					mCategories = EntityManager.getInstance().getCategories();
 					if (mCategories != null) {
 						if (mOriginalCategory != null) {
 							setCategoryIndexes();
@@ -216,7 +216,7 @@ public class CategoryBuilder extends FormActivity {
 
 	private void initCategorySpinner() {
 
-		final List<String> categories = ProxiManager.getInstance().getEntityModel().getCategoriesAsStringArray(mCategories);
+		final List<String> categories = EntityManager.getInstance().getCategoriesAsStringArray(mCategories);
 		final CategoryAdapter adapter = new CategoryAdapter(CategoryBuilder.this
 				, mSpinnerItem
 				, categories
@@ -275,7 +275,7 @@ public class CategoryBuilder extends FormActivity {
 
 	private void initSubcategorySpinner(Integer position) {
 
-		final List<String> categories = ProxiManager.getInstance().getEntityModel().getCategoriesAsStringArray(mCategory.categories);
+		final List<String> categories = EntityManager.getInstance().getCategoriesAsStringArray(mCategory.categories);
 
 		if (categories.size() > 0) {
 
@@ -350,7 +350,7 @@ public class CategoryBuilder extends FormActivity {
 
 	private void initSubsubcategorySpinner(Integer position) {
 
-		final List<String> categories = ProxiManager.getInstance().getEntityModel().getCategoriesAsStringArray(mSubCategory.categories);
+		final List<String> categories = EntityManager.getInstance().getCategoriesAsStringArray(mSubCategory.categories);
 		if (categories.size() > 0) {
 
 			final CategoryAdapter adapter = new CategoryAdapter(CategoryBuilder.this

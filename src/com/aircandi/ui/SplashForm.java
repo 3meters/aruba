@@ -23,14 +23,14 @@ import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.CommandType;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ConnectedState;
 import com.aircandi.components.NotificationManager;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.HttpService;
@@ -108,9 +108,7 @@ public class SplashForm extends SherlockActivity {
 		NotificationManager.getInstance().registerDeviceWithGCM();
 
 		/* Proxibase sdk components */
-		ProxiManager.getInstance().setContext(getApplicationContext());
 		Aircandi.getInstance().setUsingEmulator(Aircandi.usingEmulator);
-		ProxiManager.getInstance().initialize();
 
 		/* Cache categories - we delay until after the initial rush for data */
 		Aircandi.mainThreadHandler.postDelayed(new Runnable() {
@@ -226,8 +224,8 @@ public class SplashForm extends SherlockActivity {
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("LoadCategories");
 					ModelResult result = new ModelResult();
-					if (ProxiManager.getInstance().getEntityModel().getCategories().size() == 0) {
-						result = ProxiManager.getInstance().getEntityModel().loadCategories();
+					if (EntityManager.getInstance().getCategories().size() == 0) {
+						result = EntityManager.getInstance().loadCategories();
 					}
 					return result;
 				}

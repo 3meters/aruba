@@ -36,15 +36,16 @@ import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.BeaconsLockedEvent;
 import com.aircandi.components.BusProvider;
 import com.aircandi.components.CommandType;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ModelResult;
-import com.aircandi.components.ProxiManager.ScanReason;
+import com.aircandi.components.ProximityManager;
+import com.aircandi.components.ProximityManager.ModelResult;
+import com.aircandi.components.ProximityManager.ScanReason;
 import com.aircandi.components.QueryWifiScanReceivedEvent;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
@@ -54,6 +55,7 @@ import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
@@ -139,7 +141,7 @@ public class TuningWizard extends FormActivity {
 			 * that any changes only show up in the entity model if the changes make it
 			 * to the service.
 			 */
-			final Entity entityForModel = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+			final Entity entityForModel = EntityManager.getInstance().getEntity(mCommon.mEntityId);
 			if (entityForModel != null) {
 				mEntityForForm = entityForModel.clone();
 			}
@@ -287,14 +289,14 @@ public class TuningWizard extends FormActivity {
 			}
 			else {
 				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-					if (entity.photo == null &&  ((Place)entity).category != null) {
+					if (entity.photo == null && ((Place) entity).category != null) {
 
-						final int color = Place.getCategoryColor((((Place)entity).category != null)
-								? ((Place)entity).category.name
+						final int color = Place.getCategoryColor((((Place) entity).category != null)
+								? ((Place) entity).category.name
 								: null, true, mMuteColor, false);
 
 						mImageViewPicture.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-						mColorResId = Place.getCategoryColorResId((((Place)entity).category != null) ? ((Place)entity).category.name : null,
+						mColorResId = Place.getCategoryColorResId((((Place) entity).category != null) ? ((Place) entity).category.name : null,
 								true, mMuteColor, false);
 
 						if (findViewById(R.id.color_layer) != null) {
@@ -333,7 +335,7 @@ public class TuningWizard extends FormActivity {
 				public void run() {
 					Logger.d(TuningWizard.this, "Query wifi scan received event: locking beacons");
 					if (event.wifiList != null) {
-						ProxiManager.getInstance().lockBeacons();
+						ProximityManager.getInstance().lockBeacons();
 					}
 					else {
 						/*
@@ -447,7 +449,7 @@ public class TuningWizard extends FormActivity {
 			if (NetworkManager.getInstance().isWifiEnabled()) {
 				mTuningInProcess = true;
 				enableEvents();
-				ProxiManager.getInstance().scanForWifi(ScanReason.query);
+				ProximityManager.getInstance().scanForWifi(ScanReason.query);
 			}
 			else {
 				tuneProximity();
@@ -464,7 +466,7 @@ public class TuningWizard extends FormActivity {
 			if (NetworkManager.getInstance().isWifiEnabled()) {
 				mTuningInProcess = true;
 				enableEvents();
-				ProxiManager.getInstance().scanForWifi(ScanReason.query);
+				ProximityManager.getInstance().scanForWifi(ScanReason.query);
 			}
 			else {
 				tuneProximity();
@@ -517,7 +519,7 @@ public class TuningWizard extends FormActivity {
 
 						final Bundle extras = intent.getExtras();
 						final String entityId = extras.getString(Constants.EXTRA_ENTITY_ID);
-						final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(entityId);
+						final Entity entity = EntityManager.getInstance().getEntity(entityId);
 						mAddedCandi.add(entity);
 						draw();
 						toggleStarOn(R.id.image_star_add_candi);
@@ -690,7 +692,7 @@ public class TuningWizard extends FormActivity {
 		 * - no links are created.
 		 * - entity_proximity action logged.
 		 */
-		final List<Beacon> beacons = ProxiManager.getInstance().getStrongestBeacons(5);
+		final List<Beacon> beacons = ProximityManager.getInstance().getStrongestBeacons(5);
 		final Beacon primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
 
 		new AsyncTask() {
@@ -705,7 +707,7 @@ public class TuningWizard extends FormActivity {
 					actionType = "proximity_first";
 				}
 
-				final ModelResult result = ProxiManager.getInstance().getEntityModel()
+				final ModelResult result = EntityManager.getInstance()
 						.trackEntity(mEntityForForm, beacons, primaryBeacon, actionType, mUntuning);
 				return result;
 			}
@@ -738,21 +740,17 @@ public class TuningWizard extends FormActivity {
 			bitmap = null;
 		}
 
-		List<Entity> entities = mEntityForForm.getChildren();
-
 		/* Something in the call caused us to lose the most recent picture. */
-		ModelResult result = ProxiManager.getInstance().getEntityModel().updateEntity(mEntityForForm, bitmap);
+		ModelResult result = EntityManager.getInstance().updateEntity(mEntityForForm, bitmap);
 
 		if (mEntityForForm.type.equals(Constants.SCHEMA_ENTITY_PLACE) && mEntityForForm.photo != null) {
 
-			entities = mEntityForForm.getChildren();
+			List<Entity> entities = (List<Entity>) mEntityForForm.getLinkedEntitiesByLinkType(Constants.TYPE_LINK_POST, null, Direction.in, false);
 			Boolean candiMatch = false;
 			for (Entity entity : entities) {
-				if (entity.type.equals(Constants.SCHEMA_ENTITY_POST)) {
-					if (entity.getPhotoUri().equals(mEntityForForm.getPhotoUri())) {
-						candiMatch = true;
-						break;
-					}
+				if (entity.getPhotoUri().equals(mEntityForForm.getPhotoUri())) {
+					candiMatch = true;
+					break;
 				}
 			}
 
@@ -760,7 +758,7 @@ public class TuningWizard extends FormActivity {
 				Entity pictureEntity = makeEntity(Constants.SCHEMA_ENTITY_POST);
 				pictureEntity.photo = mEntityForForm.photo.clone();
 				pictureEntity.toId = mEntityForForm.id;
-				result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false, true);
+				result = EntityManager.getInstance().insertEntity(pictureEntity, null, null, null, false, true);
 			}
 		}
 

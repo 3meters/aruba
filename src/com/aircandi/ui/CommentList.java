@@ -22,14 +22,15 @@ import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EndlessAdapter;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Comment;
+import com.aircandi.service.objects.CursorSettings;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.base.CandiActivity;
@@ -40,14 +41,14 @@ import com.aircandi.utilities.DateUtils;
 
 public class CommentList extends CandiActivity {
 
-	private ListView		mListView;
-	private List<Comment>	mComments		= new ArrayList<Comment>();
-	private Button			mButtonNewComment;
+	private ListView			mListView;
+	private List<Comment>		mComments	= new ArrayList<Comment>();
+	private CursorSettings		mCursorSettings;
+	private Button				mButtonNewComment;
 
-	
-	private LayoutInflater	mInflater;
-	private Boolean			mMore			= false;
-	private static final long		LIST_MAX		= 300L;
+	private LayoutInflater		mInflater;
+	private Boolean				mMore		= false;
+	private static final long	LIST_MAX	= 300L;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -64,7 +65,7 @@ public class CommentList extends CandiActivity {
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mListView = (ListView) findViewById(R.id.list_comments);
 		mButtonNewComment = (Button) findViewById(R.id.button_new_comment);
-		
+
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_new_comment));
 	}
 
@@ -72,7 +73,7 @@ public class CommentList extends CandiActivity {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+		final Entity entity = EntityManager.getInstance().getEntity(mCommon.mEntityId);
 		mCommon.mActionBar.setTitle(entity.name);
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 	}
@@ -89,11 +90,7 @@ public class CommentList extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetComments");
-				/*
-				 * Just get the comments without updating the entity in the cache
-				 */
-				final String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, jsonEagerLoad, null);
+				ModelResult result = loadComments(refresh);
 				return result;
 			}
 
@@ -124,23 +121,18 @@ public class CommentList extends CandiActivity {
 		}.execute();
 	}
 
-	private ModelResult loadComments() {
+	private ModelResult loadComments(Boolean refresh) {
+		
+		String[] linkTypes = {Constants.TYPE_LINK_COMMENT};
 
-		final String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
-		final String jsonOptions = "{\"limit\":"
-				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
-				+ ",\"skip\":0"
-				+ ",\"sort\":{\"modifiedDate\":-1} "
-				+ ",\"children\":{\"limit\":"
-				+ String.valueOf(ProxiConstants.RADAR_CHILDENTITY_LIMIT)
-				+ ",\"skip\":0"
-				+ ",\"sort\":{\"modifiedDate\":-1}}"
-				+ ",\"comments\":{\"limit\":"
-				+ String.valueOf(ProxiConstants.RADAR_COMMENT_LIMIT)
-				+ ",\"skip\":" + String.valueOf(mComments.size())
-				+ "}}";
+		mCursorSettings = new CursorSettings()
+				.setLimit(ProxiConstants.RADAR_COMMENT_LIMIT)
+				.setSort(new Comment().modifiedDate = -1)
+				.setSkip(0);
 
-		final ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, true, jsonEagerLoad, jsonOptions);
+		final ModelResult result = EntityManager.getInstance()
+				.getEntitiesForEntity(mCommon.mEntityId, refresh, linkTypes, mCursorSettings, null);
+
 		return result;
 	}
 
@@ -196,7 +188,7 @@ public class CommentList extends CandiActivity {
 		protected boolean cacheInBackground() {
 			moreComments.clear();
 			if (mMore) {
-				final ModelResult result = loadComments();
+				final ModelResult result = loadComments(true);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					if (result.data != null) {
@@ -225,7 +217,7 @@ public class CommentList extends CandiActivity {
 			for (Comment comment : moreComments) {
 				list.add(comment);
 			}
-			list.sort(new Entity.SortEntitiesByModifiedDate());			
+			list.sort(new Entity.SortEntitiesByModifiedDate());
 			notifyDataSetChanged();
 		}
 	}

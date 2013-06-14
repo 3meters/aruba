@@ -296,7 +296,7 @@ public class CandiView extends RelativeLayout {
 		if (mDistance != null) {
 
 			String info = "here";
-			final float distance = place.getDistance(); // In meters
+			final float distance = place.getDistance(true); // In meters
 			final String target = place.hasActiveProximityLink() ? "B:" : "L:";
 			/*
 			 * If distance = -1 then we don't have the location info

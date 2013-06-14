@@ -18,11 +18,11 @@ import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ServiceDataType;
@@ -120,7 +120,7 @@ public class SignInForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("SignIn");
-					final ModelResult result = ProxiManager.getInstance().getEntityModel().signin(email, password);
+					final ModelResult result = EntityManager.getInstance().signin(email, password);
 					return result;
 				}
 

@@ -75,13 +75,13 @@ import com.aircandi.components.NetworkManager.ConnectedState;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.HttpServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;
+import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Device;
-import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
@@ -876,7 +876,7 @@ public class HttpService {
 				return Photo.setPropertiesFromMap(new Photo(), (HashMap) rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.GeoLocation) {
-				return GeoLocation.setPropertiesFromMap(new GeoLocation(), (HashMap) rootMap);
+				return AirLocation.setPropertiesFromMap(new AirLocation(), (HashMap) rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.Beacon) {
 				return Beacon.setPropertiesFromMap(new Beacon(), (HashMap) rootMap);

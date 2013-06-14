@@ -31,7 +31,7 @@ import com.aircandi.components.BusProvider;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.EntitiesChangedEvent;
 import com.aircandi.components.EntitiesForBeaconsFinishedEvent;
-import com.aircandi.components.EntityModel;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
@@ -45,15 +45,15 @@ import com.aircandi.components.NetworkManager.ConnectedState;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.PlacesNearLocationFinishedEvent;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ModelResult;
-import com.aircandi.components.ProxiManager.ScanReason;
+import com.aircandi.components.ProximityManager;
+import com.aircandi.components.ProximityManager.ModelResult;
+import com.aircandi.components.ProximityManager.ScanReason;
 import com.aircandi.components.QueryWifiScanReceivedEvent;
 import com.aircandi.components.RadarListAdapter;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
+import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.utilities.AnimUtils;
@@ -161,7 +161,7 @@ public class CandiRadar extends CandiActivity {
 		checkSession();
 
 		/* Always reset the entity cache */
-		ProxiManager.getInstance().getEntityModel().removeAllEntities();
+		EntityManager.getInstance().getEntityCache().clear();
 
 		/* Other UI references */
 		mList = (PullToRefreshListView) findViewById(R.id.radar_list);
@@ -209,7 +209,7 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("CheckSession");
-				ModelResult result = ProxiManager.getInstance().getEntityModel().checkSession();
+				ModelResult result = EntityManager.getInstance().checkSession();
 				return result;
 			}
 
@@ -241,7 +241,7 @@ public class CandiRadar extends CandiActivity {
 				Logger.d(CandiRadar.this, "Query wifi scan received event: locking beacons");
 
 				if (event.wifiList != null) {
-					ProxiManager.getInstance().lockBeacons();
+					ProximityManager.getInstance().lockBeacons();
 				}
 				else {
 					BusProvider.getInstance().post(new EntitiesForBeaconsFinishedEvent());
@@ -259,13 +259,13 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Beacons locked event");
-				mEntityModelBeaconDate = ProxiManager.getInstance().getEntityModel().getLastBeaconLockedDate();
+				mEntityModelBeaconDate = ProximityManager.getInstance().getLastBeaconLockedDate();
 				new AsyncTask() {
 
 					@Override
 					protected Object doInBackground(Object... params) {
 						Thread.currentThread().setName("GetEntitiesForBeacons");
-						final ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForBeacons();
+						final ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesForBeacons();
 						return serviceResponse;
 					}
 
@@ -355,7 +355,7 @@ public class CandiRadar extends CandiActivity {
 					}
 
 					LocationManager.getInstance().setLocationLocked(locationCandidate);
-					mCommon.updateAccuracyIndicator(LocationManager.getInstance().getLocationLocked());
+					mCommon.updateAccuracyIndicator();
 					BusProvider.getInstance().post(new LocationLockedEvent(LocationManager.getInstance().getLocationLocked()));
 
 					if (Aircandi.stopwatch2.isStarted()) {
@@ -363,8 +363,8 @@ public class CandiRadar extends CandiActivity {
 						Tracker.sendTiming("location", Aircandi.stopwatch2.getTotalTimeMills(), "location_acquired", null, Aircandi.getInstance().getUser());
 					}
 
-					final Observation observation = LocationManager.getInstance().getObservationLocked();
-					if (observation != null) {
+					final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
+					if (location != null) {
 
 						mCommon.showBusy(true);
 
@@ -377,7 +377,7 @@ public class CandiRadar extends CandiActivity {
 								Thread.currentThread().setName("GetPlacesNearLocation");
 								Aircandi.stopwatch2.start("Get places near location");
 
-								final ServiceResponse serviceResponse = ProxiManager.getInstance().getPlacesNearLocation(observation);
+								final ServiceResponse serviceResponse = ProximityManager.getInstance().getPlacesNearLocation(location);
 								return serviceResponse;
 							}
 
@@ -431,8 +431,8 @@ public class CandiRadar extends CandiActivity {
 				Logger.d(CandiRadar.this, "Entities changed event: updating radar");
 				Aircandi.stopwatch4.stop("Aircandi initialization finished and got first entities");
 
-				mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
-				mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
+				mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
+				mEntityModelActivityDate = EntityManager.getInstance().getEntityCache().getLastActivityDate();
 
 				/* Point radar adapter at the updated entities */
 				final int previousCount = mRadarAdapter.getCount();
@@ -533,8 +533,8 @@ public class CandiRadar extends CandiActivity {
 		Aircandi.stopwatch1.start("Search for places by beacon");
 		mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
 		if (NetworkManager.getInstance().isWifiEnabled()) {
-			ProxiManager.getInstance().getEntityModel().clearBeacons();
-			ProxiManager.getInstance().scanForWifi(ScanReason.query);
+			EntityManager.getInstance().getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null);
+			ProximityManager.getInstance().scanForWifi(ScanReason.query);
 		}
 	}
 
@@ -632,7 +632,7 @@ public class CandiRadar extends CandiActivity {
 		}
 
 		if (!mInitialized) return;
-		
+
 		/* Check for location service */
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 			/* We won't continue if location services are disabled */
@@ -649,7 +649,7 @@ public class CandiRadar extends CandiActivity {
 		enableEvents();
 
 		/* Reset the accuracy indicator */
-		mCommon.updateAccuracyIndicator(LocationManager.getInstance().getLocationLocked());
+		mCommon.updateAccuracyIndicator();
 	}
 
 	@Override
@@ -707,7 +707,7 @@ public class CandiRadar extends CandiActivity {
 		Logger.d(this, "onResume called");
 		if (!mInitialized) return;
 		mFreshWindow = true;
-		
+
 		/* Run help if it hasn't been run yet */
 		final Boolean runOnceHelp = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, false);
 		if (!runOnceHelp) {
@@ -759,7 +759,6 @@ public class CandiRadar extends CandiActivity {
 		 * - Preference change
 		 * - EntityModel has changed since last search
 		 */
-		final EntityModel entityModel = ProxiManager.getInstance().getEntityModel();
 		if (mEntityModelActivityDate == null) {
 			/*
 			 * Get set everytime onEntitiesChanged gets called. Means
@@ -785,7 +784,7 @@ public class CandiRadar extends CandiActivity {
 			mCommon.showBusy(true);
 			invalidateOptionsMenu();
 			mRadarAdapter.getItems().clear();
-			mRadarAdapter.getItems().addAll(ProxiManager.getInstance().getEntityModel().getAllPlaces(false));
+			mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
 			mRadarAdapter.notifyDataSetChanged();
 			mCommon.hideBusy(true);
 		}
@@ -797,7 +796,7 @@ public class CandiRadar extends CandiActivity {
 			Logger.d(this, "Start place search because didn't complete location fix");
 			LocationManager.getInstance().lockLocationBurst();
 		}
-		else if (ProxiManager.getInstance().refreshNeeded(LocationManager.getInstance().getLocationLocked())) {
+		else if (ProximityManager.getInstance().beaconRefreshNeeded(LocationManager.getInstance().getLocationLocked())) {
 			/*
 			 * We check to see if it's been awhile since the last search.
 			 */
@@ -818,8 +817,8 @@ public class CandiRadar extends CandiActivity {
 			else {
 				ImageUtils.showToastNotification("Wifi disabled", Toast.LENGTH_SHORT);
 			}
-			ProxiManager.getInstance().getEntityModel().getWifiList().clear();
-			ProxiManager.getInstance().getEntityModel().clearBeacons();
+			ProximityManager.getInstance().getWifiList().clear();
+			EntityManager.getInstance().getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null);
 			LocationManager.getInstance().setLocationLocked(null);
 		}
 		else if (NetworkManager.getInstance().getWifiState() == WifiManager.WIFI_STATE_ENABLED
@@ -830,29 +829,29 @@ public class CandiRadar extends CandiActivity {
 			ImageUtils.showToastNotification("Wifi enabled", Toast.LENGTH_SHORT);
 			mList.setRefreshing();
 		}
-		else if ((entityModel.getLastBeaconLockedDate() != null && mEntityModelBeaconDate != null)
-				&& (entityModel.getLastBeaconLockedDate().longValue() > mEntityModelBeaconDate.longValue())) {
+		else if ((ProximityManager.getInstance().getLastBeaconLockedDate() != null && mEntityModelBeaconDate != null)
+				&& (ProximityManager.getInstance().getLastBeaconLockedDate().longValue() > mEntityModelBeaconDate.longValue())) {
 			/*
 			 * The beacons we are locked to have changed so we need to search for new places linked
 			 * to beacons.
 			 */
 			Logger.d(this, "Refresh places for beacons because beacon date has changed");
-			mEntityModelBeaconDate = ProxiManager.getInstance().getEntityModel().getLastBeaconLockedDate();
+			mEntityModelBeaconDate = ProximityManager.getInstance().getLastBeaconLockedDate();
 			new AsyncTask() {
 
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("GetEntitiesForBeacons");
-					final ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForBeacons();
+					final ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesForBeacons();
 					return serviceResponse;
 				}
 
 			}.execute();
 		}
-		else if ((entityModel.getLastBeaconRefreshDate() != null && mEntityModelRefreshDate != null
-				&& entityModel.getLastBeaconRefreshDate().longValue() > mEntityModelRefreshDate.longValue())
-				|| (entityModel.getLastActivityDate() != null && mEntityModelActivityDate != null
-				&& entityModel.getLastActivityDate().longValue() > mEntityModelActivityDate.longValue())) {
+		else if ((ProximityManager.getInstance().getLastBeaconLoadDate() != null && mEntityModelRefreshDate != null
+				&& ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue())
+				|| (EntityManager.getInstance().getEntityCache().getLastActivityDate() != null && mEntityModelActivityDate != null
+				&& EntityManager.getInstance().getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue())) {
 			/*
 			 * Everytime we show details for a place, we fetch place details from the service
 			 * when in turn get pushed into the cache and activityDate gets tickled.
@@ -865,7 +864,7 @@ public class CandiRadar extends CandiActivity {
 					mCommon.showBusy(true);
 					invalidateOptionsMenu();
 					mRadarAdapter.getItems().clear();
-					mRadarAdapter.getItems().addAll(ProxiManager.getInstance().getEntityModel().getAllPlaces(false));
+					mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
 					mRadarAdapter.notifyDataSetChanged();
 					mCommon.hideBusy(true);
 				}

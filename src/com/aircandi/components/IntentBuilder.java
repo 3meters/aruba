@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.aircandi.Constants;
-import com.aircandi.components.ProxiManager.ArrayListType;
+import com.aircandi.components.ProximityManager.ArrayListType;
 
 
 public class IntentBuilder {

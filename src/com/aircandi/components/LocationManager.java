@@ -11,8 +11,7 @@ import android.location.Location;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.PlacesConstants;
-import com.aircandi.service.objects.Observation;
-import com.aircandi.utilities.DateUtils;
+import com.aircandi.service.objects.AirLocation;
 
 @SuppressWarnings("ucd")
 public class LocationManager {
@@ -29,7 +28,8 @@ public class LocationManager {
 
 	private Location							mLocationLatest;
 	private Location							mLocationLocked;
-	private Observation							mObservationLocked;
+	private AirLocation							mAirLocationLocked;
+	
 	private Boolean								mLocationModeBurstNetwork	= false;
 	private Boolean								mLocationModeBurstGps		= false;
 	protected PendingIntent						mLocationListenerPendingIntent;
@@ -127,9 +127,9 @@ public class LocationManager {
 	// Support routines
 	// --------------------------------------------------------------------------------------------
 
-	private Observation getObservationForLockedLocation() {
+	private AirLocation getAirLocationForLockedLocation() {
 
-		Observation observation = new Observation();
+		AirLocation location = new AirLocation();
 
 		if (mLocationLocked == null || !mLocationLocked.hasAccuracy()) {
 			return null;
@@ -138,48 +138,44 @@ public class LocationManager {
 		synchronized (mLocationLocked) {
 
 			if (Aircandi.usingEmulator) {
-				observation = new Observation(47.616245, -122.201645); // earls
-				observation.time = DateUtils.nowDate().getTime();
-				observation.provider = "emulator_lucky";
+				location = new AirLocation(47.616245, -122.201645); // earls
+				location.provider = "emulator_lucky";
 			}
 			else {
 				final String testingLocation = Aircandi.settings.getString(Constants.PREF_TESTING_LOCATION, "natural");
 				if (ListPreferenceMultiSelect.contains("zoka", testingLocation, null)) {
-					observation = new Observation(47.6686489, -122.3320842); // zoka
-					observation.time = DateUtils.nowDate().getTime();
-					observation.provider = "testing_zoka";
+					location = new AirLocation(47.6686489, -122.3320842); // zoka
+					location.provider = "testing_zoka";
 				}
 				else if (ListPreferenceMultiSelect.contains("lucky", testingLocation, null)) {
-					observation = new Observation(47.616245, -122.201645); // lucky
-					observation.time = DateUtils.nowDate().getTime();
-					observation.provider = "testing_lucky";
+					location = new AirLocation(47.616245, -122.201645); // lucky
+					location.provider = "testing_lucky";
 				}
 				else {
-					observation.latitude = mLocationLocked.getLatitude();
-					observation.longitude = mLocationLocked.getLongitude();
+					location.lat = mLocationLocked.getLatitude();
+					location.lng = mLocationLocked.getLongitude();
 
 					if (mLocationLocked.hasAltitude()) {
-						observation.altitude = mLocationLocked.getAltitude();
+						location.altitude = mLocationLocked.getAltitude();
 					}
 					if (mLocationLocked.hasAccuracy()) {
 						/* In meters. */
-						observation.accuracy = mLocationLocked.getAccuracy();
+						location.accuracy = mLocationLocked.getAccuracy();
 					}
 					if (mLocationLocked.hasBearing()) {
 						/* Direction of travel in degrees East of true North. */
-						observation.bearing = mLocationLocked.getBearing();
+						location.bearing = mLocationLocked.getBearing();
 					}
 					if (mLocationLocked.hasSpeed()) {
 						/* Speed of the device over ground in meters/second. */
-						observation.speed = mLocationLocked.getSpeed();
+						location.speed = mLocationLocked.getSpeed();
 					}
-					observation.time = mLocationLocked.getTime();
-					observation.provider = mLocationLocked.getProvider();
+					location.provider = mLocationLocked.getProvider();
 				}
 			}
 		}
 
-		return observation;
+		return location;
 	}
 
 	public void setLocation(Location location) {
@@ -229,14 +225,14 @@ public class LocationManager {
 								mLocationManager.requestLocationUpdates(android.location.LocationManager.GPS_PROVIDER, 0, 0, mLocationListenerPendingIntent);
 							}
 							else {
-								stopLocationBurst();							
+								stopLocationBurst();
 							}
 						}
 					}
 					else if (location.getProvider().equals("gps") && mLocationModeBurstGps) {
 						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_GPS) {
 							Logger.d(this, "Gps burst mode stopped: desired accuracy reached");
-							stopLocationBurst();							
+							stopLocationBurst();
 						}
 					}
 				}
@@ -380,15 +376,11 @@ public class LocationManager {
 
 	public void setLocationLocked(Location locationLocked) {
 		mLocationLocked = locationLocked;
-		mObservationLocked = getObservationForLockedLocation();
+		mAirLocationLocked = getAirLocationForLockedLocation();
 	}
 
-	public Observation getObservationLocked() {
-		return mObservationLocked;
-	}
-
-	public void setObservationLocked(Observation observationLocked) {
-		mObservationLocked = observationLocked;
+	public AirLocation getAirLocationLocked() {
+		return mAirLocationLocked;
 	}
 
 	private enum LocationBetterReason {

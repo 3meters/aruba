@@ -26,10 +26,10 @@ import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.ApplinkListAdapter;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.HttpService;
@@ -86,7 +86,7 @@ public class SourcesBuilder extends FormActivity {
 			}
 			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
 			if (mEntityId != null) {
-				mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
+				mEntity = EntityManager.getInstance().getEntity(mEntityId);
 			}
 		}
 
@@ -380,7 +380,7 @@ public class SourcesBuilder extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LoadSourceSuggestions");
-				ModelResult result = ProxiManager.getInstance().getEntityModel().getApplinkSuggestions(applinks, entity);
+				ModelResult result = EntityManager.getInstance().getApplinkSuggestions(applinks, entity);
 				return result;
 			}
 

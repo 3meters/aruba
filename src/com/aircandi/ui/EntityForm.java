@@ -35,13 +35,14 @@ import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CommandType;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProximityManager;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
@@ -49,11 +50,12 @@ import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.HttpService.ServiceDataType;
+import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Observation;
+import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
@@ -102,10 +104,10 @@ public class EntityForm extends FormActivity {
 		 * Starting determining the users location if we are creating new candi. We are pulling
 		 * a single shot coarse location which is usually based on network location method.
 		 */
-		if (mCommon.mEntityType.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+		if (mCommon.mEntitySchema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			mCommon.mActionBar.setTitle(R.string.form_title_place);
 		}
-		else if (mCommon.mEntityType.equals(Constants.SCHEMA_ENTITY_POST)) {
+		else if (mCommon.mEntitySchema.equals(Constants.SCHEMA_ENTITY_POST)) {
 			mCommon.mActionBar.setTitle(R.string.form_title_candigram);
 		}
 
@@ -157,10 +159,10 @@ public class EntityForm extends FormActivity {
 		 * will set any additional properties beyond the base ones.
 		 */
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
-		if (mCommon.mEntityType.equals(Constants.SCHEMA_ENTITY_PLACE)) {}
+		if (mCommon.mEntitySchema.equals(Constants.SCHEMA_ENTITY_PLACE)) {}
 
 		if (mCommon.mCommandType == CommandType.New) {
-			mEntityForForm = makeEntity(mCommon.mEntityType);
+			mEntityForForm = makeEntity(mCommon.mEntitySchema);
 		}
 		else {
 			if (mEntityForForm == null && mCommon.mEntityId != null) {
@@ -169,7 +171,7 @@ public class EntityForm extends FormActivity {
 				 * that any changes only show up in the entity model if the changes make it
 				 * to the service.
 				 */
-				final Entity entityForModel = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+				final Entity entityForModel = EntityManager.getInstance().getEntity(mCommon.mEntityId);
 				if (entityForModel != null) {
 					mEntityForForm = entityForModel.clone();
 				}
@@ -364,7 +366,7 @@ public class EntityForm extends FormActivity {
 			 * hold a set of images.
 			 */
 			final BuilderButton button = (BuilderButton) findViewById(R.id.sources);
-			List<Applink> applinks = (List<Applink>) entity.getChildrenByLinkType(Constants.TYPE_LINK_APPLINK);
+			List<Applink> applinks = (List<Applink>) entity.getLinkedEntitiesByLinkType(Constants.TYPE_LINK_APPLINK, null, Direction.in, false);
 			if (applinks.size() == 0) {
 				button.getTextView().setVisibility(View.VISIBLE);
 				button.getViewGroup().setVisibility(View.GONE);
@@ -477,8 +479,8 @@ public class EntityForm extends FormActivity {
 		final Intent intent = new Intent(this, SourcesBuilder.class);
 
 		/* Serialize the sources for the current entity */
-		List<Applink> applinks = (List<Applink>) mEntityForForm.getChildrenByLinkType(Constants.TYPE_LINK_APPLINK);
-		
+		List<Applink> applinks = (List<Applink>) mEntityForForm.getLinkedEntitiesByLinkType(Constants.TYPE_LINK_APPLINK, null, Direction.in, false);
+
 		if (applinks.size() > 0) {
 			final List<String> applinkStrings = new ArrayList<String>();
 			for (Applink applink : applinks) {
@@ -516,7 +518,7 @@ public class EntityForm extends FormActivity {
 							placeUpdated.phone = placeUpdated.phone.replaceAll("[^\\d.]", "");
 						}
 						mEntityForForm = placeUpdated;
-						((BuilderButton) findViewById(R.id.address)).setText(((Place)mEntityForForm).address);
+						((BuilderButton) findViewById(R.id.address)).setText(((Place) mEntityForForm).address);
 					}
 				}
 			}
@@ -528,7 +530,7 @@ public class EntityForm extends FormActivity {
 						final Category categoryUpdated = (Category) HttpService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 						if (categoryUpdated != null) {
 							mDirty = true;
-							((Place)mEntityForForm).category = categoryUpdated;
+							((Place) mEntityForForm).category = categoryUpdated;
 							((BuilderButton) findViewById(R.id.category)).setText(categoryUpdated.name);
 							drawImage(mEntityForForm);
 						}
@@ -758,21 +760,21 @@ public class EntityForm extends FormActivity {
 		}
 
 		/* We always send beacons to support nearby notifications */
-		beacons = ProxiManager.getInstance().getStrongestBeacons(5);
+		beacons = ProximityManager.getInstance().getStrongestBeacons(5);
 		primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
 
 		/*
 		 * Set location info if this is a place entity
 		 */
 		if (mEntityForForm.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-			((Place)mEntityForForm).provider.aircandi = Aircandi.getInstance().getUser().id;
+			((Place) mEntityForForm).provider.aircandi = Aircandi.getInstance().getUser().id;
 			/*
 			 * We add location info as a consistent feature
 			 */
-			final Observation observation = LocationManager.getInstance().getObservationLocked();
-			if (observation != null) {
-				((Place)mEntityForForm).location.lat = observation.latitude;
-				((Place)mEntityForForm).location.lng = observation.longitude;
+			final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
+			if (location != null) {
+				((Place) mEntityForForm).location.lat = location.lat;
+				((Place) mEntityForForm).location.lng = location.lng;
 			}
 		}
 
@@ -780,7 +782,7 @@ public class EntityForm extends FormActivity {
 		Bitmap bitmap = mEntityBitmap;
 		if (mEntityBitmapLocalOnly) bitmap = null;
 
-		result = ProxiManager.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, bitmap, false, null);
+		result = EntityManager.getInstance().insertEntity(mEntityForForm, beacons, primaryBeacon, bitmap, false, null);
 
 		/* Add picture entity if a new picture has been set for a place */
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -789,7 +791,7 @@ public class EntityForm extends FormActivity {
 				Entity pictureEntity = makeEntity(Constants.SCHEMA_ENTITY_POST);
 				pictureEntity.photo = entity.photo.clone();
 				pictureEntity.toId = entity.id;
-				result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false, true);
+				result = EntityManager.getInstance().insertEntity(pictureEntity, null, null, null, false, true);
 			}
 		}
 		return result;
@@ -804,7 +806,7 @@ public class EntityForm extends FormActivity {
 		}
 
 		/* Something in the call caused us to lose the most recent picture. */
-		ModelResult result = ProxiManager.getInstance().getEntityModel().updateEntity(mEntityForForm, bitmap);
+		ModelResult result = EntityManager.getInstance().updateEntity(mEntityForForm, bitmap);
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			/*
@@ -812,14 +814,12 @@ public class EntityForm extends FormActivity {
 			 */
 			if (mEntityForForm.type.equals(Constants.SCHEMA_ENTITY_PLACE) && mEntityForForm.photo != null) {
 
-				List<Entity> entities = mEntityForForm.getChildren();
+				List<Entity> entities = (List<Entity>) mEntityForForm.getLinkedEntitiesByLinkType(Constants.TYPE_LINK_POST, null, Direction.in, false);
 				Boolean candiMatch = false;
 				for (Entity entity : entities) {
-					if (entity.schema.equals(Constants.SCHEMA_ENTITY_POST)) {
-						if (entity.getPhotoUri() != null && entity.getPhotoUri().equals(mEntityForForm.getPhotoUri())) {
-							candiMatch = true;
-							break;
-						}
+					if (entity.getPhotoUri() != null && entity.getPhotoUri().equals(mEntityForForm.getPhotoUri())) {
+						candiMatch = true;
+						break;
 					}
 				}
 
@@ -827,7 +827,7 @@ public class EntityForm extends FormActivity {
 					Entity pictureEntity = makeEntity(Constants.SCHEMA_ENTITY_POST);
 					pictureEntity.photo = mEntityForForm.photo.clone();
 					pictureEntity.toId = mEntityForForm.id;
-					result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false, true);
+					result = EntityManager.getInstance().insertEntity(pictureEntity, null, null, null, false, true);
 				}
 			}
 		}
@@ -852,7 +852,7 @@ public class EntityForm extends FormActivity {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("DeleteEntity");
 				Tracker.sendEvent("ui_action", "entity_delete", mEntityForForm.type, 0, Aircandi.getInstance().getUser());
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().deleteEntity(mEntityForForm.id, false);
+				final ModelResult result = EntityManager.getInstance().deleteEntity(mEntityForForm.id, false);
 				return result;
 			}
 
@@ -941,10 +941,10 @@ public class EntityForm extends FormActivity {
 
 	@Override
 	protected int getLayoutId() {
-		if (mCommon.mEntityType.equals(Constants.SCHEMA_ENTITY_POST)) {
+		if (mCommon.mEntitySchema.equals(Constants.SCHEMA_ENTITY_POST)) {
 			return R.layout.picture_form;
 		}
-		else if (mCommon.mEntityType.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+		else if (mCommon.mEntitySchema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			return R.layout.place_form;
 		}
 		else {
