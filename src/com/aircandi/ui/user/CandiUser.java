@@ -1,6 +1,7 @@
 package com.aircandi.ui.user;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -27,24 +28,30 @@ import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.CommandType;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
+import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager;
-import com.aircandi.components.ProximityManager.ArrayListType;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
+import com.aircandi.service.objects.Count;
+import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Link.Direction;
+import com.aircandi.service.objects.LinkOptions;
+import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
+import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.CandiForm;
-import com.aircandi.ui.CandiList;
+import com.aircandi.ui.EntityList;
+import com.aircandi.ui.EntityList.ListMode;
 import com.aircandi.ui.PictureDetail;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.widgets.ComboButton;
@@ -97,11 +104,13 @@ public class CandiUser extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetUser");
-				ModelResult result = EntityManager.getInstance().getUser(mCommon.mUserId, true);
+				ModelResult result = EntityManager.getInstance().getEntity(mCommon.mUserId, true, LinkOptions.getDefault(DefaultType.UserEntities));
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					mUser = (User) result.serviceResponse.data;
+					mUser = (User) result.data;
 
-					result = EntityManager.getInstance().getUserEntities(mCommon.mUserId, true, ProxiConstants.USER_ENTITY_LIMIT);
+					Cursor cursor = new Cursor(Maps.asMap("modifiedDate", -1), 0, ProxiConstants.LIMIT_USER_OWNED_ENTITIES);
+					result = EntityManager.getInstance().getEntitiesByOwner(mCommon.mUserId, true, Arrays.asList(Constants.SCHEMA_ANY),
+							LinkOptions.getDefault(DefaultType.UserEntities), cursor);
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						mEntities = (List<Entity>) result.data;
 					}
@@ -115,7 +124,7 @@ public class CandiUser extends CandiActivity {
 				final ModelResult result = (ModelResult) modelResult;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-					mEntityModelActivityDate = EntityManager.getInstance().getEntityCache().getLastActivityDate();
+					mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 					mCommon.mActionBar.setTitle(mUser.name);
 					buildCandiUser(CandiUser.this, mUser);
 				}
@@ -148,12 +157,22 @@ public class CandiUser extends CandiActivity {
 				Thread.currentThread().setName("LikeEntity");
 				ModelResult result = new ModelResult();
 				if (!mUser.byAppUser(Constants.TYPE_LINK_LIKE)) {
-					Tracker.sendEvent("ui_action", "like_entity", null, 0, Aircandi.getInstance().getUser());
-					result = EntityManager.getInstance().verbSomething(Aircandi.getInstance().getUser().id, mUser.id, "like", "like");
+					Tracker.sendEvent("ui_action", "like_user", null, 0, Aircandi.getInstance().getUser());
+
+					Shortcut shortcut = Aircandi.getInstance().getUser().getShortcut();
+					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getUser().id
+							, mUser.id
+							, Constants.TYPE_LINK_LIKE
+							, false
+							, shortcut
+							, Constants.TYPE_LINK_LIKE);
 				}
 				else {
-					Tracker.sendEvent("ui_action", "unlike_entity", null, 0, Aircandi.getInstance().getUser());
-					result = EntityManager.getInstance().unverbSomething(Aircandi.getInstance().getUser().id, mUser.id, "like", "unlike");
+					Tracker.sendEvent("ui_action", "unlike_user", null, 0, Aircandi.getInstance().getUser());
+					result = EntityManager.getInstance().deleteLink(Aircandi.getInstance().getUser().id
+							, mUser.id
+							, Constants.TYPE_LINK_LIKE
+							, "unlike");
 				}
 				return result;
 			}
@@ -189,12 +208,22 @@ public class CandiUser extends CandiActivity {
 				Thread.currentThread().setName("WatchEntity");
 				ModelResult result = new ModelResult();
 				if (!mUser.byAppUser(Constants.TYPE_LINK_WATCH)) {
-					Tracker.sendEvent("ui_action", "watch_entity", null, 0, Aircandi.getInstance().getUser());
-					result = EntityManager.getInstance().verbSomething(Aircandi.getInstance().getUser().id, mUser.id, "watch", "watch");
+					Tracker.sendEvent("ui_action", "watch_user", null, 0, Aircandi.getInstance().getUser());
+					Shortcut shortcut = Aircandi.getInstance().getUser().getShortcut();
+					result = EntityManager.getInstance().insertLink(
+							Aircandi.getInstance().getUser().id
+							, mUser.id
+							, Constants.TYPE_LINK_WATCH
+							, false
+							, shortcut
+							, Constants.TYPE_LINK_WATCH);
 				}
 				else {
-					Tracker.sendEvent("ui_action", "unwatch_entity", null, 0, Aircandi.getInstance().getUser());
-					result = EntityManager.getInstance().unverbSomething(Aircandi.getInstance().getUser().id, mUser.id, "watch", "unwatch");
+					Tracker.sendEvent("ui_action", "unwatch_user", null, 0, Aircandi.getInstance().getUser());
+					result = EntityManager.getInstance().deleteLink(Aircandi.getInstance().getUser().id
+							, mUser.id
+							, Constants.TYPE_LINK_WATCH
+							, "unwatch");
 				}
 				return result;
 			}
@@ -218,18 +247,13 @@ public class CandiUser extends CandiActivity {
 	}
 
 	@SuppressWarnings("ucd")
-	public void onCandiClick(View view) {
+	public void onShortcutClick(View view) {
 		final Entity entity = (Entity) view.getTag();
 
 		final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
-				.setCommandType(CommandType.View)
 				.setEntityId(entity.id)
 				.setParentEntityId(entity.toId)
-				.setEntityType(entity.type);
-
-		if (entity.toId != null) {
-			intentBuilder.setCollectionId(entity.getParent().id);
-		}
+				.setEntitySchema(entity.type);
 
 		final Intent intent = intentBuilder.create();
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -260,17 +284,15 @@ public class CandiUser extends CandiActivity {
 		IntentBuilder intentBuilder = null;
 
 		if (target.equals("places")) {
-			intentBuilder = new IntentBuilder(this, CandiList.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setArrayListType(ArrayListType.OwnedByUser)
-					.setEntityType(Constants.SCHEMA_ENTITY_PLACE)
+			intentBuilder = new IntentBuilder(this, EntityList.class)
+					.setListMode(ListMode.EntitiesByOwner)
+					.setEntitySchema(Constants.SCHEMA_ENTITY_PLACE)
 					.setUserId(mCommon.mUserId);
 		}
 		else if (target.equals("candigrams")) {
-			intentBuilder = new IntentBuilder(this, CandiList.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setArrayListType(ArrayListType.OwnedByUser)
-					.setEntityType(Constants.SCHEMA_ENTITY_POST)
+			intentBuilder = new IntentBuilder(this, EntityList.class)
+					.setListMode(ListMode.EntitiesByOwner)
+					.setEntitySchema(Constants.SCHEMA_ENTITY_POST)
 					.setUserId(mCommon.mUserId);
 		}
 
@@ -287,7 +309,7 @@ public class CandiUser extends CandiActivity {
 
 		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		final WebImageView image = (WebImageView) findViewById(R.id.image);
+		final WebImageView image = (WebImageView) findViewById(R.id.photo);
 		final TextView name = (TextView) findViewById(R.id.name);
 		final TextView location = (TextView) findViewById(R.id.location);
 		final TextView link = (TextView) findViewById(R.id.link);
@@ -403,11 +425,13 @@ public class CandiUser extends CandiActivity {
 		setVisibility(findViewById(R.id.section_stats), View.GONE);
 		setVisibility(stats, View.GONE);
 		final StringBuilder statString = new StringBuilder(500);
-		if (user.getInCount(Constants.TYPE_LINK_LIKE) > 0) {
-			statString.append("Likes: " + String.valueOf(user.getInCount(Constants.TYPE_LINK_LIKE)) + "<br/>");
+		Count count = user.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
+		if (count != null && user.getCount(Constants.TYPE_LINK_LIKE, Direction.in).count.intValue() > 0) {
+			statString.append("Likes: " + String.valueOf(count.count.intValue()) + "<br/>");
 		}
-		if (user.getInCount(Constants.TYPE_LINK_WATCH) > 0) {
-			statString.append("Watchers: " + String.valueOf(user.getInCount(Constants.TYPE_LINK_WATCH)) + "<br/>");
+		count = user.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
+		if (count != null && user.getCount(Constants.TYPE_LINK_WATCH, Direction.in).count.intValue() > 0) {
+			statString.append("Watchers: " + String.valueOf(count.count.intValue()) + "<br/>");
 		}
 
 		if (stats != null && user.stats != null && user.stats.size() > 0) {
@@ -486,10 +510,10 @@ public class CandiUser extends CandiActivity {
 		List<Entity> candigrams = new ArrayList<Entity>();
 
 		for (Entity entity : mEntities) {
-			if (entity.type.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 				places.add(entity);
 			}
-			else if (entity.type.equals(Constants.SCHEMA_ENTITY_POST)) {
+			else if (entity.schema.equals(Constants.SCHEMA_ENTITY_POST)) {
 				candigrams.add(entity);
 			}
 		}
@@ -542,7 +566,7 @@ public class CandiUser extends CandiActivity {
 					View footer = inflater.inflate(R.layout.temp_section_footer, null);
 					Button button = (Button) footer.findViewById(R.id.button_more);
 					FontManager.getInstance().setTypefaceDefault(button);
-					button.setText(R.string.candi_section_candigrams_more);
+					button.setText(R.string.candi_section_posts_more);
 					button.setTag("candigrams");
 					section.setFooter(footer); // Replaces if there already is one.
 				}
@@ -592,7 +616,7 @@ public class CandiUser extends CandiActivity {
 		for (Entity entity : entities) {
 
 			View view = inflater.inflate(viewResId, null);
-			WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+			WebImageView webImageView = (WebImageView) view.findViewById(R.id.photo);
 
 			TextView title = (TextView) view.findViewById(R.id.title);
 			TextView badgeUpper = (TextView) view.findViewById(R.id.badge_upper);
@@ -689,8 +713,8 @@ public class CandiUser extends CandiActivity {
 				bind(true);
 			}
 			else if (mEntityModelActivityDate != null
-					&& EntityManager.getInstance().getEntityCache().getLastActivityDate() != null
-					&& EntityManager.getInstance().getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+					&& EntityManager.getEntityCache().getLastActivityDate() != null
+					&& EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
 				bind(true);
 			}

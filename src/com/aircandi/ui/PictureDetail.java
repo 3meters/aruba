@@ -105,7 +105,7 @@ public class PictureDetail extends FormActivity {
 		final UserView user = (UserView) layout.findViewById(R.id.author);
 		final ProgressBar progress = (ProgressBar) layout.findViewById(R.id.progressBar);
 		final ViewGroup progressGroup = (ViewGroup) layout.findViewById(R.id.progress_group);
-		final ImageView image = (ImageView) layout.findViewById(R.id.image);
+		final ImageView image = (ImageView) layout.findViewById(R.id.photo);
 		((ImageViewTouch) image).setFitToScreen(true);
 		((ImageViewTouch) image).setScrollEnabled(true);
 
@@ -216,7 +216,7 @@ public class PictureDetail extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
-		final ImageView image = (ImageView) findViewById(R.id.image);
+		final ImageView image = (ImageView) findViewById(R.id.photo);
 		((ImageViewTouch) image).setFitToScreen(true);
 		super.onConfigurationChanged(newConfig);
 	}

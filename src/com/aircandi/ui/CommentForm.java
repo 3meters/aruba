@@ -26,6 +26,8 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.Comment;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Link;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.AnimUtils;
@@ -50,7 +52,7 @@ public class CommentForm extends FormActivity {
 	private void initialize() {
 		mContent = (EditText) findViewById(R.id.description);
 		FontManager.getInstance().setTypefaceDefault(mContent);
-		
+
 		mContent.setImeOptions(EditorInfo.IME_ACTION_SEND);
 		mContent.setOnEditorActionListener(new OnEditorActionListener() {
 
@@ -63,14 +65,14 @@ public class CommentForm extends FormActivity {
 				return false;
 			}
 		});
-		
+
 	}
 
 	private void bind() {
 		/*
 		 * We are always creating a new comment.
-		 */
-		mComment = new Comment();
+		 */	
+		mComment = (Comment) Entity.makeEntity(Constants.SCHEMA_ENTITY_COMMENT);
 		mComment.creatorId = Aircandi.getInstance().getUser().id;
 		mComment.photo = Aircandi.getInstance().getUser().photo.clone();
 		mComment.name = Aircandi.getInstance().getUser().name;
@@ -172,7 +174,10 @@ public class CommentForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("InsertComment");
-					final ModelResult result = EntityManager.getInstance().insertComment(mCommon.mParentId, mComment, false);
+					final ModelResult result = EntityManager.getInstance().insertEntity(
+							mComment,
+							new Link(mCommon.mParentId, Constants.TYPE_LINK_COMMENT, true),
+							null);
 					return result;
 				}
 

@@ -11,9 +11,9 @@ public class ServiceEntry extends ServiceBase {
 
 	public ServiceEntry() {}
 
-	public static ServiceEntry setPropertiesFromMap(ServiceEntry serviceEntry, Map map) {
+	public static ServiceEntry setPropertiesFromMap(ServiceEntry serviceEntry, Map map, Boolean nameMapping) {
 
-		serviceEntry = (ServiceEntry) ServiceBase.setPropertiesFromMap(serviceEntry, map);
+		serviceEntry = (ServiceEntry) ServiceBase.setPropertiesFromMap(serviceEntry, map, nameMapping);
 		return serviceEntry;
 	}
 
@@ -22,36 +22,41 @@ public class ServiceEntry extends ServiceBase {
 		return null;
 	}
 
-	public static String getTypeFromId(String id) {
+	public static String getSchemaFromId(String id) {
 
-		String typeId = id.substring(0, 4);
-		String type = null;
-		if (typeId.equals("0001")) type = "users";
-		if (typeId.equals("0002")) type = "accounts";
-		if (typeId.equals("0003")) type = "sessions";
-		if (typeId.equals("0004")) type = "entities";
-		if (typeId.equals("0005")) type = "links";
-		if (typeId.equals("0006")) type = "actions";
-		if (typeId.equals("0007")) type = "documents";
-		if (typeId.equals("0008")) type = "beacons";
-		if (typeId.equals("0009")) type = "devices";
+		String schemaId = id.substring(0, 2);
+		String schema = null;
+		if (schemaId.equals("us")) schema = "user";
+		if (schemaId.equals("ac")) schema = "action";
+		if (schemaId.equals("se")) schema = "session";
+		if (schemaId.equals("de")) schema = "device";
+		if (schemaId.equals("li")) schema = "link";
+		if (schemaId.equals("do")) schema = "document";
 
-		return type;
+		if (schemaId.equals("ap")) schema = "applink";
+		if (schemaId.equals("be")) schema = "beacon";
+		if (schemaId.equals("co")) schema = "comment";
+		if (schemaId.equals("pl")) schema = "place";
+		if (schemaId.equals("po")) schema = "post";
+
+		return schema;
 	}
 
-	public static String getIdFromType(String type) {
+	public static String getSchemaIdFromSchema(String schema) {
 
 		String typeId = null;
-		if (type.equals("users")) typeId = "0001";
-		if (type.equals("accounts")) typeId = "0002";
-		if (type.equals("sessions")) typeId = "0003";
-		if (type.equals("entities")) typeId = "0004";
-		if (type.equals("links")) typeId = "0005";
-		if (type.equals("actions")) typeId = "0006";
-		if (type.equals("documents")) typeId = "0007";
-		if (type.equals("beacons")) typeId = "0008";
-		if (type.equals("devices")) typeId = "0009";
+		if (schema.equals("user")) typeId = "us";
+		if (schema.equals("session")) typeId = "se";
+		if (schema.equals("link")) typeId = "li";
+		if (schema.equals("action")) typeId = "ac";
+		if (schema.equals("document")) typeId = "do";
+		if (schema.equals("device")) typeId = "de";
 
+		if (schema.equals("applink")) typeId = "ap";
+		if (schema.equals("beacon")) typeId = "be";
+		if (schema.equals("comment")) typeId = "co";
+		if (schema.equals("place")) typeId = "pl";
+		if (schema.equals("post")) typeId = "po";
 		return typeId;
 	}
 }

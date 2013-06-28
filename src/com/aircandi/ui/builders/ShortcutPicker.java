@@ -26,12 +26,13 @@ import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
+import com.aircandi.service.objects.Shortcut;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.BounceListView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
-public class LinkPicker extends FormActivity {
+public class ShortcutPicker extends FormActivity {
 
 	private BounceListView		mList;
 	private final List<Entity>	mApplinks	= new ArrayList<Entity>();
@@ -64,7 +65,7 @@ public class LinkPicker extends FormActivity {
 		}
 		if (mApplinks != null && mApplinks.size() > 0) {
 			mCommon.mActionBar.setTitle(mApplinks.get(0).type);
-			Photo photo = new Photo(Applink.getDefaultIcon(mApplinks.get(0).type), null, null, null, PhotoSource.assets);
+			Photo photo = new Photo(Applink.getDefaultPhoto(mApplinks.get(0).type), null, null, null, PhotoSource.assets);
 			final BitmapRequest bitmapRequest = new BitmapRequest();
 			bitmapRequest.setImageUri(photo.getUri());
 			bitmapRequest.setImageRequestor(this);
@@ -104,14 +105,14 @@ public class LinkPicker extends FormActivity {
 	public void onBackPressed() {
 		setResult(Activity.RESULT_CANCELED);
 		finish();
-		AnimUtils.doOverridePendingTransition(LinkPicker.this, TransitionType.FormToPage);
+		AnimUtils.doOverridePendingTransition(ShortcutPicker.this, TransitionType.FormToPage);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onListItemClick(View view) {
-		View label = (View) view.findViewById(R.id.image);
-		Applink entity = (Applink) label.getTag();
-		mCommon.routeApplink(entity, null);
+		View label = (View) view.findViewById(R.id.photo);
+		Shortcut shortcut = (Shortcut) label.getTag();
+		mCommon.routeShortcut(shortcut, null);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -126,7 +127,7 @@ public class LinkPicker extends FormActivity {
 		else if (item.getItemId() == R.id.cancel) {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
-			AnimUtils.doOverridePendingTransition(LinkPicker.this, TransitionType.FormToPage);
+			AnimUtils.doOverridePendingTransition(ShortcutPicker.this, TransitionType.FormToPage);
 			return true;
 		}
 

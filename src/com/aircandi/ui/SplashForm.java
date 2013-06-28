@@ -22,7 +22,6 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
-import com.aircandi.components.CommandType;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
@@ -301,7 +300,6 @@ public class SplashForm extends SherlockActivity {
 		}
 
 		final IntentBuilder intentBuilder = new IntentBuilder(this, RegisterForm.class);
-		intentBuilder.setCommandType(CommandType.New);
 		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, Constants.ACTIVITY_SIGNIN);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);

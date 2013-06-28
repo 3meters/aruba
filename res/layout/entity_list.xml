@@ -6,7 +6,7 @@
     <!-- Body -->
 
     <com.aircandi.ui.widgets.BounceListView
-        android:id="@+id/list_candi"
+        android:id="@+id/list_entities"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
@@ -15,5 +15,18 @@
         android:background="?attr/backgroundCandi"
         android:cacheColorHint="#00000000"
         android:listSelector="#00000000" />
+    
+    <Button
+        android:id="@+id/button_new_entity"
+        style="@style/form_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_centerInParent="true"
+        android:onClick="onNewEntityButtonClick"
+        android:text="@string/entity_button_comment_first"
+        android:visibility="gone" />
+    
 
 </RelativeLayout>

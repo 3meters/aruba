@@ -25,7 +25,6 @@ import com.aircandi.beta.BuildConfig;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AndroidManager;
-import com.aircandi.components.CommandType;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -319,7 +318,6 @@ public abstract class FormActivity extends SherlockActivity {
 
 	protected void pictureFromPlace(String entityId) {
 		final IntentBuilder intentBuilder = new IntentBuilder(this, PicturePicker.class)
-				.setCommandType(CommandType.View)
 				.setEntityId(entityId);
 		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, Constants.ACTIVITY_PICTURE_PICK_PLACE);

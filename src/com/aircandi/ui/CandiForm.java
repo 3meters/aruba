@@ -1,11 +1,8 @@
 package com.aircandi.ui;
 
-import static java.util.Arrays.asList;
-
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -28,7 +25,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewStub;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -46,7 +42,6 @@ import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AndroidManager;
-import com.aircandi.components.CommandType;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
@@ -54,7 +49,6 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager;
-import com.aircandi.components.ProximityManager.ArrayListType;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
@@ -64,15 +58,16 @@ import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.AirLocation;
-import com.aircandi.service.objects.Applink;
-import com.aircandi.service.objects.ApplinkMeta;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
+import com.aircandi.service.objects.Shortcut;
+import com.aircandi.service.objects.ShortcutMeta;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.EntityList.ListMode;
 import com.aircandi.ui.base.CandiActivity;
-import com.aircandi.ui.builders.LinkPicker;
+import com.aircandi.ui.builders.ShortcutPicker;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.ComboButton;
 import com.aircandi.ui.widgets.FlowLayout;
@@ -153,17 +148,10 @@ public class CandiForm extends CandiActivity {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetEntity");
 
-				Entity entity = EntityManager.getInstance().getEntity(mCommon.mEntityId);
+				Entity entity = EntityManager.getEntity(mCommon.mEntityId);
 				Boolean refresh = refreshProposed;
-				/*
-				 * We always force refresh if we are missing children or comments. Won't have an effect
-				 * if this is still a synthetic place.
-				 */
-				List<String> types = asList(Constants.TYPE_LINK_POST, Constants.TYPE_LINK_APPLINK);
-				Integer childCount = entity.getInCount(types);
-				Integer loadedCount = entity.getLinkedEntitiesByLinkTypes(types, null, Direction.in, false).size();
 
-				if (entity == null || loadedCount < childCount) {
+				if (entity == null || (!entity.shortcuts && !mUpsize)) {
 					refresh = true;
 				}
 
@@ -179,7 +167,7 @@ public class CandiForm extends CandiActivity {
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
 						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-						mEntityModelActivityDate = EntityManager.getInstance().getEntityCache().getLastActivityDate();
+						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 						mCommon.mActionBar.setTitle(mEntity.name);
 						if (mCommon.mMenuItemEdit != null) {
 							mCommon.mMenuItemEdit.setVisible(canEdit());
@@ -227,8 +215,8 @@ public class CandiForm extends CandiActivity {
 					if (mCommon.mEntitySchema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 						final Boolean runOnceHelp = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_CANDI_PLACE, false);
 						if (!runOnceHelp) {
-							mCommon.doHelpClick();
-							return;
+							//							mCommon.doHelpClick();
+							//							return;
 						}
 					}
 				}
@@ -257,7 +245,7 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("UpsizeSynthetic");
-				final ModelResult result = EntityManager.getInstance().upsizeSynthetic((Place) mEntity, null, null);
+				final ModelResult result = EntityManager.getInstance().upsizeSynthetic((Place) mEntity);
 				return result;
 			}
 
@@ -311,11 +299,20 @@ public class CandiForm extends CandiActivity {
 				ModelResult result = new ModelResult();
 				if (!mEntity.byAppUser(Constants.TYPE_LINK_LIKE)) {
 					Tracker.sendEvent("ui_action", "like_entity", null, 0, Aircandi.getInstance().getUser());
-					result = EntityManager.getInstance().verbSomething(Aircandi.getInstance().getUser().id, mEntity.id, "like", "like");
+					Shortcut shortcut = Aircandi.getInstance().getUser().getShortcut();
+					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getUser().id
+							, mEntity.id
+							, Constants.TYPE_LINK_LIKE
+							, false
+							, shortcut
+							, Constants.TYPE_LINK_LIKE);
 				}
 				else {
 					Tracker.sendEvent("ui_action", "unlike_entity", null, 0, Aircandi.getInstance().getUser());
-					result = EntityManager.getInstance().unverbSomething(Aircandi.getInstance().getUser().id, mEntity.id, "like", "unlike");
+					result = EntityManager.getInstance().deleteLink(Aircandi.getInstance().getUser().id
+							, mEntity.id
+							, Constants.TYPE_LINK_LIKE
+							, "unlike");
 				}
 				return result;
 			}
@@ -352,11 +349,21 @@ public class CandiForm extends CandiActivity {
 				ModelResult result = new ModelResult();
 				if (!mEntity.byAppUser(Constants.TYPE_LINK_WATCH)) {
 					Tracker.sendEvent("ui_action", "watch_entity", null, 0, Aircandi.getInstance().getUser());
-					result = EntityManager.getInstance().verbSomething(Aircandi.getInstance().getUser().id, mEntity.id, "watch", "watch");
+					Shortcut shortcut = Aircandi.getInstance().getUser().getShortcut();
+					result = EntityManager.getInstance().insertLink(
+							Aircandi.getInstance().getUser().id
+							, mEntity.id
+							, Constants.TYPE_LINK_WATCH
+							, false
+							, shortcut
+							, Constants.TYPE_LINK_WATCH);
 				}
 				else {
 					Tracker.sendEvent("ui_action", "unwatch_entity", null, 0, Aircandi.getInstance().getUser());
-					result = EntityManager.getInstance().unverbSomething(Aircandi.getInstance().getUser().id, mEntity.id, "watch", "unwatch");
+					result = EntityManager.getInstance().deleteLink(Aircandi.getInstance().getUser().id
+							, mEntity.id
+							, Constants.TYPE_LINK_WATCH
+							, "unwatch");
 				}
 				return result;
 			}
@@ -382,10 +389,9 @@ public class CandiForm extends CandiActivity {
 	public void onMoreButtonClick(View view) {
 		String target = (String) view.getTag();
 		if (target.equals("candi")) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setArrayListType(ArrayListType.InCollection)
-					.setCollectionId(mEntity.id);
+			IntentBuilder intentBuilder = new IntentBuilder(this, EntityList.class)
+					.setListMode(ListMode.EntitiesForEntity)
+					.setEntityId(mCommon.mEntityId);
 
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
@@ -397,58 +403,33 @@ public class CandiForm extends CandiActivity {
 	public void onListItemClick(View view) {}
 
 	@SuppressWarnings("ucd")
-	public void onCandiClick(View view) {
-		List<Entity> entities = null;
-		final Entity entity = (Entity) view.getTag();
-		TextView badgeUpper = (TextView) ((View) view.getParent()).findViewById(R.id.badge_upper);
-		if (badgeUpper != null) {
-			entities = (List<Entity>) badgeUpper.getTag();
-		}
-		doCandiClick(entity, entities);
+	public void onShortcutClick(View view) {
+		final Shortcut shortcut = (Shortcut) view.getTag();
+		doShortcutClick(shortcut);
 	}
 
-	private void doCandiClick(Entity entity, List<Entity> entities) {
+	private void doShortcutClick(Shortcut shortcut) {
 
-		if (entities != null && entities.size() > 1) {
-			Entity first = entities.get(0);
-			if (first.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-				Applink applink = (Applink) first;
-				final ApplinkMeta meta = Applink.applinkMeta.get(applink.type);
-				if (meta != null && !meta.installDeclined
-						&& Applink.getIntentSupport(applink.type)
-						&& applink.appExists()
-						&& !applink.appInstalled()) {
-					showInstallDialog(applink);
-				}
+		final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
+		if (meta != null && !meta.installDeclined
+				&& shortcut.getIntentSupport()
+				&& shortcut.appExists()
+				&& !shortcut.appInstalled()) {
+			showInstallDialog(shortcut);
+		}
+
+		if (shortcut.group != null && shortcut.group.size() > 1) {
+			final Intent intent = new Intent(this, ShortcutPicker.class);
+			final List<String> shortcutStrings = new ArrayList<String>();
+			for (Shortcut item : shortcut.group) {
+				shortcutStrings.add(HttpService.convertObjectToJsonSmart(item, false, true));
 			}
-			else {
-				final Intent intent = new Intent(this, LinkPicker.class);
-				final List<String> entityStrings = new ArrayList<String>();
-				for (Entity sourceEntity : entities) {
-					entityStrings.add(HttpService.convertObjectToJsonSmart(sourceEntity, false, true));
-				}
-				intent.putStringArrayListExtra(Constants.EXTRA_ENTITIES, (ArrayList<String>) entityStrings);
-				startActivity(intent);
-				AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
-			}
+			intent.putStringArrayListExtra(Constants.EXTRA_SHORTCUTS, (ArrayList<String>) shortcutStrings);
+			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 		}
 		else {
-			if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-				Applink applink = (Applink) entity;
-				final ApplinkMeta meta = Applink.applinkMeta.get(applink.type);
-				if (meta != null && !meta.installDeclined
-						&& Applink.getIntentSupport(applink.type)
-						&& applink.appExists()
-						&& !applink.appInstalled()) {
-					showInstallDialog(applink);
-				}
-				else {
-					mCommon.routeApplink(applink, mEntity);
-				}
-			}
-			else {
-				mCommon.showCandiFormForEntity(entity, CandiForm.class);
-			}
+			mCommon.routeShortcut(shortcut, mEntity);
 		}
 	}
 
@@ -481,11 +462,10 @@ public class CandiForm extends CandiActivity {
 	public void doAddCandigram() {
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 			Tracker.sendEvent("ui_action", "add_candigram", null, 0, Aircandi.getInstance().getUser());
-			final IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
-					.setCommandType(CommandType.New)
+			final IntentBuilder intentBuilder = new IntentBuilder(this, EntityEdit.class)
 					.setEntityId(null)
 					.setParentEntityId(mCommon.mEntityId)
-					.setEntityType(Constants.SCHEMA_ENTITY_POST);
+					.setEntitySchema(Constants.SCHEMA_ENTITY_POST);
 
 			final Intent redirectIntent = intentBuilder.create();
 			startActivity(redirectIntent);
@@ -539,8 +519,8 @@ public class CandiForm extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onInstallButtonClick(View view) {
-		final Entity entity = (Entity) view.getTag();
-		showInstallDialog((Applink) entity);
+		final Shortcut shortcut = (Shortcut) view.getTag();
+		showInstallDialog(shortcut);
 	}
 
 	@Override
@@ -564,14 +544,13 @@ public class CandiForm extends CandiActivity {
 				if (intent != null && intent.getExtras() != null) {
 
 					final Bundle extras = intent.getExtras();
-					final String entityType = extras.getString(Constants.EXTRA_ENTITY_TYPE);
+					final String entityType = extras.getString(Constants.EXTRA_ENTITY_SCHEMA);
 					if (entityType != null && !entityType.equals("")) {
 
-						final IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
-								.setCommandType(CommandType.New)
+						final IntentBuilder intentBuilder = new IntentBuilder(this, EntityEdit.class)
 								.setEntityId(null)
 								.setParentEntityId(mCommon.mEntityId)
-								.setEntityType(entityType);
+								.setEntitySchema(entityType);
 
 						final Intent redirectIntent = intentBuilder.create();
 						startActivity(redirectIntent);
@@ -616,8 +595,6 @@ public class CandiForm extends CandiActivity {
 		 * - WebImageView child views are gone by default
 		 * - Header views are visible by default
 		 */
-		final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
 		final CandiView candiView = (CandiView) layout.findViewById(R.id.candi_view);
 		final WebImageView image = (WebImageView) layout.findViewById(R.id.candi_form_image);
 		final TextView title = (TextView) layout.findViewById(R.id.candi_form_title);
@@ -648,7 +625,7 @@ public class CandiForm extends CandiActivity {
 						image.setBitmapRequest(imageRequest);
 						image.setClickable(false);
 
-						if (entity.type.equals(Constants.SCHEMA_ENTITY_POST)) {
+						if (entity.schema.equals(Constants.SCHEMA_ENTITY_POST)) {
 							image.setClickable(true);
 						}
 						setVisibility(image, View.VISIBLE);
@@ -685,56 +662,35 @@ public class CandiForm extends CandiActivity {
 			setVisibility(layout.findViewById(R.id.section_description), View.VISIBLE);
 		}
 
-		/* Switchboard - applink entities */
-		setVisibility(layout.findViewById(R.id.section_layout_switchboard), View.GONE);
-		List<Entity> entities = (List<Entity>) entity.getLinkedEntitiesByLinkType(Constants.TYPE_LINK_APPLINK, null, Direction.in, false);
-		if (entities.size() > 0) {
+		/* Clear shortcut holder */
+		((ViewGroup) layout.findViewById(R.id.shortcut_holder)).removeAllViews();
 
-			final SectionLayout section = (SectionLayout) layout.findViewById(R.id.section_layout_switchboard);
-			if (section != null) {
-				final FlowLayout flow = (FlowLayout) layout.findViewById(R.id.flow_switchboard);
-				drawCandi(flow, entities, R.layout.temp_place_switchboard_item);
-				setVisibility(layout.findViewById(R.id.section_layout_switchboard), View.VISIBLE);
-			}
+		/* Synthetic applink shortcuts */
+		List<Shortcut> shortcuts = (List<Shortcut>) entity.getShortcuts(Constants.TYPE_LINK_APPLINK, Direction.in, true, true);
+		if (shortcuts.size() > 0) {
+			drawShortcuts(layout
+					, shortcuts
+					, R.string.candi_section_shortcuts_place
+					, R.string.candi_section_links_more
+					, mResources.getInteger(R.integer.candi_flow_limit)
+					, R.layout.temp_place_switchboard_item);
+		}
+
+		/* Service applink shortcuts */
+		shortcuts = (List<Shortcut>) entity.getShortcuts(Constants.TYPE_LINK_APPLINK, Direction.in, false, true);
+		Collections.sort(shortcuts, new Shortcut.SortByPosition());
+
+		if (shortcuts.size() > 0) {
+			drawShortcuts(layout
+					, shortcuts
+					, null
+					, null
+					, mResources.getInteger(R.integer.candi_flow_limit)
+					, R.layout.temp_place_switchboard_item);
 		}
 
 		/* Candigram button */
 		FontManager.getInstance().setTypefaceRegular(addCandigram);
-
-		/* All non-source children */
-		List<String> types = asList(Constants.TYPE_LINK_POST, Constants.TYPE_LINK_APPLINK);
-		entities = (List<Entity>) entity.getLinkedEntitiesByLinkTypes(types, null, Direction.in, false);
-		if (entities.size() > 0) {
-			final ViewStub stub = (ViewStub) layout.findViewById(R.id.stub_candi);
-			if (stub != null) {
-				((ViewStub) layout.findViewById(R.id.stub_candi)).inflate();
-			}
-		}
-
-		setVisibility(layout.findViewById(R.id.section_candi), View.GONE);
-		if (entities.size() > 0) {
-
-			final SectionLayout section = (SectionLayout) layout.findViewById(R.id.section_layout_candi);
-			if (section != null) {
-				section.getTextViewHeader().setText(getString(R.string.candi_section_candi));
-
-				if (entities.size() > getResources().getInteger(R.integer.candi_flow_limit)) {
-					View footer = inflater.inflate(R.layout.temp_section_footer, null);
-					Button button = (Button) footer.findViewById(R.id.button_more);
-					FontManager.getInstance().setTypefaceDefault(button);
-					button.setText(R.string.candi_section_candigrams_more);
-					button.setTag("candi");
-					section.setFooter(footer); // Replaces if there already is one.
-				}
-
-				final FlowLayout flow = (FlowLayout) layout.findViewById(R.id.flow_candi);
-				drawCandi(flow, entities.size() > mResources.getInteger(R.integer.candi_flow_limit)
-						? entities.subList(0, mResources.getInteger(R.integer.candi_flow_limit))
-						: entities, R.layout.temp_place_candi_item);
-
-				setVisibility(layout.findViewById(R.id.section_candi), View.VISIBLE);
-			}
-		}
 
 		/* Place specific info */
 		if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
@@ -775,7 +731,7 @@ public class CandiForm extends CandiActivity {
 				}
 			}
 			else {
-				if (entity.type.equals(Constants.SCHEMA_ENTITY_POST)) {
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_POST)) {
 					user.setLabel(getString(R.string.candi_label_user_added_by));
 				}
 				else {
@@ -803,7 +759,39 @@ public class CandiForm extends CandiActivity {
 		return layout;
 	}
 
-	private void drawCandi(FlowLayout layout, List<Entity> entities, Integer viewResId) {
+	private void drawShortcuts(ViewGroup layout, List<Shortcut> shortcuts, Integer titleResId, Integer moreResId, Integer flowLimit, Integer flowItemResId) {
+		final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		View holder = inflater.inflate(R.layout.section_shortcuts, null);
+		SectionLayout section = (SectionLayout) holder.findViewById(R.id.section_layout_shortcuts);
+		if (titleResId != null) {
+			section.setHeaderTitle(getString(titleResId));
+		}
+		else {
+			if (section.getHeader() != null) {
+				section.getHeader().setVisibility(View.GONE);
+			}
+		}
+
+		if (shortcuts.size() > flowLimit) {
+			View footer = inflater.inflate(R.layout.temp_section_footer, null);
+			Button button = (Button) footer.findViewById(R.id.button_more);
+			FontManager.getInstance().setTypefaceDefault(button);
+			button.setText(moreResId);
+			button.setTag("candi");
+			section.setFooter(footer); // Replaces if there already is one.
+		}
+
+		final FlowLayout flow = (FlowLayout) section.findViewById(R.id.flow_shortcuts);
+		flowShortcuts(flow, shortcuts.size() > flowLimit
+				? shortcuts.subList(0, flowLimit)
+				: shortcuts, flowItemResId);
+
+		((ViewGroup) layout.findViewById(R.id.shortcut_holder)).addView(holder);
+
+	}
+
+	private void flowShortcuts(FlowLayout layout, List<Shortcut> shortcuts, Integer viewResId) {
 
 		layout.removeAllViews();
 		final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -832,146 +820,90 @@ public class CandiForm extends CandiActivity {
 		layout.setSpacingHorizontal(spacingHorizontalPixels);
 		layout.setSpacingVertical(spacingVerticalPixels);
 
-		/*
-		 * Insert views for entities that we don't already have a view for
-		 */
-		final Map<String, List<Entity>> applinkLists = new HashMap<String, List<Entity>>();
-		for (Entity entity : entities) {
-			if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-				if (applinkLists.containsKey(entity.type)) {
-					applinkLists.get(entity.type).add(entity);
-				}
-				else {
-					List<Entity> sources = new ArrayList<Entity>();
-					sources.add(entity);
-					applinkLists.put(entity.type, sources);
-				}
-			}
-		}
+		for (Shortcut shortcut : shortcuts) {
 
-		final Map<String, Object> sources = new HashMap<String, Object>();
-		for (Entity entity : entities) {
-
-			if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-				if (sources.containsKey(entity.type)) {
-					continue;
-				}
-				if (entity.type.equals("likes") && (mEntity.getInCount(Constants.TYPE_LINK_LIKE) == 0)) {
-					continue;
-				}
-				if (entity.type.equals("watchers") && (mEntity.getInCount(Constants.TYPE_LINK_WATCH) == 0)) {
-					continue;
-				}
+			if (!shortcut.isActive(mEntity)) {
+				continue;
 			}
 
 			View view = inflater.inflate(viewResId, null);
-			WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+			WebImageView webImageView = (WebImageView) view.findViewById(R.id.photo);
 
 			TextView title = (TextView) view.findViewById(R.id.title);
 			TextView badgeUpper = (TextView) view.findViewById(R.id.badge_upper);
 			TextView badgeLower = (TextView) view.findViewById(R.id.badge_lower);
 			ImageView indicator = (ImageView) view.findViewById(R.id.indicator);
+			if (indicator != null) indicator.setVisibility(View.GONE);
+			if (badgeUpper != null) badgeUpper.setVisibility(View.GONE);
+			if (badgeLower != null) badgeLower.setVisibility(View.GONE);
+			title.setVisibility(View.GONE);
+
+			view.setTag(shortcut);
 
 			FontManager.getInstance().setTypefaceRegular(title);
 			FontManager.getInstance().setTypefaceDefault(badgeUpper);
 
-			if (entity.type.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+			if (shortcut.group != null && shortcut.group.size() > 1) {
+				badgeUpper.setText(String.valueOf(shortcut.group.size()));
+				badgeUpper.setVisibility(View.VISIBLE);
 
-				Applink applink = (Applink) entity;
-				indicator.setVisibility(View.GONE);
-				badgeUpper.setVisibility(View.GONE);
-				badgeLower.setVisibility(View.GONE);
-
-				if (applink.type.equals(Constants.TYPE_APPLINK_COMMENT)) {
-					Integer count = mEntity.getInCount(Constants.TYPE_LINK_COMMENT);
-					if (count > 0) {
-						badgeUpper.setText(String.valueOf(count));
-						badgeUpper.setVisibility(View.VISIBLE);
+				if (shortcut.app.equals(Constants.TYPE_APPLINK_FACEBOOK)) {
+					badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_dark);
+					if (mCommon.mThemeTone.equals("light")) {
+						badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_light);
 					}
 				}
-				else if (entity.type.equals(Constants.TYPE_APPLINK_LIKE)) {
-					Integer count = mEntity.getInCount(Constants.TYPE_LINK_COMMENT);
-					if (count > 0) {
-						badgeUpper.setText(String.valueOf(count));
-						badgeUpper.setVisibility(View.VISIBLE);
+				else if (shortcut.app.equals(Constants.TYPE_APPLINK_TWITTER)) {
+					badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_dark);
+					if (mCommon.mThemeTone.equals("light")) {
+						badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_light);
 					}
 				}
-				else if (entity.type.equals(Constants.TYPE_APPLINK_WATCH)) {
-					Integer count = mEntity.getInCount(Constants.TYPE_LINK_COMMENT);
-					if (count > 0) {
-						badgeUpper.setText(String.valueOf(count));
-						badgeUpper.setVisibility(View.VISIBLE);
+				else if (shortcut.app.equals(Constants.TYPE_APPLINK_WEBSITE)) {
+					badgeLower.setBackgroundResource(R.drawable.ic_action_website_dark);
+					if (mCommon.mThemeTone.equals("light")) {
+						badgeLower.setBackgroundResource(R.drawable.ic_action_website_light);
 					}
 				}
-				else {
-					/* Show badge if there are multiples of the same type */
-					if (applinkLists.containsKey(applink.type)) {
-						Integer sourceCount = applinkLists.get(applink.type).size();
-						if (sourceCount > 1) {
-							badgeUpper.setTag(applinkLists.get(applink.type));
-							badgeUpper.setText(String.valueOf(sourceCount));
-							badgeUpper.setVisibility(View.VISIBLE);
-						}
+				else if (shortcut.app.equals(Constants.TYPE_APPLINK_FOURSQUARE)) {
+					badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
+					if (mCommon.mThemeTone.equals("light")) {
+						badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
 					}
+				}
+				badgeLower.setVisibility(View.VISIBLE);
+			}
+			else if (shortcut.count > 0) {
+				badgeUpper.setTag(shortcut);
+				badgeUpper.setText(String.valueOf(shortcut.count));
+				badgeUpper.setVisibility(View.VISIBLE);
+			}
 
-					/* Show hint if source has app that hasn't been installed */
-					final ApplinkMeta meta = Applink.applinkMeta.get(applink.type);
-					if (meta != null && !meta.installDeclined
-							&& Applink.getIntentSupport(applink.type)
-							&& applink.appExists()
-							&& !applink.appInstalled()) {
-						/* Show hint */
-						indicator.setVisibility(View.VISIBLE);
-					}
+			/* Show hint if source has app that hasn't been installed */
+			final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
+			if (meta != null && !meta.installDeclined
+					&& shortcut.getIntentSupport()
+					&& shortcut.appExists()
+					&& !shortcut.appInstalled()) {
 
-					/* Show hint if generic icon has been replaced with a custom one */
-					if (applink.photo != null) {
-						if (applink.type.equals(Constants.TYPE_APPLINK_FACEBOOK)) {
-							badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_dark);
-							if (mCommon.mThemeTone.equals("light")) {
-								badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_light);
-							}
-						}
-						else if (applink.type.equals(Constants.TYPE_APPLINK_TWITTER)) {
-							badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_dark);
-							if (mCommon.mThemeTone.equals("light")) {
-								badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_light);
-							}
-						}
-						else if (applink.type.equals(Constants.TYPE_APPLINK_WEBSITE)) {
-							badgeLower.setBackgroundResource(R.drawable.ic_action_website_dark);
-							if (mCommon.mThemeTone.equals("light")) {
-								badgeLower.setBackgroundResource(R.drawable.ic_action_website_light);
-							}
-						}
-						else if (applink.type.equals(Constants.TYPE_APPLINK_FOURSQUARE)) {
-							badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
-							if (mCommon.mThemeTone.equals("light")) {
-								badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
-							}
-						}
-					}
-					badgeLower.setVisibility(View.VISIBLE);
+				/* Show install indicator */
+				if (indicator != null) {
+					indicator.setVisibility(View.VISIBLE);
 				}
-				title.setText(applink.type);
+			}
+
+			if (shortcut.name != null && !shortcut.name.equals("")) {
+				title.setText(shortcut.name);
 				title.setVisibility(View.VISIBLE);
 			}
-			else {
-				if (entity.name != null && !entity.name.equals("")) {
-					title.setText(entity.name);
-				}
-				else {
-					title.setVisibility(View.GONE);
-				}
-			}
 
-			String imageUri = entity.getPhotoUri();
+			String imageUri = shortcut.photo.getUri();
 			if (imageUri != null) {
 				BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
 				BitmapRequest imageRequest = builder.create();
 				webImageView.setSizeHint(candiWidthPixels);
 				webImageView.setBitmapRequest(imageRequest);
-				webImageView.setTag(entity);
+				webImageView.setTag(shortcut);
 			}
 
 			FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(candiWidthPixels, LayoutParams.WRAP_CONTENT);
@@ -982,10 +914,6 @@ public class CandiForm extends CandiActivity {
 			webImageView.setLayoutParams(paramsImage);
 
 			layout.addView(view);
-
-			if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-				sources.put(entity.type, entity);
-			}
 		}
 	}
 
@@ -1134,8 +1062,8 @@ public class CandiForm extends CandiActivity {
 			AnimUtils.doOverridePendingTransition(this, TransitionType.PageBack);
 			if (ProximityManager.getInstance().getLastBeaconLoadDate() != null
 					&& ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()
-					|| EntityManager.getInstance().getEntityCache().getLastActivityDate() != null
-					&& EntityManager.getInstance().getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+					|| EntityManager.getEntityCache().getLastActivityDate() != null
+					&& EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
 				bind(true);
 			}
@@ -1159,7 +1087,7 @@ public class CandiForm extends CandiActivity {
 	// Dialogs
 	// --------------------------------------------------------------------------------------------
 
-	private void showInstallDialog(final Applink entity) {
+	private void showInstallDialog(final Shortcut shortcut) {
 
 		final AlertDialog installDialog = AircandiCommon.showAlertDialog(null
 				, getString(R.string.dialog_install_title)
@@ -1175,9 +1103,9 @@ public class CandiForm extends CandiActivity {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
-								Tracker.sendEvent("ui_action", "install_source", entity.getPackageName(), 0, Aircandi.getInstance().getUser());
+								Tracker.sendEvent("ui_action", "install_source", shortcut.getPackageName(), 0, Aircandi.getInstance().getUser());
 								Logger.d(this, "Install: navigating to market install page");
-								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=" + entity.getPackageName()
+								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=" + shortcut.getPackageName()
 										+ "&referrer=utm_source%3Dcom.aircandi"));
 								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 								intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
@@ -1189,7 +1117,7 @@ public class CandiForm extends CandiActivity {
 								 */
 								Logger.d(this, "Install: navigating to play website install page");
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://play.google.com/store/apps/details?id="
-										+ entity.getPackageName() + "&referrer=utm_source%3Dcom.aircandi"));
+										+ shortcut.getPackageName() + "&referrer=utm_source%3Dcom.aircandi"));
 								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 								startActivityForResult(intent, Constants.ACTIVITY_MARKET);
 							}
@@ -1197,9 +1125,9 @@ public class CandiForm extends CandiActivity {
 							AnimUtils.doOverridePendingTransition(CandiForm.this, TransitionType.PageToForm);
 						}
 						else if (which == Dialog.BUTTON_NEGATIVE) {
-							final ApplinkMeta meta = Applink.applinkMeta.get(entity.type);
+							final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
 							meta.installDeclined = true;
-							doCandiClick(entity, null);
+							doShortcutClick(shortcut);
 							dialog.dismiss();
 						}
 					}

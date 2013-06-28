@@ -18,13 +18,15 @@ public class Feedback extends ServiceBase implements Cloneable, Serializable {
 
 	public Feedback() {}
 
-	public static Feedback setPropertiesFromMap(Feedback feedback, Map map) {
+	public static Feedback setPropertiesFromMap(Feedback feedback, Map map, Boolean nameMapping) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		feedback = (Feedback) ServiceBase.setPropertiesFromMap(feedback, map);
+		feedback = (Feedback) ServiceBase.setPropertiesFromMap(feedback, map, nameMapping);
 		
 		feedback.message = (String) map.get("description");
+		feedback.message = (String) (nameMapping ? map.get("description") : map.get("message"));
+		
 		return feedback;
 	}
 

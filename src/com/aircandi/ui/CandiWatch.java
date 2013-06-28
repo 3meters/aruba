@@ -24,13 +24,11 @@ import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.CommandType;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager;
-import com.aircandi.components.ProximityManager.ArrayListType;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
@@ -38,6 +36,7 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.ServiceBase;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.EntityList.ListMode;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.user.CandiUser;
 import com.aircandi.ui.widgets.FlowLayout;
@@ -88,17 +87,24 @@ public class CandiWatch extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetWatching");
-				ModelResult result = EntityManager.getInstance()
-						.getUserWatching(Aircandi.getInstance().getUser().id, "users", refresh, ProxiConstants.USER_WATCHING_USER_LIMIT);
+
+				ModelResult result = EntityManager.getInstance().getEntitiesUserWatching(Aircandi.getInstance().getUser().id
+						, refresh
+						, Constants.SCHEMA_ENTITY_PLACE
+						, ProxiConstants.LIMIT_USER_WATCHING_ENTITIES);
+
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					mEntities = (List<Entity>) result.data;
+				}
+
+				result = EntityManager.getInstance().getEntitiesUserWatching(Aircandi.getInstance().getUser().id
+						, refresh
+						, Constants.SCHEMA_ENTITY_USER
+						, ProxiConstants.LIMIT_USER_WATCHING_USERS);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					mUsers = (List<User>) result.data;
-
-					result = EntityManager.getInstance()
-							.getUserWatching(Aircandi.getInstance().getUser().id, "entities", refresh, ProxiConstants.USER_WATCHING_ENTITY_LIMIT);
-					if (result.serviceResponse.responseCode == ResponseCode.Success) {
-						mEntities = (List<Entity>) result.data;
-					}
 				}
+
 				return result;
 			}
 
@@ -107,7 +113,7 @@ public class CandiWatch extends CandiActivity {
 				final ModelResult result = (ModelResult) modelResult;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-					mEntityModelActivityDate = EntityManager.getInstance().getEntityCache().getLastActivityDate();
+					mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 					buildCandiWatch(CandiWatch.this);
 				}
 				else {
@@ -129,7 +135,7 @@ public class CandiWatch extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
-	public void onCandiClick(View view) {
+	public void onShortcutClick(View view) {
 		final ServiceBase entry = (ServiceBase) view.getTag();
 		Intent intent = null;
 
@@ -137,14 +143,10 @@ public class CandiWatch extends CandiActivity {
 			Entity entity = (Entity) entry;
 
 			final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
-					.setCommandType(CommandType.View)
 					.setEntityId(entity.id)
 					.setParentEntityId(entity.toId)
-					.setEntityType(entity.type);
+					.setEntitySchema(entity.type);
 
-			if (entity.toId != null) {
-				intentBuilder.setCollectionId(entity.getParent().id);
-			}
 			intent = intentBuilder.create();
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		}
@@ -166,17 +168,15 @@ public class CandiWatch extends CandiActivity {
 		IntentBuilder intentBuilder = null;
 
 		if (target.equals("places")) {
-			intentBuilder = new IntentBuilder(this, CandiList.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setArrayListType(ArrayListType.OwnedByUser)
-					.setEntityType(Constants.SCHEMA_ENTITY_PLACE)
+			intentBuilder = new IntentBuilder(this, EntityList.class)
+					.setListMode(ListMode.EntitiesWatchedByUser)
+					.setEntitySchema(Constants.SCHEMA_ENTITY_PLACE)
 					.setUserId(mCommon.mUserId);
 		}
 		else if (target.equals("candigrams")) {
-			intentBuilder = new IntentBuilder(this, CandiList.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setArrayListType(ArrayListType.OwnedByUser)
-					.setEntityType(Constants.SCHEMA_ENTITY_POST)
+			intentBuilder = new IntentBuilder(this, EntityList.class)
+					.setListMode(ListMode.EntitiesWatchedByUser)
+					.setEntitySchema(Constants.SCHEMA_ENTITY_POST)
 					.setUserId(mCommon.mUserId);
 		}
 
@@ -291,7 +291,7 @@ public class CandiWatch extends CandiActivity {
 		for (ServiceBase entry : entries) {
 
 			View view = inflater.inflate(viewResId, null);
-			WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+			WebImageView webImageView = (WebImageView) view.findViewById(R.id.photo);
 
 			TextView title = (TextView) view.findViewById(R.id.title);
 			TextView badgeUpper = (TextView) view.findViewById(R.id.badge_upper);
@@ -312,10 +312,11 @@ public class CandiWatch extends CandiActivity {
 				Entity entity = (Entity) entry;
 				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE) && entity.photo == null) {
 					Boolean boostColor = !android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus 4");
-					int color = Place.getCategoryColor(((Place)entity).category != null ? ((Place)entity).category.name : null, true, boostColor, false);
+					int color = Place.getCategoryColor(((Place) entity).category != null ? ((Place) entity).category.name : null, true, boostColor, false);
 					webImageView.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 
-					int colorResId = Place.getCategoryColorResId(((Place)entity).category != null ? ((Place)entity).category.name : null, true, boostColor, false);
+					int colorResId = Place.getCategoryColorResId(((Place) entity).category != null ? ((Place) entity).category.name : null, true, boostColor,
+							false);
 					if (view.findViewById(R.id.color_layer) != null) {
 						((View) view.findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
 						((View) view.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
@@ -394,8 +395,8 @@ public class CandiWatch extends CandiActivity {
 				bind(true);
 			}
 			else if (mEntityModelActivityDate != null
-					&& EntityManager.getInstance().getEntityCache().getLastActivityDate() != null
-					&& EntityManager.getInstance().getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+					&& EntityManager.getEntityCache().getLastActivityDate() != null
+					&& EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
 				bind(true);
 			}

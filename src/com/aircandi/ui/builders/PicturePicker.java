@@ -121,7 +121,7 @@ public class PicturePicker extends FormActivity {
 		}
 
 		if (mPlacePhotoMode) {
-			mEntity = EntityManager.getInstance().getEntity(mCommon.mEntityId);
+			mEntity = EntityManager.getEntity(mCommon.mEntityId);
 			mProvider = ((Place) mEntity).getProvider();
 			((ViewGroup) findViewById(R.id.search_group)).setVisibility(View.GONE);
 		}
@@ -466,7 +466,7 @@ public class PicturePicker extends FormActivity {
 			if (view == null) {
 				view = mInflater.inflate(R.layout.temp_picture_search_item, null);
 				holder = new ViewHolder();
-				holder.itemImage = (ImageView) view.findViewById(R.id.image);
+				holder.itemImage = (ImageView) view.findViewById(R.id.photo);
 				final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mImageWidthPixels, mImageWidthPixels);
 				holder.itemImage.setLayoutParams(params);
 				view.setTag(holder);

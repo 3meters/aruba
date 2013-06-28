@@ -37,7 +37,7 @@ public class ProviderMap extends ServiceObject implements Cloneable, Serializabl
 		}
 	}
 	
-	public static ProviderMap setPropertiesFromMap(ProviderMap provider, Map map) {
+	public static ProviderMap setPropertiesFromMap(ProviderMap provider, Map map, Boolean nameMapping) {
 		provider.aircandi = (String) map.get("aircandi");
 		provider.foursquare = (String) map.get("foursquare");
 		provider.google = (String) map.get("google");

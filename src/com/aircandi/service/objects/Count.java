@@ -19,7 +19,11 @@ public class Count extends ServiceObject implements Cloneable, Serializable {
 
 	public Count() {}
 
-	
+	public Count(String type, Number count) {
+		this.type = type;
+		this.count = count;
+	}
+
 	@Override
 	public Count clone() {
 		try {
@@ -31,7 +35,7 @@ public class Count extends ServiceObject implements Cloneable, Serializable {
 		}
 	}
 
-	public static Count setPropertiesFromMap(Count stat, Map map) {
+	public static Count setPropertiesFromMap(Count stat, Map map, Boolean nameMapping) {
 		stat.type = (String) map.get("type");
 		stat.count = (Number) map.get("count");
 		return stat;

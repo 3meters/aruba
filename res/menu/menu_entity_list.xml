@@ -8,10 +8,10 @@
         android:showAsAction="always"
         android:title="@string/menu_refresh_item"/>
     <item
-        android:id="@+id/add_comment"
+        android:id="@+id/add_entity"
         android:icon="?attr/iconAdd"
         android:orderInCategory="1"
         android:showAsAction="always"
-        android:title="@string/menu_add_comment_item"/>
+        android:title="@string/menu_add_entity_item"/>
 
 </menu>

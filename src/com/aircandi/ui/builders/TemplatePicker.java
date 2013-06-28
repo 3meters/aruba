@@ -69,7 +69,7 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		final Template template = (Template) view.getTag();
 		final Intent intent = new Intent();
-		intent.putExtra(Constants.EXTRA_ENTITY_TYPE, template.type);
+		intent.putExtra(Constants.EXTRA_ENTITY_SCHEMA, template.type);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
 	}
@@ -99,9 +99,9 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 			}
 
 			if (itemData != null) {
-				((ImageView) view.findViewById(R.id.item_image)).setImageResource(itemData.iconResId);
-				((TextView) view.findViewById(R.id.item_title)).setText(itemData.title);
-				FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_title));
+				((ImageView) view.findViewById(R.id.photo)).setImageResource(itemData.iconResId);
+				((TextView) view.findViewById(R.id.name)).setText(itemData.title);
+				FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.name));
 				view.setTag(itemData);
 			}
 			return view;

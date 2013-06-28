@@ -15,11 +15,11 @@ public class Document extends ServiceBase implements Cloneable, Serializable {
 
 	public Document() {}
 
-	public static Document setPropertiesFromMap(Document document, Map map) {
+	public static Document setPropertiesFromMap(Document document, Map map, Boolean nameMapping) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		document = (Document) ServiceBase.setPropertiesFromMap(document, map);
+		document = (Document) ServiceBase.setPropertiesFromMap(document, map, nameMapping);
 		
 		return document;
 	}

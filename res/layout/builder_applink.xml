@@ -30,7 +30,7 @@
                 android:orientation="horizontal" >
 
                 <com.aircandi.ui.widgets.WebImageView
-                    android:id="@+id/image"
+                    android:id="@+id/photo"
                     android:layout_width="@dimen/image_medium"
                     android:layout_height="@dimen/image_medium"
                     android:layout_marginBottom="5dp"
@@ -43,7 +43,7 @@
                     android:scaleType="centerCrop" />
 
                 <Button
-                    android:id="@+id/button_change_image"
+                    android:id="@+id/button_change_photo"
                     style="@style/form_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
                     android:layout_marginTop="-4dp"
                     android:layout_weight="0"
                     android:maxWidth="150dp"
-                    android:onClick="onChangePictureButtonClick"
+                    android:onClick="onChangePhotoButtonClick"
                     android:text="@string/form_button_change_picture" />
 
                 <View
@@ -63,14 +63,14 @@
             <!-- Title and Content -->
 
             <Spinner
-                android:id="@+id/source_type_picker"
+                android:id="@+id/type_picker"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:spinnerMode="dialog"
                 android:visibility="gone" />
 
             <EditText
-                android:id="@+id/source_label"
+                android:id="@+id/name"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:hint="@string/form_source_caption_hint"
@@ -78,7 +78,7 @@
                 android:textAppearance="@style/app_text_appearance_small" />
 
             <EditText
-                android:id="@+id/source_id"
+                android:id="@+id/app_id"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:hint="@string/form_source_id_hint"
@@ -86,7 +86,7 @@
                 android:textAppearance="@style/app_text_appearance_small" />
 
             <EditText
-                android:id="@+id/source_url"
+                android:id="@+id/app_url"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"

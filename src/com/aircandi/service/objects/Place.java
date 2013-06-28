@@ -113,16 +113,16 @@ public class Place extends Entity implements Cloneable, Serializable {
 
 	public Provider getProvider() {
 		if (provider.aircandi != null) {
-			return new Provider(provider.aircandi, "aircandi");
+			return new Provider(provider.aircandi, Constants.TYPE_PROVIDER_AIRCANDI);
 		}
 		else if (provider.foursquare != null) {
-			return new Provider(provider.foursquare, "foursquare");
+			return new Provider(provider.foursquare, Constants.TYPE_PROVIDER_FOURSQUARE);
 		}
 		else if (provider.google != null) {
-			return new Provider(provider.google, "google");
+			return new Provider(provider.google, Constants.TYPE_PROVIDER_GOOGLE);
 		}
 		else if (provider.factual != null) {
-			return new Provider(provider.factual, "factual");
+			return new Provider(provider.factual, Constants.TYPE_PROVIDER_FACTUAL);
 		}
 		return null;
 	}
@@ -309,11 +309,11 @@ public class Place extends Entity implements Cloneable, Serializable {
 	// Copy and serialization
 	// --------------------------------------------------------------------------------------------
 
-	public static Place setPropertiesFromMap(Place entity, Map map) {
+	public static Place setPropertiesFromMap(Place entity, Map map, Boolean nameMapping) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		entity = (Place) Entity.setPropertiesFromMap(entity, map);
+		entity = (Place) Entity.setPropertiesFromMap(entity, map, nameMapping);
 
 		entity.address = (String) map.get("address");
 		entity.city = (String) map.get("city");
@@ -323,11 +323,11 @@ public class Place extends Entity implements Cloneable, Serializable {
 		entity.phone = (String) map.get("phone");
 
 		if (map.get("provider") != null) {
-			entity.provider = ProviderMap.setPropertiesFromMap(new ProviderMap(), (HashMap<String, Object>) map.get("provider"));
+			entity.provider = ProviderMap.setPropertiesFromMap(new ProviderMap(), (HashMap<String, Object>) map.get("provider"), nameMapping);
 		}
 
 		if (map.get("category") != null) {
-			entity.category = Category.setPropertiesFromMap(new Category(), (HashMap<String, Object>) map.get("category"));
+			entity.category = Category.setPropertiesFromMap(new Category(), (HashMap<String, Object>) map.get("category"), nameMapping);
 		}
 
 		return entity;

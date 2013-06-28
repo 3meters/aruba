@@ -70,7 +70,7 @@ public class RegisterForm extends FormActivity {
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
-		
+
 		mTextPasswordConfirm.setImeOptions(EditorInfo.IME_ACTION_GO);
 		mTextPasswordConfirm.setOnEditorActionListener(new OnEditorActionListener() {
 
@@ -83,7 +83,6 @@ public class RegisterForm extends FormActivity {
 				return false;
 			}
 		});
-		
 
 		FontManager.getInstance().setTypefaceDefault(mTextFullname);
 		FontManager.getInstance().setTypefaceDefault(mTextEmail);
@@ -133,7 +132,7 @@ public class RegisterForm extends FormActivity {
 	@SuppressWarnings("ucd")
 	public void onChangePictureButtonClick(View view) {
 
-		mCommon.showPictureSourcePicker(null, null);
+		mCommon.showPictureSourcePicker(mUser.id, mUser.schema, mUser.type);
 		mImageRequestWebImageView = mImage;
 		mImageRequestListener = new RequestListener() {
 
@@ -142,7 +141,7 @@ public class RegisterForm extends FormActivity {
 
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					
+
 					/* Could get set to null if we are using the default */
 					mBitmap = imageBitmap;
 					if (photo != null) {
@@ -161,7 +160,7 @@ public class RegisterForm extends FormActivity {
 	public void onRegisterButtonClick(View view) {
 		doSave();
 	}
-	
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
@@ -171,21 +170,21 @@ public class RegisterForm extends FormActivity {
 					final Bundle extras = intent.getExtras();
 					final String pictureSource = extras.getString(Constants.EXTRA_PICTURE_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
-						if (pictureSource.equals("search")) {
+						if (pictureSource.equals(Constants.PHOTO_SOURCE_SEARCH)) {
 							String defaultSearch = null;
 							if (mTextFullname != null) {
 								defaultSearch = MiscUtils.emptyAsNull(mTextFullname.getText().toString().trim());
 							}
 							pictureSearch(defaultSearch);
 						}
-						else if (pictureSource.equals("gallery")) {
+						else if (pictureSource.equals(Constants.PHOTO_SOURCE_GALLERY)) {
 							pictureFromGallery();
 						}
-						else if (pictureSource.equals("camera")) {
+						else if (pictureSource.equals(Constants.PHOTO_SOURCE_CAMERA)) {
 							pictureFromCamera();
 						}
-						else if (pictureSource.equals("default")) {
-							usePictureDefault(mUser);
+						else if (pictureSource.equals(Constants.PHOTO_SOURCE_DEFAULT)) {
+							usePictureDefault();
 						}
 					}
 				}
@@ -196,16 +195,17 @@ public class RegisterForm extends FormActivity {
 		}
 	}
 
-	private void usePictureDefault(User user) {
+	private void usePictureDefault() {
 		/*
 		 * Setting the photo to null will trigger correct default handling.
 		 */
-		if (user.photo != null) {
-			user.photo.setBitmap(null);
-			user.photo = null;
+		if (mUser.photo != null) {
+			mUser.photo.setBitmap(null);
+			mUser.photo = null;
 		}
 		mBitmap = null;
-		drawImage(user);
+		mUser.photo = mUser.getDefaultPhoto();
+		drawImage(mUser);
 		Tracker.sendEvent("ui_action", "set_user_picture_to_default", null, 0, Aircandi.getInstance().getUser());
 	}
 
@@ -308,7 +308,7 @@ public class RegisterForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("InsertUser");
-					final ModelResult result = EntityManager.getInstance().insertUser(mUser, mBitmap);
+					final ModelResult result = EntityManager.getInstance().insertUser(mUser, null, mBitmap);
 					return result;
 				}
 

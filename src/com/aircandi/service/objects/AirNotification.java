@@ -39,7 +39,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 
 	public AirNotification() {}
 
-	public static AirNotification setPropertiesFromMap(AirNotification notification, Map map) {
+	public static AirNotification setPropertiesFromMap(AirNotification notification, Map map, Boolean nameMapping) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
@@ -48,27 +48,27 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 		if (map.get("entity") != null) {
 			String type = (String) map.get("type");
 			if (type.equals("place")) {
-				notification.entity = Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("entity"));
+				notification.entity = Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("entity"), nameMapping);
 			}
 			else if (type.equals("beacon")) {
-				notification.entity = Beacon.setPropertiesFromMap(new Beacon(), (HashMap<String, Object>) map.get("entity"));
+				notification.entity = Beacon.setPropertiesFromMap(new Beacon(), (HashMap<String, Object>) map.get("entity"), nameMapping);
 			}
 			else if (type.equals("post")) {
-				notification.entity = Post.setPropertiesFromMap(new Post(), (HashMap<String, Object>) map.get("entity"));
+				notification.entity = Post.setPropertiesFromMap(new Post(), (HashMap<String, Object>) map.get("entity"), nameMapping);
 			}
 			else if (type.equals("applink")) {
-				notification.entity = Applink.setPropertiesFromMap(new Applink(), (HashMap<String, Object>) map.get("entity"));
+				notification.entity = Applink.setPropertiesFromMap(new Applink(), (HashMap<String, Object>) map.get("entity"), nameMapping);
 			}
 			else if (type.equals("comment")) {
-				notification.entity = Comment.setPropertiesFromMap(new Comment(), (HashMap<String, Object>) map.get("entity"));
+				notification.entity = Comment.setPropertiesFromMap(new Comment(), (HashMap<String, Object>) map.get("entity"), nameMapping);
 			}
 			else if (type.equals("user")) {
-				notification.entity = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("entity"));
+				notification.entity = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("entity"), nameMapping);
 			}			
 		}
 
 		if (map.get("user") != null) {
-			notification.user = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
+			notification.user = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"), nameMapping);
 		}
 		
 		notification.type = (String) map.get("type");

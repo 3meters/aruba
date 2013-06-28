@@ -28,7 +28,6 @@ import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Device;
-import com.aircandi.service.objects.ServiceBase.UpdateScope;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.CandiRadar;
 import com.google.android.gcm.GCMRegistrar;
@@ -86,7 +85,6 @@ public class NotificationManager {
 					device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, CandiRadar.class);
 					device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, CandiRadar.class);
 
-					device.updateScope = UpdateScope.Property;
 					ModelResult result = EntityManager.getInstance().registerDevice(device);
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {

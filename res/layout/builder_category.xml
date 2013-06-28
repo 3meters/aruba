@@ -19,7 +19,7 @@
             <!-- Public Image -->
 
             <com.aircandi.ui.widgets.WebImageView
-                android:id="@+id/image"
+                android:id="@+id/photo"
                 style="@style/picture_framed"
                 android:layout_width="@dimen/image_medium"
                 android:layout_height="@dimen/image_medium"

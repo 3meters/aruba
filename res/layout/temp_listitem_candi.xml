@@ -10,7 +10,7 @@
     android:paddingTop="2dp" >
 
     <com.aircandi.ui.widgets.WebImageView
-        android:id="@+id/image"
+        android:id="@+id/photo"
         android:layout_width="@dimen/image_medium"
         android:layout_height="@dimen/image_medium"
         android:layout_alignParentTop="true"
@@ -19,13 +19,13 @@
         aircandi:sizeHint="@dimen/image_medium" />
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/name"
         style="?attr/candiListTitleStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_toRightOf="@id/image" />
+        android:layout_toRightOf="@id/photo" />
 
     <TextView
         android:id="@+id/subtitle"
@@ -33,9 +33,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_below="@+id/title"
+        android:layout_below="@+id/name"
         android:layout_toLeftOf="@+id/image_forward"
-        android:layout_toRightOf="@id/image" />
+        android:layout_toRightOf="@id/photo" />
 
     <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/description"
@@ -45,21 +45,21 @@
         android:layout_alignWithParentIfMissing="true"
         android:layout_below="@+id/subtitle"
         android:layout_toLeftOf="@+id/image_forward"
-        android:layout_toRightOf="@id/image" />
+        android:layout_toRightOf="@id/photo" />
 
     <LinearLayout
-        android:id="@+id/info_group"
+        android:id="@+id/holder_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignWithParentIfMissing="true"
         android:layout_below="@+id/description"
         android:layout_toLeftOf="@+id/image_forward"
-        android:layout_toRightOf="@+id/image"
+        android:layout_toRightOf="@+id/photo"
         android:orientation="vertical" >
 
         <Button
-            android:id="@+id/button_comments_browse"
+            android:id="@+id/button_comments"
             style="@style/form_button"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
@@ -70,7 +70,7 @@
             android:text="@string/dummy_comments" />
 
         <com.aircandi.ui.widgets.UserView
-            android:id="@+id/user"
+            android:id="@+id/creator"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             aircandi:layout="@layout/widget_user_view_text_only" />

@@ -30,7 +30,7 @@
                 android:orientation="horizontal" >
 
                 <com.aircandi.ui.widgets.WebImageView
-                    android:id="@+id/image"
+                    android:id="@+id/photo"
                     android:layout_width="@dimen/form_button_width_min"
                     android:layout_height="@dimen/form_button_width_min"
                     aircandi:layout="@layout/widget_webimageview_framed"

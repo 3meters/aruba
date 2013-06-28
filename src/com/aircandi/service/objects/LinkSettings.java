@@ -1,27 +1,32 @@
 package com.aircandi.service.objects;
 
+import java.util.Map;
+
+import com.aircandi.service.Expose;
+
 /**
  * @author Jayma
  */
-public class LinkSettings {
+public class LinkSettings extends ServiceObject {
 
-	public String	type;
-	public Boolean	links		= false;
-	public Boolean	load		= false;
-	public Boolean	count		= true;
-	public String	where;
-	public Number	limit;
-	public String	direction	= "both";
+	private static final long	serialVersionUID	= 4371355790668325686L;
+
+	@Expose
+	public String				type;
+	@Expose
+	public Boolean				links				= false;
+	@Expose
+	public Boolean				load				= false;
+	@Expose
+	public Boolean				count				= true;
+	@Expose
+	public Map					where;
+	@Expose
+	public Number				limit;
+	@Expose
+	public String				direction			= "both";
 
 	public LinkSettings() {}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
 
 	public LinkSettings(String type, Boolean links, Boolean load, Boolean count) {
 		this.type = type;
@@ -29,7 +34,7 @@ public class LinkSettings {
 		this.load = load;
 		this.count = count;
 	}
-	
+
 	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Number limit) {
 		this.type = type;
 		this.links = links;
@@ -38,13 +43,21 @@ public class LinkSettings {
 		this.limit = limit;
 	}
 
-	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Number limit, String where) {
+	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Number limit, Map where) {
 		this.type = type;
 		this.links = links;
 		this.load = load;
 		this.count = count;
 		this.where = where;
 		this.limit = limit;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	public Boolean getLinks() {
@@ -74,11 +87,11 @@ public class LinkSettings {
 		return this;
 	}
 
-	public String getWhere() {
+	public Object getWhere() {
 		return where;
 	}
 
-	public LinkSettings setWhere(String where) {
+	public LinkSettings setWhere(Map where) {
 		this.where = where;
 		return this;
 	}

@@ -1,44 +1,54 @@
 package com.aircandi.service.objects;
 
+import java.util.Map;
+
+import com.aircandi.service.Expose;
+
 /**
  * @author Jayma
  */
-public class Cursor {
+public class Cursor extends ServiceObject {
 
-	public String	where;
-	public String	sort;
-	public Number	skip	= 0;
-	public Number	limit;
+	private static final long	serialVersionUID	= -8424707925181657940L;
+
+	@Expose
+	public Map					where;
+	@Expose
+	public Map					sort;
+	@Expose
+	public Number				skip				= 0;
+	@Expose
+	public Number				limit;
 
 	public Cursor() {}
 
-	public String getWhere() {
-		return where;
-	}
-
-	public Cursor(String sort, Number skip, Number limit, String where) {
+	public Cursor(Map sort, Number skip, Number limit, Map where) {
 		this.sort = sort;
 		this.skip = skip;
 		this.limit = limit;
 		this.where = where;
 	}
 
-	public Cursor(String sort, Number skip, Number limit) {
+	public Cursor(Map sort, Number skip, Number limit) {
 		this.sort = sort;
 		this.skip = skip;
 		this.limit = limit;
 	}
 
-	public Cursor setWhere(String where) {
+	public Map getWhere() {
+		return where;
+	}
+
+	public Cursor setWhere(Map where) {
 		this.where = where;
 		return this;
 	}
 
-	public String getSort() {
+	public Map getSort() {
 		return sort;
 	}
 
-	public Cursor setSort(String sort) {
+	public Cursor setSort(Map sort) {
 		this.sort = sort;
 		return this;
 	}

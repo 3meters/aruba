@@ -24,7 +24,7 @@ public class ImageResult
 	/* Client only */
 	private Photo		photo;
 
-	public static ImageResult setPropertiesFromMap(ImageResult imageResult, Map map) {
+	public static ImageResult setPropertiesFromMap(ImageResult imageResult, Map map, Boolean nameMapping) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

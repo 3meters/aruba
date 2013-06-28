@@ -47,6 +47,7 @@ public class ServiceRequest {
 	private Integer			mSocketTimeout;
 	private Boolean			mRetry		= true;
 	private Boolean			mUseSecret	= false;
+	private Boolean			mIgnoreResponseData = false;
 	private boolean			mSuppressUI	= false;
 
 	@SuppressWarnings("ucd")
@@ -202,6 +203,15 @@ public class ServiceRequest {
 
 	public ServiceRequest setUseSecret(Boolean useSecret) {
 		mUseSecret = useSecret;
+		return this;
+	}
+
+	public Boolean getIgnoreResponseData() {
+		return mIgnoreResponseData;
+	}
+
+	public ServiceRequest setIgnoreResponseData(Boolean ignoreResponseData) {
+		mIgnoreResponseData = ignoreResponseData;
 		return this;
 	}
 }

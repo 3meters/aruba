@@ -17,6 +17,8 @@ import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
+import com.aircandi.service.objects.Count;
+import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateUtils;
 
@@ -35,7 +37,6 @@ public class UserView extends RelativeLayout {
 	private TextView		mTextWatchCount;
 	private String			mLabel;
 	private TextView		mTextTimeSince;
-	private User			mAuthor;
 	private User			mUser;
 	private Activity		mActivity;
 
@@ -83,10 +84,15 @@ public class UserView extends RelativeLayout {
 		this.addView(mBoundView);
 	}
 
+	public void bindToUser(User user, Long date) {
+		bindToUser(user, date, null);
+		mUser = user;
+	}
+
 	public void bindToUser(User user, Long date, Boolean locked) {
-		mAuthor = user;
+		mUser = user;
 		this.setTag(user);
-		if (mAuthor != null) {
+		if (mUser != null) {
 			if (mTextLabel != null) {
 				if (mLabel != null) {
 					mTextLabel.setText(mLabel);
@@ -97,13 +103,13 @@ public class UserView extends RelativeLayout {
 			}
 
 			if (mTextName != null) {
-				if (mAuthor.name != null) {
-					mTextName.setText(mAuthor.name);
+				if (mUser.name != null) {
+					mTextName.setText(mUser.name);
 				}
 			}
 
-			if (mTextLocation != null && mAuthor.location != null && !mAuthor.location.equals("")) {
-				mTextLocation.setText(Html.fromHtml(mAuthor.area));
+			if (mTextLocation != null && mUser.location != null && !mUser.location.equals("")) {
+				mTextLocation.setText(Html.fromHtml(mUser.area));
 			}
 
 			if (mTextTimeSince != null) {
@@ -116,9 +122,9 @@ public class UserView extends RelativeLayout {
 			}
 
 			if (mImageUser != null) {
-				if (mAuthor.getPhotoUri() != null && mAuthor.getPhotoUri().length() != 0) {
+				if (mUser.getPhotoUri() != null && mUser.getPhotoUri().length() != 0) {
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
-					builder.setFromUri(mAuthor.getPhotoUri());
+					builder.setFromUri(mUser.getPhotoUri());
 					final BitmapRequest imageRequest = builder.create();
 					mImageUser.setBitmapRequest(imageRequest);
 				}
@@ -135,46 +141,15 @@ public class UserView extends RelativeLayout {
 
 			if (mBoundView.findViewById(R.id.stats_group) != null) {
 				if (mImageWatched != null) {
-					mTextWatchCount.setText(String.valueOf(user.getInCount(Constants.TYPE_LINK_WATCH)));
+					Count count = user.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
+					mTextWatchCount.setText(String.valueOf(count != null ? count.count.intValue() : 0));
 				}
 				if (mImageLiked != null) {
-					mTextLikeCount.setText(String.valueOf(user.getInCount(Constants.TYPE_LINK_LIKE)));
+					Count count = user.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
+					mTextLikeCount.setText(String.valueOf(count != null ? count.count.intValue() : 0));
 				}
 			}
 
-		}
-	}
-
-	public void bindToUser(User user, Long date) {
-		mUser = user;
-		if (mUser != null) {
-			if (mTextLabel != null) {
-				if (mLabel != null) {
-					mTextLabel.setText(mLabel);
-				}
-				else {
-					mTextLabel.setVisibility(View.GONE);
-				}
-			}
-			if (mTextName != null) {
-				mTextName.setText(mUser.name);
-			}
-			if (mTextTimeSince != null) {
-				if (date != null) {
-					mTextTimeSince.setText(DateUtils.timeSince(date, DateUtils.nowDate().getTime()));
-				}
-				else {
-					mTextTimeSince.setVisibility(View.GONE);
-				}
-			}
-			if (mImageUser != null) {
-				if (mUser.getPhotoUri() != null && mUser.getPhotoUri().length() != 0) {
-					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
-					builder.setFromUri(mUser.getPhotoUri());
-					final BitmapRequest imageRequest = builder.create();
-					mImageUser.setBitmapRequest(imageRequest);
-				}
-			}
 		}
 	}
 
@@ -182,12 +157,12 @@ public class UserView extends RelativeLayout {
 	// Pager methods and callbacks
 	// --------------------------------------------------------------------------------------------
 
-	public void setAuthor(User author) {
-		mAuthor = author;
+	public void setUser(User user) {
+		mUser = user;
 	}
 
-	public User getAuthor() {
-		return mAuthor;
+	public User getUser() {
+		return mUser;
 	}
 
 	public void setActivity(Activity activity) {

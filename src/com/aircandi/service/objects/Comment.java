@@ -16,18 +16,18 @@ public class Comment extends Entity implements Cloneable, Serializable {
 
 	public Comment() {}
 
-	public static Comment setPropertiesFromMap(Comment entity, Map map) {
+	public static Comment setPropertiesFromMap(Comment entity, Map map, Boolean nameMapping) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
 		synchronized (entity) {
-			entity = (Comment) Entity.setPropertiesFromMap(entity, map);
+			entity = (Comment) Entity.setPropertiesFromMap(entity, map, nameMapping);
 		}
 		return entity;
 	}
 
 	@Override
-	public List<Applink> getApplinks() {
+	public List<Applink> getClientApplinks() {
 		return new ArrayList<Applink>();
 	}
 

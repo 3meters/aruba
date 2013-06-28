@@ -6,7 +6,7 @@
     android:paddingBottom="0dp" >
 
     <com.aircandi.ui.widgets.WebImageView
-        android:id="@+id/image"
+        android:id="@+id/photo"
         android:layout_width="@dimen/image_medium"
         android:layout_height="@dimen/image_medium"
         android:layout_centerInParent="true"
@@ -31,7 +31,7 @@
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/image"
+        android:layout_below="@+id/photo"
         android:ellipsize="end"
         android:gravity="center_horizontal"
         android:maxLines="1"

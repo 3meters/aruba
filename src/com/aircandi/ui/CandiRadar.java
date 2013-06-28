@@ -28,7 +28,6 @@ import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.BeaconsLockedEvent;
 import com.aircandi.components.BusProvider;
-import com.aircandi.components.CommandType;
 import com.aircandi.components.EntitiesChangedEvent;
 import com.aircandi.components.EntitiesForBeaconsFinishedEvent;
 import com.aircandi.components.EntityManager;
@@ -161,7 +160,7 @@ public class CandiRadar extends CandiActivity {
 		checkSession();
 
 		/* Always reset the entity cache */
-		EntityManager.getInstance().getEntityCache().clear();
+		EntityManager.getEntityCache().clear();
 
 		/* Other UI references */
 		mList = (PullToRefreshListView) findViewById(R.id.radar_list);
@@ -265,7 +264,7 @@ public class CandiRadar extends CandiActivity {
 					@Override
 					protected Object doInBackground(Object... params) {
 						Thread.currentThread().setName("GetEntitiesForBeacons");
-						final ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesForBeacons();
+						final ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesByProximity();
 						return serviceResponse;
 					}
 
@@ -377,7 +376,7 @@ public class CandiRadar extends CandiActivity {
 								Thread.currentThread().setName("GetPlacesNearLocation");
 								Aircandi.stopwatch2.start("Get places near location");
 
-								final ServiceResponse serviceResponse = ProximityManager.getInstance().getPlacesNearLocation(location);
+								final ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesNearLocation(location);
 								return serviceResponse;
 							}
 
@@ -432,7 +431,7 @@ public class CandiRadar extends CandiActivity {
 				Aircandi.stopwatch4.stop("Aircandi initialization finished and got first entities");
 
 				mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-				mEntityModelActivityDate = EntityManager.getInstance().getEntityCache().getLastActivityDate();
+				mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 
 				/* Point radar adapter at the updated entities */
 				final int previousCount = mRadarAdapter.getCount();
@@ -533,7 +532,7 @@ public class CandiRadar extends CandiActivity {
 		Aircandi.stopwatch1.start("Search for places by beacon");
 		mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
 		if (NetworkManager.getInstance().isWifiEnabled()) {
-			EntityManager.getInstance().getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null);
+			EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null);
 			ProximityManager.getInstance().scanForWifi(ScanReason.query);
 		}
 	}
@@ -555,10 +554,9 @@ public class CandiRadar extends CandiActivity {
 
 	public void doAddPlace() {
 		if (Aircandi.getInstance().getUser() != null) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
-					.setCommandType(CommandType.New)
+			IntentBuilder intentBuilder = new IntentBuilder(this, EntityEdit.class)
 					.setEntityId(null)
-					.setEntityType(Constants.SCHEMA_ENTITY_PLACE);
+					.setEntitySchema(Constants.SCHEMA_ENTITY_PLACE);
 
 			startActivity(intentBuilder.create());
 			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
@@ -568,14 +566,9 @@ public class CandiRadar extends CandiActivity {
 	private void showCandiForm(Entity entity, Boolean upsize) {
 
 		final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
-				.setCommandType(CommandType.View)
 				.setEntityId(entity.id)
 				.setParentEntityId(entity.toId)
-				.setEntityType(entity.type);
-
-		if (entity.toId != null) {
-			intentBuilder.setCollectionId(entity.getParent().id);
-		}
+				.setEntitySchema(entity.type);
 
 		final Intent intent = intentBuilder.create();
 		if (upsize) {
@@ -709,11 +702,11 @@ public class CandiRadar extends CandiActivity {
 		mFreshWindow = true;
 
 		/* Run help if it hasn't been run yet */
-		final Boolean runOnceHelp = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, false);
-		if (!runOnceHelp) {
-			mCommon.doHelpClick();
-			return;
-		}
+//		final Boolean runOnceHelp = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, false);
+//		if (!runOnceHelp) {
+//			mCommon.doHelpClick();
+//			return;
+//		}
 
 		if (Aircandi.getInstance().getUser() != null
 				&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
@@ -818,7 +811,7 @@ public class CandiRadar extends CandiActivity {
 				ImageUtils.showToastNotification("Wifi disabled", Toast.LENGTH_SHORT);
 			}
 			ProximityManager.getInstance().getWifiList().clear();
-			EntityManager.getInstance().getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null);
+			EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null);
 			LocationManager.getInstance().setLocationLocked(null);
 		}
 		else if (NetworkManager.getInstance().getWifiState() == WifiManager.WIFI_STATE_ENABLED
@@ -842,7 +835,7 @@ public class CandiRadar extends CandiActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("GetEntitiesForBeacons");
-					final ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesForBeacons();
+					final ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesByProximity();
 					return serviceResponse;
 				}
 
@@ -850,8 +843,8 @@ public class CandiRadar extends CandiActivity {
 		}
 		else if ((ProximityManager.getInstance().getLastBeaconLoadDate() != null && mEntityModelRefreshDate != null
 				&& ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue())
-				|| (EntityManager.getInstance().getEntityCache().getLastActivityDate() != null && mEntityModelActivityDate != null
-				&& EntityManager.getInstance().getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue())) {
+				|| (EntityManager.getEntityCache().getLastActivityDate() != null && mEntityModelActivityDate != null
+				&& EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue())) {
 			/*
 			 * Everytime we show details for a place, we fetch place details from the service
 			 * when in turn get pushed into the cache and activityDate gets tickled.

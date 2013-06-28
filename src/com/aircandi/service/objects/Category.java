@@ -43,13 +43,13 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 		}
 	}
 
-	public static Category setPropertiesFromMap(Category category, Map map) {
+	public static Category setPropertiesFromMap(Category category, Map map, Boolean nameMapping) {
 
 		category.name = (String) map.get("name");
 		category.id = (String) map.get("id");
 
 		if (map.get("photo") != null) {
-			category.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
+			category.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"), nameMapping);
 		}
 
 		if (map.get("categories") != null) {
@@ -57,7 +57,7 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 
 			category.categories = new ArrayList<Category>();
 			for (Map<String, Object> categoryMap : categoryMaps) {
-				category.categories.add(Category.setPropertiesFromMap(new Category(), categoryMap));
+				category.categories.add(Category.setPropertiesFromMap(new Category(), categoryMap, nameMapping));
 			}
 		}
 

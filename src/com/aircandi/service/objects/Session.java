@@ -23,11 +23,11 @@ public class Session extends ServiceBase {
 
 	public Session() {}
 
-	public static Session setPropertiesFromMap(Session session, Map map) {
+	public static Session setPropertiesFromMap(Session session, Map map, Boolean nameMapping) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		session = (Session) ServiceBase.setPropertiesFromMap(session, map);
+		session = (Session) ServiceBase.setPropertiesFromMap(session, map, nameMapping);
 		session.key = (String) map.get("key");
 		session.expirationDate = (Number) map.get("expirationDate");
 

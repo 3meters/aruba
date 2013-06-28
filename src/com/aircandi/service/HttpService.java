@@ -67,6 +67,7 @@ import org.apache.http.protocol.HttpContext;
 import android.graphics.Bitmap;
 
 import com.aircandi.Aircandi;
+import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.Logger;
@@ -289,7 +290,7 @@ public class HttpService {
 					Object response = handleResponse(httpRequest, httpResponse, serviceRequest.getResponseFormat(), serviceRequest.getRequestListener());
 
 					/* Check for valid client version even if the call was successful */
-					if (serviceRequest.getResponseFormat() == ResponseFormat.Json) {
+					if (serviceRequest.getResponseFormat() == ResponseFormat.Json && !serviceRequest.getIgnoreResponseData()) {
 						/*
 						 * We think anything json is coming from the Aircandi service (except Bing)
 						 */
@@ -861,37 +862,37 @@ public class HttpService {
 
 			final Map<String, Object> rootMap = (LinkedHashMap<String, Object>) parser.parse(jsonString, containerFactory);
 			if (serviceDataType == ServiceDataType.User) {
-				return User.setPropertiesFromMap(new User(), rootMap);
+				return User.setPropertiesFromMap(new User(), rootMap, false);
 			}
 			else if (serviceDataType == ServiceDataType.Session) {
-				return Session.setPropertiesFromMap(new Session(), (HashMap) rootMap);
+				return Session.setPropertiesFromMap(new Session(), (HashMap) rootMap, false);
 			}
 			else if (serviceDataType == ServiceDataType.Category) {
-				return Category.setPropertiesFromMap(new Category(), (HashMap) rootMap);
+				return Category.setPropertiesFromMap(new Category(), (HashMap) rootMap, false);
 			}
 			else if (serviceDataType == ServiceDataType.Applink) {
-				return Applink.setPropertiesFromMap(new Applink(), (HashMap) rootMap);
+				return Applink.setPropertiesFromMap(new Applink(), (HashMap) rootMap, false);
 			}
 			else if (serviceDataType == ServiceDataType.Photo) {
-				return Photo.setPropertiesFromMap(new Photo(), (HashMap) rootMap);
+				return Photo.setPropertiesFromMap(new Photo(), (HashMap) rootMap, false);
 			}
 			else if (serviceDataType == ServiceDataType.GeoLocation) {
-				return AirLocation.setPropertiesFromMap(new AirLocation(), (HashMap) rootMap);
+				return AirLocation.setPropertiesFromMap(new AirLocation(), (HashMap) rootMap, false);
 			}
 			else if (serviceDataType == ServiceDataType.Beacon) {
-				return Beacon.setPropertiesFromMap(new Beacon(), (HashMap) rootMap);
+				return Beacon.setPropertiesFromMap(new Beacon(), (HashMap) rootMap, false);
 			}
 			else if (serviceDataType == ServiceDataType.Place) {
-				return Place.setPropertiesFromMap(new Place(), (HashMap) rootMap);
+				return Place.setPropertiesFromMap(new Place(), (HashMap) rootMap, false);
 			}
 			else if (serviceDataType == ServiceDataType.Post) {
-				return Post.setPropertiesFromMap(new Post(), (HashMap) rootMap);
+				return Post.setPropertiesFromMap(new Post(), (HashMap) rootMap, false);
 			}
 			else if (serviceDataType == ServiceDataType.Comment) {
-				return Comment.setPropertiesFromMap(new Comment(), (HashMap) rootMap);
+				return Comment.setPropertiesFromMap(new Comment(), (HashMap) rootMap, false);
 			}
 			else if (serviceDataType == ServiceDataType.AirNotification) {
-				return AirNotification.setPropertiesFromMap(new AirNotification(), (HashMap) rootMap);
+				return AirNotification.setPropertiesFromMap(new AirNotification(), (HashMap) rootMap, false);
 			}
 			else {
 				return rootMap;
@@ -956,7 +957,7 @@ public class HttpService {
 	public static ServiceData convertMapToObjects(Map<String, Object> rootMap, final ServiceDataType serviceDataType) {
 
 		try {
-			ServiceData serviceData = ServiceData.setPropertiesFromMap(new ServiceData(), (HashMap) rootMap);
+			ServiceData serviceData = ServiceData.setPropertiesFromMap(new ServiceData(), (HashMap) rootMap, true);
 			/*
 			 * The data property of ServiceData is always an array even
 			 * if the request could only expect to return a single object.
@@ -971,14 +972,14 @@ public class HttpService {
 					final List<LinkedHashMap<String, Object>> maps = (List<LinkedHashMap<String, Object>>) rootMap.get("results");
 					final List<Object> list = new ArrayList<Object>();
 					for (Map<String, Object> map : maps) {
-						list.add(ImageResult.setPropertiesFromMap(new ImageResult(), (HashMap) map));
+						list.add(ImageResult.setPropertiesFromMap(new ImageResult(), (HashMap) map, true));
 					}
 					serviceData.data = list;
 				}
 			}
 			else if (serviceData.data != null) {
 				if (serviceDataType == ServiceDataType.Result) {
-					serviceData.data = Result.setPropertiesFromMap(new Result(), (HashMap) serviceData.data);
+					serviceData.data = Result.setPropertiesFromMap(new Result(), (HashMap) serviceData.data, true);
 				}
 				else {
 					List<LinkedHashMap<String, Object>> maps = null;
@@ -999,43 +1000,64 @@ public class HttpService {
 					/* Decode each map into an object and add to an array */
 					for (Map<String, Object> map : maps) {
 						if (serviceDataType == ServiceDataType.ServiceEntry) {
-							list.add(ServiceEntry.setPropertiesFromMap(new ServiceEntry(), (HashMap) map));
+							list.add(ServiceEntry.setPropertiesFromMap(new ServiceEntry(), (HashMap) map, true));
+						}
+						else if (serviceDataType == ServiceDataType.Entity) {
+							String schema = (String) map.get("schema");
+							if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+								list.add(Applink.setPropertiesFromMap(new Applink(), (HashMap) map, true));
+							}
+							else if (schema.equals(Constants.SCHEMA_ENTITY_BEACON)) {
+								list.add(Beacon.setPropertiesFromMap(new Beacon(), (HashMap) map, true));
+							}
+							else if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+								list.add(Comment.setPropertiesFromMap(new Comment(), (HashMap) map, true));
+							}
+							else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+								list.add(Place.setPropertiesFromMap(new Place(), (HashMap) map, true));
+							}
+							else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+								list.add(Post.setPropertiesFromMap(new Post(), (HashMap) map, true));
+							}
+							else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+								list.add(User.setPropertiesFromMap(new User(), (HashMap) map, true));
+							}
 						}
 						else if (serviceDataType == ServiceDataType.User) {
-							list.add(User.setPropertiesFromMap(new User(), (HashMap) map));
+							list.add(User.setPropertiesFromMap(new User(), (HashMap) map, true));
 						}
 						else if (serviceDataType == ServiceDataType.Beacon) {
-							list.add(Beacon.setPropertiesFromMap(new Beacon(), (HashMap) map));
+							list.add(Beacon.setPropertiesFromMap(new Beacon(), (HashMap) map, true));
 						}
 						else if (serviceDataType == ServiceDataType.Place) {
-							list.add(Place.setPropertiesFromMap(new Place(), (HashMap) map));
+							list.add(Place.setPropertiesFromMap(new Place(), (HashMap) map, true));
 						}
 						else if (serviceDataType == ServiceDataType.Applink) {
-							list.add(Applink.setPropertiesFromMap(new Applink(), (HashMap) map));
+							list.add(Applink.setPropertiesFromMap(new Applink(), (HashMap) map, true));
 						}
 						else if (serviceDataType == ServiceDataType.Post) {
-							list.add(Post.setPropertiesFromMap(new Post(), (HashMap) map));
+							list.add(Post.setPropertiesFromMap(new Post(), (HashMap) map, true));
 						}
 						else if (serviceDataType == ServiceDataType.Comment) {
-							list.add(Comment.setPropertiesFromMap(new Comment(), (HashMap) map));
+							list.add(Comment.setPropertiesFromMap(new Comment(), (HashMap) map, true));
 						}
 						else if (serviceDataType == ServiceDataType.Link) {
-							list.add(Link.setPropertiesFromMap(new Link(), (HashMap) map));
+							list.add(Link.setPropertiesFromMap(new Link(), (HashMap) map, true));
 						}
 						else if (serviceDataType == ServiceDataType.ImageResult) {
-							list.add(ImageResult.setPropertiesFromMap(new ImageResult(), (HashMap) map));
+							list.add(ImageResult.setPropertiesFromMap(new ImageResult(), (HashMap) map, true));
 						}
 						else if (serviceDataType == ServiceDataType.Photo) {
-							list.add(Photo.setPropertiesFromMap(new Photo(), (HashMap) map));
+							list.add(Photo.setPropertiesFromMap(new Photo(), (HashMap) map, true));
 						}
 						else if (serviceDataType == ServiceDataType.Stat) {
-							list.add(Stat.setPropertiesFromMap(new Stat(), (HashMap) map));
+							list.add(Stat.setPropertiesFromMap(new Stat(), (HashMap) map, true));
 						}
 						else if (serviceDataType == ServiceDataType.Category) {
-							list.add(Category.setPropertiesFromMap(new Category(), (HashMap) map));
+							list.add(Category.setPropertiesFromMap(new Category(), (HashMap) map, true));
 						}
 						else if (serviceDataType == ServiceDataType.Device) {
-							list.add(Device.setPropertiesFromMap(new Device(), (HashMap) map));
+							list.add(Device.setPropertiesFromMap(new Device(), (HashMap) map, true));
 						}
 					}
 					serviceData.data = list;
@@ -1101,7 +1123,11 @@ public class HttpService {
 		Stat,
 		ServiceEntry,
 		Applink,
-		Device, AirNotification, Place, Post, Comment
+		Device, 
+		AirNotification, 
+		Place, 
+		Post, 
+		Comment
 	}
 
 	public static enum RequestType {

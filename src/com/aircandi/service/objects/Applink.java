@@ -2,17 +2,15 @@ package com.aircandi.service.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
 import com.aircandi.service.Expose;
+import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.Photo.PhotoSource;
 
 /**
@@ -21,32 +19,23 @@ import com.aircandi.service.objects.Photo.PhotoSource;
 @SuppressWarnings("ucd")
 public class Applink extends Entity implements Cloneable, Serializable {
 
-	private static final long						serialVersionUID	= 4362288672245819448L;
-	public static final String						collectionId		= "applinks";
-	public static final Map<String, ApplinkMeta>	applinkMeta			= Collections.synchronizedMap(new HashMap<String, ApplinkMeta>());
+	private static final long	serialVersionUID	= 4362288672245819448L;
+	public static final String	collectionId		= "applinks";
 
 	// --------------------------------------------------------------------------------------------
 	// Service fields
 	// --------------------------------------------------------------------------------------------
 
 	@Expose
-	public String									appId;
+	public String				appId;
 	@Expose
-	public String									url;
+	public String				appUrl;
 
 	public Applink() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Set and get
 	// --------------------------------------------------------------------------------------------	
-
-	public static Boolean getIntentSupport(String type) {
-		Boolean intentSupport = (type.equals(Constants.TYPE_APPLINK_FOURSQUARE)
-				|| type.equals(Constants.TYPE_APPLINK_TRIPADVISOR)
-				|| type.equals(Constants.TYPE_APPLINK_TWITTER)
-				|| type.equals(Constants.TYPE_APPLINK_YELP));
-		return intentSupport;
-	}
 
 	@Override
 	public String getPhotoUri() {
@@ -55,36 +44,15 @@ public class Applink extends Entity implements Cloneable, Serializable {
 			imageUri = photo.getUri();
 		}
 		else {
-			Photo photo = new Photo(getDefaultIcon(type), null, null, null, PhotoSource.assets);
+			Photo photo = new Photo(getDefaultPhoto(type), null, null, null, PhotoSource.assets);
 			imageUri = photo.getUri();
 		}
 		return imageUri;
 	}
 
-	public static String getDefaultIcon(String sourceType) {
+	public static String getDefaultPhoto(String sourceType) {
 		String icon = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + sourceType + ".png";
 		return icon;
-	}
-
-	public String getPackageName() {
-		String packageName = null;
-		if (type.equals("facebook")) {
-			packageName = "com.facebook.katana";
-		}
-		else if (type.equals("twitter")) {
-			packageName = "com.twitter.android";
-		}
-		return packageName;
-	}
-
-	public Boolean appExists() {
-		return (getPackageName() != null);
-	}
-
-	public Boolean appInstalled() {
-		String packageName = getPackageName();
-		final Boolean exists = AndroidManager.getInstance().doesPackageExist(packageName);
-		return exists;
 	}
 
 	@Override
@@ -93,20 +61,31 @@ public class Applink extends Entity implements Cloneable, Serializable {
 	}
 
 	@Override
-	public List<Applink> getApplinks() {
+	public List<Applink> getClientApplinks() {
 		return new ArrayList<Applink>();
 	}
-	
+
+	@Override
+	public Shortcut getShortcut() {
+
+		Shortcut shortcut = super.getShortcut();
+		shortcut.setApp(type != null ? type : null)
+				.setAppId(appId != null ? appId : null)
+				.setAppUrl(appUrl != null ? appUrl : null);
+
+		return shortcut;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Copy and serialization
 	// --------------------------------------------------------------------------------------------
 
-	public static Applink setPropertiesFromMap(Applink entity, Map map) {
+	public static Applink setPropertiesFromMap(Applink entity, Map map, Boolean nameMapping) {
 
 		synchronized (entity) {
-			entity = (Applink) Entity.setPropertiesFromMap(entity, map);
+			entity = (Applink) Entity.setPropertiesFromMap(entity, map, nameMapping);
 			entity.appId = (String) map.get("appId");
-			entity.url = (String) map.get("url");
+			entity.appUrl = (String) map.get("appUrl");
 		}
 		return entity;
 	}
@@ -127,17 +106,18 @@ public class Applink extends Entity implements Cloneable, Serializable {
 		public static String	twitter		= "twitter";
 		public static String	website		= "website";
 	}
-	
-	public static Applink builder(Entity entity, String type, String name, String image, Integer count) {
-		
-		final Applink applink = (Applink) EntityManager.getInstance().loadEntityFromResources(R.raw.applink_entity);
+
+	public static Applink builder(Entity entity, String type, String name, String image, Boolean synthetic) {
+
+		final Applink applink = (Applink) EntityManager.getInstance().loadEntityFromResources(R.raw.applink_entity, ServiceDataType.Applink);
 		applink.id = entity.id + "." + type;
+		applink.schema = Constants.SCHEMA_ENTITY_APPLINK;
+		applink.type = type;
 		applink.name = name;
 		applink.photo = new Photo(image, null, null, null, PhotoSource.resource);
-		applink.type = type;
 		applink.synthetic = true;
-		applink.tagSecondary = String.valueOf(count);
 		applink.toId = entity.id;
+		applink.synthetic = synthetic;
 		return applink;
 	}
 }

@@ -24,15 +24,6 @@
                 android:textAppearance="@style/app_text_appearance_small" />
 
             <EditText
-                android:id="@+id/cross_street"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/form_field_height"
-                android:hint="@string/form_cross_street_hint"
-                android:inputType="textPostalAddress"
-                android:nextFocusDown="@+id/city"
-                android:textAppearance="@style/app_text_appearance_small" />
-
-            <EditText
                 android:id="@+id/city"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"

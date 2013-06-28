@@ -46,7 +46,7 @@ public class AirLocation extends ServiceObject implements Cloneable, Serializabl
 		}
 	}
 	
-	public static AirLocation setPropertiesFromMap(AirLocation location, Map map) {
+	public static AirLocation setPropertiesFromMap(AirLocation location, Map map, Boolean nameMapping) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

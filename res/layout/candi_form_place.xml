@@ -14,9 +14,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:paddingBottom="@dimen/form_field_height"
         android:background="?attr/backgroundCandi"
-        android:fillViewport="true" >
+        android:fillViewport="true"
+        android:paddingBottom="@dimen/form_field_height" >
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -51,30 +51,11 @@
                     android:layout_marginBottom="15dp"
                     layout="@layout/widget_candi_header_place" />
 
-                <com.aircandi.ui.widgets.SectionLayout
-                    android:id="@+id/section_layout_switchboard"
-                    style="@style/candi_form_section"
+                <LinearLayout
+                    android:id="@+id/shortcut_holder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    aircandi:headerTitle="@string/candi_section_switchboard_place"
-                    aircandi:layoutHeader="@layout/temp_section_header"
-                    android:orientation="vertical" >
-
-                    <com.aircandi.ui.widgets.FlowLayout
-                        android:id="@+id/flow_switchboard"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                </com.aircandi.ui.widgets.SectionLayout>
-
-                <ViewStub
-                    android:id="@+id/stub_candi"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inflatedId="@+id/section_candi"
-                    android:layout="@layout/section_candi"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="8dp" />
+                    android:orientation="vertical" />
             </LinearLayout>
 
             <LinearLayout
@@ -127,8 +108,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:orientation="vertical"
-        android:background="?attr/backgroundActionBar" >
+        android:background="?attr/backgroundActionBar"
+        android:orientation="vertical" >
 
         <View
             android:layout_width="match_parent"

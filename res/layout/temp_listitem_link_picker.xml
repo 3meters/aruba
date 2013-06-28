@@ -9,7 +9,7 @@
     android:padding="5dp" >
 
     <com.aircandi.ui.widgets.WebImageView
-        android:id="@+id/image"
+        android:id="@+id/photo"
         android:layout_width="@dimen/image_small"
         android:layout_height="@dimen/image_small"
         android:layout_centerVertical="true"
@@ -21,12 +21,12 @@
         android:scaleType="centerCrop" />
 
     <TextView
-        android:id="@+id/source_label"
+        android:id="@+id/name"
         style="@style/form_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/image"
+        android:layout_toRightOf="@+id/photo"
         android:layout_toLeftOf="@+id/image_forward"
         android:ellipsize="end"
         android:maxLines="2"

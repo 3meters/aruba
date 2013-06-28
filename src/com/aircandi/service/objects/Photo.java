@@ -30,9 +30,9 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public Number				height;
 	@Expose
-	public String				sourceName;
+	public String				source;
 	@Expose
-	public Number				createdAt;
+	public Number				createdDate;
 
 	/* Only comes from foursquare */
 	@Expose(serialize = false, deserialize = true)
@@ -49,7 +49,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		this.suffix = suffix;
 		this.width = width;
 		this.height = height;
-		this.sourceName = sourceName;
+		this.source = sourceName;
 	}
 
 	@Override
@@ -68,17 +68,17 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		}
 	}
 
-	public static Photo setPropertiesFromMap(Photo photo, Map map) {
+	public static Photo setPropertiesFromMap(Photo photo, Map map, Boolean nameMapping) {
 
 		photo.prefix = (String) map.get("prefix");
 		photo.suffix = (String) map.get("suffix");
 		photo.width = (Number) map.get("width");
 		photo.height = (Number) map.get("height");
-		photo.sourceName = (String) map.get("sourceName");
-		photo.createdAt = (Number) map.get("createdAt");
+		photo.source = (String) map.get("source");
+		photo.createdDate = (Number) map.get("createdDate");
 
 		if (map.get("user") != null) {
-			photo.user = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
+			photo.user = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"), nameMapping);
 		}
 
 		return photo;
@@ -111,14 +111,14 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		}
 
 		if (imageUri != null && !imageUri.startsWith("resource:")) {
-			if (sourceName != null) {
-				if (sourceName.equals(PhotoSource.aircandi)) {
+			if (source != null) {
+				if (source.equals(PhotoSource.aircandi)) {
 					imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 				}
-				else if (sourceName.equals(PhotoSource.assets)) {
+				else if (source.equals(PhotoSource.assets)) {
 					imageUri = ProxiConstants.URL_PROXIBASE_SERVICE + imageUri;
 				}
-				else if (sourceName.equals(PhotoSource.assets_categories)) {
+				else if (source.equals(PhotoSource.assets_categories)) {
 					imageUri = ProxiConstants.URL_PROXIBASE_SERVICE + imageUri;
 				}
 			}
@@ -131,8 +131,8 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		if (prefix != null && suffix != null) {
 			imageUri = prefix + String.valueOf(pWidth) + "x" + String.valueOf(pHeight) + suffix;
 		}
-		if (imageUri != null && !imageUri.startsWith("resource:") && sourceName != null) {
-			if (sourceName.equals(PhotoSource.aircandi)) {
+		if (imageUri != null && !imageUri.startsWith("resource:") && source != null) {
+			if (source.equals(PhotoSource.aircandi)) {
 				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 			}
 		}
@@ -140,11 +140,11 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public Number getCreatedAt() {
-		return createdAt;
+		return createdDate;
 	}
 
 	public void setCreatedAt(Number createdAt) {
-		this.createdAt = createdAt;
+		this.createdDate = createdAt;
 	}
 
 	public User getUser() {
@@ -172,11 +172,11 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public String getSourceName() {
-		return sourceName;
+		return source;
 	}
 
 	public void setSourceName(String sourceName) {
-		this.sourceName = sourceName;
+		this.source = sourceName;
 	}
 
 	public String getSuffix() {

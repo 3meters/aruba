@@ -4,24 +4,26 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.aircandi.Constants;
-import com.aircandi.components.ProximityManager.ArrayListType;
-
+import com.aircandi.ui.EntityList;
+import com.aircandi.ui.EntityList.ListMode;
 
 public class IntentBuilder {
 
-	private Context			mContext;
-	private Class<?>		mClass;
+	private Context		mContext;
+	private Class<?>	mClass;
 
-	private String			mEntityId;
-	private String			mParentEntityId;
-	private String			mEntityType;
-	private CommandType		mCommandType;
-	private String			mUserId;
-	private Boolean			mForceRefresh;
+	private String		mUserId;
+	private String		mEntityId;
+	private String		mParentEntityId;
+	private String		mEntitySchema;
 
-	private String			mMessage;
-	private ArrayListType	mArrayListType;
-	private String			mCollectionId;
+	private String		mListSchema;
+	private Boolean		mListNewEnabled;
+	private Integer		mListItemResId;
+	private ListMode	mListMode;
+
+	private Boolean		mForceRefresh;
+	private String		mMessage;
 
 	public IntentBuilder() {}
 
@@ -33,42 +35,46 @@ public class IntentBuilder {
 	public Intent create() {
 		final Intent intent = new Intent(mContext, mClass);
 
+		if (mUserId != null) {
+			intent.putExtra(Constants.EXTRA_USER_ID, mUserId);
+		}
+
 		if (mEntityId != null) {
 			intent.putExtra(Constants.EXTRA_ENTITY_ID, mEntityId);
 		}
 
-		if (mCommandType != null) {
-			intent.putExtra(Constants.EXTRA_COMMAND_TYPE, mCommandType.name());
-		}
-
-		if (mEntityType != null) {
-			intent.putExtra(Constants.EXTRA_ENTITY_TYPE, mEntityType);
+		if (mEntitySchema != null) {
+			intent.putExtra(Constants.EXTRA_ENTITY_SCHEMA, mEntitySchema);
 		}
 
 		if (mParentEntityId != null) {
 			intent.putExtra(Constants.EXTRA_PARENT_ENTITY_ID, mParentEntityId);
 		}
 
-		if (mMessage != null) {
-			intent.putExtra(Constants.EXTRA_MESSAGE, mMessage);
+		if (mListMode != null) {
+			intent.putExtra(Constants.EXTRA_LIST_MODE, mListMode.name());
 		}
 
-		if (mUserId != null) {
-			intent.putExtra(Constants.EXTRA_USER_ID, mUserId);
+		if (mListSchema != null) {
+			intent.putExtra(Constants.EXTRA_LIST_SCHEMA, mListSchema);
 		}
 
-		if (mCollectionId != null) {
-			intent.putExtra(Constants.EXTRA_COLLECTION_ID, mCollectionId);
+		if (mListItemResId != null) {
+			intent.putExtra(Constants.EXTRA_LIST_ITEM_RESID, mListItemResId);
 		}
 
-		if (mArrayListType != null) {
-			intent.putExtra(Constants.EXTRA_LIST_TYPE, mArrayListType.name());
+		if (mListNewEnabled != null) {
+			intent.putExtra(Constants.EXTRA_LIST_NEW_ENABLED, mListNewEnabled);
 		}
 
 		if (mForceRefresh != null) {
 			intent.putExtra(Constants.EXTRA_REFRESH_FORCE, mForceRefresh);
 		}
-		
+
+		if (mMessage != null) {
+			intent.putExtra(Constants.EXTRA_MESSAGE, mMessage);
+		}
+
 		return intent;
 	}
 
@@ -77,8 +83,8 @@ public class IntentBuilder {
 		return this;
 	}
 
-	public IntentBuilder setEntityType(String entityType) {
-		mEntityType = entityType;
+	public IntentBuilder setEntitySchema(String entitySchema) {
+		mEntitySchema = entitySchema;
 		return this;
 	}
 
@@ -87,33 +93,37 @@ public class IntentBuilder {
 		return this;
 	}
 
-	public IntentBuilder setCollectionId(String collectionId) {
-		mCollectionId = collectionId;
-		return this;
-	}
-
-	public IntentBuilder setCommandType(CommandType commandType) {
-		mCommandType = commandType;
-		return this;
-	}
-
 	public IntentBuilder setUserId(String userId) {
 		mUserId = userId;
 		return this;
 	}
 
-	@SuppressWarnings("ucd")
-	public IntentBuilder setArrayListType(ArrayListType arrayListType) {
-		mArrayListType = arrayListType;
+	public IntentBuilder setListMode(EntityList.ListMode arrayListType) {
+		mListMode = arrayListType;
 		return this;
-	}
-
-	public Boolean getForceRefresh() {
-		return mForceRefresh;
 	}
 
 	public IntentBuilder setForceRefresh(Boolean forceRefresh) {
 		mForceRefresh = forceRefresh;
 		return this;
+	}
+
+	public IntentBuilder setListSchema(String listSchema) {
+		mListSchema = listSchema;
+		return this;
+	}
+
+	public IntentBuilder setListNewEnabled(Boolean listNewEnabled) {
+		mListNewEnabled = listNewEnabled;
+		return this;
+	}
+
+	public IntentBuilder setListItemResId(Integer listItemResId) {
+		mListItemResId = listItemResId;
+		return this;
+	}
+
+	public void setClass(Class<?> clazz) {
+		mClass = clazz;
 	}
 }

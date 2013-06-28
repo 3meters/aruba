@@ -71,7 +71,7 @@ public class CategoryBuilder extends FormActivity {
 				mOriginalCategory = (Category) HttpService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 			}
 		}
-		mImage = (WebImageView) findViewById(R.id.image);
+		mImage = (WebImageView) findViewById(R.id.photo);
 		mSpinnerCategory = (Spinner) findViewById(R.id.category);
 		mSpinnerSubCategory = (Spinner) findViewById(R.id.sub_category);
 		mSpinnerSubSubCategory = (Spinner) findViewById(R.id.sub_sub_category);

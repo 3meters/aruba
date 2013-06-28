@@ -33,17 +33,18 @@ public class Device extends ServiceBase implements Cloneable, Serializable {
 	@Expose
 	public Number				beaconsDate;
 
-	public Device() {}
+	public Device() {
+	}
 
 	public Device(String userId, String registrationId) {
 		this.userId = userId;
 		this.registrationId = registrationId;
 	}
 
-	public static Device setPropertiesFromMap(Device device, Map map) {
+	public static Device setPropertiesFromMap(Device device, Map map, Boolean nameMapping) {
 
-		device = (Device) ServiceBase.setPropertiesFromMap(device, map);
-		device.userId = (String) map.get("_user");
+		device = (Device) ServiceBase.setPropertiesFromMap(device, map, nameMapping);
+		device.userId = (String) (nameMapping ? map.get("_user") : map.get("userId"));
 		device.registrationId = (String) map.get("registrationId");
 		device.clientVersionCode = (Number) map.get("clientVersionCode");
 		device.clientVersionName = (String) map.get("clientVersionName");
@@ -53,7 +54,7 @@ public class Device extends ServiceBase implements Cloneable, Serializable {
 			device.beacons = new ArrayList<Beacon>();
 			final List<LinkedHashMap<String, Object>> beaconMaps = (List<LinkedHashMap<String, Object>>) map.get("beacons");
 			for (Map<String, Object> beaconMap : beaconMaps) {
-				device.beacons.add(Beacon.setPropertiesFromMap(new Beacon(), beaconMap));
+				device.beacons.add(Beacon.setPropertiesFromMap(new Beacon(), beaconMap, nameMapping));
 			}
 		}
 

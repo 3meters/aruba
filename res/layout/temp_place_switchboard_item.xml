@@ -6,7 +6,7 @@
     android:paddingBottom="5dp" >
 
     <com.aircandi.ui.widgets.WebImageView
-        android:id="@+id/image"
+        android:id="@+id/photo"
         android:layout_width="@dimen/image_medium"
         android:layout_height="@dimen/image_medium"
         android:layout_centerInParent="true"
@@ -15,7 +15,7 @@
         aircandi:sizeHint="@dimen/image_medium"
         android:background="@drawable/selector_image"
         android:clickable="true"
-        android:onClick="onCandiClick"
+        android:onClick="onShortcutClick"
         android:scaleType="centerCrop" />
 
     <TextView
@@ -24,8 +24,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
         android:layout_marginRight="3dp"
-        android:layout_alignTop="@+id/image"
-        android:layout_alignRight="@+id/image"
+        android:layout_alignTop="@+id/photo"
+        android:layout_alignRight="@+id/photo"
         android:gravity="top|right"
         android:text="@string/dummy_number"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -37,8 +37,8 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_margin="0dp"
-        android:layout_alignBottom="@+id/image"
-        android:layout_alignRight="@+id/image"
+        android:layout_alignBottom="@+id/photo"
+        android:layout_alignRight="@+id/photo"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/accent_blue"
         android:visibility="visible" />
@@ -48,8 +48,8 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:layout_margin="6dp"
-        android:layout_alignTop="@+id/image"
-        android:layout_alignRight="@+id/image"
+        android:layout_alignTop="@+id/photo"
+        android:layout_alignRight="@+id/photo"
         android:src="@drawable/img_play_store_arrow"
         android:visibility="visible" />
     
@@ -57,7 +57,7 @@
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/image"
+        android:layout_below="@+id/photo"
         android:ellipsize="end"
         android:gravity="center_horizontal"
         android:maxLines="1"

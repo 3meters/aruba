@@ -40,7 +40,7 @@ public class Beacon extends Entity implements Cloneable, Serializable {
 	public Beacon() {}
 
 	public Beacon(String bssid, String ssid, String label, int levelDb, Boolean test) { // $codepro.audit.disable largeNumberOfParameters
-		id = "0011." + bssid;
+		id = "be." + bssid;
 		this.ssid = ssid;
 		this.bssid = bssid;
 		this.name = label;
@@ -101,7 +101,7 @@ public class Beacon extends Entity implements Cloneable, Serializable {
 	}
 
 	@Override
-	public List<Applink> getApplinks() {
+	public List<Applink> getClientApplinks() {
 		return new ArrayList<Applink>();
 	}
 
@@ -114,10 +114,10 @@ public class Beacon extends Entity implements Cloneable, Serializable {
 	// Copy and serialization
 	// --------------------------------------------------------------------------------------------
 
-	public static Beacon setPropertiesFromMap(Beacon entity, Map map) {
+	public static Beacon setPropertiesFromMap(Beacon entity, Map map, Boolean nameMapping) {
 
 		synchronized (entity) {
-			entity = (Beacon) Entity.setPropertiesFromMap(entity, map);
+			entity = (Beacon) Entity.setPropertiesFromMap(entity, map, nameMapping);
 			entity.ssid = (String) map.get("ssid");
 			entity.bssid = (String) map.get("bssid");
 			entity.signal = (Number) map.get("signal");

@@ -95,7 +95,7 @@
                     android:addStatesFromChildren="true"
                     android:background="?attr/backgroundButton"
                     android:clickable="true"
-                    android:onClick="onSourcesBuilderClick"
+                    android:onClick="onApplinksBuilderClick"
                     android:paddingLeft="7dp" />
 
                 <com.aircandi.ui.widgets.BuilderButton

@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -18,6 +19,8 @@ public class SectionLayout extends LinearLayout {
 	private Integer		mLayoutFooterId;
 	private String		mHeaderTitle;
 	private TextView	mTextViewHeader;
+	private View		mHeaderRule;
+	private ViewGroup	mHeader;
 
 	public SectionLayout(Context context) {
 		this(context, null);
@@ -43,6 +46,8 @@ public class SectionLayout extends LinearLayout {
 			final View view = inflater.inflate(mLayoutHeaderId, null);
 
 			mTextViewHeader = (TextView) view.findViewById(R.id.title);
+			mHeaderRule = view.findViewById(R.id.rule);
+			mHeader = (ViewGroup) view.findViewById(R.id.header);
 			FontManager.getInstance().setTypefaceDefault(mTextViewHeader);
 
 			if (mTextViewHeader != null) {
@@ -98,5 +103,21 @@ public class SectionLayout extends LinearLayout {
 				mTextViewHeader.setVisibility(View.VISIBLE);
 			}
 		}
+	}
+
+	public View getHeaderRule() {
+		return mHeaderRule;
+	}
+
+	public void setHeaderRule(View headerRule) {
+		mHeaderRule = headerRule;
+	}
+
+	public ViewGroup getHeader() {
+		return mHeader;
+	}
+
+	public void setHeader(ViewGroup header) {
+		mHeader = header;
 	}
 }

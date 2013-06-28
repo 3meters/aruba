@@ -43,15 +43,15 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 			view = mInflater.inflate(mItemLayoutId, null);
 			holder = new SearchListViewHolder();
 
-			holder.itemName = (TextView) view.findViewById(R.id.item_name);
-			holder.itemCategoryName = (TextView) view.findViewById(R.id.item_category_name);
-			holder.itemUri = (TextView) view.findViewById(R.id.item_uri);
-			holder.itemImage = (WebImageView) view.findViewById(R.id.item_image);
+			holder.name = (TextView) view.findViewById(R.id.name);
+			holder.categoryName = (TextView) view.findViewById(R.id.category_name);
+			holder.uri = (TextView) view.findViewById(R.id.uri);
+			holder.photo = (WebImageView) view.findViewById(R.id.photo);
 
-			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_section_title));
-			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_name));
-			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_category_name));
-			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_uri));
+			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.type));
+			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.name));
+			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.category_name));
+			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.uri));
 
 			view.setTag(holder);
 		}
@@ -60,74 +60,74 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 		}
 
 		if (itemData != null) {
-			final SearchItem suggestion = itemData;
-			holder.data = itemData;
+			final SearchItem searchItem = itemData;
+			holder.data = searchItem;
 			Boolean needSeparator = false;
 			if (position == 0) {
 				needSeparator = true;
 			}
-			else if (getItem(position - 1).type != suggestion.type) {
+			else if (getItem(position - 1).type != searchItem.type) {
 				needSeparator = true;
 			}
 
 			if (!needSeparator) {
-				((TextView) view.findViewById(R.id.item_section_title)).setVisibility(View.GONE);
+				((TextView) view.findViewById(R.id.type)).setVisibility(View.GONE);
 			}
 			else {
-				((TextView) view.findViewById(R.id.item_section_title)).setVisibility(View.VISIBLE);
-				((TextView) view.findViewById(R.id.item_section_title)).setText(suggestion.type.name());
+				((TextView) view.findViewById(R.id.type)).setVisibility(View.VISIBLE);
+				((TextView) view.findViewById(R.id.type)).setText(searchItem.type.name());
 			}
 
-			if (holder.itemName != null) {
-				if (suggestion.name != null && suggestion.name.length() > 0) {
-					holder.itemName.setText(suggestion.name);
-					holder.itemName.setVisibility(View.VISIBLE);
+			if (holder.name != null) {
+				if (searchItem.name != null && searchItem.name.length() > 0) {
+					holder.name.setText(searchItem.name);
+					holder.name.setVisibility(View.VISIBLE);
 				}
 				else {
-					holder.itemName.setVisibility(View.GONE);
+					holder.name.setVisibility(View.GONE);
 				}
 			}
 
-			if (holder.itemCategoryName != null) {
-				if (suggestion.categoryName != null && suggestion.categoryName.length() > 0) {
-					holder.itemCategoryName.setText(suggestion.categoryName);
-					holder.itemCategoryName.setVisibility(View.VISIBLE);
+			if (holder.categoryName != null) {
+				if (searchItem.categoryName != null && searchItem.categoryName.length() > 0) {
+					holder.categoryName.setText(searchItem.categoryName);
+					holder.categoryName.setVisibility(View.VISIBLE);
 				}
 				else {
-					holder.itemCategoryName.setVisibility(View.GONE);
+					holder.categoryName.setVisibility(View.GONE);
 				}
 			}
 
-			if (holder.itemUri != null) {
-				if (suggestion.uri != null && suggestion.uri.length() > 0) {
-					holder.itemUri.setText(suggestion.uri);
-					holder.itemUri.setVisibility(View.VISIBLE);
+			if (holder.uri != null) {
+				if (searchItem.uri != null && searchItem.uri.length() > 0) {
+					holder.uri.setText(searchItem.uri);
+					holder.uri.setVisibility(View.VISIBLE);
 				}
 				else {
-					holder.itemUri.setVisibility(View.GONE);
+					holder.uri.setVisibility(View.GONE);
 				}
 			}
 
-			if (holder.itemImage != null) {
+			if (holder.photo != null) {
 				/*
 				 * The WebImageView sets the current bitmap ref being held
 				 * by the internal image view to null before doing the work
 				 * to satisfy the new request.
 				 */
-				if (suggestion.icon != null) {
-					ImageUtils.showImageInImageView(suggestion.icon, holder.itemImage.getImageView(), true, AnimUtils.fadeInMedium());
+				if (searchItem.icon != null) {
+					ImageUtils.showImageInImageView(searchItem.icon, holder.photo.getImageView(), true, AnimUtils.fadeInMedium());
 				}
-				else if (suggestion.categoryIconUri != null) {
+				else if (searchItem.categoryIconUri != null) {
 
-					final String imageUri = suggestion.categoryIconUri;
-					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemImage).setImageUri(imageUri);
+					final String imageUri = searchItem.categoryIconUri;
+					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photo).setImageUri(imageUri);
 					final BitmapRequest imageRequest = builder.create();
 
-					holder.itemImageUri = imageUri;
-					holder.itemImage.setBitmapRequest(imageRequest);
+					holder.categoryIconUri = imageUri;
+					holder.photo.setBitmapRequest(imageRequest);
 				}
 				else {
-					holder.itemImage.getImageView().setImageResource(R.drawable.img_globe);
+					holder.photo.getImageView().setImageResource(R.drawable.img_globe);
 				}
 			}
 		}
@@ -157,11 +157,11 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 	@SuppressWarnings("ucd")
 	public static class SearchListViewHolder {
 
-		private TextView		itemName;
-		private TextView		itemUri;
-		private TextView		itemCategoryName;
-		private WebImageView	itemImage;
-		public String			itemImageUri;
+		private TextView		name;
+		private TextView		uri;
+		private TextView		categoryName;
+		private WebImageView	photo;
+		public String			categoryIconUri;
 		public Object			data;
 	}
 }

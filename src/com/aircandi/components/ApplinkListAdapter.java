@@ -45,13 +45,13 @@ public class ApplinkListAdapter extends ArrayAdapter<Entity> implements Filterab
 		if (view == null) {
 			view = mInflater.inflate(mItemLayoutId, null);
 			holder = new ViewHolder();
-			holder.image = (WebImageView) view.findViewById(R.id.image);
-			holder.label = (TextView) view.findViewById(R.id.source_label);
-			holder.id = (TextView) view.findViewById(R.id.source_id);
-			holder.url = (TextView) view.findViewById(R.id.source_url);
-			holder.check = (CheckBox) view.findViewById(R.id.check);
-			if (holder.check != null) {
-				holder.check.setOnClickListener(new OnClickListener() {
+			holder.photo = (WebImageView) view.findViewById(R.id.photo);
+			holder.name = (TextView) view.findViewById(R.id.name);
+			holder.id = (TextView) view.findViewById(R.id.id);
+			holder.url = (TextView) view.findViewById(R.id.url);
+			holder.checked = (CheckBox) view.findViewById(R.id.checked);
+			if (holder.checked != null) {
+				holder.checked.setOnClickListener(new OnClickListener() {
 
 					@Override
 					public void onClick(View view) {
@@ -63,7 +63,7 @@ public class ApplinkListAdapter extends ArrayAdapter<Entity> implements Filterab
 			}
 			view.setTag(holder);
 
-			FontManager.getInstance().setTypefaceDefault(holder.label);
+			FontManager.getInstance().setTypefaceDefault(holder.name);
 			FontManager.getInstance().setTypefaceDefault(holder.id);
 			FontManager.getInstance().setTypefaceDefault(holder.url);
 		}
@@ -72,52 +72,52 @@ public class ApplinkListAdapter extends ArrayAdapter<Entity> implements Filterab
 		}
 
 		if (itemData != null) {
-			final Applink source = (Applink) itemData;
+			final Applink applink = (Applink) itemData;
 
-			setVisibility(holder.check, View.GONE);
-			if (holder.check != null && source.checked != null) {
-				holder.check.setChecked(source.checked);
-				holder.check.setTag(source);
-				setVisibility(holder.check, View.VISIBLE);
+			setVisibility(holder.checked, View.GONE);
+			if (holder.checked != null && applink.checked != null) {
+				holder.checked.setChecked(applink.checked);
+				holder.checked.setTag(applink);
+				setVisibility(holder.checked, View.VISIBLE);
 			}
 
-			setVisibility(holder.label, View.GONE);
-			if (holder.label != null && source.name != null && source.name.length() > 0) {
-				holder.label.setText(source.name);
-				setVisibility(holder.label, View.VISIBLE);
+			setVisibility(holder.name, View.GONE);
+			if (holder.name != null && applink.name != null && applink.name.length() > 0) {
+				holder.name.setText(applink.name);
+				setVisibility(holder.name, View.VISIBLE);
 			}
 
 			setVisibility(holder.id, View.GONE);
 			if (holder.id != null) {
-				if (source.id != null && source.id.length() > 0) {
-					holder.id.setText(source.id);
+				if (applink.id != null && applink.id.length() > 0) {
+					holder.id.setText(applink.id);
 					setVisibility(holder.id, View.VISIBLE);
 				}
 			}
 
 			setVisibility(holder.url, View.GONE);
 			if (holder.url != null) {
-				if (source.url != null && source.url.length() > 0) {
-					holder.url.setText(source.url);
+				if (applink.appUrl != null && applink.appUrl.length() > 0) {
+					holder.url.setText(applink.appUrl);
 					setVisibility(holder.url, View.VISIBLE);
 				}
 			}
 			
-			if (holder.image != null) {
-				holder.image.setTag(source);
+			if (holder.photo != null) {
+				holder.photo.setTag(applink);
 				/*
 				 * The WebImageView sets the current bitmap ref being held
 				 * by the internal image view to null before doing the work
 				 * to satisfy the new request.
 				 */
-				final String imageUri = source.getPhotoUri();
+				final String imageUri = applink.getPhotoUri();
 
 				/* Don't do anything if the image is already set to the one we want */
-				if (holder.image.getImageUri() == null || !holder.image.getImageUri().equals(imageUri)) {
+				if (holder.photo.getImageUri() == null || !holder.photo.getImageUri().equals(imageUri)) {
 
-					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.image).setImageUri(imageUri);
+					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photo).setImageUri(imageUri);
 					final BitmapRequest imageRequest = builder.create();
-					holder.image.setBitmapRequest(imageRequest);
+					holder.photo.setBitmapRequest(imageRequest);
 				}
 			}
 		}
@@ -151,10 +151,10 @@ public class ApplinkListAdapter extends ArrayAdapter<Entity> implements Filterab
 	}
 
 	private static class ViewHolder {
-		private WebImageView	image;
-		private TextView		label;
+		private WebImageView	photo;
+		private TextView		name;
 		private TextView		id;
 		private TextView		url;
-		private CheckBox		check;
+		private CheckBox		checked;
 	}
 }

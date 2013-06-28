@@ -112,7 +112,7 @@ public class User extends Entity {
 	}
 
 	@Override
-	public List<Applink> getApplinks() {
+	public List<Applink> getClientApplinks() {
 		return new ArrayList<Applink>();
 	}
 
@@ -125,10 +125,10 @@ public class User extends Entity {
 	// Copy and serialization
 	// --------------------------------------------------------------------------------------------
 
-	public static User setPropertiesFromMap(User entity, Map map) {
+	public static User setPropertiesFromMap(User entity, Map map, Boolean nameMapping) {
 
 		synchronized (entity) {
-			entity = (User) Entity.setPropertiesFromMap(entity, map);
+			entity = (User) Entity.setPropertiesFromMap(entity, map, nameMapping);
 
 			entity.area = (String) map.get("area");
 			entity.email = (String) map.get("email");
@@ -146,7 +146,7 @@ public class User extends Entity {
 				entity.stats = new ArrayList<Stat>();
 				final List<LinkedHashMap<String, Object>> statMaps = (List<LinkedHashMap<String, Object>>) map.get("stats");
 				for (Map<String, Object> statMap : statMaps) {
-					entity.stats.add(Stat.setPropertiesFromMap(new Stat(), statMap));
+					entity.stats.add(Stat.setPropertiesFromMap(new Stat(), statMap, nameMapping));
 				}
 			}
 		}

@@ -55,11 +55,11 @@ public abstract class ServiceBase implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	public String				namelc;
 	@Expose
-	public Boolean				enabled;
+	public Boolean				enabled				= true;
 	@Expose
-	public Boolean				locked;
+	public Boolean				locked				= false;
 	@Expose
-	public Boolean				system;
+	public Boolean				system				= false;
 
 	/* Property bags */
 
@@ -100,7 +100,7 @@ public abstract class ServiceBase implements Cloneable, Serializable {
 
 	/* Local client only */
 
-	public UpdateScope			updateScope			= UpdateScope.Object;
+	public UpdateScope			updateScope			= UpdateScope.Property;
 
 	protected ServiceBase() {}
 
@@ -116,14 +116,14 @@ public abstract class ServiceBase implements Cloneable, Serializable {
 	}
 
 	public abstract String getCollection();
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Copy and serialization
 	// --------------------------------------------------------------------------------------------
 
-	public static ServiceBase setPropertiesFromMap(ServiceBase base, Map map) {
+	public static ServiceBase setPropertiesFromMap(ServiceBase base, Map map, Boolean nameMapping) {
 
-		base.id = (String) ((map.get("_id") != null) ? map.get("_id") : map.get("id"));
+		base.id = (String) (nameMapping ? (map.get("_id") != null) ? map.get("_id") : map.get("id") : map.get("id"));
 		base.name = (String) map.get("name");
 		base.schema = (String) map.get("schema");
 		base.type = (String) map.get("type");
@@ -133,22 +133,22 @@ public abstract class ServiceBase implements Cloneable, Serializable {
 		base.data = (HashMap<String, Object>) map.get("data");
 		base.cdata = (HashMap<String, Object>) map.get("cdata");
 
-		base.ownerId = (String) ((map.get("_owner") != null) ? map.get("_owner") : map.get("ownerId"));
-		base.creatorId = (String) ((map.get("_creator") != null) ? map.get("_creator") : map.get("creatorId"));
-		base.modifierId = (String) ((map.get("_modifier") != null) ? map.get("_modifier") : map.get("modifierId"));
+		base.ownerId = (String) (nameMapping ? (map.get("_owner") != null) ? map.get("_owner") : map.get("ownerId") : map.get("ownerId"));
+		base.creatorId = (String) (nameMapping ? (map.get("_creator") != null) ? map.get("_creator") : map.get("creatorId") : map.get("creatorId"));
+		base.modifierId = (String) (nameMapping ? (map.get("_modifier") != null) ? map.get("_modifier") : map.get("modifierId") : map.get("modifierId"));
 
 		base.createdDate = (Number) map.get("createdDate");
 		base.modifiedDate = (Number) map.get("modifiedDate");
 		base.activityDate = (Number) map.get("activityDate");
 
 		if (map.get("creator") != null) {
-			base.creator = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"));
+			base.creator = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"), nameMapping);
 		}
 		if (map.get("owner") != null) {
-			base.owner = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("owner"));
+			base.owner = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("owner"), nameMapping);
 		}
 		if (map.get("modifier") != null) {
-			base.modifier = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("modifier"));
+			base.modifier = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("modifier"), nameMapping);
 		}
 
 		return base;
@@ -216,131 +216,76 @@ public abstract class ServiceBase implements Cloneable, Serializable {
 	public Map<String, Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
 		final Map<String, Object> map = new HashMap<String, Object>();
 
+		Class<?> cls = this.getClass();
+
 		try {
-			Class<?> cls = this.getClass();
-			final Field[] fields = cls.getDeclaredFields();
-			for (Field f : fields) {
-				if (!Modifier.isStatic(f.getModifiers())
-						&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {
+			while (true) {
+				if (cls == null) {
+					return map;
+				}
+				final Field[] fields = cls.getDeclaredFields();
+				for (Field f : fields) {
+					if (!Modifier.isStatic(f.getModifiers())
+							&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {
 
-					if (useAnnotations) {
-						if (!f.isAnnotationPresent(Expose.class)) {
-							continue;
-						}
-						else {
-							Expose annotation = f.getAnnotation(Expose.class);
-							if (!annotation.serialize()) {
+						if (useAnnotations) {
+							if (!f.isAnnotationPresent(Expose.class)) {
 								continue;
 							}
-						}
-					}
-					String name = f.getName();
-
-					Boolean excludeNull = false;
-					if (useAnnotations) {
-						if (f.isAnnotationPresent(SerializedName.class)) {
-							SerializedName annotation = f.getAnnotation(SerializedName.class);
-							name = annotation.name();
-							excludeNull = annotation.excludeNull();
-						}
-					}
-
-					Object value = f.get(this);
-
-					/* Exclude annotation always wins regardless of other settings */
-					if (value == null && !excludeNull) {
-						excludeNull = (updateScope == UpdateScope.Property || excludeNulls);
-					}
-
-					if (value != null || excludeNull) {
-
-						if (value instanceof ServiceObject) {
-							Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
-							map.put(name, childMap);
-						}
-						else if (value instanceof ArrayList) {
-							List<Object> list = new ArrayList<Object>();
-							for (Object obj : (ArrayList) value) {
-
-								if (obj != null || updateScope == UpdateScope.Object || !excludeNulls) {
-									if (obj instanceof ServiceObject) {
-										Map childMap = ((ServiceObject) obj).getHashMap(useAnnotations, excludeNulls);
-										list.add(childMap);
-									}
-									else {
-										list.add(obj);
-									}
+							else {
+								Expose annotation = f.getAnnotation(Expose.class);
+								if (!annotation.serialize()) {
+									continue;
 								}
 							}
-							map.put(name, list);
 						}
-						else {
-							map.put(name, value);
+						String name = f.getName();
+
+						Boolean excludeNull = false;
+						if (useAnnotations) {
+							if (f.isAnnotationPresent(SerializedName.class)) {
+								SerializedName annotation = f.getAnnotation(SerializedName.class);
+								name = annotation.name();
+								excludeNull = annotation.excludeNull();
+							}
+						}
+
+						Object value = f.get(this);
+
+						/* Exclude annotation always wins regardless of other settings */
+						if (value == null && !excludeNull) {
+							excludeNull = (updateScope == UpdateScope.Property || excludeNulls);
+						}
+
+						if (value != null || !excludeNull) {
+
+							if (value instanceof ServiceObject) {
+								Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
+								map.put(name, childMap);
+							}
+							else if (value instanceof ArrayList) {
+								List<Object> list = new ArrayList<Object>();
+								for (Object obj : (ArrayList) value) {
+
+									if (obj != null || updateScope == UpdateScope.Object || !excludeNulls) {
+										if (obj instanceof ServiceObject) {
+											Map childMap = ((ServiceObject) obj).getHashMap(useAnnotations, excludeNulls);
+											list.add(childMap);
+										}
+										else {
+											list.add(obj);
+										}
+									}
+								}
+								map.put(name, list);
+							}
+							else {
+								map.put(name, value);
+							}
 						}
 					}
 				}
-			}
-
-			cls = this.getClass().getSuperclass();
-			final Field[] fieldsSuper = cls.getDeclaredFields();
-			for (Field f : fieldsSuper) {
-				if (!Modifier.isStatic(f.getModifiers())
-						&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {
-					if (useAnnotations) {
-						if (!f.isAnnotationPresent(Expose.class)) {
-							continue;
-						}
-						else {
-							Expose annotation = f.getAnnotation(Expose.class);
-							if (!annotation.serialize()) {
-								continue;
-							}
-						}
-					}
-					String name = f.getName();
-
-					Boolean excludeNull = false;
-					if (useAnnotations) {
-						if (f.isAnnotationPresent(SerializedName.class)) {
-							SerializedName annotation = f.getAnnotation(SerializedName.class);
-							name = annotation.name();
-							excludeNull = annotation.excludeNull();
-						}
-					}
-
-					Object value = f.get(this);
-
-					if (value == null && !excludeNull) {
-						excludeNull = (updateScope == UpdateScope.Property || excludeNulls);
-					}
-
-					if (value != null || excludeNull) {
-
-						if (value instanceof ServiceObject) {
-							Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
-							map.put(name, childMap);
-						}
-						else if (value instanceof ArrayList) {
-							List<Object> list = new ArrayList<Object>();
-							for (Object obj : (ArrayList) value) {
-
-								if (obj != null || updateScope == UpdateScope.Object || !excludeNulls) {
-									if (obj instanceof ServiceObject) {
-										Map childMap = ((ServiceObject) obj).getHashMap(useAnnotations, excludeNulls);
-										list.add(childMap);
-									}
-									else {
-										list.add(obj);
-									}
-								}
-							}
-							map.put(name, list);
-						}
-						else {
-							map.put(name, value);
-						}
-					}
-				}
+				cls = cls.getSuperclass();
 			}
 		}
 		catch (IllegalArgumentException e) {

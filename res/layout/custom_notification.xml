@@ -9,7 +9,7 @@
     android:paddingTop="5dp" >
 
     <ImageView
-        android:id="@+id/image"
+        android:id="@+id/photo"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
@@ -21,7 +21,7 @@
         style="@android:style/TextAppearance.Medium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/image" />
+        android:layout_toRightOf="@id/photo" />
 
     <TextView
         android:id="@+id/subtitle"
@@ -29,7 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/title"
-        android:layout_toRightOf="@id/image" />
+        android:layout_toRightOf="@id/photo" />
 
     <TextView
         android:id="@+id/message"
@@ -37,7 +37,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/subtitle"
-        android:layout_toRightOf="@id/image"
+        android:layout_toRightOf="@id/photo"
         android:maxLines="5"
         android:ellipsize="end" />
 </RelativeLayout>

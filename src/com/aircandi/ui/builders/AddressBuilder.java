@@ -65,7 +65,6 @@ public class AddressBuilder extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.phone));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.address));
-		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.cross_street));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.city));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.state));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.zip_code));

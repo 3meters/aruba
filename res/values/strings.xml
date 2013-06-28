@@ -10,7 +10,10 @@
     <!-- Menus -->
 
     <string name="menu_beacons_item">Beacons</string>
+    <string name="menu_add_entity_item">Add</string>
+    <string name="menu_add_place_item">Add place</string>
     <string name="menu_add_comment_item">Add comment</string>
+    <string name="menu_add_post_item">Add post</string>
     <string name="menu_refresh_item">Refresh</string>
     <string name="menu_edit_item">Edit</string>
     <string name="menu_profile_item">Profile</string>
@@ -268,15 +271,15 @@
     
     <!-- CandiList -->
 
-    <string name="name_entity_list_type_collection">collections</string>
-
+    <string name="entity_button_comment_first">add the first comment</string>
+    <string name="entity_button_post_first">add the first post</string>
+    <string name="entity_button_applink_first">add the first link</string>
+    <string name="entity_button_entity_first">add the first</string>
+    
     <!-- CandiForm -->
 
     <string name="candi_button_map">map</string>
-    <string name="candi_button_more">more</string>
-    <string name="candi_section_places_more">view all places</string>
-    <string name="candi_section_candigrams_more">view all candigrams</string>
-    <string name="candi_section_users_more">view all users</string>
+    <string name="candi_button_more">more</string>    
     <string name="candi_button_tune">tune</string>
     <string name="candi_button_call">call</string>
     <string name="candi_button_like">like</string>
@@ -286,10 +289,16 @@
     <string name="candi_button_edit">edit</string>
     <string name="candi_button_polish">polish</string>
     <string name="candi_button_add_candigram">add candigram</string>
-    <string name="candi_section_switchboard_place">place info</string>
-    <string name="candi_section_candi">candigrams</string>
+    
+    <string name="candi_section_shortcuts_place">place info</string>
+    <string name="candi_section_shortcuts_posts">posts</string>
     <string name="candi_section_user_candi_places">my places</string>
     <string name="candi_section_user_candigrams">my candigrams</string>
+    
+    <string name="candi_section_places_more">view all places</string>
+    <string name="candi_section_posts_more">view all posts</string>
+    <string name="candi_section_users_more">view all users</string>
+    <string name="candi_section_links_more">view all links</string>
     
     <string name="candi_section_watching_places">watched places</string>
     <string name="candi_section_watching_users">watched users</string>
@@ -299,11 +308,6 @@
     <string name="candi_label_user_added_by">added</string>
     <string name="candi_label_user_posted_by">posted</string>
     <string name="candi_label_user_edited_by">edited</string>
-
-    <!-- Comments -->
-
-    <string name="candi_button_comment">comment</string>
-    <string name="comment_button_comment_first">start the conversation</string>
     
     <!-- Splash -->
 
@@ -313,8 +317,8 @@
     <!-- Forms.titles -->
 
     <string name="form_title_watching">watching</string>
-    <string name="form_title_candigram">candigram</string>
-    <string name="form_title_picture">picture</string>
+    <string name="form_title_post">post</string>
+    <string name="form_title_applink">link</string>
     <string name="form_title_place">place</string>
     <string name="form_title_profile">profile settings</string>
     <string name="form_title_password">change password</string>

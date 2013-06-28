@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import android.content.BroadcastReceiver;
@@ -14,18 +13,11 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.os.Bundle;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.RequestType;
-import com.aircandi.service.HttpService.ResponseFormat;
-import com.aircandi.service.HttpService.ServiceDataType;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
@@ -60,7 +52,7 @@ public class ProximityManager {
 		if (!Aircandi.getInstance().isUsingEmulator()) {
 			mWifiManager = (WifiManager) Aircandi.applicationContext.getSystemService(Context.WIFI_SERVICE);
 		}
-		mEntityCache = EntityManager.getInstance().getEntityCache();
+		mEntityCache = EntityManager.getEntityCache();
 	}
 
 	public static class ProxiManagerHolder {
@@ -176,6 +168,7 @@ public class ProximityManager {
 						, scanResult.test);
 
 				beacon.synthetic = true;
+				beacon.schema = Constants.SCHEMA_ENTITY_BEACON;
 				mEntityCache.upsertEntity(beacon);
 			}
 		}
@@ -188,7 +181,7 @@ public class ProximityManager {
 	// Load beacon related entities
 	// --------------------------------------------------------------------------------------------
 
-	public synchronized ServiceResponse getEntitiesForBeacons() {
+	public synchronized ServiceResponse getEntitiesByProximity() {
 		/*
 		 * All current beacons ids are sent to the service. Previously discovered beacons are included in separate
 		 * array along with a their freshness date.
@@ -220,8 +213,9 @@ public class ProximityManager {
 		/* Add current registrationId */
 		String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
 
-		serviceResponse = mEntityCache.loadEntities(beaconIds
+		serviceResponse = mEntityCache.loadEntitiesByProximity(beaconIds
 				, LinkOptions.getDefault(DefaultType.BeaconEntities)
+				, null
 				, registrationId
 				, Aircandi.stopwatch1);
 
@@ -239,10 +233,8 @@ public class ProximityManager {
 		return serviceResponse;
 	}
 
-	public synchronized ServiceResponse getPlacesNearLocation(AirLocation location) {
+	public synchronized ServiceResponse getEntitiesNearLocation(AirLocation location) {
 
-		ServiceResponse serviceResponse = new ServiceResponse();
-		final Bundle parameters = new Bundle();
 		/*
 		 * We find all aircandi place entities in the cache (via proximity or location) that are active based
 		 * on the current search parameters (beacons and search radius) and could be supplied by the place provider. We
@@ -253,92 +245,15 @@ public class ProximityManager {
 		for (Entity entity : EntityManager.getInstance().getPlaces(false, null)) {
 			Place place = (Place) entity;
 			excludePlaceIds.add(place.id);
-			if (!place.getProvider().type.equals("aircandi")) {
+			if (!place.getProvider().type.equals(Constants.TYPE_PROVIDER_AIRCANDI)) {
 				excludePlaceIds.add(place.getProvider().id);
 			}
 		}
 
-		if (excludePlaceIds.size() > 0) {
-			parameters.putStringArrayList("excludePlaceIds", (ArrayList<String>) excludePlaceIds);
-		}
-
-		parameters.putString("location", "object:" + HttpService.convertObjectToJsonSmart(location, true, true));
-		parameters.putInt("limit", 50);
-
-		parameters.putString("provider",
-				Aircandi.settings.getString(
-						Constants.PREF_TESTING_PLACE_PROVIDER,
-						Constants.PREF_TESTING_PLACE_PROVIDER_DEFAULT));
-
-		parameters.putInt("radius", Integer.parseInt(
-				Aircandi.settings.getString(
-						Constants.PREF_SEARCH_RADIUS,
-						Constants.PREF_SEARCH_RADIUS_DEFAULT)));
-
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_PLACES + "getNearLocation")
-				.setRequestType(RequestType.Method)
-				.setParameters(parameters)
-				.setResponseFormat(ResponseFormat.Json);
-
-		if (Aircandi.getInstance().getUser() != null) {
-			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
-		}
-
-		serviceResponse = EntityManager.getInstance().dispatch(serviceRequest);
+		ServiceResponse serviceResponse = mEntityCache.loadEntitiesNearLocation(location, excludePlaceIds);
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
-
-			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Place);
-			serviceResponse.data = serviceData;
-
-			/* Do a bit of fixup */
-			final List<Entity> entities = (List<Entity>) serviceData.data;
-			for (Entity entity : entities) {
-				/* No id means it's a synthetic */
-				Place place = (Place) entity;
-				if (entity.id == null) {
-					place.id = place.getProvider().id;
-					place.modifiedDate = DateUtils.nowDate().getTime();
-					place.synthetic = true;
-				}
-				else {
-					place.synthetic = false;
-				}
-			}
-
-			/* Places locked in by proximity trump places locked in by location */
-			final List<Place> proximityPlaces = (List<Place>) EntityManager.getInstance().getPlaces(null, true);
-
-			Iterator<Place> iterProximityPlaces = proximityPlaces.iterator();
-			Iterator<Entity> iterLocationPlaces = entities.iterator();
-
-			while (iterLocationPlaces.hasNext()) {
-				Entity locPlace = iterLocationPlaces.next();
-
-				while (iterProximityPlaces.hasNext()) {
-					Place proxPlace = iterProximityPlaces.next();
-
-					if (proxPlace.id.equals(locPlace.id)) {
-						iterLocationPlaces.remove();
-					}
-					else if (!proxPlace.getProvider().type.equals("aircandi")) {
-						if (proxPlace.getProvider().id.equals(locPlace.id)) {
-							iterLocationPlaces.remove();
-						}
-					}
-				}
-			}
-
-			/* Remove all synthetic places from the cache just to help constrain the cache size */
-			mEntityCache.removeEntities(Constants.SCHEMA_ENTITY_PLACE, null, true);
-
-			/* Push place entities to cache */
-			mEntityCache.upsertEntities(entities);
-
 			final List<Entity> entitiesForEvent = (List<Entity>) EntityManager.getInstance().getPlaces(null, null);
-
 			BusProvider.getInstance().post(new PlacesNearLocationFinishedEvent());
 			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
 		}
@@ -375,6 +290,7 @@ public class ProximityManager {
 		final List<Beacon> beaconStrongest = new ArrayList<Beacon>();
 		int beaconCount = 0;
 		List<Beacon> beacons = (List<Beacon>) mEntityCache.getEntities(Constants.SCHEMA_ENTITY_BEACON, Constants.TYPE_ANY, null, null, null);
+		Collections.sort(beacons, new Beacon.SortBeaconsBySignalLevel());
 
 		for (Beacon beacon : beacons) {
 			if (beacon.test) continue;
@@ -449,10 +365,6 @@ public class ProximityManager {
 				}
 			}
 		}
-	}
-
-	public static enum ArrayListType {
-		TunedPlaces, SyntheticPlaces, OwnedByUser, Collections, InCollection
 	}
 
 	public static enum ScanReason {

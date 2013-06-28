@@ -14,12 +14,12 @@ public class Post extends Entity implements Cloneable, Serializable {
 
 	public Post() {}
 
-	public static Post setPropertiesFromMap(Post entity, Map map) {
+	public static Post setPropertiesFromMap(Post entity, Map map, Boolean nameMapping) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
 		synchronized (entity) {
-			entity = (Post) Entity.setPropertiesFromMap(entity, map);
+			entity = (Post) Entity.setPropertiesFromMap(entity, map, nameMapping);
 		}
 		return entity;
 	}

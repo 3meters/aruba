@@ -5,7 +5,7 @@
     android:layout_height="wrap_content" >
 
     <com.aircandi.ui.widgets.WebImageView
-        android:id="@+id/image"
+        android:id="@+id/photo"
         android:layout_width="@dimen/image_medium"
         android:layout_height="@dimen/image_medium"
         android:layout_centerInParent="true"

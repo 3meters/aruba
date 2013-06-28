@@ -45,13 +45,13 @@ public class LinkListAdapter extends ArrayAdapter<Entity> implements Filterable 
 		if (view == null) {
 			view = mInflater.inflate(mItemLayoutId, null);
 			holder = new ViewHolder();
-			holder.image = (WebImageView) view.findViewById(R.id.image);
-			holder.label = (TextView) view.findViewById(R.id.source_label);
-			holder.id = (TextView) view.findViewById(R.id.source_id);
-			holder.url = (TextView) view.findViewById(R.id.source_url);
-			holder.check = (CheckBox) view.findViewById(R.id.check);
-			if (holder.check != null) {
-				holder.check.setOnClickListener(new OnClickListener() {
+			holder.photo = (WebImageView) view.findViewById(R.id.photo);
+			holder.name = (TextView) view.findViewById(R.id.name);
+			holder.id = (TextView) view.findViewById(R.id.id);
+			holder.url = (TextView) view.findViewById(R.id.url);
+			holder.checked = (CheckBox) view.findViewById(R.id.checked);
+			if (holder.checked != null) {
+				holder.checked.setOnClickListener(new OnClickListener() {
 
 					@Override
 					public void onClick(View view) {
@@ -63,7 +63,7 @@ public class LinkListAdapter extends ArrayAdapter<Entity> implements Filterable 
 			}
 			view.setTag(holder);
 
-			FontManager.getInstance().setTypefaceDefault(holder.label);
+			FontManager.getInstance().setTypefaceDefault(holder.name);
 			FontManager.getInstance().setTypefaceDefault(holder.id);
 			FontManager.getInstance().setTypefaceDefault(holder.url);
 		}
@@ -74,14 +74,14 @@ public class LinkListAdapter extends ArrayAdapter<Entity> implements Filterable 
 		if (itemData != null) {
 			final Entity sourceEntity = itemData;
 
-			setVisibility(holder.label, View.GONE);
-			if (holder.label != null && sourceEntity.name != null && sourceEntity.name.length() > 0) {
-				holder.label.setText(sourceEntity.name);
-				setVisibility(holder.label, View.VISIBLE);
+			setVisibility(holder.name, View.GONE);
+			if (holder.name != null && sourceEntity.name != null && sourceEntity.name.length() > 0) {
+				holder.name.setText(sourceEntity.name);
+				setVisibility(holder.name, View.VISIBLE);
 			}
 
-			if (holder.image != null) {
-				holder.image.setTag(sourceEntity);
+			if (holder.photo != null) {
+				holder.photo.setTag(sourceEntity);
 				/*
 				 * The WebImageView sets the current bitmap ref being held
 				 * by the internal image view to null before doing the work
@@ -90,11 +90,11 @@ public class LinkListAdapter extends ArrayAdapter<Entity> implements Filterable 
 				final String imageUri = sourceEntity.getPhotoUri();
 
 				/* Don't do anything if the image is already set to the one we want */
-				if (holder.image.getImageUri() == null || !holder.image.getImageUri().equals(imageUri)) {
+				if (holder.photo.getImageUri() == null || !holder.photo.getImageUri().equals(imageUri)) {
 
-					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.image).setImageUri(imageUri);
+					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photo).setImageUri(imageUri);
 					final BitmapRequest imageRequest = builder.create();
-					holder.image.setBitmapRequest(imageRequest);
+					holder.photo.setBitmapRequest(imageRequest);
 				}
 			}
 		}
@@ -128,10 +128,10 @@ public class LinkListAdapter extends ArrayAdapter<Entity> implements Filterable 
 	}
 
 	private static class ViewHolder {
-		private WebImageView	image;
-		private TextView		label;
+		private WebImageView	photo;
+		private TextView		name;
 		private TextView		id;
 		private TextView		url;
-		private CheckBox		check;
+		private CheckBox		checked;
 	}
 }

@@ -65,20 +65,11 @@
                     android:visibility="visible" />
             </com.aircandi.ui.widgets.SectionLayout>
 
-            <com.aircandi.ui.widgets.SectionLayout
-                android:id="@+id/section_layout_switchboard"
-                style="@style/candi_form_section"
+            <LinearLayout
+                android:id="@+id/shortcut_holder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                aircandi:layoutHeader="@layout/temp_section_header"
-                android:orientation="vertical" >
-
-                <com.aircandi.ui.widgets.FlowLayout
-                    android:id="@+id/flow_switchboard"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-            </com.aircandi.ui.widgets.SectionLayout>
+                android:orientation="vertical" />
 
             <LinearLayout
                 android:id="@+id/authoring_holder"

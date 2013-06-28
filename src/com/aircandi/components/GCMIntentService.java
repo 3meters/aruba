@@ -10,7 +10,7 @@ import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.ui.CandiForm;
 import com.aircandi.ui.CandiRadar;
-import com.aircandi.ui.CommentList;
+import com.aircandi.ui.EntityList;
 import com.google.android.gcm.GCMBaseIntentService;
 
 public class GCMIntentService extends GCMBaseIntentService {
@@ -49,9 +49,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 		/* Build intent that can be used in association with the notification */
 		if (airNotification.entity != null) {
 			final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
-					.setCommandType(CommandType.View)
 					.setEntityId(airNotification.entity.id)
-					.setEntityType(airNotification.entity.type)
+					.setEntitySchema(airNotification.entity.type)
 					.setForceRefresh(true);
 			Intent intent = intentBuilder.create();
 			airNotification.intent = intent;
@@ -75,8 +74,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 							});
 						}
 					}
-					else if (currentActivity.getClass() == CommentList.class) {
-						final CommentList activity = (CommentList) currentActivity;
+					else if (currentActivity.getClass() == EntityList.class) {
+						final EntityList activity = (EntityList) currentActivity;
 						if (activity.getCommon().mEntityId.equals(airNotification.entity.toId)) {
 							activity.runOnUiThread(new Runnable() {
 								@Override

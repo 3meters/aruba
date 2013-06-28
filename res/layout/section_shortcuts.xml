@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.aircandi.ui.widgets.SectionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    android:id="@+id/section_layout_shortcuts"
+    style="@style/candi_form_section"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="15dp"
+    aircandi:layoutHeader="@layout/temp_section_header"
+    android:orientation="vertical" >
+
+    <com.aircandi.ui.widgets.FlowLayout
+        android:id="@+id/flow_shortcuts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</com.aircandi.ui.widgets.SectionLayout>

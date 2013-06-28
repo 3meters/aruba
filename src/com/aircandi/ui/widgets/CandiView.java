@@ -22,6 +22,8 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
+import com.aircandi.service.objects.Count;
+import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Place;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
@@ -185,19 +187,23 @@ public class CandiView extends RelativeLayout {
 				final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
 
 				/* Post indicator always goes first */
-				if (place.getInCount(Constants.TYPE_LINK_POST) > 0) {
+				Count count = place.getCount(Constants.TYPE_LINK_POST, Direction.in);
+				if (count != null && place.getCount(Constants.TYPE_LINK_POST, Direction.in).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_candi_dark", sizePixels, marginPixels);
 				}
 
-				if (place.getInCount(Constants.TYPE_LINK_COMMENT) > 0) {
+				count = place.getCount(Constants.TYPE_LINK_COMMENT, Direction.in);
+				if (count != null && place.getCount(Constants.TYPE_LINK_COMMENT, Direction.in).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_comments_dark", sizePixels, marginPixels);
 				}
 
-				if (place.getInCount(Constants.TYPE_LINK_LIKE) > 0) {
+				count = place.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
+				if (count != null && place.getCount(Constants.TYPE_LINK_LIKE, Direction.in).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_like_holo_dark", sizePixels, marginPixels);
 				}
 
-				if (place.getInCount(Constants.TYPE_LINK_WATCH) > 0) {
+				count = place.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
+				if (count != null && place.getCount(Constants.TYPE_LINK_WATCH, Direction.in).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_watched_holo_dark", sizePixels, marginPixels);
 				}
 				setVisibility(mApplinks, View.VISIBLE);
@@ -211,7 +217,7 @@ public class CandiView extends RelativeLayout {
 	private void addApplinkIndicator(String imageUri, Integer sizePixels, Integer marginPixels) {
 
 		View view = mInflater.inflate(R.layout.temp_radar_candi_item, null);
-		WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+		WebImageView webImageView = (WebImageView) view.findViewById(R.id.photo);
 		webImageView.setSizeHint(sizePixels);
 
 		webImageView.getImageView().setTag(imageUri);
@@ -266,7 +272,7 @@ public class CandiView extends RelativeLayout {
 					else {
 
 						/* Tint the image if we are using the default treatment */
-						if (mPlace.type.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+						if (mPlace.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 							if (mPlace.photo == null && mPlace.category != null) {
 
 								final int color = Place.getCategoryColor((mPlace.category != null)

@@ -26,7 +26,6 @@ import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.CommandType;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
@@ -39,6 +38,8 @@ import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.objects.LinkOptions;
+import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.User;
@@ -194,7 +195,7 @@ public class ProfileForm extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetUser");
-				final ModelResult result = EntityManager.getInstance().getUser(mUser.id, true);
+				ModelResult result = EntityManager.getInstance().getEntity(mUser.id, true, LinkOptions.getDefault(DefaultType.UserEntities));
 				return result;
 			}
 
@@ -277,7 +278,7 @@ public class ProfileForm extends FormActivity {
 	@SuppressWarnings("ucd")
 	public void onChangePictureButtonClick(View view) {
 
-		mCommon.showPictureSourcePicker(null, null);
+		mCommon.showPictureSourcePicker(mUser.id, mUser.schema, mUser.type);
 		mImageRequestWebImageView = mImage;
 		mImageRequestListener = new RequestListener() {
 
@@ -304,7 +305,6 @@ public class ProfileForm extends FormActivity {
 	@SuppressWarnings("ucd")
 	public void onChangePasswordButtonClick(View view) {
 		final IntentBuilder intentBuilder = new IntentBuilder(this, PasswordForm.class);
-		intentBuilder.setCommandType(CommandType.Edit);
 		final Intent intent = intentBuilder.create();
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
@@ -319,21 +319,21 @@ public class ProfileForm extends FormActivity {
 					final Bundle extras = intent.getExtras();
 					final String pictureSource = extras.getString(Constants.EXTRA_PICTURE_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
-						if (pictureSource.equals("search")) {
+						if (pictureSource.equals(Constants.PHOTO_SOURCE_SEARCH)) {
 							String defaultSearch = null;
 							if (mTextFullname != null) {
 								defaultSearch = MiscUtils.emptyAsNull(mTextFullname.getText().toString().trim());
 							}
 							pictureSearch(defaultSearch);
 						}
-						else if (pictureSource.equals("gallery")) {
+						else if (pictureSource.equals(Constants.PHOTO_SOURCE_GALLERY)) {
 							pictureFromGallery();
 						}
-						else if (pictureSource.equals("camera")) {
+						else if (pictureSource.equals(Constants.PHOTO_SOURCE_CAMERA)) {
 							pictureFromCamera();
 						}
-						else if (pictureSource.equals("default")) {
-							usePictureDefault(mUser);
+						else if (pictureSource.equals(Constants.PHOTO_SOURCE_DEFAULT)) {
+							usePictureDefault();
 						}
 					}
 				}
@@ -344,17 +344,19 @@ public class ProfileForm extends FormActivity {
 		}
 	}
 
-	private void usePictureDefault(User user) {
+	private void usePictureDefault() {
 		/*
 		 * Setting the photo to null will trigger correct default handling.
 		 */
 		mDirty = true;
-		if (user.photo != null) {
-			user.photo.setBitmap(null);
-			user.photo = null;
+		
+		if (mUser.photo != null) {
+			mUser.photo.setBitmap(null);
+			mUser.photo = null;
 		}
 		mBitmap = null;
-		drawImage(user);
+		mUser.photo = mUser.getDefaultPhoto();
+		drawImage(mUser);
 		Tracker.sendEvent("ui_action", "set_user_picture_to_default", null, 0, Aircandi.getInstance().getUser());
 	}
 
@@ -414,7 +416,7 @@ public class ProfileForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("UpdateUser");
-					final ModelResult result = EntityManager.getInstance().updateUser(mUser, mBitmap, false);
+					final ModelResult result = EntityManager.getInstance().updateUser(mUser, mBitmap);
 					return result;
 				}
 
@@ -430,7 +432,7 @@ public class ProfileForm extends FormActivity {
 						 * We treat updating the profile like a change to an entity in the entity model. This forces
 						 * UI to update itself and pickup the changes like a new profile name, picture, etc.
 						 */
-						EntityManager.getInstance().getEntityCache().setLastActivityDate(DateUtils.nowDate().getTime());
+						EntityManager.getEntityCache().setLastActivityDate(DateUtils.nowDate().getTime());
 
 						/* Update the global user */
 						Aircandi.getInstance().setUser(mUser);
