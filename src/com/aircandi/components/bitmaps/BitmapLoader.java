@@ -82,7 +82,7 @@ public class BitmapLoader {
 				.setResponseFormat(ResponseFormat.Bytes)
 				.setRequestListener(listener);
 
-		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest, null);
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
@@ -142,7 +142,7 @@ public class BitmapLoader {
 				.setResponseFormat(ResponseFormat.Bytes)
 				.setRequestListener(listener);
 
-		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest, null);
 		return serviceResponse;
 	}
 

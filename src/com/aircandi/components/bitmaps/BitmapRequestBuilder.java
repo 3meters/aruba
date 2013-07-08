@@ -33,19 +33,19 @@ public class BitmapRequestBuilder {
 		return bitmapRequest;
 	}
 
-	public BitmapRequestBuilder setFromUri(String imageUri) {
-		if (imageUri != null && !imageUri.equals("")) {
-			String imageUriFixed = imageUri;
-			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
-				imageUriFixed = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
+	public BitmapRequestBuilder setFromUri(String photoUri) {
+		if (photoUri != null && !photoUri.equals("")) {
+			String photoUriFixed = photoUri;
+			if (!photoUri.startsWith("http:") && !photoUri.startsWith("https:") && !photoUri.startsWith("resource:")) {
+				photoUriFixed = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 			}
-			mImageUri = imageUriFixed;
+			mImageUri = photoUriFixed;
 		}
 		return this;
 	}
 
-	public BitmapRequestBuilder setImageUri(String imageUri) {
-		mImageUri = imageUri;
+	public BitmapRequestBuilder setImageUri(String photoUri) {
+		mImageUri = photoUri;
 		return this;
 	}
 

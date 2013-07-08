@@ -274,17 +274,35 @@ public class BitmapManager {
 		}
 	}
 
+	public void putBitmapInMemoryCache(String key, Bitmap bitmap) {
+		synchronized (mMemoryCacheLock) {
+			mMemoryCache.put(key, bitmap);
+		}
+	}
+
+	public Bitmap getBitmapFromMemoryCache(String key) {
+		synchronized (mMemoryCacheLock) {
+			return mMemoryCache.get(key);
+		}
+	}
+
+	public Bitmap removeBitmapFromMemoryCache(String key) {
+		synchronized (mMemoryCacheLock) {
+			return mMemoryCache.remove(key);
+		}
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	// Load routines
 	// --------------------------------------------------------------------------------------------
 
-	public Bitmap loadBitmapFromDeviceSampled(final Uri imageUri) {
+	public Bitmap loadBitmapFromDeviceSampled(final Uri photoUri) {
 
 		final String[] projection = new String[] { Images.Thumbnails._ID, Images.Thumbnails.DATA, Images.Media.ORIENTATION };
 		File imageFile = null;
 		int rotation = 0;
 
-		final Cursor cursor = Aircandi.applicationContext.getContentResolver().query(imageUri, projection, null, null, null);
+		final Cursor cursor = Aircandi.applicationContext.getContentResolver().query(photoUri, projection, null, null, null);
 
 		if (cursor != null) {
 
@@ -303,11 +321,11 @@ public class BitmapManager {
 		else {
 
 			/* The image is in the local file system */
-			imageFile = new File(imageUri.toString().replace("file://", ""));
+			imageFile = new File(photoUri.toString().replace("file://", ""));
 
 			final ExifInterface exif;
 			try {
-				exif = new ExifInterface(imageUri.getPath());
+				exif = new ExifInterface(photoUri.getPath());
 				rotation = (int) exifOrientationToDegrees(exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
 			}
 			catch (IOException exception) {
@@ -482,14 +500,14 @@ public class BitmapManager {
 		return 0;
 	}
 
-	public static boolean isLocalImage(String imageUri) {
-		if (imageUri == null) {
+	public static boolean isLocalImage(String photoUri) {
+		if (photoUri == null) {
 			return false;
 		}
-		if (imageUri.toLowerCase(Locale.US).startsWith("resource:")) {
+		if (photoUri.toLowerCase(Locale.US).startsWith("resource:")) {
 			return true;
 		}
-		if (imageUri.toLowerCase(Locale.US).startsWith("asset:")) {
+		if (photoUri.toLowerCase(Locale.US).startsWith("asset:")) {
 			return true;
 		}
 		return false;

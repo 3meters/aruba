@@ -18,7 +18,7 @@ public final class Constants {
 	public static final String	SENDER_ID							= "657673071389";																			// google Api project number for aircandi
 
 	/* Activity parameters */
-	public static final String	EXTRA_PARENT_ENTITY_ID				= "com.aircandi.EXTRA_PARENT_ENTITY_ID";													//$NON-NLS-1$
+	public static final String	EXTRA_ENTITY_PARENT_ID				= "com.aircandi.EXTRA_PARENT_ENTITY_ID";													//$NON-NLS-1$
 	public static final String	EXTRA_ENTITY_ID						= "com.aircandi.EXTRA_ENTITY_ID";															//$NON-NLS-1$
 	public static final String	EXTRA_ENTITY_SCHEMA					= "com.aircandi.EXTRA_ENTITY_SCHEMA";														//$NON-NLS-1$
 	public static final String	EXTRA_ENTITY_TYPE					= "com.aircandi.EXTRA_ENTITY_TYPE";														//$NON-NLS-1$
@@ -34,6 +34,7 @@ public final class Constants {
 	public static final String	EXTRA_URI_TITLE						= "com.aircandi.EXTRA_URI_TITLE";															//$NON-NLS-1$
 	public static final String	EXTRA_URI_DESCRIPTION				= "com.aircandi.EXTRA_URI_DESCRIPTION";													//$NON-NLS-1$
 
+	public static final String	EXTRA_BITMAP						= "com.aircandi.EXTRA_BITMAP";															//$NON-NLS-1$
 	public static final String	EXTRA_MESSAGE						= "com.aircandi.EXTRA_MESSAGE";															//$NON-NLS-1$
 	public static final String	EXTRA_CATEGORY						= "com.aircandi.EXTRA_CATEGORY";															//$NON-NLS-1$
 	public static final String	EXTRA_VERIFY_URI					= "com.aircandi.EXTRA_VERIFY_URI";															//$NON-NLS-1$
@@ -45,6 +46,7 @@ public final class Constants {
 	public static final String	EXTRA_REFRESH_FORCE					= "com.aircandi.EXTRA_REFRESH_FORCE";														//$NON-NLS-1$
 	public static final String	EXTRA_HELP_ID						= "com.aircandi.EXTRA_HELP_ID";															//$NON-NLS-1$
 	public static final String	EXTRA_SHORTCUTS						= "com.aircandi.EXTRA_SHORTCUTS";															//$NON-NLS-1$
+	public static final String	EXTRA_SKIP_SAVE						= "com.aircandi.EXTRA_EDIT_ONLY";															//$NON-NLS-1$
 
 	/* Activity parameters: lists */
 	public static final String	EXTRA_LIST_MODE						= "com.aircandi.EXTRA_LIST_MODE";															//$NON-NLS-1$
@@ -173,7 +175,7 @@ public final class Constants {
 	public static final int		ACTIVITY_SIGNIN						= 400;
 	public static final int		ACTIVITY_COMMENT					= 430;
 	public static final int		ACTIVITY_APPLINKS_EDIT				= 535;
-	public static final int		ACTIVITY_SOURCE_EDIT				= 540;
+	public static final int		ACTIVITY_APPLINK_EDIT				= 540;
 	public static final int		ACTIVITY_APPLINK_NEW				= 545;
 	public static final int		ACTIVITY_TEMPLATE_PICK				= 560;
 	public static final int		ACTIVITY_PREFERENCES				= 600;
@@ -186,6 +188,7 @@ public final class Constants {
 	public static final int		RESULT_ENTITY_INSERTED				= 100;
 	public static final int		RESULT_ENTITY_UPDATED				= 110;
 	public static final int		RESULT_ENTITY_DELETED				= 120;
+	public static final int		RESULT_ENTITY_EDITED				= 130;
 	public static final int		RESULT_COMMENT_INSERTED				= 200;
 	public static final int		RESULT_PROFILE_UPDATED				= 310;
 	public static final int		RESULT_USER_SIGNED_IN				= 400;

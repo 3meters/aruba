@@ -15,7 +15,7 @@
         aircandi:sizeHint="@dimen/image_extra_small"
         android:scaleType="centerCrop" />
 
-    <TextView
+    <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/name"
         style="@style/form_text"
         android:layout_width="match_parent"
@@ -23,7 +23,7 @@
         android:layout_toRightOf="@+id/photo"
         android:ellipsize="end"
         android:maxLines="1"
-        android:text="@string/dummy_title"
+        android:text="@string/dummy_name"
         android:textColor="?attr/textColor"
         android:textAppearance="@style/app_text_appearance_tiny" />
 

@@ -6,11 +6,11 @@ import android.content.Intent;
 
 import com.aircandi.Constants;
 import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ServiceDataType;
+import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirNotification;
-import com.aircandi.ui.CandiForm;
-import com.aircandi.ui.CandiRadar;
 import com.aircandi.ui.EntityList;
+import com.aircandi.ui.RadarForm;
+import com.aircandi.ui.base.BaseEntityView;
 import com.google.android.gcm.GCMBaseIntentService;
 
 public class GCMIntentService extends GCMBaseIntentService {
@@ -44,11 +44,11 @@ public class GCMIntentService extends GCMBaseIntentService {
 		 * payload, its contents are available as extras in the intent.
 		 */
 		String jsonNotification = messageIntent.getStringExtra("notification");
-		AirNotification airNotification = (AirNotification) HttpService.convertJsonToObjectInternalSmart(jsonNotification, ServiceDataType.AirNotification);
+		AirNotification airNotification = (AirNotification) HttpService.jsonToObject(jsonNotification, ObjectType.AirNotification);
 
 		/* Build intent that can be used in association with the notification */
 		if (airNotification.entity != null) {
-			final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
+			final IntentBuilder intentBuilder = new IntentBuilder()
 					.setEntityId(airNotification.entity.id)
 					.setEntitySchema(airNotification.entity.type)
 					.setForceRefresh(true);
@@ -63,8 +63,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 		synchronized (lock) {
 			if (currentActivity != null) {
 				if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-					if (currentActivity.getClass() == CandiForm.class) {
-						final CandiForm activity = (CandiForm) currentActivity;
+					if (currentActivity.getClass() == BaseEntityView.class) {
+						final BaseEntityView activity = (BaseEntityView) currentActivity;
 						if (activity.getCommon().mEntityId.equals(airNotification.entity.toId)) {
 							activity.runOnUiThread(new Runnable() {
 								@Override
@@ -88,8 +88,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 				}
 				else {
 					if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-						if (currentActivity.getClass() == CandiRadar.class) {
-							final CandiRadar activity = (CandiRadar) currentActivity;
+						if (currentActivity.getClass() == RadarForm.class) {
+							final RadarForm activity = (RadarForm) currentActivity;
 							activity.runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
@@ -99,8 +99,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 						}
 					}
 					else {
-						if (currentActivity.getClass() == CandiForm.class) {
-							final CandiForm activity = (CandiForm) currentActivity;
+						if (currentActivity.getClass() == BaseEntityView.class) {
+							final BaseEntityView activity = (BaseEntityView) currentActivity;
 							if (airNotification.entity.toId != null) {
 								if (activity.getCommon().mEntityId.equals(airNotification.entity.toId)) {
 									activity.runOnUiThread(new Runnable() {

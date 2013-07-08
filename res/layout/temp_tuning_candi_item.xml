@@ -16,7 +16,7 @@
         android:background="@drawable/selector_image"
         android:scaleType="centerCrop" />
 
-    <TextView
+    <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/badge_upper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -27,8 +27,8 @@
         android:textColor="@color/accent_blue"
         android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/title"
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/photo"

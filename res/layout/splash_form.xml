@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.SplashForm" >
+
+    <ImageView
+        android:id="@+id/image_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY" />
+
+    <RelativeLayout
+        android:id="@+id/dialog"
+        style="?attr/buttonBarStyle"
+        android:layout_width="280dp"
+        android:layout_height="175dp"
+        android:layout_gravity="center"
+        android:background="#cc111111"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:visibility="visible"
+        tools:ignore="UselessParent" >
+
+        <LinearLayout
+            android:id="@+id/title_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/form_footer"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="22dp"
+            android:orientation="horizontal"
+            android:paddingRight="10dp"
+            tools:ignore="UseCompoundDrawables" >
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="4dp"
+                android:src="?attr/logo" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+
+                <com.aircandi.ui.widgets.AirTextView
+                    android:id="@+id/name"
+                    style="@style/splash_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="@string/name_app" />
+
+                <com.aircandi.ui.widgets.AirTextView
+                    android:id="@+id/message"
+                    style="@style/splash_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="3.83"
+                    android:text="@string/splash_message" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/form_footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal" >
+
+            <com.aircandi.ui.widgets.AirButton
+                android:id="@+id/button_signup"
+                style="@style/form_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="3dp"
+                android:layout_weight="1"
+                android:onClick="onSignupButtonClick"
+                android:text="@string/splash_button_signup" />
+
+            <com.aircandi.ui.widgets.AirButton
+                android:id="@+id/button_signin"
+                style="@style/form_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onSigninButtonClick"
+                android:text="@string/splash_button_signin" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:scaleType="fitCenter"
+        android:src="@drawable/img_foursquare_white" />
+
+</merge>

@@ -12,15 +12,15 @@
         android:layout_marginBottom="10dp"
         android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/candi_form_title"
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/name"
             style="?attr/candiFormTitleStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/dummy_title" />
+            android:text="@string/dummy_name" />
 
-        <TextView
-            android:id="@+id/candi_form_subtitle"
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/subtitle"
             style="@style/candi_form_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

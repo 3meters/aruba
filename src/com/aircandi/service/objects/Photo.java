@@ -7,6 +7,7 @@ import java.util.Map;
 import android.graphics.Bitmap;
 
 import com.aircandi.ProxiConstants;
+import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.components.bitmaps.ImageResult.Thumbnail;
 import com.aircandi.service.Expose;
@@ -36,11 +37,14 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 
 	/* Only comes from foursquare */
 	@Expose(serialize = false, deserialize = true)
-	public User					user;
+	public Entity				user;
 
 	/* client only */
-	private String				title;
-	private Bitmap				bitmap;
+	public String				name;
+
+	/* Used to stash temp bitmaps. Always access using set/getBitmap() */
+	protected String			bitmapKey;
+	protected Boolean			bitmapLocalOnly		= false;
 
 	public Photo() {}
 
@@ -76,6 +80,9 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		photo.height = (Number) map.get("height");
 		photo.source = (String) map.get("source");
 		photo.createdDate = (Number) map.get("createdDate");
+		photo.name = (String) map.get("name");
+		photo.bitmapKey = (String) map.get("bitmapKey");
+		photo.bitmapLocalOnly = (Boolean) map.get("bitmapLocalOnly");
 
 		if (map.get("user") != null) {
 			photo.user = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"), nameMapping);
@@ -83,6 +90,43 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 
 		return photo;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Bitmap routines
+	// --------------------------------------------------------------------------------------------
+
+	public Boolean hasBitmap() {
+		if (bitmapKey != null) {
+			return (BitmapManager.getInstance().getBitmapFromMemoryCache(bitmapKey) != null);
+		}
+		return false;
+	}
+
+	public Bitmap getBitmap() {
+		if (bitmapKey != null) {
+			return BitmapManager.getInstance().getBitmapFromMemoryCache(bitmapKey);
+		}
+		return null;
+	}
+
+	public void removeBitmap() {
+		if (hasBitmap()) {
+			Bitmap bitmap = BitmapManager.getInstance().removeBitmapFromMemoryCache(bitmapKey);
+			bitmap.recycle();
+			bitmap = null;
+		}
+		bitmapKey = null;
+		bitmapLocalOnly = false;
+	}
+
+	public void setBitmap(String key, Bitmap bitmap) {
+		BitmapManager.getInstance().putBitmapInMemoryCache(key, bitmap);
+		bitmapKey = key;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Set/get routines
+	// --------------------------------------------------------------------------------------------
 
 	public ImageResult getAsImageResult() {
 		final ImageResult imageResult = new ImageResult();
@@ -100,43 +144,43 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public String getUri() {
-		String imageUri = prefix;
+		String photoUri = prefix;
 		if (suffix != null) {
 			if (width != null && height != null) {
-				imageUri = prefix + String.valueOf(width.intValue()) + "x" + String.valueOf(height.intValue()) + suffix;
+				photoUri = prefix + String.valueOf(width.intValue()) + "x" + String.valueOf(height.intValue()) + suffix;
 			}
 			else {
-				imageUri = getSizedUri(250, 250);
+				photoUri = getSizedUri(250, 250);
 			}
 		}
 
-		if (imageUri != null && !imageUri.startsWith("resource:")) {
+		if (photoUri != null && !photoUri.startsWith("resource:")) {
 			if (source != null) {
 				if (source.equals(PhotoSource.aircandi)) {
-					imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
+					photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 				}
 				else if (source.equals(PhotoSource.assets)) {
-					imageUri = ProxiConstants.URL_PROXIBASE_SERVICE + imageUri;
+					photoUri = ProxiConstants.URL_PROXIBASE_SERVICE + photoUri;
 				}
 				else if (source.equals(PhotoSource.assets_categories)) {
-					imageUri = ProxiConstants.URL_PROXIBASE_SERVICE + imageUri;
+					photoUri = ProxiConstants.URL_PROXIBASE_SERVICE + photoUri;
 				}
 			}
 		}
-		return imageUri;
+		return photoUri;
 	}
 
 	public String getSizedUri(Number pWidth, Number pHeight) {
-		String imageUri = prefix;
+		String photoUri = prefix;
 		if (prefix != null && suffix != null) {
-			imageUri = prefix + String.valueOf(pWidth) + "x" + String.valueOf(pHeight) + suffix;
+			photoUri = prefix + String.valueOf(pWidth) + "x" + String.valueOf(pHeight) + suffix;
 		}
-		if (imageUri != null && !imageUri.startsWith("resource:") && source != null) {
+		if (photoUri != null && !photoUri.startsWith("resource:") && source != null) {
 			if (source.equals(PhotoSource.aircandi)) {
-				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
+				photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 			}
 		}
-		return imageUri;
+		return photoUri;
 	}
 
 	public Number getCreatedAt() {
@@ -147,29 +191,25 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		this.createdDate = createdAt;
 	}
 
-	public User getUser() {
+	public Entity getUser() {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(Entity user) {
 		this.user = user;
 	}
 
-	public String getTitle() {
-		return title;
+	public String getName() {
+		return name;
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public Bitmap getBitmap() {
-		return bitmap;
-	}
-
-	public void setBitmap(Bitmap bitmap) {
-		this.bitmap = bitmap;
-	}
+	// --------------------------------------------------------------------------------------------
+	// Bitmap routines
+	// --------------------------------------------------------------------------------------------
 
 	public String getSourceName() {
 		return source;
@@ -187,6 +227,14 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		this.suffix = suffix;
 	}
 
+	public Boolean isBitmapLocalOnly() {
+		return bitmapLocalOnly;
+	}
+
+	public void setBitmapLocalOnly(Boolean bitmapLocalOnly) {
+		this.bitmapLocalOnly = bitmapLocalOnly;
+	}
+
 	public static class PhotoSource {
 		public static String	external			= "external";
 		public static String	aircandi			= "aircandi";
@@ -197,5 +245,6 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		public static String	twitter				= "twitter";
 		public static String	resource			= "resource";
 		public static String	website				= "website";
+		public static String	cache				= "cache";
 	}
 }

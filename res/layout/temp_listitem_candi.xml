@@ -18,7 +18,7 @@
         aircandi:layout="@layout/widget_webimageview"
         aircandi:sizeHint="@dimen/image_medium" />
 
-    <TextView
+    <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/name"
         style="?attr/candiListTitleStyle"
         android:layout_width="match_parent"
@@ -27,7 +27,7 @@
         android:layout_alignWithParentIfMissing="true"
         android:layout_toRightOf="@id/photo" />
 
-    <TextView
+    <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/subtitle"
         style="@style/candi_list_subtitle"
         android:layout_width="match_parent"
@@ -58,7 +58,7 @@
         android:layout_toRightOf="@+id/photo"
         android:orientation="vertical" >
 
-        <Button
+        <com.aircandi.ui.widgets.AirButton
             android:id="@+id/button_comments"
             style="@style/form_button"
             android:layout_width="wrap_content"

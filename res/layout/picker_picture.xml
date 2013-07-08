@@ -14,7 +14,7 @@
         android:orientation="horizontal"
         android:padding="5dp" >
 
-        <EditText
+        <com.aircandi.ui.widgets.AirEditText
             android:id="@+id/search_text"
             style="@style/form_edit"
             android:layout_width="wrap_content"
@@ -54,7 +54,7 @@
         android:verticalSpacing="4dp" >
     </GridView>
 
-    <TextView
+    <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/message"
         style="@style/form_text"
         android:layout_width="wrap_content"

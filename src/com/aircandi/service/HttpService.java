@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -73,6 +75,7 @@ import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ConnectedState;
+import com.aircandi.components.Stopwatch;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.HttpServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;
@@ -88,14 +91,15 @@ import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Post;
 import com.aircandi.service.objects.Result;
-import com.aircandi.service.objects.ServiceBase;
+import com.aircandi.service.objects.ServiceBase.UpdateScope;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.ServiceObject;
 import com.aircandi.service.objects.Session;
+import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
-import com.aircandi.ui.CandiRadar;
+import com.aircandi.ui.RadarForm;
 
 /*
  * Http 1.1 Status Codes (subset)
@@ -239,15 +243,16 @@ public class HttpService {
 	// Public methods
 	// ----------------------------------------------------------------------------------------
 
-	public Object request(final ServiceRequest serviceRequest) throws HttpServiceException {
+	public Object request(final ServiceRequest serviceRequest, final Stopwatch stopwatch) throws HttpServiceException {
 
-		HttpRequestBase httpRequest = buildHttpRequest(serviceRequest);
+		HttpRequestBase httpRequest = buildHttpRequest(serviceRequest, stopwatch);
 		HttpResponse httpResponse = null;
 
 		int retryCount = 0;
 		while (true) {
 
 			try {
+				
 				/* Always pre-flight our connection */
 				ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
 
@@ -279,8 +284,16 @@ public class HttpService {
 				retryCount++;
 				long startTime = System.nanoTime();
 
+				if (stopwatch != null) {
+					stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": connection validation completed");
+				}
+				
 				httpResponse = mHttpClient.execute(httpRequest);
 
+				if (stopwatch != null) {
+					stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": request execute completed");
+				}
+				
 				if (isRequestSuccessful(httpResponse)) {
 					/*
 					 * Any 2.XX status code is considered success.
@@ -294,8 +307,8 @@ public class HttpService {
 						/*
 						 * We think anything json is coming from the Aircandi service (except Bing)
 						 */
-						ServiceData serviceData = HttpService.convertJsonToObjectSmart((String) response, ServiceDataType.None);
-						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, CandiRadar.class);
+						ServiceData serviceData = (ServiceData) HttpService.jsonToObject((String) response, ObjectType.None, ServiceDataWrapper.True);
+						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, RadarForm.class);
 						if (serviceData != null && serviceData.androidMinimumVersion != null) {
 							if (serviceData.androidMinimumVersion.intValue() > clientVersionCode) {
 								HttpServiceException exception = new HttpServiceException("Invalid client version", ErrorType.Service,
@@ -305,6 +318,10 @@ public class HttpService {
 						}
 					}
 
+					if (stopwatch != null) {
+						stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": successful response processing completed");
+					}
+					
 					return response;
 				}
 				else if (isTemporaryRedirect(httpResponse)) {
@@ -317,6 +334,11 @@ public class HttpService {
 					Logger.d(this, "Redirecting to: " + redirectedLocation);
 					URI redirectedUri = URI.create(redirectedLocation);
 					httpRequest.setURI(redirectedUri);
+					
+					if (stopwatch != null) {
+						stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": starting temp redirect");
+					}
+
 				}
 				else {
 					/*
@@ -333,8 +355,8 @@ public class HttpService {
 						/*
 						 * We think anything json is coming from the Aircandi service.
 						 */
-						ServiceData serviceData = HttpService.convertJsonToObjectSmart(responseContent, ServiceDataType.None);
-						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, CandiRadar.class);
+						ServiceData serviceData = (ServiceData) HttpService.jsonToObject(responseContent, ObjectType.None, ServiceDataWrapper.True);
+						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, RadarForm.class);
 						if (serviceData != null) {
 							if (serviceData.androidMinimumVersion != null && serviceData.androidMinimumVersion.intValue() > clientVersionCode) {
 								HttpServiceException exception = new HttpServiceException("Invalid client version", ErrorType.Service,
@@ -355,7 +377,14 @@ public class HttpService {
 						 * to double insert after a retry. In that case we want to eat the error and return success
 						 * to the caller. That means we also need to return the inserted entity.
 						 */
+						if (stopwatch != null) {
+							stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": throwing exception");
+						}
 						throw proxibaseException;
+					}
+					
+					if (stopwatch != null) {
+						stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": failure, retrying");
 					}
 				}
 			}
@@ -376,6 +405,9 @@ public class HttpService {
 				if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, e, retryCount)) {
 
 					final HttpServiceException proxibaseException = makeHttpServiceException(null, null, e);
+					if (stopwatch != null) {
+						stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount + 1) + ": throwing IO exception");
+					}
 					throw proxibaseException;
 
 				}
@@ -398,7 +430,12 @@ public class HttpService {
 		}
 	}
 
-	private HttpRequestBase buildHttpRequest(final ServiceRequest serviceRequest) {
+	private HttpRequestBase buildHttpRequest(final ServiceRequest serviceRequest, final Stopwatch stopwatch) {
+
+		if (stopwatch != null) {
+			stopwatch.segmentTime("Http service: request construction started");
+		}
+
 		HttpRequestBase httpRequest = null;
 		StringBuilder jsonBody = new StringBuilder(5000);
 		Query query = null;
@@ -508,6 +545,11 @@ public class HttpService {
 		}
 
 		httpRequest.setURI(uriFromString(uriString));
+		
+		if (stopwatch != null) {
+			stopwatch.segmentTime("Http service: request construction complete");
+		}
+		
 		return httpRequest;
 	}
 
@@ -844,85 +886,58 @@ public class HttpService {
 	// Json methods
 	// ----------------------------------------------------------------------------------------
 
-	public static Object convertJsonToObjectInternalSmart(String jsonString, ServiceDataType serviceDataType) {
+	public static Object jsonToObject(final String jsonString, ObjectType objectType) {
+		/*
+		 * Caller will get back either an array of objectType or a single objectType.
+		 */
+		return jsonToObject(jsonString, objectType, ServiceDataWrapper.False);
+	}
 
-		try {
-			JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
-			ContainerFactory containerFactory = new ContainerFactory() {
-				@Override
-				public Map createObjectContainer() {
-					return new LinkedHashMap();
+	public static Object jsonToObject(final String jsonString, ObjectType objectType, ServiceDataWrapper serviceDataWrapper) {
+		/*
+		 * serviceDataWrapper
+		 * 
+		 * true: Caller will get back a ServiceData object with a data property that is
+		 * either an array of objectType or a single objectType.
+		 * 
+		 * false: Caller will get back either an array of objectType or a single objectType.
+		 */
+		final Object object = jsonToObjects(jsonString, objectType, serviceDataWrapper);
+		if (object != null) {
+			if (serviceDataWrapper == ServiceDataWrapper.False) {
+				if (object instanceof List) {
+					final List<Object> array = (List<Object>) object;
+					if (array != null && array.size() > 0) {
+						return array.get(0);
+					}
 				}
-
-				@Override
-				public List<Object> createArrayContainer() {
-					return new ArrayList<Object>();
-				}
-			};
-
-			final Map<String, Object> rootMap = (LinkedHashMap<String, Object>) parser.parse(jsonString, containerFactory);
-			if (serviceDataType == ServiceDataType.User) {
-				return User.setPropertiesFromMap(new User(), rootMap, false);
-			}
-			else if (serviceDataType == ServiceDataType.Session) {
-				return Session.setPropertiesFromMap(new Session(), (HashMap) rootMap, false);
-			}
-			else if (serviceDataType == ServiceDataType.Category) {
-				return Category.setPropertiesFromMap(new Category(), (HashMap) rootMap, false);
-			}
-			else if (serviceDataType == ServiceDataType.Applink) {
-				return Applink.setPropertiesFromMap(new Applink(), (HashMap) rootMap, false);
-			}
-			else if (serviceDataType == ServiceDataType.Photo) {
-				return Photo.setPropertiesFromMap(new Photo(), (HashMap) rootMap, false);
-			}
-			else if (serviceDataType == ServiceDataType.GeoLocation) {
-				return AirLocation.setPropertiesFromMap(new AirLocation(), (HashMap) rootMap, false);
-			}
-			else if (serviceDataType == ServiceDataType.Beacon) {
-				return Beacon.setPropertiesFromMap(new Beacon(), (HashMap) rootMap, false);
-			}
-			else if (serviceDataType == ServiceDataType.Place) {
-				return Place.setPropertiesFromMap(new Place(), (HashMap) rootMap, false);
-			}
-			else if (serviceDataType == ServiceDataType.Post) {
-				return Post.setPropertiesFromMap(new Post(), (HashMap) rootMap, false);
-			}
-			else if (serviceDataType == ServiceDataType.Comment) {
-				return Comment.setPropertiesFromMap(new Comment(), (HashMap) rootMap, false);
-			}
-			else if (serviceDataType == ServiceDataType.AirNotification) {
-				return AirNotification.setPropertiesFromMap(new AirNotification(), (HashMap) rootMap, false);
 			}
 			else {
-				return rootMap;
-			}
-		}
-		catch (ParseException e) {
-			if (BuildConfig.DEBUG) {
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
-
-	public static ServiceData convertJsonToObjectSmart(final String jsonString, ServiceDataType serviceDataType) {
-
-		final ServiceData serviceData = convertJsonToObjectsSmart(jsonString, serviceDataType);
-		if (serviceData.data != null) {
-			if (serviceData.data instanceof List) {
-				final List<Object> array = (List<Object>) serviceData.data;
-				if (array != null && array.size() > 0) {
-					serviceData.data = array.get(0);
+				ServiceData serviceData = (ServiceData) object;
+				if (serviceData.data instanceof List) {
+					final List<Object> array = (List<Object>) serviceData.data;
+					if (array != null && array.size() > 0) {
+						serviceData.data = array.get(0);
+						return serviceData;
+					}
 				}
 			}
 		}
-		return serviceData;
+		return object;
 	}
 
-	public static ServiceData convertJsonToObjectsSmart(final String jsonString, final ServiceDataType serviceDataType) {
+	public static Object jsonToObjects(final String jsonString, final ObjectType objectType, ServiceDataWrapper serviceDataWrapper) {
 
+		/*
+		 * serviceDataWrapper
+		 * 
+		 * true: Caller will get back a ServiceData object with a data property that is
+		 * either an array of objectType or a single objectType.
+		 * 
+		 * false: Caller will get back either an array of objectType or a single objectType.
+		 */
 		try {
+			List<LinkedHashMap<String, Object>> maps = null;
 
 			JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
 			ContainerFactory containerFactory = new ContainerFactory() {
@@ -938,8 +953,54 @@ public class HttpService {
 			};
 
 			Map<String, Object> rootMap = (LinkedHashMap<String, Object>) parser.parse(jsonString, containerFactory);
-			ServiceData serviceData = convertMapToObjects(rootMap, serviceDataType);
-			return serviceData;
+
+			if (serviceDataWrapper == ServiceDataWrapper.False) {
+
+				maps = new ArrayList<LinkedHashMap<String, Object>>();
+				maps.add((LinkedHashMap<String, Object>) rootMap);
+				Object object = mapsToObjects(maps, objectType, false);
+				return object;
+			}
+			else {
+
+				ServiceData serviceData = ServiceData.setPropertiesFromMap(new ServiceData(), (HashMap) rootMap, true);
+				/*
+				 * The data property of ServiceData is always an array even
+				 * if the request could only expect to return a single object.
+				 */
+				if (serviceData.d != null) {
+
+					/* It's the results of a bing query */
+					rootMap = (LinkedHashMap<String, Object>) serviceData.d;
+					if (objectType == ObjectType.ImageResult) {
+
+						/* Array of objects */
+						maps = (List<LinkedHashMap<String, Object>>) rootMap.get("results");
+						final List<Object> list = new ArrayList<Object>();
+						for (Map<String, Object> map : maps) {
+							list.add(ImageResult.setPropertiesFromMap(new ImageResult(), (HashMap) map, true));
+						}
+						serviceData.data = list;
+					}
+				}
+				else if (serviceData.data != null) {
+
+					if (serviceData.data instanceof List) {
+						/* The data property is an array of objects */
+						maps = (List<LinkedHashMap<String, Object>>) serviceData.data;
+					}
+					else {
+
+						/* The data property is an object and we put it in an array */
+						final Map<String, Object> map = (LinkedHashMap<String, Object>) serviceData.data;
+						maps = new ArrayList<LinkedHashMap<String, Object>>();
+						maps.add((LinkedHashMap<String, Object>) map);
+					}
+					serviceData.data = mapsToObjects(maps, objectType, true);
+				}
+				return serviceData;
+			}
+
 		}
 		catch (ParseException e) {
 			if (BuildConfig.DEBUG) {
@@ -954,116 +1015,91 @@ public class HttpService {
 		return null;
 	}
 
-	public static ServiceData convertMapToObjects(Map<String, Object> rootMap, final ServiceDataType serviceDataType) {
+	public static Object mapsToObjects(List<LinkedHashMap<String, Object>> maps, final ObjectType objectType, Boolean nameMapping) {
 
 		try {
-			ServiceData serviceData = ServiceData.setPropertiesFromMap(new ServiceData(), (HashMap) rootMap, true);
-			/*
-			 * The data property of ServiceData is always an array even
-			 * if the request could only expect to return a single object.
-			 */
-			if (serviceData.d != null) {
 
-				/* It's the results of a bing query */
-				rootMap = (LinkedHashMap<String, Object>) serviceData.d;
-				if (serviceDataType == ServiceDataType.ImageResult) {
+			final List<Object> list = new ArrayList<Object>();
 
-					/* Array of objects */
-					final List<LinkedHashMap<String, Object>> maps = (List<LinkedHashMap<String, Object>>) rootMap.get("results");
-					final List<Object> list = new ArrayList<Object>();
-					for (Map<String, Object> map : maps) {
-						list.add(ImageResult.setPropertiesFromMap(new ImageResult(), (HashMap) map, true));
+			/* Decode each map into an object and add to an array */
+			for (Map<String, Object> map : maps) {
+				if (objectType == ObjectType.ServiceEntry) {
+					list.add(ServiceEntry.setPropertiesFromMap(new ServiceEntry(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Entity) {
+					String schema = (String) map.get("schema");
+					if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+						list.add(Applink.setPropertiesFromMap(new Applink(), (HashMap) map, nameMapping));
 					}
-					serviceData.data = list;
+					else if (schema.equals(Constants.SCHEMA_ENTITY_BEACON)) {
+						list.add(Beacon.setPropertiesFromMap(new Beacon(), (HashMap) map, nameMapping));
+					}
+					else if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+						list.add(Comment.setPropertiesFromMap(new Comment(), (HashMap) map, nameMapping));
+					}
+					else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+						list.add(Place.setPropertiesFromMap(new Place(), (HashMap) map, nameMapping));
+					}
+					else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+						list.add(Post.setPropertiesFromMap(new Post(), (HashMap) map, nameMapping));
+					}
+					else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+						list.add(User.setPropertiesFromMap(new User(), (HashMap) map, nameMapping));
+					}
+				}
+				else if (objectType == ObjectType.User) {
+					list.add(User.setPropertiesFromMap(new User(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Session) {
+					list.add(Session.setPropertiesFromMap(new Session(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Beacon) {
+					list.add(Beacon.setPropertiesFromMap(new Beacon(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Place) {
+					list.add(Place.setPropertiesFromMap(new Place(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Applink) {
+					list.add(Applink.setPropertiesFromMap(new Applink(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Shortcut) {
+					list.add(Shortcut.setPropertiesFromMap(new Shortcut(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Result) {
+					list.add(Result.setPropertiesFromMap(new Result(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Post) {
+					list.add(Post.setPropertiesFromMap(new Post(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Comment) {
+					list.add(Comment.setPropertiesFromMap(new Comment(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.AirLocation) {
+					list.add(AirLocation.setPropertiesFromMap(new AirLocation(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.AirNotification) {
+					list.add(AirNotification.setPropertiesFromMap(new AirNotification(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Link) {
+					list.add(Link.setPropertiesFromMap(new Link(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.ImageResult) {
+					list.add(ImageResult.setPropertiesFromMap(new ImageResult(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Photo) {
+					list.add(Photo.setPropertiesFromMap(new Photo(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Stat) {
+					list.add(Stat.setPropertiesFromMap(new Stat(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Category) {
+					list.add(Category.setPropertiesFromMap(new Category(), (HashMap) map, nameMapping));
+				}
+				else if (objectType == ObjectType.Device) {
+					list.add(Device.setPropertiesFromMap(new Device(), (HashMap) map, nameMapping));
 				}
 			}
-			else if (serviceData.data != null) {
-				if (serviceDataType == ServiceDataType.Result) {
-					serviceData.data = Result.setPropertiesFromMap(new Result(), (HashMap) serviceData.data, true);
-				}
-				else {
-					List<LinkedHashMap<String, Object>> maps = null;
-					if (serviceData.data instanceof List) {
-
-						/* The data property is an array of objects */
-						maps = (List<LinkedHashMap<String, Object>>) serviceData.data;
-					}
-					else {
-
-						/* The data property is an object and we put it in an array */
-						final Map<String, Object> map = (LinkedHashMap<String, Object>) serviceData.data;
-						maps = new ArrayList<LinkedHashMap<String, Object>>();
-						maps.add((LinkedHashMap<String, Object>) map);
-					}
-					final List<Object> list = new ArrayList<Object>();
-
-					/* Decode each map into an object and add to an array */
-					for (Map<String, Object> map : maps) {
-						if (serviceDataType == ServiceDataType.ServiceEntry) {
-							list.add(ServiceEntry.setPropertiesFromMap(new ServiceEntry(), (HashMap) map, true));
-						}
-						else if (serviceDataType == ServiceDataType.Entity) {
-							String schema = (String) map.get("schema");
-							if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-								list.add(Applink.setPropertiesFromMap(new Applink(), (HashMap) map, true));
-							}
-							else if (schema.equals(Constants.SCHEMA_ENTITY_BEACON)) {
-								list.add(Beacon.setPropertiesFromMap(new Beacon(), (HashMap) map, true));
-							}
-							else if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-								list.add(Comment.setPropertiesFromMap(new Comment(), (HashMap) map, true));
-							}
-							else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-								list.add(Place.setPropertiesFromMap(new Place(), (HashMap) map, true));
-							}
-							else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
-								list.add(Post.setPropertiesFromMap(new Post(), (HashMap) map, true));
-							}
-							else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
-								list.add(User.setPropertiesFromMap(new User(), (HashMap) map, true));
-							}
-						}
-						else if (serviceDataType == ServiceDataType.User) {
-							list.add(User.setPropertiesFromMap(new User(), (HashMap) map, true));
-						}
-						else if (serviceDataType == ServiceDataType.Beacon) {
-							list.add(Beacon.setPropertiesFromMap(new Beacon(), (HashMap) map, true));
-						}
-						else if (serviceDataType == ServiceDataType.Place) {
-							list.add(Place.setPropertiesFromMap(new Place(), (HashMap) map, true));
-						}
-						else if (serviceDataType == ServiceDataType.Applink) {
-							list.add(Applink.setPropertiesFromMap(new Applink(), (HashMap) map, true));
-						}
-						else if (serviceDataType == ServiceDataType.Post) {
-							list.add(Post.setPropertiesFromMap(new Post(), (HashMap) map, true));
-						}
-						else if (serviceDataType == ServiceDataType.Comment) {
-							list.add(Comment.setPropertiesFromMap(new Comment(), (HashMap) map, true));
-						}
-						else if (serviceDataType == ServiceDataType.Link) {
-							list.add(Link.setPropertiesFromMap(new Link(), (HashMap) map, true));
-						}
-						else if (serviceDataType == ServiceDataType.ImageResult) {
-							list.add(ImageResult.setPropertiesFromMap(new ImageResult(), (HashMap) map, true));
-						}
-						else if (serviceDataType == ServiceDataType.Photo) {
-							list.add(Photo.setPropertiesFromMap(new Photo(), (HashMap) map, true));
-						}
-						else if (serviceDataType == ServiceDataType.Stat) {
-							list.add(Stat.setPropertiesFromMap(new Stat(), (HashMap) map, true));
-						}
-						else if (serviceDataType == ServiceDataType.Category) {
-							list.add(Category.setPropertiesFromMap(new Category(), (HashMap) map, true));
-						}
-						else if (serviceDataType == ServiceDataType.Device) {
-							list.add(Device.setPropertiesFromMap(new Device(), (HashMap) map, true));
-						}
-					}
-					serviceData.data = list;
-				}
-			}
-			return serviceData;
+			return list;
 		}
 		catch (ClassCastException e) {
 			/*
@@ -1078,23 +1114,136 @@ public class HttpService {
 		return null;
 	}
 
-	public static String convertObjectToJsonSmart(Object object, Boolean useAnnotations, Boolean excludeNulls) {
-		String json = null;
-		if (object instanceof ServiceBase) {
-			final Map map = ((ServiceBase) object).getHashMap(useAnnotations, excludeNulls);
-			json = JSONValue.toJSONString(map);
-		}
-		else if (object instanceof ServiceObject) {
-			final Map map = ((ServiceObject) object).getHashMap(useAnnotations, excludeNulls);
-			json = JSONValue.toJSONString(map);
+	public static String objectToJson(Object object) {
+		return objectToJson(object, UseAnnotations.False, ExcludeNulls.True);
+	}
+
+	public static String objectToJson(Object object, UseAnnotations useAnnotations, ExcludeNulls excludeNulls) {
+		final Map map = HttpService.objectToMap(object, useAnnotations, excludeNulls);
+		String json = JSONValue.toJSONString(map);
+		return json;
+	}
+
+	public static Map<String, Object> objectToMap(Object object, UseAnnotations useAnnotations, ExcludeNulls excludeNullsProposed) {
+		final Map<String, Object> map = new HashMap<String, Object>();
+
+		/*
+		 * Order of precedent
+		 * 1. object.updateScope: Property = exclude nulls, Object = include nulls.
+		 * 2. excludeNulls parameter: forces exclusion even if updateScope = Object.
+		 */
+		Boolean excludeNulls = (excludeNullsProposed == ExcludeNulls.True);
+		if (((ServiceObject) object).updateScope == UpdateScope.Object) {
+			excludeNulls = false;
 		}
 
-		return json;
+		Class<?> cls = object.getClass();
+
+		try {
+			while (true) {
+				if (cls == null) {
+					return map;
+				}
+				final Field[] fields = cls.getDeclaredFields();
+				for (Field f : fields) {
+
+					f.setAccessible(true); // Ensure trusted access
+					/*
+					 * We are only mapping public and protected fields.
+					 */
+					if (!Modifier.isStatic(f.getModifiers())
+							&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {
+
+						if (useAnnotations == UseAnnotations.True) {
+							if (!f.isAnnotationPresent(Expose.class)) {
+								continue;
+							}
+							else {
+								Expose annotation = f.getAnnotation(Expose.class);
+								if (!annotation.serialize()) {
+									continue;
+								}
+							}
+						}
+
+						String key = f.getName();
+						/*
+						 * Modify the name key if annotations are active and present.
+						 */
+						if (useAnnotations == UseAnnotations.True) {
+							if (f.isAnnotationPresent(SerializedName.class)) {
+								SerializedName annotation = f.getAnnotation(SerializedName.class);
+								key = annotation.name();
+							}
+						}
+
+						Object value = f.get(object);
+						/*
+						 * Only add to map if has value or meets null requirements.
+						 */
+						if (value != null || !excludeNulls) {
+							/*
+							 * Handle nested objects and arrays
+							 */
+							if (value instanceof ServiceObject) {
+								Map childMap = HttpService.objectToMap(value, useAnnotations, excludeNullsProposed);
+								map.put(key, childMap);
+							}
+							else if (value instanceof ArrayList) {
+								List<Object> list = new ArrayList<Object>();
+								for (Object obj : (ArrayList) value) {
+									if (obj != null) {
+										if (obj instanceof ServiceObject) {
+											Map childMap = HttpService.objectToMap(obj, useAnnotations, excludeNullsProposed);
+											list.add(childMap);
+										}
+										else {
+											list.add(obj);
+										}
+									}
+								}
+								map.put(key, list);
+							}
+							else {
+								map.put(key, value);
+							}
+						}
+					}
+				}
+				cls = cls.getSuperclass();
+			}
+		}
+		catch (IllegalArgumentException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		catch (IllegalAccessException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		return map;
 	}
 
 	// ----------------------------------------------------------------------------------------
 	// Inner classes and enums
 	// ----------------------------------------------------------------------------------------
+
+	public static enum UseAnnotations {
+		True,
+		False
+	}
+
+	public static enum ServiceDataWrapper {
+		True,
+		False
+	}
+
+	public static enum ExcludeNulls {
+		True,
+		False
+	}
 
 	public static class RequestListener {
 
@@ -1102,12 +1251,12 @@ public class HttpService {
 
 		public void onComplete(Object response) {}
 
-		public void onComplete(Object response, Photo photo, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {} // $codepro.audit.disable largeNumberOfParameters
+		public void onComplete(Object response, Photo photo, String photoUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {} // $codepro.audit.disable largeNumberOfParameters
 
 		public void onProgressChanged(int progress) {}
 	}
 
-	public static enum ServiceDataType {
+	public static enum ObjectType {
 		Entity,
 		Beacon,
 		User,
@@ -1116,17 +1265,18 @@ public class HttpService {
 		Link,
 		Result,
 		ImageResult,
-		GeoLocation,
+		AirLocation,
 		Category,
 		None,
 		Location,
 		Stat,
 		ServiceEntry,
 		Applink,
-		Device, 
-		AirNotification, 
-		Place, 
-		Post, 
+		Shortcut,
+		Device,
+		AirNotification,
+		Place,
+		Post,
 		Comment
 	}
 

@@ -105,7 +105,7 @@ public class NetworkManager {
 		//mApplicationContext.registerReceiver(mNetworkStateIntentReceiver, mNetworkStateChangedFilter);
 	}
 
-	public ServiceResponse request(ServiceRequest serviceRequest) {
+	public ServiceResponse request(ServiceRequest serviceRequest, Stopwatch stopwatch) {
 		/*
 		 * Don't assume this is being called from the UI thread.
 		 */
@@ -116,7 +116,7 @@ public class NetworkManager {
 
 		try {
 			/* Could be string, input stream, or array of bytes */
-			final Object response = HttpService.getInstance().request(serviceRequest);
+			final Object response = HttpService.getInstance().request(serviceRequest, stopwatch);
 			serviceResponse = new ServiceResponse(ResponseCode.Success, response, null);
 		}
 		catch (HttpServiceException exception) {

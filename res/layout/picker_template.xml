@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <TextView
-        android:id="@+id/title"
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
@@ -16,7 +16,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_below="@+id/title"
+        android:layout_below="@+id/name"
         android:background="@color/accent_blue" />
 
     <com.aircandi.ui.widgets.BounceListView
@@ -24,7 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
-        android:layout_below="@+id/title"
+        android:layout_below="@+id/name"
         android:paddingTop="10dp" />
 
     <!-- Footer -->
@@ -43,7 +43,7 @@
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
 
-        <Button
+        <com.aircandi.ui.widgets.AirButton
             android:id="@+id/button_cancel"
             style="@style/form_button_borderless"
             android:layout_width="match_parent"

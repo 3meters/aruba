@@ -26,7 +26,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String									name;
 	@Expose
-	private String									type;
+	public String									schema;
 	@Expose
 	public String									app;
 	@Expose
@@ -43,7 +43,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	public Integer									count;
 	public List<Shortcut>							group;
 	public Entity									entity;
-	private Boolean									synthetic			= false;
+	public Boolean									synthetic			= false;
 
 	public Shortcut() {}
 
@@ -52,14 +52,17 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	// --------------------------------------------------------------------------------------------
 
 	public static Shortcut setPropertiesFromMap(Shortcut shortcut, Map map, Boolean nameMapping) {
-
+		/*
+		 * Need to include any properties that need to survive encode/decoded between activities.
+		 */
 		shortcut.id = (String) map.get("id");
 		shortcut.name = (String) map.get("name");
-		shortcut.type = (String) map.get("type");
+		shortcut.schema = (String) map.get("schema");
 		shortcut.app = (String) map.get("app");
 		shortcut.appId = (String) map.get("appId");
 		shortcut.appUrl = (String) map.get("appUrl");
 		shortcut.position = (Number) map.get("position");
+		shortcut.synthetic = (Boolean) (map.get("synthetic") != null ? map.get("synthetic") : false);
 
 		if (map.get("photo") != null) {
 			shortcut.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"), nameMapping);
@@ -97,10 +100,10 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 
 	public String getPackageName() {
 		String packageName = null;
-		if (type.equals("facebook")) {
+		if (schema.equals("facebook")) {
 			packageName = "com.facebook.katana";
 		}
-		else if (type.equals("twitter")) {
+		else if (schema.equals("twitter")) {
 			packageName = "com.twitter.android";
 		}
 		return packageName;
@@ -190,12 +193,12 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 		return this;
 	}
 
-	public String getType() {
-		return type;
+	public String getSchema() {
+		return schema;
 	}
 
-	public Shortcut setType(String type) {
-		this.type = type;
+	public Shortcut setSchema(String schema) {
+		this.schema = schema;
 		return this;
 	}
 

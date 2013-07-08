@@ -5,7 +5,6 @@ import it.sephiroth.android.library.imagezoom.ImageViewTouch;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -25,7 +24,6 @@ import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Exceptions;
-import com.aircandi.components.FontManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.PhotoPagerAdapter;
@@ -34,12 +32,10 @@ import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Photo;
-import com.aircandi.ui.base.FormActivity;
+import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.ui.widgets.UserView;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
 
-public class PictureDetail extends FormActivity {
+public class PictureDetail extends BaseActivity {
 
 	private List<Photo>	mPhotosForPaging	= new ArrayList<Photo>();
 	private String		mImageUri;
@@ -84,24 +80,10 @@ public class PictureDetail extends FormActivity {
 		}
 	}
 
-	@Override
-	public void onBackPressed() {
-		setResult(Activity.RESULT_CANCELED);
-		super.onBackPressed();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageBack);
-	}
-
-	@Override
-	public void onCancelButtonClick(View view) {
-		setResult(Activity.RESULT_CANCELED);
-		finish();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageBack);
-	}
-
 	public static View buildPictureDetail(final Context context, Photo photo, View layout) {
 
 		final SherlockActivity activity = (SherlockActivity) context;
-		final TextView title = (TextView) layout.findViewById(R.id.text_title);
+		final TextView name = (TextView) layout.findViewById(R.id.name);
 		final UserView user = (UserView) layout.findViewById(R.id.author);
 		final ProgressBar progress = (ProgressBar) layout.findViewById(R.id.progressBar);
 		final ViewGroup progressGroup = (ViewGroup) layout.findViewById(R.id.progress_group);
@@ -109,13 +91,11 @@ public class PictureDetail extends FormActivity {
 		((ImageViewTouch) image).setFitToScreen(true);
 		((ImageViewTouch) image).setScrollEnabled(true);
 
-		FontManager.getInstance().setTypefaceDefault(title);
-
 		/* Title */
-		setVisibility(title, View.GONE);
-		if (photo.getTitle() != null && !photo.getTitle().equals("")) {
-			title.setText(photo.getTitle());
-			setVisibility(title, View.VISIBLE);
+		setVisibility(name, View.GONE);
+		if (photo.getName() != null && !photo.getName().equals("")) {
+			name.setText(photo.getName());
+			setVisibility(name, View.VISIBLE);
 		}
 
 		/* Author block */
@@ -126,18 +106,18 @@ public class PictureDetail extends FormActivity {
 		}
 
 		/* Image */
-		String imageUri = photo.getUri();
-		if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
-			imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
+		String photoUri = photo.getUri();
+		if (!photoUri.startsWith("http:") && !photoUri.startsWith("https:") && !photoUri.startsWith("resource:")) {
+			photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 		}
 		final ViewHolder holder = new ViewHolder();
 		holder.itemImage = image;
-		holder.itemImage.setTag(imageUri);
+		holder.itemImage.setTag(photoUri);
 		holder.itemImage.setImageBitmap(null);
 
-		final BitmapRequest bitmapRequest = new BitmapRequest(imageUri, image);
+		final BitmapRequest bitmapRequest = new BitmapRequest(photoUri, image);
 		bitmapRequest.setImageRequestor(image);
-		bitmapRequest.setImageUri(imageUri);
+		bitmapRequest.setImageUri(photoUri);
 		bitmapRequest.setImageView(image);
 		bitmapRequest.setRequestListener(new RequestListener() {
 

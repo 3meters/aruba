@@ -88,27 +88,27 @@ public class User extends Entity {
 		 * 
 		 * Only posts and collections do not have photo objects
 		 */
-		String imageUri = "resource:img_placeholder_logo_bw";
+		String photoUri = "resource:img_placeholder_logo_bw";
 		if (photo != null) {
-			imageUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
-			if (imageUri == null) {
-				imageUri = photo.getUri();
+			photoUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
+			if (photoUri == null) {
+				photoUri = photo.getUri();
 			}
 		}
 		else {
 			if (creator != null) {
 				if (creator.getPhotoUri() != null && !creator.getPhotoUri().equals("")) {
-					imageUri = creator.getPhotoUri();
+					photoUri = creator.getPhotoUri();
 				}
 			}
-			if (!imageUri.startsWith("http:")
-					&& !imageUri.startsWith("https:")
-					&& !imageUri.startsWith("resource:")) {
-				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
+			if (!photoUri.startsWith("http:")
+					&& !photoUri.startsWith("https:")
+					&& !photoUri.startsWith("resource:")) {
+				photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 			}
 		}
 
-		return imageUri;
+		return photoUri;
 	}
 
 	@Override

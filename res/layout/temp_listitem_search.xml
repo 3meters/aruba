@@ -14,7 +14,7 @@
         android:layout_alignParentTop="true"
         android:background="?attr/ruleColor" />
 
-    <TextView
+    <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/type"
         style="@style/app_text_appearance_medium"
         android:layout_width="match_parent"
@@ -22,7 +22,7 @@
         android:layout_alignParentTop="true"
         android:gravity="center_vertical"
         android:padding="5dp"
-        android:text="@string/dummy_title"
+        android:text="@string/dummy_name"
         android:textColor="@color/text_secondary"
         android:visibility="gone" />
 

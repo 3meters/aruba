@@ -84,6 +84,7 @@ public class ProximityManager {
 					@Override
 					public void onReceive(Context context, Intent intent) {
 
+						Aircandi.stopwatch1.segmentTime("Wifi scan received from system");						
 						Logger.v(ProximityManager.this, "Received wifi scan results for " + reason.name());
 						Aircandi.applicationContext.unregisterReceiver(this);
 
@@ -193,7 +194,7 @@ public class ProximityManager {
 		 * visibility.
 		 */
 		Logger.d(this, "Processing beacons from scan");
-		Aircandi.stopwatch1.segmentTime("Entities for beacons: processing started");
+		Aircandi.stopwatch1.segmentTime("Entities for beacons (synchronized): processing started");
 
 		/*
 		 * Call the proxi service to see if the new beacons have been tagged with any entities. If call comes back
@@ -214,7 +215,7 @@ public class ProximityManager {
 		String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
 
 		serviceResponse = mEntityCache.loadEntitiesByProximity(beaconIds
-				, LinkOptions.getDefault(DefaultType.BeaconEntities)
+				, LinkOptions.getDefault(DefaultType.LinksForBeacon)
 				, null
 				, registrationId
 				, Aircandi.stopwatch1);

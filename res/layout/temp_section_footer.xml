@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1" >
 
-        <Button
+        <com.aircandi.ui.widgets.AirButton
             android:id="@+id/button_more"
             style="@style/form_button"
             android:layout_width="match_parent"
@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1" >
 
-        <Button
+        <com.aircandi.ui.widgets.AirButton
             android:id="@+id/button_footer_new_candigram"
             style="@style/form_button"
             android:layout_width="match_parent"

@@ -161,13 +161,13 @@ public class WebImageView extends RelativeLayout {
 					final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
 
 					/* Make sure this is the right target for the image */
-					if (imageResponse.imageUri.equals(mImageUri)) {
+					if (imageResponse.photoUri.equals(mImageUri)) {
 						if (imageResponse.bitmap != null) {
 							/*
 							 * Give the original listener a chance to modify the
 							 * bitmap before we display it.
 							 */
-							setImage(imageResponse.bitmap, imageResponse.imageUri);
+							setImage(imageResponse.bitmap, imageResponse.photoUri);
 						}
 					}
 				}
@@ -236,9 +236,9 @@ public class WebImageView extends RelativeLayout {
 	// Setters/Getters routines
 	// --------------------------------------------------------------------------------------------
 
-	private void setImage(final Bitmap bitmap, String imageUri) {
+	private void setImage(final Bitmap bitmap, String photoUri) {
 
-		mImageUri = imageUri;
+		mImageUri = photoUri;
 		mThreadHandler.post(new Runnable() {
 
 			@Override
@@ -261,8 +261,8 @@ public class WebImageView extends RelativeLayout {
 		return mImageUri;
 	}
 
-	public void setImageUri(String imageUri) {
-		mImageUri = imageUri;
+	public void setImageUri(String photoUri) {
+		mImageUri = photoUri;
 	}
 
 	public void setImageDrawable(Drawable drawable) {

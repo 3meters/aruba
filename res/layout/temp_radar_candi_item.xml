@@ -14,8 +14,8 @@
         aircandi:sizeHint="@dimen/image_medium"
         android:scaleType="centerCrop" />
 
-    <TextView
-        android:id="@+id/title"
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="8dp"

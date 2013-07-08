@@ -1,9 +1,12 @@
 package com.aircandi.components.bitmaps;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Environment;
 
@@ -33,5 +36,17 @@ public class Utils {
 
 	public static boolean hasExternalCacheDir() {
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO;
+	}
+
+	public static byte[] byteArrayForBitmap(Bitmap bitmap) {
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+		byte[] byteArray = stream.toByteArray();
+		return byteArray;
+	}
+
+	public static Bitmap bitmapForByteArray(byte[] byteArray) {
+		Bitmap bitmap = BitmapFactory.decodeByteArray((byte[]) byteArray, 0, byteArray.length);
+		return bitmap;
 	}
 }

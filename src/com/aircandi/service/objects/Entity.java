@@ -2,7 +2,6 @@ package com.aircandi.service.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,6 +18,7 @@ import com.aircandi.service.Expose;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Shortcut.IconStyle;
+import com.aircandi.utilities.DateUtils;
 
 /**
  * Entity as described by the proxi protocol standards.
@@ -63,19 +63,20 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	@Expose(serialize = false, deserialize = true)
 	public String				toId;											// Used to find entities this entity is linked to
 
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public List<Entity>			entities;
 
 	// --------------------------------------------------------------------------------------------
 	// Client fields (none are transferred)
 	// --------------------------------------------------------------------------------------------	
 
-	private Boolean				hidden				= false;
-	protected Float				distance;
-	public Boolean				checked				= false;
-	public Boolean				stale				= false;
-	public Boolean				synthetic			= false;					// Entity is not persisted with service
-	public Boolean				shortcuts			= false;					// Do links have shortcuts
+	public Boolean				hidden				= false;					// Flag entities not currently visible because of fencing.
+	public Float				distance;										// Used to cache most recent distance calculation.
+	public Boolean				checked				= false;					// Used to track selection in lists.
+	public Boolean				stale				= false;					// Used to determine that an entity ref is no longer current.
+	public Boolean				synthetic			= false;					// Entity is not persisted with service.
+	public Boolean				shortcuts			= false;					// Do links have shortcuts?
+	public Byte[]				imageBytes;									// Used to stash temp bitmap.
 
 	public Entity() {}
 
@@ -103,6 +104,8 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		}
 
 		entity.schema = schema;
+		entity.id = "temp:" + DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME); // Temporary
+
 		entity.signalFence = -100.0f;
 
 		if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
@@ -117,13 +120,20 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				.setAppId(id)
 				.setName(name != null ? name : null)
 				.setPhoto(photo != null ? photo : null)
-				.setType(schema != null ? schema : null)
+				.setSchema(schema != null ? schema : null)
 				.setApp(schema != null ? schema : null);
 		return shortcut;
 	}
 
 	public Integer getPosition() {
 		return position != null ? position.intValue() : 0;
+	}
+
+	public Boolean isTempId() {
+		if (id != null && id.substring(0, 5).equals("temp:")) {
+			return true;
+		}
+		return false;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -183,25 +193,30 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		 * 
 		 * Only posts and collections do not have photo objects
 		 */
-		String imageUri = "resource:img_placeholder_logo_bw";
+		String photoUri = null;
 		if (photo != null) {
-			imageUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
-			if (imageUri == null) {
-				imageUri = photo.getUri();
+			photoUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
+			if (photoUri == null) {
+				photoUri = photo.getUri();
 			}
 		}
 		else {
 			if (creator != null) {
 				if (creator.getPhotoUri() != null && !creator.getPhotoUri().equals("")) {
-					imageUri = creator.getPhotoUri();
+					photoUri = creator.getPhotoUri();
 				}
 			}
-			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
-				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
-			}
+		}
+		
+		if (photoUri == null) {
+			photoUri = "resource:img_placeholder_logo_bw";
+		}
+		
+		if (!photoUri.startsWith("http:") && !photoUri.startsWith("https:") && !photoUri.startsWith("resource:")) {
+			photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 		}
 
-		return imageUri;
+		return photoUri;
 	}
 
 	public Photo getDefaultPhoto() {
@@ -209,6 +224,9 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		if (this.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 			String photoUri = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + this.type + ".png";
 			photo = new Photo(photoUri, null, null, null, PhotoSource.assets);
+		}
+		else if (this.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			photo = null;
 		}
 		else {
 			photo = new Photo("resource:img_placeholder_logo_bw", null, null, null, null);
@@ -418,20 +436,22 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return null;
 	}
 
-	public List<Shortcut> getShortcuts(String type, Direction direction, Boolean synthetic, Boolean groupedByApp) {
+	public List<Shortcut> getShortcuts(ShortcutSettings settings, Boolean groupedByApp) {
 
 		List<Shortcut> shortcuts = new ArrayList<Shortcut>();
-		List<Link> links = direction == Direction.in ? linksIn : linksOut;
+		List<Link> links = settings.direction == Direction.in ? linksIn : linksOut;
 
 		if (links != null) {
 			for (Link link : links) {
-				if ((type == null || link.type.equals(type)) && link.shortcut != null) {
-					if (synthetic == null || link.shortcut.getSynthetic() == synthetic) {
-						/*
-						 * Must clone or the groups added below will cause circular references
-						 * that choke serializing to json.
-						 */
-						shortcuts.add(link.shortcut.clone());
+				if ((settings.linkType == null || link.type.equals(settings.linkType)) && link.shortcut != null) {
+					if (settings.targetSchema == null || (link.shortcut != null && link.shortcut.schema.equals(settings.targetSchema))) {
+						if (settings.synthetic == null || link.shortcut.getSynthetic() == settings.synthetic) {
+							/*
+							 * Must clone or the groups added below will cause circular references
+							 * that choke serializing to json.
+							 */
+							shortcuts.add(link.shortcut.clone());
+						}
 					}
 				}
 			}
@@ -456,7 +476,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					List<Shortcut> list = shortcutLists.get(iter.next());
 					Shortcut shortcut = list.get(0);
 					shortcut.setCount(0);
-					Count count = getCount(shortcut.app, direction);
+					Count count = getCount(shortcut.app, settings.direction);
 					if (count != null) {
 						shortcut.setCount(count.count.intValue());
 					}
@@ -510,13 +530,24 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public static Entity setPropertiesFromMap(Entity entity, Map map, Boolean nameMapping) {
 
 		synchronized (entity) {
-
+			/*
+			 * Need to include any properties that need to survive encode/decoded between activities.
+			 */
 			entity = (Entity) ServiceBase.setPropertiesFromMap(entity, map, nameMapping);
 
 			entity.subtitle = (String) map.get("subtitle");
 			entity.description = (String) map.get("description");
 			entity.signalFence = (Number) map.get("signalFence");
 			entity.position = (Number) map.get("position");
+
+			entity.hidden = (Boolean) (map.get("hidden") != null ? map.get("hidden") : false);
+			entity.synthetic = (Boolean) (map.get("synthetic") != null ? map.get("synthetic") : false);
+			entity.shortcuts = (Boolean) (map.get("shortcuts") != null ? map.get("shortcuts") : false);
+			entity.stale = (Boolean) (map.get("stale") != null ? map.get("stale") : false);
+			entity.checked = (Boolean) (map.get("checked") != null ? map.get("checked") : false);
+
+			entity.imageBytes = (Byte[]) map.get("imageBytes");
+
 			entity.toId = (String) (nameMapping ? map.get("_to") : map.get("toId"));
 
 			if (map.get("photo") != null) {
@@ -560,7 +591,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			}
 
 			if (map.get("entities") != null) {
-				entity.entities = Collections.synchronizedList(new ArrayList<Entity>());
+				entity.entities = new ArrayList<Entity>();
 				synchronized (entity.entities) {
 					final List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("entities");
 					for (Map<String, Object> childMap : childMaps) {

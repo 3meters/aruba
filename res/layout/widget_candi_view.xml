@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools" >
 
     <com.aircandi.ui.widgets.WebImageView
-        android:id="@+id/candi_view_image"
+        android:id="@+id/photo"
         android:layout_width="match_parent"
         android:layout_height="120dp"
         aircandi:layout="@layout/widget_webimageview_candi_view"
@@ -12,7 +12,7 @@
         android:scaleType="centerCrop" />
 
     <LinearLayout
-        android:id="@+id/text_group"
+        android:id="@+id/info_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -24,7 +24,7 @@
         android:paddingTop="25dp" >
 
         <ImageView
-            android:id="@+id/candi_view_subtitle_badge"
+            android:id="@+id/subtitle_badge"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center_vertical"
@@ -38,8 +38,8 @@
             android:layout_gravity="center_vertical"
             android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/candi_view_title"
+            <com.aircandi.ui.widgets.AirTextView
+                android:id="@+id/name"
                 style="@style/candi_view_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -50,8 +50,8 @@
                 android:text="@string/dummy_title_short"
                 android:textSize="24sp" />
 
-            <TextView
-                android:id="@+id/candi_view_subtitle"
+            <com.aircandi.ui.widgets.AirTextView
+                android:id="@+id/subtitle"
                 style="@style/candi_view_subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -64,23 +64,23 @@
         </LinearLayout>
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/candi_view_distance"
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/distance"
         style="@style/candi_view_distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/candi_view_image"
+        android:layout_alignBottom="@+id/photo"
         android:layout_alignParentRight="true"
         android:paddingBottom="12dp"
         android:paddingRight="10dp" />
 
-    <TextView
-        android:id="@+id/candi_view_place_rank_score"
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/place_rank_score"
         style="@style/candi_view_distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/candi_view_image"
+        android:layout_alignTop="@+id/photo"
         android:paddingRight="10dp"
         android:paddingTop="12dp" />
 

@@ -123,9 +123,9 @@ public class Preferences extends SherlockPreferenceActivity {
 	private void doInfoClick() {
 		final String title = getString(R.string.alert_about_title);
 		final String message = getString(R.string.alert_about_label_version) + " "
-				+ Aircandi.getVersionName(this, CandiRadar.class) + System.getProperty("line.separator")
+				+ Aircandi.getVersionName(this, RadarForm.class) + System.getProperty("line.separator")
 				+ getString(R.string.alert_about_label_code) + " "
-				+ String.valueOf(Aircandi.getVersionCode(this, CandiRadar.class)) + System.getProperty("line.separator")
+				+ String.valueOf(Aircandi.getVersionCode(this, RadarForm.class)) + System.getProperty("line.separator")
 				+ getString(R.string.dialog_about_copyright);
 		AircandiCommon.showAlertDialog(R.drawable.ic_launcher
 				, title

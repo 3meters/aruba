@@ -10,7 +10,7 @@ import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.service.Expose;
-import com.aircandi.service.HttpService.ServiceDataType;
+import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.Photo.PhotoSource;
 
 /**
@@ -39,20 +39,20 @@ public class Applink extends Entity implements Cloneable, Serializable {
 
 	@Override
 	public String getPhotoUri() {
-		String imageUri;
+		String photoUri;
 		if (photo != null) {
-			imageUri = photo.getUri();
+			photoUri = photo.getUri();
 		}
 		else {
-			Photo photo = new Photo(getDefaultPhoto(type), null, null, null, PhotoSource.assets);
-			imageUri = photo.getUri();
+			Photo photo = new Photo(getDefaultPhotoUri(type), null, null, null, PhotoSource.assets);
+			photoUri = photo.getUri();
 		}
-		return imageUri;
+		return photoUri;
 	}
 
-	public static String getDefaultPhoto(String sourceType) {
-		String icon = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + sourceType + ".png";
-		return icon;
+	public static String getDefaultPhotoUri(String sourceType) {
+		String photoUri = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + sourceType + ".png";
+		return photoUri;
 	}
 
 	@Override
@@ -109,13 +109,12 @@ public class Applink extends Entity implements Cloneable, Serializable {
 
 	public static Applink builder(Entity entity, String type, String name, String image, Boolean synthetic) {
 
-		final Applink applink = (Applink) EntityManager.getInstance().loadEntityFromResources(R.raw.applink_entity, ServiceDataType.Applink);
+		final Applink applink = (Applink) EntityManager.getInstance().loadEntityFromResources(R.raw.applink_entity, ObjectType.Applink);
 		applink.id = entity.id + "." + type;
 		applink.schema = Constants.SCHEMA_ENTITY_APPLINK;
 		applink.type = type;
 		applink.name = name;
 		applink.photo = new Photo(image, null, null, null, PhotoSource.resource);
-		applink.synthetic = true;
 		applink.toId = entity.id;
 		applink.synthetic = synthetic;
 		return applink;

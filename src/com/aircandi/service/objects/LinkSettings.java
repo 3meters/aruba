@@ -3,6 +3,7 @@ package com.aircandi.service.objects;
 import java.util.Map;
 
 import com.aircandi.service.Expose;
+import com.aircandi.service.objects.Link.Direction;
 
 /**
  * @author Jayma
@@ -105,12 +106,12 @@ public class LinkSettings extends ServiceObject {
 		return this;
 	}
 
-	public String getDirection() {
-		return direction;
+	public Direction getDirection() {
+		return Direction.valueOf(direction);
 	}
 
-	public LinkSettings setDirection(String direction) {
-		this.direction = direction;
+	public LinkSettings setDirection(Direction direction) {
+		this.direction = direction.name();
 		return this;
 	}
 }

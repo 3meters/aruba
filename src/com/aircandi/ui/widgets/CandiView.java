@@ -18,7 +18,6 @@ import android.widget.TextView;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.FontManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
@@ -39,15 +38,15 @@ public class CandiView extends RelativeLayout {
 	private Integer			mLayoutId;
 	private ViewGroup		mLayout;
 
-	private WebImageView	mCandiImage;
+	private WebImageView	mPhoto;
 	private ImageView		mCategoryImage;
-	private TextView		mTitle;
+	private TextView		mName;
 	private TextView		mSubtitle;
 	private TextView		mDistance;
 	private TextView		mPlaceRankScore;
 	private View			mCandiViewGroup;
 	private LinearLayout	mApplinks;
-	private LinearLayout	mTextGroup;
+	private LinearLayout	mInfoHolder;
 
 	private Integer			mColorResId;
 	private Boolean			mMuteColor;
@@ -78,18 +77,14 @@ public class CandiView extends RelativeLayout {
 		mLayout = (ViewGroup) mInflater.inflate(mLayoutId, this, true);
 
 		mCandiViewGroup = mLayout.findViewById(R.id.candi_view_group);
-		mCandiImage = (WebImageView) mLayout.findViewById(R.id.candi_view_image);
-		mTitle = (TextView) mLayout.findViewById(R.id.candi_view_title);
-		mSubtitle = (TextView) mLayout.findViewById(R.id.candi_view_subtitle);
-		mDistance = (TextView) mLayout.findViewById(R.id.candi_view_distance);
-		mPlaceRankScore = (TextView) mLayout.findViewById(R.id.candi_view_place_rank_score);
-		mCategoryImage = (ImageView) mLayout.findViewById(R.id.candi_view_subtitle_badge);
-		mApplinks = (LinearLayout) mLayout.findViewById(R.id.candi_view_sources);
-		mTextGroup = (LinearLayout) mLayout.findViewById(R.id.text_group);
-
-		FontManager.getInstance().setTypefaceRegular(mTitle);
-		FontManager.getInstance().setTypefaceDefault(mSubtitle);
-		FontManager.getInstance().setTypefaceDefault(mDistance);
+		mPhoto = (WebImageView) mLayout.findViewById(R.id.photo);
+		mName = (TextView) mLayout.findViewById(R.id.name);
+		mSubtitle = (TextView) mLayout.findViewById(R.id.subtitle);
+		mDistance = (TextView) mLayout.findViewById(R.id.distance);
+		mPlaceRankScore = (TextView) mLayout.findViewById(R.id.place_rank_score);
+		mCategoryImage = (ImageView) mLayout.findViewById(R.id.subtitle_badge);
+		mApplinks = (LinearLayout) mLayout.findViewById(R.id.shortcuts);
+		mInfoHolder = (LinearLayout) mLayout.findViewById(R.id.info_holder);
 	}
 
 	public void bindToPlace(Place place) {
@@ -117,8 +112,8 @@ public class CandiView extends RelativeLayout {
 			}
 
 			/* Clear image as quickly as possible */
-			if (mCandiImage != null) {
-				mCandiImage.getImageView().setImageDrawable(null);
+			if (mPhoto != null) {
+				mPhoto.getImageView().setImageDrawable(null);
 			}
 
 			mPlace = place;
@@ -137,10 +132,10 @@ public class CandiView extends RelativeLayout {
 				mCandiViewGroup.setBackgroundResource(mColorResId);
 			}
 
-			setVisibility(mTitle, View.GONE);
-			if (mTitle != null && place.name != null && !place.name.equals("")) {
-				mTitle.setText(Html.fromHtml(place.name));
-				setVisibility(mTitle, View.VISIBLE);
+			setVisibility(mName, View.GONE);
+			if (mName != null && place.name != null && !place.name.equals("")) {
+				mName.setText(Html.fromHtml(place.name));
+				setVisibility(mName, View.VISIBLE);
 			}
 
 			setVisibility(mSubtitle, View.GONE);
@@ -214,16 +209,16 @@ public class CandiView extends RelativeLayout {
 		}
 	}
 
-	private void addApplinkIndicator(String imageUri, Integer sizePixels, Integer marginPixels) {
+	private void addApplinkIndicator(String photoUri, Integer sizePixels, Integer marginPixels) {
 
 		View view = mInflater.inflate(R.layout.temp_radar_candi_item, null);
 		WebImageView webImageView = (WebImageView) view.findViewById(R.id.photo);
 		webImageView.setSizeHint(sizePixels);
 
-		webImageView.getImageView().setTag(imageUri);
+		webImageView.getImageView().setTag(photoUri);
 
-		BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
-		bitmapRequest.setImageSize(mCandiImage.getSizeHint());
+		BitmapRequest bitmapRequest = new BitmapRequest(photoUri, webImageView.getImageView());
+		bitmapRequest.setImageSize(mPhoto.getSizeHint());
 		bitmapRequest.setImageRequestor(webImageView.getImageView());
 		BitmapManager.getInstance().masterFetch(bitmapRequest);
 
@@ -238,36 +233,36 @@ public class CandiView extends RelativeLayout {
 	}
 
 	private void drawImage() {
-		if (mCandiImage != null) {
+		if (mPhoto != null) {
 
 			/* Don't use gradient if we are not using a photo */
-			if (mTextGroup != null) {
-				mTextGroup.setBackgroundResource((mPlace.photo != null) ? R.drawable.overlay_picture : 0);
+			if (mInfoHolder != null) {
+				mInfoHolder.setBackgroundResource((mPlace.photo != null) ? R.drawable.overlay_picture : 0);
 			}
 
 			if (mPlace.photo != null && mPlace.photo.getBitmap() != null) {
 				/*
 				 * If we are carrying around a bitmap then it should be used
 				 */
-				ImageUtils.showImageInImageView(mPlace.photo.getBitmap(), mCandiImage.getImageView(), true, AnimUtils.fadeInMedium());
+				ImageUtils.showImageInImageView(mPlace.photo.getBitmap(), mPhoto.getImageView(), true, AnimUtils.fadeInMedium());
 			}
 			else {
 
 				/* Remove colored filters */
-				mCandiImage.getImageView().clearColorFilter();
-				mCandiImage.setBackgroundResource(0);
+				mPhoto.getImageView().clearColorFilter();
+				mPhoto.setBackgroundResource(0);
 				(mLayout.findViewById(R.id.color_layer)).setVisibility(View.GONE);
 				(mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
 
 				/* Go get the image for the entity regardless of type */
-				final String imageUri = mPlace.getPhotoUri();
+				final String photoUri = mPlace.getPhotoUri();
 
-				if (imageUri != null) {
+				if (photoUri != null) {
 
-					if (imageUri.equals("resource:img_placeholder_logo_bw")) {
+					if (photoUri.equals("resource:img_placeholder_logo_bw")) {
 						(mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
-						mCandiImage.getImageView().setTag(imageUri);
-						mCandiImage.getImageView().setImageDrawable(null);
+						mPhoto.getImageView().setTag(photoUri);
+						mPhoto.getImageView().setImageDrawable(null);
 					}
 					else {
 
@@ -279,17 +274,17 @@ public class CandiView extends RelativeLayout {
 										? mPlace.category.name
 										: null, true, mMuteColor, false);
 
-								mCandiImage.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-								mCandiImage.setBackgroundResource(mColorResId);
+								mPhoto.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+								mPhoto.setBackgroundResource(mColorResId);
 								(mLayout.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
 								(mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
 							}
 						}
 
-						final BitmapRequest bitmapRequest = new BitmapRequest(imageUri, mCandiImage.getImageView());
-						bitmapRequest.setImageSize(mCandiImage.getSizeHint());
-						bitmapRequest.setImageRequestor(mCandiImage.getImageView());
-						mCandiImage.getImageView().setTag(imageUri);
+						final BitmapRequest bitmapRequest = new BitmapRequest(photoUri, mPhoto.getImageView());
+						bitmapRequest.setImageSize(mPhoto.getSizeHint());
+						bitmapRequest.setImageRequestor(mPhoto.getImageView());
+						mPhoto.getImageView().setTag(photoUri);
 						BitmapManager.getInstance().masterFetch(bitmapRequest);
 					}
 				}
@@ -367,11 +362,11 @@ public class CandiView extends RelativeLayout {
 	}
 
 	public WebImageView getCandiImage() {
-		return mCandiImage;
+		return mPhoto;
 	}
 
 	public void setCandiImage(WebImageView candiImage) {
-		mCandiImage = candiImage;
+		mPhoto = candiImage;
 	}
 
 	public ImageView getCategoryImage() {
@@ -383,11 +378,11 @@ public class CandiView extends RelativeLayout {
 	}
 
 	public LinearLayout getTextGroup() {
-		return mTextGroup;
+		return mInfoHolder;
 	}
 
 	public void setTextGroup(LinearLayout textGroup) {
-		mTextGroup = textGroup;
+		mInfoHolder = textGroup;
 	}
 
 	public TextView getPlaceRankScore() {

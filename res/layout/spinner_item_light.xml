@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.aircandi.ui.widgets.AirTextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/spinner_name"
     style="@style/form_spinner_item"
     android:ellipsize="end"

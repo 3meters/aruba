@@ -17,9 +17,10 @@ import com.aircandi.ProxiConstants;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.HttpService.RequestType;
 import com.aircandi.service.HttpService.ResponseFormat;
-import com.aircandi.service.HttpService.ServiceDataType;
+import com.aircandi.service.HttpService.ServiceDataWrapper;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Applink;
@@ -45,10 +46,14 @@ public class EntityCache implements Map<String, Entity> {
 	// --------------------------------------------------------------------------------------------
 
 	private ServiceResponse dispatch(ServiceRequest serviceRequest) {
+		return dispatch(serviceRequest, null);
+	}
+	
+	private ServiceResponse dispatch(ServiceRequest serviceRequest, Stopwatch stopwatch) {
 		/*
 		 * We use this as a choke point for all calls to the aircandi service.
 		 */
-		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest, stopwatch);
 		return serviceResponse;
 	}
 
@@ -82,7 +87,7 @@ public class EntityCache implements Map<String, Entity> {
 				Link link = new Link(entity.id, applink.schema, true, applink.id);
 				link.shortcut = new Shortcut()
 						.setName(applink.name != null ? applink.name : null)
-						.setType(applink.schema != null ? applink.schema : null)
+						.setSchema(applink.schema != null ? applink.schema : null)
 						.setApp(applink.type != null ? applink.type : null)
 						.setAppId(applink.id != null ? applink.id : null)
 						.setAppUrl(applink.appUrl != null ? applink.appUrl : null)
@@ -112,7 +117,7 @@ public class EntityCache implements Map<String, Entity> {
 
 		final Bundle parameters = new Bundle();
 		parameters.putStringArrayList("entityIds", (ArrayList<String>) entityIds);
-		parameters.putString("links", "object:" + HttpService.convertObjectToJsonSmart(linkOptions, true, true));
+		parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
@@ -128,7 +133,7 @@ public class EntityCache implements Map<String, Entity> {
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Entity, ServiceDataWrapper.True);
 			final List<Entity> loadedEntities = (List<Entity>) serviceData.data;
 			serviceResponse.data = serviceData;
 
@@ -146,10 +151,13 @@ public class EntityCache implements Map<String, Entity> {
 		final Bundle parameters = new Bundle();
 		parameters.putString("entityId", entityId);
 		parameters.putStringArrayList("linkTypes", (ArrayList<String>) linkTypes);
-		parameters.putString("links", "object:" + HttpService.convertObjectToJsonSmart(linkOptions, true, true));
+		
+		if (linkOptions != null) {
+			parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
+		}
 
 		if (cursor != null) {
-			parameters.putString("cursor", "object:" + HttpService.convertObjectToJsonSmart(cursor, true, true));
+			parameters.putString("cursor", "object:" + HttpService.objectToJson(cursor));
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
@@ -166,7 +174,7 @@ public class EntityCache implements Map<String, Entity> {
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Entity, ServiceDataWrapper.True);
 			final List<Entity> loadedEntities = (List<Entity>) serviceData.data;
 			serviceResponse.data = serviceData;
 
@@ -183,10 +191,10 @@ public class EntityCache implements Map<String, Entity> {
 
 		final Bundle parameters = new Bundle();
 		parameters.putStringArrayList("beaconIds", (ArrayList<String>) beaconIds);
-		parameters.putString("links", "object:" + HttpService.convertObjectToJsonSmart(linkOptions, true, true));
+		parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
 
 		if (cursor != null) {
-			parameters.putString("cursor", "object:" + HttpService.convertObjectToJsonSmart(cursor, true, true));
+			parameters.putString("cursor", "object:" + HttpService.objectToJson(cursor));
 		}
 
 		if (registrationId != null) {
@@ -207,7 +215,7 @@ public class EntityCache implements Map<String, Entity> {
 			stopwatch.segmentTime("Load entities: service call started");
 		}
 
-		ServiceResponse serviceResponse = dispatch(serviceRequest);
+		ServiceResponse serviceResponse = dispatch(serviceRequest, stopwatch);
 
 		if (stopwatch != null) {
 			stopwatch.segmentTime("Load entities: service call complete");
@@ -215,7 +223,7 @@ public class EntityCache implements Map<String, Entity> {
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Entity, ServiceDataWrapper.True);
 			final List<Entity> loadedEntities = (List<Entity>) serviceData.data;
 			serviceResponse.data = serviceData;
 
@@ -226,7 +234,11 @@ public class EntityCache implements Map<String, Entity> {
 			if (loadedEntities != null && loadedEntities.size() > 0) {
 				decorate(loadedEntities, linkOptions);
 				upsertEntities(loadedEntities);
+				if (stopwatch != null) {
+					stopwatch.segmentTime("Load entities: entities decorated and pushed to cache");
+				}
 			}
+			
 		}
 
 		return serviceResponse;
@@ -237,10 +249,10 @@ public class EntityCache implements Map<String, Entity> {
 		final Bundle parameters = new Bundle();
 		parameters.putString("ownerId", ownerId);
 		parameters.putStringArrayList("entitySchemas", (ArrayList<String>) entitySchemas);
-		parameters.putString("links", "object:" + HttpService.convertObjectToJsonSmart(linkOptions, true, true));
+		parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
 
 		if (cursor != null) {
-			parameters.putString("cursor", "object:" + HttpService.convertObjectToJsonSmart(cursor, true, true));
+			parameters.putString("cursor", "object:" + HttpService.objectToJson(cursor));
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
@@ -257,7 +269,7 @@ public class EntityCache implements Map<String, Entity> {
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Entity, ServiceDataWrapper.True);
 			final List<Entity> loadedEntities = (List<Entity>) serviceData.data;
 			serviceResponse.data = serviceData;
 
@@ -273,7 +285,7 @@ public class EntityCache implements Map<String, Entity> {
 	public ServiceResponse loadEntitiesNearLocation(AirLocation location, List<String> excludePlaceIds) {
 
 		final Bundle parameters = new Bundle();
-		parameters.putString("location", "object:" + HttpService.convertObjectToJsonSmart(location, true, true));
+		parameters.putString("location", "object:" + HttpService.objectToJson(location));
 		parameters.putInt("limit", 50);
 		parameters.putString("provider",
 				Aircandi.settings.getString(
@@ -302,7 +314,7 @@ public class EntityCache implements Map<String, Entity> {
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Place);
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Place, ServiceDataWrapper.True);
 
 			/* Do a bit of fixup */
 			final List<Entity> entities = (List<Entity>) serviceData.data;

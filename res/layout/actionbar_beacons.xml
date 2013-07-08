@@ -11,7 +11,7 @@
     android:gravity="center"
     android:minWidth="@dimen/action_button_min_width" >
 
-    <TextView
+    <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/beacon_indicator"
         style="@style/actionbar_beacons"
         android:layout_width="wrap_content"

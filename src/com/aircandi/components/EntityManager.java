@@ -23,9 +23,12 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.ExcludeNulls;
+import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.HttpService.RequestType;
 import com.aircandi.service.HttpService.ResponseFormat;
-import com.aircandi.service.HttpService.ServiceDataType;
+import com.aircandi.service.HttpService.ServiceDataWrapper;
+import com.aircandi.service.HttpService.UseAnnotations;
 import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.AirLocation;
@@ -39,7 +42,6 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
@@ -80,7 +82,7 @@ public class EntityManager {
 		/*
 		 * We use this as a choke point for all calls to the aircandi service.
 		 */
-		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest, null);
 		return serviceResponse;
 	}
 
@@ -126,7 +128,7 @@ public class EntityManager {
 		result.data = entities;
 
 		if (loadEntityIds.size() > 0) {
-			result.serviceResponse = mEntityCache.loadEntities(loadEntityIds, LinkOptions.getDefault(DefaultType.PlaceEntities));
+			result.serviceResponse = mEntityCache.loadEntities(loadEntityIds, linkOptions);
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				ServiceData serviceData = (ServiceData) result.serviceResponse.data;
 				result.data = serviceData.data;
@@ -170,27 +172,6 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult getEntitiesUserWatching(String userId, Boolean refresh, String schema, Integer limit) {
-		final ModelResult result = new ModelResult();
-
-		if (refresh) {
-			LinkOptions linkOptions = LinkOptions.getDefault(DefaultType.UserWatchingEntities);
-			linkOptions.setLoadSort(Maps.asMap("createdDate", -1));
-			linkOptions.setLoadWhere(Maps.asMap("schema", schema));
-
-			result.serviceResponse = mEntityCache.loadEntity(userId, linkOptions);
-			if (result.serviceResponse.responseCode == ResponseCode.Success) {
-				ServiceData serviceData = (ServiceData) result.serviceResponse.data;
-				result.data = serviceData.data;
-			}
-		}
-		else {
-			Entity entity = mEntityCache.get(userId);
-			result.data = entity.getLinkedEntitiesByLinkType(Constants.TYPE_LINK_WATCH, Arrays.asList(Constants.SCHEMA_ANY), Direction.out, false);
-		}
-		return result;
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Service queries
 	// --------------------------------------------------------------------------------------------
@@ -212,7 +193,7 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Category);
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Category, ServiceDataWrapper.True);
 			mCategories = (List<Category>) serviceData.data;
 			result.serviceResponse.data = mCategories;
 		}
@@ -224,9 +205,13 @@ public class EntityManager {
 		final ModelResult result = new ModelResult();
 		final Bundle parameters = new Bundle();
 
-		place.entities = applinks;
-		parameters.putString("place", "object:" + HttpService.convertObjectToJsonSmart(place, true, true));
-		place.entities = null;
+		parameters.putString("place", "object:" + HttpService.objectToJson(place, UseAnnotations.True, ExcludeNulls.True));
+
+		final List<String> entityStrings = new ArrayList<String>();
+		for (Entity applink : applinks) {
+			entityStrings.add("object:" + HttpService.objectToJson(applink, UseAnnotations.True, ExcludeNulls.True));
+		}
+		parameters.putStringArrayList("applinks", (ArrayList<String>) entityStrings);
 		parameters.putInt("timeout", ProxiConstants.SOURCE_SUGGESTIONS_TIMEOUT);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
@@ -239,8 +224,8 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Place);
-			result.data = ((Entity) serviceData.data).entities;
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Applink, ServiceDataWrapper.True);
+			result.data = serviceData.data; // updated collection of applinks
 		}
 		return result;
 	}
@@ -264,7 +249,7 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = HttpService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Photo);
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Photo, ServiceDataWrapper.True);
 			final List<Photo> photos = (List<Photo>) serviceData.data;
 			result.serviceResponse.data = photos;
 		}
@@ -282,12 +267,12 @@ public class EntityManager {
 				.setSuppressUI(true)
 				.setResponseFormat(ResponseFormat.Json);
 
-		result.serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		result.serviceResponse = NetworkManager.getInstance().request(serviceRequest, null);
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceEntry serviceEntry = (ServiceEntry) HttpService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.ServiceEntry).data;
-			result.serviceResponse.data = serviceEntry.id;
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.ServiceEntry, ServiceDataWrapper.True);
+			result.serviceResponse.data = ((ServiceEntry) serviceData.data).id;
 		}
 		return result;
 	}
@@ -378,7 +363,7 @@ public class EntityManager {
 			ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "create")
 					.setRequestType(RequestType.Insert)
-					.setRequestBody(HttpService.convertObjectToJsonSmart(user, true, true))
+					.setRequestBody(HttpService.objectToJson(user, UseAnnotations.True, ExcludeNulls.True))
 					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
 					.setRetry(false)
 					.setUseSecret(true)
@@ -390,7 +375,7 @@ public class EntityManager {
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 				String jsonResponse = (String) result.serviceResponse.data;
-				ServiceData serviceData = HttpService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);
+				ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.None, ServiceDataWrapper.True);
 				user = serviceData.user;
 				user.session = serviceData.session;
 				/*
@@ -408,7 +393,7 @@ public class EntityManager {
 					serviceRequest = new ServiceRequest()
 							.setUri(user.getEntryUri())
 							.setRequestType(RequestType.Update)
-							.setRequestBody(HttpService.convertObjectToJsonSmart(user, true, true))
+							.setRequestBody(HttpService.objectToJson(user, UseAnnotations.True, ExcludeNulls.True))
 							.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
 							.setRetry(false)
 							.setSession(user.session)
@@ -419,7 +404,7 @@ public class EntityManager {
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						jsonResponse = (String) result.serviceResponse.data;
-						serviceData = HttpService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User);
+						serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.User, ServiceDataWrapper.True);
 						final User insertedUser = (User) serviceData.data;
 						insertedUser.session = user.session;
 						result.data = insertedUser;
@@ -459,7 +444,7 @@ public class EntityManager {
 			final ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(user.getEntryUri())
 					.setRequestType(RequestType.Update)
-					.setRequestBody(HttpService.convertObjectToJsonSmart(user, true, false))
+					.setRequestBody(HttpService.objectToJson(user, UseAnnotations.True, ExcludeNulls.False))
 					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
 					.setRetry(false)
 					.setSession(Aircandi.getInstance().getUser().session)
@@ -573,7 +558,7 @@ public class EntityManager {
 
 						beacon.type = Constants.TYPE_BEACON_FIXED;
 						beacon.locked = false;
-						beaconStrings.add("object:" + HttpService.convertObjectToJsonSmart(beacon, true, true));
+						beaconStrings.add("object:" + HttpService.objectToJson(beacon, UseAnnotations.True, ExcludeNulls.True));
 					}
 					parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
 				}
@@ -595,11 +580,11 @@ public class EntityManager {
 
 				/* Link */
 				if (link != null) {
-					parameters.putString("link", "object:" + HttpService.convertObjectToJsonSmart(link, true, true));
+					parameters.putString("link", "object:" + HttpService.objectToJson(link, UseAnnotations.True, ExcludeNulls.True));
 				}
 
 				/* Entity */
-				parameters.putString("entity", "object:" + HttpService.convertObjectToJsonSmart(entity, true, true));
+				parameters.putString("entity", "object:" + HttpService.objectToJson(entity, UseAnnotations.True, ExcludeNulls.True));
 
 				final ServiceRequest serviceRequest = new ServiceRequest()
 						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity")
@@ -615,16 +600,16 @@ public class EntityManager {
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
-				ServiceDataType serviceDataType = ServiceDataType.Entity;
+				ObjectType serviceDataType = ObjectType.Entity;
 
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) serviceDataType = ServiceDataType.Applink;
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_BEACON)) serviceDataType = ServiceDataType.Beacon;
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) serviceDataType = ServiceDataType.Comment;
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) serviceDataType = ServiceDataType.Place;
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_POST)) serviceDataType = ServiceDataType.Post;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) serviceDataType = ObjectType.Applink;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_BEACON)) serviceDataType = ObjectType.Beacon;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) serviceDataType = ObjectType.Comment;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) serviceDataType = ObjectType.Place;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_POST)) serviceDataType = ObjectType.Post;
 
 				final String jsonResponse = (String) result.serviceResponse.data;
-				final ServiceData serviceData = HttpService.convertJsonToObjectSmart(jsonResponse, serviceDataType);
+				final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, serviceDataType, ServiceDataWrapper.True);
 
 				final Entity insertedEntity = (Entity) serviceData.data;
 
@@ -672,7 +657,7 @@ public class EntityManager {
 			final Bundle parameters = new Bundle();
 			parameters.putBoolean("skipActivityDate", false);
 			entity.updateScope = UpdateScope.Object;
-			parameters.putString("entity", "object:" + HttpService.convertObjectToJsonSmart(entity, true, true));
+			parameters.putString("entity", "object:" + HttpService.objectToJson(entity, UseAnnotations.True, ExcludeNulls.True));
 
 			final ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity")
@@ -774,7 +759,7 @@ public class EntityManager {
 
 				beacon.type = Constants.TYPE_BEACON_FIXED;
 				beacon.locked = false;
-				beaconStrings.add("object:" + HttpService.convertObjectToJsonSmart(beacon, true, true));
+				beaconStrings.add("object:" + HttpService.objectToJson(beacon, UseAnnotations.True, ExcludeNulls.True));
 				beaconIds.add(beacon.id);
 			}
 
@@ -927,12 +912,26 @@ public class EntityManager {
 	public ModelResult replaceEntitiesForEntity(String entityId, List<Entity> entities, String linkType) {
 
 		final ModelResult result = new ModelResult();
+
+		/* Upload new images to S3 as needed. */
+		for (Entity entity : entities) {
+			if (entity.photo != null && entity.photo.hasBitmap()) {
+				result.serviceResponse = storeImageAtS3(entity, null, entity.photo.getBitmap());
+				if (result.serviceResponse.responseCode != ResponseCode.Success) {
+					return result;
+				}
+			}
+		}
+
 		final Bundle parameters = new Bundle();
 		parameters.putString("entityId", entityId);
 
 		final List<String> entityStrings = new ArrayList<String>();
 		for (Entity entity : entities) {
-			entityStrings.add("object:" + HttpService.convertObjectToJsonSmart(entity, true, true));
+			if (entity.isTempId()) {
+				entity.id = null;
+			}
+			entityStrings.add("object:" + HttpService.objectToJson(entity, UseAnnotations.True, ExcludeNulls.True));
 		}
 		parameters.putStringArrayList("entities", (ArrayList<String>) entityStrings);
 		parameters.putString("linkType", linkType);
@@ -971,7 +970,7 @@ public class EntityManager {
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + Device.collectionId)
 				.setRequestType(RequestType.Insert)
-				.setRequestBody(HttpService.convertObjectToJsonSmart(device, true, true))
+				.setRequestBody(HttpService.objectToJson(device, UseAnnotations.True, ExcludeNulls.True))
 				.setIgnoreResponseData(true)
 				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
 				.setRetry(false)
@@ -1009,7 +1008,7 @@ public class EntityManager {
 			final ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + document.getCollection())
 					.setRequestType(RequestType.Insert)
-					.setRequestBody(HttpService.convertObjectToJsonSmart(document, true, true))
+					.setRequestBody(HttpService.objectToJson(document, UseAnnotations.True, ExcludeNulls.True))
 					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
 					.setRetry(false)
 					.setSession(Aircandi.getInstance().getUser().session)
@@ -1084,15 +1083,15 @@ public class EntityManager {
 	// Other fetch routines
 	// --------------------------------------------------------------------------------------------
 
-	public Photo getPhoto(String imageUri) {
+	public Photo getPhoto(String photoUri) {
 		for (Photo photo : mPhotos) {
 			if (photo.getUri() != null) {
-				if (photo.getUri().equals(imageUri)) {
+				if (photo.getUri().equals(photoUri)) {
 					return photo;
 				}
 			}
 			else {
-				if (photo.getUri().equals(imageUri)) {
+				if (photo.getUri().equals(photoUri)) {
 					return photo;
 				}
 			}
@@ -1108,7 +1107,7 @@ public class EntityManager {
 		return categoryStrings;
 	}
 
-	public Entity loadEntityFromResources(Integer entityResId, ServiceDataType schema) {
+	public Entity loadEntityFromResources(Integer entityResId, ObjectType objectType) {
 		InputStream inputStream = null;
 		BufferedReader reader = null;
 		try {
@@ -1120,7 +1119,7 @@ public class EntityManager {
 				text.append(line);
 			}
 			final String jsonEntity = text.toString();
-			final Entity entity = (Entity) HttpService.convertJsonToObjectInternalSmart(jsonEntity, schema);
+			final Entity entity = (Entity) HttpService.jsonToObject(jsonEntity, objectType);
 			return entity;
 		}
 		catch (IOException exception) {

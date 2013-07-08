@@ -21,26 +21,24 @@ public class Link extends ServiceBase {
 	public static final String	collectionId		= "links";
 
 	@Expose
-	public String				schema;
-	@Expose
 	@SerializedName(name = "_from")
 	public String				fromId;
 	@Expose
 	@SerializedName(name = "_to")
 	public String				toId;
+	@Expose(serialize = false, deserialize = true)
+	public String				fromCollectionId;
+	@Expose(serialize = false, deserialize = true)
+	public String				toCollectionId;
 	@Expose
 	public Boolean				strong;
+
 	@Expose
 	public Proximity			proximity;
 	@Expose(serialize = false, deserialize = true)
 	public Shortcut				shortcut;
 	@Expose(serialize = false, deserialize = true)
 	public List<Count>			stats;
-
-	@Expose(serialize = false, deserialize = true)
-	public String				fromCollectionId;
-	@Expose(serialize = false, deserialize = true)
-	public String				toCollectionId;
 
 	public Link() {}
 
@@ -116,7 +114,7 @@ public class Link extends ServiceBase {
 		}
 		return count;
 	}
-	
+
 	@Override
 	public String getCollection() {
 		return collectionId;
@@ -130,7 +128,6 @@ public class Link extends ServiceBase {
 
 		link = (Link) ServiceBase.setPropertiesFromMap(link, map, nameMapping);
 
-		link.schema = (String) map.get("schema");
 		link.fromId = (String) (nameMapping ? map.get("_from") : map.get("fromId"));
 		link.toId = (String) (nameMapping ? map.get("_to") : map.get("toId"));
 		link.fromCollectionId = (String) map.get("fromCollectionId");

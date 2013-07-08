@@ -34,7 +34,7 @@ public final class ProxiConstants {
 	public static final String	URL_PROXIBASE_SERVICE							= "http://ariseditions.com:8080";																												// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
 	public static final String	_URL_PROXIBASE_SERVICE							= "https://api.aircandi.com";																													//$NON-NLS-1$
 
-	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS		= "/img/sources/";																																//$NON-NLS-1$
+	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS		= "/img/applinks/";																																//$NON-NLS-1$
 	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES		= "/img/categories/foursquare/";																												//$NON-NLS-1$
 
 	public static final String	URL_PROXIBASE_SERVICE_REST						= URL_PROXIBASE_SERVICE + "/data/";																											//$NON-NLS-1$

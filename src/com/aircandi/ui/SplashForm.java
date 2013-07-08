@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Window;
@@ -23,7 +22,6 @@ import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
@@ -33,11 +31,11 @@ import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ServiceDataType;
+import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.User;
-import com.aircandi.ui.user.RegisterForm;
-import com.aircandi.ui.user.SignInForm;
+import com.aircandi.ui.user.RegisterEdit;
+import com.aircandi.ui.user.SignInEdit;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -67,7 +65,7 @@ public class SplashForm extends SherlockActivity {
 
 		if (!isFinishing()) {
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
-			setContentView(R.layout.splash);
+			setContentView(R.layout.splash_form);
 			initialize();
 
 			if (Aircandi.applicationUpdateRequired) {
@@ -122,11 +120,6 @@ public class SplashForm extends SherlockActivity {
 
 	private void initialize() {
 		((ImageView) findViewById(R.id.image_background)).setBackgroundResource(R.drawable.img_splash_v);
-
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.splash_title));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.splash_message));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_signup));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_signin));
 	}
 
 	private void signinAuto() {
@@ -136,9 +129,9 @@ public class SplashForm extends SherlockActivity {
 
 		if (jsonUser != null && jsonSession != null) {
 			Logger.i(this, "Auto sign in...");
-			final User user = (User) HttpService.convertJsonToObjectInternalSmart(jsonUser, ServiceDataType.User);
+			final User user = (User) HttpService.jsonToObject(jsonUser, ObjectType.User);
 			if (user != null) {
-				user.session = (Session) HttpService.convertJsonToObjectInternalSmart(jsonSession, ServiceDataType.Session);
+				user.session = (Session) HttpService.jsonToObject(jsonSession, ObjectType.Session);
 				if (user.session != null) {
 					Aircandi.getInstance().setUser(user);
 					Tracker.startNewSession(Aircandi.getInstance().getUser());
@@ -150,7 +143,7 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	private void startMainApp() {
-		final Intent intent = new Intent(this, CandiRadar.class);
+		final Intent intent = new Intent(this, RadarForm.class);
 		startActivity(intent);
 		finish();
 	}
@@ -286,7 +279,7 @@ public class SplashForm extends SherlockActivity {
 			return;
 		}
 
-		final IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
+		final IntentBuilder intentBuilder = new IntentBuilder(this, SignInEdit.class);
 		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, Constants.ACTIVITY_SIGNIN);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
@@ -299,7 +292,7 @@ public class SplashForm extends SherlockActivity {
 			return;
 		}
 
-		final IntentBuilder intentBuilder = new IntentBuilder(this, RegisterForm.class);
+		final IntentBuilder intentBuilder = new IntentBuilder(this, RegisterEdit.class);
 		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, Constants.ACTIVITY_SIGNIN);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);

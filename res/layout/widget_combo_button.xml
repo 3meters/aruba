@@ -17,7 +17,7 @@
             android:adjustViewBounds="true"
             android:scaleType="fitCenter" />
 
-        <TextView
+        <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -5,8 +5,8 @@
     android:orientation="vertical"
     android:paddingBottom="5dp" >
 
-    <TextView
-        android:id="@+id/title"
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/name"
         style="@style/app_text_appearance_large_accent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -16,7 +16,7 @@
         android:cacheColorHint="#00000000"
         android:listSelector="#00000000" />
     
-    <Button
+    <com.aircandi.ui.widgets.AirButton
         android:id="@+id/button_new_entity"
         style="@style/form_button"
         android:layout_width="wrap_content"

@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
     
-    <TextView
-        android:id="@+id/title"
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
@@ -15,19 +15,19 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_below="@+id/title"
+        android:layout_below="@+id/name"
         android:background="@color/accent_blue" />
     
     <LinearLayout
         android:id="@+id/group_uri"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/title" 
+        android:layout_below="@+id/name" 
         android:layout_marginBottom="5dp"
         android:orientation="horizontal"
         android:padding="5dp" >
 
-        <EditText
+        <com.aircandi.ui.widgets.AirEditText
             android:id="@+id/uri"
             android:layout_width="0dip"
             android:layout_height="match_parent"
@@ -38,7 +38,7 @@
             android:singleLine="true"
             android:textAppearance="@style/app_text_appearance_small" />
 
-        <Button
+        <com.aircandi.ui.widgets.AirButton
             android:id="@+id/button_test"
             style="@style/form_button"
             android:layout_width="60dp"
@@ -74,7 +74,7 @@
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
 
-        <Button
+        <com.aircandi.ui.widgets.AirButton
             android:id="@+id/button_cancel"
             style="@style/form_button_borderless"
             android:layout_width="0dp"
@@ -84,7 +84,7 @@
             android:onClick="onCancelButtonClick"
             android:text="@string/form_button_cancel" />
 
-        <Button
+        <com.aircandi.ui.widgets.AirButton
             android:id="@+id/button_ok"
             style="@style/form_button_borderless"
             android:layout_width="0dip"

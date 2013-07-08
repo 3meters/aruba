@@ -14,10 +14,10 @@ import android.widget.TextView;
 
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.FontManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Count;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateUtils;
@@ -37,7 +37,7 @@ public class UserView extends RelativeLayout {
 	private TextView		mTextWatchCount;
 	private String			mLabel;
 	private TextView		mTextTimeSince;
-	private User			mUser;
+	private Entity			mUser;
 	private Activity		mActivity;
 
 	public UserView(Context context) {
@@ -62,37 +62,33 @@ public class UserView extends RelativeLayout {
 
 	private void bindToView() {
 		if (!isInEditMode()) {
-			mImageUser = (WebImageView) mBoundView.findViewById(R.id.candi_user_picture);
-			mTextName = (TextView) mBoundView.findViewById(R.id.candi_user_fullname);
-			mTextLocation = (TextView) mBoundView.findViewById(R.id.candi_user_location);
-			mTextLabel = (TextView) mBoundView.findViewById(R.id.candi_user_label);
-			mTextTimeSince = (TextView) mBoundView.findViewById(R.id.candi_user_timesince);
+			mImageUser = (WebImageView) mBoundView.findViewById(R.id.photo);
+			mTextName = (TextView) mBoundView.findViewById(R.id.fullname);
+			mTextLocation = (TextView) mBoundView.findViewById(R.id.area);
+			mTextLabel = (TextView) mBoundView.findViewById(R.id.label);
+			mTextTimeSince = (TextView) mBoundView.findViewById(R.id.timesince);
 			mImageLocked = (ImageView) mBoundView.findViewById(R.id.image_locked);
 			mImageWatched = (ImageView) mBoundView.findViewById(R.id.image_watched);
 			mImageLiked = (ImageView) mBoundView.findViewById(R.id.image_liked);
 			mTextLikeCount = (TextView) mBoundView.findViewById(R.id.like_count);
 			mTextWatchCount = (TextView) mBoundView.findViewById(R.id.watch_count);
-			FontManager.getInstance().setTypefaceDefault(mTextName);
-			FontManager.getInstance().setTypefaceDefault(mTextLocation);
-			FontManager.getInstance().setTypefaceDefault(mTextTimeSince);
-			FontManager.getInstance().setTypefaceDefault(mTextLabel);
-			FontManager.getInstance().setTypefaceDefault(mTextLikeCount);
-			FontManager.getInstance().setTypefaceDefault(mTextWatchCount);
 		}
 
 		this.removeAllViews();
 		this.addView(mBoundView);
 	}
 
-	public void bindToUser(User user, Long date) {
+	public void bindToUser(Entity user, Long date) {
 		bindToUser(user, date, null);
 		mUser = user;
 	}
 
-	public void bindToUser(User user, Long date, Boolean locked) {
-		mUser = user;
-		this.setTag(user);
-		if (mUser != null) {
+	public void bindToUser(Entity userEntity, Long date, Boolean locked) {
+		mUser = userEntity;
+		this.setTag(userEntity);
+		User user = (User) mUser;
+		
+		if (user != null) {
 			if (mTextLabel != null) {
 				if (mLabel != null) {
 					mTextLabel.setText(mLabel);
@@ -103,13 +99,13 @@ public class UserView extends RelativeLayout {
 			}
 
 			if (mTextName != null) {
-				if (mUser.name != null) {
-					mTextName.setText(mUser.name);
+				if (user.name != null) {
+					mTextName.setText(user.name);
 				}
 			}
 
-			if (mTextLocation != null && mUser.location != null && !mUser.location.equals("")) {
-				mTextLocation.setText(Html.fromHtml(mUser.area));
+			if (mTextLocation != null && user.location != null && !user.location.equals("")) {
+				mTextLocation.setText(Html.fromHtml(user.area));
 			}
 
 			if (mTextTimeSince != null) {
@@ -122,9 +118,9 @@ public class UserView extends RelativeLayout {
 			}
 
 			if (mImageUser != null) {
-				if (mUser.getPhotoUri() != null && mUser.getPhotoUri().length() != 0) {
+				if (user.getPhotoUri() != null && user.getPhotoUri().length() != 0) {
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
-					builder.setFromUri(mUser.getPhotoUri());
+					builder.setFromUri(user.getPhotoUri());
 					final BitmapRequest imageRequest = builder.create();
 					mImageUser.setBitmapRequest(imageRequest);
 				}
@@ -157,11 +153,11 @@ public class UserView extends RelativeLayout {
 	// Pager methods and callbacks
 	// --------------------------------------------------------------------------------------------
 
-	public void setUser(User user) {
+	public void setUser(Entity user) {
 		mUser = user;
 	}
 
-	public User getUser() {
+	public Entity getUser() {
 		return mUser;
 	}
 

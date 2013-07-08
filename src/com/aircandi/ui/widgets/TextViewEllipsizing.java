@@ -11,12 +11,11 @@ import android.text.Layout.Alignment;
 import android.text.StaticLayout;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
-import android.widget.TextView;
 
 import com.aircandi.beta.R;
 
 @SuppressWarnings("ucd")
-public class TextViewEllipsizing extends TextView {
+public class TextViewEllipsizing extends AirTextView {
 
 	private static final String				ELLIPSIS						= "&#8230;";
 

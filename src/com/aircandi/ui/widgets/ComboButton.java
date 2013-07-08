@@ -11,7 +11,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aircandi.beta.R;
-import com.aircandi.components.FontManager;
 
 @SuppressWarnings("ucd")
 public class ComboButton extends RelativeLayout {
@@ -54,7 +53,6 @@ public class ComboButton extends RelativeLayout {
 		mLayout = (ViewGroup) mInflater.inflate(mLayoutId, this, true);
 		mTextLabel = (TextView) mLayout.findViewById(R.id.label);
 		mImageIcon = (ImageView) mLayout.findViewById(R.id.icon);
-		FontManager.getInstance().setTypefaceRegular(mTextLabel);
 	}
 
 	private void draw() {

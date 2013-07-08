@@ -10,7 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.aircandi.beta.R;
-import com.aircandi.components.FontManager;
 
 @SuppressWarnings("ucd")
 public class SectionLayout extends LinearLayout {
@@ -45,10 +44,9 @@ public class SectionLayout extends LinearLayout {
 		if (mLayoutHeaderId != 0) {
 			final View view = inflater.inflate(mLayoutHeaderId, null);
 
-			mTextViewHeader = (TextView) view.findViewById(R.id.title);
+			mTextViewHeader = (TextView) view.findViewById(R.id.name);
 			mHeaderRule = view.findViewById(R.id.rule);
 			mHeader = (ViewGroup) view.findViewById(R.id.header);
-			FontManager.getInstance().setTypefaceDefault(mTextViewHeader);
 
 			if (mTextViewHeader != null) {
 				if (mHeaderTitle == null) {

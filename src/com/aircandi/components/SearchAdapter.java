@@ -48,11 +48,6 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 			holder.uri = (TextView) view.findViewById(R.id.uri);
 			holder.photo = (WebImageView) view.findViewById(R.id.photo);
 
-			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.type));
-			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.name));
-			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.category_name));
-			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.uri));
-
 			view.setTag(holder);
 		}
 		else {
@@ -119,11 +114,11 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 				}
 				else if (searchItem.categoryIconUri != null) {
 
-					final String imageUri = searchItem.categoryIconUri;
-					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photo).setImageUri(imageUri);
+					final String photoUri = searchItem.categoryIconUri;
+					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photo).setImageUri(photoUri);
 					final BitmapRequest imageRequest = builder.create();
 
-					holder.categoryIconUri = imageUri;
+					holder.categoryIconUri = photoUri;
 					holder.photo.setBitmapRequest(imageRequest);
 				}
 				else {

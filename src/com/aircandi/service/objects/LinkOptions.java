@@ -9,6 +9,7 @@ import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.components.Maps;
 import com.aircandi.service.Expose;
+import com.aircandi.service.objects.Link.Direction;
 
 /**
  * @author Jayma
@@ -22,7 +23,7 @@ public class LinkOptions extends ServiceObject {
 	@Expose
 	public Map					loadWhere;
 	@Expose
-	private Boolean				shortcuts;
+	public Boolean				shortcuts;
 	@Expose
 	public List<LinkSettings>	active;
 
@@ -73,43 +74,72 @@ public class LinkOptions extends ServiceObject {
 
 	public static LinkOptions getDefault(DefaultType defaultType) {
 
-		User user = Aircandi.getInstance().getUser();
-		Number limit = ProxiConstants.LIMIT_CHILD_ENTITIES;
-		LinkOptions linkOptions = new LinkOptions()
-				.setActive(new ArrayList<LinkSettings>());
-
-		if (defaultType == DefaultType.PlaceEntities) {
-			linkOptions.setShortcuts(true);
-			linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, true, false, true, limit));
-			linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
-			linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
-			linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_POST, false, false, true, limit));
-			if (user != null) {
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, limit, Maps.asMap("_from", user.id)));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit, Maps.asMap("_from", user.id)));
+		if (defaultType == DefaultType.NoLinks) {
+			return null;
+		}
+		else {
+			User user = Aircandi.getInstance().getUser();
+			Number limit = ProxiConstants.LIMIT_CHILD_ENTITIES;
+			LinkOptions linkOptions = new LinkOptions()
+					.setActive(new ArrayList<LinkSettings>());
+			if (defaultType == DefaultType.LinksForPlace) {
+				linkOptions.setShortcuts(true);
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, true, false, true, limit));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_POST, false, false, true, limit));
+				if (user != null) {
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, limit, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit, Maps.asMap("_from", user.id)));
+				}
+				else {
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit));
+				}
 			}
-			else {
+			else if (defaultType == DefaultType.LinksForBeacon) {
+				linkOptions.setShortcuts(false);
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, true, false, true, ProxiConstants.LIMIT_RADAR_PLACES));
+			}
+			else if (defaultType == DefaultType.LinksForPost) {
+				linkOptions.setShortcuts(false);
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
+				if (user != null) {
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, limit, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit, Maps.asMap("_from", user.id)));
+				}
+				else {
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit));
+				}
+			}
+			else if (defaultType == DefaultType.LinksForUser) {
+				linkOptions.setShortcuts(true);
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit));
 			}
+			else if (defaultType == DefaultType.LinksUserWatching) {
+				linkOptions.setShortcuts(true);
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit).setDirection(Direction.out));
+			}
+			else if (defaultType == DefaultType.LinksUserLikes) {
+				linkOptions.setShortcuts(true);
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, limit).setDirection(Direction.out));
+			}
+			return linkOptions;
 		}
-		else if (defaultType == DefaultType.BeaconEntities) {
-			linkOptions.setShortcuts(false);
-			linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, true, false, true, ProxiConstants.LIMIT_RADAR_PLACES));
-		}
-		else if (defaultType == DefaultType.UserEntities) {}
-		else if (defaultType == DefaultType.UserWatchingEntities) {
-			linkOptions.setShortcuts(true);
-			linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, true, true, ProxiConstants.LIMIT_USER_WATCHING_ENTITIES));
-		}
-
-		return linkOptions;
 	}
 
 	public enum DefaultType {
-		BeaconEntities,
-		PlaceEntities,
-		UserEntities,
-		UserWatchingEntities
+		LinksForBeacon,
+		LinksForPlace,
+		LinksForPost,
+		LinksUserWatching,
+		LinksWatchingUser,
+		LinksUserLikes,
+		LinksLikesUser,
+		LinksForUser,
+		NoLinks,
 	}
 }

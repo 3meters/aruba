@@ -11,7 +11,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aircandi.beta.R;
-import com.aircandi.components.FontManager;
 
 @SuppressWarnings("ucd")
 public class BuilderButton extends RelativeLayout {
@@ -51,7 +50,6 @@ public class BuilderButton extends RelativeLayout {
 
 		mTextView = (TextView) view.findViewById(R.id.builder_text);
 		mViewGroup = (LinearLayout) view.findViewById(R.id.builder_images);
-		FontManager.getInstance().setTypefaceDefault(mTextView);
 
 		if (mTextView != null && mHint != null) {
 			mTextView.setTextColor(getResources().getColor(R.color.edit_hint));

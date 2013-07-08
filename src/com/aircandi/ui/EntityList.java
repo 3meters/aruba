@@ -35,7 +35,6 @@ import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.Maps;
@@ -54,7 +53,9 @@ import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
-import com.aircandi.ui.base.CandiActivity;
+import com.aircandi.ui.base.BaseActivity;
+import com.aircandi.ui.base.BaseEntityEdit;
+import com.aircandi.ui.edit.CommentEdit;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -62,7 +63,7 @@ import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.DateUtils;
 import com.aircandi.utilities.ImageUtils;
 
-public class EntityList extends CandiActivity {
+public class EntityList extends BaseActivity {
 
 	private ListView			mListView;
 
@@ -98,8 +99,6 @@ public class EntityList extends CandiActivity {
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mListView = (ListView) findViewById(R.id.list_entities);
 
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_new_entity));
-
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mListMode = EntityList.ListMode.valueOf(extras.getString(Constants.EXTRA_LIST_MODE));
@@ -134,7 +133,7 @@ public class EntityList extends CandiActivity {
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 			mCommon.mActionBar.setHomeButtonEnabled(true);
 			if (mCommon.mUserId != null) {
-				ModelResult result = EntityManager.getInstance().getEntity(mCommon.mUserId, false, LinkOptions.getDefault(DefaultType.UserEntities));
+				ModelResult result = EntityManager.getInstance().getEntity(mCommon.mUserId, false, LinkOptions.getDefault(DefaultType.LinksUserWatching));
 				User user = (User) result.serviceResponse.data;
 				mCommon.mActionBar.setTitle(user.name);
 			}
@@ -177,7 +176,7 @@ public class EntityList extends CandiActivity {
 						Collections.sort(mEntities, new Entity.SortEntitiesByModifiedDate());
 						mListView.setAdapter(new EndlessEntityAdapter(mEntities));
 					}
-					
+
 					mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 					mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 					mEntityModelUser = Aircandi.getInstance().getUser();
@@ -325,11 +324,6 @@ public class EntityList extends CandiActivity {
 					});
 				}
 				view.setTag(holder);
-
-				FontManager.getInstance().setTypefaceBoldDefault(holder.name);
-				FontManager.getInstance().setTypefaceDefault(holder.subtitle);
-				FontManager.getInstance().setTypefaceDefault(holder.description);
-				FontManager.getInstance().setTypefaceDefault(holder.buttonComments);
 			}
 			else {
 				holder = (ViewHolder) view.getTag();
@@ -427,17 +421,17 @@ public class EntityList extends CandiActivity {
 						ImageUtils.showImageInImageView(entity.photo.getBitmap(), holder.photo.getImageView(), true, AnimUtils.fadeInMedium());
 					}
 					else {
-						final String imageUri = entity.getPhotoUri();
+						final String photoUri = entity.getPhotoUri();
 
 						/* Don't do anything if the image is already set to the one we want */
-						if (holder.photo.getImageUri() == null || !holder.photo.getImageUri().equals(imageUri)) {
+						if (holder.photo.getImageUri() == null || !holder.photo.getImageUri().equals(photoUri)) {
 
 							final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photo)
-									.setImageUri(imageUri);
+									.setImageUri(photoUri);
 
 							final BitmapRequest imageRequest = builder.create();
 
-							holder.photoUri = imageUri;
+							holder.photoUri = photoUri;
 							if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 								Place place = (Place) entity;
 								if (place.synthetic) {
@@ -523,13 +517,12 @@ public class EntityList extends CandiActivity {
 		 * We assume the new entity button wouldn't be visible if the
 		 * entity is locked.
 		 */
-		IntentBuilder intentBuilder = new IntentBuilder(this, EntityEdit.class)
-				.setEntityId(null)
-				.setParentEntityId(mCommon.mEntityId)
-				.setEntitySchema(mListSchema);
+		IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(mListSchema))
+				.setEntitySchema(mListSchema)
+				.setEntityParentId(mCommon.mEntityId);
 
 		if (mListSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-			intentBuilder.setClass(CommentForm.class);
+			intentBuilder.setClass(CommentEdit.class);
 		}
 
 		startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
@@ -553,7 +546,7 @@ public class EntityList extends CandiActivity {
 			}
 		}
 		else {
-			mCommon.showCandiFormForEntity(entity.id, CandiForm.class);
+			mCommon.showCandiFormForEntity(entity.id, EntityList.class);
 		}
 	}
 

@@ -41,8 +41,8 @@
         android:orientation="vertical"
         android:padding="10dp" >
 
-        <TextView
-            android:id="@+id/text_title"
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/name"
             style="@style/form_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

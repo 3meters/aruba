@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/backgroundForm" >
+
+    <com.aircandi.ui.widgets.BounceScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true" >
+
+        <TableLayout
+            style="@style/form_content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:shrinkColumns="*"
+            android:stretchColumns="*" >
+
+            <!-- Tuning -->
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <com.aircandi.ui.widgets.AirTextView
+                    android:id="@+id/section_title_tune"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:layout_span="2"
+                    android:text="@string/tuning_section_tune"
+                    android:textAppearance="@style/app_text_appearance_medium_accent" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <com.aircandi.ui.widgets.AirTextView
+                    android:id="@+id/label_tune"
+                    style="@style/form_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_span="2"
+                    android:text="@string/form_label_tuning_tune" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0" >
+
+                    <com.aircandi.ui.widgets.AirButton
+                        android:id="@+id/button_tune"
+                        style="@style/form_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="2dp"
+                        android:layout_weight="0.5"
+                        android:onClick="onTuneButtonClick"
+                        android:text="@string/form_button_tuning_tune" />
+
+                    <com.aircandi.ui.widgets.AirButton
+                        android:id="@+id/button_untune"
+                        style="@style/form_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="2dp"
+                        android:layout_weight="0.5"
+                        android:onClick="onUntuneButtonClick"
+                        android:text="@string/form_button_tuning_untune"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/image_star_tune"
+                    style="@style/actionbar_beacons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="?attr/iconStarOff"
+                    android:tint="@color/brand_pink" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_span="2"
+                    android:background="?attr/ruleColor" />
+            </TableRow>
+
+            <!-- Set banner -->
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <com.aircandi.ui.widgets.AirTextView
+                    android:id="@+id/section_title_banner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:layout_span="2"
+                    android:text="@string/tuning_section_banner"
+                    android:textAppearance="@style/app_text_appearance_medium_accent" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <com.aircandi.ui.widgets.AirTextView
+                    android:id="@+id/label_banner"
+                    style="@style/form_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_span="2"
+                    android:text="@string/form_label_tuning_banner" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0" >
+
+                    <com.aircandi.ui.widgets.WebImageView
+                        android:id="@+id/photo"
+                        style="@style/picture_framed"
+                        android:layout_width="@dimen/image_large"
+                        android:layout_height="@dimen/image_large"
+                        android:layout_marginRight="10dp"
+                        aircandi:layout="@layout/widget_webimageview_candi_view"
+                        aircandi:showBusy="true"
+                        aircandi:sizeHint="@dimen/image_large"
+                        android:clickable="true"
+                        android:minWidth="@dimen/image_large"
+                        android:onClick="onChangePictureButtonClick"
+                        android:scaleType="centerCrop" />
+
+                    <com.aircandi.ui.widgets.AirButton
+                        android:id="@+id/button_change_image"
+                        style="@style/form_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:onClick="onChangePhotoButtonClick"
+                        android:text="@string/form_button_change_picture" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/image_star_banner"
+                    style="@style/actionbar_beacons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="?attr/iconStarOff"
+                    android:tint="@color/accent" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_span="2"
+                    android:background="?attr/ruleColor" />
+            </TableRow>
+
+            <!-- Advanced editing -->
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <com.aircandi.ui.widgets.AirTextView
+                    android:id="@+id/section_title_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:layout_span="2"
+                    android:text="@string/tuning_section_edit"
+                    android:textAppearance="@style/app_text_appearance_medium_accent" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <com.aircandi.ui.widgets.AirTextView
+                    android:id="@+id/label_edit"
+                    style="@style/form_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_span="2"
+                    android:text="@string/form_label_tuning_edit" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <com.aircandi.ui.widgets.AirButton
+                    android:id="@+id/button_edit"
+                    style="@style/form_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="onEditButtonClick"
+                    android:text="@string/form_button_tuning_edit" />
+            </TableRow>
+        </TableLayout>
+    </com.aircandi.ui.widgets.BounceScrollView>
+
+</RelativeLayout>

@@ -24,12 +24,11 @@ import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
 import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.HttpService.RequestListener;
-import com.aircandi.service.HttpService.ServiceDataType;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Device;
-import com.aircandi.service.objects.ServiceData;
-import com.aircandi.ui.CandiRadar;
+import com.aircandi.ui.RadarForm;
 import com.google.android.gcm.GCMRegistrar;
 
 @SuppressWarnings("ucd")
@@ -82,16 +81,15 @@ public class NotificationManager {
 					Logger.i(this, "GCM: Registering device with Aircandi notification service");
 
 					Device device = new Device(Aircandi.getInstance().getUser().id, GCMRegistrar.getRegistrationId(Aircandi.applicationContext));
-					device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, CandiRadar.class);
-					device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, CandiRadar.class);
+					device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, RadarForm.class);
+					device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, RadarForm.class);
 
 					ModelResult result = EntityManager.getInstance().registerDevice(device);
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "GCM: Device registered with Aircandi notification service");
 						final String jsonResponse = (String) result.serviceResponse.data;
-						final ServiceData serviceData = HttpService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.Device);
-						mDevice = (Device) serviceData.data;
+						mDevice = (Device) HttpService.jsonToObject(jsonResponse, ObjectType.Device);
 						GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, true);
 					}
 				}

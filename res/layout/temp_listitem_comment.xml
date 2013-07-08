@@ -24,7 +24,7 @@
         android:layout_toRightOf="@+id/photo"
         android:orientation="horizontal" >
 
-        <TextView
+        <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,7 +34,7 @@
             android:textColor="@color/text_secondary"
             android:textStyle="bold" />
 
-        <TextView
+        <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/separator"
             style="@style/bullet"
             android:layout_width="wrap_content"
@@ -46,7 +46,7 @@
             android:text="@string/symbol_bullet"
             android:textAppearance="@style/app_text_appearance_small" />
 
-        <TextView
+        <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/area"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
             android:textColor="@color/text_secondary" />
     </RelativeLayout>
 
-    <TextView
+    <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
         android:layout_below="@+id/description"
         android:orientation="horizontal" >
 
-        <TextView
+        <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/created_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

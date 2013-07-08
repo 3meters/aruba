@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.aircandi.Constants;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.EntityList;
 import com.aircandi.ui.EntityList.ListMode;
 
@@ -13,8 +15,9 @@ public class IntentBuilder {
 	private Class<?>	mClass;
 
 	private String		mUserId;
+	private Entity		mEntity;
 	private String		mEntityId;
-	private String		mParentEntityId;
+	private String		mEntityParentId;
 	private String		mEntitySchema;
 
 	private String		mListSchema;
@@ -33,7 +36,10 @@ public class IntentBuilder {
 	}
 
 	public Intent create() {
-		final Intent intent = new Intent(mContext, mClass);
+		Intent intent = new Intent();
+		if (mContext != null && mClass != null) {
+			intent = new Intent(mContext, mClass);
+		}
 
 		if (mUserId != null) {
 			intent.putExtra(Constants.EXTRA_USER_ID, mUserId);
@@ -43,12 +49,17 @@ public class IntentBuilder {
 			intent.putExtra(Constants.EXTRA_ENTITY_ID, mEntityId);
 		}
 
+		if (mEntity != null) {
+			final String jsonEntity = HttpService.objectToJson(mEntity);
+			intent.putExtra(Constants.EXTRA_ENTITY, jsonEntity);
+		}
+
 		if (mEntitySchema != null) {
 			intent.putExtra(Constants.EXTRA_ENTITY_SCHEMA, mEntitySchema);
 		}
 
-		if (mParentEntityId != null) {
-			intent.putExtra(Constants.EXTRA_PARENT_ENTITY_ID, mParentEntityId);
+		if (mEntityParentId != null) {
+			intent.putExtra(Constants.EXTRA_ENTITY_PARENT_ID, mEntityParentId);
 		}
 
 		if (mListMode != null) {
@@ -78,8 +89,8 @@ public class IntentBuilder {
 		return intent;
 	}
 
-	public IntentBuilder setParentEntityId(String parentEntityId) {
-		mParentEntityId = parentEntityId;
+	public IntentBuilder setEntityParentId(String entityParentId) {
+		mEntityParentId = entityParentId;
 		return this;
 	}
 
@@ -125,5 +136,10 @@ public class IntentBuilder {
 
 	public void setClass(Class<?> clazz) {
 		mClass = clazz;
+	}
+
+	public IntentBuilder setEntity(Entity entity) {
+		mEntity = entity;
+		return this;
 	}
 }

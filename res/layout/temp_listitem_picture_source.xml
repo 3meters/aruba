@@ -27,7 +27,7 @@
         android:layout_centerVertical="true"
         android:layout_marginTop="3dp"
         android:layout_toRightOf="@+id/photo"
-        android:text="@string/dummy_title"
+        android:text="@string/dummy_name"
         android:textAppearance="@style/app_text_appearance_small" />
 
     <View

@@ -75,21 +75,23 @@ public class Place extends Entity implements Cloneable, Serializable {
 		/*
 		 * If a special preview photo is available, we use it otherwise
 		 * we use the standard photo.
-		 * 
-		 * Only posts and collections do not have photo objects
 		 */
-		String imageUri = "resource:img_placeholder_logo_bw";
+		String photoUri = null;
 		if (photo != null) {
-			imageUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
-			if (imageUri == null) {
-				imageUri = photo.getUri();
+			photoUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
+			if (photoUri == null) {
+				photoUri = photo.getUri();
 			}
 		}
 		else if (category != null) {
-			imageUri = category.photo.getUri();
+			photoUri = category.photo.getUri();
 		}
-
-		return imageUri;
+		
+		if (photoUri == null) {
+			photoUri = "resource:img_placeholder_logo_bw";
+		}
+		
+		return photoUri;
 	}
 
 	public Link getLink(Beacon beacon, String linkType) {

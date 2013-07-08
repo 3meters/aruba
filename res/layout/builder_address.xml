@@ -15,7 +15,7 @@
             android:gravity="center_vertical|top"
             android:orientation="vertical" >
 
-            <EditText
+            <com.aircandi.ui.widgets.AirEditText
                 android:id="@+id/address"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
@@ -23,7 +23,7 @@
                 android:inputType="textPostalAddress"
                 android:textAppearance="@style/app_text_appearance_small" />
 
-            <EditText
+            <com.aircandi.ui.widgets.AirEditText
                 android:id="@+id/city"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal" >
 
-                <EditText
+                <com.aircandi.ui.widgets.AirEditText
                     android:id="@+id/state"
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/form_field_height"
@@ -47,7 +47,7 @@
                     android:nextFocusDown="@+id/zip_code"
                     android:textAppearance="@style/app_text_appearance_small" />
 
-                <EditText
+                <com.aircandi.ui.widgets.AirEditText
                     android:id="@+id/zip_code"
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/form_field_height"
@@ -58,7 +58,7 @@
                     android:textAppearance="@style/app_text_appearance_small" />
             </LinearLayout>
 
-            <EditText
+            <com.aircandi.ui.widgets.AirEditText
                 android:id="@+id/phone"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
