@@ -24,14 +24,13 @@ import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;
+import com.aircandi.components.TabManager;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
@@ -44,17 +43,18 @@ import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.ui.widgets.WebImageView;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
-import com.aircandi.utilities.DateUtils;
-import com.aircandi.utilities.ImageUtils;
-import com.aircandi.utilities.MiscUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
+import com.aircandi.utilities.Utilities;
 
 public class UserEdit extends BaseEntityEdit {
 
 	private User			mEntity;
 	
-	private ViewFlipper		mViewFlipper;
 	private WebImageView	mPhoto;
 	private EditText		mName;
 	private EditText		mBio;
@@ -62,29 +62,32 @@ public class UserEdit extends BaseEntityEdit {
 	private EditText		mArea;
 	private EditText		mEmail;
 	private CheckBox		mDoNotTrack;
+	private TabManager		mTabManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		if (!isFinishing()) {
-			initialize();
+			initialize(savedInstanceState);
 			bind();
 		}
 	}
 
 	@Override
-	protected void initialize() {
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
 
-		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+		mActionBar.setDisplayHomeAsUpEnabled(true);
+		mTabManager = new TabManager(Constants.TABS_USER_FORM_ID, mActionBar, (ViewFlipper) findViewById(R.id.flipper_form)); 
+		mTabManager.initialize();
+		mTabManager.doRestoreInstanceState(savedInstanceState);
+		
 		mEntity = Aircandi.getInstance().getUser();
 
 		if (mEntity == null) {
 			throw new IllegalStateException("Current user required by ProfileForm");
 		}
-
-		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
-		mCommon.setViewFlipper(mViewFlipper);
 
 		mPhoto = (WebImageView) findViewById(R.id.photo);
 		mName = (EditText) findViewById(R.id.name);
@@ -180,7 +183,7 @@ public class UserEdit extends BaseEntityEdit {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(true);
+				mBusyManager.showBusy();
 			}
 
 			@Override
@@ -200,11 +203,11 @@ public class UserEdit extends BaseEntityEdit {
 					mEntity.session = Aircandi.getInstance().getUser().session;
 					mImageUriOriginal = mEntity.getPhotoUri();
 
-					mCommon.hideBusy(true);
+					mBusyManager.hideBusy();
 					draw();
 				}
 				else {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.ProfileBrowse);
+					Routing.serviceError(UserEdit.this, result.serviceResponse);
 				}
 			}
 		}.execute();
@@ -240,7 +243,7 @@ public class UserEdit extends BaseEntityEdit {
 		if (mPhoto != null) {
 			if (mEntity.photo != null && mEntity.photo.hasBitmap()) {
 				mPhoto.hideLoading();
-				ImageUtils.showImageInImageView(mEntity.photo.getBitmap(), mPhoto.getImageView(), true, AnimUtils.fadeInMedium());
+				UI.showImageInImageView(mEntity.photo.getBitmap(), mPhoto.getImageView(), true, Animate.fadeInMedium());
 				mPhoto.setVisibility(View.VISIBLE);
 			}
 			else {
@@ -259,7 +262,7 @@ public class UserEdit extends BaseEntityEdit {
 	@SuppressWarnings("ucd")
 	public void onChangePictureButtonClick(View view) {
 
-		//mCommon.showPhotoSourcePicker(mEntity.id, mEntity.schema, mEntity.type);
+		//showPhotoSourcePicker(mEntity.id, mEntity.schema, mEntity.type);
 		mImageRequestWebImageView = mPhoto;
 		mImageRequestListener = new RequestListener() {
 
@@ -292,7 +295,7 @@ public class UserEdit extends BaseEntityEdit {
 		final IntentBuilder intentBuilder = new IntentBuilder(this, PasswordEdit.class);
 		final Intent intent = intentBuilder.create();
 		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@Override
@@ -307,7 +310,7 @@ public class UserEdit extends BaseEntityEdit {
 						if (pictureSource.equals(Constants.PHOTO_SOURCE_SEARCH)) {
 							String defaultSearch = null;
 							if (mName != null) {
-								defaultSearch = MiscUtils.emptyAsNull(mName.getText().toString().trim());
+								defaultSearch = Utilities.emptyAsNull(mName.getText().toString().trim());
 							}
 							pictureSearch(defaultSearch);
 						}
@@ -345,7 +348,7 @@ public class UserEdit extends BaseEntityEdit {
 	}
 
 	private void confirmDirtyExit() {
-		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
+		final AlertDialog dialog = Dialogs.showAlertDialog(null
 				, getResources().getString(R.string.alert_entity_dirty_exit_title)
 				, getResources().getString(R.string.alert_entity_dirty_exit_message)
 				, null
@@ -363,7 +366,7 @@ public class UserEdit extends BaseEntityEdit {
 						else if (which == Dialog.BUTTON_NEUTRAL) {
 							setResult(Activity.RESULT_CANCELED);
 							finish();
-							AnimUtils.doOverridePendingTransition(UserEdit.this, TransitionType.FormToPage);
+							Animate.doOverridePendingTransition(UserEdit.this, TransitionType.FormToPage);
 						}
 					}
 				}
@@ -371,6 +374,14 @@ public class UserEdit extends BaseEntityEdit {
 		dialog.setCanceledOnTouchOutside(false);
 	}
 
+	@Override
+	protected void onSaveInstanceState(Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+		mTabManager.doSaveInstanceState(savedInstanceState);
+	}
+
+	
+	
 	// --------------------------------------------------------------------------------------------
 	// Service routines
 	// --------------------------------------------------------------------------------------------
@@ -390,7 +401,7 @@ public class UserEdit extends BaseEntityEdit {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(R.string.progress_saving, true);
+					mBusyManager.showBusy(R.string.progress_saving);
 				}
 
 				@Override
@@ -407,12 +418,12 @@ public class UserEdit extends BaseEntityEdit {
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "Updated user profile: " + mEntity.name + " (" + mEntity.id + ")");
 						Tracker.sendEvent("ui_action", "update_user", null, 0, Aircandi.getInstance().getUser());
-						mCommon.hideBusy(true);
+						mBusyManager.hideBusy();
 						/*
 						 * We treat updating the profile like a change to an entity in the entity model. This forces
 						 * UI to update itself and pickup the changes like a new profile name, picture, etc.
 						 */
-						EntityManager.getEntityCache().setLastActivityDate(DateUtils.nowDate().getTime());
+						EntityManager.getEntityCache().setLastActivityDate(DateTime.nowDate().getTime());
 
 						/* Update the global user */
 						Aircandi.getInstance().setUser(mEntity);
@@ -423,12 +434,12 @@ public class UserEdit extends BaseEntityEdit {
 						Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
 						Aircandi.settingsEditor.commit();
 
-						ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
+						UI.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 						setResult(Constants.RESULT_PROFILE_UPDATED);
 						finish();
 					}
 					else {
-						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.ProfileUpdate);
+						Routing.serviceError(UserEdit.this, result.serviceResponse);
 					}
 				}
 			}.execute();
@@ -437,13 +448,13 @@ public class UserEdit extends BaseEntityEdit {
 
 	@Override
 	protected boolean validate() {
-		if (!MiscUtils.validEmail(mEmail.getText().toString())) {
-			mCommon.showAlertDialogSimple(null, getString(R.string.error_invalid_email));
+		if (!Utilities.validEmail(mEmail.getText().toString())) {
+			Dialogs.showAlertDialogSimple(this, null, getString(R.string.error_invalid_email));
 			return false;
 		}
 		if (mWebUri.getText().toString() != null && !mWebUri.getText().toString().equals("")) {
-			if (!MiscUtils.validWebUri(mWebUri.getText().toString())) {
-				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+			if (!Utilities.validWebUri(mWebUri.getText().toString())) {
+				Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 						, null
 						, getResources().getString(R.string.error_weburi_invalid)
 						, null
@@ -473,13 +484,13 @@ public class UserEdit extends BaseEntityEdit {
 			else {
 				setResult(Activity.RESULT_CANCELED);
 				finish();
-				AnimUtils.doOverridePendingTransition(UserEdit.this, TransitionType.FormToPage);
+				Animate.doOverridePendingTransition(UserEdit.this, TransitionType.FormToPage);
 			}
 			return true;
 		}
 
 		/* In case we add general menu items later */
-		mCommon.doOptionsItemSelected(item);
+		super.onOptionsItemSelected(item);
 		return true;
 	}
 

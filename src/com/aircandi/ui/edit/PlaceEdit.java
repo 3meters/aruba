@@ -8,11 +8,13 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ViewFlipper;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.LocationManager;
+import com.aircandi.components.TabManager;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirLocation;
@@ -24,15 +26,29 @@ import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.ui.helpers.AddressBuilder;
 import com.aircandi.ui.helpers.CategoryBuilder;
 import com.aircandi.ui.widgets.BuilderButton;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
 
 public class PlaceEdit extends BaseEntityEdit {
+
+	private TabManager	mTabManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		super.onCreate(savedInstanceState);
+	}
+
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+		if (mEntity != null) {
+			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
+				mTabManager = new TabManager(Constants.TABS_ENTITY_FORM_ID, mActionBar, (ViewFlipper) findViewById(R.id.flipper_form));
+				mTabManager.initialize();
+				mTabManager.doRestoreInstanceState(savedInstanceState);
+			}
+		}
 	}
 
 	@Override
@@ -94,7 +110,7 @@ public class PlaceEdit extends BaseEntityEdit {
 		final String jsonPlace = HttpService.objectToJson(mEntity);
 		intent.putExtra(Constants.EXTRA_PLACE, jsonPlace);
 		startActivityForResult(intent, Constants.ACTIVITY_ADDRESS_EDIT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")
@@ -105,7 +121,7 @@ public class PlaceEdit extends BaseEntityEdit {
 			intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
 		}
 		startActivityForResult(intent, Constants.ACTIVITY_CATEGORY_EDIT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@Override
@@ -147,7 +163,7 @@ public class PlaceEdit extends BaseEntityEdit {
 
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final List<String> jsonApplinks = extras.getStringArrayList(Constants.EXTRA_APPLINKS);
+					final List<String> jsonApplinks = extras.getStringArrayList(Constants.EXTRA_ENTITIES);
 					mApplinks.clear();
 					for (String jsonApplink : jsonApplinks) {
 						Applink applink = (Applink) HttpService.jsonToObject(jsonApplink, ObjectType.Applink);

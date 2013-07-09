@@ -18,7 +18,7 @@ import com.aircandi.service.Expose;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Shortcut.IconStyle;
-import com.aircandi.utilities.DateUtils;
+import com.aircandi.utilities.DateTime;
 
 /**
  * Entity as described by the proxi protocol standards.
@@ -104,7 +104,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		}
 
 		entity.schema = schema;
-		entity.id = "temp:" + DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME); // Temporary
+		entity.id = "temp:" + DateTime.nowString(DateTime.DATE_NOW_FORMAT_FILENAME); // Temporary
 
 		entity.signalFence = -100.0f;
 

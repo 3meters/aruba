@@ -22,8 +22,8 @@ import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.HttpService.RequestType;
 import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.UI;
 
 @SuppressWarnings("ucd")
 public class BitmapLoader {
@@ -267,8 +267,8 @@ public class BitmapLoader {
 
 											@Override
 											public void run() {
-												ImageUtils.showDrawableInImageView(bitmapDrawable, imageRequest.getImageView(), true,
-														AnimUtils.fadeInMedium());
+												UI.showDrawableInImageView(bitmapDrawable, imageRequest.getImageView(), true,
+														Animate.fadeInMedium());
 											}
 										});
 									}

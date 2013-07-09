@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +19,13 @@ import android.widget.TextView;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.ui.base.BaseEntityEdit;
-import com.aircandi.utilities.MiscUtils;
+import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Utilities;
 
 public class ApplinkEdit extends BaseEntityEdit {
 
@@ -38,15 +40,15 @@ public class ApplinkEdit extends BaseEntityEdit {
 	private List<String>	mApplinkSuggestionStrings;
 
 	@Override
-	protected void initialize() {
-		super.initialize();
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
 
 		mTypePicker = (Spinner) findViewById(R.id.type_picker);
 		mAppId = (EditText) findViewById(R.id.app_id);
 		mAppUrl = (EditText) findViewById(R.id.app_url);
 		mButtonTest = (Button) findViewById(R.id.button_test);
 
-		mSpinnerItemResId = mCommon.mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
+		mSpinnerItemResId = mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
 		/* Turn on test button if user has something to test */
 
@@ -165,7 +167,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 				final View view = super.getView(position, convertView, parent);
 
 				final TextView text = (TextView) view.findViewById(R.id.spinner_name);
-				if (mCommon.mThemeTone.equals("dark")) {
+				if (mThemeTone.equals("dark")) {
 					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 						text.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.text_dark));
 					}
@@ -185,7 +187,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 			}
 		};
 
-		if (mCommon.mThemeTone.equals("dark")) {
+		if (mThemeTone.equals("dark")) {
 			if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 				adapter.setDropDownViewResource(R.layout.spinner_item_light);
 			}
@@ -202,7 +204,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-				if (mCommon.mThemeTone.equals("dark")) {
+				if (mThemeTone.equals("dark")) {
 					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 						((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));
 					}
@@ -253,10 +255,10 @@ public class ApplinkEdit extends BaseEntityEdit {
 	protected void gather() {
 		super.gather();
 		if (mAppId != null) {
-			((Applink) mEntity).appId = MiscUtils.emptyAsNull(mAppId.getText().toString().trim());
+			((Applink) mEntity).appId = Utilities.emptyAsNull(mAppId.getText().toString().trim());
 		}
 		if (mAppUrl != null) {
-			((Applink) mEntity).appUrl = MiscUtils.emptyAsNull(mAppUrl.getText().toString().trim());
+			((Applink) mEntity).appUrl = Utilities.emptyAsNull(mAppUrl.getText().toString().trim());
 			if (mEntity.type.equals(Constants.TYPE_APPLINK_WEBSITE)) {
 				String appUrl = ((Applink) mEntity).appUrl;
 				if (!appUrl.startsWith("http://") && !appUrl.startsWith("https://")) {
@@ -269,7 +271,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 	private void doApplinkTest() {
 		if (validate()) {
 			gather();
-			mCommon.routeShortcut(mEntity.getShortcut(), null);
+			Routing.shortcut(this, mEntity.getShortcut(), null);
 		}
 	}
 
@@ -281,7 +283,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 	protected boolean validate() {
 		if (super.validate()) {
 			if (mEntity.type == null) {
-				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+				Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 						, null
 						, getResources().getString(R.string.error_missing_applink_type)
 						, null
@@ -290,9 +292,9 @@ public class ApplinkEdit extends BaseEntityEdit {
 						, null, null, null, null);
 				return false;
 			}
-			
+
 			if (mName != null && mName.getText().length() == 0) {
-				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+				Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 						, null
 						, getResources().getString(R.string.error_missing_entity_label)
 						, null
@@ -301,9 +303,9 @@ public class ApplinkEdit extends BaseEntityEdit {
 						, null, null, null, null);
 				return false;
 			}
-			
+
 			if (mAppId != null && mAppId.getText().length() == 0 && mAppId.getVisibility() == View.VISIBLE) {
-				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+				Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 						, null
 						, getResources().getString(mMissingResId)
 						, null
@@ -316,7 +318,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 			if (mAppUrl != null && mAppUrl.getVisibility() == View.VISIBLE) {
 				final String url = mAppUrl.getEditableText().toString();
 				if (url == null || url.length() == 0) {
-					AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 							, null
 							, getResources().getString(mMissingResId)
 							, null
@@ -325,8 +327,8 @@ public class ApplinkEdit extends BaseEntityEdit {
 							, null, null, null, null);
 					return false;
 				}
-				else if (url != null && url.length() > 0 && !MiscUtils.validWebUri(url)) {
-					AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+				else if (url != null && url.length() > 0 && !Utilities.validWebUri(url)) {
+					Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 							, null
 							, getResources().getString(R.string.error_weburi_invalid)
 							, null

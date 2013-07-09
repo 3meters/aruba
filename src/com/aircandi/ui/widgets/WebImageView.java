@@ -21,8 +21,8 @@ import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
 import com.aircandi.service.HttpService.RequestListener;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.UI;
 
 @SuppressWarnings("ucd")
 public class WebImageView extends RelativeLayout {
@@ -180,7 +180,7 @@ public class WebImageView extends RelativeLayout {
 						@Override
 						public void run() {
 							final Drawable drawable = WebImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
-							ImageUtils.showDrawableInImageView(drawable, mImageMain, true, AnimUtils.fadeInMedium());
+							UI.showDrawableInImageView(drawable, mImageMain, true, Animate.fadeInMedium());
 						}
 					});
 				}
@@ -212,7 +212,7 @@ public class WebImageView extends RelativeLayout {
 
 			@Override
 			public void run() {
-				ImageUtils.clearImageInImageView(mImageMain, animate, AnimUtils.fadeOutMedium());
+				UI.clearImageInImageView(mImageMain, animate, Animate.fadeOutMedium());
 			}
 		});
 	}
@@ -226,7 +226,7 @@ public class WebImageView extends RelativeLayout {
 
 			@Override
 			public void run() {
-				final Animation animation = AnimUtils.fadeOutMedium();
+				final Animation animation = Animate.fadeOutMedium();
 				mProgressBar.startAnimation(animation);
 			}
 		});
@@ -244,7 +244,7 @@ public class WebImageView extends RelativeLayout {
 			@Override
 			public void run() {
 				mImageMain.setImageBitmap(null);
-				ImageUtils.showImageInImageView(bitmap, mImageMain, true, AnimUtils.fadeInMedium());
+				UI.showImageInImageView(bitmap, mImageMain, true, Animate.fadeInMedium());
 			}
 		});
 	}
@@ -266,7 +266,7 @@ public class WebImageView extends RelativeLayout {
 	}
 
 	public void setImageDrawable(Drawable drawable) {
-		ImageUtils.showDrawableInImageView(drawable, mImageMain, true, AnimUtils.fadeInMedium());
+		UI.showDrawableInImageView(drawable, mImageMain, true, Animate.fadeInMedium());
 	}
 
 	public ImageView getImageView() {

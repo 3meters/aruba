@@ -24,8 +24,8 @@ import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Place;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.UI;
 
 @SuppressWarnings("ucd")
 public class CandiView extends RelativeLayout {
@@ -126,7 +126,7 @@ public class CandiView extends RelativeLayout {
 			drawImage();
 
 			if (mCandiViewGroup != null) {
-				final Integer padding = ImageUtils.getRawPixels(this.getContext(), 3);
+				final Integer padding = UI.getRawPixels(this.getContext(), 3);
 				this.setPadding(padding, padding, padding, padding);
 				this.setBackgroundResource(R.drawable.selector_image);
 				mCandiViewGroup.setBackgroundResource(mColorResId);
@@ -161,7 +161,7 @@ public class CandiView extends RelativeLayout {
 					mCategoryImage.setTag(place.category.photo.getUri());
 					final BitmapRequest bitmapRequest = new BitmapRequest(place.category.photo.getUri(), mCategoryImage);
 					bitmapRequest.setImageRequestor(mCategoryImage);
-					bitmapRequest.setImageSize(ImageUtils.getRawPixels(this.getContext(), 50));
+					bitmapRequest.setImageSize(UI.getRawPixels(this.getContext(), 50));
 					BitmapManager.getInstance().masterFetch(bitmapRequest);
 					mCategoryImage.setVisibility(View.VISIBLE);
 				}
@@ -178,8 +178,8 @@ public class CandiView extends RelativeLayout {
 			if (mApplinks != null && !place.synthetic) {
 
 				mApplinks.removeAllViews();
-				final int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
-				final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
+				final int sizePixels = UI.getRawPixels(this.getContext(), 20);
+				final int marginPixels = UI.getRawPixels(this.getContext(), 3);
 
 				/* Post indicator always goes first */
 				Count count = place.getCount(Constants.TYPE_LINK_POST, Direction.in);
@@ -244,7 +244,7 @@ public class CandiView extends RelativeLayout {
 				/*
 				 * If we are carrying around a bitmap then it should be used
 				 */
-				ImageUtils.showImageInImageView(mPlace.photo.getBitmap(), mPhoto.getImageView(), true, AnimUtils.fadeInMedium());
+				UI.showImageInImageView(mPlace.photo.getBitmap(), mPhoto.getImageView(), true, Animate.fadeInMedium());
 			}
 			else {
 

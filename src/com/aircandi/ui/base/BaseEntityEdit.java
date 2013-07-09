@@ -30,17 +30,16 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
 
+import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AndroidManager;
+import com.aircandi.components.BusyManager;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
@@ -78,56 +77,60 @@ import com.aircandi.ui.helpers.PictureSourcePicker;
 import com.aircandi.ui.widgets.BuilderButton;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.ui.widgets.WebImageView;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
-import com.aircandi.utilities.ImageUtils;
-import com.aircandi.utilities.MiscUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
+import com.aircandi.utilities.Utilities;
 
 public abstract class BaseEntityEdit extends BaseActivity {
 
-	protected Entity				mEntity;
-	protected WebImageView			mPhoto;
-	protected List<Entity>			mApplinks;
+	protected Entity			mEntity;
+	protected WebImageView		mPhoto;
+	protected List<Entity>		mApplinks;
 
-	protected Boolean				mEditing	= false;
-	protected Boolean				mSkipSave	= false;
-	protected Boolean				mDirty		= false;
+	protected Boolean			mEditing	= false;
+	protected Boolean			mSkipSave	= false;
 
-	protected TextView				mName;
-	protected TextView				mDescription;
-	protected ViewGroup				mPhotoHolder;
-	protected CheckBox				mLocked;
-	protected ViewFlipper			mViewFlipper;
+	public String				mParentId;
+	public String				mEntityId;
+	public String				mEntitySchema;
+	public String				mMessage;
+	public String				mUserId;
 
-	protected String				mImageUriOriginal;
-	protected RequestListener		mImageRequestListener;
-	protected WebImageView			mImageRequestWebImageView;
-	protected Uri					mMediaFileUri;
-	protected String				mMediaFilePath;
-	protected File					mMediaFile;
-	protected static LayoutInflater	mInflater;
+	protected Boolean			mDirty		= false;
+
+	protected TextView			mName;
+	protected TextView			mDescription;
+	protected ViewGroup			mPhotoHolder;
+	protected CheckBox			mLocked;
+
+	protected String			mImageUriOriginal;
+	protected RequestListener	mImageRequestListener;
+	protected WebImageView		mImageRequestWebImageView;
+	protected Uri				mMediaFileUri;
+	protected String			mMediaFilePath;
+	protected File				mMediaFile;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!isFinishing()) {
-			initialize();
+			initialize(savedInstanceState);
 			bind();
 			draw();
 		}
 	}
 
-	protected void initialize() {
-		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
-		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	protected void initialize(Bundle savedInstanceState) {
+
+		mActionBar.setDisplayHomeAsUpEnabled(true);
 		mName = (EditText) findViewById(R.id.name);
 		mDescription = (TextView) findViewById(R.id.description);
 		mPhoto = (WebImageView) findViewById(R.id.photo);
 		mPhotoHolder = (ViewGroup) findViewById(R.id.photo_holder);
 		mLocked = (CheckBox) findViewById(R.id.chk_locked);
-
-		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
-		mCommon.setViewFlipper(mViewFlipper);
 
 		if (mName != null) {
 			mName.addTextChangedListener(new SimpleTextWatcher() {
@@ -162,31 +165,44 @@ public abstract class BaseEntityEdit extends BaseActivity {
 				}
 			});
 		}
+		
+		mBusyManager = new BusyManager(this);		
 	}
 
-	protected void bind() {
+	@Override
+	protected void unpackIntent() {
 		/*
 		 * Intent inputs:
 		 * - Both: Edit_Only
 		 * - New: Schema (required), Parent_Entity_Id
 		 * - Edit: Entity (required)
 		 */
-		final Bundle extras = this.getIntent().getExtras();
+		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
+
 			mSkipSave = extras.getBoolean(Constants.EXTRA_SKIP_SAVE, false);
 			final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
 			if (jsonEntity != null) {
 				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
-				mEditing = true;
-				mCommon.mActionBar.setTitle(mEntity.name);
 			}
-			else {
-				mEntity = Entity.makeEntity(mCommon.mEntitySchema);
-				mEditing = false;
-				mCommon.mActionBar.setTitle(mEntity.schema);
-			}
-		}
 
+			mParentId = extras.getString(Constants.EXTRA_ENTITY_PARENT_ID);
+			mEntitySchema = extras.getString(Constants.EXTRA_ENTITY_SCHEMA);
+			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
+			mMessage = extras.getString(Constants.EXTRA_MESSAGE);
+		}
+	}
+
+	protected void bind() {
+		if (mEntity == null) {
+			mEntity = Entity.makeEntity(mEntitySchema);
+			mEditing = false;
+			mActionBar.setTitle(mEntity.schema);
+		}
+		else {
+			mEditing = true;
+			mActionBar.setTitle(mEntity.name);
+		}
 	}
 
 	protected void draw() {
@@ -224,35 +240,35 @@ public abstract class BaseEntityEdit extends BaseActivity {
 			final UserView creator = (UserView) findViewById(R.id.created_by);
 			final UserView editor = (UserView) findViewById(R.id.edited_by);
 
-			setVisibility(creator, View.GONE);
+			UI.setVisibility(creator, View.GONE);
 			if (creator != null
 					&& entity.creator != null
 					&& !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 
 				creator.setLabel(getString(R.string.candi_label_user_added_by));
-				creator.bindToUser(entity.creator, entity.createdDate != null ? entity.createdDate.longValue(): null, entity.locked);
-				setVisibility(creator, View.VISIBLE);
+				creator.bindToUser(entity.creator, entity.createdDate != null ? entity.createdDate.longValue() : null, entity.locked);
+				UI.setVisibility(creator, View.VISIBLE);
 			}
 
 			/* Editor block */
 
-			setVisibility(editor, View.GONE);
+			UI.setVisibility(editor, View.GONE);
 			if (editor != null && entity.modifier != null && !entity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 				if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
 					editor.setLabel(getString(R.string.candi_label_user_edited_by));
 					editor.bindToUser(entity.modifier, entity.modifiedDate.longValue(), null);
-					setVisibility(editor, View.VISIBLE);
+					UI.setVisibility(editor, View.VISIBLE);
 				}
 			}
 
 			/* Configure UI */
-			setVisibility(findViewById(R.id.button_delete), View.GONE);
+			UI.setVisibility(findViewById(R.id.button_delete), View.GONE);
 			if (entity.ownerId != null
 					&& (entity.ownerId.equals(Aircandi.getInstance().getUser().id)
 					|| (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
 							&& Aircandi.getInstance().getUser().developer != null
 							&& Aircandi.getInstance().getUser().developer))) {
-				setVisibility(findViewById(R.id.button_delete), View.VISIBLE);
+				UI.setVisibility(findViewById(R.id.button_delete), View.VISIBLE);
 			}
 		}
 	}
@@ -270,7 +286,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 
 			if (mEntity.photo != null && mEntity.photo.hasBitmap()) {
 				mPhoto.hideLoading();
-				ImageUtils.showImageInImageView(mEntity.photo.getBitmap(), mPhoto.getImageView(), true, AnimUtils.fadeInMedium());
+				UI.showImageInImageView(mEntity.photo.getBitmap(), mPhoto.getImageView(), true, Animate.fadeInMedium());
 				mPhoto.setVisibility(View.VISIBLE);
 			}
 			else {
@@ -316,8 +332,8 @@ public abstract class BaseEntityEdit extends BaseActivity {
 				button.getViewGroup().setVisibility(View.VISIBLE);
 				button.getViewGroup().removeAllViews();
 				final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				final int sizePixels = ImageUtils.getRawPixels(this, 30);
-				final int marginPixels = ImageUtils.getRawPixels(this, 5);
+				final int sizePixels = UI.getRawPixels(this, 30);
+				final int marginPixels = UI.getRawPixels(this, 5);
 
 				/* We only show the first five */
 				int shortcutCount = 0;
@@ -330,7 +346,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 					webImageView.setSizeHint(sizePixels);
 
 					if (shortcut.photo != null && shortcut.photo.hasBitmap()) {
-						ImageUtils.showImageInImageView(shortcut.photo.getBitmap(), webImageView.getImageView(), true, AnimUtils.fadeInMedium());
+						UI.showImageInImageView(shortcut.photo.getBitmap(), webImageView.getImageView(), true, Animate.fadeInMedium());
 					}
 					else {
 						String photoUri = shortcut.photo.getUri();
@@ -364,7 +380,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 		else {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
-			AnimUtils.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
+			Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
 		}
 	}
 
@@ -373,7 +389,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 		gather(); // So picture logic has the latest property values
 		IntentBuilder intentBuilder = new IntentBuilder(this, PictureSourcePicker.class).setEntity(mEntity);
 		startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_SOURCE_PICK);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 
 		mImageRequestWebImageView = mPhoto;
 		mImageRequestListener = new RequestListener() {
@@ -426,7 +442,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 						if (pictureSource.equals(Constants.PHOTO_SOURCE_SEARCH)) {
 							String defaultSearch = null;
 							if (findViewById(R.id.name) != null) {
-								defaultSearch = MiscUtils.emptyAsNull(((TextView) findViewById(R.id.name)).getText().toString().trim());
+								defaultSearch = Utilities.emptyAsNull(((TextView) findViewById(R.id.name)).getText().toString().trim());
 							}
 							pictureSearch(defaultSearch);
 						}
@@ -627,10 +643,10 @@ public abstract class BaseEntityEdit extends BaseActivity {
 
 	protected void gather() {
 		if (findViewById(R.id.name) != null) {
-			mEntity.name = MiscUtils.emptyAsNull(((TextView) findViewById(R.id.name)).getText().toString().trim());
+			mEntity.name = Utilities.emptyAsNull(((TextView) findViewById(R.id.name)).getText().toString().trim());
 		}
 		if (findViewById(R.id.description) != null) {
-			mEntity.description = MiscUtils.emptyAsNull(((TextView) findViewById(R.id.description)).getText().toString().trim());
+			mEntity.description = Utilities.emptyAsNull(((TextView) findViewById(R.id.description)).getText().toString().trim());
 		}
 		if (findViewById(R.id.chk_locked) != null) {
 			mEntity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
@@ -663,7 +679,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(true);
+					mBusyManager.showBusy();
 				}
 
 				@Override
@@ -693,9 +709,9 @@ public abstract class BaseEntityEdit extends BaseActivity {
 						doApplinksBuilder();
 					}
 					else {
-						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CommentBrowse);
+						Routing.serviceError(BaseEntityEdit.this, result.serviceResponse);
 					}
-					mCommon.hideBusy(true);
+					mBusyManager.hideBusy();
 				}
 
 			}.execute();
@@ -711,15 +727,17 @@ public abstract class BaseEntityEdit extends BaseActivity {
 			for (Entity applink : mApplinks) {
 				applinkStrings.add(HttpService.objectToJson(applink, UseAnnotations.False, ExcludeNulls.True));
 			}
-			intent.putStringArrayListExtra(Constants.EXTRA_APPLINKS, (ArrayList<String>) applinkStrings);
+			intent.putStringArrayListExtra(Constants.EXTRA_ENTITIES, (ArrayList<String>) applinkStrings);
 		}
+
+		intent.putExtra(Constants.EXTRA_ENTITY_SCHEMA, Constants.SCHEMA_ENTITY_APPLINK);
 
 		if (mEntity.id != null) {
 			intent.putExtra(Constants.EXTRA_ENTITY_ID, mEntity.id);
 		}
 
 		startActivityForResult(intent, Constants.ACTIVITY_APPLINKS_EDIT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -743,7 +761,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 		}
 		startActivityForResult(Intent.createChooser(intent, getString(R.string.chooser_gallery_title))
 				, Constants.ACTIVITY_PICTURE_PICK_DEVICE);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToSource);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToSource);
 	}
 
 	protected void pictureFromCamera() {
@@ -754,7 +772,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 			mMediaFileUri = Uri.fromFile(mMediaFile);
 			intent.putExtra(MediaStore.EXTRA_OUTPUT, mMediaFileUri);
 			startActivityForResult(intent, Constants.ACTIVITY_PICTURE_MAKE);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToSource);
+			Animate.doOverridePendingTransition(this, TransitionType.PageToSource);
 		}
 	}
 
@@ -762,7 +780,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 		final Intent intent = new Intent(this, PicturePicker.class);
 		intent.putExtra(Constants.EXTRA_SEARCH_PHRASE, defaultSearch);
 		startActivityForResult(intent, Constants.ACTIVITY_PICTURE_SEARCH);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	protected void pictureFromPlace(String entityId) {
@@ -770,7 +788,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 				.setEntityId(entityId);
 		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, Constants.ACTIVITY_PICTURE_PICK_PLACE);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -783,7 +801,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(R.string.progress_saving, true);
+				mBusyManager.showBusy(R.string.progress_saving);
 			}
 
 			@Override
@@ -800,7 +818,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 						result = EntityManager.getInstance().replaceEntitiesForEntity(insertedEntity.id, mApplinks, Constants.TYPE_LINK_APPLINK);
 					}
 
-					ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
+					UI.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 					final IntentBuilder intentBuilder = new IntentBuilder().setEntityId(insertedEntity.id);
 					setResult(Constants.RESULT_ENTITY_INSERTED, intentBuilder.create());
 				}
@@ -810,13 +828,13 @@ public abstract class BaseEntityEdit extends BaseActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
-				mCommon.hideBusy(true);
+				mBusyManager.hideBusy();
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					finish();
-					AnimUtils.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
+					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave);
+					Routing.serviceError(BaseEntityEdit.this, serviceResponse);
 				}
 			}
 
@@ -829,7 +847,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(R.string.progress_saving, true);
+				mBusyManager.showBusy(R.string.progress_saving);
 			}
 
 			@Override
@@ -847,7 +865,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 					result = updateEntityAtService();
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
-						ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
+						UI.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 						setResult(Constants.RESULT_ENTITY_UPDATED);
 					}
 				}
@@ -857,13 +875,13 @@ public abstract class BaseEntityEdit extends BaseActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
-				mCommon.hideBusy(true);
+				mBusyManager.hideBusy();
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					finish();
-					AnimUtils.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
+					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave);
+					Routing.serviceError(BaseEntityEdit.this, serviceResponse);
 				}
 			}
 
@@ -876,7 +894,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 
 	private void confirmDirtyExit() {
 		if (!mSkipSave) {
-			final AlertDialog dialog = AircandiCommon.showAlertDialog(null
+			final AlertDialog dialog = Dialogs.showAlertDialog(null
 					, getResources().getString(R.string.alert_entity_dirty_exit_title)
 					, getResources().getString(R.string.alert_entity_dirty_exit_message)
 					, null
@@ -899,7 +917,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 							else if (which == Dialog.BUTTON_NEUTRAL) {
 								setResult(Activity.RESULT_CANCELED);
 								finish();
-								AnimUtils.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
+								Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
 							}
 						}
 					}
@@ -907,7 +925,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 			dialog.setCanceledOnTouchOutside(false);
 		}
 		else {
-			final AlertDialog dialog = AircandiCommon.showAlertDialog(null
+			final AlertDialog dialog = Dialogs.showAlertDialog(null
 					, getResources().getString(R.string.alert_entity_dirty_exit_title)
 					, getResources().getString(R.string.alert_entity_dirty_exit_message)
 					, null
@@ -922,7 +940,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 							if (which == Dialog.BUTTON_POSITIVE) {
 								setResult(Activity.RESULT_CANCELED);
 								finish();
-								AnimUtils.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
+								Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
 							}
 						}
 					}
@@ -932,7 +950,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 	}
 
 	private void confirmDelete() {
-		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
+		final AlertDialog dialog = Dialogs.showAlertDialog(null
 				, getResources().getString(R.string.alert_entity_delete_title)
 				, mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)
 						? getResources().getString(R.string.alert_place_delete_message_single)
@@ -973,9 +991,9 @@ public abstract class BaseEntityEdit extends BaseActivity {
 			mEntity.linksOut.clear();
 		}
 
-		if (mCommon.mParentId != null) {
-			mEntity.toId = mCommon.mParentId;
-			link = new Link(mCommon.mParentId, mEntity.schema, true);
+		if (mParentId != null) {
+			mEntity.toId = mParentId;
+			link = new Link(mParentId, mEntity.schema, true);
 		}
 		else {
 			mEntity.toId = null;
@@ -1031,7 +1049,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(R.string.progress_deleting, true);
+				mBusyManager.showBusy(R.string.progress_deleting);
 			}
 
 			@Override
@@ -1049,17 +1067,17 @@ public abstract class BaseEntityEdit extends BaseActivity {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					Logger.i(this, "Deleted entity: " + mEntity.name);
 
-					mCommon.hideBusy(true);
-					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
+					mBusyManager.hideBusy();
+					UI.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
 					setResult(Constants.RESULT_ENTITY_DELETED);
 					/*
 					 * We either go back to a list or to radar.
 					 */
 					finish();
-					AnimUtils.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPageAfterDelete);
+					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPageAfterDelete);
 				}
 				else {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiDelete);
+					Routing.serviceError(BaseEntityEdit.this, result.serviceResponse);
 				}
 			}
 
@@ -1072,7 +1090,41 @@ public abstract class BaseEntityEdit extends BaseActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		mCommon.doCreateOptionsMenu(menu);
+
+		/*
+		 * Android 2.3 or lower: called when user hits the menu button for the first time.
+		 * Android 3.0 or higher: called when activity is first started.
+		 * 
+		 * Behavior might be modified because we are using ABS.
+		 */
+		final SherlockActivity activity = (SherlockActivity) this;
+		/* Editing */
+
+		if (mPageName.equals("CommentEdit")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_comment_form, menu);
+		}
+		else if (mPageName.equals("FeedbackEdit")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_send, menu);
+		}
+		else if (mPageName.equals("TuningEdit")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_tuning_wizard, menu);
+		}
+		else if (mPageName.equals("ApplinkEdit") || mPageName.equals("ApplinksEdit")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);
+		}
+		else if (mPageName.equals("UserEdit") || mPageName.equals("PasswordEdit")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);
+		}
+		else if (mPageName.contains("Edit")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_entity, menu);
+		}
+		else if (mPageName.contains("Builder")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);
+		}
+
+		/* Cache edit and delete menus because we need to toggle it later */
+		mMenuItemDelete = menu.findItem(R.id.delete);
+
 		if (mEntity != null) {
 
 			MenuItem menuItem = menu.findItem(R.id.delete);
@@ -1091,6 +1143,17 @@ public abstract class BaseEntityEdit extends BaseActivity {
 	}
 
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		/*
+		 * Android 2.3 or lower: called every time the user hits the menu button.
+		 * Android 3.0 or higher: called when invalidateOptionsMenu is called.
+		 * 
+		 * Behavior might be modified because we are using ABS.
+		 */
+		return true;
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.accept) {
 			if (isDirty()) {
@@ -1103,7 +1166,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 						final IntentBuilder intentBuilder = new IntentBuilder().setEntity(mEntity);
 						setResult(Constants.RESULT_ENTITY_EDITED, intentBuilder.create());
 						finish();
-						AnimUtils.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
+						Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
 					}
 					else {
 						if (mEditing) {
@@ -1117,7 +1180,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 			}
 			else {
 				finish();
-				AnimUtils.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
+				Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
 			}
 			return true;
 		}
@@ -1128,7 +1191,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 			else {
 				setResult(Activity.RESULT_CANCELED);
 				finish();
-				AnimUtils.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
+				Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
 			}
 			return true;
 		}
@@ -1138,7 +1201,7 @@ public abstract class BaseEntityEdit extends BaseActivity {
 		}
 
 		/* In case we add general menu items later */
-		mCommon.doOptionsItemSelected(item);
+		super.onOptionsItemSelected(item);
 		return true;
 	}
 

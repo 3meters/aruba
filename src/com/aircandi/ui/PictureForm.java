@@ -23,7 +23,6 @@ import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.Exceptions;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.PhotoPagerAdapter;
@@ -34,8 +33,9 @@ import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.ui.widgets.UserView;
+import com.aircandi.utilities.UI;
 
-public class PictureDetail extends BaseActivity {
+public class PictureForm extends BaseActivity {
 
 	private List<Photo>	mPhotosForPaging	= new ArrayList<Photo>();
 	private String		mImageUri;
@@ -62,8 +62,8 @@ public class PictureDetail extends BaseActivity {
 		}
 
 		setSupportProgressBarIndeterminateVisibility(true);
-		mCommon.mActionBar.setSubtitle("double-tap to zoom");
-		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+		mActionBar.setSubtitle("double-tap to zoom");
+		mActionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
 	private void bind() {
@@ -92,17 +92,17 @@ public class PictureDetail extends BaseActivity {
 		((ImageViewTouch) image).setScrollEnabled(true);
 
 		/* Title */
-		setVisibility(name, View.GONE);
+		UI.setVisibility(name, View.GONE);
 		if (photo.getName() != null && !photo.getName().equals("")) {
 			name.setText(photo.getName());
-			setVisibility(name, View.VISIBLE);
+			UI.setVisibility(name, View.VISIBLE);
 		}
 
 		/* Author block */
-		setVisibility(user, View.GONE);
+		UI.setVisibility(user, View.GONE);
 		if (photo.getUser() != null) {
 			user.bindToUser(photo.getUser(), photo.getCreatedAt().longValue(), false);
-			setVisibility(user, View.VISIBLE);
+			UI.setVisibility(user, View.VISIBLE);
 		}
 
 		/* Image */
@@ -199,23 +199,6 @@ public class PictureDetail extends BaseActivity {
 		final ImageView image = (ImageView) findViewById(R.id.photo);
 		((ImageViewTouch) image).setFitToScreen(true);
 		super.onConfigurationChanged(newConfig);
-	}
-
-	@Override
-	protected void onDestroy() {
-		/*
-		 * This activity gets destroyed everytime we leave using back or
-		 * finish().
-		 */
-		try {
-			mCommon.doDestroy();
-		}
-		catch (Exception exception) {
-			Exceptions.handle(exception);
-		}
-		finally {
-			super.onDestroy();
-		}
 	}
 
 	@Override

@@ -158,11 +158,11 @@
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.components{JsonHelper.java[JsonHelper~fromJson~QObject;"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{AircandiCommon.java[AircandiCommon~onWifiScanReceived~QMonitoringWifiScanReceivedEvent;"/>
+				handle="=Aircandi/src&lt;com.aircandi.components{java[AircandiCommon~onWifiScanReceived~QMonitoringWifiScanReceivedEvent;"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{AircandiCommon.java[AircandiCommon~onWifiScanReceived~QQueryWifiScanReceivedEvent;"/>
+				handle="=Aircandi/src&lt;com.aircandi.components{java[AircandiCommon~onWifiScanReceived~QQueryWifiScanReceivedEvent;"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{AircandiCommon.java[AircandiCommon~onLocationReceived~QLocationReceivedEvent;"/>
+				handle="=Aircandi/src&lt;com.aircandi.components{java[AircandiCommon~onLocationReceived~QLocationReceivedEvent;"/>
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.components{CommandType.java[CommandType"/>
 		<explicit-entry-point

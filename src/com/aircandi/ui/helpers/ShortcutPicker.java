@@ -29,8 +29,9 @@ import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.ui.widgets.BounceListView;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Routing;
 
 public class ShortcutPicker extends BaseActivity {
 
@@ -50,7 +51,7 @@ public class ShortcutPicker extends BaseActivity {
 
 	private void initialize() {
 
-		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+		mActionBar.setDisplayHomeAsUpEnabled(true);
 
 		/* We use this to access the source suggestions */
 		final Bundle extras = this.getIntent().getExtras();
@@ -62,7 +63,7 @@ public class ShortcutPicker extends BaseActivity {
 					mShortcuts.add(shortcut);
 				}
 			}
-			
+
 			final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
 			if (jsonEntity != null) {
 				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
@@ -70,9 +71,9 @@ public class ShortcutPicker extends BaseActivity {
 		}
 
 		mList = (BounceListView) findViewById(R.id.list);
-		
+
 		if (mShortcuts != null && mShortcuts.size() > 0) {
-			mCommon.mActionBar.setTitle(mShortcuts.get(0).app);
+			mActionBar.setTitle(mShortcuts.get(0).app);
 
 			/* Show default photo based on the type of the shortcut set */
 			Photo photo = new Photo(Applink.getDefaultPhotoUri(mShortcuts.get(0).schema), null, null, null, PhotoSource.assets);
@@ -91,7 +92,7 @@ public class ShortcutPicker extends BaseActivity {
 							@Override
 							public void run() {
 								final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-								mCommon.mActionBar.setIcon(new BitmapDrawable(Aircandi.applicationContext.getResources(), imageResponse.bitmap));
+								mActionBar.setIcon(new BitmapDrawable(Aircandi.applicationContext.getResources(), imageResponse.bitmap));
 							}
 						});
 					}
@@ -104,7 +105,7 @@ public class ShortcutPicker extends BaseActivity {
 	private void bind() {
 		final ShortcutListAdapter adapter = new ShortcutListAdapter(this, mShortcuts, R.layout.temp_listitem_shortcut_picker);
 		mList.setAdapter(adapter);
-		mCommon.hideBusy(true); // Visible by default
+		mBusyManager.hideBusy(); // Visible by default
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -115,7 +116,7 @@ public class ShortcutPicker extends BaseActivity {
 	public void onListItemClick(View view) {
 		View label = (View) view.findViewById(R.id.photo);
 		Shortcut shortcut = (Shortcut) label.getTag();
-		doShortcutClick(shortcut, mEntity);
+		Routing.shortcut(this, shortcut, mEntity);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -130,12 +131,12 @@ public class ShortcutPicker extends BaseActivity {
 		else if (item.getItemId() == R.id.cancel) {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
-			AnimUtils.doOverridePendingTransition(ShortcutPicker.this, TransitionType.FormToPage);
+			Animate.doOverridePendingTransition(ShortcutPicker.this, TransitionType.FormToPage);
 			return true;
 		}
 
 		/* In case we add general menu items later */
-		mCommon.doOptionsItemSelected(item);
+		super.onOptionsItemSelected(item);
 		return true;
 	}
 

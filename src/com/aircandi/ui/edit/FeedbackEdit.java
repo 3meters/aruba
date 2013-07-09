@@ -8,8 +8,6 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -18,8 +16,10 @@ import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.Document;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.ui.widgets.UserView;
-import com.aircandi.utilities.DateUtils;
-import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
 
 public class FeedbackEdit extends BaseEntityEdit {
 
@@ -54,7 +54,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 	protected boolean validate() {
 		if (super.validate()) {
 			if (mDescription.getText().length() == 0) {
-				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+				Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 						, null
 						, getResources().getString(R.string.error_missing_message)
 						, null
@@ -79,13 +79,13 @@ public class FeedbackEdit extends BaseEntityEdit {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(R.string.progress_sending, true);
+					mBusyManager.showBusy(R.string.progress_sending);
 				}
 
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("InsertFeedback");
-					mDocument.createdDate = DateUtils.nowDate().getTime();
+					mDocument.createdDate = DateTime.nowDate().getTime();
 					final ModelResult result = EntityManager.getInstance().insertDocument(mDocument);
 					return result;
 				}
@@ -96,12 +96,12 @@ public class FeedbackEdit extends BaseEntityEdit {
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.sendEvent("ui_action", "send_feedback", null, 0, Aircandi.getInstance().getUser());
-						mCommon.hideBusy(true);
-						ImageUtils.showToastNotification(getString(R.string.alert_feedback_sent), Toast.LENGTH_SHORT);
+						mBusyManager.hideBusy();
+						UI.showToastNotification(getString(R.string.alert_feedback_sent), Toast.LENGTH_SHORT);
 						finish();
 					}
 					else {
-						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.FeedbackSave);
+						Routing.serviceError(FeedbackEdit.this, result.serviceResponse);
 					}
 				}
 			}.execute();
@@ -120,7 +120,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 		}
 
 		/* In case we add general menu items later */
-		mCommon.doOptionsItemSelected(item);
+		super.onOptionsItemSelected(item);
 		return true;
 	}
 

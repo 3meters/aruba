@@ -17,7 +17,7 @@ import android.widget.Toast;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.Logger;
 
-public class MiscUtils {
+public class Utilities {
 
 	private static final Pattern	EMAIL_ADDRESS						= Pattern.compile(
 																				"[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
@@ -152,7 +152,7 @@ public class MiscUtils {
 			Writer writer = new BufferedWriter(new FileWriter(outputFile));
 			writer.write(data);
 			Logger.d(root, "Report successfully saved to: " + outputFile.getAbsolutePath());
-			ImageUtils.showToastNotification("Report successfully saved to: " + outputFile.getAbsolutePath(), Toast.LENGTH_LONG);
+			UI.showToastNotification("Report successfully saved to: " + outputFile.getAbsolutePath(), Toast.LENGTH_LONG);
 			writer.close();
 		}
 		catch (IOException e) {

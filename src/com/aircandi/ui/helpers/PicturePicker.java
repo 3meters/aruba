@@ -44,7 +44,6 @@ import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
@@ -69,8 +68,9 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.base.BaseActivity;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
 
 /*
  * We often will get duplicates because the ordering of images isn't
@@ -83,9 +83,9 @@ public class PicturePicker extends BaseActivity {
 	private GridView				mGridView;
 	private EditText				mSearch;
 	private final List<ImageResult>	mImages			= new ArrayList<ImageResult>();
-	private TextView				mName;
 	private TextView				mMessage;
 	private Entity					mEntity;
+	public String					mEntityId;
 
 	private long					mOffset			= 0;
 	private String					mQuery;
@@ -111,17 +111,26 @@ public class PicturePicker extends BaseActivity {
 		}
 	}
 
-	private void initialize() {
+	@Override
+	protected void unpackIntent() {
+
+		final Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
+		}
+	}
+
+	protected void initialize() {
 
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mDrawableManager = new DrawableManager();
 
-		if (mCommon.mEntityId != null) {
+		if (mEntityId != null) {
 			mPlacePhotoMode = true;
 		}
 
 		if (mPlacePhotoMode) {
-			mEntity = EntityManager.getEntity(mCommon.mEntityId);
+			mEntity = EntityManager.getEntity(mEntityId);
 			mProvider = ((Place) mEntity).getProvider();
 			((ViewGroup) findViewById(R.id.search_group)).setVisibility(View.GONE);
 		}
@@ -162,20 +171,14 @@ public class PicturePicker extends BaseActivity {
 			desiredWidthPixels = (int) (metrics.ydpi * 0.60f);
 		}
 		final Integer count = (int) Math.ceil(layoutWidthPixels / desiredWidthPixels);
-		mImageMarginPixels = ImageUtils.getRawPixels(this, 2);
+		mImageMarginPixels = UI.getRawPixels(this, 2);
 		mImageWidthPixels = (layoutWidthPixels / count) - (mImageMarginPixels * (count - 1));
 
-		if (isDialog()) {
-			mName = (TextView) findViewById(R.id.name);
-			mName.setText(mPlacePhotoMode ? R.string.dialog_picture_picker_place_title : R.string.dialog_picture_picker_search_title);
+		if (mPlacePhotoMode) {
+			mActionBar.setTitle(mEntity.name);
 		}
 		else {
-			if (mPlacePhotoMode) {
-				mCommon.mActionBar.setTitle(mEntity.name);
-			}
-			else {
-				mCommon.mActionBar.setTitle(R.string.dialog_picture_picker_search_title);
-			}
+			mActionBar.setTitle(R.string.dialog_picture_picker_search_title);
 		}
 
 		mMessage = (TextView) findViewById(R.id.message);
@@ -364,7 +367,7 @@ public class PicturePicker extends BaseActivity {
 						}
 					}
 					else {
-						mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
+						Routing.serviceError(PicturePicker.this, serviceResponse);
 						return false;
 					}
 					mOffset += PAGE_SIZE;
@@ -372,7 +375,7 @@ public class PicturePicker extends BaseActivity {
 
 						@Override
 						public void run() {
-							mCommon.hideBusy(true);
+							mBusyManager.hideBusy();
 						}
 					});
 					return mMoreImages.size() >= PAGE_SIZE;
@@ -382,7 +385,7 @@ public class PicturePicker extends BaseActivity {
 
 						@Override
 						public void run() {
-							mCommon.hideBusy(true);
+							mBusyManager.hideBusy();
 						}
 					});
 					return false;
@@ -416,7 +419,7 @@ public class PicturePicker extends BaseActivity {
 							+ String.valueOf(getWrappedAdapter().getCount() + mMoreImages.size()));
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
+					Routing.serviceError(PicturePicker.this, serviceResponse);
 					return false;
 				}
 				mOffset += PAGE_SIZE;
@@ -424,7 +427,7 @@ public class PicturePicker extends BaseActivity {
 
 					@Override
 					public void run() {
-						mCommon.hideBusy(true);
+						mBusyManager.hideBusy();
 					}
 				});
 				return (getWrappedAdapter().getCount() + mMoreImages.size()) < LIST_MAX;
@@ -497,7 +500,7 @@ public class PicturePicker extends BaseActivity {
 			synchronized (mBitmapCache) {
 				if (mBitmapCache.containsKey(uri) && mBitmapCache.get(uri).get() != null) {
 					final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), mBitmapCache.get(uri).get());
-					ImageUtils.showDrawableInImageView(bitmapDrawable, holder.itemImage, false, AnimUtils.fadeInMedium());
+					UI.showDrawableInImageView(bitmapDrawable, holder.itemImage, false, Animate.fadeInMedium());
 					return;
 				}
 			}
@@ -509,8 +512,8 @@ public class PicturePicker extends BaseActivity {
 					final DrawableManager drawableManager = getDrawableManager().get();
 					if (drawableManager != null) {
 						if (((String) holder.itemImage.getTag()).equals(uri)) {
-							ImageUtils.showDrawableInImageView((Drawable) message.obj, holder.itemImage, true,
-									AnimUtils.fadeInMedium());
+							UI.showDrawableInImageView((Drawable) message.obj, holder.itemImage, true,
+									Animate.fadeInMedium());
 						}
 					}
 				}

@@ -22,7 +22,7 @@ import com.aircandi.beta.BuildConfig;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.ServiceRequest;
-import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.UI;
 
 /**
  * Designed as a singleton. The private Constructor prevents any other class from instantiating.
@@ -91,13 +91,13 @@ public class NetworkManager {
 					boolean noConnection = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
 
 					if (noConnection) {
-						ImageUtils.showToastNotification("Lost network connection", Toast.LENGTH_SHORT);
+						UI.showToastNotification("Lost network connection", Toast.LENGTH_SHORT);
 					}
 					if (wifi.isAvailable()) {
-						ImageUtils.showToastNotification("Wifi network is available", Toast.LENGTH_SHORT);
+						UI.showToastNotification("Wifi network is available", Toast.LENGTH_SHORT);
 					}
 					if (mobile.isAvailable()) {
-						ImageUtils.showToastNotification("Mobile network is available", Toast.LENGTH_SHORT);
+						UI.showToastNotification("Mobile network is available", Toast.LENGTH_SHORT);
 					}
 				}
 			}

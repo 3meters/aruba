@@ -5,7 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-public class DateUtils {
+public class DateTime {
 
 	public static final String	DATE_NOW_FORMAT_FILENAME			= "yyyyMMdd_HHmmss";
 	private static final String	DATE_FORMAT_TIME_SINCE				= "MMM d";
@@ -46,7 +46,7 @@ public class DateUtils {
 		String interval = "just now";
 		if (days >= 1) {
 			SimpleDateFormat datePart = new SimpleDateFormat(DATE_FORMAT_TIME_SINCE, Locale.US);
-			if (dateOld.getYear() != DateUtils.nowDate().getYear()) {
+			if (dateOld.getYear() != DateTime.nowDate().getYear()) {
 				datePart = new SimpleDateFormat(DATE_FORMAT_TIME_SINCE_WITH_YEAR, Locale.US);
 				return datePart.format(dateOld.getTime());
 			}

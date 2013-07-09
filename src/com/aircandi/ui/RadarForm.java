@@ -1,8 +1,14 @@
 package com.aircandi.ui;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.media.AudioManager;
@@ -12,19 +18,23 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.provider.Settings;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
+import com.aircandi.ScanService;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.BeaconsLockedEvent;
 import com.aircandi.components.BusProvider;
 import com.aircandi.components.EntitiesChangedEvent;
@@ -38,6 +48,7 @@ import com.aircandi.components.LocationLockedEvent;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.LocationTimeoutEvent;
 import com.aircandi.components.Logger;
+import com.aircandi.components.MonitoringWifiScanReceivedEvent;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ConnectedState;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -46,6 +57,7 @@ import com.aircandi.components.PlacesNearLocationFinishedEvent;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.ProximityManager.ScanReason;
+import com.aircandi.components.ProximityManager.WifiScanResult;
 import com.aircandi.components.QueryWifiScanReceivedEvent;
 import com.aircandi.components.RadarListAdapter;
 import com.aircandi.components.Tracker;
@@ -55,10 +67,12 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.ui.edit.PlaceEdit;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
-import com.aircandi.utilities.DateUtils;
-import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
@@ -112,6 +126,11 @@ public class RadarForm extends BaseActivity {
 	private Number					mPauseDate;
 
 	private PullToRefreshListView	mList;
+	private View					mAccuracyIndicator;
+	private TextView				mBeaconIndicator;
+	private String					mDebugWifi;
+	private String					mDebugLocation			= "--";
+	private MenuItem				mMenuItemBeacons;
 
 	private SoundPool				mSoundPool;
 	private int						mNewCandiSoundId;
@@ -124,6 +143,7 @@ public class RadarForm extends BaseActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		if (!isFinishing()) {
 			Aircandi.stopwatch4.start("Creating radar");
 			/*
@@ -137,7 +157,7 @@ public class RadarForm extends BaseActivity {
 			if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 				/* We won't continue if location services are disabled */
 				startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-				AnimUtils.doOverridePendingTransition(RadarForm.this, TransitionType.PageToForm);
+				Animate.doOverridePendingTransition(RadarForm.this, TransitionType.PageToForm);
 				finish();
 			}
 
@@ -148,7 +168,7 @@ public class RadarForm extends BaseActivity {
 		}
 	}
 
-	private void initialize() {
+	protected void initialize() {
 		/*
 		 * Here we initialize activity level state. Only called from
 		 * onCreate.
@@ -199,7 +219,7 @@ public class RadarForm extends BaseActivity {
 
 		mInitialized = true;
 	}
-
+	
 	private void checkSession() {
 		new AsyncTask() {
 
@@ -214,7 +234,7 @@ public class RadarForm extends BaseActivity {
 			protected void onPostExecute(Object modelResult) {
 				final ModelResult result = (ModelResult) modelResult;
 				if (result.serviceResponse.responseCode != ResponseCode.Success) {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
+					Routing.serviceError(RadarForm.this, result.serviceResponse);
 				}
 			}
 
@@ -270,8 +290,8 @@ public class RadarForm extends BaseActivity {
 					protected void onPostExecute(Object result) {
 						final ServiceResponse serviceResponse = (ServiceResponse) result;
 						if (serviceResponse.responseCode != ResponseCode.Success) {
-							mCommon.handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
-							mCommon.hideBusy(true);
+							Routing.serviceError(RadarForm.this, serviceResponse);
+							mBusyManager.hideBusy();
 						}
 					}
 
@@ -297,6 +317,24 @@ public class RadarForm extends BaseActivity {
 		});
 	}
 
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
+		updateDevIndicator(event.wifiList, null);
+	}
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onWifiQueryReceived(QueryWifiScanReceivedEvent event) {
+		updateDevIndicator(event.wifiList, null);
+	}
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onLocationLocked(LocationLockedEvent event) {
+		updateDevIndicator(null, event.location);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Event bus routines: location
 	// --------------------------------------------------------------------------------------------
@@ -312,9 +350,9 @@ public class RadarForm extends BaseActivity {
 				Logger.d(RadarForm.this, "Location fix attempt aborted: timeout: ** done **");
 				if (LocationManager.getInstance().getLocationLocked() == null) {
 					/* We only show toast if we timeout without getting any location fix */
-					ImageUtils.showToastNotification(getString(R.string.error_location_poor), Toast.LENGTH_SHORT);
+					UI.showToastNotification(getString(R.string.error_location_poor), Toast.LENGTH_SHORT);
 				}
-				mCommon.hideBusy(true);
+				mBusyManager.hideBusy();
 				mList.onRefreshComplete();
 			}
 		});
@@ -352,7 +390,7 @@ public class RadarForm extends BaseActivity {
 					}
 
 					LocationManager.getInstance().setLocationLocked(locationCandidate);
-					mCommon.updateAccuracyIndicator();
+					updateAccuracyIndicator();
 					BusProvider.getInstance().post(new LocationLockedEvent(LocationManager.getInstance().getLocationLocked()));
 
 					if (Aircandi.stopwatch2.isStarted()) {
@@ -363,7 +401,7 @@ public class RadarForm extends BaseActivity {
 					final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
 					if (location != null) {
 
-						mCommon.showBusy(true);
+						mBusyManager.showBusy();
 
 						new AsyncTask() {
 
@@ -382,15 +420,15 @@ public class RadarForm extends BaseActivity {
 							protected void onPostExecute(Object result) {
 								final ServiceResponse serviceResponse = (ServiceResponse) result;
 								if (serviceResponse.responseCode != ResponseCode.Success) {
-									mCommon.handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
-									mCommon.hideBusy(true);
+									Routing.serviceError(RadarForm.this, serviceResponse);
+									mBusyManager.hideBusy();
 								}
 							}
 
 						}.execute();
 					}
 					else {
-						mCommon.hideBusy(true);
+						mBusyManager.hideBusy();
 					}
 				}
 			}
@@ -407,7 +445,7 @@ public class RadarForm extends BaseActivity {
 			@Override
 			public void run() {
 				Logger.d(RadarForm.this, "Places near location finished event: ** done **");
-				mCommon.hideBusy(true);
+				mBusyManager.hideBusy();
 				mList.onRefreshComplete();
 			}
 		});
@@ -438,7 +476,6 @@ public class RadarForm extends BaseActivity {
 				mRadarAdapter.setItems(entities);
 				mRadarAdapter.notifyDataSetChanged();
 				Aircandi.stopwatch1.stop("Search for places by beacon complete");
-				
 
 				/* Add some sparkle */
 				if (previousCount == 0 && entities.size() > 0) {
@@ -478,14 +515,14 @@ public class RadarForm extends BaseActivity {
 		/* We won't perform a search if location access is disabled */
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-			AnimUtils.doOverridePendingTransition(RadarForm.this, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(RadarForm.this, TransitionType.PageToForm);
 		}
 		else {
 			new AsyncTask() {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(true);
+					mBusyManager.showBusy();
 				}
 
 				@Override
@@ -514,14 +551,14 @@ public class RadarForm extends BaseActivity {
 						if (Aircandi.stopwatch4.isStarted()) {
 							Aircandi.stopwatch4.stop("Aircandi initialization finished: network problem");
 						}
-						mCommon.hideBusy(true);
+						mBusyManager.hideBusy();
 						mList.onRefreshComplete();
 
 						if (connectedState == ConnectedState.WalledGarden) {
-							mCommon.showAlertDialogSimple(null, getString(R.string.error_connection_walled_garden));
+							Dialogs.showAlertDialogSimple(RadarForm.this, null, getString(R.string.error_connection_walled_garden));
 						}
 						else if (connectedState == ConnectedState.None) {
-							mCommon.showAlertDialogSimple(null, getString(R.string.error_connection_none));
+							Dialogs.showAlertDialogSimple(RadarForm.this, null, getString(R.string.error_connection_none));
 						}
 					}
 				}
@@ -557,7 +594,7 @@ public class RadarForm extends BaseActivity {
 		if (Aircandi.getInstance().getUser() != null) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, PlaceEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_PLACE);
 			startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 		}
 	}
 
@@ -574,7 +611,7 @@ public class RadarForm extends BaseActivity {
 		}
 
 		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.RadarToPage);
+		Animate.doOverridePendingTransition(this, TransitionType.RadarToPage);
 	}
 
 	@SuppressWarnings("unused")
@@ -596,11 +633,200 @@ public class RadarForm extends BaseActivity {
 		if (NetworkManager.getInstance().isWifiTethered()
 				|| (!NetworkManager.getInstance().isWifiEnabled() && !Aircandi.usingEmulator)) {
 
-			showWifiAlertDialog(NetworkManager.getInstance().isWifiTethered()
+			Dialogs.showWifiAlertDialog(RadarForm.this, NetworkManager.getInstance().isWifiTethered()
 					? R.string.alert_wifi_tethered
 					: R.string.alert_wifi_disabled
 					, null);
 		}
+	}
+
+	public void updateAccuracyIndicator() {
+
+		final Location location = LocationManager.getInstance().getLocationLocked();
+
+		if (mAccuracyIndicator != null) {
+
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+
+					int sizeDip = 35;
+
+					if (location != null && location.hasAccuracy()) {
+
+						sizeDip = 35;
+
+						if (location.getAccuracy() <= 100) {
+							sizeDip = 25;
+						}
+						if (location.getAccuracy() <= 50) {
+							sizeDip = 13;
+						}
+						if (location.getAccuracy() <= 30) {
+							sizeDip = 7;
+						}
+						Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));
+					}
+
+					final int sizePixels = UI.getRawPixels(RadarForm.this, sizeDip);
+					final FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(sizePixels, sizePixels, Gravity.CENTER);
+					mAccuracyIndicator.setLayoutParams(layoutParams);
+					mAccuracyIndicator.setBackgroundResource(R.drawable.bg_accuracy_indicator);
+				}
+			});
+		}
+	}
+
+	private void doBeaconIndicatorClick() {
+		if (mBeaconIndicator != null) {
+			final StringBuilder beaconMessage = new StringBuilder(500);
+			List<WifiScanResult> wifiList = ProximityManager.getInstance().getWifiList();
+			synchronized (wifiList) {
+				if (Aircandi.getInstance().getUser() != null
+						&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+						&& Aircandi.getInstance().getUser().developer != null
+						&& Aircandi.getInstance().getUser().developer) {
+					if (Aircandi.wifiCount > 0) {
+						for (WifiScanResult wifi : wifiList) {
+							if (!wifi.SSID.equals("candi_feed")) {
+								beaconMessage.append(wifi.SSID + ": (" + String.valueOf(wifi.level) + ") " + wifi.BSSID + System.getProperty("line.separator"));
+							}
+						}
+						beaconMessage.append(System.getProperty("line.separator"));
+						beaconMessage.append("Wifi fix: " + DateTime.intervalSince(ProximityManager.getInstance().mLastWifiUpdate, DateTime.nowDate()));
+					}
+
+					final Location location = LocationManager.getInstance().getLocationLocked();
+					if (location != null) {
+						final Date fixDate = new Date(location.getTime());
+						beaconMessage.append(System.getProperty("line.separator") + "Location fix: " + DateTime.intervalSince(fixDate, DateTime.nowDate()));
+						beaconMessage.append(System.getProperty("line.separator") + "Location accuracy: " + String.valueOf(location.getAccuracy()));
+						beaconMessage.append(System.getProperty("line.separator") + "Location provider: " + location.getProvider());
+					}
+					else {
+						beaconMessage.append(System.getProperty("line.separator") + "Location fix: none");
+					}
+				}
+				else {
+					return;
+				}
+			}
+			Dialogs.showAlertDialog(R.drawable.ic_launcher
+					, getString(R.string.alert_beacons_title)
+					, beaconMessage.toString()
+					, null
+					, this
+					, android.R.string.ok
+					, null
+					, null
+					, new
+					DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {}
+					}, null);
+		}
+	}
+
+	public void updateDevIndicator(final List<WifiScanResult> scanList, Location location) {
+
+		if (mBeaconIndicator == null) return;
+
+		if (scanList != null) {
+
+			synchronized (scanList) {
+				/*
+				 * In case we get called from a background thread.
+				 */
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+
+						WifiScanResult wifiStrongest = null;
+						int wifiCount = 0;
+						for (WifiScanResult wifi : scanList) {
+							wifiCount++;
+							if (wifiStrongest == null) {
+								wifiStrongest = wifi;
+							}
+							else if (wifi.level > wifiStrongest.level) {
+								wifiStrongest = wifi;
+							}
+						}
+
+						Aircandi.wifiCount = wifiCount;
+						mDebugWifi = String.valueOf(wifiCount);
+					}
+				});
+
+			}
+		}
+
+		if (location != null) {
+			Location locationLocked = LocationManager.getInstance().getLocationLocked();
+			if (locationLocked != null) {
+				if (location.getProvider().equals(locationLocked.getProvider()) && (int) location.getAccuracy() == (int) locationLocked.getAccuracy()) {
+					mBeaconIndicator.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.accent_blue));
+				}
+				else {
+					if (mThemeTone.equals("dark")) {
+						mBeaconIndicator.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.text_dark));
+					}
+					else {
+						mBeaconIndicator.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.text_light));
+					}
+				}
+			}
+
+			String debugLocation = location.getProvider().substring(0, 1).toUpperCase(Locale.ROOT);
+			if (location.hasAccuracy()) {
+				debugLocation += String.valueOf((int) location.getAccuracy());
+			}
+			else {
+				debugLocation += "--";
+			}
+			mDebugLocation = debugLocation;
+		}
+
+		mBeaconIndicator.setText(mDebugWifi + ":" + mDebugLocation);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+
+		/* Beacon indicator */
+		mMenuItemBeacons = menu.findItem(R.id.beacons);
+		if (mMenuItemBeacons != null) {
+
+			/* Only show beacon indicator if user is a developer */
+			if (!Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+					|| Aircandi.getInstance().getUser() == null
+					|| Aircandi.getInstance().getUser().developer == null
+					|| !Aircandi.getInstance().getUser().developer) {
+				mMenuItemBeacons.setVisible(false);
+			}
+			else {
+				mBeaconIndicator = (TextView) mMenuItemBeacons.getActionView().findViewById(R.id.beacon_indicator);
+				mMenuItemBeacons.getActionView().findViewById(R.id.beacon_frame).setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						doBeaconIndicatorClick();
+					}
+				});
+			}
+		}
+
+		/* Cache refresh menu item for later ui updates */
+		mMenuItemRefresh = menu.findItem(R.id.refresh);
+		if (mMenuItemRefresh != null) {
+			mAccuracyIndicator = mMenuItemRefresh.getActionView().findViewById(R.id.accuracy_indicator);
+			updateAccuracyIndicator();
+		}
+
+		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -628,7 +854,7 @@ public class RadarForm extends BaseActivity {
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 			/* We won't continue if location services are disabled */
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-			AnimUtils.doOverridePendingTransition(RadarForm.this, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(RadarForm.this, TransitionType.PageToForm);
 			finish();
 		}
 
@@ -640,7 +866,7 @@ public class RadarForm extends BaseActivity {
 		enableEvents();
 
 		/* Reset the accuracy indicator */
-		mCommon.updateAccuracyIndicator();
+		updateAccuracyIndicator();
 	}
 
 	@Override
@@ -662,7 +888,7 @@ public class RadarForm extends BaseActivity {
 		}
 
 		/* Kill busy */
-		mCommon.hideBusy(true);
+		mBusyManager.hideBusy();
 		mList.onRefreshComplete();
 
 		Logger.d(this, "CandiRadarActivity stopped");
@@ -680,8 +906,8 @@ public class RadarForm extends BaseActivity {
 		 * be followed by onStop if we are not visible. Does not fire if the activity window
 		 * loses focus but the activity is still active.
 		 */
-		mCommon.stopScanService();
-		mPauseDate = DateUtils.nowDate().getTime();
+		stopScanService();
+		mPauseDate = DateTime.nowDate().getTime();
 
 		super.onPause();
 	}
@@ -700,17 +926,17 @@ public class RadarForm extends BaseActivity {
 		mFreshWindow = true;
 
 		/* Run help if it hasn't been run yet */
-//		final Boolean runOnceHelp = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, false);
-//		if (!runOnceHelp) {
-//			mCommon.doHelpClick();
-//			return;
-//		}
+		//		final Boolean runOnceHelp = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, false);
+		//		if (!runOnceHelp) {
+		//			doHelpClick();
+		//			return;
+		//		}
 
 		if (Aircandi.getInstance().getUser() != null
 				&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
 				&& Aircandi.getInstance().getUser().developer != null
 				&& Aircandi.getInstance().getUser().developer) {
-			mCommon.startScanService(Constants.INTERVAL_SCAN_WIFI);
+			startScanService(Constants.INTERVAL_SCAN_WIFI);
 		}
 	}
 
@@ -723,7 +949,7 @@ public class RadarForm extends BaseActivity {
 		if (hasFocus && mFreshWindow) {
 
 			if (mPauseDate != null) {
-				final Long interval = DateUtils.nowDate().getTime() - mPauseDate.longValue();
+				final Long interval = DateTime.nowDate().getTime() - mPauseDate.longValue();
 				if (interval > Constants.INTERVAL_TETHER_ALERT) {
 					tetherAlert();
 				}
@@ -772,12 +998,12 @@ public class RadarForm extends BaseActivity {
 			 */
 			Logger.d(this, "Refresh Ui because of preference change");
 			mPrefChangeRefreshUiNeeded = false;
-			mCommon.showBusy(true);
+			mBusyManager.showBusy();
 			invalidateOptionsMenu();
 			mRadarAdapter.getItems().clear();
 			mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
 			mRadarAdapter.notifyDataSetChanged();
-			mCommon.hideBusy(true);
+			mBusyManager.hideBusy();
 		}
 		else if (LocationManager.getInstance().getLocationLocked() == null) {
 			/*
@@ -803,10 +1029,10 @@ public class RadarForm extends BaseActivity {
 			if (wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED
 					|| wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED + 10) {
 				Logger.d(this, "Wifi Ap enabled, clearing beacons");
-				ImageUtils.showToastNotification("Hotspot or tethering enabled", Toast.LENGTH_SHORT);
+				UI.showToastNotification("Hotspot or tethering enabled", Toast.LENGTH_SHORT);
 			}
 			else {
-				ImageUtils.showToastNotification("Wifi disabled", Toast.LENGTH_SHORT);
+				UI.showToastNotification("Wifi disabled", Toast.LENGTH_SHORT);
 			}
 			ProximityManager.getInstance().getWifiList().clear();
 			EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null);
@@ -817,7 +1043,7 @@ public class RadarForm extends BaseActivity {
 			/*
 			 * Wifi has been enabled since our last search
 			 */
-			ImageUtils.showToastNotification("Wifi enabled", Toast.LENGTH_SHORT);
+			UI.showToastNotification("Wifi enabled", Toast.LENGTH_SHORT);
 			mList.setRefreshing();
 		}
 		else if ((ProximityManager.getInstance().getLastBeaconLockedDate() != null && mEntityModelBeaconDate != null)
@@ -852,12 +1078,12 @@ public class RadarForm extends BaseActivity {
 
 				@Override
 				public void run() {
-					mCommon.showBusy(true);
+					mBusyManager.showBusy();
 					invalidateOptionsMenu();
 					mRadarAdapter.getItems().clear();
 					mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
 					mRadarAdapter.notifyDataSetChanged();
-					mCommon.hideBusy(true);
+					mBusyManager.hideBusy();
 				}
 			}, 100);
 		}
@@ -886,30 +1112,35 @@ public class RadarForm extends BaseActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Application menu routines (settings)
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		mCommon.doCreateOptionsMenu(menu);
-		return true;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		mCommon.doPrepareOptionsMenu(menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		mCommon.doOptionsItemSelected(menuItem);
-		return true;
-	}
-
-	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
+	@SuppressWarnings("ucd")
+	public void startScanService(int scanInterval) {
+
+		/* Start first scan right away */
+		Logger.d(this, "Starting wifi scan service");
+		final Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
+		startService(scanIntent);
+
+		/* Setup a scanning schedule */
+		if (scanInterval > 0) {
+			final AlarmManager alarmManager = (AlarmManager) getSystemService(Service.ALARM_SERVICE);
+			final PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
+			alarmManager.cancel(pendingIntent);
+			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP
+					, SystemClock.elapsedRealtime() + scanInterval
+					, scanInterval, pendingIntent);
+		}
+	}
+
+	@SuppressWarnings("ucd")
+	public void stopScanService() {
+		final AlarmManager alarmManager = (AlarmManager) getSystemService(Service.ALARM_SERVICE);
+		final Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
+		final PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
+		alarmManager.cancel(pendingIntent);
+		Logger.d(this, "Stopped wifi scan service");
+	}
 
 	private void enableEvents() {
 		BusProvider.getInstance().register(this);

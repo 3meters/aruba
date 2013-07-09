@@ -25,7 +25,7 @@ import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.ServiceData;
-import com.aircandi.utilities.DateUtils;
+import com.aircandi.utilities.DateTime;
 import com.google.android.gcm.GCMRegistrar;
 
 public class ProximityManager {
@@ -84,7 +84,7 @@ public class ProximityManager {
 					@Override
 					public void onReceive(Context context, Intent intent) {
 
-						Aircandi.stopwatch1.segmentTime("Wifi scan received from system");						
+						Aircandi.stopwatch1.segmentTime("Wifi scan received from system");
 						Logger.v(ProximityManager.this, "Received wifi scan results for " + reason.name());
 						Aircandi.applicationContext.unregisterReceiver(this);
 
@@ -122,7 +122,7 @@ public class ProximityManager {
 						}
 						Collections.sort(mWifiList, new WifiScanResult.SortWifiBySignalLevel());
 
-						mLastWifiUpdate = DateUtils.nowDate();
+						mLastWifiUpdate = DateTime.nowDate();
 						if (reason == ScanReason.monitoring) {
 							BusProvider.getInstance().post(new MonitoringWifiScanReceivedEvent(mWifiList));
 						}
@@ -174,7 +174,7 @@ public class ProximityManager {
 			}
 		}
 
-		mLastBeaconLockedDate = DateUtils.nowDate().getTime();
+		mLastBeaconLockedDate = DateTime.nowDate().getTime();
 		BusProvider.getInstance().post(new BeaconsLockedEvent());
 	}
 
@@ -267,7 +267,7 @@ public class ProximityManager {
 
 	public Boolean beaconRefreshNeeded(Location activeLocation) {
 		if (mLastBeaconLoadDate != null) {
-			final Long interval = DateUtils.nowDate().getTime() - mLastBeaconLoadDate;
+			final Long interval = DateTime.nowDate().getTime() - mLastBeaconLoadDate;
 			if (interval > Constants.INTERVAL_REFRESH) {
 				Logger.v(this, "Refresh needed: past interval");
 				return true;
@@ -331,11 +331,11 @@ public class ProximityManager {
 		public ServiceResponse	serviceResponse	= new ServiceResponse();
 	}
 
-	static class WifiScanResult {
+	public static class WifiScanResult {
 
-		String			BSSID;
-		String			SSID;
-		int				level	= 0;
+		public String	BSSID;
+		public String	SSID;
+		public int		level	= 0;
 		public Boolean	test	= false;
 
 		private WifiScanResult(String bssid, String ssid, int level, Boolean test) {

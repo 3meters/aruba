@@ -8,9 +8,9 @@ import com.aircandi.Constants;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirNotification;
-import com.aircandi.ui.EntityList;
 import com.aircandi.ui.RadarForm;
-import com.aircandi.ui.base.BaseEntityView;
+import com.aircandi.ui.base.BaseEntityForm;
+import com.aircandi.ui.base.BaseEntityList;
 import com.google.android.gcm.GCMBaseIntentService;
 
 public class GCMIntentService extends GCMBaseIntentService {
@@ -63,24 +63,24 @@ public class GCMIntentService extends GCMBaseIntentService {
 		synchronized (lock) {
 			if (currentActivity != null) {
 				if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-					if (currentActivity.getClass() == BaseEntityView.class) {
-						final BaseEntityView activity = (BaseEntityView) currentActivity;
-						if (activity.getCommon().mEntityId.equals(airNotification.entity.toId)) {
+					if (currentActivity.getClass() == BaseEntityForm.class) {
+						final BaseEntityForm activity = (BaseEntityForm) currentActivity;
+						if (activity.mEntityId.equals(airNotification.entity.toId)) {
 							activity.runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-									activity.getCommon().doRefreshClick();
+									activity.doRefresh();
 								}
 							});
 						}
 					}
-					else if (currentActivity.getClass() == EntityList.class) {
-						final EntityList activity = (EntityList) currentActivity;
-						if (activity.getCommon().mEntityId.equals(airNotification.entity.toId)) {
+					else if (currentActivity.getClass() == BaseEntityList.class) {
+						final BaseEntityList activity = (BaseEntityList) currentActivity;
+						if (activity.mEntityId.equals(airNotification.entity.toId)) {
 							activity.runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-									activity.getCommon().doRefreshClick();
+									activity.doRefresh();
 								}
 							});
 						}
@@ -93,20 +93,20 @@ public class GCMIntentService extends GCMBaseIntentService {
 							activity.runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-									activity.getCommon().doRefreshClick();
+									activity.doRefresh();
 								}
 							});
 						}
 					}
 					else {
-						if (currentActivity.getClass() == BaseEntityView.class) {
-							final BaseEntityView activity = (BaseEntityView) currentActivity;
+						if (currentActivity.getClass() == BaseEntityForm.class) {
+							final BaseEntityForm activity = (BaseEntityForm) currentActivity;
 							if (airNotification.entity.toId != null) {
-								if (activity.getCommon().mEntityId.equals(airNotification.entity.toId)) {
+								if (activity.mEntityId.equals(airNotification.entity.toId)) {
 									activity.runOnUiThread(new Runnable() {
 										@Override
 										public void run() {
-											activity.getCommon().doRefreshClick();
+											activity.doRefresh();
 										}
 									});
 								}

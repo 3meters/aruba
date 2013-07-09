@@ -17,7 +17,7 @@
         <!-- Title and Content -->
 
         <com.aircandi.ui.widgets.AirTextView
-            android:id="@+id/form_message"
+            android:id="@+id/message"
             style="@style/form_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

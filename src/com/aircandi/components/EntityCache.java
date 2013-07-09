@@ -34,11 +34,11 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.User;
-import com.aircandi.utilities.DateUtils;
+import com.aircandi.utilities.DateTime;
 
 public class EntityCache implements Map<String, Entity> {
 
-	private Number						mLastActivityDate	= DateUtils.nowDate().getTime();
+	private Number						mLastActivityDate	= DateTime.nowDate().getTime();
 	private final Map<String, Entity>	mMap				= Collections.synchronizedMap(new HashMap<String, Entity>());
 
 	// --------------------------------------------------------------------------------------------
@@ -328,7 +328,7 @@ public class EntityCache implements Map<String, Entity> {
 
 					if (entity.id == null) {
 						place.id = place.getProvider().id;
-						place.modifiedDate = DateUtils.nowDate().getTime();
+						place.modifiedDate = DateTime.nowDate().getTime();
 						place.synthetic = true;
 					}
 					else {
@@ -384,7 +384,7 @@ public class EntityCache implements Map<String, Entity> {
 
 		removeEntityTree(entity.id);
 		put(entity.id, entity);
-		mLastActivityDate = DateUtils.nowDate().getTime();
+		mLastActivityDate = DateTime.nowDate().getTime();
 		return get(entity.id);
 	}
 
@@ -433,7 +433,7 @@ public class EntityCache implements Map<String, Entity> {
 				}
 			}
 		}
-		mLastActivityDate = DateUtils.nowDate().getTime();
+		mLastActivityDate = DateTime.nowDate().getTime();
 	}
 
 	public void addLinkTo(String toId, String type, String fromId, Shortcut shortcut) {
@@ -441,7 +441,7 @@ public class EntityCache implements Map<String, Entity> {
 		Entity entity = get(toId);
 
 		if (entity != null) {
-			Long time = DateUtils.nowDate().getTime();
+			Long time = DateTime.nowDate().getTime();
 			if (entity.linksIn == null) {
 				entity.linksIn = new ArrayList<Link>();
 			}
@@ -488,7 +488,7 @@ public class EntityCache implements Map<String, Entity> {
 				}
 			}
 
-			setLastActivityDate(DateUtils.nowDate().getTime());
+			setLastActivityDate(DateTime.nowDate().getTime());
 		}
 		return staleEntity;
 	}
@@ -506,7 +506,7 @@ public class EntityCache implements Map<String, Entity> {
 				}
 			}
 		}
-		mLastActivityDate = DateUtils.nowDate().getTime();
+		mLastActivityDate = DateTime.nowDate().getTime();
 	}
 
 	public void removeLinkTo(String toId, String type, String fromId) {
@@ -530,7 +530,7 @@ public class EntityCache implements Map<String, Entity> {
 				}
 			}
 		}
-		Long time = DateUtils.nowDate().getTime();
+		Long time = DateTime.nowDate().getTime();
 		entity.activityDate = time;
 		setLastActivityDate(time);
 	}

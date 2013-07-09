@@ -11,14 +11,12 @@ import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.Tracker;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Dialogs;
 
 public class Preferences extends SherlockPreferenceActivity {
-
-	private AircandiCommon	mCommon;
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -26,7 +24,6 @@ public class Preferences extends SherlockPreferenceActivity {
 		/*
 		 * We need to set the theme so ActionBarSherlock behaves correctly on API < V14
 		 */
-		mCommon = new AircandiCommon(this, savedInstanceState);
 		/*
 		 * Set theme.
 		 * TODO: Switch over to using the preferenceStyle attribute for the current theme.
@@ -127,7 +124,7 @@ public class Preferences extends SherlockPreferenceActivity {
 				+ getString(R.string.alert_about_label_code) + " "
 				+ String.valueOf(Aircandi.getVersionCode(this, RadarForm.class)) + System.getProperty("line.separator")
 				+ getString(R.string.dialog_about_copyright);
-		AircandiCommon.showAlertDialog(R.drawable.ic_launcher
+		Dialogs.showAlertDialog(R.drawable.ic_launcher
 				, title
 				, message
 				, null
@@ -142,18 +139,18 @@ public class Preferences extends SherlockPreferenceActivity {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
+		Animate.doOverridePendingTransition(this, TransitionType.FormToPage);
 	}
 
 	@Override
 	protected void onStop() {
+		Tracker.activityStop(this, Aircandi.getInstance().getUser());
 		super.onStop();
-		mCommon.doStop();
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		mCommon.doStart();
+		Tracker.activityStart(this, Aircandi.getInstance().getUser());
 	}
 }

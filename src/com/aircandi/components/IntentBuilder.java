@@ -6,15 +6,14 @@ import android.content.Intent;
 import com.aircandi.Constants;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.ui.EntityList;
-import com.aircandi.ui.EntityList.ListMode;
+import com.aircandi.ui.base.BaseEntityList;
+import com.aircandi.ui.base.BaseEntityList.ListMode;
 
 public class IntentBuilder {
 
 	private Context		mContext;
 	private Class<?>	mClass;
 
-	private String		mUserId;
 	private Entity		mEntity;
 	private String		mEntityId;
 	private String		mEntityParentId;
@@ -39,10 +38,6 @@ public class IntentBuilder {
 		Intent intent = new Intent();
 		if (mContext != null && mClass != null) {
 			intent = new Intent(mContext, mClass);
-		}
-
-		if (mUserId != null) {
-			intent.putExtra(Constants.EXTRA_USER_ID, mUserId);
 		}
 
 		if (mEntityId != null) {
@@ -104,12 +99,7 @@ public class IntentBuilder {
 		return this;
 	}
 
-	public IntentBuilder setUserId(String userId) {
-		mUserId = userId;
-		return this;
-	}
-
-	public IntentBuilder setListMode(EntityList.ListMode arrayListType) {
+	public IntentBuilder setListMode(BaseEntityList.ListMode arrayListType) {
 		mListMode = arrayListType;
 		return this;
 	}

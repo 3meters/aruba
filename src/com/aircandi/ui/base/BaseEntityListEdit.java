@@ -24,7 +24,6 @@ import android.widget.TextView;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.bitmaps.BitmapManager;
@@ -37,9 +36,10 @@ import com.aircandi.service.HttpService.UseAnnotations;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.widgets.BounceListView;
 import com.aircandi.ui.widgets.WebImageView;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
-import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.UI;
 
 public abstract class BaseEntityListEdit extends BaseEntityEdit {
 
@@ -52,7 +52,8 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 	protected List<String>		mJsonEntitiesOriginal;
 
 	@Override
-	protected void initialize() {
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
 
 		/* We use this to access the source suggestions */
 		final Bundle extras = this.getIntent().getExtras();
@@ -86,7 +87,6 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 		Collections.sort(mEntities, new Entity.SortEntitiesByPosition());
 
 		if (mEntities.size() == 0) {
-			mCommon.hideBusy(true); // visible by default
 			mMessage.setText(R.string.sources_builder_empty);
 			mMessage.setVisibility(View.VISIBLE);
 		}
@@ -99,6 +99,7 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 				position++;
 			}
 		}
+		mBusyManager.hideBusy(); // visible by default
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -124,14 +125,14 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 
 	@SuppressWarnings("ucd")
 	public void onAddButtonClick(View view) {
-		final IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(mEntityEditing.schema))
-				.setEntitySchema(mCommon.mEntitySchema)
+		final IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(mEntitySchema))
+				.setEntitySchema(mEntitySchema)
 				.setEntityParentId(mParentId);
 
 		Intent intent = intentBuilder.create();
 		intent.putExtra(Constants.EXTRA_SKIP_SAVE, true);
 		startActivityForResult(intent, Constants.ACTIVITY_ENTITY_INSERT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")
@@ -176,7 +177,7 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 		intent.putExtra(Constants.EXTRA_SKIP_SAVE, true);
 
 		startActivityForResult(intent, Constants.ACTIVITY_ENTITY_EDIT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@Override
@@ -268,7 +269,7 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 				? R.string.alert_source_delete_message_single
 				: R.string.alert_source_delete_message_multiple);
 
-		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
+		final AlertDialog dialog = Dialogs.showAlertDialog(null
 				, getResources().getString(R.string.alert_source_delete_title)
 				, null
 				, customView
@@ -295,7 +296,7 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 	}
 
 	private void confirmDirtyExit() {
-		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
+		final AlertDialog dialog = Dialogs.showAlertDialog(null
 				, getResources().getString(R.string.alert_sources_dirty_exit_title)
 				, getResources().getString(R.string.alert_sources_dirty_exit_message)
 				, null
@@ -313,7 +314,7 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 						else if (which == Dialog.BUTTON_NEUTRAL) {
 							setResult(Activity.RESULT_CANCELED);
 							finish();
-							AnimUtils.doOverridePendingTransition(BaseEntityListEdit.this, TransitionType.FormToPage);
+							Animate.doOverridePendingTransition(BaseEntityListEdit.this, TransitionType.FormToPage);
 						}
 					}
 				}
@@ -332,7 +333,7 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 		intent.putStringArrayListExtra(Constants.EXTRA_ENTITIES, (ArrayList<String>) jsonEntities);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
+		Animate.doOverridePendingTransition(this, TransitionType.FormToPage);
 	}
 
 	@Override
@@ -394,13 +395,13 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 			else {
 				setResult(Activity.RESULT_CANCELED);
 				finish();
-				AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
+				Animate.doOverridePendingTransition(this, TransitionType.FormToPage);
 			}
 			return true;
 		}
 
 		/* In case we add general menu items later */
-		mCommon.doOptionsItemSelected(item);
+		super.onOptionsItemSelected(item);
 		return true;
 	}
 
@@ -504,7 +505,7 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 					 * to satisfy the new request.
 					 */
 					if (entity.photo != null && entity.photo.hasBitmap()) {
-						ImageUtils.showImageInImageView(entity.photo.getBitmap(), holder.photo.getImageView(), true, AnimUtils.fadeInMedium());
+						UI.showImageInImageView(entity.photo.getBitmap(), holder.photo.getImageView(), true, Animate.fadeInMedium());
 					}
 					else {
 						final String photoUri = entity.getPhotoUri();

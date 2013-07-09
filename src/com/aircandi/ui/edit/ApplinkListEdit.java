@@ -22,10 +22,10 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityListEdit;
 import com.aircandi.ui.widgets.WebImageView;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.UI;
 
-public abstract class ApplinkListEdit extends BaseEntityListEdit {
+public class ApplinkListEdit extends BaseEntityListEdit {
 
 	@Override
 	protected void bind() {
@@ -53,8 +53,8 @@ public abstract class ApplinkListEdit extends BaseEntityListEdit {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(true);
-				mCommon.startBodyBusyIndicator();
+				mBusyManager.showBusy();
+				mBusyManager.startBodyBusyIndicator();
 			}
 
 			@Override
@@ -82,10 +82,10 @@ public abstract class ApplinkListEdit extends BaseEntityListEdit {
 							int activeCountNew = applinksProcessed.size();
 							mEntities = applinksProcessed;
 							if (activeCountNew == activeCountOld) {
-								ImageUtils.showToastNotification(getResources().getString(R.string.toast_source_no_links), Toast.LENGTH_SHORT);
+								UI.showToastNotification(getResources().getString(R.string.toast_source_no_links), Toast.LENGTH_SHORT);
 							}
 							else {
-								ImageUtils.showToastNotification(getResources().getString((applinksProcessed.size() == 1)
+								UI.showToastNotification(getResources().getString((applinksProcessed.size() == 1)
 										? R.string.toast_source_linked
 										: R.string.toast_sources_linked), Toast.LENGTH_SHORT);
 							}
@@ -94,7 +94,7 @@ public abstract class ApplinkListEdit extends BaseEntityListEdit {
 					}
 				}
 				bind();
-				mCommon.hideBusy(true);
+				mBusyManager.hideBusy();
 			}
 		}.execute();
 	}
@@ -152,32 +152,32 @@ public abstract class ApplinkListEdit extends BaseEntityListEdit {
 			if (entity != null) {
 				final Applink applink = (Applink) entity;
 
-				setVisibility(holder.checked, View.GONE);
+				UI.setVisibility(holder.checked, View.GONE);
 				if (holder.checked != null && applink.checked != null) {
 					holder.checked.setChecked(applink.checked);
 					holder.checked.setTag(applink);
-					setVisibility(holder.checked, View.VISIBLE);
+					UI.setVisibility(holder.checked, View.VISIBLE);
 				}
 
-				setVisibility(holder.name, View.GONE);
+				UI.setVisibility(holder.name, View.GONE);
 				if (holder.name != null && applink.name != null && applink.name.length() > 0) {
 					holder.name.setText(applink.name);
-					setVisibility(holder.name, View.VISIBLE);
+					UI.setVisibility(holder.name, View.VISIBLE);
 				}
 
-				setVisibility(holder.appId, View.GONE);
+				UI.setVisibility(holder.appId, View.GONE);
 				if (holder.appId != null) {
 					if (applink.appId != null && applink.appId.length() > 0) {
 						holder.appId.setText(applink.appId);
-						setVisibility(holder.appId, View.VISIBLE);
+						UI.setVisibility(holder.appId, View.VISIBLE);
 					}
 				}
 
-				setVisibility(holder.appUrl, View.GONE);
+				UI.setVisibility(holder.appUrl, View.GONE);
 				if (holder.appUrl != null) {
 					if (applink.appUrl != null && applink.appUrl.length() > 0) {
 						holder.appUrl.setText(applink.appUrl);
-						setVisibility(holder.appUrl, View.VISIBLE);
+						UI.setVisibility(holder.appUrl, View.VISIBLE);
 					}
 				}
 
@@ -189,7 +189,7 @@ public abstract class ApplinkListEdit extends BaseEntityListEdit {
 					 * to satisfy the new request.
 					 */
 					if (applink.photo != null && applink.photo.hasBitmap()) {
-						ImageUtils.showImageInImageView(applink.photo.getBitmap(), holder.photo.getImageView(), true, AnimUtils.fadeInMedium());
+						UI.showImageInImageView(applink.photo.getBitmap(), holder.photo.getImageView(), true, Animate.fadeInMedium());
 					}
 					else {
 						final String photoUri = applink.getPhotoUri();

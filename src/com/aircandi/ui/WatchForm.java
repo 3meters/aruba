@@ -5,12 +5,12 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -22,17 +22,19 @@ import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutSettings;
-import com.aircandi.ui.EntityList.ListMode;
-import com.aircandi.ui.base.BaseEntityView;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.ui.base.BaseEntityForm;
+import com.aircandi.ui.base.BaseEntityList.ListMode;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Routing;
 
 @SuppressWarnings("ucd")
-public class WatchForm extends BaseEntityView {
+public class WatchForm extends BaseEntityForm {
 
 	@Override
-	protected void initialize() {
-		mCommon.mActionBar.setIcon(R.drawable.img_watch);
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+		mActionBar.setIcon(R.drawable.img_watch);
 	}
 
 	@Override
@@ -42,20 +44,20 @@ public class WatchForm extends BaseEntityView {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(true);
+				mBusyManager.showBusy();
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetWatching");
 
-				Entity entity = EntityManager.getEntity(mCommon.mEntityId);
+				Entity entity = EntityManager.getEntity(mEntityId);
 				Boolean refresh = refreshProposed;
 				if (entity == null || !entity.shortcuts) {
 					refresh = true;
 				}
 
-				ModelResult result = EntityManager.getInstance().getEntity(mCommon.mEntityId
+				ModelResult result = EntityManager.getInstance().getEntity(mEntityId
 						, refresh
 						, LinkOptions.getDefault(DefaultType.LinksUserWatching));
 
@@ -71,14 +73,14 @@ public class WatchForm extends BaseEntityView {
 						mEntity = (Entity) result.data;
 						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
-						mCommon.mActionBar.setTitle(mEntity.name);
+						mActionBar.setTitle(mEntity.name);
 						drawForm();
 					}
 				}
 				else {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiUser);
+					Routing.serviceError(WatchForm.this, result.serviceResponse);
 				}
-				mCommon.hideBusy(true);
+				mBusyManager.hideBusy();
 			}
 
 		}.execute();
@@ -97,11 +99,11 @@ public class WatchForm extends BaseEntityView {
 		intentBuilder = new IntentBuilder(this, EntityList.class)
 				.setListMode(ListMode.EntitiesWatchedByUser)
 				.setEntitySchema(settings.targetSchema)
-				.setUserId(mCommon.mUserId);
+				.setEntityId(mEntityId);
 
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToPage);
 	}
 
 	// --------------------------------------------------------------------------------------------

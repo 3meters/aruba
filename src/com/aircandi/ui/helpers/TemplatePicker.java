@@ -41,7 +41,7 @@ public class TemplatePicker extends BaseActivity implements OnItemClickListener 
 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();
-		if (mCommon.mThemeTone.equals("dark")) {
+		if (mThemeTone.equals("dark")) {
 			listData.add(new Template(R.drawable.ic_action_picture_dark, getString(R.string.name_entity_type_picture), null, Constants.SCHEMA_ENTITY_POST));
 		}
 		else {

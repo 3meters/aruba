@@ -52,8 +52,8 @@ import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.User;
-import com.aircandi.utilities.DateUtils;
-import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.UI;
 
 public class EntityManager {
 
@@ -672,7 +672,7 @@ public class EntityManager {
 		}
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			entity.activityDate = DateUtils.nowDate().getTime();
+			entity.activityDate = DateTime.nowDate().getTime();
 			mEntityCache.upsertEntity(entity);
 		}
 
@@ -951,8 +951,8 @@ public class EntityManager {
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			Entity entity = EntityManager.getEntity(entityId);
 			if (entity != null) {
-				entity.activityDate = DateUtils.nowDate().getTime();
-				mEntityCache.setLastActivityDate(DateUtils.nowDate().getTime());
+				entity.activityDate = DateTime.nowDate().getTime();
+				mEntityCache.setLastActivityDate(DateTime.nowDate().getTime());
 			}
 		}
 		return result;
@@ -1028,13 +1028,13 @@ public class EntityManager {
 		 */
 
 		/* Make sure the bitmap is less than or equal to the maximum size we want to persist. */
-		bitmap = ImageUtils.ensureBitmapScaleForS3(bitmap);
+		bitmap = UI.ensureBitmapScaleForS3(bitmap);
 
 		/*
 		 * Push it to S3. It is always formatted/compressed as a jpeg.
 		 */
 		try {
-			final String stringDate = DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME);
+			final String stringDate = DateTime.nowString(DateTime.DATE_NOW_FORMAT_FILENAME);
 			final String imageKey = String.valueOf((user != null) ? user.id : Aircandi.getInstance().getUser().id) + "_" + stringDate + ".jpg";
 			S3.putImage(imageKey, bitmap, Constants.IMAGE_QUALITY_S3);
 

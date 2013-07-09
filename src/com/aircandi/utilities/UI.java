@@ -6,6 +6,7 @@ import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.ImageView;
@@ -14,7 +15,7 @@ import android.widget.Toast;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 
-public class ImageUtils {
+public class UI {
 
 	public static void showToastNotification(final String message, final int duration) {
 		Aircandi.mainThreadHandler.post(new Runnable() {
@@ -102,4 +103,12 @@ public class ImageUtils {
 			imageView.postInvalidate();
 		}
 	}
+
+	public static void setVisibility(View view, Integer visibility) {
+		if (view != null) {
+			view.setVisibility(visibility);
+		}
+	}
+
+
 }

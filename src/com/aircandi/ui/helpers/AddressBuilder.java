@@ -17,7 +17,7 @@ import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseActivity;
-import com.aircandi.utilities.MiscUtils;
+import com.aircandi.utilities.Utilities;
 
 public class AddressBuilder extends BaseActivity {
 
@@ -45,8 +45,8 @@ public class AddressBuilder extends BaseActivity {
 			mEntity = new Place();
 		}
 
-		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
-		mCommon.mActionBar.setTitle(R.string.dialog_address_builder_title);
+		mActionBar.setDisplayHomeAsUpEnabled(true);
+		mActionBar.setTitle(R.string.dialog_address_builder_title);
 
 		((EditText) findViewById(R.id.phone)).setImeOptions(EditorInfo.IME_ACTION_DONE);
 		((EditText) findViewById(R.id.phone)).setOnEditorActionListener(new OnEditorActionListener() {
@@ -89,11 +89,11 @@ public class AddressBuilder extends BaseActivity {
 
 	private void gather() {
 		Place place = (Place) mEntity;
-		place.phone = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.phone)).getEditableText().toString());
-		place.address = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.address)).getEditableText().toString());
-		place.city = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.city)).getEditableText().toString());
-		place.region = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.state)).getEditableText().toString());
-		place.postalCode = MiscUtils.emptyAsNull(((EditText) findViewById(R.id.zip_code)).getEditableText().toString());
+		place.phone = Utilities.emptyAsNull(((EditText) findViewById(R.id.phone)).getEditableText().toString());
+		place.address = Utilities.emptyAsNull(((EditText) findViewById(R.id.address)).getEditableText().toString());
+		place.city = Utilities.emptyAsNull(((EditText) findViewById(R.id.city)).getEditableText().toString());
+		place.region = Utilities.emptyAsNull(((EditText) findViewById(R.id.state)).getEditableText().toString());
+		place.postalCode = Utilities.emptyAsNull(((EditText) findViewById(R.id.zip_code)).getEditableText().toString());
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -123,7 +123,7 @@ public class AddressBuilder extends BaseActivity {
 		}
 
 		/* In case we add general menu items later */
-		mCommon.doOptionsItemSelected(item);
+		super.onOptionsItemSelected(item);
 		return true;
 	}
 

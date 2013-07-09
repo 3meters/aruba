@@ -15,8 +15,8 @@ import com.aircandi.components.SearchManager.SearchItem;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.ui.widgets.WebImageView;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.UI;
 
 public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterable {
 
@@ -110,7 +110,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 				 * to satisfy the new request.
 				 */
 				if (searchItem.icon != null) {
-					ImageUtils.showImageInImageView(searchItem.icon, holder.photo.getImageView(), true, AnimUtils.fadeInMedium());
+					UI.showImageInImageView(searchItem.icon, holder.photo.getImageView(), true, Animate.fadeInMedium());
 				}
 				else if (searchItem.categoryIconUri != null) {
 

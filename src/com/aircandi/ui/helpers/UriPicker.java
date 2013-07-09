@@ -21,7 +21,6 @@ import android.widget.TextView;
 
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -33,9 +32,11 @@ import com.aircandi.service.HttpService.RequestType;
 import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.ui.base.BaseActivity;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
-import com.aircandi.utilities.MiscUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Utilities;
 
 @SuppressWarnings("ucd")
 public class UriPicker extends BaseActivity {
@@ -97,7 +98,7 @@ public class UriPicker extends BaseActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(R.string.progress_searching, true);
+				mBusyManager.showBusy(R.string.progress_searching);
 			}
 
 			@Override
@@ -114,7 +115,7 @@ public class UriPicker extends BaseActivity {
 			protected void onPostExecute(Object response) {
 				mSearchAdapter = new SearchAdapter(UriPicker.this, mSearchItems, null);
 				mListView.setAdapter(mSearchAdapter);
-				mCommon.hideBusy(true);
+				mBusyManager.hideBusy();
 			}
 
 		}.execute();
@@ -136,14 +137,14 @@ public class UriPicker extends BaseActivity {
 			linkUri = "http://" + linkUri;
 		}
 
-		if (!MiscUtils.validWebUri(linkUri)) {
-			mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
+		if (!Utilities.validWebUri(linkUri)) {
+			Dialogs.showAlertDialogSimple(this, null, getString(R.string.error_weburi_invalid));
 		}
 		else {
 			final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 			intent.setData(Uri.parse(linkUri));
 			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToSource);
+			Animate.doOverridePendingTransition(this, TransitionType.PageToSource);
 		}
 	}
 
@@ -165,8 +166,8 @@ public class UriPicker extends BaseActivity {
 				linkUri = "http://" + mUri;
 			}
 
-			if (!MiscUtils.validWebUri(linkUri)) {
-				mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
+			if (!Utilities.validWebUri(linkUri)) {
+				Dialogs.showAlertDialogSimple(this, null, getString(R.string.error_weburi_invalid));
 				return false;
 			}
 		}
@@ -181,7 +182,7 @@ public class UriPicker extends BaseActivity {
 
 					@Override
 					protected void onPreExecute() {
-						mCommon.showBusy(R.string.progress_verifying, true);
+						mBusyManager.showBusy(R.string.progress_verifying);
 					}
 
 					@Override
@@ -243,7 +244,7 @@ public class UriPicker extends BaseActivity {
 							if (description != null) {
 								mUriDescription = description;
 							}
-							mCommon.hideBusy(true);
+							mBusyManager.hideBusy();
 
 							final Intent intent = new Intent();
 							intent.putExtra(Constants.EXTRA_URI, mUri);
@@ -253,7 +254,7 @@ public class UriPicker extends BaseActivity {
 							finish();
 						}
 						else {
-							mCommon.handleServiceError(serviceResponse, ServiceOperation.PickBookmark);
+							Routing.serviceError(UriPicker.this, serviceResponse);
 						}
 					}
 				}.execute();

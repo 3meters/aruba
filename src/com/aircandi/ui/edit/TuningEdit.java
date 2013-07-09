@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -27,8 +28,8 @@ import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityEdit;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
 import com.squareup.otto.Subscribe;
 
 public class TuningEdit extends BaseEntityEdit {
@@ -42,8 +43,8 @@ public class TuningEdit extends BaseEntityEdit {
 	private Boolean	mUntuning			= false;
 
 	@Override
-	protected void initialize() {
-		super.initialize();
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
 		mButtonTune = (Button) findViewById(R.id.button_tune);
 		mButtonUntune = (Button) findViewById(R.id.button_untune);
 	}
@@ -56,7 +57,7 @@ public class TuningEdit extends BaseEntityEdit {
 	public void onEditButtonClick(View view) {
 		IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(mEntity.schema)).setEntity(mEntity);
 		startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")
@@ -64,7 +65,7 @@ public class TuningEdit extends BaseEntityEdit {
 		if (!mTuned) {
 			Tracker.sendEvent("ui_action", "tune_place", null, 0, Aircandi.getInstance().getUser());
 			mUntuning = false;
-			mCommon.showBusy(R.string.progress_tuning, true);
+			mBusyManager.showBusy(R.string.progress_tuning);
 			if (NetworkManager.getInstance().isWifiEnabled()) {
 				mTuningInProcess = true;
 				enableEvents();
@@ -81,7 +82,7 @@ public class TuningEdit extends BaseEntityEdit {
 		if (!mUntuned) {
 			Tracker.sendEvent("ui_action", "untune_place", null, 0, Aircandi.getInstance().getUser());
 			mUntuning = true;
-			mCommon.showBusy(R.string.progress_tuning, true);
+			mBusyManager.showBusy(R.string.progress_tuning);
 			if (NetworkManager.getInstance().isWifiEnabled()) {
 				mTuningInProcess = true;
 				enableEvents();
@@ -152,7 +153,7 @@ public class TuningEdit extends BaseEntityEdit {
 
 			@Override
 			public void run() {
-				if (mCommon.mThemeTone.equals("dark")) {
+				if (mThemeTone.equals("dark")) {
 					((ImageView) findViewById(starId)).setImageResource(R.drawable.ic_action_star_10_dark);
 				}
 				else {
@@ -186,7 +187,7 @@ public class TuningEdit extends BaseEntityEdit {
 						 */
 						disableEvents();
 						setSupportProgressBarIndeterminateVisibility(false);
-						mCommon.hideBusy(true);
+						mBusyManager.hideBusy();
 						if (mUntuning) {
 							mButtonUntune.setText(R.string.form_button_tuning_tuned);
 							mUntuned = true;
@@ -256,7 +257,7 @@ public class TuningEdit extends BaseEntityEdit {
 			@Override
 			protected void onPostExecute(Object response) {
 				setSupportProgressBarIndeterminateVisibility(false);
-				mCommon.hideBusy(true);
+				mBusyManager.hideBusy();
 				if (mUntuning) {
 					mButtonUntune.setText(R.string.form_button_tuning_tuned);
 					mUntuned = true;

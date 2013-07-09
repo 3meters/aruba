@@ -27,9 +27,9 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.ImageUtils;
-import com.aircandi.utilities.MiscUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.UI;
+import com.aircandi.utilities.Utilities;
 
 @SuppressWarnings("ucd")
 public class BitmapManager {
@@ -69,7 +69,7 @@ public class BitmapManager {
 			@Override
 			protected int sizeOf(String key, Bitmap bitmap) {
 				/* The cache size will be measured in bytes rather than number of items. */
-				return ImageUtils.getImageMemorySize(bitmap.getHeight(), bitmap.getWidth(), bitmap.hasAlpha());
+				return UI.getImageMemorySize(bitmap.getHeight(), bitmap.getWidth(), bitmap.hasAlpha());
 			}
 		};
 
@@ -135,7 +135,7 @@ public class BitmapManager {
 
 		Bitmap bitmap = null;
 		synchronized (mMemoryCacheLock) {
-			final String memKeyHashed = MiscUtils.md5(memCacheKey);
+			final String memKeyHashed = Utilities.md5(memCacheKey);
 			bitmap = mMemoryCache.get(memKeyHashed);
 
 			if (bitmap == null) {
@@ -158,7 +158,7 @@ public class BitmapManager {
 			Aircandi.mainThreadHandler.post(new Runnable() {
 				@Override
 				public void run() {
-					ImageUtils.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, AnimUtils.fadeInMedium());
+					UI.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, Animate.fadeInMedium());
 				}
 			});
 		}
@@ -186,7 +186,7 @@ public class BitmapManager {
 				Aircandi.mainThreadHandler.post(new Runnable() {
 					@Override
 					public void run() {
-						ImageUtils.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, AnimUtils.fadeInMedium());
+						UI.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, Animate.fadeInMedium());
 					}
 				});
 			}
@@ -208,7 +208,7 @@ public class BitmapManager {
 		 * and a scaled bitmap into the memory cache.
 		 */
 		final String diskCacheKey = key;
-		final String diskKeyHashed = MiscUtils.md5(diskCacheKey);
+		final String diskKeyHashed = Utilities.md5(diskCacheKey);
 
 		/* First add unscaled version to disk cache */
 		synchronized (mDiskCacheLock) {
@@ -234,8 +234,8 @@ public class BitmapManager {
 		if (size != null) {
 			memCacheKey += "." + String.valueOf(size);
 		}
-		final String memKeyHashed = MiscUtils.md5(memCacheKey);
-		final String diskKeyHashed = MiscUtils.md5(diskCacheKey);
+		final String memKeyHashed = Utilities.md5(memCacheKey);
+		final String diskKeyHashed = Utilities.md5(diskCacheKey);
 
 		synchronized (mMemoryCacheLock) {
 			Bitmap bitmap = mMemoryCache.get(memKeyHashed);
@@ -397,7 +397,7 @@ public class BitmapManager {
 			}
 		}
 		else {
-			final int imageMemorySize = ImageUtils.getImageMemorySize(height, width, true);
+			final int imageMemorySize = UI.getImageMemorySize(height, width, true);
 			if (imageMemorySize > Constants.IMAGE_MEMORY_BYTES_MAX) {
 				scale = Math.round(((float) imageMemorySize / (float) Constants.IMAGE_MEMORY_BYTES_MAX) / 2f);
 			}
@@ -448,7 +448,7 @@ public class BitmapManager {
 			}
 		}
 		else {
-			final int imageMemorySize = ImageUtils.getImageMemorySize(height, width, true);
+			final int imageMemorySize = UI.getImageMemorySize(height, width, true);
 			if (imageMemorySize > Constants.IMAGE_MEMORY_BYTES_MAX) {
 				scale = Math.round(((float) imageMemorySize / (float) Constants.IMAGE_MEMORY_BYTES_MAX) / 2f);
 			}

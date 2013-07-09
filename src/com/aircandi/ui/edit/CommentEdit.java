@@ -1,5 +1,6 @@
 package com.aircandi.ui.edit;
 
+import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
@@ -7,14 +8,14 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.aircandi.Aircandi;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon;
 import com.aircandi.ui.base.BaseEntityEdit;
+import com.aircandi.utilities.Dialogs;
 
 public class CommentEdit extends BaseEntityEdit {
 
 	@Override
-	protected void initialize() {
-		super.initialize();
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
 		mDescription.setImeOptions(EditorInfo.IME_ACTION_SEND);
 		mDescription.setOnEditorActionListener(new OnEditorActionListener() {
 
@@ -52,7 +53,7 @@ public class CommentEdit extends BaseEntityEdit {
 	protected boolean validate() {
 		if (super.validate()) {
 			if (mDescription.getText().length() == 0) {
-				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+				Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 						, null
 						, getResources().getString(R.string.error_missing_message)
 						, null

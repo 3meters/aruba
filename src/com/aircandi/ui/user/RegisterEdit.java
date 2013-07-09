@@ -19,8 +19,6 @@ import android.widget.Toast;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -36,10 +34,12 @@ import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.ui.widgets.WebImageView;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
-import com.aircandi.utilities.ImageUtils;
-import com.aircandi.utilities.MiscUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
+import com.aircandi.utilities.Utilities;
 
 public class RegisterEdit extends BaseEntityEdit {
 
@@ -55,14 +55,15 @@ public class RegisterEdit extends BaseEntityEdit {
 		super.onCreate(savedInstanceState);
 
 		if (!isFinishing()) {
-			initialize();
+			initialize(savedInstanceState);
 			bind();
 			draw();
 		}
 	}
 
 	@Override
-	protected void initialize() {
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
 		mPhoto = (WebImageView) findViewById(R.id.photo);
 		mTextFullname = (EditText) findViewById(R.id.name);
 		mTextEmail = (EditText) findViewById(R.id.email);
@@ -98,7 +99,7 @@ public class RegisterEdit extends BaseEntityEdit {
 		if (mPhoto != null) {
 			if (mEntity.photo != null && mEntity.photo.hasBitmap()) {
 				mPhoto.hideLoading();
-				ImageUtils.showImageInImageView(mEntity.photo.getBitmap(), mPhoto.getImageView(), true, AnimUtils.fadeInMedium());
+				UI.showImageInImageView(mEntity.photo.getBitmap(), mPhoto.getImageView(), true, Animate.fadeInMedium());
 				mPhoto.setVisibility(View.VISIBLE);
 			}
 			else {
@@ -122,7 +123,7 @@ public class RegisterEdit extends BaseEntityEdit {
 	@SuppressWarnings("ucd")
 	public void onChangePictureButtonClick(View view) {
 
-		//mCommon.showPhotoSourcePicker(mEntity.id, mEntity.schema, mEntity.type);
+		//showPhotoSourcePicker(mEntity.id, mEntity.schema, mEntity.type);
 		mImageRequestWebImageView = mPhoto;
 		mImageRequestListener = new RequestListener() {
 
@@ -168,7 +169,7 @@ public class RegisterEdit extends BaseEntityEdit {
 						if (pictureSource.equals(Constants.PHOTO_SOURCE_SEARCH)) {
 							String defaultSearch = null;
 							if (mTextFullname != null) {
-								defaultSearch = MiscUtils.emptyAsNull(mTextFullname.getText().toString().trim());
+								defaultSearch = Utilities.emptyAsNull(mTextFullname.getText().toString().trim());
 							}
 							pictureSearch(defaultSearch);
 						}
@@ -212,14 +213,14 @@ public class RegisterEdit extends BaseEntityEdit {
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(Constants.URL_AIRCANDI_TERMS));
 		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 
 	}
 
 	@Override
 	protected boolean validate() {
 		if (mTextFullname.getText().length() == 0) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_fullname)
 					, null
@@ -229,7 +230,7 @@ public class RegisterEdit extends BaseEntityEdit {
 			return false;
 		}
 		if (mTextEmail.getText().length() == 0) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_email)
 					, null
@@ -239,7 +240,7 @@ public class RegisterEdit extends BaseEntityEdit {
 			return false;
 		}
 		if (mTextPassword.getText().length() < 6) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_password)
 					, null
@@ -249,7 +250,7 @@ public class RegisterEdit extends BaseEntityEdit {
 			return false;
 		}
 		if (mTextPasswordConfirm.getText().length() < 6) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_password_confirmation)
 					, null
@@ -258,8 +259,8 @@ public class RegisterEdit extends BaseEntityEdit {
 					, null, null, null, null);
 			return false;
 		}
-		if (!MiscUtils.validEmail(mTextEmail.getText().toString())) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_invalid_email)
 					, null
@@ -269,7 +270,7 @@ public class RegisterEdit extends BaseEntityEdit {
 			return false;
 		}
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, getResources().getString(R.string.error_signup_missmatched_passwords_title)
 					, getResources().getString(R.string.error_signup_missmatched_passwords_message)
 					, null
@@ -297,7 +298,7 @@ public class RegisterEdit extends BaseEntityEdit {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(R.string.progress_signing_up, true);
+					mBusyManager.showBusy(R.string.progress_signing_up);
 				}
 
 				@Override
@@ -320,10 +321,10 @@ public class RegisterEdit extends BaseEntityEdit {
 						final User insertedUser = (User) result.data;
 						Aircandi.getInstance().setUser(insertedUser);
 
-						mCommon.hideBusy(true);
+						mBusyManager.hideBusy();
 						Logger.i(RegisterEdit.this, "Inserted new user: " + mEntity.name + " (" + mEntity.id + ")");
 
-						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
+						UI.showToastNotification(getResources().getString(R.string.alert_signed_in)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
 						final String jsonUser = HttpService.objectToJson(insertedUser);
@@ -336,14 +337,14 @@ public class RegisterEdit extends BaseEntityEdit {
 
 						setResult(Constants.RESULT_USER_SIGNED_IN);
 						finish();
-						AnimUtils.doOverridePendingTransition(RegisterEdit.this, TransitionType.FormToPage);
+						Animate.doOverridePendingTransition(RegisterEdit.this, TransitionType.FormToPage);
 					}
 					else {
 						/*
 						 * TODO: Need to handle AmazonClientException.
 						 * Does clearing the password fields always make sense?
 						 */
-						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.Signup);
+						Routing.serviceError(RegisterEdit.this, result.serviceResponse);
 					}
 				}
 			}.execute();

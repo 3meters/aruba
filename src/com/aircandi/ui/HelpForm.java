@@ -8,8 +8,8 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.ui.base.BaseActivity;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
 
 public class HelpForm extends BaseActivity {
 
@@ -39,14 +39,14 @@ public class HelpForm extends BaseActivity {
 	public void onHelpClick(View view) {
 		updateRunOnce();
 		finish();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.HelpToPage);
+		Animate.doOverridePendingTransition(this, TransitionType.HelpToPage);
 	}
 
 	@Override
 	public void onBackPressed() {
 		updateRunOnce();
 		finish();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.HelpToPage);
+		Animate.doOverridePendingTransition(this, TransitionType.HelpToPage);
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class HelpForm extends BaseActivity {
 		}
 
 		/* In case we add general menu items later */
-		mCommon.doOptionsItemSelected(item);
+		super.onOptionsItemSelected(item);
 		return true;
 	}
 
@@ -80,11 +80,6 @@ public class HelpForm extends BaseActivity {
 				Aircandi.settingsEditor.commit();					
 			}
 		}
-	}
-
-	@Override
-	protected Boolean isDialog() {
-		return false;
 	}
 
 	@Override

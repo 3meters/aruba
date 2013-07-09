@@ -21,7 +21,7 @@ import android.view.animation.TranslateAnimation;
 import com.aircandi.Aircandi;
 import com.aircandi.beta.R;
 
-public class AnimUtils {
+public class Animate {
 
 	private static Animation	mFadeInMedium;
 	private static Animation	mFadeOutMedium;
@@ -34,7 +34,7 @@ public class AnimUtils {
 		 * If there is a better way to do this later then this will serve
 		 * as a choke point for the implementation.
 		 */
-		mFadeInMedium = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+		mFadeInMedium = Animate.loadAnimation(R.anim.fade_in_medium);
 		return mFadeInMedium;
 	}
 
@@ -42,7 +42,7 @@ public class AnimUtils {
 		/*
 		 * Same comment as above
 		 */
-		mFadeOutMedium = AnimUtils.loadAnimation(R.anim.fade_out_medium);
+		mFadeOutMedium = Animate.loadAnimation(R.anim.fade_out_medium);
 		return mFadeOutMedium;
 	}
 
@@ -197,7 +197,7 @@ public class AnimUtils {
 		XmlResourceParser parser = null;
 		try {
 			parser = Aircandi.applicationContext.getResources().getAnimation(animationResId);
-			return AnimUtils.createAnimationFromXml(Aircandi.applicationContext, parser);
+			return Animate.createAnimationFromXml(Aircandi.applicationContext, parser);
 		}
 		catch (XmlPullParserException ex) {
 			final NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" + Integer.toHexString(animationResId));
@@ -217,7 +217,7 @@ public class AnimUtils {
 	}
 
 	private static Animation createAnimationFromXml(Context c, XmlPullParser parser) throws XmlPullParserException, IOException {
-		return AnimUtils.createAnimationFromXml(c, parser, null, Xml.asAttributeSet(parser));
+		return Animate.createAnimationFromXml(c, parser, null, Xml.asAttributeSet(parser));
 	}
 
 	private static Animation createAnimationFromXml(Context c, XmlPullParser parser, AnimationSet parent, AttributeSet attrs) throws XmlPullParserException,

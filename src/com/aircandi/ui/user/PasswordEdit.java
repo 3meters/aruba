@@ -8,8 +8,6 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -17,7 +15,9 @@ import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseActivity;
-import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
 
 @SuppressWarnings("ucd")
 public class PasswordEdit extends BaseActivity {
@@ -38,7 +38,7 @@ public class PasswordEdit extends BaseActivity {
 
 	private void initialize() {
 		
-		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+		mActionBar.setDisplayHomeAsUpEnabled(true);
 
 		mUser = Aircandi.getInstance().getUser();
 		mTextPasswordOld = (EditText) findViewById(R.id.password_old);
@@ -58,7 +58,7 @@ public class PasswordEdit extends BaseActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(R.string.progress_changing_password, true);
+					mBusyManager.showBusy(R.string.progress_changing_password);
 				}
 
 				@Override
@@ -74,18 +74,18 @@ public class PasswordEdit extends BaseActivity {
 				@Override
 				protected void onPostExecute(Object response) {
 					final ModelResult result = (ModelResult) response;
-					mCommon.hideBusy(true);
+					mBusyManager.hideBusy();
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						Logger.i(this, "User changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
 						Tracker.sendEvent("ui_action", "change_password", null, 0, Aircandi.getInstance().getUser());
-						ImageUtils.showToastNotification(getResources().getString(R.string.alert_password_changed)
+						UI.showToastNotification(getResources().getString(R.string.alert_password_changed)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 						finish();
 					}
 					else {
 						mTextPassword.setText("");
-						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.PasswordChange);
+						Routing.serviceError(PasswordEdit.this, result.serviceResponse);
 					}
 				}
 			}.execute();
@@ -94,7 +94,7 @@ public class PasswordEdit extends BaseActivity {
 
 	private boolean validate() {
 		if (mTextPasswordOld.getText().length() == 0) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_password_new)
 					, null
@@ -104,7 +104,7 @@ public class PasswordEdit extends BaseActivity {
 			return false;
 		}
 		if (mTextPassword.getText().length() == 0) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_password_new)
 					, null
@@ -114,7 +114,7 @@ public class PasswordEdit extends BaseActivity {
 			return false;
 		}
 		if (mTextPasswordConfirm.getText().length() == 0) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_password_confirmation)
 					, null
@@ -124,7 +124,7 @@ public class PasswordEdit extends BaseActivity {
 			return false;
 		}
 		if (mTextPassword.getText().length() < 6 || mTextPasswordConfirm.getText().length() < 6) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_password_weak)
 					, null
@@ -135,7 +135,7 @@ public class PasswordEdit extends BaseActivity {
 		}
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
 
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, getResources().getString(R.string.error_signup_missmatched_passwords_title)
 					, getResources().getString(R.string.error_signup_missmatched_passwords_message)
 					, null
@@ -160,7 +160,7 @@ public class PasswordEdit extends BaseActivity {
 		}
 
 		/* In case we add general menu items later */
-		mCommon.doOptionsItemSelected(item);
+		super.onOptionsItemSelected(item);
 		return true;
 	}
 

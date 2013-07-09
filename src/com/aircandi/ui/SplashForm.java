@@ -3,11 +3,7 @@ package com.aircandi.ui;
 import java.io.InputStream;
 import java.util.Properties;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,7 +16,6 @@ import com.actionbarsherlock.view.Window;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
@@ -36,8 +31,9 @@ import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.user.RegisterEdit;
 import com.aircandi.ui.user.SignInEdit;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Dialogs;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.GoogleAnalytics;
@@ -149,58 +145,12 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	private void updateRequired() {
-		showUpdateDialog();
+		Dialogs.showUpdateDialog(this);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Dialogs
 	// --------------------------------------------------------------------------------------------
-
-	private void showUpdateDialog() {
-
-		final AlertDialog updateDialog = AircandiCommon.showAlertDialog(null
-				, getString(R.string.dialog_update_title)
-				, getString(R.string.dialog_update_message)
-				, null
-				, this
-				, R.string.dialog_update_ok
-				, R.string.dialog_update_cancel
-				, null
-				, new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (which == Dialog.BUTTON_POSITIVE) {
-							try {
-								Tracker.sendEvent("ui_action", "update_aircandi", "com.aircandi.beta", 0, Aircandi.getInstance().getUser());
-								Logger.d(this, "Update: navigating to market install/update page");
-								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(Constants.APP_MARKET_URI));
-								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-								intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-								startActivity(intent);
-							}
-							catch (Exception e) {
-								/*
-								 * In case the market app isn't installed on the phone
-								 */
-								Logger.d(this, "Install: navigating to play website install page");
-								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://play.google.com/store/apps/details?id="
-										+ "com.aircandi.beta&referrer=utm_source%3Dcom.aircandi"));
-								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-								startActivityForResult(intent, Constants.ACTIVITY_MARKET);
-							}
-							dialog.dismiss();
-							AnimUtils.doOverridePendingTransition(SplashForm.this, TransitionType.PageToForm);
-						}
-						else if (which == Dialog.BUTTON_NEGATIVE) {
-							dialog.dismiss();
-						}
-					}
-				}
-				, null);
-		updateDialog.setCanceledOnTouchOutside(false);
-		updateDialog.show();
-	}
 
 	private void loadCategories() {
 		if (NetworkManager.getInstance().getConnectedState() == ConnectedState.Normal) {
@@ -282,7 +232,7 @@ public class SplashForm extends SherlockActivity {
 		final IntentBuilder intentBuilder = new IntentBuilder(this, SignInEdit.class);
 		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, Constants.ACTIVITY_SIGNIN);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")
@@ -295,7 +245,7 @@ public class SplashForm extends SherlockActivity {
 		final IntentBuilder intentBuilder = new IntentBuilder(this, RegisterEdit.class);
 		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, Constants.ACTIVITY_SIGNIN);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@Override

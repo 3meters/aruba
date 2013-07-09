@@ -26,15 +26,11 @@ public final class Constants {
 	public static final String	EXTRA_ENTITY						= "com.aircandi.EXTRA_ENTITY";															//$NON-NLS-1$
 
 	public static final String	EXTRA_PLACE							= "com.aircandi.EXTRA_PLACE";																//$NON-NLS-1$
-	public static final String	EXTRA_APPLINK						= "com.aircandi.EXTRA_APPLINK";															//$NON-NLS-1$
-	public static final String	EXTRA_APPLINKS						= "com.aircandi.EXTRA_APPLINKS";															//$NON-NLS-1$
 
-	public static final String	EXTRA_USER_ID						= "com.aircandi.EXTRA_USER_ID";															//$NON-NLS-1$
 	public static final String	EXTRA_URI							= "com.aircandi.EXTRA_URI";																//$NON-NLS-1$
 	public static final String	EXTRA_URI_TITLE						= "com.aircandi.EXTRA_URI_TITLE";															//$NON-NLS-1$
 	public static final String	EXTRA_URI_DESCRIPTION				= "com.aircandi.EXTRA_URI_DESCRIPTION";													//$NON-NLS-1$
 
-	public static final String	EXTRA_BITMAP						= "com.aircandi.EXTRA_BITMAP";															//$NON-NLS-1$
 	public static final String	EXTRA_MESSAGE						= "com.aircandi.EXTRA_MESSAGE";															//$NON-NLS-1$
 	public static final String	EXTRA_CATEGORY						= "com.aircandi.EXTRA_CATEGORY";															//$NON-NLS-1$
 	public static final String	EXTRA_VERIFY_URI					= "com.aircandi.EXTRA_VERIFY_URI";															//$NON-NLS-1$
@@ -77,7 +73,7 @@ public final class Constants {
 	/* Ui */
 	public static final int		MAX_Y_OVERSCROLL_DISTANCE			= 50;
 	public static final int		TABS_PRIMARY_ID						= 1;
-	public static final int		TABS_PROFILE_FORM_ID				= 2;
+	public static final int		TABS_USER_FORM_ID				= 2;
 	public static final int		TABS_ENTITY_FORM_ID					= 3;
 	public static final int		TABS_CANDI_PICKER_ID				= 4;
 	public static final float	DIALOGS_DIM_AMOUNT					= 0.5f;

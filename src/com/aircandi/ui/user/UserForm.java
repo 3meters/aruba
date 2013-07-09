@@ -15,7 +15,6 @@ import android.widget.TextView;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Maps;
@@ -35,14 +34,16 @@ import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.EntityList;
-import com.aircandi.ui.EntityList.ListMode;
-import com.aircandi.ui.base.BaseEntityView;
+import com.aircandi.ui.base.BaseEntityForm;
+import com.aircandi.ui.base.BaseEntityList.ListMode;
 import com.aircandi.ui.widgets.WebImageView;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
 
 @SuppressWarnings("ucd")
-public class UserForm extends BaseEntityView {
+public class UserForm extends BaseEntityForm {
 
 	private List<Entity>	mEntitiesOwned;
 
@@ -53,14 +54,14 @@ public class UserForm extends BaseEntityView {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(true);
+				mBusyManager.showBusy();
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetUser");
 
-				Entity entity = EntityManager.getEntity(mCommon.mEntityId);
+				Entity entity = EntityManager.getEntity(mEntityId);
 				Boolean refresh = refreshProposed;
 				if (entity == null || !entity.shortcuts) {
 					refresh = true;
@@ -95,14 +96,14 @@ public class UserForm extends BaseEntityView {
 					if (result.data != null) {
 						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
-						mCommon.mActionBar.setTitle(mEntity.name);
+						mActionBar.setTitle(mEntity.name);
 						drawForm();
 					}
 				}
 				else {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiUser);
+					Routing.serviceError(UserForm.this, result.serviceResponse);
 				}
-				mCommon.hideBusy(true);
+				mBusyManager.hideBusy();
 			}
 
 		}.execute();
@@ -121,11 +122,11 @@ public class UserForm extends BaseEntityView {
 		intentBuilder = new IntentBuilder(this, EntityList.class)
 				.setListMode(ListMode.EntitiesByOwner)
 				.setEntitySchema(settings.targetSchema)
-				.setUserId(mCommon.mUserId);
+				.setEntityId(mEntityId);
 
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToPage);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -148,7 +149,7 @@ public class UserForm extends BaseEntityView {
 		final TextView bio = (TextView) findViewById(R.id.bio);
 		final TextView stats = (TextView) findViewById(R.id.stats);
 
-		setVisibility(photo, View.GONE);
+		UI.setVisibility(photo, View.GONE);
 		if (photo != null) {
 			final String photoUri = mEntity.getPhotoUri();
 			if (photoUri != null) {
@@ -163,47 +164,47 @@ public class UserForm extends BaseEntityView {
 					if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_POST)) {
 						photo.setClickable(true);
 					}
-					setVisibility(photo, View.VISIBLE);
+					UI.setVisibility(photo, View.VISIBLE);
 				}
 			}
 		}
 
 		/* Description section */
 
-		setVisibility(findViewById(R.id.section_details), View.GONE);
+		UI.setVisibility(findViewById(R.id.section_details), View.GONE);
 
-		setVisibility(name, View.GONE);
+		UI.setVisibility(name, View.GONE);
 		if (name != null && user.name != null && !user.name.equals("")) {
 			name.setText(Html.fromHtml(user.name));
-			setVisibility(name, View.VISIBLE);
-			setVisibility(findViewById(R.id.section_details), View.VISIBLE);
+			UI.setVisibility(name, View.VISIBLE);
+			UI.setVisibility(findViewById(R.id.section_details), View.VISIBLE);
 		}
 
-		setVisibility(area, View.GONE);
+		UI.setVisibility(area, View.GONE);
 		if (area != null && user.location != null && !user.location.equals("")) {
 			area.setText(Html.fromHtml(user.area));
-			setVisibility(area, View.VISIBLE);
-			setVisibility(findViewById(R.id.section_details), View.VISIBLE);
+			UI.setVisibility(area, View.VISIBLE);
+			UI.setVisibility(findViewById(R.id.section_details), View.VISIBLE);
 		}
 
-		setVisibility(webUri, View.GONE);
+		UI.setVisibility(webUri, View.GONE);
 		if (webUri != null && user.webUri != null && !user.webUri.equals("")) {
 			webUri.setText(Html.fromHtml(user.webUri));
-			setVisibility(webUri, View.VISIBLE);
-			setVisibility(findViewById(R.id.section_details), View.VISIBLE);
+			UI.setVisibility(webUri, View.VISIBLE);
+			UI.setVisibility(findViewById(R.id.section_details), View.VISIBLE);
 		}
 
-		setVisibility(bio, View.GONE);
+		UI.setVisibility(bio, View.GONE);
 		if (bio != null && user.bio != null && !user.bio.equals("")) {
 			bio.setText(Html.fromHtml(user.bio));
-			setVisibility(bio, View.VISIBLE);
-			setVisibility(findViewById(R.id.section_details), View.VISIBLE);
+			UI.setVisibility(bio, View.VISIBLE);
+			UI.setVisibility(findViewById(R.id.section_details), View.VISIBLE);
 		}
 
 		/* Stats */
 
-		setVisibility(findViewById(R.id.section_stats), View.GONE);
-		setVisibility(stats, View.GONE);
+		UI.setVisibility(findViewById(R.id.section_stats), View.GONE);
+		UI.setVisibility(stats, View.GONE);
 		final StringBuilder statString = new StringBuilder(500);
 		Count count = user.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
 		if (count != null && user.getCount(Constants.TYPE_LINK_LIKE, Direction.in).count.intValue() > 0) {
@@ -288,8 +289,8 @@ public class UserForm extends BaseEntityView {
 			}
 
 			stats.setText(Html.fromHtml(statString.toString()));
-			setVisibility(stats, View.VISIBLE);
-			setVisibility(findViewById(R.id.section_stats), View.VISIBLE);
+			UI.setVisibility(stats, View.VISIBLE);
+			UI.setVisibility(findViewById(R.id.section_stats), View.VISIBLE);
 		}
 
 		/* Clear shortcut holder */

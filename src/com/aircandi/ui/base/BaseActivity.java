@@ -1,58 +1,77 @@
 package com.aircandi.ui.base;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.net.Uri;
+import android.content.res.Resources;
+import android.graphics.PixelFormat;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.BusProvider;
+import com.aircandi.components.BusyManager;
+import com.aircandi.components.EntityManager;
+import com.aircandi.components.FontManager;
+import com.aircandi.components.GCMIntentService;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
+import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NotificationManager;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ExcludeNulls;
-import com.aircandi.service.HttpService.RequestListener;
-import com.aircandi.service.HttpService.UseAnnotations;
-import com.aircandi.service.objects.AirNotification;
-import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Shortcut;
-import com.aircandi.service.objects.ShortcutMeta;
-import com.aircandi.service.objects.User;
+import com.aircandi.ui.Preferences;
+import com.aircandi.ui.RadarForm;
 import com.aircandi.ui.SplashForm;
-import com.aircandi.ui.helpers.ShortcutPicker;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.ui.edit.FeedbackEdit;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.UI;
+import com.google.android.gcm.GCMRegistrar;
 
 public abstract class BaseActivity extends SherlockActivity {
 
-	protected AircandiCommon	mCommon;
-	private AlertDialog			mUpdateAlertDialog;
-	private AlertDialog			mWifiAlertDialog;
-	protected Boolean			mMuteColor;
-	protected Boolean			mPrefChangeNewSearchNeeded	= false;
-	protected Boolean			mPrefChangeRefreshUiNeeded	= false;
-	protected Boolean			mPrefChangeReloadNeeded		= false;
+	protected ActionBar				mActionBar;
+	public BusyManager				mBusyManager;
+	protected String				mPageName;
+
+	protected Boolean				mMuteColor;
+	protected Boolean				mPrefChangeNewSearchNeeded	= false;
+	protected Boolean				mPrefChangeRefreshUiNeeded	= false;
+	protected Boolean				mPrefChangeReloadNeeded		= false;
+	protected static LayoutInflater	mInflater;
+	protected static Resources		mResources;
+
+	/* Theme */
+	public String					mPrefTheme;
+	public String					mThemeTone;
+	protected Boolean				mIsDialog;
+
+	/* Menus */
+	protected MenuItem				mMenuItemRefresh;
+	protected MenuItem				mMenuItemEdit;
+	protected MenuItem				mMenuItemDelete;
+	protected MenuItem				mMenuItemAdd;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,16 +88,49 @@ public abstract class BaseActivity extends SherlockActivity {
 			finish();
 		}
 		else {
-			mCommon = new AircandiCommon(this, savedInstanceState);
-			mCommon.setTheme(getThemeId(), isDialog(), isTransparent());
-			mCommon.unpackIntent();
-			mMuteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others		
+			/*
+			 * We do all this here so the work is finished before subclasses start
+			 * their create/initialize processing.
+			 */
+			unpackIntent();
+
+			mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			mResources = getResources();
+			/*
+			 * Theme must be set before contentView is processed.
+			 */
+			setTheme(isDialog(), isTransparent());
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			super.setContentView(getLayoutId());
 			super.onCreate(savedInstanceState);
-			mCommon.initialize();
+
+			/* Stash the action bar */
+			mActionBar = getSupportActionBar();
+			mPageName = getClass().getSimpleName();
+
+			/* Fonts */
+			final Integer titleId = getActionBarTitleId();
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(titleId));
+
+			/* Make sure we have successfully registered this device with aircandi service */
+			/* FIXME: This might be getting called too often */
+			NotificationManager.getInstance().registerDeviceWithAircandi();
+
+			/* Theme info */
+			final TypedValue resourceName = new TypedValue();
+			if (getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
+				mThemeTone = (String) resourceName.coerceToString();
+			}
+
+			/* Default sizing if this is a dialog */
+			if (mIsDialog) {
+				setDialogSize(getResources().getConfiguration());
+			}
+			mMuteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others
 		}
 	}
+
+	protected void unpackIntent() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Events routines
@@ -89,238 +141,27 @@ public abstract class BaseActivity extends SherlockActivity {
 		/* Activity is destroyed */
 		setResult(Activity.RESULT_CANCELED);
 		super.onBackPressed();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageBack);
-	}
-
-	protected void doShortcutClick(Shortcut shortcut, Entity entity) {
-
-		final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
-		if (meta != null && !meta.installDeclined
-				&& shortcut.getIntentSupport()
-				&& shortcut.appExists()
-				&& !shortcut.appInstalled()) {
-			showInstallDialog(shortcut, entity);
-		}
-
-		if (shortcut.group != null && shortcut.group.size() > 1) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, ShortcutPicker.class).setEntity(entity);
-			final Intent intent = intentBuilder.create();
-			final List<String> shortcutStrings = new ArrayList<String>();
-			for (Shortcut item : shortcut.group) {
-				Shortcut clone = item.clone();
-				clone.group = null;
-				shortcutStrings.add(HttpService.objectToJson(clone, UseAnnotations.False, ExcludeNulls.True));
-			}
-			intent.putStringArrayListExtra(Constants.EXTRA_SHORTCUTS, (ArrayList<String>) shortcutStrings);
-			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
-		}
-		else {
-			mCommon.routeShortcut(shortcut, entity);
-		}
+		Animate.doOverridePendingTransition(this, TransitionType.PageBack);
 	}
 
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		Logger.d(this, "Configuration changed");
-		mCommon.doConfigurationChanged(newConfig);
+		if (mIsDialog) {
+			setDialogSize(newConfig);
+		}
 		super.onConfigurationChanged(newConfig);
 	}
 
 	public void onCancelButtonClick(View view) {
 		setResult(Activity.RESULT_CANCELED);
 		finish();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageBack);
-	}
-
-	@Override
-	protected void onSaveInstanceState(Bundle savedInstanceState) {
-		super.onSaveInstanceState(savedInstanceState);
-		mCommon.doSaveInstanceState(savedInstanceState);
-	}
-
-	public void showUpdateAlert(RequestListener listener) {
-		showUpdateNotification();
-		showUpdateAlertDialog(listener);
-	}
-
-	private void showUpdateNotification() {
-		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-		intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
-		AirNotification airNotification = new AirNotification();
-		airNotification.title = getString(R.string.alert_upgrade_title);
-		airNotification.subtitle = getString(Aircandi.applicationUpdateRequired ? R.string.alert_upgrade_required_body : R.string.alert_upgrade_needed_body);
-		airNotification.intent = intent;
-		airNotification.type = "update";
-		NotificationManager.getInstance().showNotification(airNotification, this);
-	}
-
-	public void onUserClick(View view) {
-		User user = (User) view.getTag();
-		mCommon.doUserClick(user);
+		Animate.doOverridePendingTransition(this, TransitionType.PageBack);
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Dialogs
+	// Preferences
 	// --------------------------------------------------------------------------------------------
-
-	private void showInstallDialog(final Shortcut shortcut, final Entity entity) {
-
-		final AlertDialog installDialog = AircandiCommon.showAlertDialog(null
-				, getString(R.string.dialog_install_title)
-				, getString(R.string.dialog_install_message)
-				, null
-				, this
-				, R.string.dialog_install_ok
-				, R.string.dialog_install_cancel
-				, null
-				, new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (which == Dialog.BUTTON_POSITIVE) {
-							try {
-								Tracker.sendEvent("ui_action", "install_source", shortcut.getPackageName(), 0, Aircandi.getInstance().getUser());
-								Logger.d(this, "Install: navigating to market install page");
-								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=" + shortcut.getPackageName()
-										+ "&referrer=utm_source%3Dcom.aircandi"));
-								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-								intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-								startActivity(intent);
-							}
-							catch (Exception e) {
-								/*
-								 * In case the market app isn't installed on the phone
-								 */
-								Logger.d(this, "Install: navigating to play website install page");
-								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://play.google.com/store/apps/details?id="
-										+ shortcut.getPackageName() + "&referrer=utm_source%3Dcom.aircandi"));
-								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-								startActivityForResult(intent, Constants.ACTIVITY_MARKET);
-							}
-							dialog.dismiss();
-							AnimUtils.doOverridePendingTransition(BaseActivity.this, TransitionType.PageToForm);
-						}
-						else if (which == Dialog.BUTTON_NEGATIVE) {
-							final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
-							meta.installDeclined = true;
-							doShortcutClick(shortcut, entity);
-							dialog.dismiss();
-						}
-					}
-				}
-				, null);
-		installDialog.setCanceledOnTouchOutside(false);
-		installDialog.show();
-	}
-
-	private void showUpdateAlertDialog(final RequestListener listener) {
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				if (mUpdateAlertDialog == null || !mUpdateAlertDialog.isShowing()) {
-					mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.ic_launcher
-							, getString(R.string.alert_upgrade_title)
-							, getString(Aircandi.applicationUpdateRequired ? R.string.alert_upgrade_required_body
-									: R.string.alert_upgrade_needed_body)
-							, null
-							, BaseActivity.this
-							, R.string.alert_upgrade_ok
-							, R.string.alert_upgrade_cancel
-							, null
-							, new DialogInterface.OnClickListener() {
-
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									if (which == Dialog.BUTTON_POSITIVE) {
-										Logger.d(this, "Update check: navigating to install page");
-										final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-										intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
-										startActivity(intent);
-										AnimUtils.doOverridePendingTransition(BaseActivity.this, TransitionType.PageToSource);
-									}
-									else if (which == Dialog.BUTTON_NEGATIVE) {
-										/*
-										 * We don't continue running if user doesn't install a required
-										 * update
-										 */
-										if (Aircandi.applicationUpdateRequired) {
-											Logger.d(this, "Update check: user declined");
-											finish();
-										}
-										if (listener != null) {
-											listener.onComplete(true);
-										}
-									}
-								}
-							}
-							, new DialogInterface.OnCancelListener() {
-
-								@Override
-								public void onCancel(DialogInterface dialog) {
-									/* Back button can trigger this */
-									if (Aircandi.applicationUpdateRequired) {
-										Logger.d(this, "Update check: user canceled");
-										finish();
-									}
-									if (listener != null) {
-										listener.onComplete(true);
-									}
-								}
-							});
-					mUpdateAlertDialog.setCanceledOnTouchOutside(false);
-				}
-			}
-		});
-	}
-
-	public void showWifiAlertDialog(final Integer messageResId, final RequestListener listener) {
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				if (mWifiAlertDialog == null || !mWifiAlertDialog.isShowing()) {
-					mWifiAlertDialog = AircandiCommon.showAlertDialog(R.drawable.ic_launcher
-							, getString(R.string.alert_wifi_title)
-							, getString(messageResId)
-							, null
-							, BaseActivity.this
-							, R.string.alert_wifi_settings
-							, R.string.alert_wifi_cancel
-							, null
-							, new DialogInterface.OnClickListener() {
-
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									if (which == Dialog.BUTTON_POSITIVE) {
-										Logger.d(this, "Wifi check: navigating to wifi settings");
-										startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
-										AnimUtils.doOverridePendingTransition(BaseActivity.this, TransitionType.PageToForm);
-									}
-									else if (which == Dialog.BUTTON_NEGATIVE) {
-										Logger.d(this, "Wifi check: user declined");
-										if (listener != null) {
-											listener.onComplete();
-										}
-									}
-								}
-							}
-							, new DialogInterface.OnCancelListener() {
-
-								@Override
-								public void onCancel(DialogInterface dialog) {
-									/* Back button can trigger this */
-									if (listener != null) {
-										listener.onComplete();
-									}
-								}
-							});
-					mWifiAlertDialog.setCanceledOnTouchOutside(false);
-				}
-			}
-		});
-	}
 
 	public void checkForPreferenceChanges() {
 
@@ -330,7 +171,7 @@ public abstract class BaseActivity extends SherlockActivity {
 
 		/* Common prefs */
 
-		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Constants.PREF_THEME, Constants.PREF_THEME_DEFAULT))) {
+		if (!mPrefTheme.equals(Aircandi.settings.getString(Constants.PREF_THEME, Constants.PREF_THEME_DEFAULT))) {
 			Logger.d(this, "Pref change: theme, restarting current activity");
 			mPrefChangeReloadNeeded = true;
 		}
@@ -385,15 +226,53 @@ public abstract class BaseActivity extends SherlockActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// UI routines
+	// General Ui routines
 	// --------------------------------------------------------------------------------------------
 
-	protected Integer getThemeId() {
-		return null;
+	public void setTheme(Boolean isDialog, Boolean isTransparent) {
+		mPrefTheme = Aircandi.settings.getString(Constants.PREF_THEME, Constants.PREF_THEME_DEFAULT);
+		mIsDialog = isDialog;
+		/*
+		 * ActionBarSherlock takes over the title area if version < 4.0 (Ice Cream Sandwich).
+		 */
+		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+		}
+		/*
+		 * Need to use application context so our app level themes and attributes are available to actionbarsherlock
+		 */
+		Integer themeId = getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", getPackageName());
+		if (isDialog) {
+			themeId = R.style.aircandi_theme_dialog_dark;
+			if (mPrefTheme.equals("aircandi_theme_snow")) {
+				themeId = R.style.aircandi_theme_dialog_light;
+			}
+		}
+		else if (isTransparent) {
+			themeId = R.style.aircandi_theme_midnight_transparent;
+			if (mPrefTheme.equals("aircandi_theme_snow")) {
+				themeId = R.style.aircandi_theme_snow_transparent;
+			}
+		}
+
+		setTheme(themeId);
 	}
 
 	protected Boolean isDialog() {
 		return false;
+	}
+
+	@SuppressLint("NewApi")
+	private void setDialogSize(Configuration newConfig) {
+
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB_MR2) {
+			//			final android.view.WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
+			//			final int height = Math.min(newConfig.screenHeightDp, 450);
+			//			final int width = Math.min(newConfig.screenWidthDp, 350);
+			//			params.height = ImageUtils.getRawPixels(mActivity, height);
+			//			params.width = ImageUtils.getRawPixels(mActivity, width);
+			//			mActivity.getWindow().setAttributes(params);
+		}
 	}
 
 	protected Boolean isTransparent() {
@@ -404,10 +283,92 @@ public abstract class BaseActivity extends SherlockActivity {
 		return 0;
 	}
 
-	protected static void setVisibility(View view, Integer visibility) {
-		if (view != null) {
-			view.setVisibility(visibility);
+	public int getActionBarTitleId() {
+		Integer actionBarTitleId = null;
+		try {
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+				actionBarTitleId = Class.forName("com.actionbarsherlock.R$id").getField("abs__action_bar_title").getInt(null);
+			}
+			else {
+				// Use reflection to get the actionbar title TextView and set the custom font. May break in updates.
+				actionBarTitleId = Class.forName("com.android.internal.R$id").getField("action_bar_title").getInt(null);
+			}
 		}
+		catch (Exception e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		return actionBarTitleId;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Methods
+	// --------------------------------------------------------------------------------------------
+
+	public void signout() {
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				new AsyncTask() {
+
+					@Override
+					protected void onPreExecute() {
+						if (mBusyManager != null) {
+							mBusyManager.showBusy(R.string.progress_signing_out);
+						}
+					}
+
+					@Override
+					protected Object doInBackground(Object... params) {
+						Thread.currentThread().setName("SignOut");
+						final ModelResult result = EntityManager.getInstance().signout();
+						return result;
+					}
+
+					@SuppressLint("NewApi")
+					@Override
+					protected void onPostExecute(Object response) {
+						final ModelResult result = (ModelResult) response;
+						/* We continue on even if the service call failed. */
+						if (result.serviceResponse.responseCode == ResponseCode.Success) {
+							Logger.i(this, "User signed out: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
+						}
+						else {
+							Logger.w(this, "User signed out, service call failed: " + Aircandi.getInstance().getUser().id);
+						}
+
+						/* Stop the current tracking session. Starts again when a user logs in. */
+						Tracker.stopSession(Aircandi.getInstance().getUser());
+
+						/* Clear the user and session that is tied into auto-signin */
+						com.aircandi.components.NotificationManager.getInstance().unregisterDeviceWithAircandi(
+								GCMRegistrar.getRegistrationId(Aircandi.applicationContext));
+						Aircandi.getInstance().setUser(null);
+
+						Aircandi.settingsEditor.putString(Constants.SETTING_USER, null);
+						Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, null);
+						Aircandi.settingsEditor.commit();
+
+						/* Make sure onPrepareOptionsMenu gets called */
+						invalidateOptionsMenu();
+
+						/* Notify interested parties */
+						UI.showToastNotification(getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
+						if (mBusyManager != null) {
+							mBusyManager.hideBusy();
+						}
+						final Intent intent = new Intent(BaseActivity.this, SplashForm.class);
+						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						startActivity(intent);
+						finish();
+						Animate.doOverridePendingTransition(BaseActivity.this, TransitionType.FormToPage);
+					}
+				}.execute();
+
+			}
+		});
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -415,21 +376,47 @@ public abstract class BaseActivity extends SherlockActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		mCommon.doCreateOptionsMenu(menu);
-		return true;
-	}
+	public boolean onOptionsItemSelected(MenuItem menuItem) {
+		Intent intent = null;
 
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		mCommon.doPrepareOptionsMenu(menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		mCommon.doOptionsItemSelected(item);
-		return true;
+		switch (menuItem.getItemId()) {
+			case android.R.id.home:
+				onBackPressed();
+				return true;
+			case R.id.home:
+				intent = new Intent(this, RadarForm.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				finish();
+				startActivity(intent);
+				Animate.doOverridePendingTransition(this, TransitionType.PageToPage);
+				return true;
+			case R.id.settings:
+				startActivityForResult(new Intent(this, Preferences.class), Constants.ACTIVITY_PREFERENCES);
+				Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+				return true;
+			case R.id.signout:
+				Tracker.sendEvent("ui_action", "signout_user", null, 0, Aircandi.getInstance().getUser());
+				signout();
+				return true;
+			case R.id.feedback:
+				final IntentBuilder intentBuilder = new IntentBuilder(this, FeedbackEdit.class);
+				intent = intentBuilder.create();
+				startActivity(intent);
+				Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+				return true;
+			case R.id.cancel:
+				setResult(Activity.RESULT_CANCELED);
+				finish();
+				Animate.doOverridePendingTransition(this, TransitionType.FormToPage);
+				return true;
+			case R.id.cancel_help:
+				setResult(Activity.RESULT_CANCELED);
+				finish();
+				Animate.doOverridePendingTransition(this, TransitionType.HelpToPage);
+				return true;
+			default:
+				return true;
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -446,7 +433,7 @@ public abstract class BaseActivity extends SherlockActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		mCommon.doStart();
+		Tracker.activityStart(this, Aircandi.getInstance().getUser());
 		if (mPrefChangeReloadNeeded) {
 			final Intent intent = getIntent();
 			startActivity(intent);
@@ -457,23 +444,25 @@ public abstract class BaseActivity extends SherlockActivity {
 
 	@Override
 	protected void onResume() {
-		mCommon.doResume();
+		BusProvider.getInstance().register(this);
+		synchronized (GCMIntentService.lock) {
+			GCMIntentService.currentActivity = this;
+		}
 		super.onResume();
 	}
 
 	@Override
 	protected void onPause() {
-		if (mCommon != null) {
-			mCommon.doPause();
+		BusProvider.getInstance().unregister(this);
+		synchronized (GCMIntentService.lock) {
+			GCMIntentService.currentActivity = null;
 		}
 		super.onPause();
 	}
 
 	@Override
 	protected void onStop() {
-		if (mCommon != null) {
-			mCommon.doStop();
-		}
+		Tracker.activityStop(this, Aircandi.getInstance().getUser());
 		super.onStop();
 	}
 
@@ -481,34 +470,23 @@ public abstract class BaseActivity extends SherlockActivity {
 	protected void onDestroy() {
 		/* This activity gets destroyed everytime we leave using back or finish(). */
 		Logger.d(this, "onDestroy called");
-		try {
-			if (mCommon != null) {
-				mCommon.doDestroy();
-			}
-		}
-		catch (Exception e) {
-			if (BuildConfig.DEBUG) {
-				e.printStackTrace();
-			}
-		}
-		finally {
-			super.onDestroy();
-		}
+		super.onDestroy();
 	}
 
 	@Override
 	public void onAttachedToWindow() {
 		super.onAttachedToWindow();
-		mCommon.doAttachedToWindow();
-	}
-
-	public AircandiCommon getCommon() {
-		return mCommon;
+		final Window window = getWindow();
+		window.setFormat(PixelFormat.RGBA_8888);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Inner classes and enums
 	// --------------------------------------------------------------------------------------------
+	public enum ServiceOperation {
+		Signin,
+		PasswordChange,
+	}
 
 	public static class SimpleTextWatcher implements TextWatcher {
 

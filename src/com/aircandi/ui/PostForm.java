@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -27,12 +26,14 @@ import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutSettings;
-import com.aircandi.ui.base.BaseEntityView;
+import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.ui.widgets.WebImageView;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
 
-public class PostForm extends BaseEntityView {
+public class PostForm extends BaseEntityForm {
 
 	@Override
 	protected void bind(final Boolean refreshProposed) {
@@ -45,21 +46,21 @@ public class PostForm extends BaseEntityView {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(true);
-				mCommon.startBodyBusyIndicator();
+				mBusyManager.showBusy();
+				mBusyManager.startBodyBusyIndicator();
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetEntity");
 
-				Entity entity = EntityManager.getEntity(mCommon.mEntityId);
+				Entity entity = EntityManager.getEntity(mEntityId);
 				Boolean refresh = refreshProposed;
 				if (entity == null || !entity.shortcuts) {
 					refresh = true;
 				}
 
-				final ModelResult result = EntityManager.getInstance().getEntity(mCommon.mEntityId
+				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId
 						, refresh
 						, LinkOptions.getDefault(DefaultType.LinksForPost));
 				return result;
@@ -74,14 +75,14 @@ public class PostForm extends BaseEntityView {
 						mEntity = (Entity) result.data;
 						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
-						mCommon.mActionBar.setTitle(mEntity.name);
+						mActionBar.setTitle(mEntity.name);
 						draw();
 					}
 				}
 				else {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
+					Routing.serviceError(PostForm.this, result.serviceResponse);
 				}
-				mCommon.hideBusy(false);
+				mBusyManager.hideBusy();
 			}
 
 		}.execute();
@@ -122,7 +123,7 @@ public class PostForm extends BaseEntityView {
 			candiView.bindToPlace((Place) mEntity);
 		}
 		else {
-			setVisibility(image, View.GONE);
+			UI.setVisibility(image, View.GONE);
 			if (image != null) {
 				final String photoUri = mEntity.getPhotoUri();
 				if (photoUri != null) {
@@ -137,7 +138,7 @@ public class PostForm extends BaseEntityView {
 						if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_POST)) {
 							image.setClickable(true);
 						}
-						setVisibility(image, View.VISIBLE);
+						UI.setVisibility(image, View.VISIBLE);
 					}
 				}
 			}
@@ -145,16 +146,16 @@ public class PostForm extends BaseEntityView {
 			name.setText(null);
 			subtitle.setText(null);
 
-			setVisibility(name, View.GONE);
+			UI.setVisibility(name, View.GONE);
 			if (name != null && mEntity.name != null && !mEntity.name.equals("")) {
 				name.setText(Html.fromHtml(mEntity.name));
-				setVisibility(name, View.VISIBLE);
+				UI.setVisibility(name, View.VISIBLE);
 			}
 
-			setVisibility(subtitle, View.GONE);
+			UI.setVisibility(subtitle, View.GONE);
 			if (subtitle != null && mEntity.subtitle != null && !mEntity.subtitle.equals("")) {
 				subtitle.setText(Html.fromHtml(mEntity.subtitle));
-				setVisibility(subtitle, View.VISIBLE);
+				UI.setVisibility(subtitle, View.VISIBLE);
 			}
 		}
 
@@ -162,10 +163,10 @@ public class PostForm extends BaseEntityView {
 
 		description.setText(null);
 
-		setVisibility(findViewById(R.id.section_description), View.GONE);
+		UI.setVisibility(findViewById(R.id.section_description), View.GONE);
 		if (description != null && mEntity.description != null && !mEntity.description.equals("")) {
 			description.setText(Html.fromHtml(mEntity.description));
-			setVisibility(findViewById(R.id.section_description), View.VISIBLE);
+			UI.setVisibility(findViewById(R.id.section_description), View.VISIBLE);
 		}
 
 		/* Clear shortcut holder */
@@ -199,8 +200,8 @@ public class PostForm extends BaseEntityView {
 
 		/* Creator block */
 
-		setVisibility(user_one, View.GONE);
-		setVisibility(user_two, View.GONE);
+		UI.setVisibility(user_one, View.GONE);
+		UI.setVisibility(user_two, View.GONE);
 		UserView user = user_one;
 
 		if (user != null
@@ -211,7 +212,7 @@ public class PostForm extends BaseEntityView {
 				if (((Place) mEntity).getProvider().type.equals("aircandi")) {
 					user.setLabel(getString(R.string.candi_label_user_created_by));
 					user.bindToUser(mEntity.creator, mEntity.createdDate.longValue(), mEntity.locked);
-					setVisibility(user, View.VISIBLE);
+					UI.setVisibility(user, View.VISIBLE);
 					user = user_two;
 				}
 			}
@@ -223,7 +224,7 @@ public class PostForm extends BaseEntityView {
 					user.setLabel(getString(R.string.candi_label_user_created_by));
 				}
 				user.bindToUser(mEntity.creator, mEntity.createdDate.longValue(), mEntity.locked);
-				setVisibility(user_one, View.VISIBLE);
+				UI.setVisibility(user_one, View.VISIBLE);
 				user = user_two;
 			}
 		}
@@ -234,7 +235,7 @@ public class PostForm extends BaseEntityView {
 			if (mEntity.createdDate.longValue() != mEntity.modifiedDate.longValue()) {
 				user.setLabel(getString(R.string.candi_label_user_edited_by));
 				user.bindToUser(mEntity.modifier, mEntity.modifiedDate.longValue(), null);
-				setVisibility(user, View.VISIBLE);
+				UI.setVisibility(user, View.VISIBLE);
 			}
 		}
 	}

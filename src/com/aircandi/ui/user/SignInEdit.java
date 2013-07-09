@@ -15,8 +15,6 @@ import android.widget.Toast;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.AircandiCommon;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -28,16 +26,20 @@ import com.aircandi.service.HttpService.ServiceDataWrapper;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseActivity;
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
-import com.aircandi.utilities.ImageUtils;
-import com.aircandi.utilities.MiscUtils;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
+import com.aircandi.utilities.Utilities;
 
 public class SignInEdit extends BaseActivity {
 
 	private EditText	mTextEmail;
 	private EditText	mTextPassword;
 	private TextView	mTextMessage;
+
+	private String		mMessage;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -48,10 +50,19 @@ public class SignInEdit extends BaseActivity {
 		}
 	}
 
+	@Override
+	protected void unpackIntent() {
+
+		final Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			mMessage = extras.getString(Constants.EXTRA_MESSAGE);
+		}
+	}
+
 	private void initialize() {
 		mTextEmail = (EditText) findViewById(R.id.email);
 		mTextPassword = (EditText) findViewById(R.id.password);
-		mTextMessage = (TextView) findViewById(R.id.form_message);
+		mTextMessage = (TextView) findViewById(R.id.message);
 
 		mTextPassword.setImeOptions(EditorInfo.IME_ACTION_GO);
 		mTextPassword.setOnEditorActionListener(new OnEditorActionListener() {
@@ -68,8 +79,8 @@ public class SignInEdit extends BaseActivity {
 	}
 
 	private void draw() {
-		if (mCommon.mMessage != null) {
-			mTextMessage.setText(mCommon.mMessage);
+		if (mMessage != null) {
+			mTextMessage.setText(mMessage);
 		}
 		final String email = Aircandi.settings.getString(Constants.SETTING_LAST_EMAIL, null);
 		if (email != null) {
@@ -84,7 +95,7 @@ public class SignInEdit extends BaseActivity {
 
 	@SuppressWarnings("ucd")
 	public void onSendPasswordButtonClick(View view) {
-		AircandiCommon.showAlertDialog(R.drawable.ic_launcher
+		Dialogs.showAlertDialog(R.drawable.ic_launcher
 				, getResources().getString(R.string.alert_send_password_title)
 				, getResources().getString(R.string.alert_send_password_message)
 				, null
@@ -107,7 +118,7 @@ public class SignInEdit extends BaseActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(R.string.progress_signing_in, true);
+					mBusyManager.showBusy(R.string.progress_signing_in);
 				}
 
 				@Override
@@ -121,7 +132,7 @@ public class SignInEdit extends BaseActivity {
 				protected void onPostExecute(Object response) {
 
 					final ModelResult result = (ModelResult) response;
-					mCommon.hideBusy(true);
+					mBusyManager.hideBusy();
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						final String jsonResponse = (String) result.serviceResponse.data;
@@ -135,7 +146,7 @@ public class SignInEdit extends BaseActivity {
 						Tracker.startNewSession(Aircandi.getInstance().getUser());
 						Tracker.sendEvent("ui_action", "signin_user", null, 0, Aircandi.getInstance().getUser());
 
-						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
+						UI.showToastNotification(getResources().getString(R.string.alert_signed_in)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
 						final String jsonUser = HttpService.objectToJson(user);
@@ -148,10 +159,10 @@ public class SignInEdit extends BaseActivity {
 
 						setResult(Constants.RESULT_USER_SIGNED_IN);
 						finish();
-						AnimUtils.doOverridePendingTransition(SignInEdit.this, TransitionType.FormToPage);
+						Animate.doOverridePendingTransition(SignInEdit.this, TransitionType.FormToPage);
 					}
 					else {
-						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.Signin);
+						Routing.serviceError(SignInEdit.this, result.serviceResponse);
 					}
 				}
 			}.execute();
@@ -160,7 +171,7 @@ public class SignInEdit extends BaseActivity {
 
 	private boolean validate() {
 		if (mTextPassword.getText().length() < 6) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_password)
 					, null
@@ -169,8 +180,8 @@ public class SignInEdit extends BaseActivity {
 					, null, null, null, null);
 			return false;
 		}
-		if (!MiscUtils.validEmail(mTextEmail.getText().toString())) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
+			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_invalid_email)
 					, null
