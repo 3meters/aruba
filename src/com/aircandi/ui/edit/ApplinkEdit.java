@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -38,6 +39,12 @@ public class ApplinkEdit extends BaseEntityEdit {
 	private Integer			mMissingResId;
 
 	private List<String>	mApplinkSuggestionStrings;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+		super.onCreate(savedInstanceState);
+	}
 
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
@@ -239,24 +246,29 @@ public class ApplinkEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
 	public void onTestButtonClick(View view) {
-		doApplinkTest();
+		if (validate()) {
+			gather();
+			Routing.shortcut(this, mEntity.getShortcut(), null);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Service routines
+	// Services
 	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected void gather() {
 		super.gather();
+
 		if (mAppId != null) {
 			((Applink) mEntity).appId = Utilities.emptyAsNull(mAppId.getText().toString().trim());
 		}
+
 		if (mAppUrl != null) {
 			((Applink) mEntity).appUrl = Utilities.emptyAsNull(mAppUrl.getText().toString().trim());
 			if (mEntity.type.equals(Constants.TYPE_APPLINK_WEBSITE)) {
@@ -268,44 +280,52 @@ public class ApplinkEdit extends BaseEntityEdit {
 		}
 	}
 
-	private void doApplinkTest() {
-		if (validate()) {
-			gather();
-			Routing.shortcut(this, mEntity.getShortcut(), null);
-		}
-	}
-
 	// --------------------------------------------------------------------------------------------
-	// Service routines
+	// Services
 	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected boolean validate() {
-		if (super.validate()) {
-			if (mEntity.type == null) {
-				Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
-						, null
-						, getResources().getString(R.string.error_missing_applink_type)
-						, null
-						, this
-						, android.R.string.ok
-						, null, null, null, null);
-				return false;
-			}
+		if (!super.validate()) {
+			return false;
+		}
+		if (mEntity.type == null) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_applink_type)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			return false;
+		}
 
-			if (mName != null && mName.getText().length() == 0) {
-				Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
-						, null
-						, getResources().getString(R.string.error_missing_entity_label)
-						, null
-						, this
-						, android.R.string.ok
-						, null, null, null, null);
-				return false;
-			}
+		if (mName != null && mName.getText().length() == 0) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_entity_label)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			return false;
+		}
 
-			if (mAppId != null && mAppId.getText().length() == 0 && mAppId.getVisibility() == View.VISIBLE) {
-				Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
+		if (mAppId != null && mAppId.getText().length() == 0 && mAppId.getVisibility() == View.VISIBLE) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(mMissingResId)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			return false;
+		}
+
+		if (mAppUrl != null && mAppUrl.getVisibility() == View.VISIBLE) {
+			final String url = mAppUrl.getEditableText().toString();
+			if (url == null || url.length() == 0) {
+				Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 						, null
 						, getResources().getString(mMissingResId)
 						, null
@@ -314,29 +334,15 @@ public class ApplinkEdit extends BaseEntityEdit {
 						, null, null, null, null);
 				return false;
 			}
-
-			if (mAppUrl != null && mAppUrl.getVisibility() == View.VISIBLE) {
-				final String url = mAppUrl.getEditableText().toString();
-				if (url == null || url.length() == 0) {
-					Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
-							, null
-							, getResources().getString(mMissingResId)
-							, null
-							, this
-							, android.R.string.ok
-							, null, null, null, null);
-					return false;
-				}
-				else if (url != null && url.length() > 0 && !Utilities.validWebUri(url)) {
-					Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
-							, null
-							, getResources().getString(R.string.error_weburi_invalid)
-							, null
-							, this
-							, android.R.string.ok
-							, null, null, null, null);
-					return false;
-				}
+			else if (url != null && url.length() > 0 && !Utilities.validWebUri(url)) {
+				Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+						, null
+						, getResources().getString(R.string.error_weburi_invalid)
+						, null
+						, this
+						, android.R.string.ok
+						, null, null, null, null);
+				return false;
 			}
 		}
 		return true;

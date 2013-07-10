@@ -20,7 +20,6 @@ import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Category;
-import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.ui.helpers.AddressBuilder;
@@ -101,7 +100,7 @@ public class PlaceEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
@@ -180,12 +179,15 @@ public class PlaceEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Methods
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected void beforeInsert(Entity entity) {
-		((Place) mEntity).provider.aircandi = Aircandi.getInstance().getUser().id;
+	protected void gather() {
+		super.gather();
+		if (!mEditing) {
+			((Place) mEntity).provider.aircandi = Aircandi.getInstance().getUser().id;
+		}
 		/*
 		 * We add location info as a consistent feature
 		 */
@@ -195,6 +197,10 @@ public class PlaceEdit extends BaseEntityEdit {
 			((Place) mEntity).location.lng = location.lng;
 		}
 	}
+	
+	// --------------------------------------------------------------------------------------------
+	// Misc routines
+	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected int getLayoutId() {

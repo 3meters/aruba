@@ -24,7 +24,7 @@ public class CommentEdit extends BaseEntityEdit {
 				if (actionId == EditorInfo.IME_ACTION_SEND) {
 					if (validate()) {
 						gather();
-						doSaveInsert();
+						update();
 					}
 					return true;
 				}
@@ -46,22 +46,23 @@ public class CommentEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Service routines
+	// Services
 	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected boolean validate() {
-		if (super.validate()) {
-			if (mDescription.getText().length() == 0) {
-				Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
-						, null
-						, getResources().getString(R.string.error_missing_message)
-						, null
-						, this
-						, android.R.string.ok
-						, null, null, null, null);
-				return false;
-			}
+		if (!super.validate()) {
+			return false;
+		}
+		if (mDescription.getText().length() == 0) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_message)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			return false;
 		}
 		return true;
 	}

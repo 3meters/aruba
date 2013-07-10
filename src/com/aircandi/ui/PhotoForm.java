@@ -35,7 +35,7 @@ import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.UI;
 
-public class PictureForm extends BaseActivity {
+public class PhotoForm extends BaseActivity {
 
 	private List<Photo>	mPhotosForPaging	= new ArrayList<Photo>();
 	private String		mImageUri;

@@ -69,7 +69,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 							activity.runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-									activity.doRefresh();
+									activity.onRefresh();
 								}
 							});
 						}
@@ -106,7 +106,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 									activity.runOnUiThread(new Runnable() {
 										@Override
 										public void run() {
-											activity.doRefresh();
+											activity.onRefresh();
 										}
 									});
 								}

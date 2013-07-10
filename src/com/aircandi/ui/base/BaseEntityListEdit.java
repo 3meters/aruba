@@ -24,7 +24,6 @@ import android.widget.TextView;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
@@ -39,23 +38,26 @@ import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
 
-public abstract class BaseEntityListEdit extends BaseEntityEdit {
+public abstract class BaseEntityListEdit extends BaseEdit {
 
 	protected BounceListView	mList;
 	protected TextView			mMessage;
-	protected List<Entity>		mEntities	= new ArrayList<Entity>();
-	protected String			mParentId;
-	protected Entity			mParent;
+
 	protected Entity			mEntityEditing;
 	protected List<String>		mJsonEntitiesOriginal;
 
-	@Override
-	protected void initialize(Bundle savedInstanceState) {
-		super.initialize(savedInstanceState);
+	/* Inputs */
+	protected String			mParentId;
+	protected List<Entity>		mEntities	= new ArrayList<Entity>();
+	protected String			mListSchema;
 
-		/* We use this to access the source suggestions */
+	@Override
+	protected void unpackIntent() {
+		super.unpackIntent();
+
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
 			final List<String> jsonEntities = extras.getStringArrayList(Constants.EXTRA_ENTITIES);
@@ -67,10 +69,13 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 				}
 			}
 			mParentId = extras.getString(Constants.EXTRA_ENTITY_PARENT_ID);
-			if (mParentId != null) {
-				mParent = EntityManager.getEntity(mParentId);
-			}
+			mListSchema = extras.getString(Constants.EXTRA_LIST_SCHEMA);
 		}
+	}
+
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
 
 		mMessage = (TextView) findViewById(R.id.message);
 		mList = (BounceListView) findViewById(R.id.list);
@@ -102,9 +107,37 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 		mBusyManager.hideBusy(); // visible by default
 	}
 
+	@Override
+	protected void draw(){}
+	
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Events
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onAccept() {
+		if (isDirty()) {
+			if (validate()) {
+
+				/* Pull all the control values back into the entity object */
+				final Intent intent = new Intent();
+				final List<String> jsonEntities = new ArrayList<String>();
+
+				for (Entity entity : mEntities) {
+					jsonEntities.add(HttpService.objectToJson(entity, UseAnnotations.False, ExcludeNulls.True));
+				}
+
+				intent.putStringArrayListExtra(Constants.EXTRA_ENTITIES, (ArrayList<String>) jsonEntities);
+				setResult(Activity.RESULT_OK, intent);
+				finish();
+				Animate.doOverridePendingTransition(this, TransitionType.FormToPage);
+			}
+		}
+		else {
+			finish();
+			Animate.doOverridePendingTransition(BaseEntityListEdit.this, TransitionType.FormToPage);
+		}
+	}
 
 	public void onCheckedClick(View view) {
 		CheckBox check = (CheckBox) view.findViewById(R.id.checked);
@@ -117,7 +150,7 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 	public void onDeleteButtonClick(View view) {
 		for (int i = mEntities.size() - 1; i >= 0; i--) {
 			if (mEntities.get(i).checked) {
-				confirmEntityDelete();
+				confirmDelete();
 				return;
 			}
 		}
@@ -125,8 +158,8 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 
 	@SuppressWarnings("ucd")
 	public void onAddButtonClick(View view) {
-		final IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(mEntitySchema))
-				.setEntitySchema(mEntitySchema)
+		final IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(mListSchema))
+				.setEntitySchema(mListSchema)
 				.setEntityParentId(mParentId);
 
 		Intent intent = intentBuilder.create();
@@ -232,7 +265,8 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
-	private void confirmEntityDelete() {
+	@Override
+	public void confirmDelete() {
 
 		/* How many are we deleting? */
 		Integer deleteCount = 0;
@@ -269,7 +303,7 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 				? R.string.alert_source_delete_message_single
 				: R.string.alert_source_delete_message_multiple);
 
-		final AlertDialog dialog = Dialogs.showAlertDialog(null
+		final AlertDialog dialog = Dialogs.alertDialog(null
 				, getResources().getString(R.string.alert_source_delete_title)
 				, null
 				, customView
@@ -295,51 +329,8 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 		dialog.setCanceledOnTouchOutside(false);
 	}
 
-	private void confirmDirtyExit() {
-		final AlertDialog dialog = Dialogs.showAlertDialog(null
-				, getResources().getString(R.string.alert_sources_dirty_exit_title)
-				, getResources().getString(R.string.alert_sources_dirty_exit_message)
-				, null
-				, this
-				, R.string.alert_dirty_save
-				, android.R.string.cancel
-				, R.string.alert_dirty_discard
-				, new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (which == Dialog.BUTTON_POSITIVE) {
-							gatherAndExit();
-						}
-						else if (which == Dialog.BUTTON_NEUTRAL) {
-							setResult(Activity.RESULT_CANCELED);
-							finish();
-							Animate.doOverridePendingTransition(BaseEntityListEdit.this, TransitionType.FormToPage);
-						}
-					}
-				}
-				, null);
-		dialog.setCanceledOnTouchOutside(false);
-	}
-
-	private void gatherAndExit() {
-		final Intent intent = new Intent();
-		final List<String> jsonEntities = new ArrayList<String>();
-
-		for (Entity entity : mEntities) {
-			jsonEntities.add(HttpService.objectToJson(entity, UseAnnotations.False, ExcludeNulls.True));
-		}
-
-		intent.putStringArrayListExtra(Constants.EXTRA_ENTITIES, (ArrayList<String>) jsonEntities);
-		setResult(Activity.RESULT_OK, intent);
-		finish();
-		Animate.doOverridePendingTransition(this, TransitionType.FormToPage);
-	}
-
 	@Override
-	protected Boolean isDirty() {
-
-		/* Gather */
+	public Boolean isDirty() {
 
 		final List<String> jsonEntities = new ArrayList<String>();
 		for (Entity entity : mEntities) {
@@ -368,10 +359,6 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 		return false;
 	}
 
-	// --------------------------------------------------------------------------------------------
-	// Application menu routines (settings)
-	// --------------------------------------------------------------------------------------------
-
 	private void scrollToBottom() {
 		runOnUiThread(new Runnable() {
 
@@ -383,26 +370,21 @@ public abstract class BaseEntityListEdit extends BaseEntityEdit {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.accept) {
-			gatherAndExit();
-			return true;
-		}
-		else if (item.getItemId() == R.id.cancel) {
-			if (isDirty()) {
-				confirmDirtyExit();
-			}
-			else {
-				setResult(Activity.RESULT_CANCELED);
-				finish();
-				Animate.doOverridePendingTransition(this, TransitionType.FormToPage);
-			}
-			return true;
-		}
+	protected void insert() {}
 
-		/* In case we add general menu items later */
-		super.onOptionsItemSelected(item);
-		return true;
+	@Override
+	protected void update() {}
+
+	@Override
+	protected void delete() {}
+
+	// --------------------------------------------------------------------------------------------
+	// Menus
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem menuItem) {
+		return Routing.route(this, Routing.routeForMenu(menuItem));
 	}
 
 	// --------------------------------------------------------------------------------------------

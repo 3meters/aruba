@@ -1,9 +1,6 @@
 package com.aircandi.ui.user;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -20,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
@@ -32,17 +28,12 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.TabManager;
 import com.aircandi.components.Tracker;
-import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.RequestListener;
-import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEntityEdit;
-import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.DateTime;
@@ -53,67 +44,46 @@ import com.aircandi.utilities.Utilities;
 
 public class UserEdit extends BaseEntityEdit {
 
-	private User			mEntity;
-	
-	private WebImageView	mPhoto;
-	private EditText		mName;
-	private EditText		mBio;
-	private EditText		mWebUri;
-	private EditText		mArea;
-	private EditText		mEmail;
-	private CheckBox		mDoNotTrack;
-	private TabManager		mTabManager;
+	private EditText	mBio;
+	private EditText	mWebUri;
+	private EditText	mArea;
+	private EditText	mEmail;
+	private CheckBox	mDoNotTrack;
+
+	private TabManager	mTabManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-		if (!isFinishing()) {
-			initialize(savedInstanceState);
-			bind();
-		}
+		super.onCreate(savedInstanceState);
 	}
 
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
-		mActionBar.setDisplayHomeAsUpEnabled(true);
-		mTabManager = new TabManager(Constants.TABS_USER_FORM_ID, mActionBar, (ViewFlipper) findViewById(R.id.flipper_form)); 
-		mTabManager.initialize();
-		mTabManager.doRestoreInstanceState(savedInstanceState);
-		
 		mEntity = Aircandi.getInstance().getUser();
 
 		if (mEntity == null) {
 			throw new IllegalStateException("Current user required by ProfileForm");
 		}
 
-		mPhoto = (WebImageView) findViewById(R.id.photo);
-		mName = (EditText) findViewById(R.id.name);
+		mTabManager = new TabManager(Constants.TABS_USER_FORM_ID, mActionBar, (ViewFlipper) findViewById(R.id.flipper_form));
+		mTabManager.initialize();
+		mTabManager.doRestoreInstanceState(savedInstanceState);
+
 		mBio = (EditText) findViewById(R.id.bio);
 		mWebUri = (EditText) findViewById(R.id.web_uri);
 		mArea = (EditText) findViewById(R.id.area);
 		mEmail = (EditText) findViewById(R.id.email);
 		mDoNotTrack = (CheckBox) findViewById(R.id.chk_do_not_track);
 
-		if (mName != null) {
-			mName.addTextChangedListener(new SimpleTextWatcher() {
-
-				@Override
-				public void afterTextChanged(Editable s) {
-					if (!s.toString().equals(mEntity.name)) {
-						mDirty = true;
-					}
-				}
-			});
-		}
 		if (mBio != null) {
 			mBio.addTextChangedListener(new SimpleTextWatcher() {
 
 				@Override
 				public void afterTextChanged(Editable s) {
-					if (!s.toString().equals(mEntity.bio)) {
+					if (!s.toString().equals(((User) mEntity).bio)) {
 						mDirty = true;
 					}
 				}
@@ -124,7 +94,7 @@ public class UserEdit extends BaseEntityEdit {
 
 				@Override
 				public void afterTextChanged(Editable s) {
-					if (!s.toString().equals(mEntity.webUri)) {
+					if (!s.toString().equals(((User) mEntity).webUri)) {
 						mDirty = true;
 					}
 				}
@@ -135,7 +105,7 @@ public class UserEdit extends BaseEntityEdit {
 
 				@Override
 				public void afterTextChanged(Editable s) {
-					if (!s.toString().equals(mEntity.location)) {
+					if (!s.toString().equals(((User) mEntity).area)) {
 						mDirty = true;
 					}
 				}
@@ -146,7 +116,7 @@ public class UserEdit extends BaseEntityEdit {
 
 				@Override
 				public void afterTextChanged(Editable s) {
-					if (!s.toString().equals(mEntity.email)) {
+					if (!s.toString().equals(((User) mEntity).email)) {
 						mDirty = true;
 					}
 				}
@@ -157,7 +127,7 @@ public class UserEdit extends BaseEntityEdit {
 
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					if (mEntity.doNotTrack != isChecked) {
+					if (((User) mEntity).doNotTrack != isChecked) {
 						mDirty = true;
 					}
 
@@ -174,60 +144,20 @@ public class UserEdit extends BaseEntityEdit {
 	}
 
 	@Override
-	protected void bind() {
-		/*
-		 * This form is always for editing. We always reload the user to make sure
-		 * we have the freshest data.
-		 */
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mBusyManager.showBusy();
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("GetUser");
-				ModelResult result = EntityManager.getInstance().getEntity(mEntity.id, true, LinkOptions.getDefault(DefaultType.LinksUserWatching));
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object modelResult) {
-				final ModelResult result = (ModelResult) modelResult;
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					mEntity = (User) result.serviceResponse.data;
-
-					/* We got fresh user data but we want to hook up the old session. */
-					mEntity.session = Aircandi.getInstance().getUser().session;
-					mImageUriOriginal = mEntity.getPhotoUri();
-
-					mBusyManager.hideBusy();
-					draw();
-				}
-				else {
-					Routing.serviceError(UserEdit.this, result.serviceResponse);
-				}
-			}
-		}.execute();
-	}
-
-	@Override
 	protected void draw() {
+		super.draw();
 
-		drawPhoto();
+		User user = (User) mEntity;
 
-		mName.setText(mEntity.name);
-		mBio.setText(mEntity.bio);
-		mWebUri.setText(mEntity.webUri);
-		mArea.setText(mEntity.area);
-		mEmail.setText(mEntity.email);
-		if (mEntity.doNotTrack == null) {
-			mEntity.doNotTrack = false;
+		mBio.setText(user.bio);
+		mWebUri.setText(user.webUri);
+		mArea.setText(user.area);
+		mEmail.setText(user.email);
+		if (user.doNotTrack == null) {
+			user.doNotTrack = false;
 		}
-		mDoNotTrack.setChecked(mEntity.doNotTrack);
-		if (mEntity.doNotTrack) {
+		mDoNotTrack.setChecked(user.doNotTrack);
+		if (user.doNotTrack) {
 			((TextView) findViewById(R.id.do_not_track_hint)).setText(R.string.form_do_not_track_on_hint);
 		}
 		else {
@@ -238,25 +168,8 @@ public class UserEdit extends BaseEntityEdit {
 
 	}
 
-	@Override
-	protected void drawPhoto() {
-		if (mPhoto != null) {
-			if (mEntity.photo != null && mEntity.photo.hasBitmap()) {
-				mPhoto.hideLoading();
-				UI.showImageInImageView(mEntity.photo.getBitmap(), mPhoto.getImageView(), true, Animate.fadeInMedium());
-				mPhoto.setVisibility(View.VISIBLE);
-			}
-			else {
-				final BitmapRequestBuilder builder = new BitmapRequestBuilder(mPhoto);
-				builder.setImageUri(mEntity.getPhotoUri());
-				final BitmapRequest imageRequest = builder.create();
-				mPhoto.setBitmapRequest(imageRequest);
-			}
-		}
-	}
-
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
@@ -332,129 +245,41 @@ public class UserEdit extends BaseEntityEdit {
 		}
 	}
 
-	private void usePictureDefault() {
-		/*
-		 * Setting the photo to null will trigger correct default handling.
-		 */
-		mDirty = true;
-		
-		if (mEntity.photo != null) {
-			mEntity.photo.removeBitmap();
-			mEntity.photo = null;
-		}
-		mEntity.photo = mEntity.getDefaultPhoto();
-		drawPhoto();
-		Tracker.sendEvent("ui_action", "set_user_picture_to_default", null, 0, Aircandi.getInstance().getUser());
-	}
-
-	private void confirmDirtyExit() {
-		final AlertDialog dialog = Dialogs.showAlertDialog(null
-				, getResources().getString(R.string.alert_entity_dirty_exit_title)
-				, getResources().getString(R.string.alert_entity_dirty_exit_message)
-				, null
-				, this
-				, R.string.alert_dirty_save
-				, android.R.string.cancel
-				, R.string.alert_dirty_discard
-				, new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (which == Dialog.BUTTON_POSITIVE) {
-							updateProfile();
-						}
-						else if (which == Dialog.BUTTON_NEUTRAL) {
-							setResult(Activity.RESULT_CANCELED);
-							finish();
-							Animate.doOverridePendingTransition(UserEdit.this, TransitionType.FormToPage);
-						}
-					}
-				}
-				, null);
-		dialog.setCanceledOnTouchOutside(false);
-	}
-
 	@Override
 	protected void onSaveInstanceState(Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
 		mTabManager.doSaveInstanceState(savedInstanceState);
 	}
 
-	
-	
 	// --------------------------------------------------------------------------------------------
-	// Service routines
+	// Methods
 	// --------------------------------------------------------------------------------------------
 
-	private void updateProfile() {
+	@Override
+	protected void gather() {
+		super.gather();
 
-		if (validate()) {
-
-			mEntity.email = mEmail.getText().toString().trim();
-			mEntity.name = mName.getText().toString().trim();
-			mEntity.bio = mBio.getText().toString().trim();
-			mEntity.area = mArea.getText().toString().trim();
-			mEntity.webUri = mWebUri.getText().toString().trim();
-			mEntity.doNotTrack = mDoNotTrack.isChecked();
-
-			new AsyncTask() {
-
-				@Override
-				protected void onPreExecute() {
-					mBusyManager.showBusy(R.string.progress_saving);
-				}
-
-				@Override
-				protected Object doInBackground(Object... params) {
-					Thread.currentThread().setName("UpdateUser");
-					final ModelResult result = EntityManager.getInstance().updateUser(mEntity, mEntity.photo.getBitmap());
-					return result;
-				}
-
-				@Override
-				protected void onPostExecute(Object response) {
-					final ModelResult result = (ModelResult) response;
-
-					if (result.serviceResponse.responseCode == ResponseCode.Success) {
-						Logger.i(this, "Updated user profile: " + mEntity.name + " (" + mEntity.id + ")");
-						Tracker.sendEvent("ui_action", "update_user", null, 0, Aircandi.getInstance().getUser());
-						mBusyManager.hideBusy();
-						/*
-						 * We treat updating the profile like a change to an entity in the entity model. This forces
-						 * UI to update itself and pickup the changes like a new profile name, picture, etc.
-						 */
-						EntityManager.getEntityCache().setLastActivityDate(DateTime.nowDate().getTime());
-
-						/* Update the global user */
-						Aircandi.getInstance().setUser(mEntity);
-						/*
-						 * We also need to update the user that has been persisted for auto sign in.
-						 */
-						final String jsonUser = HttpService.objectToJson(mEntity);
-						Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
-						Aircandi.settingsEditor.commit();
-
-						UI.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-						setResult(Constants.RESULT_PROFILE_UPDATED);
-						finish();
-					}
-					else {
-						Routing.serviceError(UserEdit.this, result.serviceResponse);
-					}
-				}
-			}.execute();
-		}
+		User user = (User) mEntity;
+		user.email = mEmail.getText().toString().trim();
+		user.bio = mBio.getText().toString().trim();
+		user.area = mArea.getText().toString().trim();
+		user.webUri = mWebUri.getText().toString().trim();
+		user.doNotTrack = mDoNotTrack.isChecked();
 	}
 
 	@Override
 	protected boolean validate() {
+		if (!super.validate()) {
+			return false;
+		}
+
 		if (!Utilities.validEmail(mEmail.getText().toString())) {
-			Dialogs.showAlertDialogSimple(this, null, getString(R.string.error_invalid_email));
+			Dialogs.alertDialogSimple(this, null, getString(R.string.error_invalid_email));
 			return false;
 		}
 		if (mWebUri.getText().toString() != null && !mWebUri.getText().toString().equals("")) {
 			if (!Utilities.validWebUri(mWebUri.getText().toString())) {
-				Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
+				Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 						, null
 						, getResources().getString(R.string.error_weburi_invalid)
 						, null
@@ -468,34 +293,66 @@ public class UserEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Application menu routines (settings)
+	// Services
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.accept) {
-			updateProfile();
-			return true;
-		}
-		else if (item.getItemId() == R.id.cancel) {
-			if (isDirty()) {
-				confirmDirtyExit();
-			}
-			else {
-				setResult(Activity.RESULT_CANCELED);
-				finish();
-				Animate.doOverridePendingTransition(UserEdit.this, TransitionType.FormToPage);
-			}
-			return true;
-		}
+	protected void update() {
 
-		/* In case we add general menu items later */
-		super.onOptionsItemSelected(item);
-		return true;
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				mBusyManager.showBusy(R.string.progress_saving);
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("UpdateUser");
+				final ModelResult result = EntityManager.getInstance().updateUser((User) mEntity, mEntity.photo.getBitmap());
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				final ModelResult result = (ModelResult) response;
+
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					Logger.i(this, "Updated user profile: " + mEntity.name + " (" + mEntity.id + ")");
+					Tracker.sendEvent("ui_action", "update_user", null, 0, Aircandi.getInstance().getUser());
+					mBusyManager.hideBusy();
+					/*
+					 * We treat updating the profile like a change to an entity in the entity model. This forces
+					 * UI to update itself and pickup the changes like a new profile name, picture, etc.
+					 */
+					EntityManager.getEntityCache().setLastActivityDate(DateTime.nowDate().getTime());
+
+					/* Update the global user */
+					Aircandi.getInstance().setUser((User) mEntity);
+					/*
+					 * We also need to update the user that has been persisted for auto sign in.
+					 */
+					final String jsonUser = HttpService.objectToJson(mEntity);
+					Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
+					Aircandi.settingsEditor.commit();
+
+					UI.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
+					setResult(Constants.RESULT_PROFILE_UPDATED);
+					finish();
+				}
+				else {
+					Routing.serviceError(UserEdit.this, result.serviceResponse);
+				}
+			}
+		}.execute();
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Menus
+	// --------------------------------------------------------------------------------------------
+
+	// --------------------------------------------------------------------------------------------
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override

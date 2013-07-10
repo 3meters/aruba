@@ -22,14 +22,18 @@ import com.aircandi.beta.R;
 import com.aircandi.components.Logger;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Shortcut;
+import com.aircandi.service.objects.ShortcutMeta;
 import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Routing.Route;
 
 public class Dialogs {
 
 	public static AlertDialog	mWifiAlertDialog;
 
 	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-	public static AlertDialog showAlertDialog(Integer iconResource // $codepro.audit.disable largeNumberOfParameters
+	public static AlertDialog alertDialog(Integer iconResource // $codepro.audit.disable largeNumberOfParameters
 			, String titleText
 			, String message
 			, View customView
@@ -93,13 +97,13 @@ public class Dialogs {
 		return alert;
 	}
 
-	public static void showAlertDialogSimple(final Activity activity, final String titleText, final String message) {
+	public static void alertDialogSimple(final Activity activity, final String titleText, final String message) {
 		if (!activity.isFinishing()) {
 			activity.runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
-					showAlertDialog(R.drawable.ic_launcher
+					alertDialog(R.drawable.ic_launcher
 							, titleText
 							, message
 							, null
@@ -114,13 +118,13 @@ public class Dialogs {
 		}
 	}
 
-	public static void showWifiAlertDialog(final Activity activity, final Integer messageResId, final RequestListener listener) {
+	public static void wifi(final Activity activity, final Integer messageResId, final RequestListener listener) {
 		activity.runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
 				if (mWifiAlertDialog == null || !mWifiAlertDialog.isShowing()) {
-					mWifiAlertDialog = showAlertDialog(R.drawable.ic_launcher
+					mWifiAlertDialog = alertDialog(R.drawable.ic_launcher
 							, activity.getString(R.string.alert_wifi_title)
 							, activity.getString(messageResId)
 							, null
@@ -161,9 +165,9 @@ public class Dialogs {
 		});
 	}
 
-	public static void showUpdateDialog(final Activity activity) {
-	
-		final AlertDialog updateDialog = showAlertDialog(null
+	public static void update(final Activity activity) {
+
+		final AlertDialog updateDialog = alertDialog(null
 				, activity.getString(R.string.dialog_update_title)
 				, activity.getString(R.string.dialog_update_message)
 				, null
@@ -172,7 +176,7 @@ public class Dialogs {
 				, R.string.dialog_update_cancel
 				, null
 				, new DialogInterface.OnClickListener() {
-	
+
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
@@ -205,6 +209,66 @@ public class Dialogs {
 				, null);
 		updateDialog.setCanceledOnTouchOutside(false);
 		updateDialog.show();
+	}
+
+	public static void install(final Activity activity, final Shortcut shortcut, final Entity entity) {
+
+		final AlertDialog installDialog = Dialogs.alertDialog(null
+				, activity.getString(R.string.dialog_install_title)
+				, activity.getString(R.string.dialog_install_message)
+				, null
+				, activity
+				, R.string.dialog_install_ok
+				, R.string.dialog_install_cancel
+				, null
+				, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							try {
+								Tracker.sendEvent("ui_action", "install_source", shortcut.getPackageName(), 0, Aircandi.getInstance().getUser());
+								Logger.d(this, "Install: navigating to market install page");
+								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=" + shortcut.getPackageName()
+										+ "&referrer=utm_source%3Dcom.aircandi"));
+								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+								intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+								activity.startActivity(intent);
+							}
+							catch (Exception e) {
+								/*
+								 * In case the market app isn't installed on the phone
+								 */
+								Logger.d(this, "Install: navigating to play website install page");
+								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://play.google.com/store/apps/details?id="
+										+ shortcut.getPackageName() + "&referrer=utm_source%3Dcom.aircandi"));
+								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+								activity.startActivityForResult(intent, Constants.ACTIVITY_MARKET);
+							}
+							dialog.dismiss();
+							Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+						}
+						else if (which == Dialog.BUTTON_NEGATIVE) {
+							final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
+							meta.installDeclined = true;
+							Routing.route(activity, Route.Shortcut, entity, shortcut);
+							dialog.dismiss();
+						}
+					}
+				}
+				, null);
+
+		installDialog.setCanceledOnTouchOutside(false);
+		installDialog.show();
+	}
+
+	public static void sendPassword(final Activity activity) {
+		Dialogs.alertDialog(R.drawable.ic_launcher
+				, activity.getResources().getString(R.string.alert_send_password_title)
+				, activity.getResources().getString(R.string.alert_send_password_message)
+				, null
+				, activity, android.R.string.ok, null, null, null, null);
+		Tracker.sendEvent("ui_action", "recover_password", null, 0, Aircandi.getInstance().getUser());
 	}
 
 }

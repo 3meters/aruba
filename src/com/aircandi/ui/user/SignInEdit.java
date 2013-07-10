@@ -25,7 +25,7 @@ import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.HttpService.ServiceDataWrapper;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
-import com.aircandi.ui.base.BaseActivity;
+import com.aircandi.ui.base.BaseEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
@@ -33,44 +33,36 @@ import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
 import com.aircandi.utilities.Utilities;
 
-public class SignInEdit extends BaseActivity {
+public class SignInEdit extends BaseEdit {
 
-	private EditText	mTextEmail;
-	private EditText	mTextPassword;
-	private TextView	mTextMessage;
+	private EditText	mEmail;
+	private EditText	mPassword;
+	private TextView	mMessage;
 
-	private String		mMessage;
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		if (!isFinishing()) {
-			initialize();
-			draw();
-		}
-	}
+	private String		mFormMessage;
 
 	@Override
 	protected void unpackIntent() {
 
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			mMessage = extras.getString(Constants.EXTRA_MESSAGE);
+			mFormMessage = extras.getString(Constants.EXTRA_MESSAGE);
 		}
 	}
 
-	private void initialize() {
-		mTextEmail = (EditText) findViewById(R.id.email);
-		mTextPassword = (EditText) findViewById(R.id.password);
-		mTextMessage = (TextView) findViewById(R.id.message);
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		mEmail = (EditText) findViewById(R.id.email);
+		mPassword = (EditText) findViewById(R.id.password);
+		mMessage = (TextView) findViewById(R.id.message);
 
-		mTextPassword.setImeOptions(EditorInfo.IME_ACTION_GO);
-		mTextPassword.setOnEditorActionListener(new OnEditorActionListener() {
+		mPassword.setImeOptions(EditorInfo.IME_ACTION_GO);
+		mPassword.setOnEditorActionListener(new OnEditorActionListener() {
 
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_GO) {
-					doSignIn();
+					signin();
 					return true;
 				}
 				return false;
@@ -78,100 +70,102 @@ public class SignInEdit extends BaseActivity {
 		});
 	}
 
-	private void draw() {
+	@Override
+	protected void draw() {
 		if (mMessage != null) {
-			mTextMessage.setText(mMessage);
+			mMessage.setText(mFormMessage);
 		}
 		final String email = Aircandi.settings.getString(Constants.SETTING_LAST_EMAIL, null);
 		if (email != null) {
-			mTextEmail.setText(email);
-			mTextPassword.requestFocus();
+			mEmail.setText(email);
+			mPassword.requestFocus();
 		}
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
 	public void onSendPasswordButtonClick(View view) {
-		Dialogs.showAlertDialog(R.drawable.ic_launcher
-				, getResources().getString(R.string.alert_send_password_title)
-				, getResources().getString(R.string.alert_send_password_message)
-				, null
-				, SignInEdit.this, android.R.string.ok, null, null, null, null);
-		Tracker.sendEvent("ui_action", "recover_password", null, 0, Aircandi.getInstance().getUser());
+		Dialogs.sendPassword(this);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onSignInButtonClick(View view) {
-		doSignIn();
+		signin();
 	}
 
-	private void doSignIn() {
+	@Override
+	public void onAccept() {
 		if (validate()) {
-
-			final String email = mTextEmail.getText().toString().toLowerCase(Locale.US);
-			final String password = mTextPassword.getText().toString();
-
-			new AsyncTask() {
-
-				@Override
-				protected void onPreExecute() {
-					mBusyManager.showBusy(R.string.progress_signing_in);
-				}
-
-				@Override
-				protected Object doInBackground(Object... params) {
-					Thread.currentThread().setName("SignIn");
-					final ModelResult result = EntityManager.getInstance().signin(email, password);
-					return result;
-				}
-
-				@Override
-				protected void onPostExecute(Object response) {
-
-					final ModelResult result = (ModelResult) response;
-					mBusyManager.hideBusy();
-					if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-						final String jsonResponse = (String) result.serviceResponse.data;
-						final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.None, ServiceDataWrapper.True);
-						final User user = serviceData.user;
-						user.session = serviceData.session;
-						Logger.i(this, "User signed in: " + user.name + " (" + user.id + ")");
-
-						Aircandi.getInstance().setUser(user);
-
-						Tracker.startNewSession(Aircandi.getInstance().getUser());
-						Tracker.sendEvent("ui_action", "signin_user", null, 0, Aircandi.getInstance().getUser());
-
-						UI.showToastNotification(getResources().getString(R.string.alert_signed_in)
-								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
-
-						final String jsonUser = HttpService.objectToJson(user);
-						final String jsonSession = HttpService.objectToJson(user.session);
-
-						Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
-						Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, jsonSession);
-						Aircandi.settingsEditor.putString(Constants.SETTING_LAST_EMAIL, user.email);
-						Aircandi.settingsEditor.commit();
-
-						setResult(Constants.RESULT_USER_SIGNED_IN);
-						finish();
-						Animate.doOverridePendingTransition(SignInEdit.this, TransitionType.FormToPage);
-					}
-					else {
-						Routing.serviceError(SignInEdit.this, result.serviceResponse);
-					}
-				}
-			}.execute();
+			signin();
 		}
 	}
 
-	private boolean validate() {
-		if (mTextPassword.getText().length() < 6) {
-			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
+	private void signin() {
+
+		final String email = mEmail.getText().toString().toLowerCase(Locale.US);
+		final String password = mPassword.getText().toString();
+
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				mBusyManager.showBusy(R.string.progress_signing_in);
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("SignIn");
+				final ModelResult result = EntityManager.getInstance().signin(email, password);
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+
+				final ModelResult result = (ModelResult) response;
+				mBusyManager.hideBusy();
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+
+					final String jsonResponse = (String) result.serviceResponse.data;
+					final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.None, ServiceDataWrapper.True);
+					final User user = serviceData.user;
+					user.session = serviceData.session;
+					Logger.i(this, "User signed in: " + user.name + " (" + user.id + ")");
+
+					Aircandi.getInstance().setUser(user);
+
+					Tracker.startNewSession(Aircandi.getInstance().getUser());
+					Tracker.sendEvent("ui_action", "signin_user", null, 0, Aircandi.getInstance().getUser());
+
+					UI.showToastNotification(getResources().getString(R.string.alert_signed_in)
+							+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
+
+					final String jsonUser = HttpService.objectToJson(user);
+					final String jsonSession = HttpService.objectToJson(user.session);
+
+					Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
+					Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, jsonSession);
+					Aircandi.settingsEditor.putString(Constants.SETTING_LAST_EMAIL, user.email);
+					Aircandi.settingsEditor.commit();
+
+					setResult(Constants.RESULT_USER_SIGNED_IN);
+					finish();
+					Animate.doOverridePendingTransition(SignInEdit.this, TransitionType.FormToPage);
+				}
+				else {
+					Routing.serviceError(SignInEdit.this, result.serviceResponse);
+				}
+			}
+		}.execute();
+	}
+
+	@Override
+	protected boolean validate() {
+		if (mPassword.getText().length() < 6) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_password)
 					, null
@@ -180,8 +174,8 @@ public class SignInEdit extends BaseActivity {
 					, null, null, null, null);
 			return false;
 		}
-		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
-			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
+		if (!Utilities.validEmail(mEmail.getText().toString())) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_invalid_email)
 					, null
@@ -201,4 +195,16 @@ public class SignInEdit extends BaseActivity {
 	protected int getLayoutId() {
 		return R.layout.signin_edit;
 	}
+
+	@Override
+	protected void bind() {}
+
+	@Override
+	protected void update() {}
+
+	@Override
+	protected void delete() {}
+
+	@Override
+	protected void insert() {}
 }

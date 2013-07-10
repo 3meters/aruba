@@ -112,8 +112,13 @@
 
     <string name="alert_dirty_save">Save</string>
     <string name="alert_dirty_discard">Discard</string>
+    
+    <string name="alert_dirty_exit_title">Editing</string>
+    <string name="alert_dirty_exit_message">Do you want to save your editing changes?</string>
+    
     <string name="alert_entity_dirty_exit_title">Editing</string>
     <string name="alert_entity_dirty_exit_message">Do you want to save your editing changes?</string>
+    
     <string name="alert_comment_dirty_exit_title">Unposted</string>
     <string name="alert_comment_dirty_exit_message">Do you want to send your comment?</string>
     <string name="alert_feedback_dirty_exit_title">Unposted</string>
@@ -125,6 +130,10 @@
     
     <!-- Alerts: confirm delete -->
 
+    <string name="alert_delete_title">Confirm delete</string>
+    <string name="alert_delete_message_single">Are you sure you want to delete this?</string>
+    <string name="alert_delete_message_multiple">Are you sure you want to delete these?</string>
+    
     <string name="alert_entity_delete_title">Confirm delete</string>
     <string name="alert_place_delete_message_single">Are you sure you want to delete this place?</string>
     <string name="alert_candi_delete_message_single">Are you sure you want to delete this candigram?</string>

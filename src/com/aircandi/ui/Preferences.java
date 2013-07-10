@@ -12,9 +12,10 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.Tracker;
-import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 
 public class Preferences extends SherlockPreferenceActivity {
 
@@ -124,7 +125,7 @@ public class Preferences extends SherlockPreferenceActivity {
 				+ getString(R.string.alert_about_label_code) + " "
 				+ String.valueOf(Aircandi.getVersionCode(this, RadarForm.class)) + System.getProperty("line.separator")
 				+ getString(R.string.dialog_about_copyright);
-		Dialogs.showAlertDialog(R.drawable.ic_launcher
+		Dialogs.alertDialog(R.drawable.ic_launcher
 				, title
 				, message
 				, null
@@ -138,8 +139,7 @@ public class Preferences extends SherlockPreferenceActivity {
 
 	@Override
 	public void onBackPressed() {
-		super.onBackPressed();
-		Animate.doOverridePendingTransition(this, TransitionType.FormToPage);
+		Routing.route(this, Route.Back, TransitionType.FormToPage);
 	}
 
 	@Override

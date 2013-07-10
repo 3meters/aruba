@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
@@ -34,18 +35,17 @@ import com.aircandi.components.BusyManager;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.GCMIntentService;
-import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
+import com.aircandi.components.MenuManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NotificationManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.ui.Preferences;
-import com.aircandi.ui.RadarForm;
 import com.aircandi.ui.SplashForm;
-import com.aircandi.ui.edit.FeedbackEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -68,7 +68,6 @@ public abstract class BaseActivity extends SherlockActivity {
 	protected Boolean				mIsDialog;
 
 	/* Menus */
-	protected MenuItem				mMenuItemRefresh;
 	protected MenuItem				mMenuItemEdit;
 	protected MenuItem				mMenuItemDelete;
 	protected MenuItem				mMenuItemAdd;
@@ -92,8 +91,6 @@ public abstract class BaseActivity extends SherlockActivity {
 			 * We do all this here so the work is finished before subclasses start
 			 * their create/initialize processing.
 			 */
-			unpackIntent();
-
 			mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			mResources = getResources();
 			/*
@@ -139,9 +136,7 @@ public abstract class BaseActivity extends SherlockActivity {
 	@Override
 	public void onBackPressed() {
 		/* Activity is destroyed */
-		setResult(Activity.RESULT_CANCELED);
-		super.onBackPressed();
-		Animate.doOverridePendingTransition(this, TransitionType.PageBack);
+		Routing.route(this, Route.Back, TransitionType.PageBack);
 	}
 
 	@Override
@@ -258,10 +253,6 @@ public abstract class BaseActivity extends SherlockActivity {
 		setTheme(themeId);
 	}
 
-	protected Boolean isDialog() {
-		return false;
-	}
-
 	@SuppressLint("NewApi")
 	private void setDialogSize(Configuration newConfig) {
 
@@ -273,6 +264,10 @@ public abstract class BaseActivity extends SherlockActivity {
 			//			params.width = ImageUtils.getRawPixels(mActivity, width);
 			//			mActivity.getWindow().setAttributes(params);
 		}
+	}
+
+	protected Boolean isDialog() {
+		return false;
 	}
 
 	protected Boolean isTransparent() {
@@ -372,52 +367,36 @@ public abstract class BaseActivity extends SherlockActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Application menu routines (settings)
+	// Menus
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		Intent intent = null;
-
-		switch (menuItem.getItemId()) {
-			case android.R.id.home:
-				onBackPressed();
-				return true;
-			case R.id.home:
-				intent = new Intent(this, RadarForm.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				finish();
-				startActivity(intent);
-				Animate.doOverridePendingTransition(this, TransitionType.PageToPage);
-				return true;
-			case R.id.settings:
-				startActivityForResult(new Intent(this, Preferences.class), Constants.ACTIVITY_PREFERENCES);
-				Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
-				return true;
-			case R.id.signout:
-				Tracker.sendEvent("ui_action", "signout_user", null, 0, Aircandi.getInstance().getUser());
-				signout();
-				return true;
-			case R.id.feedback:
-				final IntentBuilder intentBuilder = new IntentBuilder(this, FeedbackEdit.class);
-				intent = intentBuilder.create();
-				startActivity(intent);
-				Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
-				return true;
-			case R.id.cancel:
-				setResult(Activity.RESULT_CANCELED);
-				finish();
-				Animate.doOverridePendingTransition(this, TransitionType.FormToPage);
-				return true;
-			case R.id.cancel_help:
-				setResult(Activity.RESULT_CANCELED);
-				finish();
-				Animate.doOverridePendingTransition(this, TransitionType.HelpToPage);
-				return true;
-			default:
-				return true;
-		}
+	public boolean onCreateOptionsMenu(Menu menu) {
+		/*
+		 * Android 2.3 or lower: called when user hits the menu button for the first time.
+		 * Android 3.0 or higher: called when activity is first started.
+		 * 
+		 * Behavior might be modified because we are using ABS.
+		 */
+		return MenuManager.onCreateOptionsMenu(this, menu);
 	}
+	
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		/*
+		 * Android 2.3 or lower: called every time the user hits the menu button.
+		 * Android 3.0 or higher: called when invalidateOptionsMenu is called.
+		 * 
+		 * Behavior might be modified because we are using ABS.
+		 */
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem menuItem) {
+		return Routing.route(this, Routing.routeForMenu(menuItem));
+	}
+
 
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
@@ -483,6 +462,7 @@ public abstract class BaseActivity extends SherlockActivity {
 	// --------------------------------------------------------------------------------------------
 	// Inner classes and enums
 	// --------------------------------------------------------------------------------------------
+
 	public enum ServiceOperation {
 		Signin,
 		PasswordChange,

@@ -126,7 +126,7 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name="com.aircandi.ui.PictureForm"
+            android:name="com.aircandi.ui.PhotoForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" >

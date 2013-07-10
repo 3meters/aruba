@@ -184,7 +184,7 @@ public class PlaceForm extends BaseEntityForm {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
@@ -210,7 +210,7 @@ public class PlaceForm extends BaseEntityForm {
 			Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 		}
 		else {
-			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.alert_entity_locked)
 					, null
@@ -226,7 +226,7 @@ public class PlaceForm extends BaseEntityForm {
 			Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 		}
 		else {
-			Dialogs.showAlertDialog(android.R.drawable.ic_dialog_alert
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, mResources.getString(R.string.alert_entity_locked)
 					, null
@@ -443,6 +443,10 @@ public class PlaceForm extends BaseEntityForm {
 		UI.setVisibility(findViewById(R.id.button_tune), canAdd() ? View.VISIBLE : View.GONE);
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Menus
+	// --------------------------------------------------------------------------------------------
+	
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------

@@ -10,13 +10,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.aircandi.Aircandi;
-import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.BeaconsLockedEvent;
 import com.aircandi.components.BusProvider;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.ProximityManager;
@@ -28,8 +26,8 @@ import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityEdit;
-import com.aircandi.utilities.Animate;
-import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 import com.squareup.otto.Subscribe;
 
 public class TuningEdit extends BaseEntityEdit {
@@ -48,55 +46,6 @@ public class TuningEdit extends BaseEntityEdit {
 		mButtonTune = (Button) findViewById(R.id.button_tune);
 		mButtonUntune = (Button) findViewById(R.id.button_untune);
 	}
-
-	// --------------------------------------------------------------------------------------------
-	// Event routines
-	// --------------------------------------------------------------------------------------------
-
-	@SuppressWarnings("ucd")
-	public void onEditButtonClick(View view) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(mEntity.schema)).setEntity(mEntity);
-		startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
-	}
-
-	@SuppressWarnings("ucd")
-	public void onTuneButtonClick(View view) {
-		if (!mTuned) {
-			Tracker.sendEvent("ui_action", "tune_place", null, 0, Aircandi.getInstance().getUser());
-			mUntuning = false;
-			mBusyManager.showBusy(R.string.progress_tuning);
-			if (NetworkManager.getInstance().isWifiEnabled()) {
-				mTuningInProcess = true;
-				enableEvents();
-				ProximityManager.getInstance().scanForWifi(ScanReason.query);
-			}
-			else {
-				tuneProximity();
-			}
-		}
-	}
-
-	@SuppressWarnings("ucd")
-	public void onUntuneButtonClick(View view) {
-		if (!mUntuned) {
-			Tracker.sendEvent("ui_action", "untune_place", null, 0, Aircandi.getInstance().getUser());
-			mUntuning = true;
-			mBusyManager.showBusy(R.string.progress_tuning);
-			if (NetworkManager.getInstance().isWifiEnabled()) {
-				mTuningInProcess = true;
-				enableEvents();
-				ProximityManager.getInstance().scanForWifi(ScanReason.query);
-			}
-			else {
-				tuneProximity();
-			}
-		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Ui routines
-	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected void draw() {
@@ -148,6 +97,53 @@ public class TuningEdit extends BaseEntityEdit {
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Events
+	// --------------------------------------------------------------------------------------------
+
+	@SuppressWarnings("ucd")
+	public void onEditButtonClick(View view) {
+		Routing.route(this, Route.Edit, mEntity);
+	}
+
+	@SuppressWarnings("ucd")
+	public void onTuneButtonClick(View view) {
+		if (!mTuned) {
+			Tracker.sendEvent("ui_action", "tune_place", null, 0, Aircandi.getInstance().getUser());
+			mUntuning = false;
+			mBusyManager.showBusy(R.string.progress_tuning);
+			if (NetworkManager.getInstance().isWifiEnabled()) {
+				mTuningInProcess = true;
+				enableEvents();
+				ProximityManager.getInstance().scanForWifi(ScanReason.query);
+			}
+			else {
+				tuneProximity();
+			}
+		}
+	}
+
+	@SuppressWarnings("ucd")
+	public void onUntuneButtonClick(View view) {
+		if (!mUntuned) {
+			Tracker.sendEvent("ui_action", "untune_place", null, 0, Aircandi.getInstance().getUser());
+			mUntuning = true;
+			mBusyManager.showBusy(R.string.progress_tuning);
+			if (NetworkManager.getInstance().isWifiEnabled()) {
+				mTuningInProcess = true;
+				enableEvents();
+				ProximityManager.getInstance().scanForWifi(ScanReason.query);
+			}
+			else {
+				tuneProximity();
+			}
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Methods
+	// --------------------------------------------------------------------------------------------
+
 	private void toggleStarOn(final Integer starId) {
 		runOnUiThread(new Runnable() {
 
@@ -165,7 +161,7 @@ public class TuningEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Event bus routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@Subscribe
@@ -222,7 +218,7 @@ public class TuningEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Service routines
+	// Services
 	// --------------------------------------------------------------------------------------------
 
 	private void tuneProximity() {

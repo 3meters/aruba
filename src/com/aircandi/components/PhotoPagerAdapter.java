@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 
 import com.aircandi.beta.R;
 import com.aircandi.service.objects.Photo;
-import com.aircandi.ui.PictureForm;
+import com.aircandi.ui.PhotoForm;
 
 public class PhotoPagerAdapter extends PagerAdapter {
 
@@ -40,7 +40,7 @@ public class PhotoPagerAdapter extends PagerAdapter {
 		final Photo photo = mPhotos.get(position);
 		final Integer layoutId = R.layout.temp_photo_detail;
 		View layout = mInflater.inflate(layoutId, null);
-		layout = PictureForm.buildPictureDetail(mContext, photo, layout);
+		layout = PhotoForm.buildPictureDetail(mContext, photo, layout);
 		((ViewPager) collection).addView(layout, 0);
 		return layout;
 	}

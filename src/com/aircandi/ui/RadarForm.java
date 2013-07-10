@@ -20,11 +20,9 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +35,7 @@ import com.aircandi.ScanService;
 import com.aircandi.beta.R;
 import com.aircandi.components.BeaconsLockedEvent;
 import com.aircandi.components.BusProvider;
+import com.aircandi.components.BusyManager;
 import com.aircandi.components.EntitiesChangedEvent;
 import com.aircandi.components.EntitiesForBeaconsFinishedEvent;
 import com.aircandi.components.EntityManager;
@@ -126,7 +125,6 @@ public class RadarForm extends BaseActivity {
 	private Number					mPauseDate;
 
 	private PullToRefreshListView	mList;
-	private View					mAccuracyIndicator;
 	private TextView				mBeaconIndicator;
 	private String					mDebugWifi;
 	private String					mDebugLocation			= "--";
@@ -143,7 +141,7 @@ public class RadarForm extends BaseActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		if (!isFinishing()) {
 			Aircandi.stopwatch4.start("Creating radar");
 			/*
@@ -193,6 +191,9 @@ public class RadarForm extends BaseActivity {
 			}
 		});
 
+		/* Busy */
+		mBusyManager = new BusyManager(this);
+
 		/* Adapter snapshots the items in mEntities */
 		mRadarAdapter = new RadarListAdapter(this, mEntities);
 		mList.getRefreshableView().setAdapter(mRadarAdapter);
@@ -219,7 +220,7 @@ public class RadarForm extends BaseActivity {
 
 		mInitialized = true;
 	}
-	
+
 	private void checkSession() {
 		new AsyncTask() {
 
@@ -390,7 +391,9 @@ public class RadarForm extends BaseActivity {
 					}
 
 					LocationManager.getInstance().setLocationLocked(locationCandidate);
-					updateAccuracyIndicator();
+					if (mBusyManager != null) {
+						mBusyManager.updateAccuracyIndicator();
+					}
 					BusProvider.getInstance().post(new LocationLockedEvent(LocationManager.getInstance().getLocationLocked()));
 
 					if (Aircandi.stopwatch2.isStarted()) {
@@ -555,10 +558,10 @@ public class RadarForm extends BaseActivity {
 						mList.onRefreshComplete();
 
 						if (connectedState == ConnectedState.WalledGarden) {
-							Dialogs.showAlertDialogSimple(RadarForm.this, null, getString(R.string.error_connection_walled_garden));
+							Dialogs.alertDialogSimple(RadarForm.this, null, getString(R.string.error_connection_walled_garden));
 						}
 						else if (connectedState == ConnectedState.None) {
-							Dialogs.showAlertDialogSimple(RadarForm.this, null, getString(R.string.error_connection_none));
+							Dialogs.alertDialogSimple(RadarForm.this, null, getString(R.string.error_connection_none));
 						}
 					}
 				}
@@ -633,48 +636,10 @@ public class RadarForm extends BaseActivity {
 		if (NetworkManager.getInstance().isWifiTethered()
 				|| (!NetworkManager.getInstance().isWifiEnabled() && !Aircandi.usingEmulator)) {
 
-			Dialogs.showWifiAlertDialog(RadarForm.this, NetworkManager.getInstance().isWifiTethered()
+			Dialogs.wifi(RadarForm.this, NetworkManager.getInstance().isWifiTethered()
 					? R.string.alert_wifi_tethered
 					: R.string.alert_wifi_disabled
 					, null);
-		}
-	}
-
-	public void updateAccuracyIndicator() {
-
-		final Location location = LocationManager.getInstance().getLocationLocked();
-
-		if (mAccuracyIndicator != null) {
-
-			runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-
-					int sizeDip = 35;
-
-					if (location != null && location.hasAccuracy()) {
-
-						sizeDip = 35;
-
-						if (location.getAccuracy() <= 100) {
-							sizeDip = 25;
-						}
-						if (location.getAccuracy() <= 50) {
-							sizeDip = 13;
-						}
-						if (location.getAccuracy() <= 30) {
-							sizeDip = 7;
-						}
-						Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));
-					}
-
-					final int sizePixels = UI.getRawPixels(RadarForm.this, sizeDip);
-					final FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(sizePixels, sizePixels, Gravity.CENTER);
-					mAccuracyIndicator.setLayoutParams(layoutParams);
-					mAccuracyIndicator.setBackgroundResource(R.drawable.bg_accuracy_indicator);
-				}
-			});
 		}
 	}
 
@@ -712,7 +677,7 @@ public class RadarForm extends BaseActivity {
 					return;
 				}
 			}
-			Dialogs.showAlertDialog(R.drawable.ic_launcher
+			Dialogs.alertDialog(R.drawable.ic_launcher
 					, getString(R.string.alert_beacons_title)
 					, beaconMessage.toString()
 					, null
@@ -793,11 +758,16 @@ public class RadarForm extends BaseActivity {
 		mBeaconIndicator.setText(mDebugWifi + ":" + mDebugLocation);
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Menus
+	// --------------------------------------------------------------------------------------------	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-
-		/* Beacon indicator */
+		super.onCreateOptionsMenu(menu);		
+		/*
+		 * Setup menu items local to radar.
+		 */
 		mMenuItemBeacons = menu.findItem(R.id.beacons);
 		if (mMenuItemBeacons != null) {
 
@@ -818,15 +788,15 @@ public class RadarForm extends BaseActivity {
 				});
 			}
 		}
-
-		/* Cache refresh menu item for later ui updates */
-		mMenuItemRefresh = menu.findItem(R.id.refresh);
-		if (mMenuItemRefresh != null) {
-			mAccuracyIndicator = mMenuItemRefresh.getActionView().findViewById(R.id.accuracy_indicator);
-			updateAccuracyIndicator();
-		}
-
 		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem menuItem) {
+		/*
+		 * Routing.route return false if it can't handle the menu item.
+		 */
+		return Routing.route(this, Routing.routeForMenu(menuItem));
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -866,7 +836,9 @@ public class RadarForm extends BaseActivity {
 		enableEvents();
 
 		/* Reset the accuracy indicator */
-		updateAccuracyIndicator();
+		if (mBusyManager != null) {
+			mBusyManager.updateAccuracyIndicator();
+		}
 	}
 
 	@Override

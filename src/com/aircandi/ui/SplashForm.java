@@ -145,7 +145,7 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	private void updateRequired() {
-		Dialogs.showUpdateDialog(this);
+		Dialogs.update(this);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -219,7 +219,7 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")

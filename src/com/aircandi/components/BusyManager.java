@@ -2,12 +2,16 @@ package com.aircandi.components;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.location.Location;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.BadTokenException;
+import android.widget.FrameLayout;
 
 import com.aircandi.Aircandi;
 import com.aircandi.beta.R;
+import com.aircandi.utilities.UI;
 
 public class BusyManager {
 
@@ -15,9 +19,59 @@ public class BusyManager {
 	private ProgressDialog	mProgressDialog;
 	private View			mRefreshImage;
 	private View			mRefreshProgress;
+	private View			mAccuracyIndicator;
 
 	public BusyManager(Activity activity) {
 		mActivity = activity;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Location accuracy
+	// --------------------------------------------------------------------------------------------
+
+	public void updateAccuracyIndicator() {
+
+		if (mAccuracyIndicator != null) {
+
+			final Location location = LocationManager.getInstance().getLocationLocked();
+			mActivity.runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+
+					int sizeDip = 35;
+
+					if (location != null && location.hasAccuracy()) {
+
+						sizeDip = 35;
+
+						if (location.getAccuracy() <= 100) {
+							sizeDip = 25;
+						}
+						if (location.getAccuracy() <= 50) {
+							sizeDip = 13;
+						}
+						if (location.getAccuracy() <= 30) {
+							sizeDip = 7;
+						}
+						Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));
+					}
+
+					final int sizePixels = UI.getRawPixels(mActivity, sizeDip);
+					final FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(sizePixels, sizePixels, Gravity.CENTER);
+					mAccuracyIndicator.setLayoutParams(layoutParams);
+					mAccuracyIndicator.setBackgroundResource(R.drawable.bg_accuracy_indicator);
+				}
+			});
+		}
+	}
+
+	public View getAccuracyIndicator() {
+		return mAccuracyIndicator;
+	}
+
+	public void setAccuracyIndicator(View accuracyIndicator) {
+		mAccuracyIndicator = accuracyIndicator;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -134,4 +188,5 @@ public class BusyManager {
 	public void setRefreshProgress(View refreshProgress) {
 		mRefreshProgress = refreshProgress;
 	}
+
 }

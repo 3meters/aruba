@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -27,6 +28,16 @@ import com.aircandi.utilities.UI;
 
 public class ApplinkListEdit extends BaseEntityListEdit {
 
+	private Entity	mParent;
+
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+		if (mParentId != null) {
+			mParent = EntityManager.getEntity(mParentId);
+		}
+	}
+
 	@Override
 	protected void bind() {
 		super.bind();
@@ -35,17 +46,16 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
 	public void onSuggestLinksButtonClick(View view) {
-		/* Go get applink suggestions again */
 		loadApplinkSuggestions(mEntities, true, (Place) mParent);
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Methods
+	// Services
 	// --------------------------------------------------------------------------------------------
 
 	private void loadApplinkSuggestions(final List<Entity> applinks, final Boolean autoInsert, final Place entity) {
@@ -99,6 +109,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 		}.execute();
 	}
 
+	
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------

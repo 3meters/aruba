@@ -138,7 +138,7 @@ public class UriPicker extends BaseActivity {
 		}
 
 		if (!Utilities.validWebUri(linkUri)) {
-			Dialogs.showAlertDialogSimple(this, null, getString(R.string.error_weburi_invalid));
+			Dialogs.alertDialogSimple(this, null, getString(R.string.error_weburi_invalid));
 		}
 		else {
 			final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
@@ -167,7 +167,7 @@ public class UriPicker extends BaseActivity {
 			}
 
 			if (!Utilities.validWebUri(linkUri)) {
-				Dialogs.showAlertDialogSimple(this, null, getString(R.string.error_weburi_invalid));
+				Dialogs.alertDialogSimple(this, null, getString(R.string.error_weburi_invalid));
 				return false;
 			}
 		}
@@ -271,7 +271,7 @@ public class UriPicker extends BaseActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------

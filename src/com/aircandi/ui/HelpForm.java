@@ -10,6 +10,8 @@ import com.aircandi.beta.R;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 
 public class HelpForm extends BaseActivity {
 
@@ -32,7 +34,7 @@ public class HelpForm extends BaseActivity {
 	private void draw() {}
 
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
@@ -45,9 +47,12 @@ public class HelpForm extends BaseActivity {
 	@Override
 	public void onBackPressed() {
 		updateRunOnce();
-		finish();
-		Animate.doOverridePendingTransition(this, TransitionType.HelpToPage);
+		Routing.route(this, Route.Back, TransitionType.HelpToPage);
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Menus
+	// --------------------------------------------------------------------------------------------
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -64,20 +69,20 @@ public class HelpForm extends BaseActivity {
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
-	
+
 	private void updateRunOnce() {
 		if (mHelpResId == R.layout.radar_help) {
 			final Boolean runOnce = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, false);
 			if (!runOnce) {
 				Aircandi.settingsEditor.putBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, true);
-				Aircandi.settingsEditor.commit();					
+				Aircandi.settingsEditor.commit();
 			}
 		}
 		else if (mHelpResId == R.layout.place_help) {
 			final Boolean runOnce = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_CANDI_PLACE, false);
 			if (!runOnce) {
 				Aircandi.settingsEditor.putBoolean(Constants.SETTING_RUN_ONCE_HELP_CANDI_PLACE, true);
-				Aircandi.settingsEditor.commit();					
+				Aircandi.settingsEditor.commit();
 			}
 		}
 	}

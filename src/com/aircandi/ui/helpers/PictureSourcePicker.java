@@ -124,7 +124,7 @@ public class PictureSourcePicker extends BaseActivity implements OnItemClickList
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@Override

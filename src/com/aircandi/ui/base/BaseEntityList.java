@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
@@ -17,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -63,7 +60,7 @@ import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
 
-public abstract class BaseEntityList extends BaseActivity {
+public abstract class BaseEntityList extends BaseBrowse {
 
 	private ListView				mListView;
 
@@ -78,8 +75,8 @@ public abstract class BaseEntityList extends BaseActivity {
 	private Number					mEntityModelActivityDate;
 	private User					mEntityModelUser;
 
+	/* Inputs */
 	public String					mEntityId;
-
 	private ListMode				mListMode;
 	private String					mListSchema;
 	private Integer					mListItemResId;
@@ -88,39 +85,8 @@ public abstract class BaseEntityList extends BaseActivity {
 	protected static LayoutInflater	mInflater;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-		if (!isFinishing()) {
-			initialize();
-			configureActionBar();
-			bind(false);
-		}
-	}
-
-	private void initialize() {
-
-		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-		mListView = (ListView) findViewById(R.id.list_entities);
-		mButtonNewEntity = (Button) findViewById(R.id.button_new_entity);
-		mButtonNewEntity.setText(getString(R.string.entity_button_entity_first) + " " + mListSchema);
-		
-		if (mListSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-			mButtonNewEntity.setText(R.string.entity_button_comment_first);
-		}
-		else if (mListSchema.equals(Constants.SCHEMA_ENTITY_POST)) {
-			mButtonNewEntity.setText(R.string.entity_button_post_first);
-		}
-		else if (mListSchema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-			mButtonNewEntity.setText(R.string.entity_button_applink_first);
-		}
-		
-		mBusyManager = new BusyManager(this);		
-	}
-
-	@Override
 	protected void unpackIntent() {
+		super.unpackIntent();
 
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -132,7 +98,29 @@ public abstract class BaseEntityList extends BaseActivity {
 		}
 	}
 
-	private void configureActionBar() {
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+
+		mListView = (ListView) findViewById(R.id.list_entities);
+		mButtonNewEntity = (Button) findViewById(R.id.button_new_entity);
+		mButtonNewEntity.setText(getString(R.string.entity_button_entity_first) + " " + mListSchema);
+
+		if (mListSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			mButtonNewEntity.setText(R.string.entity_button_comment_first);
+		}
+		else if (mListSchema.equals(Constants.SCHEMA_ENTITY_POST)) {
+			mButtonNewEntity.setText(R.string.entity_button_post_first);
+		}
+		else if (mListSchema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+			mButtonNewEntity.setText(R.string.entity_button_applink_first);
+		}
+
+		mBusyManager = new BusyManager(this);
+	}
+
+	@Override
+	protected void configureActionBar() {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
@@ -152,7 +140,8 @@ public abstract class BaseEntityList extends BaseActivity {
 		}
 	}
 
-	private void bind(final Boolean refresh) {
+	@Override
+	protected void bind(final Boolean refresh) {
 
 		new AsyncTask() {
 
@@ -186,7 +175,7 @@ public abstract class BaseEntityList extends BaseActivity {
 						mEntities = (List<Entity>) result.data;
 						mButtonNewEntity.setVisibility(View.GONE);
 						Collections.sort(mEntities, new Entity.SortEntitiesByModifiedDate());
-						mListView.setAdapter(new EndlessEntityAdapter(mEntities));
+						mListView.setAdapter(new EndlessEntityAdapter(mEntities)); // draw happens in the adapter
 					}
 
 					mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
@@ -238,8 +227,185 @@ public abstract class BaseEntityList extends BaseActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// Events
+	// --------------------------------------------------------------------------------------------
+	
+	public void onNewEntityButtonClick(View view) {
+		onAdd();
+	}
+
+	@Override
+	public void onAdd() {
+		/*
+		 * We assume the new entity button wouldn't be visible if the
+		 * entity is locked.
+		 */
+		IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(mListSchema))
+				.setEntitySchema(mListSchema)
+				.setEntityParentId(mEntityId);
+
+		if (mListSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			intentBuilder.setClass(CommentEdit.class);
+		}
+
+		startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+	}
+
+	@SuppressWarnings("ucd")
+	public void onListItemClick(View view) {
+		Logger.v(this, "List item clicked");
+		final Entity entity = (Entity) ((ViewHolder) view.getTag()).data;
+		if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+			Applink applink = (Applink) entity;
+			if (applink.type.equals(Constants.TYPE_APPLINK_TWITTER)) {
+				AndroidManager.getInstance().callTwitterActivity(this, applink.appId);
+			}
+			else if (applink.type.equals(Constants.TYPE_APPLINK_FACEBOOK)) {
+				AndroidManager.getInstance().callFacebookActivity(this, applink.appId);
+			}
+			else if (applink.type.equals(Constants.TYPE_APPLINK_WEBSITE)) {
+				AndroidManager.getInstance().callBrowserActivity(this, applink.appId);
+			}
+		}
+		else {
+			showCandiFormForEntity(entity.id, BaseEntityForm.viewFormBySchema(entity.schema));
+		}
+	}
+
+	public void showCandiFormForEntity(String entityId, Class<?> clazz) {
+
+		final IntentBuilder intentBuilder = new IntentBuilder(this, clazz)
+				.setEntityId(entityId)
+				.setEntitySchema(ServiceEntry.getSchemaFromId(entityId));
+
+		Entity entity = EntityManager.getEntity(entityId);
+		if (entity != null) {
+			intentBuilder.setEntitySchema(entity.schema);
+			if (entity.toId != null) {
+				intentBuilder.setEntityParentId(entity.getParent().id);
+			}
+		}
+
+		final Intent intent = intentBuilder.create();
+
+		startActivity(intent);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToPage);
+	}
+
+	@SuppressWarnings("ucd")
+	public void onCommentsClick(View view) {
+
+		final Entity entity = (Entity) view.getTag();
+		final IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityList.class)
+				.setListMode(ListMode.EntitiesForEntity)
+				.setEntityId(entity.id)
+				.setListSchema(Constants.SCHEMA_ENTITY_COMMENT)
+				.setListNewEnabled(true)
+				.setListItemResId(R.layout.temp_listitem_comment);
+		final Intent intent = intentBuilder.create();
+		startActivity(intent);
+		Animate.doOverridePendingTransition(this, TransitionType.PageToPage);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Events
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void draw() {}
+	
+	// --------------------------------------------------------------------------------------------
+	// Menus
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+
+		/*
+		 * Setup menu items that are common to entity list browsing.
+		 */
+		MenuItem menuItem = menu.findItem(R.id.add);
+		menuItem.setVisible(false);
+		if (mListNewEnabled) {
+			menuItem.setTitle(R.string.menu_add_entity_item);
+			if (mListSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+				menuItem.setTitle(R.string.menu_add_comment_item);
+			}
+			else if (mListSchema.equals(Constants.SCHEMA_ENTITY_POST)) {
+				menuItem.setTitle(R.string.menu_add_post_item);
+			}
+			menuItem.setVisible(true);
+		}
+
+		MenuItem refresh = menu.findItem(R.id.refresh);
+		if (refresh != null) {
+			if (mBusyManager != null) {
+				mBusyManager.setAccuracyIndicator(refresh.getActionView().findViewById(R.id.accuracy_indicator));
+				mBusyManager.setRefreshImage(refresh.getActionView().findViewById(R.id.refresh_image));
+				mBusyManager.setRefreshProgress(refresh.getActionView().findViewById(R.id.refresh_progress));
+				mBusyManager.updateAccuracyIndicator();
+			}
+
+			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					doRefresh();
+				}
+			});
+		}
+
+		return true;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle routines
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		/*
+		 * We have to be pretty aggressive about refreshing the UI because
+		 * there are lots of actions that could have happened while this activity
+		 * was stopped that change what the user would expect to see.
+		 * 
+		 * - Entity deleted or modified
+		 * - Entity children modified
+		 * - New comments
+		 * - Change in user which effects which candi and UI should be visible.
+		 * - User signed out.
+		 * - User profile could have been updated and we don't catch that.
+		 */
+		if (!isFinishing() && mEntityModelUser != null) {
+			if (!Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)
+					|| ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()
+					|| EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+				invalidateOptionsMenu();
+				bind(true);
+			}
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Misc routines
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected int getLayoutId() {
+		return R.layout.entity_list;
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// Inner classes/enums
 	// --------------------------------------------------------------------------------------------
+
+	public static enum ListMode {
+		EntitiesForEntity,
+		EntitiesByOwner,
+		EntitiesWatchedByUser,
+	}
 
 	private class EndlessEntityAdapter extends EndlessAdapter {
 
@@ -516,197 +682,4 @@ public abstract class BaseEntityList extends BaseActivity {
 		public Button		buttonComments;
 	}
 
-	// --------------------------------------------------------------------------------------------
-	// Event routines
-	// --------------------------------------------------------------------------------------------
-
-	public void onNewEntityButtonClick(View view) {
-		doNewEntity();
-	}
-
-	public void doNewEntity() {
-		/*
-		 * We assume the new entity button wouldn't be visible if the
-		 * entity is locked.
-		 */
-		IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(mListSchema))
-				.setEntitySchema(mListSchema)
-				.setEntityParentId(mEntityId);
-
-		if (mListSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-			intentBuilder.setClass(CommentEdit.class);
-		}
-
-		startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
-	}
-
-	@SuppressWarnings("ucd")
-	public void onListItemClick(View view) {
-		Logger.v(this, "List item clicked");
-		final Entity entity = (Entity) ((ViewHolder) view.getTag()).data;
-		if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-			Applink applink = (Applink) entity;
-			if (applink.type.equals(Constants.TYPE_APPLINK_TWITTER)) {
-				AndroidManager.getInstance().callTwitterActivity(this, applink.appId);
-			}
-			else if (applink.type.equals(Constants.TYPE_APPLINK_FACEBOOK)) {
-				AndroidManager.getInstance().callFacebookActivity(this, applink.appId);
-			}
-			else if (applink.type.equals(Constants.TYPE_APPLINK_WEBSITE)) {
-				AndroidManager.getInstance().callBrowserActivity(this, applink.appId);
-			}
-		}
-		else {
-			showCandiFormForEntity(entity.id, BaseEntityForm.viewFormBySchema(entity.schema));
-		}
-	}
-
-	public void showCandiFormForEntity(String entityId, Class<?> clazz) {
-
-		final IntentBuilder intentBuilder = new IntentBuilder(this, clazz)
-				.setEntityId(entityId)
-				.setEntitySchema(ServiceEntry.getSchemaFromId(entityId));
-
-		Entity entity = EntityManager.getEntity(entityId);
-		if (entity != null) {
-			intentBuilder.setEntitySchema(entity.schema);
-			if (entity.toId != null) {
-				intentBuilder.setEntityParentId(entity.getParent().id);
-			}
-		}
-
-		final Intent intent = intentBuilder.create();
-
-		startActivity(intent);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToPage);
-	}
-
-	@SuppressWarnings("ucd")
-	public void onCommentsClick(View view) {
-
-		final Entity entity = (Entity) view.getTag();
-		final IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityList.class)
-				.setListMode(ListMode.EntitiesForEntity)
-				.setEntityId(entity.id)
-				.setListSchema(Constants.SCHEMA_ENTITY_COMMENT)
-				.setListNewEnabled(true)
-				.setListItemResId(R.layout.temp_listitem_comment);
-		final Intent intent = intentBuilder.create();
-		startActivity(intent);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToPage);
-	}
-
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-
-		if (requestCode == Constants.ACTIVITY_SIGNIN) {
-			if (resultCode == Activity.RESULT_CANCELED) {
-				setResult(resultCode);
-				finish();
-			}
-			else {
-				initialize();
-				bind(true);
-			}
-		}
-		else {
-			super.onActivityResult(requestCode, resultCode, intent);
-		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Application menu routines (settings)
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-
-		MenuItem menuItem = menu.findItem(R.id.add_entity);
-		menuItem.setVisible(false);
-		if (mListNewEnabled) {
-			menuItem.setTitle(R.string.menu_add_entity_item);
-			if (mListSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-				menuItem.setTitle(R.string.menu_add_comment_item);
-			}
-			else if (mListSchema.equals(Constants.SCHEMA_ENTITY_POST)) {
-				menuItem.setTitle(R.string.menu_add_post_item);
-			}
-			menuItem.setVisible(true);
-		}
-		
-		/* Cache refresh menu item for later ui updates */
-		mMenuItemRefresh = menu.findItem(R.id.refresh);
-		if (mMenuItemRefresh != null) {
-			if (mBusyManager != null) {
-				mBusyManager.setRefreshImage(mMenuItemRefresh.getActionView().findViewById(R.id.refresh_image));
-				mBusyManager.setRefreshProgress(mMenuItemRefresh.getActionView().findViewById(R.id.refresh_progress));
-			}
-			mMenuItemRefresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					doRefresh();
-				}
-			});
-		}
-		
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.add_entity) {
-			doNewEntity();
-			return true;
-		}
-
-		/* In case we add general menu items later */
-		super.onOptionsItemSelected(item);
-		return true;
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Lifecycle routines
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		/*
-		 * We have to be pretty aggressive about refreshing the UI because
-		 * there are lots of actions that could have happened while this activity
-		 * was stopped that change what the user would expect to see.
-		 * 
-		 * - Entity deleted or modified
-		 * - Entity children modified
-		 * - New comments
-		 * - Change in user which effects which candi and UI should be visible.
-		 * - User signed out.
-		 * - User profile could have been updated and we don't catch that.
-		 */
-		if (!isFinishing() && mEntityModelUser != null) {
-			if (!Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)
-					|| ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()
-					|| EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
-				invalidateOptionsMenu();
-				bind(true);
-			}
-		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Misc routines
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	protected int getLayoutId() {
-		return R.layout.entity_list;
-	}
-
-	public static enum ListMode {
-		EntitiesForEntity,
-		EntitiesByOwner,
-		EntitiesWatchedByUser,
-	}
 }

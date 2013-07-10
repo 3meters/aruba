@@ -58,7 +58,7 @@ public class TemplatePicker extends BaseActivity implements OnItemClickListener 
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@Override
