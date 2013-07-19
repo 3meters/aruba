@@ -34,7 +34,7 @@
                     android:layout_marginBottom="10dp"
                     android:layout_weight="0" >
 
-                    <com.aircandi.ui.widgets.WebImageView
+                    <com.aircandi.ui.widgets.AirImageView
                         android:id="@+id/photo"
                         style="@style/picture_framed"
                         android:layout_width="@dimen/image_large"

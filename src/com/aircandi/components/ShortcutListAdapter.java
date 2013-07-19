@@ -11,22 +11,21 @@ import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.aircandi.beta.R;
-import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Shortcut;
-import com.aircandi.ui.widgets.WebImageView;
+import com.aircandi.ui.widgets.AirImageView;
+import com.aircandi.utilities.UI;
 
 public class ShortcutListAdapter extends ArrayAdapter<Shortcut> implements Filterable {
 
 	private final LayoutInflater	mInflater;
-	private Integer					mItemLayoutId	= R.layout.temp_listitem_applink_list_edit;
+	private Integer					mItemLayoutId	= R.layout.temp_listitem_applink_edit;
 	private final List<Shortcut>	mListItems;
 
 	public ShortcutListAdapter(Context context, List<Shortcut> shortcuts, Integer itemLayoutId) {
 		super(context, 0, shortcuts);
 
 		mListItems = shortcuts;
-		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mInflater = LayoutInflater.from(context);
 
 		if (itemLayoutId != null) {
 			mItemLayoutId = itemLayoutId;
@@ -42,7 +41,7 @@ public class ShortcutListAdapter extends ArrayAdapter<Shortcut> implements Filte
 		if (view == null) {
 			view = mInflater.inflate(mItemLayoutId, null);
 			holder = new ViewHolder();
-			holder.photo = (WebImageView) view.findViewById(R.id.photo);
+			holder.photoView = (AirImageView) view.findViewById(R.id.photo);
 			holder.name = (TextView) view.findViewById(R.id.name);
 			view.setTag(holder);
 		}
@@ -59,22 +58,9 @@ public class ShortcutListAdapter extends ArrayAdapter<Shortcut> implements Filte
 				setVisibility(holder.name, View.VISIBLE);
 			}
 
-			if (holder.photo != null) {
-				holder.photo.setTag(shortcut);
-				/*
-				 * The WebImageView sets the current bitmap ref being held
-				 * by the internal image view to null before doing the work
-				 * to satisfy the new request.
-				 */
-				final String photoUri = shortcut.photo.getUri();
-
-				/* Don't do anything if the image is already set to the one we want */
-				if (holder.photo.getImageUri() == null || !holder.photo.getImageUri().equals(photoUri)) {
-
-					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photo).setImageUri(photoUri);
-					final BitmapRequest imageRequest = builder.create();
-					holder.photo.setBitmapRequest(imageRequest);
-				}
+			if (holder.photoView != null) {
+				holder.photoView.setTag(shortcut);
+				UI.drawPhoto(holder.photoView, shortcut.getPhoto());
 			}
 		}
 		return view;
@@ -107,7 +93,7 @@ public class ShortcutListAdapter extends ArrayAdapter<Shortcut> implements Filte
 	}
 
 	private static class ViewHolder {
-		private WebImageView	photo;
+		private AirImageView	photoView;
 		private TextView		name;
 	}
 }

@@ -3,6 +3,7 @@
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
     android:paddingBottom="5dp"
     android:paddingLeft="10dp"
     android:paddingRight="10dp" >
@@ -48,7 +49,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <com.aircandi.ui.widgets.WebImageView
+    <com.aircandi.ui.widgets.AirImageView
         android:id="@+id/photo"
         android:layout_width="@dimen/image_extra_small"
         android:layout_height="@dimen/image_extra_small"

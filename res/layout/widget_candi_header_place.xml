@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta" >
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context="com.aircandi.ui.PlaceForm" >
 
     <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/candi_form_address"
@@ -21,29 +25,62 @@
             style="@style/form_button"
             android:layout_width="@dimen/form_button_width_min"
             android:layout_height="@dimen/form_button_height"
-            aircandi:drawable="?attr/iconTune"
             android:layout_marginRight="3dp"
-            aircandi:label="@string/candi_button_tune"
+            aircandi:drawable="?attr/iconTune"
+            aircandi:label="@string/button_tune"
+            aircandi:layout="@layout/widget_combo_button"
             android:minWidth="@dimen/form_button_width_min"
             android:onClick="onTuneButtonClick" />
-        <com.aircandi.ui.widgets.ComboButton
-            android:id="@+id/button_like"
-            style="@style/form_button"
-            android:layout_width="@dimen/form_button_height"
-            android:layout_height="@dimen/form_button_height"
-            android:layout_marginRight="3dp"
-            aircandi:drawable="?attr/iconLike"
-            android:minWidth="@dimen/form_button_height"
-            android:onClick="onLikeButtonClick" />
 
-        <com.aircandi.ui.widgets.ComboButton
-            android:id="@+id/button_watch"
-            style="@style/form_button"
-            android:layout_width="@dimen/form_button_height"
+        <LinearLayout
+            android:id="@+id/button_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <com.aircandi.ui.widgets.ComboButton
+                android:id="@+id/button_like"
+                style="@style/form_button"
+                android:layout_width="@dimen/form_button_height"
+                android:layout_height="@dimen/form_button_height"
+                android:layout_marginRight="3dp"
+                aircandi:drawable="?attr/iconLike"
+                aircandi:layout="@layout/widget_combo_button_no_text"
+                android:minWidth="@dimen/form_button_height"
+                android:onClick="onLikeButtonClick" />
+
+            <com.aircandi.ui.widgets.ComboButton
+                android:id="@+id/button_watch"
+                style="@style/form_button"
+                android:layout_width="@dimen/form_button_height"
+                android:layout_height="@dimen/form_button_height"
+                aircandi:drawable="?attr/iconWatch"
+                aircandi:layout="@layout/widget_combo_button_no_text"
+                android:minWidth="@dimen/form_button_height"
+                android:onClick="onWatchButtonClick" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/form_button_height"
-            aircandi:drawable="?attr/iconWatch"
-            android:minWidth="@dimen/form_button_height"
-            android:onClick="onWatchButtonClick" />
+            android:layout_marginLeft="8dp"
+            android:gravity="center_vertical"
+            android:orientation="vertical" >
+
+            <com.aircandi.ui.widgets.AirTextView
+                android:id="@+id/like_stats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dummy_like_stat"
+                android:textAppearance="@style/app_text_appearance_tiny" />
+
+            <com.aircandi.ui.widgets.AirTextView
+                android:id="@+id/watching_stats"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dummy_watch_stat"
+                android:textAppearance="@style/app_text_appearance_tiny" />
+        </LinearLayout>
     </LinearLayout>
 
     <com.aircandi.ui.widgets.SectionLayout

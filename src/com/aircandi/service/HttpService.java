@@ -252,7 +252,7 @@ public class HttpService {
 		while (true) {
 
 			try {
-				
+
 				/* Always pre-flight our connection */
 				ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
 
@@ -287,13 +287,13 @@ public class HttpService {
 				if (stopwatch != null) {
 					stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": connection validation completed");
 				}
-				
+
 				httpResponse = mHttpClient.execute(httpRequest);
 
 				if (stopwatch != null) {
 					stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": request execute completed");
 				}
-				
+
 				if (isRequestSuccessful(httpResponse)) {
 					/*
 					 * Any 2.XX status code is considered success.
@@ -321,7 +321,7 @@ public class HttpService {
 					if (stopwatch != null) {
 						stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": successful response processing completed");
 					}
-					
+
 					return response;
 				}
 				else if (isTemporaryRedirect(httpResponse)) {
@@ -334,7 +334,7 @@ public class HttpService {
 					Logger.d(this, "Redirecting to: " + redirectedLocation);
 					URI redirectedUri = URI.create(redirectedLocation);
 					httpRequest.setURI(redirectedUri);
-					
+
 					if (stopwatch != null) {
 						stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": starting temp redirect");
 					}
@@ -382,7 +382,7 @@ public class HttpService {
 						}
 						throw proxibaseException;
 					}
-					
+
 					if (stopwatch != null) {
 						stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": failure, retrying");
 					}
@@ -545,11 +545,11 @@ public class HttpService {
 		}
 
 		httpRequest.setURI(uriFromString(uriString));
-		
+
 		if (stopwatch != null) {
 			stopwatch.segmentTime("Http service: request construction complete");
 		}
-		
+
 		return httpRequest;
 	}
 
@@ -1078,7 +1078,8 @@ public class HttpService {
 					list.add(AirLocation.setPropertiesFromMap(new AirLocation(), (HashMap) map, nameMapping));
 				}
 				else if (objectType == ObjectType.AirNotification) {
-					list.add(AirNotification.setPropertiesFromMap(new AirNotification(), (HashMap) map, nameMapping));
+					AirNotification notification = AirNotification.setPropertiesFromMap(new AirNotification(), (HashMap) map, nameMapping);
+					list.add(notification);
 				}
 				else if (objectType == ObjectType.Link) {
 					list.add(Link.setPropertiesFromMap(new Link(), (HashMap) map, nameMapping));
@@ -1133,9 +1134,12 @@ public class HttpService {
 		 * 2. excludeNulls parameter: forces exclusion even if updateScope = Object.
 		 */
 		Boolean excludeNulls = (excludeNullsProposed == ExcludeNulls.True);
-		if (((ServiceObject) object).updateScope == UpdateScope.Object) {
-			excludeNulls = false;
+		try {
+			if (((ServiceObject) object).updateScope == UpdateScope.Object) {
+				excludeNulls = false;
+			}
 		}
+		catch (Exception e) {}
 
 		Class<?> cls = object.getClass();
 

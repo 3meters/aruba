@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="2dp"
             android:onClick="onMoreButtonClick"
-            android:text="@string/candi_button_more" />
+            android:text="@string/button_more" />
     </FrameLayout>
 
     <FrameLayout

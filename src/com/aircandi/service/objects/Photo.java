@@ -34,6 +34,10 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	public String				source;
 	@Expose
 	public Number				createdDate;
+	@Expose(serialize = false, deserialize = true)
+	public Boolean				colorize			= false;
+	@Expose(serialize = false, deserialize = true)
+	public String				colorizeKey;
 
 	/* Only comes from foursquare */
 	@Expose(serialize = false, deserialize = true)
@@ -41,6 +45,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 
 	/* client only */
 	public String				name;
+	public Boolean				usingDefault = false;
 
 	/* Used to stash temp bitmaps. Always access using set/getBitmap() */
 	protected String			bitmapKey;
@@ -81,6 +86,9 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		photo.source = (String) map.get("source");
 		photo.createdDate = (Number) map.get("createdDate");
 		photo.name = (String) map.get("name");
+		photo.colorize = (Boolean) map.get("colorize");
+		photo.colorizeKey = (String) map.get("colorizeKey");
+		photo.usingDefault = (Boolean) map.get("usingDefault");
 		photo.bitmapKey = (String) map.get("bitmapKey");
 		photo.bitmapLocalOnly = (Boolean) map.get("bitmapLocalOnly");
 

@@ -14,29 +14,31 @@ import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
+import com.aircandi.components.MessageEvent;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequestBuilder;
+import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.base.BaseEntityForm;
+import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.UserView;
-import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
+import com.squareup.otto.Subscribe;
 
 public class PostForm extends BaseEntityForm {
 
 	@Override
-	protected void bind(final Boolean refreshProposed) {
+	protected void databind(final Boolean refreshProposed) {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
@@ -76,6 +78,9 @@ public class PostForm extends BaseEntityForm {
 						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 						mActionBar.setTitle(mEntity.name);
+						if (mMenuItemEdit != null) {
+							mMenuItemEdit.setVisible(canEdit());
+						}
 						draw();
 					}
 				}
@@ -89,15 +94,32 @@ public class PostForm extends BaseEntityForm {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// UI routines
+	// Events
+	// --------------------------------------------------------------------------------------------
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onMessage(final MessageEvent event) {
+		/*
+		 * Refresh the form because something new has been added to it
+		 * like a comment or post.
+		 */
+		if (mEntityId.equals(event.notification.entity.toId)) {
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					onRefresh();
+				}
+			});
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// UI
 	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected void draw() {
-		drawForm();
-	}
-
-	private void drawForm() {
 		/*
 		 * For now, we assume that the candi form isn't recycled.
 		 * 
@@ -108,7 +130,7 @@ public class PostForm extends BaseEntityForm {
 		 * - Header views are visible by default
 		 */
 		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);
-		final WebImageView image = (WebImageView) findViewById(R.id.photo);
+		final AirImageView photoView = (AirImageView) findViewById(R.id.photo);
 		final TextView name = (TextView) findViewById(R.id.name);
 		final TextView subtitle = (TextView) findViewById(R.id.subtitle);
 
@@ -120,27 +142,17 @@ public class PostForm extends BaseEntityForm {
 			/*
 			 * This is a place entity with a fancy image widget
 			 */
-			candiView.bindToPlace((Place) mEntity);
+			candiView.databind((Place) mEntity);
 		}
 		else {
-			UI.setVisibility(image, View.GONE);
-			if (image != null) {
-				final String photoUri = mEntity.getPhotoUri();
-				if (photoUri != null) {
-					if (mEntity.creator == null || !photoUri.equals(mEntity.creator.getPhotoUri())) {
-
-						final BitmapRequestBuilder builder = new BitmapRequestBuilder(image).setImageUri(photoUri);
-						final BitmapRequest imageRequest = builder.create();
-
-						image.setBitmapRequest(imageRequest);
-						image.setClickable(false);
-
-						if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_POST)) {
-							image.setClickable(true);
-						}
-						UI.setVisibility(image, View.VISIBLE);
-					}
+			UI.setVisibility(photoView, View.GONE);
+			if (photoView != null) {
+				Photo photo = mEntity.getPhoto();
+				UI.drawPhoto(photoView, photo);
+				if (photo.usingDefault == null || !photo.usingDefault) {
+					photoView.setClickable(true);
 				}
+				UI.setVisibility(photoView, View.VISIBLE);
 			}
 
 			name.setText(null);
@@ -169,32 +181,49 @@ public class PostForm extends BaseEntityForm {
 			UI.setVisibility(findViewById(R.id.section_description), View.VISIBLE);
 		}
 
+		/* Stats */
+
+		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
+		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
+		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
+		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
+
+		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
+		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
+		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
+		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
+
+		/* Shortcuts */
+
 		/* Clear shortcut holder */
 		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();
 
 		/* Synthetic applink shortcuts */
-		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, null, Direction.in, true);
-		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, true);
+		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true,
+				R.layout.temp_listitem_applink);
+		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
 		if (shortcuts.size() > 0) {
 			drawShortcuts(shortcuts
 					, settings
-					, R.string.candi_section_shortcuts_place
-					, R.string.candi_section_links_more
-					, mResources.getInteger(R.integer.candi_flow_limit)
+					, R.string.section_place_shortcuts_applinks
+					, R.string.section_links_more
+					, mResources.getInteger(R.integer.shortcuts_flow_limit)
+					, R.id.shortcut_holder
 					, R.layout.temp_place_switchboard_item);
 		}
 
 		/* Service applink shortcuts */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, null, Direction.in, false);
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, true);
+		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true, R.layout.temp_listitem_applink);
+		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
 		Collections.sort(shortcuts, new Shortcut.SortByPosition());
 
 		if (shortcuts.size() > 0) {
 			drawShortcuts(shortcuts
 					, settings
 					, null
-					, null
-					, mResources.getInteger(R.integer.candi_flow_limit)
+					, R.string.section_links_more
+					, mResources.getInteger(R.integer.shortcuts_flow_limit)
+					, R.id.shortcut_holder
 					, R.layout.temp_place_switchboard_item);
 		}
 
@@ -211,7 +240,7 @@ public class PostForm extends BaseEntityForm {
 			if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 				if (((Place) mEntity).getProvider().type.equals("aircandi")) {
 					user.setLabel(getString(R.string.candi_label_user_created_by));
-					user.bindToUser(mEntity.creator, mEntity.createdDate.longValue(), mEntity.locked);
+					user.databind(mEntity.creator, mEntity.createdDate.longValue(), mEntity.locked);
 					UI.setVisibility(user, View.VISIBLE);
 					user = user_two;
 				}
@@ -223,7 +252,7 @@ public class PostForm extends BaseEntityForm {
 				else {
 					user.setLabel(getString(R.string.candi_label_user_created_by));
 				}
-				user.bindToUser(mEntity.creator, mEntity.createdDate.longValue(), mEntity.locked);
+				user.databind(mEntity.creator, mEntity.createdDate.longValue(), mEntity.locked);
 				UI.setVisibility(user_one, View.VISIBLE);
 				user = user_two;
 			}
@@ -234,10 +263,27 @@ public class PostForm extends BaseEntityForm {
 		if (user != null && mEntity.modifier != null && !mEntity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 			if (mEntity.createdDate.longValue() != mEntity.modifiedDate.longValue()) {
 				user.setLabel(getString(R.string.candi_label_user_edited_by));
-				user.bindToUser(mEntity.modifier, mEntity.modifiedDate.longValue(), null);
+				user.databind(mEntity.modifier, mEntity.modifiedDate.longValue(), null);
 				UI.setVisibility(user, View.VISIBLE);
 			}
 		}
+
+		/* Buttons */
+		drawButtons();
+
+		/* Visibility */
+		if (mFooterHolder != null) {
+			mFooterHolder.setVisibility(View.VISIBLE);
+		}
+
+		if (mScrollView != null) {
+			mScrollView.setVisibility(View.VISIBLE);
+		}
+	}
+
+	@Override
+	protected void drawButtons() {
+		super.drawButtons();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -245,7 +291,7 @@ public class PostForm extends BaseEntityForm {
 	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override

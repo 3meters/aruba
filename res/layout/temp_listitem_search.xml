@@ -26,7 +26,7 @@
         android:textColor="@color/text_secondary"
         android:visibility="gone" />
 
-    <com.aircandi.ui.widgets.WebImageView
+    <com.aircandi.ui.widgets.AirImageView
         android:id="@+id/photo"
         android:layout_width="@dimen/image_extra_small"
         android:layout_height="@dimen/image_extra_small"

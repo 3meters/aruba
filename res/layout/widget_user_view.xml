@@ -17,7 +17,7 @@
         android:layout_marginBottom="5dp"
         android:text="@string/candi_label_user_created_by" />
 
-    <com.aircandi.ui.widgets.WebImageView
+    <com.aircandi.ui.widgets.AirImageView
         android:id="@+id/candi_user_picture"
         android:layout_width="@dimen/image_extra_small"
         android:layout_height="@dimen/image_extra_small"

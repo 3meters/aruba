@@ -36,8 +36,6 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
@@ -46,10 +44,10 @@ import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.PlaceForm;
 import com.aircandi.ui.PostForm;
 import com.aircandi.ui.user.UserForm;
+import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.ComboButton;
 import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
-import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
@@ -71,7 +69,6 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	protected Boolean				mForceRefresh		= false;
 	public String					mParentId;
 	public String					mEntityId;
-	public String					mEntitySchema;
 	public String					mMessage;
 
 	protected final PackageReceiver	mPackageReceiver	= new PackageReceiver();
@@ -83,7 +80,6 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mParentId = extras.getString(Constants.EXTRA_ENTITY_PARENT_ID);
-			mEntitySchema = extras.getString(Constants.EXTRA_ENTITY_SCHEMA);
 			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
 			mMessage = extras.getString(Constants.EXTRA_MESSAGE);
 		}
@@ -92,22 +88,16 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-		
+
 		mFormHolder = (ViewGroup) findViewById(R.id.form_holder);
 		mBodyHolder = (ViewGroup) findViewById(R.id.body_holder);
 		mFooterHolder = (ViewGroup) findViewById(R.id.footer_holder);
 		mScrollView = (ScrollView) findViewById(R.id.scroll_view);
 	}
 
-	@Override
-	protected void configureActionBar() {}
-	
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
-	
-	@Override
-	public void onAdd() {}
 
 	@SuppressWarnings("ucd")
 	public void onLikeButtonClick(View view) {
@@ -145,7 +135,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				setSupportProgressBarIndeterminateVisibility(false);
 				mBusyManager.hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					bind(false);
+					databind(false);
 				}
 				else {
 					if (result.serviceResponse.exception.getStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
@@ -193,10 +183,11 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			@Override
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
-				setSupportProgressBarIndeterminateVisibility(false);
+				//setSupportProgressBarIndeterminateVisibility(false);
 				mBusyManager.hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					bind(false);
+					//databind(false);
+					draw();
 				}
 				else {
 					if (result.serviceResponse.exception.getStatusCode() != ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
@@ -210,15 +201,13 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 	public void onMoreButtonClick(View view) {
 		ShortcutSettings settings = (ShortcutSettings) view.getTag();
-		Bundle extras = new Bundle();
-		extras.putString(Constants.EXTRA_LIST_SCHEMA, settings.targetSchema);
-		Routing.route(this, Route.EntityList, mEntity, null, null, extras);
+		Routing.route(this, Route.EntityList, mEntity, null, settings, null);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onShortcutClick(View view) {
 		final Shortcut shortcut = (Shortcut) view.getTag();
-		Routing.route(this, Route.Shortcut, mEntity, shortcut);
+		Routing.route(this, Route.Shortcut, mEntity, shortcut, null, null);
 	}
 
 	public void onUserClick(View view) {
@@ -228,7 +217,9 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 	@SuppressWarnings("ucd")
 	public void onImageClick(View view) {
-		Routing.route(this, Route.Photo, mEntity);
+		if (mEntity.photo != null) {
+			Routing.route(this, Route.Photo, mEntity);
+		}
 	}
 
 	@SuppressWarnings("ucd")
@@ -311,60 +302,66 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	protected void drawButtons() {
 
 		if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE) && ((Place) mEntity).synthetic) {
-			UI.setVisibility(findViewById(R.id.button_like), View.GONE);
-			UI.setVisibility(findViewById(R.id.button_watch), View.GONE);
+			UI.setVisibility(findViewById(R.id.button_holder), View.GONE);
+		}
+		else if (mEntity.id.equals(Aircandi.getInstance().getUser().id)) {
+			UI.setVisibility(findViewById(R.id.button_holder), View.GONE);
 		}
 		else {
-			UI.setVisibility(findViewById(R.id.button_like), View.VISIBLE);
-			UI.setVisibility(findViewById(R.id.button_watch), View.VISIBLE);
-		}
+			UI.setVisibility(findViewById(R.id.button_holder), View.VISIBLE);
 
-		ComboButton watched = (ComboButton) findViewById(R.id.button_watch);
-		if (watched != null) {
-			if (mEntity.byAppUser(Constants.TYPE_LINK_WATCH)) {
-				final int color = Aircandi.getInstance().getResources().getColor(R.color.brand_pink_lighter);
-				watched.setLabel(getString(R.string.candi_button_unwatch));
-				watched.setDrawableId(R.drawable.ic_action_show_dark);
-				watched.setAlpha(1);
-				watched.getImageIcon().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
-			}
-			else {
-				watched.setLabel(getString(R.string.candi_button_watch));
-				watched.getImageIcon().setColorFilter(null);
-				if (mThemeTone.equals("dark")) {
+			ComboButton watched = (ComboButton) findViewById(R.id.button_watch);
+			if (watched != null) {
+				if (mEntity.byAppUser(Constants.TYPE_LINK_WATCH)) {
+					final int color = Aircandi.getInstance().getResources().getColor(R.color.brand_pink_lighter);
+					watched.setLabel(getString(R.string.button_unwatch));
 					watched.setDrawableId(R.drawable.ic_action_show_dark);
+					watched.setAlpha(1);
+					watched.getImageIcon().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
 				}
 				else {
-					watched.setDrawableId(R.drawable.ic_action_show_light);
+					watched.setLabel(getString(R.string.button_watch));
+					watched.getImageIcon().setColorFilter(null);
+					if (mThemeTone.equals("dark")) {
+						watched.setDrawableId(R.drawable.ic_action_show_dark);
+					}
+					else {
+						watched.setDrawableId(R.drawable.ic_action_show_light);
+					}
 				}
 			}
-		}
 
-		ComboButton liked = (ComboButton) findViewById(R.id.button_like);
-		if (liked != null) {
-			if (mEntity.byAppUser(Constants.TYPE_LINK_LIKE)) {
-				final int color = Aircandi.getInstance().getResources().getColor(R.color.accent_red);
-				liked.setLabel(getString(R.string.candi_button_unlike));
-				liked.setDrawableId(R.drawable.ic_action_heart_dark);
-				liked.getImageIcon().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
-			}
-			else {
-				liked.setLabel(getString(R.string.candi_button_like));
-				liked.getImageIcon().setColorFilter(null);
-				if (mThemeTone.equals("dark")) {
+			ComboButton liked = (ComboButton) findViewById(R.id.button_like);
+			if (liked != null) {
+				if (mEntity.byAppUser(Constants.TYPE_LINK_LIKE)) {
+					final int color = Aircandi.getInstance().getResources().getColor(R.color.accent_red);
+					liked.setLabel(getString(R.string.button_unlike));
 					liked.setDrawableId(R.drawable.ic_action_heart_dark);
+					liked.getImageIcon().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
 				}
 				else {
-					liked.setDrawableId(R.drawable.ic_action_heart_light);
+					liked.setLabel(getString(R.string.button_like));
+					liked.getImageIcon().setColorFilter(null);
+					if (mThemeTone.equals("dark")) {
+						liked.setDrawableId(R.drawable.ic_action_heart_dark);
+					}
+					else {
+						liked.setDrawableId(R.drawable.ic_action_heart_light);
+					}
 				}
 			}
 		}
 	}
 
-	protected void drawShortcuts(List<Shortcut> shortcuts, ShortcutSettings settings, Integer titleResId, Integer moreResId, Integer flowLimit,
-			Integer flowItemResId) {
+	protected void drawShortcuts(List<Shortcut> shortcuts
+			, ShortcutSettings settings
+			, Integer titleResId
+			, Integer moreResId
+			, Integer flowLimit
+			, Integer holderId
+			, Integer flowItemResId) {
 
-		View holder = mInflater.inflate(R.layout.section_shortcuts, null);
+		View holder = LayoutInflater.from(this).inflate(R.layout.section_shortcuts, null);
 		SectionLayout section = (SectionLayout) holder.findViewById(R.id.section_layout_shortcuts);
 		if (titleResId != null) {
 			section.setHeaderTitle(getString(titleResId));
@@ -376,7 +373,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		}
 
 		if (shortcuts.size() > flowLimit) {
-			View footer = mInflater.inflate(R.layout.temp_section_footer, null);
+			View footer = LayoutInflater.from(this).inflate(R.layout.temp_section_footer, null);
 			Button button = (Button) footer.findViewById(R.id.button_more);
 			button.setText(moreResId);
 			button.setTag(settings);
@@ -388,14 +385,13 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				? shortcuts.subList(0, flowLimit)
 				: shortcuts, flowItemResId);
 
-		((ViewGroup) findViewById(R.id.shortcut_holder)).addView(holder);
+		((ViewGroup) findViewById(holderId)).addView(holder);
 
 	}
 
 	private void flowShortcuts(FlowLayout layout, List<Shortcut> shortcuts, Integer viewResId) {
 
 		layout.removeAllViews();
-		final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		final DisplayMetrics metrics = getResources().getDisplayMetrics();
 		final View parentView = (View) layout.getParent();
@@ -427,8 +423,8 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				continue;
 			}
 
-			View view = inflater.inflate(viewResId, null);
-			WebImageView webImageView = (WebImageView) view.findViewById(R.id.photo);
+			View view = LayoutInflater.from(this).inflate(viewResId, null);
+			AirImageView photoView = (AirImageView) view.findViewById(R.id.photo);
 
 			TextView name = (TextView) view.findViewById(R.id.name);
 			TextView badgeUpper = (TextView) view.findViewById(R.id.badge_upper);
@@ -445,25 +441,25 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				badgeUpper.setText(String.valueOf(shortcut.group.size()));
 				badgeUpper.setVisibility(View.VISIBLE);
 
-				if (shortcut.app.equals(Constants.TYPE_APPLINK_FACEBOOK)) {
+				if (shortcut.app.equals(Constants.TYPE_APP_FACEBOOK)) {
 					badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_dark);
 					if (mThemeTone.equals("light")) {
 						badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_light);
 					}
 				}
-				else if (shortcut.app.equals(Constants.TYPE_APPLINK_TWITTER)) {
+				else if (shortcut.app.equals(Constants.TYPE_APP_TWITTER)) {
 					badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_dark);
 					if (mThemeTone.equals("light")) {
 						badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_light);
 					}
 				}
-				else if (shortcut.app.equals(Constants.TYPE_APPLINK_WEBSITE)) {
+				else if (shortcut.app.equals(Constants.TYPE_APP_WEBSITE)) {
 					badgeLower.setBackgroundResource(R.drawable.ic_action_website_dark);
 					if (mThemeTone.equals("light")) {
 						badgeLower.setBackgroundResource(R.drawable.ic_action_website_light);
 					}
 				}
-				else if (shortcut.app.equals(Constants.TYPE_APPLINK_FOURSQUARE)) {
+				else if (shortcut.app.equals(Constants.TYPE_APP_FOURSQUARE)) {
 					badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
 					if (mThemeTone.equals("light")) {
 						badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
@@ -471,7 +467,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				}
 				badgeLower.setVisibility(View.VISIBLE);
 			}
-			else if (shortcut.count > 0) {
+			else if (shortcut.count != null && shortcut.count > 0) {
 				badgeUpper.setTag(shortcut);
 				badgeUpper.setText(String.valueOf(shortcut.count));
 				badgeUpper.setVisibility(View.VISIBLE);
@@ -495,21 +491,16 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				name.setVisibility(View.VISIBLE);
 			}
 
-			String photoUri = shortcut.photo.getUri();
-			if (photoUri != null) {
-				BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(photoUri);
-				BitmapRequest imageRequest = builder.create();
-				webImageView.setSizeHint(candiWidthPixels);
-				webImageView.setBitmapRequest(imageRequest);
-				webImageView.setTag(shortcut);
-			}
+			photoView.setTag(shortcut);
+			photoView.setSizeHint(candiWidthPixels);
+			UI.drawPhoto(photoView, shortcut.getPhoto());
 
 			FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(candiWidthPixels, LayoutParams.WRAP_CONTENT);
 			params.setCenterHorizontal(false);
 			view.setLayoutParams(params);
 
 			RelativeLayout.LayoutParams paramsImage = new RelativeLayout.LayoutParams(candiWidthPixels, candiHeightPixels);
-			webImageView.setLayoutParams(paramsImage);
+			photoView.setLayoutParams(paramsImage);
 
 			layout.addView(view);
 		}
@@ -550,12 +541,10 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		MenuItem refresh = menu.findItem(R.id.refresh);
 		if (refresh != null) {
 			if (mBusyManager != null) {
-				mBusyManager.setAccuracyIndicator(refresh.getActionView().findViewById(R.id.accuracy_indicator));
 				mBusyManager.setRefreshImage(refresh.getActionView().findViewById(R.id.refresh_image));
 				mBusyManager.setRefreshProgress(refresh.getActionView().findViewById(R.id.refresh_progress));
-				mBusyManager.updateAccuracyIndicator();
 			}
-			
+
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
@@ -578,9 +567,6 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				return true;
 			}
 			else if (mEntity.ownerId.equals(ProxiConstants.ADMIN_USER_ID)) {
-				return true;
-			}
-			else if (!mEntity.ownerId.equals(ProxiConstants.ADMIN_USER_ID) && !mEntity.locked) {
 				return true;
 			}
 		}
@@ -618,13 +604,13 @@ public abstract class BaseEntityForm extends BaseBrowse {
 					&& ProximityManager.getInstance().getLastBeaconLoadDate() != null
 					&& ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()) {
 				invalidateOptionsMenu();
-				bind(true);
+				databind(true);
 			}
 			else if (mEntityModelActivityDate != null
 					&& EntityManager.getEntityCache().getLastActivityDate() != null
 					&& EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
-				bind(true);
+				databind(true);
 			}
 
 			/* Package receiver */
@@ -644,7 +630,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	private class PackageReceiver extends BroadcastReceiver {
@@ -662,7 +648,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 						@Override
 						public void run() {
-							bind(false);
+							databind(false);
 						}
 					}, 1500);
 				}

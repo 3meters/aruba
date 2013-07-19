@@ -10,23 +10,22 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:divider="?attr/ruleColor"
-        android:dividerHeight="1px"
         android:background="?attr/backgroundCandi"
         android:cacheColorHint="#00000000"
+        android:divider="?attr/ruleColor"
+        android:dividerHeight="1px"
         android:listSelector="#00000000" />
-    
+
     <com.aircandi.ui.widgets.AirButton
         android:id="@+id/button_new_entity"
         style="@style/form_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
         android:layout_centerInParent="true"
         android:onClick="onNewEntityButtonClick"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:text="@string/entity_button_comment_first"
         android:visibility="gone" />
-    
 
 </RelativeLayout>

@@ -70,28 +70,17 @@ public class Place extends Entity implements Cloneable, Serializable {
 	}
 
 	@Override
-	public String getPhotoUri() {
-
-		/*
-		 * If a special preview photo is available, we use it otherwise
-		 * we use the standard photo.
-		 */
-		String photoUri = null;
-		if (photo != null) {
-			photoUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
-			if (photoUri == null) {
-				photoUri = photo.getUri();
-			}
+	public Photo getPhoto() {
+		if (this.photo != null) {
+			return this.photo;
 		}
-		else if (category != null) {
-			photoUri = category.photo.getUri();
+		else if (category != null && category.photo != null) {
+			Photo photo = category.photo.clone();
+			return photo;
 		}
-		
-		if (photoUri == null) {
-			photoUri = "resource:img_placeholder_logo_bw";
+		else {
+			return getDefaultPhoto();
 		}
-		
-		return photoUri;
 	}
 
 	public Link getLink(Beacon beacon, String linkType) {
@@ -354,22 +343,22 @@ public class Place extends Entity implements Cloneable, Serializable {
 	// Inner classes
 	// --------------------------------------------------------------------------------------------
 
-	public static class SortEntitiesByProximityAndDistance implements Comparator<Entity> {
+	public static class SortByProximityAndDistance implements Comparator<Entity> {
 
 		@Override
-		public int compare(Entity entity1, Entity entity2) {
+		public int compare(Entity object1, Entity object2) {
 
-			if (entity1.hasActiveProximityLink() && !entity2.hasActiveProximityLink()) {
+			if (object1.hasActiveProximityLink() && !object2.hasActiveProximityLink()) {
 				return -1;
 			}
-			else if (entity2.hasActiveProximityLink() && !entity1.hasActiveProximityLink()) {
+			else if (object2.hasActiveProximityLink() && !object1.hasActiveProximityLink()) {
 				return 1;
 			}
 			else {
-				if (entity1.distance < entity2.distance.intValue()) {
+				if (object1.distance < object2.distance.intValue()) {
 					return -1;
 				}
-				else if (entity1.distance.intValue() > entity2.distance.intValue()) {
+				else if (object1.distance.intValue() > object2.distance.intValue()) {
 					return 1;
 				}
 				else {
@@ -380,15 +369,15 @@ public class Place extends Entity implements Cloneable, Serializable {
 	}
 
 	@SuppressWarnings("ucd")
-	public static class SortEntitiesByDistance implements Comparator<Entity> {
+	public static class SortByDistance implements Comparator<Entity> {
 
 		@Override
-		public int compare(Entity entity1, Entity entity2) {
+		public int compare(Entity object1, Entity object2) {
 
-			if (entity1.distance < entity2.distance.intValue()) {
+			if (object1.distance < object2.distance.intValue()) {
 				return -1;
 			}
-			else if (entity1.distance.intValue() > entity2.distance.intValue()) {
+			else if (object1.distance.intValue() > object2.distance.intValue()) {
 				return 1;
 			}
 			else {

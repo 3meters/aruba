@@ -12,18 +12,18 @@ import com.aircandi.ui.base.BaseEntityEdit;
 
 public class PostEdit extends BaseEntityEdit {
 
-	private TabManager		mTabManager;
+	private TabManager	mTabManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		super.onCreate(savedInstanceState);
 	}
-	
+
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-		
+
 		if (mEntity != null) {
 			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
 				mTabManager = new TabManager(Constants.TABS_ENTITY_FORM_ID, mActionBar, (ViewFlipper) findViewById(R.id.flipper_form));
@@ -34,7 +34,16 @@ public class PostEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Methods
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected String getLinkType() {
+		return Constants.TYPE_LINK_POST;
+	};
+
+	// --------------------------------------------------------------------------------------------
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override

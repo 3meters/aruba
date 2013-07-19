@@ -19,7 +19,6 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -41,12 +40,12 @@ import com.aircandi.components.EntitiesForBeaconsFinishedEvent;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.LocationChangedEvent;
 import com.aircandi.components.LocationLockedEvent;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.LocationTimeoutEvent;
 import com.aircandi.components.Logger;
+import com.aircandi.components.MessageEvent;
 import com.aircandi.components.MonitoringWifiScanReceivedEvent;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ConnectedState;
@@ -54,7 +53,6 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.PlacesNearLocationFinishedEvent;
 import com.aircandi.components.ProximityManager;
-import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.ProximityManager.ScanReason;
 import com.aircandi.components.ProximityManager.WifiScanResult;
 import com.aircandi.components.QueryWifiScanReceivedEvent;
@@ -64,13 +62,11 @@ import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
-import com.aircandi.ui.base.BaseActivity;
-import com.aircandi.ui.edit.PlaceEdit;
-import com.aircandi.utilities.Animate;
-import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
@@ -114,7 +110,7 @@ import com.squareup.otto.Subscribe;
  * Unlock screen with Aircandi in foreground: Restart->Start->Resume
  */
 
-public class RadarForm extends BaseActivity {
+public class RadarForm extends BaseBrowse {
 
 	private final Handler			mHandler				= new Handler();
 
@@ -139,43 +135,14 @@ public class RadarForm extends BaseActivity {
 	private Boolean					mFreshWindow			= false;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	protected void initialize(Bundle savedInstanceState) {
 
-		if (!isFinishing()) {
-			Aircandi.stopwatch4.start("Creating radar");
-			/*
-			 * Get setup for location snapshots. Initialize will populate location
-			 * with the best of any cached location fixes. A single update will
-			 * be launched if the best cached location fix doesn't meet our freshness
-			 * and accuracy requirements.
-			 */
-			LocationManager.getInstance().initialize(getApplicationContext());
+		mActionBar.setDisplayHomeAsUpEnabled(false);
+		mBusyManager = new BusyManager(this);
 
-			if (!LocationManager.getInstance().isLocationAccessEnabled()) {
-				/* We won't continue if location services are disabled */
-				startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-				Animate.doOverridePendingTransition(RadarForm.this, TransitionType.PageToForm);
-				finish();
-			}
-
-			initialize();
-			tetherAlert();
-
-			//throw new RuntimeException("Test exception");
+		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
+			Routing.route(this, Route.SettingsLocation);
 		}
-	}
-
-	protected void initialize() {
-		/*
-		 * Here we initialize activity level state. Only called from
-		 * onCreate.
-		 * 
-		 * First fire off a check to make sure the session is valid. This will also
-		 * be the first opportunity to check our network connection. Also, the
-		 * users session window will be extended assuming the session is valid.
-		 */
-		checkSession();
 
 		/* Always reset the entity cache */
 		EntityManager.getEntityCache().clear();
@@ -187,12 +154,14 @@ public class RadarForm extends BaseActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				final Place entity = (Place) mRadarAdapter.getItems().get(position - 1);
-				showCandiForm(entity, entity.synthetic);
+				Bundle extras = null;
+				if (entity.synthetic) {
+					extras = new Bundle();
+					extras.putBoolean(Constants.EXTRA_UPSIZE_SYNTHETIC, true);
+				}
+				Routing.route(RadarForm.this, Route.Browse, entity, null, extras);
 			}
 		});
-
-		/* Busy */
-		mBusyManager = new BusyManager(this);
 
 		/* Adapter snapshots the items in mEntities */
 		mRadarAdapter = new RadarListAdapter(this, mEntities);
@@ -218,32 +187,14 @@ public class RadarForm extends BaseActivity {
 		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
 		mNewCandiSoundId = mSoundPool.load(this, R.raw.notification_candi_discovered, 1);
 
+		/* Check if the device is tethered */
+		tetherAlert();
+
 		mInitialized = true;
 	}
 
-	private void checkSession() {
-		new AsyncTask() {
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("CheckSession");
-				ModelResult result = EntityManager.getInstance().checkSession();
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object modelResult) {
-				final ModelResult result = (ModelResult) modelResult;
-				if (result.serviceResponse.responseCode != ResponseCode.Success) {
-					Routing.serviceError(RadarForm.this, result.serviceResponse);
-				}
-			}
-
-		}.execute();
-	}
-
 	// --------------------------------------------------------------------------------------------
-	// Event bus routines: beacons
+	// Bus: beacons
 	// --------------------------------------------------------------------------------------------
 
 	@Subscribe
@@ -330,14 +281,8 @@ public class RadarForm extends BaseActivity {
 		updateDevIndicator(event.wifiList, null);
 	}
 
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onLocationLocked(LocationLockedEvent event) {
-		updateDevIndicator(null, event.location);
-	}
-
 	// --------------------------------------------------------------------------------------------
-	// Event bus routines: location
+	// Bus: location
 	// --------------------------------------------------------------------------------------------
 
 	@Subscribe
@@ -454,8 +399,14 @@ public class RadarForm extends BaseActivity {
 		});
 	}
 
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onLocationLocked(LocationLockedEvent event) {
+		updateDevIndicator(null, event.location);
+	}
+
 	// --------------------------------------------------------------------------------------------
-	// Event bus routines: general
+	// Bus: general
 	// --------------------------------------------------------------------------------------------
 
 	@Subscribe
@@ -500,11 +451,28 @@ public class RadarForm extends BaseActivity {
 
 	}
 
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onMessage(final MessageEvent event) {
+		/*
+		 * Refreshes radar so newly created place can pop in.
+		 */
+		if (event.notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					onRefresh();
+				}
+			});
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
-	// Search routines
+	// Methods
 	// --------------------------------------------------------------------------------------------
 
-	public void doRefresh() {
+	@Override
+	public void onRefresh() {
 		/*
 		 * This only gets called by a user clicking the refresh button.
 		 */
@@ -517,8 +485,7 @@ public class RadarForm extends BaseActivity {
 
 		/* We won't perform a search if location access is disabled */
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
-			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-			Animate.doOverridePendingTransition(RadarForm.this, TransitionType.PageToForm);
+			Routing.route(this, Route.SettingsLocation);
 		}
 		else {
 			new AsyncTask() {
@@ -586,35 +553,18 @@ public class RadarForm extends BaseActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// UI routines
+	// UI
 	// --------------------------------------------------------------------------------------------
 
 	public void onAddPlaceButtonClick(View view) {
-		doAddPlace();
+		onAdd();
 	}
 
-	public void doAddPlace() {
+	@Override
+	public void onAdd() {
 		if (Aircandi.getInstance().getUser() != null) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, PlaceEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_PLACE);
-			startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
-			Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+			Routing.route(this, Route.New, null, Constants.SCHEMA_ENTITY_PLACE, null);
 		}
-	}
-
-	private void showCandiForm(Entity entity, Boolean upsize) {
-
-		final IntentBuilder intentBuilder = new IntentBuilder(this, PlaceForm.class)
-				.setEntityId(entity.id)
-				.setEntityParentId(entity.toId)
-				.setEntitySchema(entity.type);
-
-		final Intent intent = intentBuilder.create();
-		if (upsize) {
-			intent.putExtra(Constants.EXTRA_UPSIZE_SYNTHETIC, true);
-		}
-
-		startActivity(intent);
-		Animate.doOverridePendingTransition(this, TransitionType.RadarToPage);
 	}
 
 	@SuppressWarnings("unused")
@@ -764,7 +714,7 @@ public class RadarForm extends BaseActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);		
+		super.onCreateOptionsMenu(menu);
 		/*
 		 * Setup menu items local to radar.
 		 */
@@ -788,9 +738,27 @@ public class RadarForm extends BaseActivity {
 				});
 			}
 		}
+
+		MenuItem refresh = menu.findItem(R.id.refresh);
+		if (refresh != null) {
+			if (mBusyManager != null) {
+				mBusyManager.setAccuracyIndicator(refresh.getActionView().findViewById(R.id.accuracy_indicator));
+				mBusyManager.setRefreshImage(refresh.getActionView().findViewById(R.id.refresh_image));
+				mBusyManager.setRefreshProgress(refresh.getActionView().findViewById(R.id.refresh_progress));
+				mBusyManager.updateAccuracyIndicator();
+			}
+
+			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					onRefresh();
+				}
+			});
+		}
+
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem menuItem) {
 		/*
@@ -800,7 +768,7 @@ public class RadarForm extends BaseActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// System callbacks
+	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -823,17 +791,13 @@ public class RadarForm extends BaseActivity {
 		/* Check for location service */
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 			/* We won't continue if location services are disabled */
-			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-			Animate.doOverridePendingTransition(RadarForm.this, TransitionType.PageToForm);
+			Routing.route(this, Route.SettingsLocation);
 			finish();
 		}
 
 		if (Constants.DEBUG_TRACE) {
 			Debug.startMethodTracing("aircandi", 100000000);
 		}
-
-		/* Start listening for events */
-		enableEvents();
 
 		/* Reset the accuracy indicator */
 		if (mBusyManager != null) {
@@ -846,8 +810,6 @@ public class RadarForm extends BaseActivity {
 		/*
 		 * Fired when starting another activity and we lose our window.
 		 */
-		/* Start listening for events */
-		disableEvents();
 
 		/*
 		 * Stop any location burst that might be active unless
@@ -1084,8 +1046,9 @@ public class RadarForm extends BaseActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
+
 	@SuppressWarnings("ucd")
 	public void startScanService(int scanInterval) {
 
@@ -1112,17 +1075,6 @@ public class RadarForm extends BaseActivity {
 		final PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
 		alarmManager.cancel(pendingIntent);
 		Logger.d(this, "Stopped wifi scan service");
-	}
-
-	private void enableEvents() {
-		BusProvider.getInstance().register(this);
-	}
-
-	private void disableEvents() {
-		try {
-			BusProvider.getInstance().unregister(this);
-		}
-		catch (Exception e) {} // $codepro.audit.disable emptyCatchClause
 	}
 
 	@Override

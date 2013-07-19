@@ -17,10 +17,10 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.IntentBuilder;
+import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.NetworkManager.ConnectedState;
+import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NotificationManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
@@ -29,11 +29,9 @@ import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.User;
-import com.aircandi.ui.user.RegisterEdit;
-import com.aircandi.ui.user.SignInEdit;
-import com.aircandi.utilities.Animate;
-import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.GoogleAnalytics;
@@ -53,10 +51,15 @@ public class SplashForm extends SherlockActivity {
 
 		if (!Aircandi.applicationUpdateRequired) {
 			if (Aircandi.firstStartApp) {
-				initializeApp();
+				requestWindowFeature(Window.FEATURE_NO_TITLE);
+				setContentView(R.layout.splash_form);
+				findViewById(R.id.button_holder).setVisibility(View.GONE);
+				warmup();
+				return;
 			}
-
-			signinAuto();
+			else {
+				signinAuto();
+			}
 		}
 
 		if (!isFinishing()) {
@@ -70,7 +73,41 @@ public class SplashForm extends SherlockActivity {
 		}
 	}
 
-	private void initializeApp() {
+	private void warmup() {
+		new AsyncTask() {
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("InitializeApp");
+				ModelResult result = initializeApp();
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object modelResult) {
+				ModelResult result = (ModelResult) modelResult;
+
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					Aircandi.firstStartApp = false;
+					signinAuto();
+					if (!isFinishing()) {
+						initialize();
+						if (Aircandi.applicationUpdateRequired) {
+							updateRequired();
+						}
+					}
+				}
+				else {
+					Routing.serviceError(SplashForm.this, result.serviceResponse);
+				}
+			}
+
+		}.execute();
+	}
+
+	private ModelResult initializeApp() {
+
+		ModelResult result = new ModelResult();
 
 		if (Build.PRODUCT.contains("sdk")) {
 			Aircandi.usingEmulator = true;
@@ -90,32 +127,52 @@ public class SplashForm extends SherlockActivity {
 		NetworkManager.getInstance().setContext(getApplicationContext());
 		NetworkManager.getInstance().initialize();
 
-		/* Service notifications */
-		GCMRegistrar.checkDevice(this); 	// Does device support GCM
-		GCMRegistrar.checkManifest(this); 	// Is manifest setup correctly for GCM
-		String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
-		if (registrationId != null) {
-			NotificationManager.getInstance().unregisterDeviceWithAircandi(registrationId);
-			GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
-		}
-		NotificationManager.getInstance().registerDeviceWithGCM();
+		/*
+		 * Fire off a check to make sure the session is valid. This will also
+		 * be the first opportunity to check our network connection. Also, the
+		 * users session window will be extended assuming the session is valid.
+		 */
+		result = EntityManager.getInstance().checkSession();
 
-		/* Proxibase sdk components */
-		Aircandi.getInstance().setUsingEmulator(Aircandi.usingEmulator);
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
-		/* Cache categories - we delay until after the initial rush for data */
-		Aircandi.mainThreadHandler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				loadCategories();
+			/* Cache categories - we delay until after the initial rush for data */
+			if (EntityManager.getInstance().getCategories().size() == 0) {
+				result = EntityManager.getInstance().loadCategories();
 			}
-		}, Constants.INTERVAL_CATEGORIES_DOWNLOAD);
+		}
 
-		Aircandi.firstStartApp = false;
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+
+			/* Service notifications */
+			GCMRegistrar.checkDevice(this); 	// Does device support GCM
+			GCMRegistrar.checkManifest(this); 	// Is manifest setup correctly for GCM
+			String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
+			if (registrationId != null) {
+				NotificationManager.getInstance().unregisterDeviceWithAircandi(registrationId);
+				GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
+			}
+
+			NotificationManager.getInstance().registerDeviceWithGCM();
+
+			/* Proxibase sdk components */
+			Aircandi.getInstance().setUsingEmulator(Aircandi.usingEmulator);
+
+			/*
+			 * Get setup for location snapshots. Initialize will populate location
+			 * with the best of any cached location fixes. A single update will
+			 * be launched if the best cached location fix doesn't meet our freshness
+			 * and accuracy requirements.
+			 */
+			LocationManager.getInstance().initialize(getApplicationContext());
+		}
+
+		return result;
 	}
 
 	private void initialize() {
 		((ImageView) findViewById(R.id.image_background)).setBackgroundResource(R.drawable.img_splash_v);
+		findViewById(R.id.button_holder).setVisibility(View.VISIBLE);
 	}
 
 	private void signinAuto() {
@@ -151,39 +208,6 @@ public class SplashForm extends SherlockActivity {
 	// --------------------------------------------------------------------------------------------
 	// Dialogs
 	// --------------------------------------------------------------------------------------------
-
-	private void loadCategories() {
-		if (NetworkManager.getInstance().getConnectedState() == ConnectedState.Normal) {
-			new AsyncTask() {
-
-				@Override
-				protected void onPostExecute(Object result) {
-					// TODO Auto-generated method stub
-					super.onPostExecute(result);
-				}
-
-				@Override
-				protected Object doInBackground(Object... params) {
-					Thread.currentThread().setName("LoadCategories");
-					ModelResult result = new ModelResult();
-					if (EntityManager.getInstance().getCategories().size() == 0) {
-						result = EntityManager.getInstance().loadCategories();
-					}
-					return result;
-				}
-			}.execute();
-		}
-		else {
-			/* Schedule the next attempt */
-			Aircandi.mainThreadHandler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					loadCategories();
-				}
-			}, Constants.INTERVAL_CATEGORIES_DOWNLOAD);
-
-		}
-	}
 
 	private void startGetAWSCredentials() {
 		final Thread t = new Thread() {
@@ -228,11 +252,7 @@ public class SplashForm extends SherlockActivity {
 			updateRequired();
 			return;
 		}
-
-		final IntentBuilder intentBuilder = new IntentBuilder(this, SignInEdit.class);
-		final Intent intent = intentBuilder.create();
-		startActivityForResult(intent, Constants.ACTIVITY_SIGNIN);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Routing.route(this, Route.Signin);
 	}
 
 	@SuppressWarnings("ucd")
@@ -241,11 +261,7 @@ public class SplashForm extends SherlockActivity {
 			updateRequired();
 			return;
 		}
-
-		final IntentBuilder intentBuilder = new IntentBuilder(this, RegisterEdit.class);
-		final Intent intent = intentBuilder.create();
-		startActivityForResult(intent, Constants.ACTIVITY_SIGNIN);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Routing.route(this, Route.Register);
 	}
 
 	@Override

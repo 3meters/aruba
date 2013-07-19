@@ -1,5 +1,6 @@
 package com.aircandi.service.objects;
 
+import java.util.List;
 import java.util.Map;
 
 import com.aircandi.service.Expose;
@@ -12,36 +13,27 @@ public class Cursor extends ServiceObject {
 	private static final long	serialVersionUID	= -8424707925181657940L;
 
 	@Expose
-	public Map					where;
-	@Expose
 	public Map					sort;
 	@Expose
 	public Number				skip				= 0;
 	@Expose
 	public Number				limit;
+	@Expose
+	public List<String>			linkTypes;
+	@Expose
+	public List<String>			schemas;
+	@Expose
+	public String				direction;
 
 	public Cursor() {}
 
-	public Cursor(Map sort, Number skip, Number limit, Map where) {
+	public Cursor(List<String> linkTypes, List<String> schemas, String direction, Map sort, Number skip, Number limit) {
 		this.sort = sort;
 		this.skip = skip;
 		this.limit = limit;
-		this.where = where;
-	}
-
-	public Cursor(Map sort, Number skip, Number limit) {
-		this.sort = sort;
-		this.skip = skip;
-		this.limit = limit;
-	}
-
-	public Map getWhere() {
-		return where;
-	}
-
-	public Cursor setWhere(Map where) {
-		this.where = where;
-		return this;
+		this.linkTypes = linkTypes;
+		this.schemas = schemas;
+		this.direction = direction;
 	}
 
 	public Map getSort() {
@@ -68,6 +60,33 @@ public class Cursor extends ServiceObject {
 
 	public Cursor setLimit(Number limit) {
 		this.limit = limit;
+		return this;
+	}
+
+	public List<String> getLinkTypes() {
+		return linkTypes;
+	}
+
+	public Cursor setLinkTypes(List<String> linkTypes) {
+		this.linkTypes = linkTypes;
+		return this;
+	}
+
+	public List<String> getSchemas() {
+		return schemas;
+	}
+
+	public Cursor setSchemas(List<String> schemas) {
+		this.schemas = schemas;
+		return this;
+	}
+
+	public String getDirection() {
+		return direction;
+	}
+
+	public Cursor setDirection(String direction) {
+		this.direction = direction;
 		return this;
 	}
 

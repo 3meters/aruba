@@ -9,7 +9,6 @@ import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -63,24 +62,25 @@ import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutSettings;
+import com.aircandi.service.objects.User;
 import com.aircandi.ui.edit.ApplinkEdit;
-import com.aircandi.ui.edit.ApplinkListEdit;
+import com.aircandi.ui.edit.CommentEdit;
 import com.aircandi.ui.edit.PlaceEdit;
 import com.aircandi.ui.edit.PostEdit;
-import com.aircandi.ui.helpers.PicturePicker;
-import com.aircandi.ui.helpers.PictureSourcePicker;
+import com.aircandi.ui.user.UserEdit;
+import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.BuilderButton;
 import com.aircandi.ui.widgets.UserView;
-import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.aircandi.utilities.Utilities;
 
 public abstract class BaseEntityEdit extends BaseEdit {
 
-	protected WebImageView		mPhoto;
+	protected AirImageView		mPhotoView;
 	protected List<Entity>		mApplinks;
 
 	protected TextView			mName;
@@ -90,7 +90,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 	protected String			mImageUriOriginal;
 	protected RequestListener	mImageRequestListener;
-	protected WebImageView		mImageRequestWebImageView;
+	protected AirImageView		mImageRequestWebImageView;
 	protected Uri				mMediaFileUri;
 	protected String			mMediaFilePath;
 	protected File				mMediaFile;
@@ -131,7 +131,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 		mName = (EditText) findViewById(R.id.name);
 		mDescription = (TextView) findViewById(R.id.description);
-		mPhoto = (WebImageView) findViewById(R.id.photo);
+		mPhotoView = (AirImageView) findViewById(R.id.photo);
 		mPhotoHolder = (ViewGroup) findViewById(R.id.photo_holder);
 		mLocked = (CheckBox) findViewById(R.id.chk_locked);
 
@@ -171,7 +171,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	}
 
 	@Override
-	protected void bind() {
+	protected void databind() {
 		if (mEntity == null) {
 			mEntity = Entity.makeEntity(mEntitySchema);
 			mEditing = false;
@@ -225,7 +225,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					&& !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 
 				creator.setLabel(getString(R.string.candi_label_user_added_by));
-				creator.bindToUser(entity.creator, entity.createdDate != null ? entity.createdDate.longValue() : null, entity.locked);
+				creator.databind(entity.creator, entity.createdDate != null ? entity.createdDate.longValue() : null, entity.locked);
 				UI.setVisibility(creator, View.VISIBLE);
 			}
 
@@ -235,7 +235,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			if (editor != null && entity.modifier != null && !entity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 				if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
 					editor.setLabel(getString(R.string.candi_label_user_edited_by));
-					editor.bindToUser(entity.modifier, entity.modifiedDate.longValue(), null);
+					editor.databind(entity.modifier, entity.modifiedDate.longValue(), null);
 					UI.setVisibility(editor, View.VISIBLE);
 				}
 			}
@@ -253,29 +253,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	}
 
 	protected void drawPhoto() {
-		if (mPhoto != null) {
-
-			mPhoto.getImageView().clearColorFilter();
-			mPhoto.getImageView().setBackgroundResource(0);
-			if (findViewById(R.id.color_layer) != null) {
-				(findViewById(R.id.color_layer)).setBackgroundResource(0);
-				(findViewById(R.id.color_layer)).setVisibility(View.GONE);
-				(findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
-			}
-
-			if (mEntity.photo != null && mEntity.photo.hasBitmap()) {
-				mPhoto.hideLoading();
-				UI.showImageInImageView(mEntity.photo.getBitmap(), mPhoto.getImageView(), true, Animate.fadeInMedium());
-				mPhoto.setVisibility(View.VISIBLE);
-			}
-			else {
-				final String photoUri = mEntity.getPhotoUri();
-				final BitmapRequest bitmapRequest = new BitmapRequest(photoUri, mPhoto.getImageView());
-				bitmapRequest.setImageSize(mPhoto.getSizeHint());
-				bitmapRequest.setImageRequestor(mPhoto.getImageView());
-				mPhoto.getImageView().setTag(photoUri);
-				BitmapManager.getInstance().masterFetch(bitmapRequest);
-			}
+		if (mPhotoView != null) {
+			UI.drawPhoto(mPhotoView, mEntity.getPhoto());
 		}
 	}
 
@@ -297,10 +276,11 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				}
 			}
 			else {
-				shortcuts = (List<Shortcut>) entity.getShortcuts(new ShortcutSettings(Constants.TYPE_LINK_APPLINK, null, Direction.in, false), true);
+				shortcuts = (List<Shortcut>) entity.getShortcuts(new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK,
+						Direction.in, false, true));
 			}
 
-			Collections.sort(shortcuts, new Shortcut.SortByPosition());
+			Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());
 
 			if (shortcuts.size() == 0) {
 				button.getTextView().setVisibility(View.VISIBLE);
@@ -310,7 +290,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				button.getTextView().setVisibility(View.GONE);
 				button.getViewGroup().setVisibility(View.VISIBLE);
 				button.getViewGroup().removeAllViews();
-				final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				final LayoutInflater inflater = LayoutInflater.from(this);
 				final int sizePixels = UI.getRawPixels(this, 30);
 				final int marginPixels = UI.getRawPixels(this, 5);
 
@@ -320,19 +300,11 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					if (shortcutCount >= 5) {
 						break;
 					}
-					View view = inflater.inflate(R.layout.temp_radar_candi_item, null);
-					WebImageView webImageView = (WebImageView) view.findViewById(R.id.photo);
-					webImageView.setSizeHint(sizePixels);
+					View view = inflater.inflate(R.layout.temp_entity_edit_link_item, null);
+					AirImageView photoView = (AirImageView) view.findViewById(R.id.photo);
+					photoView.setSizeHint(sizePixels);
 
-					if (shortcut.photo != null && shortcut.photo.hasBitmap()) {
-						UI.showImageInImageView(shortcut.photo.getBitmap(), webImageView.getImageView(), true, Animate.fadeInMedium());
-					}
-					else {
-						String photoUri = shortcut.photo.getUri();
-						BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(photoUri);
-						BitmapRequest imageRequest = builder.create();
-						webImageView.setBitmapRequest(imageRequest);
-					}
+					UI.drawPhoto(photoView, shortcut.getPhoto());
 
 					LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
 					params.setMargins(marginPixels
@@ -370,25 +342,23 @@ public abstract class BaseEntityEdit extends BaseEdit {
 						update();
 					}
 					else {
-						update();
+						insert();
 					}
 				}
 			}
 		}
 		else {
-			finish();
-			Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
+			onCancel(false);
 		}
 	}
 
 	@SuppressWarnings("ucd")
 	public void onChangePhotoButtonClick(View view) {
-		gather(); // So picture logic has the latest property values
-		IntentBuilder intentBuilder = new IntentBuilder(this, PictureSourcePicker.class).setEntity(mEntity);
-		startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_SOURCE_PICK);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
 
-		mImageRequestWebImageView = mPhoto;
+		gather(); // So picture logic has the latest property values
+		Routing.route(this, Route.PhotoSource, mEntity);
+
+		mImageRequestWebImageView = mPhotoView;
 		mImageRequestListener = new RequestListener() {
 
 			@Override
@@ -418,6 +388,11 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		};
 	}
 
+	public void onUserClick(View view) {
+		Entity entity = (Entity) view.getTag();
+		Routing.route(this, Route.Profile, entity);
+	}
+
 	@SuppressWarnings("ucd")
 	public void onApplinksBuilderClick(View view) {
 		loadApplinks();
@@ -441,19 +416,19 @@ public abstract class BaseEntityEdit extends BaseEdit {
 							if (findViewById(R.id.name) != null) {
 								defaultSearch = Utilities.emptyAsNull(((TextView) findViewById(R.id.name)).getText().toString().trim());
 							}
-							pictureSearch(defaultSearch);
+							photoSearch(defaultSearch);
 						}
 						else if (pictureSource.equals(Constants.PHOTO_SOURCE_GALLERY)) {
-							pictureFromGallery();
+							photoFromGallery();
 						}
 						else if (pictureSource.equals(Constants.PHOTO_SOURCE_CAMERA)) {
-							pictureFromCamera();
+							photoFromCamera();
 						}
 						else if (pictureSource.equals(Constants.PHOTO_SOURCE_PLACE)) {
-							pictureFromPlace(mEntity.id);
+							photoFromPlace(mEntity);
 						}
 						else if (pictureSource.equals(Constants.PHOTO_SOURCE_DEFAULT)) {
-							usePictureDefault();
+							usePhotoDefault();
 						}
 						else if (pictureSource.equals(Constants.PHOTO_SOURCE_FACEBOOK)) {
 							mEntity.photo = new Photo("https://graph.facebook.com/" + ((Applink) mEntity).appId + "/picture?type=large", null, null, null,
@@ -624,6 +599,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
+	protected abstract String getLinkType();
+
 	protected void gather() {
 		if (findViewById(R.id.name) != null) {
 			mEntity.name = Utilities.emptyAsNull(((TextView) findViewById(R.id.name)).getText().toString().trim());
@@ -649,6 +626,12 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		}
 		else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 			return ApplinkEdit.class;
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+			return UserEdit.class;
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			return CommentEdit.class;
 		}
 		return null;
 	}
@@ -676,10 +659,11 @@ public abstract class BaseEntityEdit extends BaseEdit {
 							.setSort(Maps.asMap("modifiedDate", -1))
 							.setSkip(0);
 
-					ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mEntity.id
-							, Constants.TYPE_LINK_APPLINK
-							, null
-							, cursor);
+					List<String> linkTypes = new ArrayList<String>();
+					linkTypes.add(Constants.TYPE_LINK_APPLINK);
+					cursor.setLinkTypes(linkTypes);
+
+					ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mEntity.id, null, cursor);
 
 					return result;
 				}
@@ -702,28 +686,22 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	}
 
 	public void doApplinksBuilder() {
-		final Intent intent = new Intent(this, ApplinkListEdit.class);
 
 		/* Serialize the applinks */
+		Bundle extras = new Bundle();
 		if (mApplinks.size() > 0) {
 			final List<String> applinkStrings = new ArrayList<String>();
 			for (Entity applink : mApplinks) {
 				applinkStrings.add(HttpService.objectToJson(applink, UseAnnotations.False, ExcludeNulls.True));
 			}
-			intent.putStringArrayListExtra(Constants.EXTRA_ENTITIES, (ArrayList<String>) applinkStrings);
+			extras.putStringArrayList(Constants.EXTRA_ENTITIES, (ArrayList<String>) applinkStrings);
 		}
 
-		intent.putExtra(Constants.EXTRA_ENTITY_SCHEMA, Constants.SCHEMA_ENTITY_APPLINK);
-
-		if (mEntity.id != null) {
-			intent.putExtra(Constants.EXTRA_ENTITY_ID, mEntity.id);
-		}
-
-		startActivityForResult(intent, Constants.ACTIVITY_APPLINKS_EDIT);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+		extras.putString(Constants.EXTRA_LIST_LINK_SCHEMA, Constants.SCHEMA_ENTITY_APPLINK);
+		Routing.route(this, Route.ApplinksEdit, mEntity, null, null, extras);
 	}
 
-	protected void usePictureDefault() {
+	protected void usePhotoDefault() {
 		/*
 		 * Setting the photo to null will trigger correct default handling.
 		 */
@@ -742,50 +720,29 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressLint("InlinedApi")
-	protected void pictureFromGallery() {
-		//		Intent picturePickerIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-		//		picturePickerIntent.setType("image/*");
-		//		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
-
-		final Intent intent = new Intent();
-		intent.setType("image/*");
-		intent.setAction(Intent.ACTION_GET_CONTENT);
-		/*
-		 * We want to filter out remove images like the linked in from picasa.
-		 */
-		if (Constants.SUPPORTS_HONEYCOMB) {
-			intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-		}
-		startActivityForResult(Intent.createChooser(intent, getString(R.string.chooser_gallery_title))
-				, Constants.ACTIVITY_PICTURE_PICK_DEVICE);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToSource);
+	protected void photoFromGallery() {
+		Routing.route(this, Route.PhotoFromGallery);
 	}
 
-	protected void pictureFromCamera() {
-		final Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+	protected void photoFromCamera() {
+		Bundle extras = new Bundle();
 		mMediaFile = AndroidManager.getOutputMediaFile(AndroidManager.MEDIA_TYPE_IMAGE);
 		if (mMediaFile != null) {
 			mMediaFilePath = mMediaFile.getAbsolutePath();
 			mMediaFileUri = Uri.fromFile(mMediaFile);
-			intent.putExtra(MediaStore.EXTRA_OUTPUT, mMediaFileUri);
-			startActivityForResult(intent, Constants.ACTIVITY_PICTURE_MAKE);
-			Animate.doOverridePendingTransition(this, TransitionType.PageToSource);
+			extras.putParcelable(MediaStore.EXTRA_OUTPUT, mMediaFileUri);
+			Routing.route(this, Route.PhotoFromCamera, mEntity, null, null, extras);
 		}
 	}
 
-	protected void pictureSearch(String defaultSearch) {
-		final Intent intent = new Intent(this, PicturePicker.class);
-		intent.putExtra(Constants.EXTRA_SEARCH_PHRASE, defaultSearch);
-		startActivityForResult(intent, Constants.ACTIVITY_PICTURE_SEARCH);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+	protected void photoSearch(String defaultSearch) {
+		Bundle extras = new Bundle();
+		extras.putString(Constants.EXTRA_SEARCH_PHRASE, defaultSearch);
+		Routing.route(this, Route.PhotoSearch, null, null, null, extras);
 	}
 
-	protected void pictureFromPlace(String entityId) {
-		final IntentBuilder intentBuilder = new IntentBuilder(this, PicturePicker.class)
-				.setEntityId(entityId);
-		final Intent intent = intentBuilder.create();
-		startActivityForResult(intent, Constants.ACTIVITY_PICTURE_PICK_PLACE);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+	protected void photoFromPlace(Entity entity) {
+		Routing.route(this, Route.PhotoPlaceSearch, entity);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -821,7 +778,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				if (mParentId != null) {
 					mEntity.toId = mParentId;
-					link = new Link(mParentId, mEntity.schema, true);
+					link = new Link(mParentId, getLinkType(), true);
 				}
 				else {
 					mEntity.toId = null;
@@ -896,7 +853,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				/* Update entity */
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
-					Tracker.sendEvent("ui_action", "entity_update", mEntity.type, 0, Aircandi.getInstance().getUser());
+					Tracker.sendEvent("ui_action", "entity_update", mEntity.schema, 0, Aircandi.getInstance().getUser());
 					Bitmap bitmap = null;
 					if (mEntity.photo != null && mEntity.photo.hasBitmap() && !mEntity.photo.isBitmapLocalOnly()) {
 						bitmap = mEntity.photo.getBitmap();
@@ -906,8 +863,19 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					result = EntityManager.getInstance().updateEntity(mEntity, bitmap);
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
-						UI.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-						setResult(Constants.RESULT_ENTITY_UPDATED);
+						if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+							if (Aircandi.getInstance().getUser().id.equals(mEntity.id)) {
+
+								/* We also need to update the user that has been persisted for auto sign in. */
+								final String jsonUser = HttpService.objectToJson(mEntity);
+								Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
+								Aircandi.settingsEditor.commit();
+								
+								/* Update the global user but retain the session info */
+								((User)mEntity).session = Aircandi.getInstance().getUser().session;
+								Aircandi.getInstance().setUser((User) mEntity);
+							}
+						}
 					}
 				}
 				return result.serviceResponse;
@@ -918,6 +886,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				mBusyManager.hideBusy();
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					UI.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
+					setResult(Constants.RESULT_ENTITY_UPDATED);
 					finish();
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
 				}
@@ -958,12 +928,12 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					Logger.i(this, "Deleted entity: " + mEntity.name);
 
-					mBusyManager.hideBusy();
-					UI.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
-					setResult(Constants.RESULT_ENTITY_DELETED);
 					/*
 					 * We either go back to a list or to radar.
 					 */
+					mBusyManager.hideBusy();
+					UI.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
+					setResult(Constants.RESULT_ENTITY_DELETED);
 					finish();
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPageAfterDelete);
 				}

@@ -7,6 +7,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.aircandi.Aircandi;
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Dialogs;
@@ -34,8 +35,8 @@ public class CommentEdit extends BaseEntityEdit {
 	}
 
 	@Override
-	protected void bind() {
-		super.bind();
+	protected void databind() {
+		super.databind();
 		/*
 		 * We are always creating a new comment.
 		 */
@@ -44,6 +45,15 @@ public class CommentEdit extends BaseEntityEdit {
 		mEntity.photo = Aircandi.getInstance().getUser().photo.clone();
 		mEntity.name = Aircandi.getInstance().getUser().name;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Methods
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected String getLinkType() {
+		return Constants.TYPE_LINK_COMMENT;
+	};
 
 	// --------------------------------------------------------------------------------------------
 	// Services
@@ -68,7 +78,7 @@ public class CommentEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override

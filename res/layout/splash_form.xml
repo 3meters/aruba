@@ -9,30 +9,33 @@
         android:id="@+id/image_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitXY" />
+        android:scaleType="fitXY"
+        android:src="@drawable/img_splash_v" />
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/dialog"
         style="?attr/buttonBarStyle"
         android:layout_width="280dp"
-        android:layout_height="175dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="#cc111111"
+        android:gravity="center"
         android:orientation="vertical"
-        android:padding="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="25dp"
+        android:paddingBottom="10dp"
         android:visibility="visible"
         tools:ignore="UselessParent" >
 
         <LinearLayout
             android:id="@+id/title_holder"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/form_footer"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="22dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:gravity="center_horizontal"
             android:orientation="horizontal"
-            android:paddingRight="10dp"
             tools:ignore="UseCompoundDrawables" >
 
             <ImageView
@@ -44,7 +47,7 @@
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
                 <com.aircandi.ui.widgets.AirTextView
@@ -59,18 +62,19 @@
                     android:id="@+id/message"
                     style="@style/splash_message"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="3.83"
                     android:text="@string/splash_message" />
             </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/form_footer"
+            android:id="@+id/button_holder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:orientation="horizontal" >
+            android:orientation="horizontal"
+            android:visibility="visible" >
 
             <com.aircandi.ui.widgets.AirButton
                 android:id="@+id/button_signup"
@@ -91,7 +95,7 @@
                 android:onClick="onSigninButtonClick"
                 android:text="@string/splash_button_signin" />
         </LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
 
     <ImageView
         android:layout_width="200dp"

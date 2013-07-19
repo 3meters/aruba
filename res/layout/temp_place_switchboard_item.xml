@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:paddingBottom="5dp" >
 
-    <com.aircandi.ui.widgets.WebImageView
+    <com.aircandi.ui.widgets.AirImageView
         android:id="@+id/photo"
         android:layout_width="@dimen/image_medium"
         android:layout_height="@dimen/image_medium"
@@ -22,10 +22,10 @@
         android:id="@+id/badge_upper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
-        android:layout_marginRight="3dp"
-        android:layout_alignTop="@+id/photo"
         android:layout_alignRight="@+id/photo"
+        android:layout_alignTop="@+id/photo"
+        android:layout_marginRight="3dp"
+        android:layout_marginTop="0dp"
         android:gravity="top|right"
         android:text="@string/dummy_number"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -36,23 +36,23 @@
         android:id="@+id/badge_lower"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_margin="0dp"
         android:layout_alignBottom="@+id/photo"
         android:layout_alignRight="@+id/photo"
+        android:layout_margin="0dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/accent_blue"
         android:visibility="visible" />
-    
+
     <ImageView
         android:id="@+id/indicator"
         android:layout_width="16dp"
         android:layout_height="16dp"
-        android:layout_margin="6dp"
-        android:layout_alignTop="@+id/photo"
         android:layout_alignRight="@+id/photo"
+        android:layout_alignTop="@+id/photo"
+        android:layout_margin="6dp"
         android:src="@drawable/img_play_store_arrow"
         android:visibility="visible" />
-    
+
     <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/name"
         android:layout_width="match_parent"
@@ -60,7 +60,7 @@
         android:layout_below="@+id/photo"
         android:ellipsize="end"
         android:gravity="center_horizontal"
-        android:maxLines="1"
+        android:maxLines="2"
         android:textAppearance="@style/app_text_appearance_tiny"
         android:visibility="gone" />
 

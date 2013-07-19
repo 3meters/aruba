@@ -29,25 +29,19 @@ import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Place;
-import com.aircandi.ui.base.BaseActivity;
+import com.aircandi.ui.base.BaseBrowse;
 
-public class PictureSourcePicker extends BaseActivity implements OnItemClickListener {
+public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener {
 
+	private TextView	mName;
 	private ListView	mListView;
 	private ListAdapter	mListAdapter;
-	private TextView	mName;
 	private Entity		mEntity;
-
+	
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		if (!isFinishing()) {
-			initialize();
-			bind();
-		}
-	}
-
-	private void initialize() {
+	protected void unpackIntent() {
+		super.unpackIntent();
+		
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
@@ -57,8 +51,17 @@ public class PictureSourcePicker extends BaseActivity implements OnItemClickList
 		}
 	}
 
-	private void bind() {
-		
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+
+		mName = (TextView) findViewById(R.id.name);
+		mListView = (ListView) findViewById(R.id.form_list);
+	}
+
+	@Override
+	protected void databind(Boolean refresh) {
+
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();
 
@@ -85,7 +88,17 @@ public class PictureSourcePicker extends BaseActivity implements OnItemClickList
 						, getString(R.string.dialog_picture_source_place), null, Constants.PHOTO_SOURCE_PLACE));
 			}
 			else {
-				List<Entity> entities = (List<Entity>) mEntity.getLinkedEntitiesByLinkType(Constants.TYPE_LINK_POST, null, Direction.in, false);
+				
+				List<String> schemas = new ArrayList<String>();
+				schemas.add(Constants.SCHEMA_ENTITY_POST);
+				List<String> linkTypes = new ArrayList<String>();
+				linkTypes.add(Constants.TYPE_LINK_POST);
+				
+				List<Entity> entities = (List<Entity>) mEntity.getLinkedEntitiesByLinkTypes(linkTypes
+						, schemas
+						, Direction.in
+						, false);
+				
 				for (Entity post : entities) {
 					if (post.photo != null) {
 						listData.add(new Template(mThemeTone.equals("light") ? R.drawable.ic_action_location_light
@@ -99,11 +112,11 @@ public class PictureSourcePicker extends BaseActivity implements OnItemClickList
 		else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 			Applink applink = (Applink) mEntity;
 			if (applink.appId != null) {
-				if (applink.type.equals(Constants.TYPE_APPLINK_FACEBOOK)) {
+				if (applink.type.equals(Constants.TYPE_APP_FACEBOOK)) {
 					listData.add(new Template(mThemeTone.equals("light") ? R.drawable.ic_action_facebook_light : R.drawable.ic_action_facebook_dark
 							, getString(R.string.dialog_picture_source_facebook), null, Constants.PHOTO_SOURCE_FACEBOOK));
 				}
-				else if (applink.type.equals(Constants.TYPE_APPLINK_TWITTER)) {
+				else if (applink.type.equals(Constants.TYPE_APP_TWITTER)) {
 					listData.add(new Template(mThemeTone.equals("light") ? R.drawable.ic_action_twitter_light : R.drawable.ic_action_twitter_dark
 							, getString(R.string.dialog_picture_source_twitter), null, Constants.PHOTO_SOURCE_TWITTER));
 				}
@@ -114,11 +127,9 @@ public class PictureSourcePicker extends BaseActivity implements OnItemClickList
 		listData.add(new Template(mThemeTone.equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
 				, getString(R.string.dialog_picture_source_default), null, Constants.PHOTO_SOURCE_DEFAULT));
 
-		mName = (TextView) findViewById(R.id.name);
 		mName.setText(R.string.dialog_picture_source_title);
 
 		mListAdapter = new ListAdapter(this, listData);
-		mListView = (ListView) findViewById(R.id.form_list);
 		mListView.setAdapter(mListAdapter);
 		mListView.setOnItemClickListener(this);
 	}
@@ -140,8 +151,8 @@ public class PictureSourcePicker extends BaseActivity implements OnItemClickList
 	// Inner classes
 	// --------------------------------------------------------------------------------------------
 
-	private class ListAdapter extends ArrayAdapter<Object>
-	{
+	private class ListAdapter extends ArrayAdapter<Object> {
+		
 		private final List<Object>	items;
 
 		private ListAdapter(Context context, List<Object> items) {
@@ -156,8 +167,7 @@ public class PictureSourcePicker extends BaseActivity implements OnItemClickList
 			final Template itemData = (Template) items.get(position);
 
 			if (view == null) {
-				final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				view = inflater.inflate(R.layout.temp_listitem_picture_source, null);
+				view = LayoutInflater.from(PhotoSourcePicker.this).inflate(R.layout.temp_listitem_photo_source, null);
 			}
 
 			if (itemData != null) {
@@ -170,7 +180,7 @@ public class PictureSourcePicker extends BaseActivity implements OnItemClickList
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -182,4 +192,5 @@ public class PictureSourcePicker extends BaseActivity implements OnItemClickList
 	protected int getLayoutId() {
 		return R.layout.picker_picture_source;
 	}
+
 }

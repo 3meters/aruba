@@ -135,18 +135,22 @@ public class NotificationManager {
 		}.execute();
 	}
 
+	public void broadcastNotification(final AirNotification notification) {
+		BusProvider.getInstance().post(new MessageEvent(notification));
+	}
+
 	public void showNotification(final AirNotification airNotification, Context context) {
 		/*
 		 * Small icon displays on left unless a large icon is specified
 		 * and then it moves to the right.
 		 */
 		if (airNotification.type != null) {
-			if (airNotification.type.equals("nearby")) {
+			if (airNotification.type.equals(Constants.TYPE_NOTIFICATION_NEARBY)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_NEARBY, Constants.PREF_NOTIFICATIONS_NEARBY_DEFAULT)) {
 					return;
 				}
 			}
-			else if (airNotification.type.equals("watch")) {
+			else if (airNotification.type.equals(Constants.TYPE_NOTIFICATION_WATCH)) {
 				if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 					if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_COMMENTS, Constants.PREF_NOTIFICATIONS_COMMENTS_DEFAULT)) {
 						return;

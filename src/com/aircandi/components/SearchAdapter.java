@@ -14,7 +14,7 @@ import com.aircandi.beta.R;
 import com.aircandi.components.SearchManager.SearchItem;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.ui.widgets.WebImageView;
+import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.UI;
 
@@ -27,7 +27,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 	public SearchAdapter(Context context, List<SearchItem> searchItems, Integer itemLayoutId) {
 		super(context, 0, searchItems);
 		mListItems = searchItems;
-		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mInflater = LayoutInflater.from(context);
 		if (itemLayoutId != null) {
 			mItemLayoutId = itemLayoutId;
 		}
@@ -46,7 +46,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 			holder.name = (TextView) view.findViewById(R.id.name);
 			holder.categoryName = (TextView) view.findViewById(R.id.category_name);
 			holder.uri = (TextView) view.findViewById(R.id.uri);
-			holder.photo = (WebImageView) view.findViewById(R.id.photo);
+			holder.photoView = (AirImageView) view.findViewById(R.id.photo);
 
 			view.setTag(holder);
 		}
@@ -103,26 +103,26 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 				}
 			}
 
-			if (holder.photo != null) {
+			if (holder.photoView != null) {
 				/*
 				 * The WebImageView sets the current bitmap ref being held
 				 * by the internal image view to null before doing the work
 				 * to satisfy the new request.
 				 */
 				if (searchItem.icon != null) {
-					UI.showImageInImageView(searchItem.icon, holder.photo.getImageView(), true, Animate.fadeInMedium());
+					UI.showImageInImageView(searchItem.icon, holder.photoView.getImageView(), true, Animate.fadeInMedium());
 				}
 				else if (searchItem.categoryIconUri != null) {
 
 					final String photoUri = searchItem.categoryIconUri;
-					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photo).setImageUri(photoUri);
+					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photoView).setImageUri(photoUri);
 					final BitmapRequest imageRequest = builder.create();
 
 					holder.categoryIconUri = photoUri;
-					holder.photo.setBitmapRequest(imageRequest);
+					holder.photoView.setBitmapRequest(imageRequest);
 				}
 				else {
-					holder.photo.getImageView().setImageResource(R.drawable.img_globe);
+					holder.photoView.getImageView().setImageResource(R.drawable.img_globe);
 				}
 			}
 		}
@@ -155,7 +155,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 		private TextView		name;
 		private TextView		uri;
 		private TextView		categoryName;
-		private WebImageView	photo;
+		private AirImageView	photoView;
 		public String			categoryIconUri;
 		public Object			data;
 	}

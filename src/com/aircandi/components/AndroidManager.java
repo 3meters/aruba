@@ -83,10 +83,17 @@ public class AndroidManager {
 	}
 
 	public void callMapActivity(Context context, String latitude, String longitude, String label) {
-		final String uri = "geo:" + latitude + "," + longitude + "?q="
+		final String uri = "geo:0,0?q="
 				+ latitude
-				+ "," + longitude
-				+ "(" + label + ")";
+				+ "," + longitude;
+		
+//		final String uri = "geo:" + latitude + "," + longitude + "?q="
+//				+ Uri.encode(latitude
+//				+ "," + longitude
+//				+ "(" + label + ")");
+		
+		//		final String uri = "geo:" + latitude + "," + longitude;
+		
 		final Intent searchAddress = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
 		context.startActivity(searchAddress);
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);

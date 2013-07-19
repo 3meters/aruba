@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <integer name="candi_flow_limit">8</integer>
+    <integer name="shortcuts_flow_limit">8</integer>
+    <integer name="place_shortcuts_flow_limit">8</integer>
 
 </resources>

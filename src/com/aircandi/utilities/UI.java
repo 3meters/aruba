@@ -3,6 +3,7 @@ package com.aircandi.utilities;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -14,8 +15,62 @@ import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
+import com.aircandi.beta.R;
+import com.aircandi.components.bitmaps.BitmapManager;
+import com.aircandi.components.bitmaps.BitmapRequest;
+import com.aircandi.service.objects.Photo;
+import com.aircandi.service.objects.Place;
+import com.aircandi.ui.widgets.AirImageView;
 
 public class UI {
+
+	public static void drawPhoto(AirImageView view, Photo photo) {
+
+		if (photo != null && photo.hasBitmap()) {
+			view.hideLoading();
+			UI.showImageInImageView(photo.getBitmap(), view.getImageView(), true, Animate.fadeInMedium());
+			view.setVisibility(View.VISIBLE);
+		}
+		else {
+			/* Don't do anything if the image is already set to the one we want */
+			final String photoUri = photo.getUri();
+			if (view.getImageUri() == null || !view.getImageUri().equals(photoUri)) {
+				final BitmapRequest bitmapRequest = new BitmapRequest(photoUri, view.getImageView());
+				bitmapRequest.setImageSize(view.getSizeHint());
+				bitmapRequest.setImageRequestor(view.getImageView());
+				view.getImageView().setTag(photoUri);
+				BitmapManager.getInstance().masterFetch(bitmapRequest);
+			}
+		}
+		/*
+		 * Special color treatment if enabled.
+		 */
+		if (photo.colorize != null && photo.colorize) {
+
+			final int color = Place.getCategoryColor(photo.colorizeKey, true, Aircandi.muteColor, false);
+
+			view.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+			Integer colorResId = Place.getCategoryColorResId(photo.colorizeKey, true, Aircandi.muteColor, false);
+
+			if (view.findViewById(R.id.color_layer) != null) {
+				(view.findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
+				(view.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
+				(view.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
+			}
+			else {
+				view.getImageView().setBackgroundResource(colorResId);
+			}
+		}
+		else {
+			view.getImageView().clearColorFilter();
+			view.getImageView().setBackgroundResource(0);
+			if (view.findViewById(R.id.color_layer) != null) {
+				(view.findViewById(R.id.color_layer)).setBackgroundResource(0);
+				(view.findViewById(R.id.color_layer)).setVisibility(View.GONE);
+				(view.findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
+			}
+		}
+	}
 
 	public static void showToastNotification(final String message, final int duration) {
 		Aircandi.mainThreadHandler.post(new Runnable() {
@@ -109,6 +164,5 @@ public class UI {
 			view.setVisibility(visibility);
 		}
 	}
-
 
 }

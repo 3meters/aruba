@@ -72,7 +72,7 @@
 
     <style name="picture_framed_thick" parent="picture">
         <item name="android:background">?attr/backgroundPictureFramed</item>
-        <item name="android:padding">15dp</item>
+        <item name="android:layout_margin">15dp</item>
         <item name="android:cropToPadding">true</item>
     </style>
 

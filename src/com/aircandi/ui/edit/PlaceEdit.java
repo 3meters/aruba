@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -22,11 +21,9 @@ import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityEdit;
-import com.aircandi.ui.helpers.AddressBuilder;
-import com.aircandi.ui.helpers.CategoryBuilder;
 import com.aircandi.ui.widgets.BuilderButton;
-import com.aircandi.utilities.Animate;
-import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 
 public class PlaceEdit extends BaseEntityEdit {
 
@@ -41,6 +38,7 @@ public class PlaceEdit extends BaseEntityEdit {
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
+		
 		if (mEntity != null) {
 			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
 				mTabManager = new TabManager(Constants.TABS_ENTITY_FORM_ID, mActionBar, (ViewFlipper) findViewById(R.id.flipper_form));
@@ -71,56 +69,18 @@ public class PlaceEdit extends BaseEntityEdit {
 
 	}
 
-	@Override
-	protected void drawPhoto() {
-		super.drawPhoto();
-		/*
-		 * Special color layering if we are using the category photo.
-		 */
-		Place place = (Place) mEntity;
-		if (place.photo == null && place.category != null) {
-
-			final int color = Place.getCategoryColor((place.category != null)
-					? place.category.name
-					: null, true, mMuteColor, false);
-
-			mPhoto.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-			Integer colorResId = Place.getCategoryColorResId(place.category != null ? place.category.name : null,
-					true, mMuteColor, false);
-
-			if (findViewById(R.id.color_layer) != null) {
-				(findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
-				(findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
-				(findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
-			}
-			else {
-				mPhoto.getImageView().setBackgroundResource(colorResId);
-			}
-		}
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
 	public void onAddressBuilderClick(View view) {
-		final Intent intent = new Intent(this, AddressBuilder.class);
-		final String jsonPlace = HttpService.objectToJson(mEntity);
-		intent.putExtra(Constants.EXTRA_PLACE, jsonPlace);
-		startActivityForResult(intent, Constants.ACTIVITY_ADDRESS_EDIT);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Routing.route(this, Route.AddressEdit, mEntity);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onCategoryBuilderClick(View view) {
-		final Intent intent = new Intent(this, CategoryBuilder.class);
-		if (((Place) mEntity).category != null) {
-			final String jsonCategory = HttpService.objectToJson(((Place) mEntity).category);
-			intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
-		}
-		startActivityForResult(intent, Constants.ACTIVITY_CATEGORY_EDIT);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Routing.route(this, Route.CategoryEdit, mEntity);
 	}
 
 	@Override
@@ -193,13 +153,21 @@ public class PlaceEdit extends BaseEntityEdit {
 		 */
 		final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
 		if (location != null) {
+			if (((Place) mEntity).location == null) {
+				((Place) mEntity).location = new AirLocation();
+			}
 			((Place) mEntity).location.lat = location.lat;
 			((Place) mEntity).location.lng = location.lng;
 		}
 	}
-	
+
+	@Override
+	protected String getLinkType() {
+		return Constants.TYPE_LINK_PROXIMITY;
+	};
+
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override

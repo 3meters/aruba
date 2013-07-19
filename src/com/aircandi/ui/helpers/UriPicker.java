@@ -31,7 +31,7 @@ import com.aircandi.components.SearchManager.SearchItem;
 import com.aircandi.service.HttpService.RequestType;
 import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
-import com.aircandi.ui.base.BaseActivity;
+import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
@@ -39,7 +39,7 @@ import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Utilities;
 
 @SuppressWarnings("ucd")
-public class UriPicker extends BaseActivity {
+public class UriPicker extends BaseBrowse {
 
 	private TextView				mName;
 	private ListView				mListView;
@@ -52,22 +52,19 @@ public class UriPicker extends BaseActivity {
 	private Boolean					mVerifyUri		= false;
 	private final List<SearchItem>	mSearchItems	= new ArrayList<SearchItem>();
 	private SearchAdapter			mSearchAdapter;
-
+	
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		if (!isFinishing()) {
-			initialize();
-		}
-	}
-
-	private void initialize() {
-
+	protected void unpackIntent() {
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mVerifyUri = extras.getBoolean(Constants.EXTRA_VERIFY_URI, false);
 			mUri = extras.getString(Constants.EXTRA_URI);
 		}
+	}
+
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
 
 		mListView = (ListView) findViewById(R.id.form_list);
 		mOkButton = (Button) findViewById(R.id.button_ok);
@@ -88,11 +85,10 @@ public class UriPicker extends BaseActivity {
 				mTestButton.setEnabled(mTextUri.getText().length() > 0);
 			}
 		});
-
-		bind();
 	}
 
-	private void bind() {
+	@Override
+	protected void databind(Boolean refresh) {
 
 		new AsyncTask() {
 
@@ -275,7 +271,7 @@ public class UriPicker extends BaseActivity {
 	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
-	// Lifecycle routines
+	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
 	@Override

@@ -166,7 +166,7 @@ public class PasswordEdit extends BaseEdit {
 	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -174,16 +174,4 @@ public class PasswordEdit extends BaseEdit {
 		return R.layout.password_edit;
 	}
 
-	@Override
-	protected void bind() {}
-
-	
-	@Override
-	protected void draw() {}
-
-	@Override
-	protected void delete() {}
-
-	@Override
-	protected void insert() {}
 }

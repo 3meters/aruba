@@ -29,7 +29,7 @@
                 android:gravity="left"
                 android:orientation="horizontal" >
 
-                <com.aircandi.ui.widgets.WebImageView
+                <com.aircandi.ui.widgets.AirImageView
                     android:id="@+id/photo"
                     android:layout_width="@dimen/image_medium"
                     android:layout_height="@dimen/image_medium"

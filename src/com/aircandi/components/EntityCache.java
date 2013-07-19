@@ -23,7 +23,6 @@ import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.HttpService.ServiceDataWrapper;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.AirLocation;
-import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Entity;
@@ -48,7 +47,7 @@ public class EntityCache implements Map<String, Entity> {
 	private ServiceResponse dispatch(ServiceRequest serviceRequest) {
 		return dispatch(serviceRequest, null);
 	}
-	
+
 	private ServiceResponse dispatch(ServiceRequest serviceRequest, Stopwatch stopwatch) {
 		/*
 		 * We use this as a choke point for all calls to the aircandi service.
@@ -69,7 +68,9 @@ public class EntityCache implements Map<String, Entity> {
 		 */
 		if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)
 				|| entity.schema.equals(Constants.SCHEMA_ENTITY_POST)) {
-			List<Applink> applinks = entity.getClientApplinks();
+
+			List<Shortcut> shortcuts = entity.getClientShortcuts();
+
 			if (entity.linksIn == null) {
 				entity.linksIn = new ArrayList<Link>();
 			}
@@ -77,23 +78,15 @@ public class EntityCache implements Map<String, Entity> {
 				entity.linksInCounts = new ArrayList<Count>();
 			}
 			else if (entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.in) == null) {
-				entity.linksInCounts.add(new Count(Constants.TYPE_LINK_APPLINK, applinks.size()));
+				entity.linksInCounts.add(new Count(Constants.TYPE_LINK_APPLINK, shortcuts.size()));
 			}
 			else {
 				entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.in).count = entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.in).count.intValue()
-						+ applinks.size();
+						+ shortcuts.size();
 			}
-			for (Applink applink : applinks) {
-				Link link = new Link(entity.id, applink.schema, true, applink.id);
-				link.shortcut = new Shortcut()
-						.setName(applink.name != null ? applink.name : null)
-						.setSchema(applink.schema != null ? applink.schema : null)
-						.setApp(applink.type != null ? applink.type : null)
-						.setAppId(applink.id != null ? applink.id : null)
-						.setAppUrl(applink.appUrl != null ? applink.appUrl : null)
-						.setPhoto(applink.photo != null ? applink.photo : null)
-						.setSynthetic(applink.synthetic != null ? applink.synthetic : null);
-
+			for (Shortcut shortcut : shortcuts) {
+				Link link = new Link(entity.id, shortcut.schema, true, shortcut.getId());
+				link.shortcut = shortcut;
 				entity.linksIn.add(link);
 			}
 		}
@@ -117,7 +110,9 @@ public class EntityCache implements Map<String, Entity> {
 
 		final Bundle parameters = new Bundle();
 		parameters.putStringArrayList("entityIds", (ArrayList<String>) entityIds);
-		parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
+		if (linkOptions != null) {
+			parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
+		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
@@ -146,12 +141,11 @@ public class EntityCache implements Map<String, Entity> {
 		return serviceResponse;
 	}
 
-	public ServiceResponse loadEntitiesForEntity(String entityId, List<String> linkTypes, LinkOptions linkOptions, Cursor cursor) {
+	public ServiceResponse loadEntitiesForEntity(String entityId, LinkOptions linkOptions, Cursor cursor) {
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("entityId", entityId);
-		parameters.putStringArrayList("linkTypes", (ArrayList<String>) linkTypes);
-		
+
 		if (linkOptions != null) {
 			parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
 		}
@@ -179,6 +173,14 @@ public class EntityCache implements Map<String, Entity> {
 			serviceResponse.data = serviceData;
 
 			if (loadedEntities != null && loadedEntities.size() > 0) {
+				for (Entity entity : loadedEntities) {
+					if (cursor != null && cursor.direction != null && cursor.direction.equals("out")) {
+						entity.fromId = entityId;
+					}
+					else {
+						entity.toId = entityId;
+					}
+				}
 				decorate(loadedEntities, linkOptions);
 				upsertEntities(loadedEntities);
 			}
@@ -191,7 +193,10 @@ public class EntityCache implements Map<String, Entity> {
 
 		final Bundle parameters = new Bundle();
 		parameters.putStringArrayList("beaconIds", (ArrayList<String>) beaconIds);
-		parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
+
+		if (linkOptions != null) {
+			parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
+		}
 
 		if (cursor != null) {
 			parameters.putString("cursor", "object:" + HttpService.objectToJson(cursor));
@@ -238,51 +243,13 @@ public class EntityCache implements Map<String, Entity> {
 					stopwatch.segmentTime("Load entities: entities decorated and pushed to cache");
 				}
 			}
-			
+
 		}
 
 		return serviceResponse;
 	}
 
-	public ServiceResponse loadEntitiesByOwner(String ownerId, List<String> entitySchemas, LinkOptions linkOptions, Cursor cursor) {
-
-		final Bundle parameters = new Bundle();
-		parameters.putString("ownerId", ownerId);
-		parameters.putStringArrayList("entitySchemas", (ArrayList<String>) entitySchemas);
-		parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
-
-		if (cursor != null) {
-			parameters.putString("cursor", "object:" + HttpService.objectToJson(cursor));
-		}
-
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesByOwner")
-				.setRequestType(RequestType.Method)
-				.setParameters(parameters)
-				.setResponseFormat(ResponseFormat.Json);
-
-		if (Aircandi.getInstance().getUser() != null) {
-			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
-		}
-
-		ServiceResponse serviceResponse = dispatch(serviceRequest);
-
-		if (serviceResponse.responseCode == ResponseCode.Success) {
-			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Entity, ServiceDataWrapper.True);
-			final List<Entity> loadedEntities = (List<Entity>) serviceData.data;
-			serviceResponse.data = serviceData;
-
-			if (loadedEntities != null && loadedEntities.size() > 0) {
-				decorate(loadedEntities, linkOptions);
-				upsertEntities(loadedEntities);
-			}
-		}
-
-		return serviceResponse;
-	}
-
-	public ServiceResponse loadEntitiesNearLocation(AirLocation location, List<String> excludePlaceIds) {
+	public ServiceResponse loadEntitiesNearLocation(AirLocation location, LinkOptions linkOptions, List<String> excludePlaceIds) {
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("location", "object:" + HttpService.objectToJson(location));
@@ -295,6 +262,11 @@ public class EntityCache implements Map<String, Entity> {
 				Aircandi.settings.getString(
 						Constants.PREF_SEARCH_RADIUS,
 						Constants.PREF_SEARCH_RADIUS_DEFAULT)));
+
+		if (linkOptions != null) {
+			parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
+		}
+
 		if (excludePlaceIds != null && excludePlaceIds.size() > 0) {
 			parameters.putStringArrayList("excludePlaceIds", (ArrayList<String>) excludePlaceIds);
 		}
@@ -382,16 +354,18 @@ public class EntityCache implements Map<String, Entity> {
 
 	public synchronized Entity upsertEntity(Entity entity) {
 
-		removeEntityTree(entity.id);
+		@SuppressWarnings("unused")
+		Entity removedEntity = removeEntityTree(entity.id);
 		put(entity.id, entity);
 		mLastActivityDate = DateTime.nowDate().getTime();
 		return get(entity.id);
 	}
 
-	public synchronized void updateEntityUser(User user) {
+	public synchronized void updateEntityUser(Entity entity) {
 		/*
 		 * Updates user objects that are embedded in entities.
 		 */
+		User user = (User) entity;
 		for (Entry<String, Entity> entry : entrySet()) {
 			if (entry.getValue().creatorId != null && entry.getValue().creatorId.equals(user.id)) {
 				if (entry.getValue().creator != null) {
@@ -464,7 +438,7 @@ public class EntityCache implements Map<String, Entity> {
 
 			entity.linksIn.add(link);
 			entity.activityDate = time;
-			setLastActivityDate(time);
+			mLastActivityDate = DateTime.nowDate().getTime();
 		}
 	}
 
@@ -480,7 +454,7 @@ public class EntityCache implements Map<String, Entity> {
 		if (staleEntity != null) {
 			staleEntity.stale = true;
 
-			List<Entity> entities = (List<Entity>) staleEntity.getLinkedEntitiesByLinkType(Constants.TYPE_ANY, null, Direction.in, true);
+			List<Entity> entities = (List<Entity>) staleEntity.getLinkedEntitiesByLinkTypes(null, null, Direction.in, true);
 			for (Entity childEntity : entities) {
 				staleEntity = remove(childEntity.id);
 				if (staleEntity != null) {
@@ -488,7 +462,7 @@ public class EntityCache implements Map<String, Entity> {
 				}
 			}
 
-			setLastActivityDate(DateTime.nowDate().getTime());
+			mLastActivityDate = DateTime.nowDate().getTime();
 		}
 		return staleEntity;
 	}
@@ -523,7 +497,7 @@ public class EntityCache implements Map<String, Entity> {
 
 			if (entity.linksIn != null) {
 				for (Link link : entity.linksIn) {
-					if (link.fromId.equals(fromId) && link.type.equals(type)) {
+					if (link.fromId != null && link.fromId.equals(fromId) && link.type.equals(type)) {
 						entity.linksIn.remove(link);
 						break;
 					}
@@ -532,7 +506,7 @@ public class EntityCache implements Map<String, Entity> {
 		}
 		Long time = DateTime.nowDate().getTime();
 		entity.activityDate = time;
-		setLastActivityDate(time);
+		mLastActivityDate = DateTime.nowDate().getTime();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -557,38 +531,6 @@ public class EntityCache implements Map<String, Entity> {
 									Float distance = entity.getDistance(true);
 									if (distance == null || distance <= radius) {
 										entities.add(entity);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return entities;
-	}
-
-	public synchronized List<? extends Entity> getEntitiesByOwner(String ownerId, String schema, String type, Boolean synthetic, Integer radius,
-			Boolean proximity) {
-		List<Entity> entities = new ArrayList<Entity>();
-		final Iterator iter = keySet().iterator();
-		Entity entity = null;
-		while (iter.hasNext()) {
-			entity = get(iter.next());
-			if (entity.ownerId != null && entity.ownerId.equals(ownerId)) {
-				if (!entity.isHidden()) {
-					if (schema == null || schema.equals(Constants.SCHEMA_ANY) || entity.schema.equals(schema)) {
-						if (type == null || type.equals(Constants.TYPE_ANY) || (entity.type != null && entity.type.equals(type))) {
-							if (synthetic == null || entity.synthetic == synthetic) {
-								if (proximity == null || entity.getActiveBeacon(Constants.TYPE_LINK_PROXIMITY, true) != null) {
-									if (radius == null) {
-										entities.add(entity);
-									}
-									else {
-										Float distance = entity.getDistance(true);
-										if (distance == null || distance <= radius) {
-											entities.add(entity);
-										}
 									}
 								}
 							}

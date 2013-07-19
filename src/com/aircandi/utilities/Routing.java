@@ -16,12 +16,18 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.provider.Settings;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
+import com.aircandi.applications.Comments;
+import com.aircandi.applications.Places;
+import com.aircandi.applications.Posts;
+import com.aircandi.applications.Users;
 import com.aircandi.beta.R;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
@@ -40,133 +46,585 @@ import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
+import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutMeta;
+import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.EntityList;
 import com.aircandi.ui.HelpForm;
 import com.aircandi.ui.PhotoForm;
 import com.aircandi.ui.Preferences;
 import com.aircandi.ui.RadarForm;
 import com.aircandi.ui.SplashForm;
-import com.aircandi.ui.WatchForm;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.ui.base.BaseActivity.ServiceOperation;
 import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.ui.base.BaseEdit;
 import com.aircandi.ui.base.BaseEntityEdit;
-import com.aircandi.ui.base.BaseEntityList.ListMode;
+import com.aircandi.ui.base.BaseEntityForm;
+import com.aircandi.ui.edit.ApplinkListEdit;
 import com.aircandi.ui.edit.CommentEdit;
 import com.aircandi.ui.edit.FeedbackEdit;
+import com.aircandi.ui.edit.TuningEdit;
+import com.aircandi.ui.helpers.AddressBuilder;
+import com.aircandi.ui.helpers.CategoryBuilder;
+import com.aircandi.ui.helpers.PhotoPicker;
+import com.aircandi.ui.helpers.PhotoSourcePicker;
 import com.aircandi.ui.helpers.ShortcutPicker;
+import com.aircandi.ui.user.PasswordEdit;
+import com.aircandi.ui.user.RegisterEdit;
+import com.aircandi.ui.user.SignInEdit;
 import com.aircandi.ui.user.UserForm;
 import com.aircandi.utilities.Animate.TransitionType;
 
 public final class Routing {
 
-	public static void shortcut(final Activity activity, Shortcut shortcut, Entity hostEntity) {
+	public static boolean route(final Activity activity, Route route) {
+		return route(activity, route, null, null, null);
+	}
 
-		Tracker.sendEvent("ui_action", "browse_source", shortcut.app, 0, Aircandi.getInstance().getUser());
-		if (shortcut.app.equals(Constants.TYPE_APPLINK_TWITTER)) {
-			AndroidManager.getInstance().callTwitterActivity(activity, (shortcut.appId != null) ? shortcut.appId : shortcut.appUrl);
-		}
-		else if (shortcut.app.equals(Constants.TYPE_APPLINK_FOURSQUARE)) {
-			AndroidManager.getInstance().callFoursquareActivity(activity, (shortcut.appId != null) ? shortcut.appId : shortcut.appUrl);
-		}
-		else if (shortcut.app.equals(Constants.TYPE_APPLINK_FACEBOOK)) {
-			AndroidManager.getInstance().callFacebookActivity(activity, (shortcut.appId != null) ? shortcut.appId : shortcut.appUrl);
-		}
-		else if (shortcut.app.equals(Constants.TYPE_APPLINK_MAP) && hostEntity != null) {
-			Tracker.sendEvent("ui_action", "map_place", null, 0, Aircandi.getInstance().getUser());
-			final AirLocation location = hostEntity.getLocation();
-			AndroidManager.getInstance().callMapActivity(activity, String.valueOf(location.lat.doubleValue())
-					, String.valueOf(location.lng.doubleValue())
-					, hostEntity.name);
-		}
-		else if (shortcut.app.equals(Constants.TYPE_APPLINK_YELP)) {
-			AndroidManager.getInstance().callYelpActivity(activity, shortcut.appId, shortcut.appUrl);
-		}
-		else if (shortcut.app.equals(Constants.TYPE_APPLINK_OPENTABLE)) {
-			AndroidManager.getInstance().callOpentableActivity(activity, shortcut.appId, shortcut.appUrl);
-		}
-		else if (shortcut.app.equals(Constants.TYPE_APPLINK_WEBSITE)) {
-			AndroidManager.getInstance().callBrowserActivity(activity, (shortcut.appUrl != null) ? shortcut.appUrl : shortcut.appId);
-		}
-		else if (shortcut.app.equals(Constants.TYPE_APPLINK_EMAIL)) {
-			AndroidManager.getInstance().callSendToActivity(activity, shortcut.name, shortcut.appId, null, null);
-		}
-		else if (shortcut.app.equals(Constants.TYPE_APPLINK_COMMENT) && hostEntity != null) {
-			final IntentBuilder intentBuilder = new IntentBuilder(activity, EntityList.class)
-					.setEntityId(hostEntity.id)
-					.setListMode(ListMode.EntitiesForEntity)
-					.setListItemResId(R.layout.temp_listitem_comment)
-					.setListNewEnabled(true)
-					.setListSchema(Constants.SCHEMA_ENTITY_COMMENT);
+	public static boolean route(final Activity activity, Route route, Entity entity) {
+		return route(activity, route, entity, null, null);
+	}
 
-			final Intent intent = intentBuilder.create();
-			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
-		}
-		else if (shortcut.app.equals(Constants.TYPE_APPLINK_LIKE)) {
-			/*
-			 * We don't do anything right now. Goal is to show a form with
-			 * more detail on the likes.
-			 */
-		}
-		else if (shortcut.app.equals(Constants.TYPE_APPLINK_WATCH)) {
-			/*
-			 * We don't do anything right now. Goal is to show a form with
-			 * more detail on the watchers.
-			 */
-		}
-		else if (shortcut.app.equals(Constants.TYPE_APPLINK_POST) && hostEntity != null) {
-			IntentBuilder intentBuilder = null;
-			intentBuilder = new IntentBuilder(activity, EntityList.class)
-					.setEntityId(hostEntity.id)
-					.setListMode(ListMode.EntitiesForEntity)
-					.setListItemResId(R.layout.temp_listitem_candi)
-					.setListNewEnabled(true)
-					.setListSchema(Constants.SCHEMA_ENTITY_POST);
+	public static boolean route(final Activity activity, Route route, Entity entity, Shortcut shortcut, ShortcutSettings settings, Bundle extras) {
 
-			final Intent intent = intentBuilder.create();
-			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
-		}
-		else if (shortcut.app.equals(Constants.SCHEMA_ENTITY_PLACE) && hostEntity != null) {
-			IntentBuilder intentBuilder = null;
-			intentBuilder = new IntentBuilder(activity, EntityList.class)
-					.setEntityId(hostEntity.id)
-					.setListMode(ListMode.EntitiesForEntity)
-					.setListItemResId(R.layout.temp_listitem_candi)
-					.setListNewEnabled(true)
-					.setListSchema(Constants.SCHEMA_ENTITY_POST);
+		if (route == Route.Shortcut) {
+			if (entity == null) {
+				throw new IllegalArgumentException("valid entity required for selected route");
+			}
+			if (shortcut == null) {
+				throw new IllegalArgumentException("valid shortcut required for selected route");
+			}
 
-			final Intent intent = intentBuilder.create();
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
-		}
-		else if (shortcut.app.equals(Constants.SCHEMA_ENTITY_USER) && hostEntity != null) {
-			IntentBuilder intentBuilder = null;
+			final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
+			if (meta != null && !meta.installDeclined
+					&& shortcut.getIntentSupport()
+					&& shortcut.appExists()
+					&& !shortcut.appInstalled()) {
+				Dialogs.install(activity, shortcut, entity);
+			}
+
 			if (shortcut.group != null && shortcut.group.size() > 1) {
-				intentBuilder = new IntentBuilder(activity, EntityList.class)
-						.setEntityId(hostEntity.id)
-						.setListMode(ListMode.EntitiesForEntity)
-						.setListItemResId(R.layout.temp_listitem_candi)
-						.setListNewEnabled(true)
-						.setListSchema(Constants.SCHEMA_ENTITY_USER);
+				IntentBuilder intentBuilder = new IntentBuilder(activity, ShortcutPicker.class).setEntity(entity);
+				final Intent intent = intentBuilder.create();
+				final List<String> shortcutStrings = new ArrayList<String>();
+				for (Shortcut item : shortcut.group) {
+					Shortcut clone = item.clone();
+					clone.group = null;
+					shortcutStrings.add(HttpService.objectToJson(clone, UseAnnotations.False, ExcludeNulls.True));
+				}
+				intent.putStringArrayListExtra(Constants.EXTRA_SHORTCUTS, (ArrayList<String>) shortcutStrings);
+				activity.startActivity(intent);
+				Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
 			}
 			else {
-				intentBuilder = new IntentBuilder(activity, UserForm.class).setEntityId(shortcut.id);
+				Routing.shortcut(activity, shortcut, entity);
 			}
 
-			final Intent intent = intentBuilder.create();
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-			activity.startActivity(intent);
+			return true;
+		}
+		else if (route == Route.EntityList && settings != null) {
+
+			if (entity == null) {
+				throw new IllegalArgumentException("valid entity required for selected route");
+			}
+			IntentBuilder intentBuilder = new IntentBuilder(activity, EntityList.class)
+					.setEntityId(entity.id)
+					.setListLinkType(settings.linkType)
+					.setListLinkSchema(settings.linkSchema)
+					.setListItemResId(settings.listItemResId)
+					.setListLinkDirection(settings.direction.name())
+					.setExtras(extras);
+
+			activity.startActivity(intentBuilder.create());
 			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			return true;
 		}
 		else {
-			AndroidManager.getInstance().callGenericActivity(activity, (shortcut.appUrl != null) ? shortcut.appUrl : shortcut.appId);
+			return route(activity, route, entity, null, extras);
+		}
+	}
+
+	public static boolean route(final Activity activity, Route route, Entity entity, String schema, Bundle extras) {
+
+		if (route == Route.Browse) {
+
+			if (entity == null) {
+				throw new IllegalArgumentException("valid entity required for selected route");
+			}
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityForm.viewFormBySchema(entity.schema))
+					.setEntityId(entity.id)
+					.setExtras(extras);
+
+			if (entity.toId != null) {
+				intentBuilder.setEntityParentId(entity.toId);
+			}
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			return true;
+		}
+
+		else if (route == Route.Edit) {
+
+			if (entity == null) {
+				throw new IllegalArgumentException("valid entity required for selected route");
+			}
+			Tracker.sendEvent("ui_action", "edit_" + entity.schema, null, 0, Aircandi.getInstance().getUser());
+			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.editFormBySchema(entity.schema))
+					.setEntity(entity)
+					.setExtras(extras);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.Add) {
+
+			((BaseBrowse) activity).onAdd();
+			return true;
+		}
+
+		else if (route == Route.New) {
+
+			Tracker.sendEvent("ui_action", "new_" + schema, null, 0, Aircandi.getInstance().getUser());
+			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.editFormBySchema(schema))
+					.setEntitySchema(schema)
+					.setExtras(extras);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.Help) {
+			/*
+			 * Extra constructed here because this gets routed from menus.
+			 */
+			Intent intent = new Intent(activity, HelpForm.class);
+			if (activity.getClass().getSimpleName().equals("RadarForm")) {
+				intent.putExtra(Constants.EXTRA_HELP_ID, R.layout.radar_help);
+			}
+			else if (activity.getClass().getSimpleName().equals("PlaceForm")) {
+				intent.putExtra(Constants.EXTRA_HELP_ID, R.layout.place_help);
+			}
+			activity.startActivity(intent);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToHelp);
+			return true;
+		}
+
+		else if (route == Route.SigninProfile) {
+
+			entity = Aircandi.getInstance().getUser();
+			if (entity == null) {
+				throw new IllegalArgumentException("valid user entity required for selected route");
+			}
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, UserForm.class)
+					.setEntityId(entity.id);
+
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			return true;
+		}
+
+		else if (route == Route.Profile) {
+
+			if (entity == null) {
+				throw new IllegalArgumentException("valid user entity required for selected route");
+			}
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, UserForm.class)
+					.setEntityId(entity.id);
+
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			return true;
+		}
+
+		else if (route == Route.Watching) {
+
+			entity = Aircandi.getInstance().getUser();
+			if (entity == null) {
+				throw new IllegalArgumentException("valid user entity required for selected route");
+			}
+			Bundle stuff = new Bundle();
+			stuff.putInt(Constants.EXTRA_TAB_POSITION, 2);
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, UserForm.class)
+					.setEntityId(entity.id)
+					.setExtras(stuff);
+
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			//			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			//			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			return true;
+		}
+
+		else if (route == Route.Photo) {
+
+			if (entity == null) {
+				throw new IllegalArgumentException("valid entity required for selected route");
+			}
+
+			Intent intent = null;
+			final Photo photo = entity.photo;
+			photo.setCreatedAt(entity.modifiedDate.longValue());
+			photo.setName(entity.name);
+			photo.setUser(entity.creator);
+			EntityManager.getInstance().getPhotos().clear();
+			EntityManager.getInstance().getPhotos().add(photo);
+			intent = new Intent(activity, PhotoForm.class);
+			intent.putExtra(Constants.EXTRA_URI, photo.getUri());
+			intent.putExtra(Constants.EXTRA_PAGING_ENABLED, false);
+
+			activity.startActivity(intent);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			return true;
+		}
+
+		else if (route == Route.CommentNew) {
+
+			if (entity == null) {
+				throw new IllegalArgumentException("valid entity required for selected route");
+			}
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, CommentEdit.class).setEntityParentId(entity.id);
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.EntityList) {
+
+			/* Extras must set list mode. */
+			if (entity == null) {
+				throw new IllegalArgumentException("valid entity required for selected route");
+			}
+
+			IntentBuilder intentBuilder = new IntentBuilder(activity, EntityList.class)
+					.setEntityId(entity.id)
+					.setListLinkSchema(schema)
+					.setExtras(extras);
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			return true;
+		}
+
+		else if (route == Route.Accept) {
+
+			((BaseEdit) activity).onAccept();	// Give activity a chance for discard confirmation
+			return true;
+		}
+
+		else if (route == Route.Cancel) {
+
+			((BaseActivity) activity).onCancel(false);	// Give activity a chance for discard confirmation
+			return true;
+		}
+
+		else if (route == Route.CancelForce) {
+
+			((BaseActivity) activity).onCancel(true);	// Give activity a chance for discard confirmation
+			return true;
+		}
+
+		else if (route == Route.Delete) {
+
+			((BaseEdit) activity).confirmDelete();	// Give activity a chance for discard confirmation
+			return true;
+		}
+
+		else if (route == Route.CancelHelp) {
+
+			activity.setResult(Activity.RESULT_CANCELED);
+			activity.finish();
+			Animate.doOverridePendingTransition(activity, TransitionType.HelpToPage);
+			return true;
+		}
+
+		else if (route == Route.Home) {
+
+			Intent intent = new Intent(activity, RadarForm.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			activity.finish();
+			activity.startActivity(intent);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			return true;
+		}
+
+		else if (route == Route.Settings) {
+
+			activity.startActivityForResult(new Intent(activity, Preferences.class), Constants.ACTIVITY_PREFERENCES);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.Feedback) {
+
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, FeedbackEdit.class);
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.Signout) {
+
+			((BaseActivity) activity).signout();
+			return true;
+		}
+
+		else if (route == Route.Signin) {
+
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, SignInEdit.class);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_SIGNIN);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.Register) {
+
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, RegisterEdit.class);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_SIGNIN);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.Terms) {
+
+			final IntentBuilder intentBuilder = new IntentBuilder(android.content.Intent.ACTION_VIEW);
+			intentBuilder.setData(Uri.parse(Constants.URL_AIRCANDI_TERMS));
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.SettingsLocation) {
+
+			activity.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			activity.finish();
+			return true;
+		}
+
+		else if (route == Route.SettingsWifi) {
+
+			activity.startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			activity.finish();
+			return true;
+		}
+
+		else if (route == Route.AddressEdit) {
+
+			IntentBuilder intentBuilder = new IntentBuilder(activity, AddressBuilder.class).setEntity(entity);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ADDRESS_EDIT);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.CategoryEdit) {
+
+			final Intent intent = new Intent(activity, CategoryBuilder.class);
+			if (((Place) entity).category != null) {
+				final String jsonCategory = HttpService.objectToJson(((Place) entity).category);
+				intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
+			}
+			activity.startActivityForResult(intent, Constants.ACTIVITY_CATEGORY_EDIT);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.PasswordChange) {
+
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, PasswordEdit.class);
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.Splash) {
+
+			final Intent intent = new Intent(activity, SplashForm.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			activity.startActivity(intent);
+			activity.finish();
+			Animate.doOverridePendingTransition(activity, TransitionType.FormToPage);
+			return true;
+		}
+
+		else if (route == Route.PhotoSource) {
+
+			IntentBuilder intentBuilder = new IntentBuilder(activity, PhotoSourcePicker.class).setEntity(entity);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_SOURCE_PICK);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.ApplinksEdit) {
+
+			if (entity == null) {
+				throw new IllegalArgumentException("valid entity required for selected route");
+			}
+			IntentBuilder intentBuilder = new IntentBuilder(activity, ApplinkListEdit.class)
+					.setEntityId(entity.id)
+					.setExtras(extras);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_APPLINKS_EDIT);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.PhotoFromGallery) {
+
+			final Intent intent = new Intent()
+					.setType("image/*")
+					.setAction(Intent.ACTION_GET_CONTENT);
+
+			/* We want to filter out remove images like the linked in from picasa. */
+			if (Constants.SUPPORTS_HONEYCOMB) {
+				intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+			}
+
+			activity.startActivityForResult(Intent.createChooser(intent
+					, activity.getString(R.string.chooser_gallery_title))
+					, Constants.ACTIVITY_PICTURE_PICK_DEVICE);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.PhotoFromCamera) {
+
+			IntentBuilder intentBuilder = new IntentBuilder(MediaStore.ACTION_IMAGE_CAPTURE).setExtras(extras);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_MAKE);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.PhotoSearch) {
+
+			IntentBuilder intentBuilder = new IntentBuilder(activity, PhotoPicker.class).setExtras(extras);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_PICK_PLACE);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.PhotoPlaceSearch) {
+
+			if (entity == null) {
+				throw new IllegalArgumentException("valid entity required for selected route");
+			}
+			IntentBuilder intentBuilder = new IntentBuilder(activity, PhotoPicker.class).setEntityId(entity.id);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_PICK_PLACE);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.Tune) {
+
+			if (entity == null) {
+				throw new IllegalArgumentException("valid entity required for selected route");
+			}
+			IntentBuilder intentBuilder = new IntentBuilder(activity, TuningEdit.class).setEntity(entity);
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		return false;
+	}
+
+	public static void shortcut(final Activity activity, Shortcut shortcut, Entity entity) {
+
+		if (shortcut.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+
+			if (shortcut.app.equals(Constants.TYPE_APP_POST)) {
+				if (shortcut.getAction().equals("view")) {
+					Posts.view(activity, entity);
+				}
+				else if (shortcut.getAction().equals("viewFor")) {
+					Posts.viewFor(activity, entity, shortcut.linkType);
+				}
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_COMMENT)) {
+				if (shortcut.getAction().equals("view")) {
+					Comments.view(activity, entity);
+				}
+				else if (shortcut.getAction().equals("viewFor")) {
+					Comments.viewFor(activity, entity, shortcut.linkType);
+				}
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_PLACE)) {
+				if (shortcut.getAction().equals("view")) {
+					Places.view(activity, entity);
+				}
+				else if (shortcut.getAction().equals("viewFor")) {
+					Places.viewFor(activity, entity, shortcut.linkType);
+				}
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_USER)) {
+				if (shortcut.getAction().equals("view")) {
+					Users.view(activity, entity);
+				}
+				else if (shortcut.getAction().equals("viewFor")) {
+					Users.viewFor(activity, entity, shortcut.linkType);
+				}
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_TWITTER)) {
+				AndroidManager.getInstance().callTwitterActivity(activity, (shortcut.appId != null) ? shortcut.appId : shortcut.appUrl);
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_FOURSQUARE)) {
+				AndroidManager.getInstance().callFoursquareActivity(activity, (shortcut.appId != null) ? shortcut.appId : shortcut.appUrl);
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_FACEBOOK)) {
+				AndroidManager.getInstance().callFacebookActivity(activity, (shortcut.appId != null) ? shortcut.appId : shortcut.appUrl);
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_MAP) && entity != null) {
+				Tracker.sendEvent("ui_action", "map_place", null, 0, Aircandi.getInstance().getUser());
+				final AirLocation location = entity.getLocation();
+				AndroidManager.getInstance().callMapActivity(activity
+						, String.valueOf(location.lat.doubleValue())
+						, String.valueOf(location.lng.doubleValue())
+						, entity.name);
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_YELP)) {
+				AndroidManager.getInstance().callYelpActivity(activity, shortcut.appId, shortcut.appUrl);
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_OPENTABLE)) {
+				AndroidManager.getInstance().callOpentableActivity(activity, shortcut.appId, shortcut.appUrl);
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_WEBSITE)) {
+				AndroidManager.getInstance().callBrowserActivity(activity, (shortcut.appUrl != null) ? shortcut.appUrl : shortcut.appId);
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_EMAIL)) {
+				AndroidManager.getInstance().callSendToActivity(activity, shortcut.name, shortcut.appId, null, null);
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_LIKE)) {
+				/*
+				 * We don't do anything right now. Goal is to show a form with more detail on the likes.
+				 */
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_WATCH)) {
+				/*
+				 * We don't do anything right now. Goal is to show a form with more detail on the watchers.
+				 */
+			}
+			else {
+				AndroidManager.getInstance().callGenericActivity(activity, (shortcut.appUrl != null) ? shortcut.appUrl : shortcut.appId);
+			}
+		}
+		else {
+			if (shortcut.isContent()) {
+				if (shortcut.getAction().equals("view")) {
+					if (shortcut.app.equals(Constants.TYPE_APP_POST)) {
+						Posts.view(activity, shortcut.getId());
+					}
+					else if (shortcut.app.equals(Constants.TYPE_APP_COMMENT)) {
+						Comments.view(activity, shortcut.getId());
+					}
+					else if (shortcut.app.equals(Constants.TYPE_APP_PLACE)) {
+						Places.view(activity, shortcut.getId());
+					}
+					else if (shortcut.app.equals(Constants.TYPE_APP_USER)) {
+						Users.view(activity, shortcut.getId());
+					}
+				}
+			}
 		}
 	}
 
@@ -387,209 +845,6 @@ public final class Routing {
 		Logger.w(activity, "Service error: " + errorMessage);
 	}
 
-	public static boolean route(final Activity activity, Route route) {
-		return route(activity, route, null, null, null, null);
-	}
-
-	public static boolean route(final Activity activity, Route route, TransitionType transitionType) {
-		return route(activity, route, null, null, transitionType, null);
-	}
-
-	public static boolean route(final Activity activity, Route route, Entity entity) {
-		return route(activity, route, entity, null, null, null);
-	}
-
-	public static boolean route(final Activity activity, Route route, Entity entity, Shortcut shortcut) {
-		return route(activity, route, entity, shortcut, null, null);
-	}
-
-	public static boolean route(final Activity activity, Route route, Entity entity, Shortcut shortcut, TransitionType transitionType, Bundle extras) {
-
-		if (route == Route.Edit) {
-			if (entity == null) {
-				throw new IllegalArgumentException("valid entity required for selected route");
-			}
-			if (entity != null) {
-				Tracker.sendEvent("ui_action", "edit_" + entity.schema, null, 0, Aircandi.getInstance().getUser());
-			}
-			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.editFormBySchema(entity.schema)).setEntity(entity);
-			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
-			return true;
-		}
-
-		else if (route == Route.Add) {
-			((BaseBrowse) activity).onAdd();	// Give activity a chance for discard confirmation
-			return true;
-		}
-		
-		else if (route == Route.Help) {
-			Intent intent = new Intent(activity, HelpForm.class);
-			if (activity.getClass().getSimpleName().equals("RadarForm")) {
-				intent.putExtra(Constants.EXTRA_HELP_ID, R.layout.radar_help);
-			}
-			else if (activity.getClass().getSimpleName().equals("PlaceForm")) {
-				intent.putExtra(Constants.EXTRA_HELP_ID, R.layout.place_help);
-			}
-			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToHelp);
-			return true;
-		}
-
-		else if (route == Route.Profile) {
-			Intent intent = new Intent(activity, UserForm.class);
-			intent.putExtra(Constants.EXTRA_ENTITY_ID, Aircandi.getInstance().getUser().id);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.RadarToPage);
-			return true;
-		}
-
-		else if (route == Route.Watching) {
-			Intent intent = new Intent(activity, WatchForm.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.RadarToPage);
-			return true;
-		}
-
-		else if (route == Route.Photo) {
-			if (entity == null) {
-				throw new IllegalArgumentException("valid entity required for selected route");
-			}
-
-			Intent intent = null;
-			final Photo photo = entity.photo;
-			photo.setCreatedAt(entity.modifiedDate.longValue());
-			photo.setName(entity.name);
-			photo.setUser(entity.creator);
-			EntityManager.getInstance().getPhotos().clear();
-			EntityManager.getInstance().getPhotos().add(photo);
-			intent = new Intent(activity, PhotoForm.class);
-			intent.putExtra(Constants.EXTRA_URI, photo.getUri());
-			intent.putExtra(Constants.EXTRA_PAGING_ENABLED, false);
-
-			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
-		}
-
-		else if (route == Route.CommentNew) {
-			if (entity == null) {
-				throw new IllegalArgumentException("valid entity required for selected route");
-			}
-			final IntentBuilder intentBuilder = new IntentBuilder(activity, CommentEdit.class);
-			intentBuilder.setEntityId(null);
-			intentBuilder.setEntityParentId(entity.id);
-			final Intent intent = intentBuilder.create();
-			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
-		}
-
-		else if (route == Route.Shortcut) {
-			if (entity == null) {
-				throw new IllegalArgumentException("valid entity required for selected route");
-			}
-			if (shortcut == null) {
-				throw new IllegalArgumentException("valid shortcut required for selected route");
-			}
-
-			final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
-			if (meta != null && !meta.installDeclined
-					&& shortcut.getIntentSupport()
-					&& shortcut.appExists()
-					&& !shortcut.appInstalled()) {
-				Dialogs.install(activity, shortcut, entity);
-			}
-
-			if (shortcut.group != null && shortcut.group.size() > 1) {
-				IntentBuilder intentBuilder = new IntentBuilder(activity, ShortcutPicker.class).setEntity(entity);
-				final Intent intent = intentBuilder.create();
-				final List<String> shortcutStrings = new ArrayList<String>();
-				for (Shortcut item : shortcut.group) {
-					Shortcut clone = item.clone();
-					clone.group = null;
-					shortcutStrings.add(HttpService.objectToJson(clone, UseAnnotations.False, ExcludeNulls.True));
-				}
-				intent.putStringArrayListExtra(Constants.EXTRA_SHORTCUTS, (ArrayList<String>) shortcutStrings);
-				activity.startActivity(intent);
-				Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
-			}
-			else {
-				Routing.shortcut(activity, shortcut, entity);
-			}
-
-		}
-
-		else if (route == Route.EntityList) {
-			if (entity == null) {
-				throw new IllegalArgumentException("valid entity required for selected route");
-			}
-
-			IntentBuilder intentBuilder = new IntentBuilder(activity, EntityList.class)
-					.setListMode(ListMode.EntitiesForEntity)
-					.setEntityId(entity.id);
-			Intent intent = intentBuilder.create();
-			if (extras != null) {
-				intent.putExtras(extras);
-			}
-			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
-		}
-
-		else if (route == Route.Accept) {
-			((BaseEdit) activity).onAccept();	// Give activity a chance for discard confirmation
-		}
-
-		else if (route == Route.Back || route == Route.Cancel) {
-			((BaseEdit) activity).onCancel();	// Give activity a chance for discard confirmation
-		}
-
-		else if (route == Route.Delete) {
-			((BaseEdit) activity).confirmDelete();	// Give activity a chance for discard confirmation
-		}
-		
-		else if (route == Route.CancelHelp) {
-			activity.setResult(Activity.RESULT_CANCELED);
-			activity.finish();
-			Animate.doOverridePendingTransition(activity, transitionType != null ? transitionType : TransitionType.HelpToPage);
-		}
-
-		else if (route == Route.Home) {
-			Intent intent = new Intent(activity, RadarForm.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			activity.finish();
-			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
-		}
-
-		else if (route == Route.Settings) {
-			activity.startActivityForResult(new Intent(activity, Preferences.class), Constants.ACTIVITY_PREFERENCES);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
-		}
-
-		else if (route == Route.Feedback) {
-			final IntentBuilder intentBuilder = new IntentBuilder(activity, FeedbackEdit.class);
-			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
-		}
-
-		else if (route == Route.Signout) {
-			((BaseActivity) activity).signout();
-		}
-
-		else if (route == Route.Terms) {
-			Tracker.sendEvent("ui_action", "view_terms", null, 0, Aircandi.getInstance().getUser());
-			final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-			intent.setData(Uri.parse(Constants.URL_AIRCANDI_TERMS));
-			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
-		}
-		
-		return false;
-	}
-
 	public static Route routeForMenu(MenuItem menuItem) {
 		if (menuItem.getItemId() == R.id.edit) {
 			return Route.Edit;
@@ -607,13 +862,13 @@ public final class Routing {
 			return Route.Feedback;
 		}
 		else if (menuItem.getItemId() == R.id.profile) {
-			return Route.Profile;
+			return Route.SigninProfile;
 		}
 		else if (menuItem.getItemId() == R.id.watching) {
 			return Route.Watching;
 		}
 		else if (menuItem.getItemId() == android.R.id.home) {
-			return Route.Back;
+			return Route.Cancel;
 		}
 		else if (menuItem.getItemId() == R.id.home) {
 			return Route.Home;
@@ -638,9 +893,13 @@ public final class Routing {
 
 	public static enum Route {
 		Unknown,
+		Add,
+		New,
 		Edit,
+		Browse,
 		Help,
 		Profile,
+		SigninProfile,
 		Watching,
 		Photo,
 		CommentNew,
@@ -648,6 +907,31 @@ public final class Routing {
 		EntityList,
 		Back,
 		BackConfirm,
-		Home, Settings, Feedback, Cancel, CancelHelp, Delete, Refresh, Signout, Accept, Terms, Add
+		Home,
+		Settings,
+		Feedback,
+		Cancel,
+		CancelForce,
+		CancelHelp,
+		Delete,
+		Refresh,
+		Signout,
+		Signin,
+		Register,
+		Accept,
+		Terms,
+		SettingsLocation,
+		SettingsWifi,
+		AddressEdit,
+		CategoryEdit,
+		PasswordChange,
+		Splash,
+		PhotoSource,
+		ApplinksEdit,
+		PhotoFromGallery,
+		PhotoFromCamera,
+		PhotoSearch,
+		PhotoPlaceSearch,
+		Tune,
 	}
 }

@@ -23,7 +23,7 @@ public class PhotoPagerAdapter extends PagerAdapter {
 	public PhotoPagerAdapter(Context context, ViewPager viewPager, List<Photo> photos) {
 		super();
 		mContext = context;
-		mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mInflater = LayoutInflater.from(context);
 		mPhotos = photos;
 	}
 

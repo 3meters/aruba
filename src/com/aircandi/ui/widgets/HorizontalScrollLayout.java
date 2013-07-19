@@ -14,7 +14,6 @@ import com.aircandi.beta.R;
 @SuppressWarnings("ucd")
 public class HorizontalScrollLayout extends HorizontalScrollView {
 
-	private LayoutInflater	mInflater;
 	private Integer			mLayoutItemId;
 	private Context			mContext;
 	private LinearLayout	mLayout;
@@ -33,7 +32,6 @@ public class HorizontalScrollLayout extends HorizontalScrollView {
 		final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.HorizontalScrollLayout, defStyle, 0);
 		mLayoutItemId = ta.getResourceId(R.styleable.HorizontalScrollLayout_layout, R.layout.temp_place_photo_item);
 		ta.recycle();		
-		mInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		initialize();
 	}
 
@@ -48,7 +46,7 @@ public class HorizontalScrollLayout extends HorizontalScrollView {
 		if (isInEditMode()) {
 			int itemCount = 0;
 			while (itemCount < 3) {
-				mInflater.inflate(mLayoutItemId, mLayout, true);
+				LayoutInflater.from(this.getContext()).inflate(mLayoutItemId, mLayout, true);
 				this.invalidate();
 				mLayout.invalidate();
 				itemCount++;

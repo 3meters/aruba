@@ -16,8 +16,6 @@ import com.aircandi.components.EntityManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.service.Expose;
 import com.aircandi.service.objects.Link.Direction;
-import com.aircandi.service.objects.Photo.PhotoSource;
-import com.aircandi.service.objects.Shortcut.IconStyle;
 import com.aircandi.utilities.DateTime;
 
 /**
@@ -62,6 +60,8 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	@Expose(serialize = false, deserialize = true)
 	public String				toId;											// Used to find entities this entity is linked to
+	@Expose(serialize = false, deserialize = true)
+	public String				fromId;										// Used to find entities this entity is linked from
 
 	@Expose(serialize = false, deserialize = true)
 	public List<Entity>			entities;
@@ -76,7 +76,6 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public Boolean				stale				= false;					// Used to determine that an entity ref is no longer current.
 	public Boolean				synthetic			= false;					// Entity is not persisted with service.
 	public Boolean				shortcuts			= false;					// Do links have shortcuts?
-	public Byte[]				imageBytes;									// Used to stash temp bitmap.
 
 	public Entity() {}
 
@@ -102,6 +101,9 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		else if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 			entity = new Comment();
 		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+			entity = new User();
+		}
 
 		entity.schema = schema;
 		entity.id = "temp:" + DateTime.nowString(DateTime.DATE_NOW_FORMAT_FILENAME); // Temporary
@@ -118,8 +120,9 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public Shortcut getShortcut() {
 		Shortcut shortcut = new Shortcut()
 				.setAppId(id)
+				.setId(id)
 				.setName(name != null ? name : null)
-				.setPhoto(photo != null ? photo : null)
+				.setPhoto(getPhoto())
 				.setSchema(schema != null ? schema : null)
 				.setApp(schema != null ? schema : null);
 		return shortcut;
@@ -137,7 +140,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Set and get
+	// Properties
 	// --------------------------------------------------------------------------------------------
 
 	public Boolean isHidden() {
@@ -187,31 +190,12 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	public String getPhotoUri() {
 
-		/*
-		 * If a special preview photo is available, we use it otherwise
-		 * we use the standard photo.
-		 * 
-		 * Only posts and collections do not have photo objects
-		 */
-		String photoUri = null;
-		if (photo != null) {
-			photoUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
-			if (photoUri == null) {
-				photoUri = photo.getUri();
-			}
-		}
-		else {
-			if (creator != null) {
-				if (creator.getPhotoUri() != null && !creator.getPhotoUri().equals("")) {
-					photoUri = creator.getPhotoUri();
-				}
-			}
-		}
-		
+		Photo photo = getPhoto();
+		String photoUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
 		if (photoUri == null) {
-			photoUri = "resource:img_placeholder_logo_bw";
+			photoUri = photo.getUri();
 		}
-		
+
 		if (!photoUri.startsWith("http:") && !photoUri.startsWith("https:") && !photoUri.startsWith("resource:")) {
 			photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 		}
@@ -219,18 +203,18 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return photoUri;
 	}
 
-	public Photo getDefaultPhoto() {
-		Photo photo = null;
-		if (this.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-			String photoUri = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + this.type + ".png";
-			photo = new Photo(photoUri, null, null, null, PhotoSource.assets);
-		}
-		else if (this.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-			photo = null;
+	public Photo getPhoto() {
+		if (this.photo != null) {
+			return this.photo;
 		}
 		else {
-			photo = new Photo("resource:img_placeholder_logo_bw", null, null, null, null);
+			return getDefaultPhoto();
 		}
+	}
+
+	public Photo getDefaultPhoto() {
+		Photo photo = new Photo("resource:img_placeholder_logo_bw", null, null, null, null);
+		photo.usingDefault = true;
 		return photo;
 	}
 
@@ -299,16 +283,6 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			return beacon;
 		}
 		return null;
-	}
-
-	public List<? extends Entity> getLinkedEntitiesByLinkType(String linkType, List<String> schemas, Direction direction, Boolean traverse) {
-		List<String> linkTypes = null;
-		if (!linkType.equals(Constants.TYPE_ANY)) {
-			linkTypes = new ArrayList<String>();
-			linkTypes.add(linkType);
-		}
-		List<? extends Entity> entities = getLinkedEntitiesByLinkTypes(linkTypes, schemas, direction, traverse);
-		return entities;
 	}
 
 	public List<? extends Entity> getLinkedEntitiesByLinkTypes(List<String> linkTypes, List<String> schemas, Direction direction, Boolean traverse) {
@@ -436,7 +410,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return null;
 	}
 
-	public List<Shortcut> getShortcuts(ShortcutSettings settings, Boolean groupedByApp) {
+	public List<Shortcut> getShortcuts(ShortcutSettings settings) {
 
 		List<Shortcut> shortcuts = new ArrayList<Shortcut>();
 		List<Link> links = settings.direction == Direction.in ? linksIn : linksOut;
@@ -444,8 +418,8 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		if (links != null) {
 			for (Link link : links) {
 				if ((settings.linkType == null || link.type.equals(settings.linkType)) && link.shortcut != null) {
-					if (settings.targetSchema == null || (link.shortcut != null && link.shortcut.schema.equals(settings.targetSchema))) {
-						if (settings.synthetic == null || link.shortcut.getSynthetic() == settings.synthetic) {
+					if (settings.linkSchema == null || (link.shortcut != null && link.shortcut.schema.equals(settings.linkSchema))) {
+						if (settings.synthetic == null || link.shortcut.isSynthetic() == settings.synthetic) {
 							/*
 							 * Must clone or the groups added below will cause circular references
 							 * that choke serializing to json.
@@ -456,7 +430,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				}
 			}
 
-			if (shortcuts.size() > 0 && groupedByApp) {
+			if (shortcuts.size() > 0 && settings.groupedByApp) {
 
 				final Map<String, List<Shortcut>> shortcutLists = new HashMap<String, List<Shortcut>>();
 				for (Shortcut shortcut : shortcuts) {
@@ -500,28 +474,30 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return false;
 	}
 
-	public List<Applink> getClientApplinks() {
-		List<Applink> applinks = new ArrayList<Applink>();
-		applinks.add(Applink.builder(this, Constants.TYPE_APPLINK_MAP, "map", "resource:img_map", true));
-		applinks.add(Applink.builder(this, Constants.TYPE_APPLINK_COMMENT, "comments", "resource:img_post", true));
-		applinks.add(Applink.builder(this, Constants.TYPE_APPLINK_LIKE, "likes", "resource:img_like", true));
-		applinks.add(Applink.builder(this, Constants.TYPE_APPLINK_WATCH, "watching", "resource:img_watch", true));
-		applinks.add(Applink.builder(this, Constants.TYPE_APPLINK_POST, "posts", "resource:ic_launcher", true));
-		return applinks;
-	}
-
-	public static IconStyle getIconStyle(String type) {
-		if (type.equals(Constants.TYPE_LINK_APPLINK)) {
-			return IconStyle.inset;
+	public List<Shortcut> getClientShortcuts() {
+		List<Shortcut> shortcuts = new ArrayList<Shortcut>();
+		Shortcut shortcut = Shortcut.builder(this
+				, Constants.SCHEMA_ENTITY_APPLINK
+				, Constants.TYPE_APP_POST
+				, "viewFor"
+				, "posts"
+				, "resource:ic_launcher"
+				, 10
+				, false
+				, true);
+		Link link = getLinkByType(Constants.TYPE_LINK_POST, null, Direction.in);
+		if (link != null) {
+			shortcut.photo = link.shortcut.getPhoto();
 		}
-		else {
-			return IconStyle.normal;
-		}
+		shortcuts.add(shortcut);
+		shortcuts.add(Shortcut.builder(
+				this, Constants.SCHEMA_ENTITY_APPLINK, Constants.TYPE_APP_COMMENT, "viewFor", "comments", "resource:img_post", 20, false, true));
+		shortcuts.add(Shortcut.builder(
+				this, Constants.SCHEMA_ENTITY_APPLINK, Constants.TYPE_APP_MAP, "view", "map", "resource:img_map", 30, false, true));
+		return shortcuts;
 	}
 
-	public void removeLink() {
-
-	}
+	public void removeLink() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Copy and serialization
@@ -546,9 +522,8 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			entity.stale = (Boolean) (map.get("stale") != null ? map.get("stale") : false);
 			entity.checked = (Boolean) (map.get("checked") != null ? map.get("checked") : false);
 
-			entity.imageBytes = (Byte[]) map.get("imageBytes");
-
 			entity.toId = (String) (nameMapping ? map.get("_to") : map.get("toId"));
+			entity.fromId = (String) (nameMapping ? map.get("_from") : map.get("fromId"));
 
 			if (map.get("photo") != null) {
 				entity.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"), nameMapping);
@@ -623,6 +598,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	@Override
 	public Entity clone() {
+
 		final Entity entity = (Entity) super.clone();
 		if (linksIn != null) {
 			entity.linksIn = (List<Link>) ((ArrayList) linksIn).clone();
@@ -643,55 +619,58 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Inner classes
+	// Classes
 	// --------------------------------------------------------------------------------------------	
 
-	public static class SortEntitiesByModifiedDate implements Comparator<Entity> {
+	public static class SortByPositionModifiedDate implements Comparator<Entity> {
 
 		@Override
-		public int compare(Entity entity1, Entity entity2) {
-
-			if (!entity1.schema.equals(Constants.SCHEMA_ENTITY_APPLINK) && entity2.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-				return 1;
-			}
-			if (entity1.schema.equals(Constants.SCHEMA_ENTITY_APPLINK) && !entity2.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+		public int compare(Entity object1, Entity object2) {
+			if (object1.getPosition().intValue() < object2.getPosition().intValue()) {
 				return -1;
 			}
-			else {
-				if (entity1.modifiedDate.longValue() < entity2.modifiedDate.longValue()) {
-					return 1;
-				}
-				else if (entity1.modifiedDate.longValue() == entity2.modifiedDate.longValue()) {
+			if (object1.getPosition().intValue() == object2.getPosition().intValue()) {
+				if (object1.modifiedDate == null || object2.modifiedDate == null) {
 					return 0;
 				}
-				return -1;
+				else {
+					if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
+						return 1;
+					}
+					else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
+						return 0;
+					}
+					return -1;
+				}
 			}
+			return 1;
 		}
 	}
 
-	public static class SortLinksByCreatedDate implements Comparator<Link> {
+	public static class SortByModifiedDate implements Comparator<Entity> {
 
 		@Override
-		public int compare(Link item1, Link item2) {
+		public int compare(Entity object1, Entity object2) {
 
-			if (item1.createdDate.longValue() < item2.createdDate.longValue()) {
+			if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
 				return 1;
 			}
-			else if (item1.createdDate.longValue() == item2.createdDate.longValue()) {
+			else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
 				return 0;
 			}
 			return -1;
 		}
 	}
 
-	public static class SortEntitiesByPosition implements Comparator<Entity> {
+	public static class SortByPosition implements Comparator<Entity> {
 
 		@Override
-		public int compare(Entity entity1, Entity entity2) {
-			if (entity1.getPosition() < entity2.getPosition()) {
+		public int compare(Entity object1, Entity object2) {
+
+			if (object1.getPosition() < object2.getPosition()) {
 				return -1;
 			}
-			if (entity1.getPosition().equals(entity2.getPosition())) {
+			if (object1.getPosition().equals(object2.getPosition())) {
 				return 0;
 			}
 			return 1;

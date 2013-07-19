@@ -3,13 +3,10 @@ package com.aircandi.ui.helpers;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 
-import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
@@ -27,33 +24,19 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Shortcut;
-import com.aircandi.ui.base.BaseActivity;
+import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.ui.widgets.BounceListView;
-import com.aircandi.utilities.Animate;
-import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Routing;
 
-public class ShortcutPicker extends BaseActivity {
+public class ShortcutPicker extends BaseBrowse {
 
 	private BounceListView			mList;
 	private final List<Shortcut>	mShortcuts	= new ArrayList<Shortcut>();
 	private Entity					mEntity;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-		if (!isFinishing()) {
-			initialize();
-			bind();
-		}
-	}
-
-	private void initialize() {
-
-		mActionBar.setDisplayHomeAsUpEnabled(true);
-
-		/* We use this to access the source suggestions */
+	protected void unpackIntent() {
+		super.unpackIntent();
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
 			final List<String> jsonShortcuts = extras.getStringArrayList(Constants.EXTRA_SHORTCUTS);
@@ -69,8 +52,18 @@ public class ShortcutPicker extends BaseActivity {
 				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
 			}
 		}
-
+	}
+	
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
 		mList = (BounceListView) findViewById(R.id.list);
+	}
+
+	@Override
+	protected void databind(Boolean refresh) {
+		
+		/* We use this to access the source suggestions */
 
 		if (mShortcuts != null && mShortcuts.size() > 0) {
 			mActionBar.setTitle(mShortcuts.get(0).app);
@@ -100,9 +93,7 @@ public class ShortcutPicker extends BaseActivity {
 			});
 			BitmapManager.getInstance().masterFetch(bitmapRequest);
 		}
-	}
-
-	private void bind() {
+		
 		final ShortcutListAdapter adapter = new ShortcutListAdapter(this, mShortcuts, R.layout.temp_listitem_shortcut_picker);
 		mList.setAdapter(adapter);
 		mBusyManager.hideBusy(); // Visible by default
@@ -120,32 +111,12 @@ public class ShortcutPicker extends BaseActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Menus
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.accept) {
-			return true;
-		}
-		else if (item.getItemId() == R.id.cancel) {
-			setResult(Activity.RESULT_CANCELED);
-			finish();
-			Animate.doOverridePendingTransition(ShortcutPicker.this, TransitionType.FormToPage);
-			return true;
-		}
-
-		/* In case we add general menu items later */
-		super.onOptionsItemSelected(item);
-		return true;
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Lifecycle routines
+	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected int getLayoutId() {
 		return R.layout.picker_link;
 	}
+
 }

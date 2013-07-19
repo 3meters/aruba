@@ -43,6 +43,7 @@ public class SignInEdit extends BaseEdit {
 
 	@Override
 	protected void unpackIntent() {
+		super.unpackIntent();
 
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -52,6 +53,8 @@ public class SignInEdit extends BaseEdit {
 
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+		
 		mEmail = (EditText) findViewById(R.id.email);
 		mPassword = (EditText) findViewById(R.id.password);
 		mMessage = (TextView) findViewById(R.id.message);
@@ -188,7 +191,7 @@ public class SignInEdit extends BaseEdit {
 	}
 
 	//--------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -196,15 +199,4 @@ public class SignInEdit extends BaseEdit {
 		return R.layout.signin_edit;
 	}
 
-	@Override
-	protected void bind() {}
-
-	@Override
-	protected void update() {}
-
-	@Override
-	protected void delete() {}
-
-	@Override
-	protected void insert() {}
 }

@@ -44,7 +44,7 @@ public class ListViewExpanded extends LinearLayout {
 	}
 
 	private void initialize() {
-		final LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final LayoutInflater inflater = LayoutInflater.from(this.getContext());
 		if (mLayoutItemId != 0) {
 			int itemCount = 0;
 			while (itemCount < mItemMaxCount) {
@@ -62,7 +62,7 @@ public class ListViewExpanded extends LinearLayout {
 
 	public void setAdapter(ListAdapter adapter) {
 		mAdapter = adapter;
-		final LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final LayoutInflater inflater = LayoutInflater.from(this.getContext());
 
 		final int itemCount = mAdapter.getCount();
 		for (int i = 0; i < itemCount; i++) {

@@ -4,7 +4,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -16,14 +16,11 @@ import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityListEdit;
-import com.aircandi.ui.widgets.WebImageView;
-import com.aircandi.utilities.Animate;
+import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.utilities.UI;
 
 public class ApplinkListEdit extends BaseEntityListEdit {
@@ -31,17 +28,13 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 	private Entity	mParent;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
-		super.initialize(savedInstanceState);
-		if (mParentId != null) {
-			mParent = EntityManager.getEntity(mParentId);
-		}
-	}
+	protected void databind() {
+		super.databind();
 
-	@Override
-	protected void bind() {
-		super.bind();
-		final ListAdapter adapter = new ListAdapter(this, mEntities, R.layout.temp_listitem_applink_list_edit);
+		if (mEntityId != null) {
+			mParent = EntityManager.getEntity(mEntityId);
+		}
+		final ListAdapter adapter = new ListAdapter(this, mEntities, R.layout.temp_listitem_applink_edit);
 		mList.setAdapter(adapter);
 	}
 
@@ -49,16 +42,70 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 	// Events
 	// --------------------------------------------------------------------------------------------
 
+	@Override
+	public void onRefresh() {
+		refreshApplinks(mEntities);
+	}
+
 	@SuppressWarnings("ucd")
 	public void onSuggestLinksButtonClick(View view) {
-		loadApplinkSuggestions(mEntities, true, (Place) mParent);
+		suggestApplinks(mEntities, true, (Place) mParent);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Services
 	// --------------------------------------------------------------------------------------------
 
-	private void loadApplinkSuggestions(final List<Entity> applinks, final Boolean autoInsert, final Place entity) {
+	private void suggestApplinks(final List<Entity> applinks, final Boolean autoInsert, final Place entity) {
+		
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				mBusyManager.showBusy();
+				mBusyManager.startBodyBusyIndicator();
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("LoadApplinkSuggestions");
+				ModelResult result = EntityManager.getInstance().suggestApplinks(applinks, entity);
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				final ModelResult result = (ModelResult) response;
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					final List<Entity> applinks = (List<Entity>) result.data;
+
+					if (autoInsert) {
+						if (applinks.size() > 0) {
+
+							int activeCountOld = mEntities.size();
+							int activeCountNew = applinks.size();
+							mEntities = applinks;
+							if (activeCountNew == activeCountOld) {
+								UI.showToastNotification(getResources().getString(R.string.toast_applinks_no_links), Toast.LENGTH_SHORT);
+							}
+							else {
+								mDirty = true;
+								UI.showToastNotification(getResources().getString((applinks.size() == 1)
+										? R.string.toast_applinks_linked
+										: R.string.toast_applinks_linked), Toast.LENGTH_SHORT);
+							}
+						}
+
+					}
+				}
+				databind();
+				mBusyManager.hideBusy();
+			}
+		}.execute();
+	}
+
+	private void refreshApplinks(final List<Entity> applinks) {
+		
 		new AsyncTask() {
 
 			@Override
@@ -70,7 +117,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LoadSourceSuggestions");
-				ModelResult result = EntityManager.getInstance().getApplinkSuggestions(applinks, entity);
+				ModelResult result = EntityManager.getInstance().refreshApplinks(applinks);
 				return result;
 			}
 
@@ -78,40 +125,40 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					final List<Entity> applinksProcessed = (List<Entity>) result.data;
-					if (autoInsert) {
-						if (applinksProcessed.size() > 0) {
+					final List<Entity> applinks = (List<Entity>) result.data;
 
-							/* First make sure they have default captions */
-							for (Entity applink : applinksProcessed) {
-								if (applink.name == null) {
-									applink.name = applink.type;
+					if (applinks.size() > 0) {
+						for (Entity entity : mEntities) {
+							for (Entity applink : applinks) {
+								if (applink.id.equals(entity.id)) {
+									mDirty = true;
+									entity.name = applink.name;
+									entity.description = applink.description;
+									if (applink.photo != null) {
+										entity.photo = applink.photo.clone();
+									}
+									entity.data = applink.data;
+									((Applink) entity).appId = ((Applink) applink).appId;
+									((Applink) entity).appUrl = ((Applink) applink).appUrl;
 								}
 							}
-							int activeCountOld = mEntities.size();
-							int activeCountNew = applinksProcessed.size();
-							mEntities = applinksProcessed;
-							if (activeCountNew == activeCountOld) {
-								UI.showToastNotification(getResources().getString(R.string.toast_source_no_links), Toast.LENGTH_SHORT);
-							}
-							else {
-								UI.showToastNotification(getResources().getString((applinksProcessed.size() == 1)
-										? R.string.toast_source_linked
-										: R.string.toast_sources_linked), Toast.LENGTH_SHORT);
-							}
 						}
-
+						mEntities = applinks;
+						UI.showToastNotification(getResources().getString(R.string.toast_applinks_refreshed), Toast.LENGTH_SHORT);
 					}
 				}
-				bind();
+				databind();
 				mBusyManager.hideBusy();
 			}
 		}.execute();
 	}
 
-	
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Menus
+	// --------------------------------------------------------------------------------------------	
+
+	// --------------------------------------------------------------------------------------------
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -136,12 +183,13 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 			final Entity entity = mListItems.get(position);
 
 			if (view == null) {
-				view = mInflater.inflate(mItemLayoutId, null);
+				view = LayoutInflater.from(mContext).inflate(mItemLayoutId, null);
 				holder = new ViewHolder();
-				holder.photo = (WebImageView) view.findViewById(R.id.photo);
+				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
 				holder.name = (TextView) view.findViewById(R.id.name);
 				holder.appId = (TextView) view.findViewById(R.id.app_id);
 				holder.appUrl = (TextView) view.findViewById(R.id.app_url);
+				holder.type = (TextView) view.findViewById(R.id.type);
 				holder.checked = (CheckBox) view.findViewById(R.id.checked);
 				if (holder.checked != null) {
 					holder.checked.setOnClickListener(new OnClickListener() {
@@ -170,6 +218,12 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 					UI.setVisibility(holder.checked, View.VISIBLE);
 				}
 
+				UI.setVisibility(holder.type, View.GONE);
+				if (holder.type != null && applink.type != null && applink.type.length() > 0) {
+					holder.type.setText(applink.type);
+					UI.setVisibility(holder.type, View.VISIBLE);
+				}
+
 				UI.setVisibility(holder.name, View.GONE);
 				if (holder.name != null && applink.name != null && applink.name.length() > 0) {
 					holder.name.setText(applink.name);
@@ -192,38 +246,20 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 					}
 				}
 
-				if (holder.photo != null) {
-					holder.photo.setTag(applink);
-					/*
-					 * The WebImageView sets the current bitmap ref being held
-					 * by the internal image view to null before doing the work
-					 * to satisfy the new request.
-					 */
-					if (applink.photo != null && applink.photo.hasBitmap()) {
-						UI.showImageInImageView(applink.photo.getBitmap(), holder.photo.getImageView(), true, Animate.fadeInMedium());
-					}
-					else {
-						final String photoUri = applink.getPhotoUri();
-
-						/* Don't do anything if the image is already set to the one we want */
-						if (holder.photo.getImageUri() == null || !holder.photo.getImageUri().equals(photoUri)) {
-
-							final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photo).setImageUri(photoUri);
-							final BitmapRequest imageRequest = builder.create();
-							holder.photo.setBitmapRequest(imageRequest);
-						}
-					}
-
+				if (holder.photoView != null) {
+					holder.photoView.setTag(applink);
+					UI.drawPhoto(holder.photoView, applink.getPhoto());
 				}
 			}
 			return view;
 		}
 
 		private static class ViewHolder {
-			private WebImageView	photo;
+			private AirImageView	photoView;
 			private TextView		name;
 			private TextView		appId;
 			private TextView		appUrl;
+			private TextView		type;
 			private CheckBox		checked;
 		}
 	}

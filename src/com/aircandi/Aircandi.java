@@ -1,6 +1,8 @@
 // $codepro.audit.disable fileComment
 package com.aircandi;
 
+import java.util.Locale;
+
 import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
@@ -25,40 +27,40 @@ import com.amazonaws.auth.BasicAWSCredentials;
 
 @ReportsCrashes(formUri = "http://www.bugsense.com/api/acra?api_key=342354ad"
 		, formKey = ""
-//		, customReportContent = {
-//				ReportField.REPORT_ID,
-//				ReportField.APP_VERSION_CODE,
-//				ReportField.APP_VERSION_NAME,
-//				ReportField.PACKAGE_NAME,
-//				ReportField.FILE_PATH,
-//				ReportField.PHONE_MODEL,
-//				ReportField.BRAND,
-//				ReportField.PRODUCT,
-//				ReportField.ANDROID_VERSION,
-//				ReportField.BUILD,
-//				ReportField.TOTAL_MEM_SIZE,
-//				ReportField.AVAILABLE_MEM_SIZE,
-//				ReportField.CUSTOM_DATA,
-//				ReportField.IS_SILENT,
-//				ReportField.STACK_TRACE,
-//				ReportField.INITIAL_CONFIGURATION,
-//				ReportField.CRASH_CONFIGURATION,
-//				ReportField.DISPLAY,
-//				ReportField.USER_COMMENT,
-//				ReportField.USER_EMAIL,
-//				ReportField.USER_APP_START_DATE,
-//				ReportField.USER_CRASH_DATE,
-//				ReportField.DUMPSYS_MEMINFO,
-//				ReportField.DROPBOX,
-//				ReportField.LOGCAT,
-//				ReportField.RADIOLOG,
-//				ReportField.DEVICE_ID,
-//				ReportField.INSTALLATION_ID,
-//				ReportField.DEVICE_FEATURES,
-//				ReportField.ENVIRONMENT,
-//				ReportField.SHARED_PREFERENCES,
-//				ReportField.SETTINGS_SYSTEM,
-//				ReportField.SETTINGS_SECURE }
+		//		, customReportContent = {
+		//				ReportField.REPORT_ID,
+		//				ReportField.APP_VERSION_CODE,
+		//				ReportField.APP_VERSION_NAME,
+		//				ReportField.PACKAGE_NAME,
+		//				ReportField.FILE_PATH,
+		//				ReportField.PHONE_MODEL,
+		//				ReportField.BRAND,
+		//				ReportField.PRODUCT,
+		//				ReportField.ANDROID_VERSION,
+		//				ReportField.BUILD,
+		//				ReportField.TOTAL_MEM_SIZE,
+		//				ReportField.AVAILABLE_MEM_SIZE,
+		//				ReportField.CUSTOM_DATA,
+		//				ReportField.IS_SILENT,
+		//				ReportField.STACK_TRACE,
+		//				ReportField.INITIAL_CONFIGURATION,
+		//				ReportField.CRASH_CONFIGURATION,
+		//				ReportField.DISPLAY,
+		//				ReportField.USER_COMMENT,
+		//				ReportField.USER_EMAIL,
+		//				ReportField.USER_APP_START_DATE,
+		//				ReportField.USER_CRASH_DATE,
+		//				ReportField.DUMPSYS_MEMINFO,
+		//				ReportField.DROPBOX,
+		//				ReportField.LOGCAT,
+		//				ReportField.RADIOLOG,
+		//				ReportField.DEVICE_ID,
+		//				ReportField.INSTALLATION_ID,
+		//				ReportField.DEVICE_FEATURES,
+		//				ReportField.ENVIRONMENT,
+		//				ReportField.SHARED_PREFERENCES,
+		//				ReportField.SETTINGS_SYSTEM,
+		//				ReportField.SETTINGS_SECURE }
 		, mode = ReportingInteractionMode.TOAST
 		, resToastText = R.string.crash_sent_toast_text
 		, resNotifTickerText = R.string.crash_notif_ticker_text
@@ -92,6 +94,8 @@ public class Aircandi extends Application {
 	public static Boolean					firstStartApp				= true;
 	public static Boolean					usingEmulator				= false;
 	public static Integer					wifiCount					= 0;
+
+	public static Boolean					muteColor					= false;
 
 	public static Boolean					applicationUpdateNeeded		= false;
 	public static Boolean					applicationUpdateRequired	= false;
@@ -145,6 +149,9 @@ public class Aircandi extends Application {
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		settingsEditor = settings.edit();
+
+		/* Color hinting */
+		muteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others
 
 		/* Set prefs so we can tell when a change happens that we need to respond to. Theme is set in setTheme(). */
 		snapshotPreferences();

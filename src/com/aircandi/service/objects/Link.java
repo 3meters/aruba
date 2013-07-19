@@ -1,6 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -167,6 +168,21 @@ public class Link extends ServiceBase {
 	// --------------------------------------------------------------------------------------------
 	// Inner classes
 	// --------------------------------------------------------------------------------------------	
+	
+	public static class SortByCreatedDate implements Comparator<Link> {
+
+		@Override
+		public int compare(Link object1, Link object2) {
+
+			if (object1.createdDate.longValue() < object2.createdDate.longValue()) {
+				return 1;
+			}
+			else if (object1.createdDate.longValue() == object2.createdDate.longValue()) {
+				return 0;
+			}
+			return -1;
+		}
+	}
 
 	public enum Direction {
 		in,

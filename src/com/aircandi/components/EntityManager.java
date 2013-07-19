@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,6 +53,7 @@ import com.aircandi.service.objects.ServiceBase.UpdateScope;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.Shortcut;
+import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.UI;
@@ -137,37 +140,14 @@ public class EntityManager {
 		return result;
 	}
 
-	public synchronized ModelResult loadEntitiesForEntity(String entityId, String linkType, LinkOptions linkOptions, Cursor cursor) {
+	public synchronized ModelResult loadEntitiesForEntity(String entityId, LinkOptions linkOptions, Cursor cursor) {
 		final ModelResult result = new ModelResult();
 
-		List<String> linkTypes = new ArrayList<String>();
-		linkTypes.add(linkType);
-		result.serviceResponse = mEntityCache.loadEntitiesForEntity(entityId, linkTypes, linkOptions, cursor);
+		result.serviceResponse = mEntityCache.loadEntitiesForEntity(entityId, linkOptions, cursor);
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			ServiceData serviceData = (ServiceData) result.serviceResponse.data;
 			result.data = serviceData.data;
-		}
-		return result;
-	}
-
-	public ModelResult getEntitiesByOwner(String userId, Boolean refresh, List<String> entitySchemas, LinkOptions linkOptions, Cursor cursor) {
-		final ModelResult result = new ModelResult();
-
-		if (refresh) {
-			result.serviceResponse = mEntityCache.loadEntitiesByOwner(userId, entitySchemas, linkOptions, cursor);
-			if (result.serviceResponse.responseCode == ResponseCode.Success) {
-				ServiceData serviceData = (ServiceData) result.serviceResponse.data;
-				result.data = serviceData.data;
-			}
-		}
-		else {
-			List<Entity> entities = new ArrayList<Entity>();
-			for (String schema : entitySchemas) {
-				List<Entity> schemaEntities = (List<Entity>) mEntityCache.getEntitiesByOwner(userId, schema, Constants.TYPE_ANY, null, null, null);
-				entities.addAll(schemaEntities);
-			}
-			result.data = entities;
 		}
 		return result;
 	}
@@ -200,7 +180,34 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult getApplinkSuggestions(List<Entity> applinks, Place place) {
+	public ModelResult refreshApplinks(List<Entity> applinks) {
+
+		final ModelResult result = new ModelResult();
+		final Bundle parameters = new Bundle();
+
+		final List<String> entityStrings = new ArrayList<String>();
+		for (Entity applink : applinks) {
+			entityStrings.add("object:" + HttpService.objectToJson(applink, UseAnnotations.True, ExcludeNulls.True));
+		}
+		parameters.putStringArrayList("applinks", (ArrayList<String>) entityStrings);
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_APPLINKS + "refresh")
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
+				.setResponseFormat(ResponseFormat.Json);
+
+		result.serviceResponse = dispatch(serviceRequest);
+
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			final String jsonResponse = (String) result.serviceResponse.data;
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Applink, ServiceDataWrapper.True);
+			result.data = serviceData.data; // updated collection of applinks
+		}
+		return result;
+	}
+	
+	public ModelResult suggestApplinks(List<Entity> applinks, Place place) {
 
 		final ModelResult result = new ModelResult();
 		final Bundle parameters = new Bundle();
@@ -417,44 +424,44 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult updateUser(User user, Bitmap bitmap) {
-		final ModelResult result = new ModelResult();
-		/*
-		 * TODO: We are going with a garbage collection scheme for orphaned images. We
-		 * need to use an extended property on S3 items that is set to a date when
-		 * collection is ok. This allows downloaded entities to keep working even if
-		 * an image for entity has changed.
-		 */
-
-		/*
-		 * Put image to S3 if we have a new one. Handles updating the photo
-		 * object on user
-		 */
-		if (bitmap != null && !bitmap.isRecycled()) {
-			result.serviceResponse = storeImageAtS3(null, user, bitmap);
-		}
-
-		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			/*
-			 * Service handles modifiedId and modifiedDate based
-			 * on the session info passed with request.
-			 */
-			user.updateScope = UpdateScope.Object;
-
-			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(user.getEntryUri())
-					.setRequestType(RequestType.Update)
-					.setRequestBody(HttpService.objectToJson(user, UseAnnotations.True, ExcludeNulls.False))
-					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
-					.setRetry(false)
-					.setSession(Aircandi.getInstance().getUser().session)
-					.setResponseFormat(ResponseFormat.Json);
-
-			result.serviceResponse = dispatch(serviceRequest);
-			mEntityCache.updateEntityUser(user);
-		}
-		return result;
-	}
+//	public ModelResult updateUser(User user, Bitmap bitmap) {
+//		final ModelResult result = new ModelResult();
+//		/*
+//		 * TODO: We are going with a garbage collection scheme for orphaned images. We
+//		 * need to use an extended property on S3 items that is set to a date when
+//		 * collection is ok. This allows downloaded entities to keep working even if
+//		 * an image for entity has changed.
+//		 */
+//
+//		/*
+//		 * Put image to S3 if we have a new one. Handles updating the photo
+//		 * object on user
+//		 */
+//		if (bitmap != null && !bitmap.isRecycled()) {
+//			result.serviceResponse = storeImageAtS3(null, user, bitmap);
+//		}
+//
+//		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+//			/*
+//			 * Service handles modifiedId and modifiedDate based
+//			 * on the session info passed with request.
+//			 */
+//			user.updateScope = UpdateScope.Object;
+//
+//			final ServiceRequest serviceRequest = new ServiceRequest()
+//					.setUri(user.getEntryUri())
+//					.setRequestType(RequestType.Update)
+//					.setRequestBody(HttpService.objectToJson(user, UseAnnotations.True, ExcludeNulls.False))
+//					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+//					.setRetry(false)
+//					.setSession(Aircandi.getInstance().getUser().session)
+//					.setResponseFormat(ResponseFormat.Json);
+//
+//			result.serviceResponse = dispatch(serviceRequest);
+//			mEntityCache.updateEntityUser(user);
+//		}
+//		return result;
+//	}
 
 	public ModelResult checkSession() {
 		ModelResult result = new ModelResult();
@@ -463,10 +470,46 @@ public class EntityManager {
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "checkSession")
 				.setRequestType(RequestType.Get)
-				.setResponseFormat(ResponseFormat.Json)
-				.setSession(Aircandi.getInstance().getUser().session);
+				.setResponseFormat(ResponseFormat.Json);
+
+		if (Aircandi.getInstance().getUser() != null) {
+			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+		}
 
 		result.serviceResponse = dispatch(serviceRequest);
+		return result;
+	}
+
+	public ModelResult getUserStats(String entityId) {
+		ModelResult result = new ModelResult();
+
+		// http://ariseditions.com:8080/data/actions?countBy=_user,type&find={"_user":"us.000000.00000.000.000001"}
+		try {
+			final ServiceRequest serviceRequest = new ServiceRequest()
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST 
+							+ "actions?countBy=" 
+							+ URLEncoder.encode("_user,type", "utf-8")
+							+ "&find="
+							+ URLEncoder.encode("{\"_user\":\"" + entityId + "\"}", "utf-8"))
+					.setRequestType(RequestType.Get)
+					.setResponseFormat(ResponseFormat.Json);
+
+			if (Aircandi.getInstance().getUser() != null) {
+				serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+			}
+
+			result.serviceResponse = dispatch(serviceRequest);
+			if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				final String jsonResponse = (String) result.serviceResponse.data;
+				final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Stat, ServiceDataWrapper.True);
+				final List<Stat> stats = (List<Stat>) serviceData.data;
+				result.data = stats;
+			}
+			
+		}
+		catch (UnsupportedEncodingException exception) {
+			exception.printStackTrace();
+		}
 		return result;
 	}
 
@@ -674,6 +717,9 @@ public class EntityManager {
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			entity.activityDate = DateTime.nowDate().getTime();
 			mEntityCache.upsertEntity(entity);
+			if (entity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+				mEntityCache.updateEntityUser(entity);				
+			}
 		}
 
 		return result;
@@ -1075,7 +1121,7 @@ public class EntityManager {
 				searchRangeMeters,
 				proximity);
 
-		Collections.sort(places, new Place.SortEntitiesByProximityAndDistance());
+		Collections.sort(places, new Place.SortByProximityAndDistance());
 		return places.size() > ProxiConstants.LIMIT_RADAR_PLACES ? places.subList(0, ProxiConstants.LIMIT_RADAR_PLACES) : places;
 	}
 

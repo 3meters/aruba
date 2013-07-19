@@ -215,7 +215,7 @@ public class ProximityManager {
 		String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
 
 		serviceResponse = mEntityCache.loadEntitiesByProximity(beaconIds
-				, LinkOptions.getDefault(DefaultType.LinksForBeacon)
+				, LinkOptions.getDefault(DefaultType.LinksForProximity)
 				, null
 				, registrationId
 				, Aircandi.stopwatch1);
@@ -251,7 +251,9 @@ public class ProximityManager {
 			}
 		}
 
-		ServiceResponse serviceResponse = mEntityCache.loadEntitiesNearLocation(location, excludePlaceIds);
+		ServiceResponse serviceResponse = mEntityCache.loadEntitiesNearLocation(location
+				, LinkOptions.getDefault(DefaultType.LinksForPlace)
+				, excludePlaceIds);
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			final List<Entity> entitiesForEvent = (List<Entity>) EntityManager.getInstance().getPlaces(null, null);
@@ -262,7 +264,7 @@ public class ProximityManager {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	public Boolean beaconRefreshNeeded(Location activeLocation) {
@@ -291,7 +293,7 @@ public class ProximityManager {
 		final List<Beacon> beaconStrongest = new ArrayList<Beacon>();
 		int beaconCount = 0;
 		List<Beacon> beacons = (List<Beacon>) mEntityCache.getEntities(Constants.SCHEMA_ENTITY_BEACON, Constants.TYPE_ANY, null, null, null);
-		Collections.sort(beacons, new Beacon.SortBeaconsBySignalLevel());
+		Collections.sort(beacons, new Beacon.SortBySignalLevel());
 
 		for (Beacon beacon : beacons) {
 			if (beacon.test) continue;

@@ -25,14 +25,14 @@ import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.UI;
 
 @SuppressWarnings("ucd")
-public class WebImageView extends RelativeLayout {
+public class AirImageView extends RelativeLayout {
 
 	private ImageView					mImageMain;
 	private ImageView					mImageZoom;
 	private ProgressBar					mProgressBar;
 
 	private String						mImageUri;
-	private final Handler						mThreadHandler		= new Handler();
+	private final Handler				mThreadHandler		= new Handler();
 
 	private Integer						mSizeHint;
 
@@ -53,23 +53,23 @@ public class WebImageView extends RelativeLayout {
 															ScaleType.CENTER_INSIDE
 															};
 
-	public WebImageView(Context context) {
+	public AirImageView(Context context) {
 		this(context, null);
 	}
 
-	public WebImageView(Context context, AttributeSet attrs) {
+	public AirImageView(Context context, AttributeSet attrs) {
 		this(context, attrs, 0);
 	}
 
-	public WebImageView(Context context, AttributeSet attributes, int defStyle) {
+	public AirImageView(Context context, AttributeSet attributes, int defStyle) {
 		super(context, attributes, defStyle);
 
-		final TypedArray ta = context.obtainStyledAttributes(attributes, R.styleable.WebImageView, defStyle, 0);
+		final TypedArray ta = context.obtainStyledAttributes(attributes, R.styleable.AirImageView, defStyle, 0);
 
-		mSizeHint = ta.getDimensionPixelSize(R.styleable.WebImageView_sizeHint, Integer.MAX_VALUE);
-		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
-		mLayoutId = ta.getResourceId(R.styleable.WebImageView_layout, R.layout.widget_webimageview);
-		mBrokenDrawable = ta.getResourceId(R.styleable.WebImageView_brokenDrawable, R.drawable.img_broken);
+		mSizeHint = ta.getDimensionPixelSize(R.styleable.AirImageView_sizeHint, Integer.MAX_VALUE);
+		mShowBusy = ta.getBoolean(R.styleable.AirImageView_showBusy, true);
+		mLayoutId = ta.getResourceId(R.styleable.AirImageView_layout, R.layout.widget_webimageview);
+		mBrokenDrawable = ta.getResourceId(R.styleable.AirImageView_brokenDrawable, R.drawable.img_broken);
 
 		ta.recycle();
 
@@ -84,8 +84,7 @@ public class WebImageView extends RelativeLayout {
 	}
 
 	private void initialize(Context context) {
-		final LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		final View view = inflater.inflate(mLayoutId, this, true);
+		final View view = LayoutInflater.from(context).inflate(mLayoutId, this, true);
 
 		mImageMain = (ImageView) view.findViewById(R.id.image_main);
 
@@ -179,7 +178,7 @@ public class WebImageView extends RelativeLayout {
 
 						@Override
 						public void run() {
-							final Drawable drawable = WebImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
+							final Drawable drawable = AirImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
 							UI.showDrawableInImageView(drawable, mImageMain, true, Animate.fadeInMedium());
 						}
 					});
@@ -204,7 +203,7 @@ public class WebImageView extends RelativeLayout {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	public void clearImage(final boolean animate, final Integer animationId) {

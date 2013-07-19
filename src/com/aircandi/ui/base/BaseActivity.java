@@ -1,10 +1,7 @@
 package com.aircandi.ui.base;
 
-import java.util.Locale;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -16,7 +13,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
@@ -34,7 +30,6 @@ import com.aircandi.components.BusProvider;
 import com.aircandi.components.BusyManager;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.GCMIntentService;
 import com.aircandi.components.Logger;
 import com.aircandi.components.MenuManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -55,11 +50,9 @@ public abstract class BaseActivity extends SherlockActivity {
 	public BusyManager				mBusyManager;
 	protected String				mPageName;
 
-	protected Boolean				mMuteColor;
 	protected Boolean				mPrefChangeNewSearchNeeded	= false;
 	protected Boolean				mPrefChangeRefreshUiNeeded	= false;
 	protected Boolean				mPrefChangeReloadNeeded		= false;
-	protected static LayoutInflater	mInflater;
 	protected static Resources		mResources;
 
 	/* Theme */
@@ -91,7 +84,6 @@ public abstract class BaseActivity extends SherlockActivity {
 			 * We do all this here so the work is finished before subclasses start
 			 * their create/initialize processing.
 			 */
-			mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			mResources = getResources();
 			/*
 			 * Theme must be set before contentView is processed.
@@ -123,20 +115,22 @@ public abstract class BaseActivity extends SherlockActivity {
 			if (mIsDialog) {
 				setDialogSize(getResources().getConfiguration());
 			}
-			mMuteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others
 		}
 	}
 
 	protected void unpackIntent() {}
 
+	protected void configureActionBar(){}
+
 	// --------------------------------------------------------------------------------------------
-	// Events routines
+	// Events
 	// --------------------------------------------------------------------------------------------
+	
+	public void onRefresh() {}
 
 	@Override
 	public void onBackPressed() {
-		/* Activity is destroyed */
-		Routing.route(this, Route.Back, TransitionType.PageBack);
+		Routing.route(this, Route.Cancel);
 	}
 
 	@Override
@@ -149,11 +143,17 @@ public abstract class BaseActivity extends SherlockActivity {
 	}
 
 	public void onCancelButtonClick(View view) {
+		Routing.route(this, Route.Cancel);
+	}
+
+	public void onCancel(Boolean force) {
 		setResult(Activity.RESULT_CANCELED);
 		finish();
 		Animate.doOverridePendingTransition(this, TransitionType.PageBack);
 	}
 
+	public void onAdd() {}
+	
 	// --------------------------------------------------------------------------------------------
 	// Preferences
 	// --------------------------------------------------------------------------------------------
@@ -221,7 +221,7 @@ public abstract class BaseActivity extends SherlockActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// General Ui routines
+	// UI
 	// --------------------------------------------------------------------------------------------
 
 	public void setTheme(Boolean isDialog, Boolean isTransparent) {
@@ -354,11 +354,8 @@ public abstract class BaseActivity extends SherlockActivity {
 						if (mBusyManager != null) {
 							mBusyManager.hideBusy();
 						}
-						final Intent intent = new Intent(BaseActivity.this, SplashForm.class);
-						intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-						startActivity(intent);
-						finish();
-						Animate.doOverridePendingTransition(BaseActivity.this, TransitionType.FormToPage);
+						
+						Routing.route(BaseActivity.this, Route.Splash);
 					}
 				}.execute();
 
@@ -380,7 +377,7 @@ public abstract class BaseActivity extends SherlockActivity {
 		 */
 		return MenuManager.onCreateOptionsMenu(this, menu);
 	}
-	
+
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		/*
@@ -391,15 +388,14 @@ public abstract class BaseActivity extends SherlockActivity {
 		 */
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem menuItem) {
 		return Routing.route(this, Routing.routeForMenu(menuItem));
 	}
 
-
 	// --------------------------------------------------------------------------------------------
-	// Lifecycle routines
+	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -424,18 +420,12 @@ public abstract class BaseActivity extends SherlockActivity {
 	@Override
 	protected void onResume() {
 		BusProvider.getInstance().register(this);
-		synchronized (GCMIntentService.lock) {
-			GCMIntentService.currentActivity = this;
-		}
 		super.onResume();
 	}
 
 	@Override
 	protected void onPause() {
 		BusProvider.getInstance().unregister(this);
-		synchronized (GCMIntentService.lock) {
-			GCMIntentService.currentActivity = null;
-		}
 		super.onPause();
 	}
 
@@ -460,7 +450,7 @@ public abstract class BaseActivity extends SherlockActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Inner classes and enums
+	// Classes
 	// --------------------------------------------------------------------------------------------
 
 	public enum ServiceOperation {

@@ -13,7 +13,6 @@ import java.util.Properties;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -67,7 +66,7 @@ import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.ServiceData;
-import com.aircandi.ui.base.BaseActivity;
+import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
@@ -76,7 +75,7 @@ import com.aircandi.utilities.UI;
  * We often will get duplicates because the ordering of images isn't
  * guaranteed while paging.
  */
-public class PicturePicker extends BaseActivity {
+public class PhotoPicker extends BaseBrowse {
 
 	private DrawableManager			mDrawableManager;
 
@@ -90,7 +89,6 @@ public class PicturePicker extends BaseActivity {
 	private long					mOffset			= 0;
 	private String					mQuery;
 	private String					mDefaultSearch;
-	private LayoutInflater			mInflater;
 	private String					mTitleOptional;
 	private Boolean					mPlacePhotoMode	= false;
 	private Provider				mProvider;
@@ -103,16 +101,8 @@ public class PicturePicker extends BaseActivity {
 	private static final String		QUERY_DEFAULT	= "wallpaper unusual places";
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		if (!isFinishing()) {
-			initialize();
-			bind();
-		}
-	}
-
-	@Override
 	protected void unpackIntent() {
+		super.unpackIntent();
 
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -120,9 +110,10 @@ public class PicturePicker extends BaseActivity {
 		}
 	}
 
-	protected void initialize() {
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
 
-		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mDrawableManager = new DrawableManager();
 
 		if (mEntityId != null) {
@@ -206,12 +197,23 @@ public class PicturePicker extends BaseActivity {
 		});
 	}
 
-	private void bind() {
+	@Override
+	protected void databind(Boolean refresh) {
 		/*
 		 * First check to see if there are any candi picture children.
 		 */
 		if (mPlacePhotoMode && mEntity != null) {
-			List<Entity> entities = (List<Entity>) mEntity.getLinkedEntitiesByLinkType(Constants.TYPE_LINK_POST, null, Direction.in, false);
+			
+			List<String> schemas = new ArrayList<String>();
+			schemas.add(Constants.SCHEMA_ENTITY_POST);
+			List<String> linkTypes = new ArrayList<String>();
+			linkTypes.add(Constants.TYPE_LINK_POST);
+
+			List<Entity> entities = (List<Entity>) mEntity.getLinkedEntitiesByLinkTypes(linkTypes
+					, schemas
+					, Direction.in
+					, false);
+
 			for (Entity entity : entities) {
 				if (entity.photo != null) {
 					if (!entity.photo.getSourceName().equals(PhotoSource.foursquare)) {
@@ -225,6 +227,42 @@ public class PicturePicker extends BaseActivity {
 
 		mGridView.setAdapter(new EndlessImageAdapter(mImages));
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Events
+	// --------------------------------------------------------------------------------------------
+
+	@SuppressWarnings("ucd")
+	public void onSearchClick(View view) {
+		mQuery = mSearch.getText().toString();
+		mMessage.setVisibility(View.VISIBLE);
+		Aircandi.settingsEditor.putString(Constants.SETTING_PICTURE_SEARCH, mQuery);
+		Aircandi.settingsEditor.commit();
+		mOffset = 0;
+		mTitleOptional = mQuery;
+		mImages.clear();
+		((EndlessImageAdapter) mGridView.getAdapter()).notifyDataSetChanged();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Methods
+	// --------------------------------------------------------------------------------------------
+
+	private String getBingKey() {
+		final Properties properties = new Properties();
+		try {
+			properties.load(getClass().getResourceAsStream("/com/aircandi/bing_api.properties"));
+			final String appId = properties.getProperty("appKey");
+			return appId;
+		}
+		catch (IOException exception) {
+			throw new IllegalStateException("Unable to retrieve bing appKey");
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Services
+	// --------------------------------------------------------------------------------------------
 
 	private ServiceResponse loadSearchImages(String query, long count, long offset) {
 
@@ -265,23 +303,7 @@ public class PicturePicker extends BaseActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Events
-	// --------------------------------------------------------------------------------------------
-
-	@SuppressWarnings("ucd")
-	public void onSearchClick(View view) {
-		mQuery = mSearch.getText().toString();
-		mMessage.setVisibility(View.VISIBLE);
-		Aircandi.settingsEditor.putString(Constants.SETTING_PICTURE_SEARCH, mQuery);
-		Aircandi.settingsEditor.commit();
-		mOffset = 0;
-		mTitleOptional = mQuery;
-		mImages.clear();
-		((EndlessImageAdapter) mGridView.getAdapter()).notifyDataSetChanged();
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Lifecycle routines
+	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -291,20 +313,8 @@ public class PicturePicker extends BaseActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
-
-	private String getBingKey() {
-		final Properties properties = new Properties();
-		try {
-			properties.load(getClass().getResourceAsStream("/com/aircandi/bing_api.properties"));
-			final String appId = properties.getProperty("appKey");
-			return appId;
-		}
-		catch (IOException exception) {
-			throw new IllegalStateException("Unable to retrieve bing appKey");
-		}
-	}
 
 	@Override
 	protected int getLayoutId() {
@@ -312,7 +322,7 @@ public class PicturePicker extends BaseActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Inner classes
+	// Classes
 	// --------------------------------------------------------------------------------------------
 
 	private class EndlessImageAdapter extends EndlessAdapter {
@@ -326,9 +336,9 @@ public class PicturePicker extends BaseActivity {
 		@Override
 		protected View getPendingView(ViewGroup parent) {
 			if (mImages.size() == 0) {
-				return new View(PicturePicker.this);
+				return new View(PhotoPicker.this);
 			}
-			return mInflater.inflate(R.layout.temp_picture_search_item_placeholder, null);
+			return LayoutInflater.from(PhotoPicker.this).inflate(R.layout.temp_picture_search_item_placeholder, null);
 		}
 
 		@Override
@@ -367,7 +377,7 @@ public class PicturePicker extends BaseActivity {
 						}
 					}
 					else {
-						Routing.serviceError(PicturePicker.this, serviceResponse);
+						Routing.serviceError(PhotoPicker.this, serviceResponse);
 						return false;
 					}
 					mOffset += PAGE_SIZE;
@@ -419,7 +429,7 @@ public class PicturePicker extends BaseActivity {
 							+ String.valueOf(getWrappedAdapter().getCount() + mMoreImages.size()));
 				}
 				else {
-					Routing.serviceError(PicturePicker.this, serviceResponse);
+					Routing.serviceError(PhotoPicker.this, serviceResponse);
 					return false;
 				}
 				mOffset += PAGE_SIZE;
@@ -447,7 +457,7 @@ public class PicturePicker extends BaseActivity {
 	private class ListAdapter extends ArrayAdapter<ImageResult> {
 
 		private ListAdapter(List<ImageResult> list) {
-			super(PicturePicker.this, 0, list);
+			super(PhotoPicker.this, 0, list);
 		}
 
 		@Override
@@ -458,7 +468,7 @@ public class PicturePicker extends BaseActivity {
 			final ImageResult itemData = mImages.get(position);
 
 			if (view == null) {
-				view = mInflater.inflate(R.layout.temp_picture_search_item, null);
+				view = LayoutInflater.from(PhotoPicker.this).inflate(R.layout.temp_picture_search_item, null);
 				holder = new ViewHolder();
 				holder.itemImage = (ImageView) view.findViewById(R.id.photo);
 				final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mImageWidthPixels, mImageWidthPixels);
@@ -574,4 +584,5 @@ public class PicturePicker extends BaseActivity {
 			return mDrawableManager;
 		}
 	}
+
 }

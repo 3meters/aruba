@@ -1,5 +1,6 @@
 package com.aircandi.ui.base;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -9,6 +10,7 @@ import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.BusyManager;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
@@ -28,7 +30,8 @@ public abstract class BaseEdit extends BaseActivity {
 		if (!isFinishing()) {
 			unpackIntent();
 			initialize(savedInstanceState);
-			bind();
+			configureActionBar();
+			databind();
 			draw();
 		}
 	}
@@ -46,9 +49,9 @@ public abstract class BaseEdit extends BaseActivity {
 		mBusyManager = new BusyManager(this);
 	}
 
-	protected abstract void bind();
+	protected void databind() {}
 
-	protected abstract void draw();
+	protected void draw() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Events
@@ -56,18 +59,21 @@ public abstract class BaseEdit extends BaseActivity {
 
 	@Override
 	public void onBackPressed() {
-		if (isDirty()) {
-			confirmDirtyExit();
-		}
-		else {
-			Routing.route(this, Route.Back, TransitionType.FormToPage);
-		}
+		Routing.route(this, Route.Cancel);
 	}
 
 	public abstract void onAccept();
 
-	public void onCancel() {
-		onBackPressed();
+	@Override
+	public void onCancel(Boolean force) {
+		if (!force && isDirty()) {
+			confirmDirtyExit();
+		}
+		else {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			Animate.doOverridePendingTransition(this, TransitionType.PageBack);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -82,11 +88,11 @@ public abstract class BaseEdit extends BaseActivity {
 	// Services
 	// --------------------------------------------------------------------------------------------
 
-	protected abstract void insert();
-	
-	protected abstract void update();
+	protected void insert() {}
 
-	protected abstract void delete();
+	protected void update() {}
+
+	protected void delete() {}
 
 	protected void confirmDirtyExit() {
 		if (!mSkipSave) {
@@ -103,15 +109,10 @@ public abstract class BaseEdit extends BaseActivity {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							if (which == Dialog.BUTTON_POSITIVE) {
-								if (mEditing) {
-									update();
-								}
-								else {
-									update();
-								}
+								onAccept();
 							}
 							else if (which == Dialog.BUTTON_NEUTRAL) {
-								Routing.route(BaseEdit.this, Route.Cancel);
+								Routing.route(BaseEdit.this, Route.CancelForce);
 							}
 						}
 					}
@@ -132,7 +133,7 @@ public abstract class BaseEdit extends BaseActivity {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							if (which == Dialog.BUTTON_POSITIVE) {
-								Routing.route(BaseEdit.this, Route.Cancel);
+								Routing.route(BaseEdit.this, Route.CancelForce);
 							}
 						}
 					}

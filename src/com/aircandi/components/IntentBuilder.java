@@ -2,27 +2,32 @@ package com.aircandi.components;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
 
 import com.aircandi.Constants;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.ui.base.BaseEntityList;
-import com.aircandi.ui.base.BaseEntityList.ListMode;
 
 public class IntentBuilder {
 
 	private Context		mContext;
 	private Class<?>	mClass;
+	private String		mAction;
+	private Uri			mData;
 
 	private Entity		mEntity;
 	private String		mEntityId;
 	private String		mEntityParentId;
 	private String		mEntitySchema;
 
-	private String		mListSchema;
+	private String		mListLinkSchema;
+	private String		mListLinkType;
+	private String		mListLinkDirection;
 	private Boolean		mListNewEnabled;
 	private Integer		mListItemResId;
-	private ListMode	mListMode;
+
+	private Bundle		mExtras;
 
 	private Boolean		mForceRefresh;
 	private String		mMessage;
@@ -34,10 +39,17 @@ public class IntentBuilder {
 		mClass = clazz;
 	}
 
+	public IntentBuilder(String action) {
+		mAction = action;
+	}
+
 	public Intent create() {
 		Intent intent = new Intent();
 		if (mContext != null && mClass != null) {
 			intent = new Intent(mContext, mClass);
+		}
+		else if (mAction != null) {
+			intent = new Intent(mAction);
 		}
 
 		if (mEntityId != null) {
@@ -57,14 +69,18 @@ public class IntentBuilder {
 			intent.putExtra(Constants.EXTRA_ENTITY_PARENT_ID, mEntityParentId);
 		}
 
-		if (mListMode != null) {
-			intent.putExtra(Constants.EXTRA_LIST_MODE, mListMode.name());
+		if (mListLinkType != null) {
+			intent.putExtra(Constants.EXTRA_LIST_LINK_TYPE, mListLinkType);
 		}
 
-		if (mListSchema != null) {
-			intent.putExtra(Constants.EXTRA_LIST_SCHEMA, mListSchema);
+		if (mListLinkSchema != null) {
+			intent.putExtra(Constants.EXTRA_LIST_LINK_SCHEMA, mListLinkSchema);
 		}
 
+		if (mListLinkDirection != null) {
+			intent.putExtra(Constants.EXTRA_LIST_LINK_DIRECTION, mListLinkDirection);
+		}
+		
 		if (mListItemResId != null) {
 			intent.putExtra(Constants.EXTRA_LIST_ITEM_RESID, mListItemResId);
 		}
@@ -79,6 +95,14 @@ public class IntentBuilder {
 
 		if (mMessage != null) {
 			intent.putExtra(Constants.EXTRA_MESSAGE, mMessage);
+		}
+
+		if (mExtras != null) {
+			intent.putExtras(mExtras);
+		}
+
+		if (mData != null) {
+			intent.setData(mData);
 		}
 
 		return intent;
@@ -99,18 +123,13 @@ public class IntentBuilder {
 		return this;
 	}
 
-	public IntentBuilder setListMode(BaseEntityList.ListMode arrayListType) {
-		mListMode = arrayListType;
-		return this;
-	}
-
 	public IntentBuilder setForceRefresh(Boolean forceRefresh) {
 		mForceRefresh = forceRefresh;
 		return this;
 	}
 
-	public IntentBuilder setListSchema(String listSchema) {
-		mListSchema = listSchema;
+	public IntentBuilder setListLinkSchema(String listLinkSchema) {
+		mListLinkSchema = listLinkSchema;
 		return this;
 	}
 
@@ -130,6 +149,30 @@ public class IntentBuilder {
 
 	public IntentBuilder setEntity(Entity entity) {
 		mEntity = entity;
+		return this;
+	}
+
+	public Bundle getExtras() {
+		return mExtras;
+	}
+
+	public IntentBuilder setExtras(Bundle extras) {
+		mExtras = extras;
+		return this;
+	}
+
+	public IntentBuilder setData(Uri data) {
+		mData = data;
+		return this;
+	}
+
+	public IntentBuilder setListLinkType(String listLinkType) {
+		mListLinkType = listLinkType;
+		return this;
+	}
+
+	public IntentBuilder setListLinkDirection(String listLinkDirection) {
+		mListLinkDirection = listLinkDirection;
 		return this;
 	}
 }

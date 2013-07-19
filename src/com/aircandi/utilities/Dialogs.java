@@ -11,7 +11,6 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -51,8 +50,7 @@ public class Dialogs {
 		}
 
 		if (titleText != null) {
-			final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View title = inflater.inflate(R.layout.temp_dialog_title, null);
+			View title = LayoutInflater.from(context).inflate(R.layout.temp_dialog_title, null);
 			((TextView) title.findViewById(R.id.name)).setText(titleText);
 			builder.setCustomTitle(title);
 		}
@@ -138,8 +136,7 @@ public class Dialogs {
 								public void onClick(DialogInterface dialog, int which) {
 									if (which == Dialog.BUTTON_POSITIVE) {
 										Logger.d(this, "Wifi check: navigating to wifi settings");
-										activity.startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
-										Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+										Routing.route(activity, Route.SettingsWifi);
 									}
 									else if (which == Dialog.BUTTON_NEGATIVE) {
 										Logger.d(this, "Wifi check: user declined");
@@ -251,7 +248,7 @@ public class Dialogs {
 						else if (which == Dialog.BUTTON_NEGATIVE) {
 							final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
 							meta.installDeclined = true;
-							Routing.route(activity, Route.Shortcut, entity, shortcut);
+							Routing.route(activity, Route.Shortcut, entity, shortcut, null, null);
 							dialog.dismiss();
 						}
 					}

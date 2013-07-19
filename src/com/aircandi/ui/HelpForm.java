@@ -1,37 +1,19 @@
 package com.aircandi.ui;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 
-import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.ui.base.BaseActivity;
+import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
-import com.aircandi.utilities.Routing;
-import com.aircandi.utilities.Routing.Route;
 
-public class HelpForm extends BaseActivity {
+public class HelpForm extends BaseBrowse {
 
 	private Integer	mHelpResId;
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		if (!isFinishing()) {
-			initialize();
-			bind();
-			draw();
-		}
-	}
-
-	private void initialize() {}
-
-	private void bind() {}
-
-	private void draw() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Events
@@ -39,35 +21,23 @@ public class HelpForm extends BaseActivity {
 
 	@SuppressWarnings("ucd")
 	public void onHelpClick(View view) {
-		updateRunOnce();
-		finish();
-		Animate.doOverridePendingTransition(this, TransitionType.HelpToPage);
+		onCancel(false);
 	}
 
 	@Override
-	public void onBackPressed() {
+	public void onCancel(Boolean force) {
 		updateRunOnce();
-		Routing.route(this, Route.Back, TransitionType.HelpToPage);
+		setResult(Activity.RESULT_CANCELED);
+		finish();
+		Animate.doOverridePendingTransition(this, TransitionType.HelpToPage);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Menus
 	// --------------------------------------------------------------------------------------------
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		if (item.getItemId() == R.id.cancel) {
-			updateRunOnce();
-		}
-
-		/* In case we add general menu items later */
-		super.onOptionsItemSelected(item);
-		return true;
-	}
-
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	private void updateRunOnce() {

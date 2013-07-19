@@ -19,7 +19,7 @@ public abstract class BaseBrowse extends BaseActivity {
 			unpackIntent();
 			initialize(savedInstanceState);
 			configureActionBar();
-			bind(mForceRefresh);
+			databind(mForceRefresh);
 		}
 	}
 
@@ -32,29 +32,28 @@ public abstract class BaseBrowse extends BaseActivity {
 	}
 
 	protected void initialize(Bundle savedInstanceState) {
-		mActionBar.setDisplayHomeAsUpEnabled(true);
+		if (mActionBar != null) {
+			mActionBar.setDisplayHomeAsUpEnabled(true);
+		}
 		mBusyManager = new BusyManager(this);
 	}
 
-	protected abstract void configureActionBar();
-
-	protected abstract void bind(final Boolean refreshProposed);
+	protected void databind(final Boolean refreshProposed) {}
 
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
 
+	@Override
 	public void onRefresh() {
-		bind(true); // Called from AircandiCommon
+		databind(true); // Called from Routing
 	}
 
-	public abstract void onAdd();
-
 	// --------------------------------------------------------------------------------------------
-	// UI routines
+	// UI
 	// --------------------------------------------------------------------------------------------
 
-	protected abstract void draw();
+	protected void draw() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Methods
@@ -69,7 +68,7 @@ public abstract class BaseBrowse extends BaseActivity {
 	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 }

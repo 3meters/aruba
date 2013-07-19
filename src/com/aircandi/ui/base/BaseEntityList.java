@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.content.Intent;
-import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -27,20 +25,16 @@ import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
+import com.aircandi.applications.Comments;
 import com.aircandi.beta.R;
-import com.aircandi.components.AndroidManager;
 import com.aircandi.components.BusyManager;
 import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Entity;
@@ -49,40 +43,37 @@ import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.ServiceData;
-import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.User;
-import com.aircandi.ui.edit.CommentEdit;
+import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.UserView;
-import com.aircandi.ui.widgets.WebImageView;
-import com.aircandi.utilities.Animate;
-import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 
 public abstract class BaseEntityList extends BaseBrowse {
 
-	private ListView				mListView;
+	private ListView			mListView;
+	private OnClickListener		mClickListener;
 
-	private List<Entity>			mEntities	= new ArrayList<Entity>();
-	private Cursor					mCursorSettings;
-	private Button					mButtonNewEntity;
+	private List<Entity>		mEntities	= new ArrayList<Entity>();
+	private Cursor				mCursorSettings;
+	private Button				mButtonNewEntity;
 
-	private Boolean					mMore		= false;
-	private static final long		LIST_MAX	= 300L;
+	private Boolean				mMore		= false;
+	private static final long	LIST_MAX	= 300L;
 
-	private Number					mEntityModelRefreshDate;
-	private Number					mEntityModelActivityDate;
-	private User					mEntityModelUser;
+	private Number				mEntityModelRefreshDate;
+	private Number				mEntityModelActivityDate;
+	private User				mEntityModelUser;
 
 	/* Inputs */
-	public String					mEntityId;
-	private ListMode				mListMode;
-	private String					mListSchema;
-	private Integer					mListItemResId;
-	private Boolean					mListNewEnabled;
-
-	protected static LayoutInflater	mInflater;
+	public String				mEntityId;
+	protected String			mListLinkSchema;
+	protected String			mListLinkType;
+	protected String			mListLinkDirection;
+	protected Integer			mListItemResId;
+	protected Boolean			mListNewEnabled;
 
 	@Override
 	protected void unpackIntent() {
@@ -91,11 +82,57 @@ public abstract class BaseEntityList extends BaseBrowse {
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
-			mListMode = BaseEntityList.ListMode.valueOf(extras.getString(Constants.EXTRA_LIST_MODE));
-			mListSchema = extras.getString(Constants.EXTRA_LIST_SCHEMA);
+			/*
+			 * Could be any link type: place, post, comment, applink, create, like, watch
+			 */
+			mListLinkSchema = extras.getString(Constants.EXTRA_LIST_LINK_SCHEMA);
+			mListLinkType = extras.getString(Constants.EXTRA_LIST_LINK_TYPE, mListLinkSchema);
+			mListLinkDirection = extras.getString(Constants.EXTRA_LIST_LINK_DIRECTION, "in");
 			mListNewEnabled = extras.getBoolean(Constants.EXTRA_LIST_NEW_ENABLED, false);
-			mListItemResId = extras.getInt(Constants.EXTRA_LIST_ITEM_RESID, R.layout.temp_listitem_candi);
+			mListItemResId = extras.getInt(Constants.EXTRA_LIST_ITEM_RESID, getListItemResId(mListLinkSchema));
 		}
+	}
+
+	private Integer getListItemResId(String schema) {
+		if (schema != null) {
+			if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+				return R.layout.temp_listitem_comment;
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+				return R.layout.temp_listitem_entity;
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				return R.layout.temp_listitem_entity;
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+				return R.layout.temp_listitem_entity;
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+				return R.layout.temp_listitem_entity;
+			}
+		}
+		return R.layout.temp_listitem_entity;
+	}
+
+	private LinkOptions getLinkOptions(String schema) {
+		if (schema != null) {
+			if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+				return LinkOptions.getDefault(DefaultType.NoLinks);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+				return LinkOptions.getDefault(DefaultType.LinksForPost);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				return LinkOptions.getDefault(DefaultType.LinksForPlace);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+				return LinkOptions.getDefault(DefaultType.LinksForUser);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+				return LinkOptions.getDefault(DefaultType.NoLinks);
+			}
+		}
+		return LinkOptions.getDefault(DefaultType.NoLinks);
 	}
 
 	@Override
@@ -104,17 +141,32 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 		mListView = (ListView) findViewById(R.id.list_entities);
 		mButtonNewEntity = (Button) findViewById(R.id.button_new_entity);
-		mButtonNewEntity.setText(getString(R.string.entity_button_entity_first) + " " + mListSchema);
+		mButtonNewEntity.setText(getString(R.string.entity_button_entity_first) + " " + mListLinkSchema);
 
-		if (mListSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+		if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 			mButtonNewEntity.setText(R.string.entity_button_comment_first);
 		}
-		else if (mListSchema.equals(Constants.SCHEMA_ENTITY_POST)) {
+		else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_POST)) {
 			mButtonNewEntity.setText(R.string.entity_button_post_first);
 		}
-		else if (mListSchema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+		else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 			mButtonNewEntity.setText(R.string.entity_button_applink_first);
 		}
+
+		mClickListener = new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Logger.v(this, "List item clicked");
+
+				final Entity entity = (Entity) ((ViewHolder) v.getTag()).data;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+					Routing.shortcut(BaseEntityList.this, entity.getShortcut(), null);
+				}
+				else {
+					Routing.route(BaseEntityList.this, Route.Browse, entity, null, null);
+				}
+			}
+		};
 
 		mBusyManager = new BusyManager(this);
 	}
@@ -124,24 +176,15 @@ public abstract class BaseEntityList extends BaseBrowse {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		if (mListMode == ListMode.EntitiesForEntity) {
-			final Entity entity = EntityManager.getEntity(mEntityId);
-			mActionBar.setDisplayHomeAsUpEnabled(true);
+		final Entity entity = EntityManager.getEntity(mEntityId);
+		mActionBar.setDisplayHomeAsUpEnabled(true);
+		if (entity != null) {
 			mActionBar.setTitle(entity.name);
-		}
-		else if (mListMode == ListMode.EntitiesByOwner) {
-			mActionBar.setDisplayHomeAsUpEnabled(true);
-			mActionBar.setHomeButtonEnabled(true);
-			if (mEntityId != null) {
-				ModelResult result = EntityManager.getInstance().getEntity(mEntityId, false, LinkOptions.getDefault(DefaultType.LinksUserWatching));
-				User user = (User) result.serviceResponse.data;
-				mActionBar.setTitle(user.name);
-			}
 		}
 	}
 
 	@Override
-	protected void bind(final Boolean refresh) {
+	protected void databind(final Boolean refresh) {
 
 		new AsyncTask() {
 
@@ -174,7 +217,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 					else {
 						mEntities = (List<Entity>) result.data;
 						mButtonNewEntity.setVisibility(View.GONE);
-						Collections.sort(mEntities, new Entity.SortEntitiesByModifiedDate());
+						Collections.sort(mEntities, new Entity.SortByPositionModifiedDate());
 						mListView.setAdapter(new EndlessEntityAdapter(mEntities)); // draw happens in the adapter
 					}
 
@@ -200,36 +243,36 @@ public abstract class BaseEntityList extends BaseBrowse {
 				.setSort(Maps.asMap("modifiedDate", -1))
 				.setSkip(refresh ? 0 : mEntities.size());
 
-		ModelResult result = new ModelResult();
-
-		if (mListMode == ListMode.EntitiesForEntity) {
-			result = EntityManager.getInstance().loadEntitiesForEntity(mEntityId
-					, mListSchema
-					, null
-					, mCursorSettings);
-		}
-		else if (mListMode == ListMode.EntitiesByOwner) {
+		if (mListLinkSchema != null) {
 			List<String> schemas = new ArrayList<String>();
-			schemas.add(mListSchema);
-			result = EntityManager.getInstance().getEntitiesByOwner(mEntityId
-					, true
-					, schemas
-					, null
-					, mCursorSettings);
+			schemas.add(mListLinkSchema);
+			mCursorSettings.setSchemas(schemas);
 		}
+
+		if (mListLinkType != null) {
+			List<String> linkTypes = new ArrayList<String>();
+			linkTypes.add(mListLinkType);
+			mCursorSettings.setLinkTypes(linkTypes);
+		}
+
+		if (mListLinkDirection != null) {
+			mCursorSettings.setDirection(mListLinkDirection);
+		}
+
+		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mEntityId, getLinkOptions(mListLinkSchema), mCursorSettings);
 
 		return result;
 	}
 
 	public void doRefresh() {
 		/* Called from AircandiCommon */
-		bind(true);
+		databind(true);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
-	
+
 	public void onNewEntityButtonClick(View view) {
 		onAdd();
 	}
@@ -240,81 +283,21 @@ public abstract class BaseEntityList extends BaseBrowse {
 		 * We assume the new entity button wouldn't be visible if the
 		 * entity is locked.
 		 */
-		IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(mListSchema))
-				.setEntitySchema(mListSchema)
-				.setEntityParentId(mEntityId);
-
-		if (mListSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-			intentBuilder.setClass(CommentEdit.class);
-		}
-
-		startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
-	}
-
-	@SuppressWarnings("ucd")
-	public void onListItemClick(View view) {
-		Logger.v(this, "List item clicked");
-		final Entity entity = (Entity) ((ViewHolder) view.getTag()).data;
-		if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-			Applink applink = (Applink) entity;
-			if (applink.type.equals(Constants.TYPE_APPLINK_TWITTER)) {
-				AndroidManager.getInstance().callTwitterActivity(this, applink.appId);
-			}
-			else if (applink.type.equals(Constants.TYPE_APPLINK_FACEBOOK)) {
-				AndroidManager.getInstance().callFacebookActivity(this, applink.appId);
-			}
-			else if (applink.type.equals(Constants.TYPE_APPLINK_WEBSITE)) {
-				AndroidManager.getInstance().callBrowserActivity(this, applink.appId);
-			}
-		}
-		else {
-			showCandiFormForEntity(entity.id, BaseEntityForm.viewFormBySchema(entity.schema));
-		}
-	}
-
-	public void showCandiFormForEntity(String entityId, Class<?> clazz) {
-
-		final IntentBuilder intentBuilder = new IntentBuilder(this, clazz)
-				.setEntityId(entityId)
-				.setEntitySchema(ServiceEntry.getSchemaFromId(entityId));
-
-		Entity entity = EntityManager.getEntity(entityId);
-		if (entity != null) {
-			intentBuilder.setEntitySchema(entity.schema);
-			if (entity.toId != null) {
-				intentBuilder.setEntityParentId(entity.getParent().id);
-			}
-		}
-
-		final Intent intent = intentBuilder.create();
-
-		startActivity(intent);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToPage);
+		Bundle extras = new Bundle();
+		extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mEntityId);
+		Routing.route(this, Route.New, null, mListLinkSchema, extras);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onCommentsClick(View view) {
-
 		final Entity entity = (Entity) view.getTag();
-		final IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityList.class)
-				.setListMode(ListMode.EntitiesForEntity)
-				.setEntityId(entity.id)
-				.setListSchema(Constants.SCHEMA_ENTITY_COMMENT)
-				.setListNewEnabled(true)
-				.setListItemResId(R.layout.temp_listitem_comment);
-		final Intent intent = intentBuilder.create();
-		startActivity(intent);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToPage);
+		Comments.viewFor(this, entity, Constants.TYPE_LINK_POST);
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Events
+	// UI
 	// --------------------------------------------------------------------------------------------
 
-	@Override
-	protected void draw() {}
-	
 	// --------------------------------------------------------------------------------------------
 	// Menus
 	// --------------------------------------------------------------------------------------------
@@ -330,10 +313,10 @@ public abstract class BaseEntityList extends BaseBrowse {
 		menuItem.setVisible(false);
 		if (mListNewEnabled) {
 			menuItem.setTitle(R.string.menu_add_entity_item);
-			if (mListSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 				menuItem.setTitle(R.string.menu_add_comment_item);
 			}
-			else if (mListSchema.equals(Constants.SCHEMA_ENTITY_POST)) {
+			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_POST)) {
 				menuItem.setTitle(R.string.menu_add_post_item);
 			}
 			menuItem.setVisible(true);
@@ -342,10 +325,8 @@ public abstract class BaseEntityList extends BaseBrowse {
 		MenuItem refresh = menu.findItem(R.id.refresh);
 		if (refresh != null) {
 			if (mBusyManager != null) {
-				mBusyManager.setAccuracyIndicator(refresh.getActionView().findViewById(R.id.accuracy_indicator));
 				mBusyManager.setRefreshImage(refresh.getActionView().findViewById(R.id.refresh_image));
 				mBusyManager.setRefreshProgress(refresh.getActionView().findViewById(R.id.refresh_progress));
-				mBusyManager.updateAccuracyIndicator();
 			}
 
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
@@ -360,7 +341,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Lifecycle routines
+	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -383,13 +364,13 @@ public abstract class BaseEntityList extends BaseBrowse {
 					|| ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()
 					|| EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
-				bind(true);
+				databind(true);
 			}
 		}
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -400,12 +381,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 	// Inner classes/enums
 	// --------------------------------------------------------------------------------------------
-
-	public static enum ListMode {
-		EntitiesForEntity,
-		EntitiesByOwner,
-		EntitiesWatchedByUser,
-	}
 
 	private class EndlessEntityAdapter extends EndlessAdapter {
 
@@ -421,7 +396,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 				return new View(BaseEntityList.this);
 
 			}
-			return mInflater.inflate(R.layout.temp_candi_list_item_placeholder, null);
+			return LayoutInflater.from(BaseEntityList.this).inflate(R.layout.temp_candi_list_item_placeholder, null);
 		}
 
 		@Override
@@ -457,7 +432,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 			for (Entity entity : moreEntities) {
 				list.add(entity);
 			}
-			list.sort(new Entity.SortEntitiesByModifiedDate());
+			list.sort(new Entity.SortByModifiedDate());
 			notifyDataSetChanged();
 		}
 	}
@@ -477,11 +452,12 @@ public abstract class BaseEntityList extends BaseBrowse {
 			final Entity entity = mEntities.get(position);
 
 			if (view == null) {
-				view = mInflater.inflate(mListItemResId, null);
+				view = LayoutInflater.from(BaseEntityList.this).inflate(mListItemResId, null);
 				holder = new ViewHolder();
 				holder.name = (TextView) view.findViewById(R.id.name);
-				holder.photo = (WebImageView) view.findViewById(R.id.photo);
+				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
 				holder.subtitle = (TextView) view.findViewById(R.id.subtitle);
+				holder.type = (TextView) view.findViewById(R.id.type);
 				holder.description = (TextView) view.findViewById(R.id.description);
 				holder.creator = (UserView) view.findViewById(R.id.creator);
 				holder.area = (TextView) view.findViewById(R.id.area);
@@ -548,6 +524,12 @@ public abstract class BaseEntityList extends BaseBrowse {
 					}
 				}
 
+				UI.setVisibility(holder.type, View.GONE);
+				if (holder.type != null && entity.type != null && entity.type.length() > 0) {
+					holder.type.setText(entity.type);
+					UI.setVisibility(holder.type, View.VISIBLE);
+				}
+
 				UI.setVisibility(holder.description, View.GONE);
 				if (holder.description != null && entity.description != null && entity.description.length() > 0) {
 					holder.description.setMaxLines(5);
@@ -572,7 +554,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 				UI.setVisibility(holder.creator, View.GONE);
 				if (holder.creator != null && entity.creator != null && !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
-					holder.creator.bindToUser(entity.creator, entity.modifiedDate.longValue(), entity.locked);
+					holder.creator.databind(entity.creator, entity.modifiedDate.longValue(), entity.locked);
 					UI.setVisibility(holder.creator, View.VISIBLE);
 				}
 
@@ -588,43 +570,13 @@ public abstract class BaseEntityList extends BaseBrowse {
 					UI.setVisibility(holder.createdDate, View.VISIBLE);
 				}
 
-				if (holder.photo != null) {
-					holder.photo.setTag(entity);
-					/*
-					 * The WebImageView sets the current bitmap ref being held
-					 * by the internal image view to null before doing the work
-					 * to satisfy the new request.
-					 */
-					if (entity.photo != null && entity.photo.getBitmap() != null) {
-						UI.showImageInImageView(entity.photo.getBitmap(), holder.photo.getImageView(), true, Animate.fadeInMedium());
-					}
-					else {
-						final String photoUri = entity.getPhotoUri();
-
-						/* Don't do anything if the image is already set to the one we want */
-						if (holder.photo.getImageUri() == null || !holder.photo.getImageUri().equals(photoUri)) {
-
-							final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photo)
-									.setImageUri(photoUri);
-
-							final BitmapRequest imageRequest = builder.create();
-
-							holder.photoUri = photoUri;
-							if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-								Place place = (Place) entity;
-								if (place.synthetic) {
-									final int color = Place.getCategoryColor((place.category != null) ? place.category.name : null, true, true, false);
-									holder.photo.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-								}
-								else {
-									holder.photo.getImageView().clearColorFilter();
-								}
-							}
-
-							holder.photo.setBitmapRequest(imageRequest);
-						}
-					}
+				if (holder.photoView != null) {
+					holder.photoView.setTag(entity);
+					UI.drawPhoto(holder.photoView, entity.getPhoto());
 				}
+
+				view.setClickable(true);
+				view.setOnClickListener(mClickListener);
 			}
 			return view;
 		}
@@ -668,9 +620,10 @@ public abstract class BaseEntityList extends BaseBrowse {
 	public static class ViewHolder {
 
 		public TextView		name;
-		public WebImageView	photo;
+		public AirImageView	photoView;
 		public TextView		subtitle;
 		public TextView		description;
+		public TextView		type;
 		public TextView		area;
 		public TextView		createdDate;
 		public UserView		creator;

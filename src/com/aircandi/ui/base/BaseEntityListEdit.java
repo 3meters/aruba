@@ -21,24 +21,22 @@ import android.widget.Filterable;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.IntentBuilder;
-import com.aircandi.components.bitmaps.BitmapManager;
-import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ExcludeNulls;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.HttpService.UseAnnotations;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.BounceListView;
-import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 
 public abstract class BaseEntityListEdit extends BaseEdit {
@@ -50,7 +48,7 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 	protected List<String>		mJsonEntitiesOriginal;
 
 	/* Inputs */
-	protected String			mParentId;
+	protected String			mEntityId;
 	protected List<Entity>		mEntities	= new ArrayList<Entity>();
 	protected String			mListSchema;
 
@@ -68,8 +66,8 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 					mEntities.add(entity);
 				}
 			}
-			mParentId = extras.getString(Constants.EXTRA_ENTITY_PARENT_ID);
-			mListSchema = extras.getString(Constants.EXTRA_LIST_SCHEMA);
+			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
+			mListSchema = extras.getString(Constants.EXTRA_LIST_LINK_SCHEMA);
 		}
 	}
 
@@ -82,14 +80,14 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 	}
 
 	@Override
-	protected void bind() {
+	protected void databind() {
 		/*
 		 * Before entities are customized, they have no position and are
 		 * sorted by the modified date on the link. Once entity customization
 		 * is saved to the service, the position field has been set on the set of
 		 * entities.
 		 */
-		Collections.sort(mEntities, new Entity.SortEntitiesByPosition());
+		Collections.sort(mEntities, new Entity.SortByPositionModifiedDate());
 
 		if (mEntities.size() == 0) {
 			mMessage.setText(R.string.sources_builder_empty);
@@ -108,8 +106,8 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 	}
 
 	@Override
-	protected void draw(){}
-	
+	protected void draw() {}
+
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
@@ -158,14 +156,15 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 
 	@SuppressWarnings("ucd")
 	public void onAddButtonClick(View view) {
-		final IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(mListSchema))
-				.setEntitySchema(mListSchema)
-				.setEntityParentId(mParentId);
+		onAdd();
+	}
 
-		Intent intent = intentBuilder.create();
-		intent.putExtra(Constants.EXTRA_SKIP_SAVE, true);
-		startActivityForResult(intent, Constants.ACTIVITY_ENTITY_INSERT);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+	@Override
+	public void onAdd() {
+		Bundle extras = new Bundle();
+		extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mEntityId);
+		extras.putBoolean(Constants.EXTRA_SKIP_SAVE, true);
+		Routing.route(this, Route.New, null, mListSchema, extras);
 	}
 
 	@SuppressWarnings("ucd")
@@ -175,12 +174,13 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 				mEntities.get(i).position = mEntities.get(i).position.intValue() - 2;
 			}
 		}
-		Collections.sort(mEntities, new Entity.SortEntitiesByPosition());
+		Collections.sort(mEntities, new Entity.SortByPosition());
 		Integer position = 0;
 		for (Entity entity : mEntities) {
 			entity.position = position;
 			position++;
 		}
+		mDirty = true;
 		mList.invalidateViews();
 	}
 
@@ -191,12 +191,13 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 				mEntities.get(i).position = mEntities.get(i).position.intValue() + 2;
 			}
 		}
-		Collections.sort(mEntities, new Entity.SortEntitiesByPosition());
+		Collections.sort(mEntities, new Entity.SortByPosition());
 		Integer position = 0;
 		for (Entity entity : mEntities) {
 			entity.position = position;
 			position++;
 		}
+		mDirty = true;
 		mList.invalidateViews();
 	}
 
@@ -204,13 +205,9 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 	public void onListItemClick(View view) {
 		final CheckBox check = (CheckBox) ((View) view.getParent()).findViewById(R.id.checked);
 		mEntityEditing = (Entity) check.getTag();
-
-		final IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(mEntityEditing.schema)).setEntity(mEntityEditing);
-		Intent intent = intentBuilder.create();
-		intent.putExtra(Constants.EXTRA_SKIP_SAVE, true);
-
-		startActivityForResult(intent, Constants.ACTIVITY_ENTITY_EDIT);
-		Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+		Bundle extras = new Bundle();
+		extras.putBoolean(Constants.EXTRA_SKIP_SAVE, true);
+		Routing.route(this, Route.Edit, mEntityEditing, null, null, extras);
 	}
 
 	@Override
@@ -230,6 +227,7 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 									break;
 								}
 							}
+							mDirty = true;
 							mList.invalidateViews();
 						}
 					}
@@ -251,7 +249,7 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 								entity.position = position;
 								position++;
 							}
-
+							mDirty = true;
 							mList.invalidateViews();
 							scrollToBottom();
 						}
@@ -276,25 +274,23 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 			}
 		}
 
-		final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final LayoutInflater inflater = LayoutInflater.from(this);
 		final ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.temp_delete_sources, null);
 		final TextView message = (TextView) customView.findViewById(R.id.message);
 		final LinearLayout list = (LinearLayout) customView.findViewById(R.id.list);
 		for (Entity entity : mEntities) {
 			if (entity.checked) {
-				View sourceView = inflater.inflate(R.layout.temp_listitem_delete_sources, null);
-				WebImageView image = (WebImageView) sourceView.findViewById(R.id.photo);
+				View sourceView = inflater.inflate(R.layout.temp_listitem_applink_delete, null);
+
 				TextView name = (TextView) sourceView.findViewById(R.id.name);
+				AirImageView photoView = (AirImageView) sourceView.findViewById(R.id.photo);
+
 				if (entity.name != null) {
 					name.setText(entity.name);
 				}
-				image.setTag(entity);
-				final String photoUri = entity.getPhotoUri();
-				BitmapRequest bitmapRequest = new BitmapRequest(photoUri, image.getImageView());
-				bitmapRequest.setImageSize(image.getSizeHint());
-				bitmapRequest.setImageRequestor(image.getImageView());
+				photoView.setTag(entity);
+				UI.drawPhoto(photoView, entity.getPhoto());
 
-				BitmapManager.getInstance().masterFetch(bitmapRequest);
 				list.addView(sourceView);
 			}
 		}
@@ -321,42 +317,13 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 									mEntities.remove(i);
 								}
 							}
+							mDirty = true;
 							mList.invalidateViews();
 						}
 					}
 				}
 				, null);
 		dialog.setCanceledOnTouchOutside(false);
-	}
-
-	@Override
-	public Boolean isDirty() {
-
-		final List<String> jsonEntities = new ArrayList<String>();
-		for (Entity entity : mEntities) {
-			jsonEntities.add(HttpService.objectToJson(entity, UseAnnotations.False, ExcludeNulls.True));
-		}
-
-		if (mJsonEntitiesOriginal == null) {
-			if (jsonEntities.size() > 0) {
-				return true;
-			}
-		}
-		else {
-
-			if (jsonEntities.size() != mJsonEntitiesOriginal.size()) {
-				return true;
-			}
-
-			int position = 0;
-			for (String jsonEntity : jsonEntities) {
-				if (!jsonEntity.equals(mJsonEntitiesOriginal.get(position))) {
-					return true;
-				}
-				position++;
-			}
-		}
-		return false;
 	}
 
 	private void scrollToBottom() {
@@ -380,15 +347,32 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 
 	// --------------------------------------------------------------------------------------------
 	// Menus
-	// --------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------	
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		return Routing.route(this, Routing.routeForMenu(menuItem));
-	}
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		
+		MenuItem refresh = menu.findItem(R.id.refresh);
+		if (refresh != null) {
+			if (mBusyManager != null) {
+				mBusyManager.setRefreshImage(refresh.getActionView().findViewById(R.id.refresh_image));
+				mBusyManager.setRefreshProgress(refresh.getActionView().findViewById(R.id.refresh_progress));
+			}
 
+			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					onRefresh();
+				}
+			});
+		}
+
+		return true;
+	}
+	
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -402,15 +386,15 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 
 	protected abstract static class EntityListAdapter extends ArrayAdapter<Entity> implements Filterable {
 
-		protected final LayoutInflater	mInflater;
 		protected Integer				mItemLayoutId;
 		protected final List<Entity>	mListItems;
+		protected Context				mContext;
 
 		public EntityListAdapter(Context context, List<Entity> entities, Integer itemLayoutId) {
 			super(context, 0, entities);
 
 			mListItems = entities;
-			mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			mContext = context;
 
 			if (itemLayoutId != null) {
 				mItemLayoutId = itemLayoutId;
@@ -424,9 +408,9 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 			final Entity entity = mListItems.get(position);
 
 			if (view == null) {
-				view = mInflater.inflate(mItemLayoutId, null);
+				view = LayoutInflater.from(mContext).inflate(mItemLayoutId, null);
 				holder = new ViewHolder();
-				holder.photo = (WebImageView) view.findViewById(R.id.photo);
+				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
 				holder.name = (TextView) view.findViewById(R.id.name);
 				holder.subtitle = (TextView) view.findViewById(R.id.subtitle);
 				holder.description = (TextView) view.findViewById(R.id.description);
@@ -479,28 +463,9 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 					}
 				}
 
-				if (holder.photo != null) {
-					holder.photo.setTag(entity);
-					/*
-					 * The WebImageView sets the current bitmap ref being held
-					 * by the internal image view to null before doing the work
-					 * to satisfy the new request.
-					 */
-					if (entity.photo != null && entity.photo.hasBitmap()) {
-						UI.showImageInImageView(entity.photo.getBitmap(), holder.photo.getImageView(), true, Animate.fadeInMedium());
-					}
-					else {
-						final String photoUri = entity.getPhotoUri();
-
-						/* Don't do anything if the image is already set to the one we want */
-						if (holder.photo.getImageUri() == null || !holder.photo.getImageUri().equals(photoUri)) {
-
-							final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photo).setImageUri(photoUri);
-							final BitmapRequest imageRequest = builder.create();
-							holder.photo.setBitmapRequest(imageRequest);
-						}
-					}
-
+				if (holder.photoView != null) {
+					holder.photoView.setTag(entity);
+					UI.drawPhoto(holder.photoView, entity.getPhoto());
 				}
 			}
 			return view;
@@ -533,7 +498,7 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 		}
 
 		private static class ViewHolder {
-			private WebImageView	photo;
+			private AirImageView	photoView;
 			private TextView		name;
 			private TextView		subtitle;
 			private TextView		description;

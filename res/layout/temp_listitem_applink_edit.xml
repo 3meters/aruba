@@ -26,7 +26,7 @@
         android:onClick="onListItemClick"
         android:orientation="horizontal" >
 
-        <com.aircandi.ui.widgets.WebImageView
+        <com.aircandi.ui.widgets.AirImageView
             android:id="@+id/photo"
             android:layout_width="@dimen/image_small"
             android:layout_height="@dimen/image_small"
@@ -40,10 +40,24 @@
             android:scaleType="centerCrop" />
 
         <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/type"
+            style="@style/form_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/image_forward"
+            android:layout_toRightOf="@+id/photo"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingLeft="2dp"
+            android:text="@string/dummy_name"
+            android:textColor="@color/accent_blue" />
+
+        <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/name"
             style="@style/form_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/type"
             android:layout_toLeftOf="@+id/image_forward"
             android:layout_toRightOf="@+id/photo"
             android:ellipsize="end"
@@ -52,7 +66,7 @@
             android:textColor="?attr/textColor" />
 
         <com.aircandi.ui.widgets.AirTextView
-            android:id="@+id/subtitle"
+            android:id="@+id/app_id"
             style="@style/form_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -65,11 +79,11 @@
             android:textColor="@color/text_secondary" />
 
         <com.aircandi.ui.widgets.AirTextView
-            android:id="@+id/description"
+            android:id="@+id/app_url"
             style="@style/form_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/subtitle"
+            android:layout_below="@+id/app_id"
             android:layout_toLeftOf="@+id/image_forward"
             android:layout_toRightOf="@+id/photo"
             android:ellipsize="end"

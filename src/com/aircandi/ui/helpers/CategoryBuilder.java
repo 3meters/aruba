@@ -1,12 +1,10 @@
 package com.aircandi.ui.helpers;
 
 import java.util.List;
-import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -19,25 +17,23 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.bitmaps.BitmapManager;
-import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.Category;
-import com.aircandi.service.objects.Place;
-import com.aircandi.ui.base.BaseActivity;
-import com.aircandi.ui.widgets.WebImageView;
+import com.aircandi.service.objects.Photo;
+import com.aircandi.ui.base.BaseEdit;
+import com.aircandi.ui.widgets.AirImageView;
+import com.aircandi.utilities.UI;
 
-public class CategoryBuilder extends BaseActivity {
+public class CategoryBuilder extends BaseEdit {
 
-	private WebImageView	mPhoto;
+	private AirImageView	mPhotoView;
 	private Spinner			mSpinnerCategory;
 	private Spinner			mSpinnerSubCategory;
 	private Spinner			mSpinnerSubSubCategory;
@@ -53,16 +49,11 @@ public class CategoryBuilder extends BaseActivity {
 	private Category		mSubSubCategory;
 
 	private List<Category>	mCategories;
-
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		if (!isFinishing()) {
-			initialize();
-		}
-	}
-
-	private void initialize() {
+	protected void unpackIntent() {
+		super.unpackIntent();
+		
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
 			final String jsonCategory = extras.getString(Constants.EXTRA_CATEGORY);
@@ -70,16 +61,25 @@ public class CategoryBuilder extends BaseActivity {
 				mOriginalCategory = (Category) HttpService.jsonToObject(jsonCategory, ObjectType.Category);
 			}
 		}
-		mPhoto = (WebImageView) findViewById(R.id.photo);
+	}
+
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+
+		mPhotoView = (AirImageView) findViewById(R.id.photo);
 		mSpinnerCategory = (Spinner) findViewById(R.id.category);
 		mSpinnerSubCategory = (Spinner) findViewById(R.id.sub_category);
 		mSpinnerSubSubCategory = (Spinner) findViewById(R.id.sub_sub_category);
 
 		mSpinnerItem = mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
-		mActionBar.setDisplayHomeAsUpEnabled(true);
 		mActionBar.setTitle(R.string.dialog_category_builder_title);
 
+	}
+
+	@Override
+	protected void databind() {
 		if (EntityManager.getInstance().getCategories().size() == 0) {
 			loadCategories();
 		}
@@ -125,13 +125,16 @@ public class CategoryBuilder extends BaseActivity {
 	// Events
 	// --------------------------------------------------------------------------------------------
 
-	private void gather() {}
+	@Override
+	public void onAccept() {
+		save();
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Services
 	// --------------------------------------------------------------------------------------------
 
-	private void doSave() {
+	private void save() {
 		final Intent intent = new Intent();
 		if (mSubSubCategory != null) {
 			final Category category = new Category();
@@ -157,21 +160,8 @@ public class CategoryBuilder extends BaseActivity {
 	// Menus
 	// --------------------------------------------------------------------------------------------
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.accept) {
-			gather();
-			doSave();
-			return true;
-		}
-
-		/* In case we add general menu items later */
-		super.onOptionsItemSelected(item);
-		return true;
-	}
-
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	private void setCategoryIndexes() {
@@ -243,7 +233,7 @@ public class CategoryBuilder extends BaseActivity {
 
 					mCategory = mCategories.get(position);
 					if (mCategory.photo != null) {
-						updateCustomImage(mCategory.photo.getUri(), mCategory);
+						updateCustomImage(mCategory.photo);
 					}
 
 					mSubCategory = null;
@@ -319,7 +309,7 @@ public class CategoryBuilder extends BaseActivity {
 					if (position < mCategory.categories.size()) {
 						mSubCategory = mCategory.categories.get(position);
 						if (mSubCategory.photo != null) {
-							updateCustomImage(mSubCategory.photo.getUri(), mSubCategory);
+							updateCustomImage(mSubCategory.photo);
 						}
 
 						mSubSubCategory = null;
@@ -393,7 +383,7 @@ public class CategoryBuilder extends BaseActivity {
 					if (position < mSubCategory.categories.size()) {
 						mSubSubCategory = mSubCategory.categories.get(position);
 						if (mSubSubCategory.photo != null) {
-							updateCustomImage(mSubSubCategory.photo.getUri(), mSubSubCategory);
+							updateCustomImage(mSubSubCategory.photo);
 						}
 					}
 				}
@@ -409,28 +399,8 @@ public class CategoryBuilder extends BaseActivity {
 		}
 	}
 
-	private void updateCustomImage(String uri, Category category) {
-
-		final Boolean boostColor = !android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus 4");
-		final int color = Place.getCategoryColor(category.name, true, boostColor, false);
-		mPhoto.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-
-		final int colorResId = Place.getCategoryColorResId(category.name, true, boostColor, false);
-		if (findViewById(R.id.color_layer) != null) {
-			(findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
-			(findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
-			(findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
-		}
-		else {
-			mPhoto.getImageView().setBackgroundResource(colorResId);
-		}
-
-		mPhoto.getImageView().setTag(uri);
-		final BitmapRequest bitmapRequest = new BitmapRequest(uri, mPhoto.getImageView());
-		bitmapRequest.setBrokenDrawableResId(R.drawable.ic_launcher);
-		bitmapRequest.setImageSize(mPhoto.getSizeHint());
-		bitmapRequest.setImageRequestor(mPhoto.getImageView());
-		BitmapManager.getInstance().masterFetch(bitmapRequest);
+	private void updateCustomImage(Photo photo) {
+		UI.drawPhoto(mPhotoView, photo);
 	}
 
 	private class CategoryAdapter extends ArrayAdapter {
@@ -473,4 +443,5 @@ public class CategoryBuilder extends BaseActivity {
 	protected int getLayoutId() {
 		return R.layout.builder_category;
 	}
+
 }

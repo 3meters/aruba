@@ -20,24 +20,25 @@ import android.widget.TextView;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.Template;
-import com.aircandi.ui.base.BaseActivity;
+import com.aircandi.ui.base.BaseBrowse;
 
-public class TemplatePicker extends BaseActivity implements OnItemClickListener {
+public class TemplatePicker extends BaseBrowse implements OnItemClickListener {
 
+	private TextView	mName;
 	private ListView	mListView;
 	private ListAdapter	mListAdapter;
-	private TextView	mName;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
 
-		if (!isFinishing()) {
-			initialize();
-		}
+		mName = (TextView) findViewById(R.id.name);
+		mListView = (ListView) findViewById(R.id.form_list);
 	}
 
-	private void initialize() {
+	@Override
+	protected void databind(Boolean refresh) {
+		mName.setText(R.string.dialog_template_picker_title);
 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();
@@ -48,11 +49,7 @@ public class TemplatePicker extends BaseActivity implements OnItemClickListener 
 			listData.add(new Template(R.drawable.ic_action_picture_light, getString(R.string.name_entity_type_picture), null, Constants.SCHEMA_ENTITY_POST));
 		}
 
-		mName = (TextView) findViewById(R.id.name);
-		mName.setText(R.string.dialog_template_picker_title);
-
 		mListAdapter = new ListAdapter(this, listData);
-		mListView = (ListView) findViewById(R.id.form_list);
 		mListView.setAdapter(mListAdapter);
 		mListView.setOnItemClickListener(this);
 	}
@@ -90,8 +87,7 @@ public class TemplatePicker extends BaseActivity implements OnItemClickListener 
 			final Template itemData = (Template) items.get(position);
 
 			if (view == null) {
-				final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				view = inflater.inflate(R.layout.temp_listitem_templates, null);
+				view = LayoutInflater.from(TemplatePicker.this).inflate(R.layout.temp_listitem_templates, null);
 			}
 
 			if (itemData != null) {
@@ -104,7 +100,7 @@ public class TemplatePicker extends BaseActivity implements OnItemClickListener 
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override

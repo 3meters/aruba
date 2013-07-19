@@ -17,12 +17,12 @@ public class RadarListAdapter extends ArrayAdapter<Entity> {
 
 	private final LayoutInflater	mInflater;
 	private final Integer			mItemLayoutId	= R.layout.temp_listitem_radar;
-	private List<Entity>	mItems;
+	private List<Entity>			mItems;
 
 	public RadarListAdapter(Context context, List<Entity> entities) {
 		super(context, 0, entities);
 		mItems = entities;
-		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mInflater = LayoutInflater.from(context);
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class RadarListAdapter extends ArrayAdapter<Entity> {
 		if (itemData != null) {
 			final Place entity = (Place) itemData;
 			holder.data = entity;
-			holder.candiView.bindToPlace(entity);
+			holder.candiView.databind(entity);
 		}
 		return view;
 	}

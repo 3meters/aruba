@@ -12,10 +12,7 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.Tracker;
-import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
-import com.aircandi.utilities.Routing;
-import com.aircandi.utilities.Routing.Route;
 
 public class Preferences extends SherlockPreferenceActivity {
 
@@ -135,11 +132,6 @@ public class Preferences extends SherlockPreferenceActivity {
 				}, null);
 		Tracker.sendEvent("ui_action", "open_dialog", "about", 0, Aircandi.getInstance().getUser());
 
-	}
-
-	@Override
-	public void onBackPressed() {
-		Routing.route(this, Route.Back, TransitionType.FormToPage);
 	}
 
 	@Override

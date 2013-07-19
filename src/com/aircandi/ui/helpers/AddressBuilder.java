@@ -9,43 +9,36 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
-import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
-import com.aircandi.ui.base.BaseActivity;
+import com.aircandi.ui.base.BaseEdit;
 import com.aircandi.utilities.Utilities;
 
-public class AddressBuilder extends BaseActivity {
+public class AddressBuilder extends BaseEdit {
 
 	private Entity	mEntity;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		if (!isFinishing()) {
-			initialize();
-			draw();
-		}
-	}
-
-	private void initialize() {
+	protected void unpackIntent() {
+		super.unpackIntent();
+		
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			final String jsonAddress = extras.getString(Constants.EXTRA_PLACE);
+			final String jsonAddress = extras.getString(Constants.EXTRA_ENTITY);
 			if (jsonAddress != null) {
 				mEntity = (Place) HttpService.jsonToObject(jsonAddress, ObjectType.Place);
 			}
 		}
+	}
+	
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
 
-		if (mEntity == null) {
-			mEntity = new Place();
-		}
-
-		mActionBar.setDisplayHomeAsUpEnabled(true);
 		mActionBar.setTitle(R.string.dialog_address_builder_title);
 
 		((EditText) findViewById(R.id.phone)).setImeOptions(EditorInfo.IME_ACTION_DONE);
@@ -54,8 +47,7 @@ public class AddressBuilder extends BaseActivity {
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_DONE) {
-					gather();
-					doSave();
+					onAccept();
 					return true;
 				}
 				return false;
@@ -63,8 +55,16 @@ public class AddressBuilder extends BaseActivity {
 		});
 	}
 
-	private void draw() {
-		
+	@Override
+	protected void databind() {
+		if (mEntity == null) {
+			mEntity = new Place();
+		}
+	}
+
+	@Override
+	protected void draw() {
+
 		Place place = (Place) mEntity;
 		if (place.address != null) {
 			((EditText) findViewById(R.id.address)).setText(place.address);
@@ -96,11 +96,17 @@ public class AddressBuilder extends BaseActivity {
 		place.postalCode = Utilities.emptyAsNull(((EditText) findViewById(R.id.zip_code)).getEditableText().toString());
 	}
 
+	@Override
+	public void onAccept() {
+		gather();
+		save();
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Services
 	// --------------------------------------------------------------------------------------------
 
-	private void doSave() {
+	private void save() {
 		final Intent intent = new Intent();
 		if (mEntity != null) {
 			final String jsonAddress = HttpService.objectToJson(mEntity);
@@ -111,24 +117,7 @@ public class AddressBuilder extends BaseActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Menus
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.accept) {
-			gather();
-			doSave();
-			return true;
-		}
-
-		/* In case we add general menu items later */
-		super.onOptionsItemSelected(item);
-		return true;
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override

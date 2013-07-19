@@ -3,10 +3,14 @@ package com.aircandi.ui.edit;
 import java.util.HashMap;
 
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.text.Editable;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.beta.R;
+import com.aircandi.components.BusyManager;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -25,7 +29,31 @@ public class FeedbackEdit extends BaseEntityEdit {
 	private Document	mDocument;
 
 	@Override
-	protected void bind() {
+	protected void initialize(Bundle savedInstanceState) {
+		/*
+		 * Feedback are not really an entity type so we handle
+		 * all the expected initialization.
+		 */
+		mActionBar.setDisplayHomeAsUpEnabled(true);
+		mBusyManager = new BusyManager(this);
+		mDescription = (TextView) findViewById(R.id.description);
+
+		if (mDescription != null) {
+			mDescription.addTextChangedListener(new SimpleTextWatcher() {
+
+				@Override
+				public void afterTextChanged(Editable s) {
+					mDirty = false;
+					if (s.toString() != null || !s.toString().equals("")) {
+						mDirty = true;
+					}
+				}
+			});
+		}
+	}
+
+	@Override
+	protected void databind() {
 		/*
 		 * We are always creating a new comment.
 		 */
@@ -37,16 +65,21 @@ public class FeedbackEdit extends BaseEntityEdit {
 
 	@Override
 	protected void draw() {
-		((UserView) findViewById(R.id.created_by)).bindToUser(Aircandi.getInstance().getUser(), null);
+		((UserView) findViewById(R.id.created_by)).databind(Aircandi.getInstance().getUser(), null);
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
-	
+
 	@Override
-	protected void gather(){
-		mDocument.data.put("message", (Object) mDescription.getText().toString().trim());		
+	protected String getLinkType() {
+		return null;
+	}
+
+	@Override
+	protected void gather() {
+		mDocument.data.put("message", (Object) mDescription.getText().toString().trim());
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -112,7 +145,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override

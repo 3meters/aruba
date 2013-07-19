@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <integer name="candi_flow_limit">21</integer>
+    <integer name="shortcuts_flow_limit">21</integer>
 
 </resources>

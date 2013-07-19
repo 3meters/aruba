@@ -130,22 +130,22 @@ public class ApplinkEdit extends BaseEntityEdit {
 			mAppId.setVisibility(View.GONE);
 			mAppUrl.setVisibility(View.GONE);
 
-			if (mEntity.type.equals(Constants.TYPE_APPLINK_WEBSITE)) {
+			if (mEntity.type.equals(Constants.TYPE_APP_WEBSITE)) {
 				mAppUrl.setVisibility(View.VISIBLE);
 				mAppUrl.setHint(R.string.form_applink_url_website_hint);
 				mMissingResId = R.string.error_missing_applink_url_website;
 			}
-			else if (mEntity.type.equals(Constants.TYPE_APPLINK_EMAIL)) {
+			else if (mEntity.type.equals(Constants.TYPE_APP_EMAIL)) {
 				mAppId.setVisibility(View.VISIBLE);
 				mAppId.setHint(R.string.form_applink_id_email_hint);
 				mMissingResId = R.string.error_missing_applink_id_email;
 			}
-			else if (mEntity.type.equals(Constants.TYPE_APPLINK_FACEBOOK)) {
+			else if (mEntity.type.equals(Constants.TYPE_APP_FACEBOOK)) {
 				mAppId.setVisibility(View.VISIBLE);
 				mAppId.setHint(R.string.form_applink_id_facebook_hint);
 				mMissingResId = R.string.error_missing_applink_id_facebook;
 			}
-			else if (mEntity.type.equals(Constants.TYPE_APPLINK_TWITTER)) {
+			else if (mEntity.type.equals(Constants.TYPE_APP_TWITTER)) {
 				mAppId.setVisibility(View.VISIBLE);
 				mAppId.setHint(R.string.form_applink_id_twitter_hint);
 				mMissingResId = R.string.error_missing_applink_id_twitter;
@@ -258,7 +258,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Services
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -271,7 +271,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 
 		if (mAppUrl != null) {
 			((Applink) mEntity).appUrl = Utilities.emptyAsNull(mAppUrl.getText().toString().trim());
-			if (mEntity.type.equals(Constants.TYPE_APPLINK_WEBSITE)) {
+			if (mEntity.type.equals(Constants.TYPE_APP_WEBSITE)) {
 				String appUrl = ((Applink) mEntity).appUrl;
 				if (!appUrl.startsWith("http://") && !appUrl.startsWith("https://")) {
 					((Applink) mEntity).appUrl = "http://" + appUrl;
@@ -279,6 +279,11 @@ public class ApplinkEdit extends BaseEntityEdit {
 			}
 		}
 	}
+
+	@Override
+	protected String getLinkType() {
+		return Constants.TYPE_LINK_APPLINK;
+	};
 
 	// --------------------------------------------------------------------------------------------
 	// Services
@@ -349,7 +354,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override

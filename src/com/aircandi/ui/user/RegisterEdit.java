@@ -59,6 +59,12 @@ public class RegisterEdit extends BaseEntityEdit {
 		});
 	}
 
+	@Override
+	protected void databind() {
+		mEntitySchema = Constants.SCHEMA_ENTITY_USER;
+		super.databind();
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
@@ -84,6 +90,11 @@ public class RegisterEdit extends BaseEntityEdit {
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected String getLinkType() {
+		return null;
+	}
 
 	@Override
 	protected void gather() {
@@ -180,7 +191,11 @@ public class RegisterEdit extends BaseEntityEdit {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("InsertUser");
-				final ModelResult result = EntityManager.getInstance().insertUser((User) mEntity, null, mEntity.photo.getBitmap());
+
+				final ModelResult result = EntityManager.getInstance().insertUser((User) mEntity
+						, null
+						, mEntity.photo != null ? mEntity.photo.getBitmap() : null);
+				
 				return result;
 			}
 
@@ -227,7 +242,7 @@ public class RegisterEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
 
 	@Override

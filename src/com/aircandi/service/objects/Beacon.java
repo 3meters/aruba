@@ -1,9 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 
 import com.aircandi.Constants;
@@ -101,11 +99,6 @@ public class Beacon extends Entity implements Cloneable, Serializable {
 	}
 
 	@Override
-	public List<Applink> getClientApplinks() {
-		return new ArrayList<Applink>();
-	}
-
-	@Override
 	public String getCollection() {
 		return collectionId;
 	}
@@ -135,7 +128,7 @@ public class Beacon extends Entity implements Cloneable, Serializable {
 	// Inner classes
 	// --------------------------------------------------------------------------------------------
 
-	public static class SortBeaconsBySignalLevel implements Comparator<Beacon> {
+	public static class SortBySignalLevel implements Comparator<Beacon> {
 
 		@Override
 		public int compare(Beacon object1, Beacon object2) {

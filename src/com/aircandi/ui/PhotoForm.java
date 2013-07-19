@@ -31,11 +31,11 @@ import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Photo;
-import com.aircandi.ui.base.BaseActivity;
+import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.UI;
 
-public class PhotoForm extends BaseActivity {
+public class PhotoForm extends BaseBrowse {
 
 	private List<Photo>	mPhotosForPaging	= new ArrayList<Photo>();
 	private String		mImageUri;
@@ -47,14 +47,12 @@ public class PhotoForm extends BaseActivity {
 		/* This has to be called before setContentView */
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
-
-		if (!isFinishing()) {
-			initialize();
-			bind();
-		}
 	}
 
-	private void initialize() {
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
 			mImageUri = extras.getString(Constants.EXTRA_URI);
@@ -66,7 +64,8 @@ public class PhotoForm extends BaseActivity {
 		mActionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
-	private void bind() {
+	@Override
+	protected void databind(Boolean refresh) {
 		List<Photo> photos = EntityManager.getInstance().getPhotos();
 		final Photo photo = EntityManager.getInstance().getPhoto(mImageUri);
 		if (!mPagingEnabled) {
@@ -101,7 +100,7 @@ public class PhotoForm extends BaseActivity {
 		/* Author block */
 		UI.setVisibility(user, View.GONE);
 		if (photo.getUser() != null) {
-			user.bindToUser(photo.getUser(), photo.getCreatedAt().longValue(), false);
+			user.databind(photo.getUser(), photo.getCreatedAt().longValue(), false);
 			UI.setVisibility(user, View.VISIBLE);
 		}
 
@@ -192,8 +191,9 @@ public class PhotoForm extends BaseActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
+	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		final ImageView image = (ImageView) findViewById(R.id.photo);
@@ -205,4 +205,5 @@ public class PhotoForm extends BaseActivity {
 	protected int getLayoutId() {
 		return R.layout.picture_detail;
 	}
+
 }

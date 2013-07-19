@@ -50,6 +50,8 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 
 		if (map.get("photo") != null) {
 			category.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"), nameMapping);
+			category.photo.colorize = true;
+			category.photo.colorizeKey = category.name;
 		}
 
 		if (map.get("categories") != null) {

@@ -1,8 +1,6 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import com.aircandi.Constants;
@@ -38,16 +36,10 @@ public class Applink extends Entity implements Cloneable, Serializable {
 	// --------------------------------------------------------------------------------------------	
 
 	@Override
-	public String getPhotoUri() {
-		String photoUri;
-		if (photo != null) {
-			photoUri = photo.getUri();
-		}
-		else {
-			Photo photo = new Photo(getDefaultPhotoUri(type), null, null, null, PhotoSource.assets);
-			photoUri = photo.getUri();
-		}
-		return photoUri;
+	public Photo getDefaultPhoto() {
+		String photoUri = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + this.type + ".png";
+		Photo photo = new Photo(photoUri, null, null, null, PhotoSource.assets);
+		return photo;
 	}
 
 	public static String getDefaultPhotoUri(String sourceType) {
@@ -58,11 +50,6 @@ public class Applink extends Entity implements Cloneable, Serializable {
 	@Override
 	public String getCollection() {
 		return collectionId;
-	}
-
-	@Override
-	public List<Applink> getClientApplinks() {
-		return new ArrayList<Applink>();
 	}
 
 	@Override

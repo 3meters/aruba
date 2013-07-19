@@ -104,6 +104,9 @@ public class Animate {
 
 	@SuppressWarnings("ucd")
 	public static void doOverridePendingTransitionDefault(Activity activity, TransitionType transitionType) {
+		/*
+		 * Default android animations are used unless overridden here.
+		 */
 		if (transitionType == TransitionType.PageToHelp) {
 			activity.overridePendingTransition(R.anim.fade_in_short, R.anim.hold);
 		}

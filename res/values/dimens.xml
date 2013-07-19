@@ -14,6 +14,7 @@
     <dimen name="image_extra_large">250dp</dimen>
     <dimen name="image_large">150dp</dimen>
     <dimen name="image_medium">100dp</dimen>
+    <dimen name="image_medium_small">75dp</dimen>
     <dimen name="image_small">50dp</dimen>
     <dimen name="image_extra_small">35dp</dimen>
     <dimen name="image_combo_button">30dp</dimen>

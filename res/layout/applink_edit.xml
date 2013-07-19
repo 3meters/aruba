@@ -51,7 +51,7 @@
                 android:layout_weight="0"
                 android:visibility="gone" >
 
-                <com.aircandi.ui.widgets.WebImageView
+                <com.aircandi.ui.widgets.AirImageView
                     android:id="@+id/photo"
                     style="@style/picture_framed"
                     android:layout_width="@dimen/image_medium"

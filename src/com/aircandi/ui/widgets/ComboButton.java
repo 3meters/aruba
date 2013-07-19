@@ -15,13 +15,12 @@ import com.aircandi.beta.R;
 @SuppressWarnings("ucd")
 public class ComboButton extends RelativeLayout {
 
-	private Integer			mLayoutId;
-	private Integer			mDrawableId;
-	private String			mLabel;
-	private ViewGroup		mLayout;
-	private ImageView		mImageIcon;
-	private TextView		mTextLabel;
-	private LayoutInflater	mInflater;
+	private Integer		mLayoutId;
+	private Integer		mDrawableId;
+	private String		mLabel;
+	private ViewGroup	mLayout;
+	private ImageView	mImageIcon;
+	private TextView	mTextLabel;
 
 	public ComboButton(Context context) {
 		this(context, null);
@@ -37,36 +36,41 @@ public class ComboButton extends RelativeLayout {
 		if (attrs != null) {
 
 			final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ComboButton, defStyle, 0);
-			mLayoutId = ta.getResourceId(R.styleable.ComboButton_layout, R.layout.widget_combo_button);
-			mDrawableId = ta.getResourceId(R.styleable.ComboButton_drawable, 0);
+			mLayoutId = ta.getResourceId(R.styleable.ComboButton_layout, R.layout.widget_combo_button_no_text);
+			mDrawableId = ta.getResourceId(R.styleable.ComboButton_drawable, R.drawable.ic_launcher);
 			mLabel = ta.getString(R.styleable.ComboButton_label);
 
 			ta.recycle();
 			initialize();
-			draw();
+			if (!this.isInEditMode()) {
+				draw();
+			}
 		}
 	}
 
 	private void initialize() {
 
-		mInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		mLayout = (ViewGroup) mInflater.inflate(mLayoutId, this, true);
-		mTextLabel = (TextView) mLayout.findViewById(R.id.label);
-		mImageIcon = (ImageView) mLayout.findViewById(R.id.icon);
+		mLayout = (ViewGroup) LayoutInflater.from(this.getContext()).inflate(mLayoutId, this, true);
+		if (!this.isInEditMode()) {
+			mTextLabel = (TextView) mLayout.findViewById(R.id.label);
+			mImageIcon = (ImageView) mLayout.findViewById(R.id.image);
+		}
 	}
 
 	private void draw() {
 		if (mDrawableId != 0) {
-			mImageIcon.setImageResource(mDrawableId);
+			mImageIcon.setImageDrawable(getResources().getDrawable(mDrawableId));
 		}
 		else {
 			mImageIcon.setVisibility(View.GONE);
 		}
-		if (mLabel != null) {
-			mTextLabel.setText(mLabel);
-		}
-		else {
-			mTextLabel.setVisibility(View.GONE);
+		if (mTextLabel != null) {
+			if (mLabel != null) {
+				mTextLabel.setText(mLabel);
+			}
+			else {
+				mTextLabel.setVisibility(View.GONE);
+			}
 		}
 	}
 

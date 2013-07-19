@@ -13,7 +13,6 @@ import com.aircandi.Aircandi;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.BeaconsLockedEvent;
-import com.aircandi.components.BusProvider;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
@@ -24,7 +23,6 @@ import com.aircandi.components.QueryWifiScanReceivedEvent;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
@@ -43,6 +41,7 @@ public class TuningEdit extends BaseEntityEdit {
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
+
 		mButtonTune = (Button) findViewById(R.id.button_tune);
 		mButtonUntune = (Button) findViewById(R.id.button_untune);
 	}
@@ -69,34 +68,6 @@ public class TuningEdit extends BaseEntityEdit {
 		}
 	}
 
-	@Override
-	protected void drawPhoto() {
-		super.drawPhoto();
-		/*
-		 * Special color layering if we are using the category photo.
-		 */
-		Place place = (Place) mEntity;
-		if (place.photo == null && place.category != null) {
-
-			final int color = Place.getCategoryColor((place.category != null)
-					? place.category.name
-					: null, true, mMuteColor, false);
-
-			mPhoto.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-			Integer colorResId = Place.getCategoryColorResId(place.category != null ? place.category.name : null,
-					true, mMuteColor, false);
-
-			if (findViewById(R.id.color_layer) != null) {
-				(findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
-				(findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
-				(findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
-			}
-			else {
-				mPhoto.getImageView().setBackgroundResource(colorResId);
-			}
-		}
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
@@ -114,7 +85,6 @@ public class TuningEdit extends BaseEntityEdit {
 			mBusyManager.showBusy(R.string.progress_tuning);
 			if (NetworkManager.getInstance().isWifiEnabled()) {
 				mTuningInProcess = true;
-				enableEvents();
 				ProximityManager.getInstance().scanForWifi(ScanReason.query);
 			}
 			else {
@@ -131,7 +101,6 @@ public class TuningEdit extends BaseEntityEdit {
 			mBusyManager.showBusy(R.string.progress_tuning);
 			if (NetworkManager.getInstance().isWifiEnabled()) {
 				mTuningInProcess = true;
-				enableEvents();
 				ProximityManager.getInstance().scanForWifi(ScanReason.query);
 			}
 			else {
@@ -143,6 +112,11 @@ public class TuningEdit extends BaseEntityEdit {
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected String getLinkType() {
+		return null;
+	}
 
 	private void toggleStarOn(final Integer starId) {
 		runOnUiThread(new Runnable() {
@@ -181,7 +155,6 @@ public class TuningEdit extends BaseEntityEdit {
 						/*
 						 * We fake that the tuning happened because it is simpler than enabling/disabling ui
 						 */
-						disableEvents();
 						setSupportProgressBarIndeterminateVisibility(false);
 						mBusyManager.hideBusy();
 						if (mUntuning) {
@@ -210,7 +183,6 @@ public class TuningEdit extends BaseEntityEdit {
 				@Override
 				public void run() {
 					Logger.d(TuningEdit.this, "Beacons locked event: tune entity");
-					disableEvents();
 					tuneProximity();
 				}
 			});
@@ -275,26 +247,9 @@ public class TuningEdit extends BaseEntityEdit {
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
-	@Override
-	protected void onStop() {
-		disableEvents();
-		super.onStop();
-	}
-
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Misc
 	// --------------------------------------------------------------------------------------------
-
-	private void enableEvents() {
-		BusProvider.getInstance().register(this);
-	}
-
-	private void disableEvents() {
-		try {
-			BusProvider.getInstance().unregister(this);
-		}
-		catch (Exception e) {} // $codepro.audit.disable emptyCatchClause
-	}
 
 	@Override
 	protected int getLayoutId() {

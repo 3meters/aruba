@@ -1,6 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class User extends Entity {
 	@Expose(serialize = false, deserialize = true)
 	public String				googleId;
 
-	@Expose(serialize = false, deserialize = true)
+	@Expose
 	public String				authSource;
 
 	@Expose(serialize = false, deserialize = true)
@@ -112,11 +113,6 @@ public class User extends Entity {
 	}
 
 	@Override
-	public List<Applink> getClientApplinks() {
-		return new ArrayList<Applink>();
-	}
-
-	@Override
 	public String getCollection() {
 		return collectionId;
 	}
@@ -138,9 +134,14 @@ public class User extends Entity {
 			entity.developer = (Boolean) map.get("developer");
 			entity.doNotTrack = (Boolean) map.get("doNotTrack");
 			entity.password = (String) map.get("password");
+			entity.authSource = (String) map.get("authSource");
 			entity.lastSignedInDate = (Number) map.get("lastSignedInDate");
 			entity.validationDate = (Number) map.get("validationDate");
 			entity.validationNotifyDate = (Number) map.get("validationNotifyDate");
+			
+			if (map.get("session") != null) {
+				entity.session = Session.setPropertiesFromMap(new Session(), (HashMap<String, Object>) map.get("session"), nameMapping);
+			}
 
 			if (map.get("stats") != null) {
 				entity.stats = new ArrayList<Stat>();

@@ -40,7 +40,7 @@ public class SectionLayout extends LinearLayout {
 	}
 
 	private void initialize() {
-		final LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final LayoutInflater inflater = LayoutInflater.from(this.getContext());
 		if (mLayoutHeaderId != 0) {
 			final View view = inflater.inflate(mLayoutHeaderId, null);
 

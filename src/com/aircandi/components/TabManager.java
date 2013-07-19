@@ -43,7 +43,7 @@ public class TabManager implements ActionBar.TabListener {
 			tab.setTabListener(tabListener);
 			mActionBar.addTab(tab, false);
 		}
-		else if (tabsId == Constants.TABS_USER_FORM_ID) {
+		else if (tabsId == Constants.TABS_USER_EDIT_ID) {
 
 			ActionBar.Tab tab = mActionBar.newTab();
 			tab.setText(R.string.profile_tab_profile);
@@ -54,6 +54,26 @@ public class TabManager implements ActionBar.TabListener {
 			tab = mActionBar.newTab();
 			tab.setText(R.string.profile_tab_account);
 			tab.setTag(R.string.profile_tab_account);
+			tab.setTabListener(tabListener);
+			mActionBar.addTab(tab, false);
+		}
+		else if (tabsId == Constants.TABS_USER_FORM_ID) {
+
+			ActionBar.Tab tab = mActionBar.newTab();
+			tab.setText(R.string.profile_tab_profile);
+			tab.setTag(R.string.profile_tab_profile);
+			tab.setTabListener(tabListener);
+			mActionBar.addTab(tab, false);
+
+			tab = mActionBar.newTab();
+			tab.setText(R.string.profile_tab_created);
+			tab.setTag(R.string.profile_tab_created);
+			tab.setTabListener(tabListener);
+			mActionBar.addTab(tab, false);
+			
+			tab = mActionBar.newTab();
+			tab.setText(R.string.profile_tab_watching);
+			tab.setTag(R.string.profile_tab_watching);
 			tab.setTabListener(tabListener);
 			mActionBar.addTab(tab, false);
 		}

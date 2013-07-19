@@ -45,8 +45,7 @@ public class BuilderButton extends RelativeLayout {
 	}
 
 	private void initialize() {
-		final LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		final View view = inflater.inflate(mLayoutId, this);
+		final View view = LayoutInflater.from(this.getContext()).inflate(mLayoutId, this);
 
 		mTextView = (TextView) view.findViewById(R.id.builder_text);
 		mViewGroup = (LinearLayout) view.findViewById(R.id.builder_images);

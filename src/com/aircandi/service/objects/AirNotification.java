@@ -6,6 +6,7 @@ import java.util.Map;
 
 import android.content.Intent;
 
+import com.aircandi.Constants;
 import com.aircandi.service.Expose;
 
 /**
@@ -46,24 +47,25 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 		notification.action = (String) map.get("action");
 		
 		if (map.get("entity") != null) {
-			String type = (String) map.get("type");
-			if (type.equals("place")) {
-				notification.entity = Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("entity"), nameMapping);
+			Map<String, Object> entityMap = (HashMap<String, Object>) map.get("entity");
+			String schema = (String) entityMap.get("schema");
+			if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				notification.entity = Place.setPropertiesFromMap(new Place(), entityMap, nameMapping);
 			}
-			else if (type.equals("beacon")) {
-				notification.entity = Beacon.setPropertiesFromMap(new Beacon(), (HashMap<String, Object>) map.get("entity"), nameMapping);
+			else if (schema.equals(Constants.SCHEMA_ENTITY_BEACON)) {
+				notification.entity = Beacon.setPropertiesFromMap(new Beacon(), entityMap, nameMapping);
 			}
-			else if (type.equals("post")) {
-				notification.entity = Post.setPropertiesFromMap(new Post(), (HashMap<String, Object>) map.get("entity"), nameMapping);
+			else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+				notification.entity = Post.setPropertiesFromMap(new Post(), entityMap, nameMapping);
 			}
-			else if (type.equals("applink")) {
-				notification.entity = Applink.setPropertiesFromMap(new Applink(), (HashMap<String, Object>) map.get("entity"), nameMapping);
+			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+				notification.entity = Applink.setPropertiesFromMap(new Applink(), entityMap, nameMapping);
 			}
-			else if (type.equals("comment")) {
-				notification.entity = Comment.setPropertiesFromMap(new Comment(), (HashMap<String, Object>) map.get("entity"), nameMapping);
+			else if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+				notification.entity = Comment.setPropertiesFromMap(new Comment(), entityMap, nameMapping);
 			}
-			else if (type.equals("user")) {
-				notification.entity = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("entity"), nameMapping);
+			else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+				notification.entity = User.setPropertiesFromMap(new User(), entityMap, nameMapping);
 			}			
 		}
 

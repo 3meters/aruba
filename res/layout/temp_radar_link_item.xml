@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingRight="2dp"
+    android:orientation="horizontal" >
+
+    <com.aircandi.ui.widgets.AirImageView
+        android:id="@+id/photo"
+        android:layout_width="@dimen/image_badge_bug"
+        android:layout_height="@dimen/image_badge_bug"
+        android:layout_marginRight="3dp"
+        aircandi:layout="@layout/widget_webimageview"
+        aircandi:showBusy="true"
+        aircandi:sizeHint="@dimen/image_badge_bug"
+        android:scaleType="centerCrop" />
+
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginRight="3dp"
+        android:gravity="top|right"
+        android:text="@string/dummy_number"
+        android:textAppearance="@style/app_text_appearance_tiny"
+        android:visibility="visible" />
+
+</LinearLayout>

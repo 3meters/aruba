@@ -1,22 +1,17 @@
 package com.aircandi.components;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
 import com.aircandi.Constants;
+import com.aircandi.applications.Comments;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirNotification;
-import com.aircandi.ui.RadarForm;
 import com.aircandi.ui.base.BaseEntityForm;
-import com.aircandi.ui.base.BaseEntityList;
 import com.google.android.gcm.GCMBaseIntentService;
 
 public class GCMIntentService extends GCMBaseIntentService {
-
-	public static Activity		currentActivity;
-	public static final Object	lock	= new Object();
 
 	public GCMIntentService() {
 		super(Constants.SENDER_ID);
@@ -44,84 +39,34 @@ public class GCMIntentService extends GCMBaseIntentService {
 		 * payload, its contents are available as extras in the intent.
 		 */
 		String jsonNotification = messageIntent.getStringExtra("notification");
-		AirNotification airNotification = (AirNotification) HttpService.jsonToObject(jsonNotification, ObjectType.AirNotification);
+		AirNotification notification = (AirNotification) HttpService.jsonToObject(jsonNotification, ObjectType.AirNotification);
 
 		/* Build intent that can be used in association with the notification */
-		if (airNotification.entity != null) {
-			final IntentBuilder intentBuilder = new IntentBuilder()
-					.setEntityId(airNotification.entity.id)
-					.setEntitySchema(airNotification.entity.type)
-					.setForceRefresh(true);
-			Intent intent = intentBuilder.create();
-			airNotification.intent = intent;
-		}
-
-		/* Stash in our queue */
-		NotificationManager.getInstance().getNotifications().add(airNotification);
-
-		/* See if target is visible and refresh */
-		synchronized (lock) {
-			if (currentActivity != null) {
-				if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-					if (currentActivity.getClass() == BaseEntityForm.class) {
-						final BaseEntityForm activity = (BaseEntityForm) currentActivity;
-						if (activity.mEntityId.equals(airNotification.entity.toId)) {
-							activity.runOnUiThread(new Runnable() {
-								@Override
-								public void run() {
-									activity.onRefresh();
-								}
-							});
-						}
-					}
-					else if (currentActivity.getClass() == BaseEntityList.class) {
-						final BaseEntityList activity = (BaseEntityList) currentActivity;
-						if (activity.mEntityId.equals(airNotification.entity.toId)) {
-							activity.runOnUiThread(new Runnable() {
-								@Override
-								public void run() {
-									activity.doRefresh();
-								}
-							});
-						}
-					}
-				}
-				else {
-					if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-						if (currentActivity.getClass() == RadarForm.class) {
-							final RadarForm activity = (RadarForm) currentActivity;
-							activity.runOnUiThread(new Runnable() {
-								@Override
-								public void run() {
-									activity.doRefresh();
-								}
-							});
-						}
-					}
-					else {
-						if (currentActivity.getClass() == BaseEntityForm.class) {
-							final BaseEntityForm activity = (BaseEntityForm) currentActivity;
-							if (airNotification.entity.toId != null) {
-								if (activity.mEntityId.equals(airNotification.entity.toId)) {
-									activity.runOnUiThread(new Runnable() {
-										@Override
-										public void run() {
-											activity.onRefresh();
-										}
-									});
-								}
-							}
-						}
-					}
-				}
+		if (notification.entity != null) {
+			if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+				notification.intent = Comments.viewForGetIntent(context, notification.entity.toId, Constants.TYPE_LINK_COMMENT);
+			}
+			else {
+				Class<?> clazz = BaseEntityForm.viewFormBySchema(notification.entity.schema);
+				IntentBuilder intentBuilder = new IntentBuilder(context, clazz)
+						.setEntityId(notification.entity.id)
+						.setEntitySchema(notification.entity.schema)
+						.setForceRefresh(true);
+				notification.intent = intentBuilder.create();
 			}
 		}
 
+		/* Stash in our queue */
+		NotificationManager.getInstance().getNotifications().add(notification);
+
+		/* Trigger event so subscribers can decide if they should refresh */
+		NotificationManager.getInstance().broadcastNotification(notification);
+
 		/* Pass to the cache */
-		EntityManager.getInstance().processNotification(airNotification);
+		EntityManager.getInstance().processNotification(notification);
 
 		/* Display */
-		NotificationManager.getInstance().showNotification(airNotification, context);
+		NotificationManager.getInstance().showNotification(notification, context);
 	}
 
 	@Override

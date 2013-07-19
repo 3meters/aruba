@@ -9,21 +9,21 @@
         android:gravity="center" >
 
         <ImageView
-            android:id="@+id/icon"
+            android:id="@+id/image"
             android:layout_width="@dimen/image_combo_button"
             android:layout_height="@dimen/image_combo_button"
-            android:layout_centerVertical="true"
             android:layout_marginRight="2dp"
             android:adjustViewBounds="true"
+            android:src="@drawable/ic_launcher"
             android:scaleType="fitCenter" />
 
         <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:gravity="center_vertical"
             android:layout_marginLeft="2dp"
+            android:text="@string/dummy_button_label"
             android:textAppearance="@style/app_text_appearance_small"
             android:textColor="?attr/textColorButtonLink" />
     </LinearLayout>
