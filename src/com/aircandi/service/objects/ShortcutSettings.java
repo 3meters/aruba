@@ -12,25 +12,15 @@ public class ShortcutSettings {
 	public Direction	direction;
 	public Boolean		synthetic		= false;
 	public Boolean		groupedByApp	= false;
-	public Integer		listItemResId;
+	public Class<?>		appClass;
 
 	public ShortcutSettings() {}
 
-	public ShortcutSettings(String linkType, String linkSchema, Direction direction, Boolean synthetic, Boolean groupedByApp, Integer listItemResId) {
-		this.linkType = linkType;
-		this.linkSchema = linkSchema;
-		this.direction = direction;
-		this.synthetic = synthetic;
-		this.groupedByApp = groupedByApp;
-		this.listItemResId = listItemResId;
-	}
-	
 	public ShortcutSettings(String linkType, String linkSchema, Direction direction, Boolean synthetic, Boolean groupedByApp) {
 		this.linkType = linkType;
 		this.linkSchema = linkSchema;
 		this.direction = direction;
 		this.synthetic = synthetic;
 		this.groupedByApp = groupedByApp;
-	}
-
+	}	
 }

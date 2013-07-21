@@ -147,17 +147,19 @@ public class PlaceEdit extends BaseEntityEdit {
 		super.gather();
 		if (!mEditing) {
 			((Place) mEntity).provider.aircandi = Aircandi.getInstance().getUser().id;
-		}
-		/*
-		 * We add location info as a consistent feature
-		 */
-		final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
-		if (location != null) {
-			if (((Place) mEntity).location == null) {
-				((Place) mEntity).location = new AirLocation();
+			/*
+			 * Custom places get the current location.
+			 * 
+			 * Upsized places inherited a location from the place authority.
+			 */
+			final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
+			if (location != null) {
+				if (((Place) mEntity).location == null) {
+					((Place) mEntity).location = new AirLocation();
+				}
+				((Place) mEntity).location.lat = location.lat;
+				((Place) mEntity).location.lng = location.lng;
 			}
-			((Place) mEntity).location.lat = location.lat;
-			((Place) mEntity).location.lng = location.lng;
 		}
 	}
 

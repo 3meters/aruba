@@ -6,7 +6,7 @@
     android:orientation="horizontal" >
 
     <com.aircandi.ui.widgets.AirTextView
-        android:id="@+id/fullname"
+        android:id="@+id/widget_name"
         style="@style/candi_user"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

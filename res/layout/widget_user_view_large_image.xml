@@ -7,7 +7,7 @@
     android:orientation="vertical" >
 
     <com.aircandi.ui.widgets.AirImageView
-        android:id="@+id/photo"
+        android:id="@+id/widget_photo"
         android:layout_width="@dimen/image_medium"
         android:layout_height="@dimen/image_medium"
         android:layout_gravity="left"
@@ -17,7 +17,7 @@
         android:scaleType="centerCrop" />
 
     <com.aircandi.ui.widgets.TextViewEllipsizing
-        android:id="@+id/fullname"
+        android:id="@+id/widget_name"
         style="@style/candi_user"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

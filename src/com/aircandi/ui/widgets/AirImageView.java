@@ -21,6 +21,7 @@ import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
 import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.objects.Photo;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.UI;
 
@@ -31,6 +32,7 @@ public class AirImageView extends RelativeLayout {
 	private ImageView					mImageZoom;
 	private ProgressBar					mProgressBar;
 
+	private Photo						mPhoto;
 	private String						mImageUri;
 	private final Handler				mThreadHandler		= new Handler();
 
@@ -256,14 +258,6 @@ public class AirImageView extends RelativeLayout {
 		doImageRequest(bitmapRequest, okToRecycle);
 	}
 
-	public String getImageUri() {
-		return mImageUri;
-	}
-
-	public void setImageUri(String photoUri) {
-		mImageUri = photoUri;
-	}
-
 	public void setImageDrawable(Drawable drawable) {
 		UI.showDrawableInImageView(drawable, mImageMain, true, Animate.fadeInMedium());
 	}
@@ -282,5 +276,13 @@ public class AirImageView extends RelativeLayout {
 
 	public void setSizeHint(Integer sizeHint) {
 		mSizeHint = sizeHint;
+	}
+
+	public Photo getPhoto() {
+		return mPhoto;
+	}
+
+	public void setPhoto(Photo photo) {
+		mPhoto = photo;
 	}
 }

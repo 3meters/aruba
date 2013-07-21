@@ -23,6 +23,13 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.ui.widgets.AirImageView;
 
 public class UI {
+	
+	public static Boolean photosEqual(Photo photoCurrent, Photo photoNew) {
+		if (photoCurrent != null && photoNew != null && photoNew.getUri().equals(photoCurrent.getUri())) {
+			return true;
+		}
+		return false;
+	}
 
 	public static void drawPhoto(AirImageView view, Photo photo) {
 
@@ -34,11 +41,12 @@ public class UI {
 		else {
 			/* Don't do anything if the image is already set to the one we want */
 			final String photoUri = photo.getUri();
-			if (view.getImageUri() == null || !view.getImageUri().equals(photoUri)) {
+			if (!UI.photosEqual(view.getPhoto(), photo)) {
 				final BitmapRequest bitmapRequest = new BitmapRequest(photoUri, view.getImageView());
 				bitmapRequest.setImageSize(view.getSizeHint());
 				bitmapRequest.setImageRequestor(view.getImageView());
 				view.getImageView().setTag(photoUri);
+				view.setPhoto(photo);
 				BitmapManager.getInstance().masterFetch(bitmapRequest);
 			}
 		}
@@ -48,10 +56,9 @@ public class UI {
 		if (photo.colorize != null && photo.colorize) {
 
 			final int color = Place.getCategoryColor(photo.colorizeKey, true, Aircandi.muteColor, false);
-
 			view.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+			
 			Integer colorResId = Place.getCategoryColorResId(photo.colorizeKey, true, Aircandi.muteColor, false);
-
 			if (view.findViewById(R.id.color_layer) != null) {
 				(view.findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
 				(view.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);

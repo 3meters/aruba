@@ -107,7 +107,7 @@ public class ShortcutPicker extends BaseBrowse {
 	public void onListItemClick(View view) {
 		View label = (View) view.findViewById(R.id.photo);
 		Shortcut shortcut = (Shortcut) label.getTag();
-		Routing.shortcut(this, shortcut, mEntity);
+		Routing.shortcut(this, shortcut, mEntity, null);
 	}
 
 	// --------------------------------------------------------------------------------------------

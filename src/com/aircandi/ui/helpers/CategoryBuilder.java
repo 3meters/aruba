@@ -152,6 +152,14 @@ public class CategoryBuilder extends BaseEdit {
 			final String jsonCategory = HttpService.objectToJson(category);
 			intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
 		}
+		else if (mCategory != null) {
+			final Category category = new Category();
+			category.id = mCategory.id;
+			category.name = mCategory.name;
+			category.photo = mCategory.photo;
+			final String jsonCategory = HttpService.objectToJson(category);
+			intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
+		}
 		setResult(Activity.RESULT_OK, intent);
 		finish();
 	}

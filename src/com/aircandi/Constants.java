@@ -114,6 +114,9 @@ public final class Constants {
 	public static final String	SCHEMA_ENTITY_USER					= "user";																					//$NON-NLS-1$
 	public static final String	SCHEMA_LINK							= "link";																					//$NON-NLS-1$
 
+	public static final String	ACTION_VIEW							= "view";
+	public static final String	ACTION_VIEW_FOR						= "view_for";
+
 	public static final String	TYPE_ANY							= "any";																					//$NON-NLS-1$
 	public static final String	TYPE_APP_FACEBOOK					= "facebook";																				//$NON-NLS-1$
 	public static final String	TYPE_APP_TWITTER					= "twitter";																				//$NON-NLS-1$

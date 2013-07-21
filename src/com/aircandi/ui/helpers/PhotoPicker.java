@@ -92,8 +92,8 @@ public class PhotoPicker extends BaseBrowse {
 	private String					mTitleOptional;
 	private Boolean					mPlacePhotoMode	= false;
 	private Provider				mProvider;
-	private Integer					mImageWidthPixels;
-	private Integer					mImageMarginPixels;
+	private Integer					mPhotoWidthPixels;
+	private Integer					mPhotoMarginPixels;
 
 	private static final long		PAGE_SIZE		= 30L;
 	private static final long		LIST_MAX		= 300L;
@@ -153,7 +153,7 @@ public class PhotoPicker extends BaseBrowse {
 		}
 
 		/* Stash some sizing info */
-		mGridView = (GridView) findViewById(R.id.grid_gallery);
+		mGridView = (GridView) findViewById(R.id.grid);
 		final DisplayMetrics metrics = getResources().getDisplayMetrics();
 		final Integer layoutWidthPixels = metrics.widthPixels - (mGridView.getPaddingLeft() + mGridView.getPaddingRight());
 
@@ -162,8 +162,8 @@ public class PhotoPicker extends BaseBrowse {
 			desiredWidthPixels = (int) (metrics.ydpi * 0.60f);
 		}
 		final Integer count = (int) Math.ceil(layoutWidthPixels / desiredWidthPixels);
-		mImageMarginPixels = UI.getRawPixels(this, 2);
-		mImageWidthPixels = (layoutWidthPixels / count) - (mImageMarginPixels * (count - 1));
+		mPhotoMarginPixels = UI.getRawPixels(this, 2);
+		mPhotoWidthPixels = (layoutWidthPixels / count) - (mPhotoMarginPixels * (count - 1));
 
 		if (mPlacePhotoMode) {
 			mActionBar.setTitle(mEntity.name);
@@ -173,7 +173,7 @@ public class PhotoPicker extends BaseBrowse {
 		}
 
 		mMessage = (TextView) findViewById(R.id.message);
-		mGridView.setColumnWidth(mImageWidthPixels);
+		mGridView.setColumnWidth(mPhotoWidthPixels);
 		mGridView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -470,22 +470,22 @@ public class PhotoPicker extends BaseBrowse {
 			if (view == null) {
 				view = LayoutInflater.from(PhotoPicker.this).inflate(R.layout.temp_picture_search_item, null);
 				holder = new ViewHolder();
-				holder.itemImage = (ImageView) view.findViewById(R.id.photo);
-				final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mImageWidthPixels, mImageWidthPixels);
-				holder.itemImage.setLayoutParams(params);
+				holder.photoView = (ImageView) view.findViewById(R.id.photo);
+				final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mPhotoWidthPixels, mPhotoWidthPixels);
+				holder.photoView.setLayoutParams(params);
 				view.setTag(holder);
 			}
 			else {
 				holder = (ViewHolder) view.getTag();
-				if (holder.itemImage.getTag().equals(itemData.getThumbnail().getUrl())) {
+				if (holder.photoView.getTag().equals(itemData.getThumbnail().getUrl())) {
 					return view;
 				}
 			}
 
 			if (itemData != null) {
 				holder.data = itemData;
-				holder.itemImage.setTag(itemData.getThumbnail().getUrl());
-				holder.itemImage.setImageBitmap(null);
+				holder.photoView.setTag(itemData.getThumbnail().getUrl());
+				holder.photoView.setImageBitmap(null);
 				mDrawableManager.fetchDrawableOnThread(itemData.getThumbnail().getUrl(), holder);
 			}
 			return view;
@@ -510,7 +510,7 @@ public class PhotoPicker extends BaseBrowse {
 			synchronized (mBitmapCache) {
 				if (mBitmapCache.containsKey(uri) && mBitmapCache.get(uri).get() != null) {
 					final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), mBitmapCache.get(uri).get());
-					UI.showDrawableInImageView(bitmapDrawable, holder.itemImage, false, Animate.fadeInMedium());
+					UI.showDrawableInImageView(bitmapDrawable, holder.photoView, false, Animate.fadeInMedium());
 					return;
 				}
 			}
@@ -521,8 +521,8 @@ public class PhotoPicker extends BaseBrowse {
 				public void handleMessage(Message message) {
 					final DrawableManager drawableManager = getDrawableManager().get();
 					if (drawableManager != null) {
-						if (((String) holder.itemImage.getTag()).equals(uri)) {
-							UI.showDrawableInImageView((Drawable) message.obj, holder.itemImage, true,
+						if (((String) holder.photoView.getTag()).equals(uri)) {
+							UI.showDrawableInImageView((Drawable) message.obj, holder.photoView, true,
 									Animate.fadeInMedium());
 						}
 					}

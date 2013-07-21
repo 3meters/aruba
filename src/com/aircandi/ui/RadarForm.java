@@ -983,8 +983,8 @@ public class RadarForm extends BaseBrowse {
 		else if ((ProximityManager.getInstance().getLastBeaconLockedDate() != null && mEntityModelBeaconDate != null)
 				&& (ProximityManager.getInstance().getLastBeaconLockedDate().longValue() > mEntityModelBeaconDate.longValue())) {
 			/*
-			 * The beacons we are locked to have changed so we need to search for new places linked
-			 * to beacons.
+			 * The beacons we are locked to have changed while we were away so we need to 
+			 * search for new places linked to beacons.
 			 */
 			Logger.d(this, "Refresh places for beacons because beacon date has changed");
 			mEntityModelBeaconDate = ProximityManager.getInstance().getLastBeaconLockedDate();

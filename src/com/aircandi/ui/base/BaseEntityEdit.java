@@ -710,7 +710,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			mEntity.photo.removeBitmap();
 			mEntity.photo = null;
 		}
-		mEntity.photo = mEntity.getDefaultPhoto();
 		drawPhoto();
 		Tracker.sendEvent("ui_action", "set_" + mEntitySchema + "_photo_to_default", null, 0, Aircandi.getInstance().getUser());
 	}

@@ -26,6 +26,7 @@
                 android:layout_weight="1"
                 android:gravity="top"
                 android:hint="@string/form_feedback_hint"
+                android:layout_marginBottom="10dp"
                 android:imeOptions="actionSend"
                 android:inputType="textCapSentences|textAutoCorrect|textLongMessage"
                 android:minLines="10" />
@@ -34,6 +35,7 @@
                 android:id="@+id/created_by"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="3dp"
                 aircandi:layout="@layout/widget_user_view_compact"
                 android:background="?attr/backgroundButton" />
         </LinearLayout>

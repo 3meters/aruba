@@ -192,7 +192,7 @@ public class RegisterEdit extends BaseEntityEdit {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("InsertUser");
 
-				final ModelResult result = EntityManager.getInstance().insertUser((User) mEntity
+				final ModelResult result = EntityManager.getInstance().registerUser((User) mEntity
 						, null
 						, mEntity.photo != null ? mEntity.photo.getBitmap() : null);
 				

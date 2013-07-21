@@ -28,6 +28,11 @@ import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
+import com.aircandi.applications.Applinks;
+import com.aircandi.applications.Comments;
+import com.aircandi.applications.Places;
+import com.aircandi.applications.Posts;
+import com.aircandi.applications.Users;
 import com.aircandi.beta.R;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
@@ -183,10 +188,8 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			@Override
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
-				//setSupportProgressBarIndeterminateVisibility(false);
 				mBusyManager.hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					//databind(false);
 					draw();
 				}
 				else {
@@ -200,8 +203,8 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	}
 
 	public void onMoreButtonClick(View view) {
-		ShortcutSettings settings = (ShortcutSettings) view.getTag();
-		Routing.route(this, Route.EntityList, mEntity, null, settings, null);
+		Intent intent = (Intent) view.getTag();
+		Routing.intent(this, intent);
 	}
 
 	@SuppressWarnings("ucd")
@@ -376,7 +379,24 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			View footer = LayoutInflater.from(this).inflate(R.layout.temp_section_footer, null);
 			Button button = (Button) footer.findViewById(R.id.button_more);
 			button.setText(moreResId);
-			button.setTag(settings);
+			
+			Intent intent = null;
+			if (settings.appClass.equals(Applinks.class)) {
+				intent = Applinks.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
+			}
+			if (settings.appClass.equals(Comments.class)) {
+				intent = Comments.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
+			}
+			if (settings.appClass.equals(Places.class)) {
+				intent = Places.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
+			}
+			if (settings.appClass.equals(Posts.class)) {
+				intent = Posts.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
+			}
+			if (settings.appClass.equals(Users.class)) {
+				intent = Users.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
+			}
+			button.setTag(intent);
 			section.setFooter(footer); // Replaces if there already is one.
 		}
 

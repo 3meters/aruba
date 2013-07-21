@@ -529,7 +529,7 @@ public class BitmapManager {
 	@SuppressWarnings("ucd")
 	public static class ViewHolder {
 
-		public ImageView	itemImage;
+		public ImageView	photoView;
 		public ImageResult	data;
 
 	}

@@ -358,7 +358,7 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult insertUser(User user, Link link, Bitmap bitmap) {
+	public ModelResult registerUser(User user, Link link, Bitmap bitmap) {
 
 		/* Pre-fetch an id so a failed request can be retried */
 		final ModelResult result = getDocumentId(User.collectionId);
@@ -423,45 +423,6 @@ public class EntityManager {
 
 		return result;
 	}
-
-//	public ModelResult updateUser(User user, Bitmap bitmap) {
-//		final ModelResult result = new ModelResult();
-//		/*
-//		 * TODO: We are going with a garbage collection scheme for orphaned images. We
-//		 * need to use an extended property on S3 items that is set to a date when
-//		 * collection is ok. This allows downloaded entities to keep working even if
-//		 * an image for entity has changed.
-//		 */
-//
-//		/*
-//		 * Put image to S3 if we have a new one. Handles updating the photo
-//		 * object on user
-//		 */
-//		if (bitmap != null && !bitmap.isRecycled()) {
-//			result.serviceResponse = storeImageAtS3(null, user, bitmap);
-//		}
-//
-//		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-//			/*
-//			 * Service handles modifiedId and modifiedDate based
-//			 * on the session info passed with request.
-//			 */
-//			user.updateScope = UpdateScope.Object;
-//
-//			final ServiceRequest serviceRequest = new ServiceRequest()
-//					.setUri(user.getEntryUri())
-//					.setRequestType(RequestType.Update)
-//					.setRequestBody(HttpService.objectToJson(user, UseAnnotations.True, ExcludeNulls.False))
-//					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
-//					.setRetry(false)
-//					.setSession(Aircandi.getInstance().getUser().session)
-//					.setResponseFormat(ResponseFormat.Json);
-//
-//			result.serviceResponse = dispatch(serviceRequest);
-//			mEntityCache.updateEntityUser(user);
-//		}
-//		return result;
-//	}
 
 	public ModelResult checkSession() {
 		ModelResult result = new ModelResult();

@@ -9,12 +9,12 @@ import com.aircandi.beta.R;
 public class MenuManager {
 
 	public static boolean onCreateOptionsMenu(Activity activity, Menu menu) {
-		
+
 		String activityName = activity.getClass().getSimpleName();
 		final SherlockActivity sherlock = (SherlockActivity) activity;
-		
+
 		/* Browsing */
-		
+
 		if (activityName.equals("RadarForm")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_radar, menu);
 		}
@@ -27,7 +27,8 @@ public class MenuManager {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_entity, menu);
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
 		}
-		else if (activityName.equals("EntityList")) {
+		else if (activityName.equals("EntityList")
+				|| activityName.equals("EntityGrid")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_entity_list, menu);
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
 		}
@@ -58,7 +59,7 @@ public class MenuManager {
 		else {
 			return false;
 		}
-		
+
 		return true;
 	}
 }

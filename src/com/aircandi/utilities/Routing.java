@@ -45,6 +45,7 @@ import com.aircandi.service.WalledGardenException;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
@@ -78,6 +79,12 @@ import com.aircandi.ui.user.UserForm;
 import com.aircandi.utilities.Animate.TransitionType;
 
 public final class Routing {
+	
+	public static boolean intent(Activity activity, Intent intent) {
+		activity.startActivity(intent);
+		Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+		return true;
+	}
 
 	public static boolean route(final Activity activity, Route route) {
 		return route(activity, route, null, null, null);
@@ -119,7 +126,7 @@ public final class Routing {
 				Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
 			}
 			else {
-				Routing.shortcut(activity, shortcut, entity);
+				Routing.shortcut(activity, shortcut, entity, null);
 			}
 
 			return true;
@@ -133,7 +140,6 @@ public final class Routing {
 					.setEntityId(entity.id)
 					.setListLinkType(settings.linkType)
 					.setListLinkSchema(settings.linkSchema)
-					.setListItemResId(settings.listItemResId)
 					.setListLinkDirection(settings.direction.name())
 					.setExtras(extras);
 
@@ -529,40 +535,40 @@ public final class Routing {
 		return false;
 	}
 
-	public static void shortcut(final Activity activity, Shortcut shortcut, Entity entity) {
+	public static void shortcut(final Activity activity, Shortcut shortcut, Entity entity, Direction direction) {
 
 		if (shortcut.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 
 			if (shortcut.app.equals(Constants.TYPE_APP_POST)) {
-				if (shortcut.getAction().equals("view")) {
-					Posts.view(activity, entity);
+				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
+					Posts.view(activity, entity.id);
 				}
-				else if (shortcut.getAction().equals("viewFor")) {
-					Posts.viewFor(activity, entity, shortcut.linkType);
+				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
+					Posts.viewFor(activity, entity.id, shortcut.linkType, direction);
 				}
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_COMMENT)) {
-				if (shortcut.getAction().equals("view")) {
-					Comments.view(activity, entity);
+				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
+					Comments.view(activity, entity.id);
 				}
-				else if (shortcut.getAction().equals("viewFor")) {
-					Comments.viewFor(activity, entity, shortcut.linkType);
+				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
+					Comments.viewFor(activity, entity.id, shortcut.linkType, direction);
 				}
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_PLACE)) {
-				if (shortcut.getAction().equals("view")) {
-					Places.view(activity, entity);
+				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
+					Places.view(activity, entity.id);
 				}
-				else if (shortcut.getAction().equals("viewFor")) {
-					Places.viewFor(activity, entity, shortcut.linkType);
+				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
+					Places.viewFor(activity, entity.id, shortcut.linkType, direction);
 				}
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_USER)) {
-				if (shortcut.getAction().equals("view")) {
-					Users.view(activity, entity);
+				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
+					Users.view(activity, entity.id);
 				}
-				else if (shortcut.getAction().equals("viewFor")) {
-					Users.viewFor(activity, entity, shortcut.linkType);
+				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
+					Users.viewFor(activity, entity.id, shortcut.linkType, direction);
 				}
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_TWITTER)) {
@@ -610,7 +616,7 @@ public final class Routing {
 		}
 		else {
 			if (shortcut.isContent()) {
-				if (shortcut.getAction().equals("view")) {
+				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
 					if (shortcut.app.equals(Constants.TYPE_APP_POST)) {
 						Posts.view(activity, shortcut.getId());
 					}

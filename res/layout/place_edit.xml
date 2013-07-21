@@ -51,7 +51,7 @@
 
                     <com.aircandi.ui.widgets.AirButton
                         android:id="@+id/button_change_image"
-                        style="@style/form_button"
+                        style="@style/form_button_floating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"

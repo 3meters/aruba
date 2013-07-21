@@ -101,7 +101,7 @@ public class LinkOptions extends ServiceObject {
 				linkOptions = getDefault(DefaultType.LinksForPlace);
 			}
 			else if (defaultType == DefaultType.LinksForPost) {
-				linkOptions.setShortcuts(false);
+				linkOptions.setShortcuts(true);
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
 				if (user != null) {

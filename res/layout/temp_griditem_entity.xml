@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/selector_button" >
+
+    <com.aircandi.ui.widgets.AirImageView
+        android:id="@+id/photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        aircandi:layout="@layout/widget_webimageview_candi_view"
+        aircandi:sizeHint="@dimen/image_medium" />
+
+    <LinearLayout
+        android:id="@+id/info_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/overlay_picture"
+        android:orientation="vertical"
+        android:paddingBottom="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="10dp" >
+
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/name"
+            style="?attr/candiListTitleStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="@string/dummy_title_short" />
+
+        <com.aircandi.ui.widgets.UserView
+            android:id="@+id/creator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            aircandi:layout="@layout/widget_user_view_text_only_stacked" />
+    </LinearLayout>
+
+</RelativeLayout>

@@ -17,7 +17,9 @@ import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
@@ -53,8 +55,11 @@ import com.aircandi.utilities.UI;
 
 public abstract class BaseEntityList extends BaseBrowse {
 
-	private ListView			mListView;
-	private OnClickListener		mClickListener;
+	protected ListView			mListView;
+	protected GridView			mGridView;
+	protected OnClickListener	mClickListener;
+	protected Integer			mPhotoWidthPixels;
+	protected Integer			mPhotoMarginPixels;
 
 	private List<Entity>		mEntities	= new ArrayList<Entity>();
 	private Cursor				mCursorSettings;
@@ -66,6 +71,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 	private Number				mEntityModelRefreshDate;
 	private Number				mEntityModelActivityDate;
 	private User				mEntityModelUser;
+	private EntityAdapter		mAdapter;
 
 	/* Inputs */
 	public String				mEntityId;
@@ -93,25 +99,12 @@ public abstract class BaseEntityList extends BaseBrowse {
 		}
 	}
 
-	private Integer getListItemResId(String schema) {
-		if (schema != null) {
-			if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-				return R.layout.temp_listitem_comment;
-			}
-			else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
-				return R.layout.temp_listitem_entity;
-			}
-			else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-				return R.layout.temp_listitem_entity;
-			}
-			else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
-				return R.layout.temp_listitem_entity;
-			}
-			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-				return R.layout.temp_listitem_entity;
-			}
+	protected Integer getListItemResId(String schema) {
+		Integer itemResId = R.layout.temp_listitem_entity;
+		if (schema != null && schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			itemResId = R.layout.temp_listitem_comment;
 		}
-		return R.layout.temp_listitem_entity;
+		return itemResId;
 	}
 
 	private LinkOptions getLinkOptions(String schema) {
@@ -139,7 +132,8 @@ public abstract class BaseEntityList extends BaseBrowse {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
-		mListView = (ListView) findViewById(R.id.list_entities);
+		mListView = (ListView) findViewById(R.id.list);
+		mGridView = (GridView) findViewById(R.id.grid);
 		mButtonNewEntity = (Button) findViewById(R.id.button_new_entity);
 		mButtonNewEntity.setText(getString(R.string.entity_button_entity_first) + " " + mListLinkSchema);
 
@@ -160,7 +154,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 				final Entity entity = (Entity) ((ViewHolder) v.getTag()).data;
 				if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-					Routing.shortcut(BaseEntityList.this, entity.getShortcut(), null);
+					Routing.shortcut(BaseEntityList.this, entity.getShortcut(), null, null);
 				}
 				else {
 					Routing.route(BaseEntityList.this, Route.Browse, entity, null, null);
@@ -218,7 +212,18 @@ public abstract class BaseEntityList extends BaseBrowse {
 						mEntities = (List<Entity>) result.data;
 						mButtonNewEntity.setVisibility(View.GONE);
 						Collections.sort(mEntities, new Entity.SortByPositionModifiedDate());
-						mListView.setAdapter(new EndlessEntityAdapter(mEntities)); // draw happens in the adapter
+						if (mAdapter == null) {
+							mAdapter = new EntityAdapter(mEntities);
+							if (mListView != null) {
+								mListView.setAdapter(mAdapter); // draw happens in the adapter
+							}
+							else if (mGridView != null) {
+								mGridView.setAdapter(mAdapter); // draw happens in the adapter
+							}
+						}
+						else {
+							mAdapter.notifyDataSetChanged();
+						}
 					}
 
 					mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
@@ -291,7 +296,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 	@SuppressWarnings("ucd")
 	public void onCommentsClick(View view) {
 		final Entity entity = (Entity) view.getTag();
-		Comments.viewFor(this, entity, Constants.TYPE_LINK_POST);
+		Comments.viewFor(this, entity.id, Constants.TYPE_LINK_COMMENT, null);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -382,11 +387,11 @@ public abstract class BaseEntityList extends BaseBrowse {
 	// Inner classes/enums
 	// --------------------------------------------------------------------------------------------
 
-	private class EndlessEntityAdapter extends EndlessAdapter {
+	private class EntityAdapter extends EndlessAdapter {
 
 		private List<Entity>	moreEntities	= new ArrayList<Entity>();
 
-		private EndlessEntityAdapter(List<Entity> list) {
+		private EntityAdapter(List<Entity> list) {
 			super(new ListAdapter(list));
 		}
 
@@ -455,7 +460,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 				view = LayoutInflater.from(BaseEntityList.this).inflate(mListItemResId, null);
 				holder = new ViewHolder();
 				holder.name = (TextView) view.findViewById(R.id.name);
-				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
 				holder.subtitle = (TextView) view.findViewById(R.id.subtitle);
 				holder.type = (TextView) view.findViewById(R.id.type);
 				holder.description = (TextView) view.findViewById(R.id.description);
@@ -477,6 +481,13 @@ public abstract class BaseEntityList extends BaseBrowse {
 						}
 					});
 				}
+
+				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
+				if (mGridView != null) {
+					final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mPhotoWidthPixels, mPhotoWidthPixels);
+					holder.photoView.getImageView().setLayoutParams(params);
+				}
+
 				view.setTag(holder);
 			}
 			else {

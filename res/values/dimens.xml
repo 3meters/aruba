@@ -30,6 +30,7 @@
     
     <dimen name="form_button_height">48dp</dimen>
     <dimen name="form_button_width_min">96dp</dimen>
+    <dimen name="form_button_floating_width_min">96dp</dimen>
     <dimen name="form_button_stroke_width">1px</dimen>
     <dimen name="form_button_corner_radius">0dp</dimen>
     <dimen name="form_button_padding">4dp</dimen>

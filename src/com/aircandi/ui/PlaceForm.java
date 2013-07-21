@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
+import com.aircandi.applications.Applinks;
 import com.aircandi.beta.R;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
@@ -331,16 +332,11 @@ public class PlaceForm extends BaseEntityForm {
 		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();
 
 		/* Synthetic applink shortcuts */
-		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK
-				, Constants.SCHEMA_ENTITY_APPLINK
-				, Direction.in
-				, true
-				, true
-				, R.layout.temp_listitem_applink);
+		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
+		settings.appClass = Applinks.class;
 		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
-		Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());
-
 		if (shortcuts.size() > 0) {
+			Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());
 			drawShortcuts(shortcuts
 					, settings
 					, R.string.section_place_shortcuts_applinks
@@ -351,16 +347,11 @@ public class PlaceForm extends BaseEntityForm {
 		}
 
 		/* Service applink shortcuts */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK
-				, Constants.SCHEMA_ENTITY_APPLINK
-				, Direction.in
-				, false
-				, true
-				, R.layout.temp_listitem_applink);
+		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
+		settings.appClass = Applinks.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
-		Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());
-
 		if (shortcuts.size() > 0) {
+			Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());
 			drawShortcuts(shortcuts
 					, settings
 					, null

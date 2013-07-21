@@ -15,6 +15,9 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
+import com.aircandi.applications.Places;
+import com.aircandi.applications.Posts;
+import com.aircandi.applications.Users;
 import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -291,8 +294,8 @@ public class UserForm extends BaseEntityForm {
 
 		/* Shortcuts for place entities created by user */
 		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
+		settings.appClass = Places.class;
 		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
-
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 			drawShortcuts(shortcuts
@@ -306,8 +309,8 @@ public class UserForm extends BaseEntityForm {
 
 		/* Shortcuts for post entities created by user */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_POST, Direction.out, false, false);
+		settings.appClass = Posts.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
-
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 			drawShortcuts(shortcuts
@@ -324,6 +327,7 @@ public class UserForm extends BaseEntityForm {
 
 		/* Watching places */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
+		settings.appClass = Places.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
@@ -338,6 +342,7 @@ public class UserForm extends BaseEntityForm {
 
 		/* Watching posts */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_POST, Direction.out, false, false);
+		settings.appClass = Posts.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
@@ -352,6 +357,7 @@ public class UserForm extends BaseEntityForm {
 
 		/* Watching users */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, Direction.out, false, false);
+		settings.appClass = Users.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());

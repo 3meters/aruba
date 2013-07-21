@@ -110,9 +110,9 @@ public class PhotoForm extends BaseBrowse {
 			photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 		}
 		final ViewHolder holder = new ViewHolder();
-		holder.itemImage = image;
-		holder.itemImage.setTag(photoUri);
-		holder.itemImage.setImageBitmap(null);
+		holder.photoView = image;
+		holder.photoView.setTag(photoUri);
+		holder.photoView.setImageBitmap(null);
 
 		final BitmapRequest bitmapRequest = new BitmapRequest(photoUri, image);
 		bitmapRequest.setImageRequestor(image);

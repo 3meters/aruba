@@ -1,46 +1,68 @@
 package com.aircandi.applications;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.ui.EntityList;
 import com.aircandi.ui.PlaceForm;
 import com.aircandi.ui.edit.PlaceEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 
-public class Places extends BaseApp {
+public class Places  {
 
-	public static void view(Activity activity, String entityId) {
-		IntentBuilder intentBuilder = new IntentBuilder(activity, PlaceForm.class).setEntityId(entityId);
-		activity.startActivity(intentBuilder.create());
-		Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+	public static void view(Context context, String entityId) {
+		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceForm.class).setEntityId(entityId);
+		context.startActivity(intentBuilder.create());
+		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
 	}
 
-	public static void viewFor(Activity activity, Entity entity, String linkType) {
-		IntentBuilder intentBuilder = new IntentBuilder(activity, EntityList.class)
-				.setEntityId(entity.id)
+	public static void viewFor(Context context, String entityId, String linkType, Direction direction) {
+		if (direction == null) {
+			direction = Direction.in;
+		}
+		IntentBuilder intentBuilder = new IntentBuilder(context, EntityList.class)
+				.setEntityId(entityId)
 				.setListLinkType(linkType)
+				.setListLinkDirection(direction.name())
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_PLACE)
-				.setListItemResId(R.layout.temp_listitem_comment)
+				.setListItemResId(R.layout.temp_listitem_entity)
 				.setListNewEnabled(true);
 
-		activity.startActivity(intentBuilder.create());
-		Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+		context.startActivity(intentBuilder.create());
+		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
 	}
 
-	public static void edit(Activity activity, Entity entity) {
-		IntentBuilder intentBuilder = new IntentBuilder(activity, PlaceEdit.class).setEntity(entity);
-		activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
-		Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction) {
+		if (direction == null) {
+			direction = Direction.in;
+		}
+		IntentBuilder intentBuilder = new IntentBuilder(context, EntityList.class)
+				.setEntityId(entityId)
+				.setListLinkType(linkType)
+				.setListLinkDirection(direction.name())
+				.setListLinkSchema(Constants.SCHEMA_ENTITY_PLACE)
+				.setListItemResId(R.layout.temp_listitem_entity)
+				.setListNewEnabled(true);
+
+		return intentBuilder.create();
 	}
 
-	public static void insert(Activity activity) {
-		IntentBuilder intentBuilder = new IntentBuilder(activity, PlaceEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_PLACE);
-		activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
-		Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+	public static void edit(Context context, Entity entity) {
+		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceEdit.class).setEntity(entity);
+		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
+		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
+	}
+
+	public static void insert(Context context) {
+		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_PLACE);
+		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
+		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
 	}
 }

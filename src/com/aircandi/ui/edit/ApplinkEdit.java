@@ -253,7 +253,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 	public void onTestButtonClick(View view) {
 		if (validate()) {
 			gather();
-			Routing.shortcut(this, mEntity.getShortcut(), null);
+			Routing.shortcut(this, mEntity.getShortcut(), null, null);
 		}
 	}
 

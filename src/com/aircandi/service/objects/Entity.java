@@ -16,6 +16,7 @@ import com.aircandi.components.EntityManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.service.Expose;
 import com.aircandi.service.objects.Link.Direction;
+import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.utilities.DateTime;
 
 /**
@@ -111,8 +112,14 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		entity.signalFence = -100.0f;
 
 		if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-			((Place) entity).provider = new ProviderMap();
-			((Place) entity).provider.aircandi = Aircandi.getInstance().getUser().id;
+			Place place = (Place) entity;
+			place.provider = new ProviderMap();
+			place.provider.aircandi = Aircandi.getInstance().getUser().id;
+			place.category = new Category();
+			place.category.id = "generic";			
+			place.category.photo = new Photo(ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES + "generic_88.png", null, null, null,
+					PhotoSource.assets_categories);
+			place.category.photo.colorize = true;
 		}
 		return entity;
 	}
@@ -220,7 +227,10 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	public AirLocation getLocation() {
 		AirLocation loc = null;
-		final Beacon parent = (Beacon) getParent();
+		Beacon parent = null;
+		if (getParent() instanceof Beacon) {
+			parent = (Beacon) getParent();
+		}
 		if (parent != null) {
 			loc = parent.location;
 		}
@@ -479,7 +489,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		Shortcut shortcut = Shortcut.builder(this
 				, Constants.SCHEMA_ENTITY_APPLINK
 				, Constants.TYPE_APP_POST
-				, "viewFor"
+				, Constants.ACTION_VIEW_FOR
 				, "posts"
 				, "resource:ic_launcher"
 				, 10
@@ -490,10 +500,12 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			shortcut.photo = link.shortcut.getPhoto();
 		}
 		shortcuts.add(shortcut);
+		shortcuts
+				.add(Shortcut.builder(
+						this, Constants.SCHEMA_ENTITY_APPLINK, Constants.TYPE_APP_COMMENT, Constants.ACTION_VIEW_FOR, "comments", "resource:img_post", 20,
+						false, true));
 		shortcuts.add(Shortcut.builder(
-				this, Constants.SCHEMA_ENTITY_APPLINK, Constants.TYPE_APP_COMMENT, "viewFor", "comments", "resource:img_post", 20, false, true));
-		shortcuts.add(Shortcut.builder(
-				this, Constants.SCHEMA_ENTITY_APPLINK, Constants.TYPE_APP_MAP, "view", "map", "resource:img_map", 30, false, true));
+				this, Constants.SCHEMA_ENTITY_APPLINK, Constants.TYPE_APP_MAP, Constants.ACTION_VIEW, "map", "resource:img_map", 30, false, true));
 		return shortcuts;
 	}
 

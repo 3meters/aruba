@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
+import com.aircandi.applications.Applinks;
 import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
@@ -73,6 +74,7 @@ public class PostForm extends BaseEntityForm {
 				final ModelResult result = (ModelResult) modelResult;
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
 						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
@@ -199,10 +201,11 @@ public class PostForm extends BaseEntityForm {
 		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();
 
 		/* Synthetic applink shortcuts */
-		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true,
-				R.layout.temp_listitem_applink);
+		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
+		settings.appClass = Applinks.class;
 		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
 		if (shortcuts.size() > 0) {
+			Collections.sort(shortcuts, new Shortcut.SortByPosition());
 			drawShortcuts(shortcuts
 					, settings
 					, R.string.section_place_shortcuts_applinks
@@ -213,11 +216,11 @@ public class PostForm extends BaseEntityForm {
 		}
 
 		/* Service applink shortcuts */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true, R.layout.temp_listitem_applink);
+		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
+		settings.appClass = Applinks.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
-		Collections.sort(shortcuts, new Shortcut.SortByPosition());
-
 		if (shortcuts.size() > 0) {
+			Collections.sort(shortcuts, new Shortcut.SortByPosition());
 			drawShortcuts(shortcuts
 					, settings
 					, null

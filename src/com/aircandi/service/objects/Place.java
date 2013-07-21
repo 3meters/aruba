@@ -3,6 +3,7 @@ package com.aircandi.service.objects;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -61,7 +62,6 @@ public class Place extends Entity implements Cloneable, Serializable {
 		 * in the entity model in case we keep it because of a failure.
 		 */
 		final Place entity = synthetic.clone();
-		entity.id = null;
 		entity.locked = false;
 		if (synthetic.category != null) {
 			entity.subtitle = synthetic.category.name;
@@ -149,7 +149,7 @@ public class Place extends Entity implements Cloneable, Serializable {
 		if (semi) {
 			colorResId = R.color.accent_gray_semi;
 		}
-		if (categoryName != null) {
+		if (categoryName != null && !categoryName.toLowerCase(Locale.US).equals("generic")) {
 
 			final Random rand = new Random(categoryName.hashCode());
 			final int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
@@ -223,7 +223,7 @@ public class Place extends Entity implements Cloneable, Serializable {
 			colorResId = R.color.accent_gray_semi;
 		}
 
-		if (categoryName != null) {
+		if (categoryName != null && !categoryName.toLowerCase(Locale.US).equals("generic")) {
 
 			final Random rand = new Random(categoryName.hashCode());
 			final int colorIndex = rand.nextInt(5 - 1 + 1) + 1;

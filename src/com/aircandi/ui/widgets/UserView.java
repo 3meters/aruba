@@ -52,7 +52,7 @@ public class UserView extends RelativeLayout {
 		super(context, attrs, defStyle);
 
 		final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.UserLayout, defStyle, 0);
-		final int layoutId = ta.getResourceId(R.styleable.UserLayout_layout, R.layout.widget_user_view);
+		final int layoutId = ta.getResourceId(R.styleable.UserLayout_layout, R.layout.widget_user_view_detailed);
 		mBoundView = (ViewGroup) LayoutInflater.from(this.getContext()).inflate(layoutId, null);
 
 		ta.recycle();
@@ -61,8 +61,8 @@ public class UserView extends RelativeLayout {
 
 	private void initialize() {
 		if (!isInEditMode()) {
-			mPhotoView = (AirImageView) mBoundView.findViewById(R.id.photo);
-			mName = (TextView) mBoundView.findViewById(R.id.fullname);
+			mPhotoView = (AirImageView) mBoundView.findViewById(R.id.widget_photo);
+			mName = (TextView) mBoundView.findViewById(R.id.widget_name);
 			mArea = (TextView) mBoundView.findViewById(R.id.area);
 			mLabel = (TextView) mBoundView.findViewById(R.id.label);
 			mTimeSince = (TextView) mBoundView.findViewById(R.id.timesince);

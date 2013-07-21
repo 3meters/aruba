@@ -113,6 +113,12 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
+            android:name="com.aircandi.ui.EntityGrid"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/form_title_picture_browse"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
             android:name="com.aircandi.ui.HelpForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/aircandi_theme_midnight_transparent"
