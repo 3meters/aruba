@@ -42,8 +42,6 @@ public class CommentEdit extends BaseEntityEdit {
 		 */
 		mEntity.creator = Aircandi.getInstance().getUser();
 		mEntity.creatorId = Aircandi.getInstance().getUser().id;
-		mEntity.photo = Aircandi.getInstance().getUser().photo.clone();
-		mEntity.name = Aircandi.getInstance().getUser().name;
 	}
 
 	// --------------------------------------------------------------------------------------------

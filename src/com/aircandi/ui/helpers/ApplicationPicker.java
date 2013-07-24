@@ -19,14 +19,31 @@ import android.widget.TextView;
 
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.Template;
+import com.aircandi.components.AirApplication;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.ObjectType;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.base.BaseBrowse;
 
-public class TemplatePicker extends BaseBrowse implements OnItemClickListener {
+public class ApplicationPicker extends BaseBrowse implements OnItemClickListener {
 
 	private TextView	mName;
 	private ListView	mListView;
 	private ListAdapter	mListAdapter;
+	private Entity		mEntity;
+
+	@Override
+	protected void unpackIntent() {
+		super.unpackIntent();
+
+		final Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
+			if (jsonEntity != null) {
+				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
+			}
+		}
+	}
 
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
@@ -42,11 +59,13 @@ public class TemplatePicker extends BaseBrowse implements OnItemClickListener {
 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();
-		if (mThemeTone.equals("dark")) {
-			listData.add(new Template(R.drawable.ic_action_picture_dark, getString(R.string.name_entity_type_picture), null, Constants.SCHEMA_ENTITY_POST));
-		}
-		else {
-			listData.add(new Template(R.drawable.ic_action_picture_light, getString(R.string.name_entity_type_picture), null, Constants.SCHEMA_ENTITY_POST));
+
+		if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_edit_light : R.drawable.ic_action_edit_dark
+					, getString(R.string.dialog_application_post_new), null, Constants.SCHEMA_ENTITY_POST));
+
+			listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_monolog_light : R.drawable.ic_action_monolog_dark
+					, getString(R.string.dialog_application_comment_new), null, Constants.SCHEMA_ENTITY_COMMENT));
 		}
 
 		mListAdapter = new ListAdapter(this, listData);
@@ -60,9 +79,9 @@ public class TemplatePicker extends BaseBrowse implements OnItemClickListener {
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		final Template template = (Template) view.getTag();
+		final AirApplication choice = (AirApplication) view.getTag();
 		final Intent intent = new Intent();
-		intent.putExtra(Constants.EXTRA_ENTITY_SCHEMA, template.type);
+		intent.putExtra(Constants.EXTRA_ENTITY_SCHEMA, choice.schema);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
 	}
@@ -84,10 +103,10 @@ public class TemplatePicker extends BaseBrowse implements OnItemClickListener {
 		public View getView(int position, View convertView, ViewGroup parent)
 		{
 			View view = convertView;
-			final Template itemData = (Template) items.get(position);
+			final AirApplication itemData = (AirApplication) items.get(position);
 
 			if (view == null) {
-				view = LayoutInflater.from(TemplatePicker.this).inflate(R.layout.temp_listitem_templates, null);
+				view = LayoutInflater.from(ApplicationPicker.this).inflate(R.layout.temp_listitem_applications, null);
 			}
 
 			if (itemData != null) {
@@ -110,6 +129,6 @@ public class TemplatePicker extends BaseBrowse implements OnItemClickListener {
 
 	@Override
 	protected int getLayoutId() {
-		return R.layout.picker_template;
+		return R.layout.picker_application;
 	}
 }

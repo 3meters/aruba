@@ -1,5 +1,7 @@
 package com.aircandi.ui.base;
 
+import java.lang.reflect.Field;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -14,12 +16,13 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
@@ -44,26 +47,28 @@ import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.google.android.gcm.GCMRegistrar;
 
-public abstract class BaseActivity extends SherlockActivity {
+public abstract class BaseActivity extends SherlockFragmentActivity {
 
-	protected ActionBar				mActionBar;
-	public BusyManager				mBusyManager;
-	protected String				mPageName;
+	protected ActionBar			mActionBar;
+	protected String			mPageName;
+	protected String			mActivityTitle;
 
-	protected Boolean				mPrefChangeNewSearchNeeded	= false;
-	protected Boolean				mPrefChangeRefreshUiNeeded	= false;
-	protected Boolean				mPrefChangeReloadNeeded		= false;
-	protected static Resources		mResources;
+	protected Boolean			mPrefChangeNewSearchNeeded	= false;
+	protected Boolean			mPrefChangeRefreshUiNeeded	= false;
+	protected Boolean			mPrefChangeReloadNeeded		= false;
+	protected static Resources	mResources;
+	public static BusyManager	mBusyManager;
 
 	/* Theme */
-	public String					mPrefTheme;
-	public String					mThemeTone;
-	protected Boolean				mIsDialog;
+	public String				mPrefTheme;
+	public String				mThemeTone;
+	protected Boolean			mIsDialog;
 
 	/* Menus */
-	protected MenuItem				mMenuItemEdit;
-	protected MenuItem				mMenuItemDelete;
-	protected MenuItem				mMenuItemAdd;
+	protected MenuItem			mMenuItemEdit;
+	protected MenuItem			mMenuItemDelete;
+	protected MenuItem			mMenuItemAdd;
+	protected MenuItem			mMenuItemSignout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -120,12 +125,26 @@ public abstract class BaseActivity extends SherlockActivity {
 
 	protected void unpackIntent() {}
 
-	protected void configureActionBar(){}
+	protected void configureActionBar() {
+		try {
+			ViewConfiguration config = ViewConfiguration.get(this);
+			Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
+			if (menuKeyField != null) {
+				menuKeyField.setAccessible(true);
+				menuKeyField.setBoolean(config, false);
+			}
+		}
+		catch (Exception ex) {
+			// Ignore
+		}
+	}
+
+	protected void configureNavigationDrawer() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
-	
+
 	public void onRefresh() {}
 
 	@Override
@@ -153,7 +172,7 @@ public abstract class BaseActivity extends SherlockActivity {
 	}
 
 	public void onAdd() {}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Preferences
 	// --------------------------------------------------------------------------------------------
@@ -297,12 +316,21 @@ public abstract class BaseActivity extends SherlockActivity {
 		return actionBarTitleId;
 	}
 
+	public void setActivityTitle(String title) {
+		mActivityTitle = title;
+		mActionBar.setTitle(title);
+	}
+
+	public String getActivityTitle() {
+		return (String) (mActivityTitle != null ? mActivityTitle : getTitle());
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
-	public void signout() {
-		runOnUiThread(new Runnable() {
+	public static void signout(final Activity activity, final Boolean silent) {
+		Runnable task = new Runnable() {
 
 			@Override
 			public void run() {
@@ -310,8 +338,10 @@ public abstract class BaseActivity extends SherlockActivity {
 
 					@Override
 					protected void onPreExecute() {
-						if (mBusyManager != null) {
-							mBusyManager.showBusy(R.string.progress_signing_out);
+						if (!silent) {
+							if (mBusyManager != null) {
+								mBusyManager.showBusy(R.string.progress_signing_out);
+							}
 						}
 					}
 
@@ -346,21 +376,24 @@ public abstract class BaseActivity extends SherlockActivity {
 						Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, null);
 						Aircandi.settingsEditor.commit();
 
-						/* Make sure onPrepareOptionsMenu gets called */
-						invalidateOptionsMenu();
+						if (!silent) {
 
-						/* Notify interested parties */
-						UI.showToastNotification(getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
-						if (mBusyManager != null) {
-							mBusyManager.hideBusy();
+							/* Notify interested parties */
+							UI.showToastNotification(Aircandi.applicationContext.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
+							if (mBusyManager != null) {
+								mBusyManager.hideBusy();
+							}
+							Routing.route(activity, Route.Splash);
 						}
-						
-						Routing.route(BaseActivity.this, Route.Splash);
+
 					}
 				}.execute();
-
 			}
-		});
+		};
+		
+		if (!silent && activity != null) {
+			activity.runOnUiThread(task);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -390,8 +423,8 @@ public abstract class BaseActivity extends SherlockActivity {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		return Routing.route(this, Routing.routeForMenu(menuItem));
+	public boolean onOptionsItemSelected(MenuItem item) {
+		return Routing.route(this, Routing.routeForMenuId(item.getItemId()));
 	}
 
 	// --------------------------------------------------------------------------------------------

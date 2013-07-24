@@ -39,7 +39,7 @@ public class AddressBuilder extends BaseEdit {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
-		mActionBar.setTitle(R.string.dialog_address_builder_title);
+		setActivityTitle(getString(R.string.dialog_address_builder_title));
 
 		((EditText) findViewById(R.id.phone)).setImeOptions(EditorInfo.IME_ACTION_DONE);
 		((EditText) findViewById(R.id.phone)).setOnEditorActionListener(new OnEditorActionListener() {

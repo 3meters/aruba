@@ -30,9 +30,12 @@ public class EntityGrid extends BaseEntityList {
 		mGridView.setColumnWidth(mPhotoWidthPixels);
 	}
 
+
+	@Override
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
+		super.onMessage(event);
 		/*
 		 * Refreshes the comment list to show new comment.
 		 */

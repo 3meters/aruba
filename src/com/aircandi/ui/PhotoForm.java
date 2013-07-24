@@ -17,7 +17,7 @@ import android.widget.ImageView.ScaleType;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Window;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
@@ -60,8 +60,23 @@ public class PhotoForm extends BaseBrowse {
 		}
 
 		setSupportProgressBarIndeterminateVisibility(true);
-		mActionBar.setSubtitle("double-tap to zoom");
-		mActionBar.setDisplayHomeAsUpEnabled(true);
+	}
+
+	@Override
+	protected void configureActionBar() {
+		super.configureActionBar();
+
+		if (mActionBar != null) {
+			mActionBar.setSubtitle("double-tap to zoom");
+		}
+	}
+
+	@Override
+	protected void configureNavigationDrawer() {
+		super.configureNavigationDrawer();
+		if (mDrawerLayout != null) {
+			mDrawerToggle.setDrawerIndicatorEnabled(false);
+		}
 	}
 
 	@Override
@@ -81,7 +96,7 @@ public class PhotoForm extends BaseBrowse {
 
 	public static View buildPictureDetail(final Context context, Photo photo, View layout) {
 
-		final SherlockActivity activity = (SherlockActivity) context;
+		final SherlockFragmentActivity activity = (SherlockFragmentActivity) context;
 		final TextView name = (TextView) layout.findViewById(R.id.name);
 		final UserView user = (UserView) layout.findViewById(R.id.author);
 		final ProgressBar progress = (ProgressBar) layout.findViewById(R.id.progressBar);
@@ -193,7 +208,7 @@ public class PhotoForm extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 	// Misc
 	// --------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		final ImageView image = (ImageView) findViewById(R.id.photo);

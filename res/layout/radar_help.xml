@@ -3,41 +3,37 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="48dp"
     android:background="?attr/backgroundHelp"
     android:clickable="true"
     android:onClick="onHelpClick" >
 
-    <com.aircandi.ui.widgets.AirTextView
-        android:id="@+id/radar_browse_places"
-        style="@style/balloon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
-        android:text="@string/help_radar_browse_places" />
-
     <LinearLayout
-        android:id="@+id/radar_add_places"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
         android:orientation="vertical" >
-
-        <com.aircandi.ui.widgets.AirTextView
-            android:id="@+id/radar_add_places"
-            style="@style/balloon"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:text="@string/help_radar_add_places" />
 
         <View
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_gravity="center"
             android:layout_marginRight="5dp"
-            android:background="@drawable/ic_action_arrow_bottom_dark" />
+            android:background="@drawable/ic_action_arrow_top_dark" />
+
+        <com.aircandi.ui.widgets.AirTextView
+            style="@style/balloon"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="@string/help_radar_add_places" />
     </LinearLayout>
+
+    <com.aircandi.ui.widgets.AirTextView
+        style="@style/balloon"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="@string/help_radar_browse_places" />
 
 </RelativeLayout>

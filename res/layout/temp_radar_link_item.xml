@@ -18,6 +18,7 @@
 
     <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/name"
+        style="@style/candi_view_count"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginRight="3dp"

@@ -13,5 +13,11 @@
         android:orderInCategory="1"
         android:showAsAction="always"
         android:title="@string/menu_edit_item"/>
+    <item
+        android:id="@+id/add"
+        android:icon="?attr/iconAdd"
+        android:orderInCategory="1"
+        android:showAsAction="always"
+        android:title="@string/menu_add_entity_item"/>
 
 </menu>

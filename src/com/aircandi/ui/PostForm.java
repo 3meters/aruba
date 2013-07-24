@@ -37,6 +37,14 @@ import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
 public class PostForm extends BaseEntityForm {
+	
+	@Override
+	protected void configureNavigationDrawer() {
+		super.configureNavigationDrawer();
+		if (mDrawerLayout != null) {
+			mDrawerToggle.setDrawerIndicatorEnabled(false);
+		}
+	}
 
 	@Override
 	protected void databind(final Boolean refreshProposed) {
@@ -74,12 +82,12 @@ public class PostForm extends BaseEntityForm {
 				final ModelResult result = (ModelResult) modelResult;
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					
+
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
 						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
-						mActionBar.setTitle(mEntity.name);
+						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
 							mMenuItemEdit.setVisible(canEdit());
 						}
@@ -99,9 +107,11 @@ public class PostForm extends BaseEntityForm {
 	// Events
 	// --------------------------------------------------------------------------------------------
 
+	@Override
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
+		super.onMessage(event);
 		/*
 		 * Refresh the form because something new has been added to it
 		 * like a comment or post.

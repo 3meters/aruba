@@ -74,7 +74,7 @@ public class CategoryBuilder extends BaseEdit {
 
 		mSpinnerItem = mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
-		mActionBar.setTitle(R.string.dialog_category_builder_title);
+		setActivityTitle(getString(R.string.dialog_category_builder_title));
 
 	}
 

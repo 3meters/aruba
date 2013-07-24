@@ -166,10 +166,10 @@ public class PhotoPicker extends BaseBrowse {
 		mPhotoWidthPixels = (layoutWidthPixels / count) - (mPhotoMarginPixels * (count - 1));
 
 		if (mPlacePhotoMode) {
-			mActionBar.setTitle(mEntity.name);
+			setActivityTitle(mEntity.name);
 		}
 		else {
-			mActionBar.setTitle(R.string.dialog_picture_picker_search_title);
+			setActivityTitle(getString(R.string.dialog_picture_picker_search_title));
 		}
 
 		mMessage = (TextView) findViewById(R.id.message);

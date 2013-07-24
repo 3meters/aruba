@@ -79,8 +79,8 @@
     <style name="balloon">
         <item name="android:textAppearance">@style/app_text_appearance_medium</item>
         <item name="android:gravity">center</item>
-        <item name="android:padding">10dp</item>
-        <item name="android:maxWidth">200dp</item>
+        <item name="android:padding">20dp</item>
+        <item name="android:minWidth">200dp</item>
         <item name="android:textStyle">italic</item>
         <item name="android:background">?attr/backgroundBalloon</item>
     </style>
@@ -148,7 +148,7 @@
     <style name="form_button_floating" parent="form_button">
         <item name="android:minWidth">@dimen/form_button_floating_width_min</item>
     </style>
-    
+
     <style name="form_button_borderless" parent="Widget.Sherlock.ActionButton">
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
         <item name="android:textColor">?attr/textColor</item>
@@ -220,10 +220,9 @@
         <item name="android:textStyle">normal</item>
     </style>
 
-    <style name="candi_view_distance" parent="candi_view_name">
-        <item name="android:textAppearance">@style/app_text_appearance_tiny</item>
-        <item name="android:textStyle">normal</item>
-    </style>
+    <style name="candi_view_distance" parent="candi_view_name" />
+
+    <style name="candi_view_count" parent="candi_view_name" />
 
     <style name="candi_view_name_synthetic" parent="candi_view_name">
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
@@ -283,6 +282,20 @@
 
     <style name="candi_list_description">
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
+    </style>
+
+    <!-- Navigation drawer -->
+
+    <style name="menu_button" parent="Widget.Sherlock.ActionButton">
+        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textColor">?attr/textColor</item>
+        <item name="android:background">@drawable/selector_button</item>
+    </style>
+
+    <style name="menu_count">
+        <item name="android:background">?attr/backgroundButton</item>
+        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textColor">?attr/textColorButtonLink</item>
     </style>
 
     <!-- Actionbar -->

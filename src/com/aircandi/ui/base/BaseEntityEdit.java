@@ -175,11 +175,11 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (mEntity == null) {
 			mEntity = Entity.makeEntity(mEntitySchema);
 			mEditing = false;
-			mActionBar.setTitle(mEntity.schema);
+			setActivityTitle(mEntity.schema);
 		}
 		else {
 			mEditing = true;
-			mActionBar.setTitle(mEntity.name);
+			setActivityTitle(mEntity.name);
 		}
 	}
 
@@ -406,6 +406,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		 */
 		if (resultCode != Activity.RESULT_CANCELED) {
 			if (requestCode == Constants.ACTIVITY_PICTURE_SOURCE_PICK) {
+				
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
 					final String pictureSource = extras.getString(Constants.EXTRA_PICTURE_SOURCE);
@@ -974,7 +975,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		return Routing.route(this, Routing.routeForMenu(menuItem), mEntity);
+		return Routing.route(this, Routing.routeForMenuId(menuItem.getItemId()), mEntity);
 	}
 
 }

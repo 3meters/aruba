@@ -66,7 +66,7 @@ public class ShortcutPicker extends BaseBrowse {
 		/* We use this to access the source suggestions */
 
 		if (mShortcuts != null && mShortcuts.size() > 0) {
-			mActionBar.setTitle(mShortcuts.get(0).app);
+			setActivityTitle(mShortcuts.get(0).app);
 
 			/* Show default photo based on the type of the shortcut set */
 			Photo photo = new Photo(Applink.getDefaultPhotoUri(mShortcuts.get(0).schema), null, null, null, PhotoSource.assets);

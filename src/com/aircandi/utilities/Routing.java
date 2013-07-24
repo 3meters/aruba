@@ -20,7 +20,6 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
@@ -53,6 +52,7 @@ import com.aircandi.service.objects.ShortcutMeta;
 import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.EntityList;
 import com.aircandi.ui.HelpForm;
+import com.aircandi.ui.NotificationList;
 import com.aircandi.ui.PhotoForm;
 import com.aircandi.ui.Preferences;
 import com.aircandi.ui.RadarForm;
@@ -68,6 +68,7 @@ import com.aircandi.ui.edit.CommentEdit;
 import com.aircandi.ui.edit.FeedbackEdit;
 import com.aircandi.ui.edit.TuningEdit;
 import com.aircandi.ui.helpers.AddressBuilder;
+import com.aircandi.ui.helpers.ApplicationPicker;
 import com.aircandi.ui.helpers.CategoryBuilder;
 import com.aircandi.ui.helpers.PhotoPicker;
 import com.aircandi.ui.helpers.PhotoSourcePicker;
@@ -79,7 +80,7 @@ import com.aircandi.ui.user.UserForm;
 import com.aircandi.utilities.Animate.TransitionType;
 
 public final class Routing {
-	
+
 	public static boolean intent(Activity activity, Intent intent) {
 		activity.startActivity(intent);
 		Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
@@ -154,20 +155,73 @@ public final class Routing {
 
 	public static boolean route(final Activity activity, Route route, Entity entity, String schema, Bundle extras) {
 
-		if (route == Route.Browse) {
+		if (route == Route.Radar) {
+
+			Intent intent = new Intent(activity, RadarForm.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			activity.startActivity(intent);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			return true;
+		}
+
+		else if (route == Route.Profile) {
+
+			if (entity == null) {
+				throw new IllegalArgumentException("valid user entity required for selected route");
+			}
+
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, UserForm.class)
+					.setEntityId(entity.id);
+
+			Intent intent = intentBuilder.create();
+			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+
+			activity.startActivity(intent);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			return true;
+		}
+
+		else if (route == Route.Notifications) {
+
+			Intent intent = new Intent(activity, NotificationList.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			activity.startActivity(intent);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			return true;
+		}
+
+		else if (route == Route.Settings) {
+
+			activity.startActivityForResult(new Intent(activity, Preferences.class), Constants.ACTIVITY_PREFERENCES);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.Feedback) {
+
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, FeedbackEdit.class);
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.Browse) {
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
 			}
-			final IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityForm.viewFormBySchema(entity.schema))
-					.setEntityId(entity.id)
-					.setExtras(extras);
+			Class<?> clazz = BaseEntityForm.viewFormBySchema(entity.schema);
+			if (clazz != null) {
+				final IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityForm.viewFormBySchema(entity.schema))
+						.setEntityId(entity.id)
+						.setExtras(extras);
 
-			if (entity.toId != null) {
-				intentBuilder.setEntityParentId(entity.toId);
+				if (entity.toId != null) {
+					intentBuilder.setEntityParentId(entity.toId);
+				}
+				activity.startActivity(intentBuilder.create());
+				Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
 			}
-			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
 			return true;
 		}
 
@@ -221,19 +275,6 @@ public final class Routing {
 		else if (route == Route.SigninProfile) {
 
 			entity = Aircandi.getInstance().getUser();
-			if (entity == null) {
-				throw new IllegalArgumentException("valid user entity required for selected route");
-			}
-			final IntentBuilder intentBuilder = new IntentBuilder(activity, UserForm.class)
-					.setEntityId(entity.id);
-
-			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
-			return true;
-		}
-
-		else if (route == Route.Profile) {
-
 			if (entity == null) {
 				throw new IllegalArgumentException("valid user entity required for selected route");
 			}
@@ -337,6 +378,11 @@ public final class Routing {
 			return true;
 		}
 
+		else if (route == Route.DeleteNotifications) {
+
+			return true;
+		}
+
 		else if (route == Route.CancelHelp) {
 
 			activity.setResult(Activity.RESULT_CANCELED);
@@ -345,34 +391,9 @@ public final class Routing {
 			return true;
 		}
 
-		else if (route == Route.Home) {
-
-			Intent intent = new Intent(activity, RadarForm.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			activity.finish();
-			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
-			return true;
-		}
-
-		else if (route == Route.Settings) {
-
-			activity.startActivityForResult(new Intent(activity, Preferences.class), Constants.ACTIVITY_PREFERENCES);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
-			return true;
-		}
-
-		else if (route == Route.Feedback) {
-
-			final IntentBuilder intentBuilder = new IntentBuilder(activity, FeedbackEdit.class);
-			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
-			return true;
-		}
-
 		else if (route == Route.Signout) {
 
-			((BaseActivity) activity).signout();
+			BaseActivity.signout(activity, false);
 			return true;
 		}
 
@@ -448,7 +469,8 @@ public final class Routing {
 		else if (route == Route.Splash) {
 
 			final Intent intent = new Intent(activity, SplashForm.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			activity.startActivity(intent);
 			activity.finish();
 			Animate.doOverridePendingTransition(activity, TransitionType.FormToPage);
@@ -459,6 +481,14 @@ public final class Routing {
 
 			IntentBuilder intentBuilder = new IntentBuilder(activity, PhotoSourcePicker.class).setEntity(entity);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_SOURCE_PICK);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			return true;
+		}
+
+		else if (route == Route.NewFor) {
+
+			IntentBuilder intentBuilder = new IntentBuilder(activity, ApplicationPicker.class).setEntity(entity);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_APPLICATION_PICK);
 			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
 			return true;
 		}
@@ -638,20 +668,22 @@ public final class Routing {
 		serviceError(activity, serviceResponse, null);
 	}
 
-	public static void serviceError(final Activity activity, ServiceResponse serviceResponse, ServiceOperation serviceOperation) {
+	public static Float serviceError(final Activity activity, ServiceResponse serviceResponse, ServiceOperation serviceOperation) {
 
 		final ErrorType errorType = serviceResponse.exception.getErrorType();
 		final String errorMessage = serviceResponse.exception.getMessage();
 		final Float statusCode = serviceResponse.exception.getStatusCode();
 
 		/* We always make sure the progress indicator has been stopped */
-		activity.runOnUiThread(new Runnable() {
+		if (activity instanceof BaseActivity) {
+			activity.runOnUiThread(new Runnable() {
 
-			@Override
-			public void run() {
-				((BaseActivity) activity).mBusyManager.hideBusy();
-			}
-		});
+				@Override
+				public void run() {
+					BaseActivity.mBusyManager.hideBusy();
+				}
+			});
+		}
 
 		/*
 		 * Client errors occur when we are unable to get a response from a service, or when the client is
@@ -808,7 +840,7 @@ public final class Routing {
 						/*
 						 * Make sure the user is logged out
 						 */
-						((BaseActivity) activity).signout();
+						BaseActivity.signout(null, true);
 
 					}
 					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
@@ -822,7 +854,7 @@ public final class Routing {
 							}
 						}
 						else {
-							((BaseActivity) activity).signout();
+							BaseActivity.signout(null, true);
 						}
 					}
 					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
@@ -849,50 +881,60 @@ public final class Routing {
 		}
 
 		Logger.w(activity, "Service error: " + errorMessage);
+		return statusCode;
 	}
 
-	public static Route routeForMenu(MenuItem menuItem) {
-		if (menuItem.getItemId() == R.id.edit) {
+	public static Route routeForMenuId(int itemId) {
+		if (itemId == R.id.edit) {
 			return Route.Edit;
 		}
-		else if (menuItem.getItemId() == R.id.help) {
+		else if (itemId == R.id.help) {
 			return Route.Help;
 		}
-		else if (menuItem.getItemId() == R.id.refresh) {
+		else if (itemId == R.id.refresh) {
 			return Route.Refresh;
 		}
-		else if (menuItem.getItemId() == R.id.settings) {
+		else if (itemId == R.id.settings) {
 			return Route.Settings;
 		}
-		else if (menuItem.getItemId() == R.id.feedback) {
+		else if (itemId == R.id.feedback) {
 			return Route.Feedback;
 		}
-		else if (menuItem.getItemId() == R.id.profile) {
+		else if (itemId == R.id.profile) {
 			return Route.SigninProfile;
 		}
-		else if (menuItem.getItemId() == R.id.watching) {
+		else if (itemId == R.id.watching) {
 			return Route.Watching;
 		}
-		else if (menuItem.getItemId() == android.R.id.home) {
+		else if (itemId == android.R.id.home) {
 			return Route.Cancel;
 		}
-		else if (menuItem.getItemId() == R.id.home) {
+		else if (itemId == R.id.home) {
 			return Route.Home;
 		}
-		else if (menuItem.getItemId() == R.id.signout) {
+		else if (itemId == R.id.radar) {
+			return Route.Radar;
+		}
+		else if (itemId == R.id.notifications) {
+			return Route.Notifications;
+		}
+		else if (itemId == R.id.signout) {
 			return Route.Signout;
 		}
-		else if (menuItem.getItemId() == R.id.cancel) {
+		else if (itemId == R.id.cancel) {
 			return Route.Cancel;
 		}
-		else if (menuItem.getItemId() == R.id.accept) {
+		else if (itemId == R.id.accept) {
 			return Route.Accept;
 		}
-		else if (menuItem.getItemId() == R.id.add) {
+		else if (itemId == R.id.add) {
 			return Route.Add;
 		}
-		else if (menuItem.getItemId() == R.id.delete) {
+		else if (itemId == R.id.delete) {
 			return Route.Delete;
+		}
+		else if (itemId == R.id.delete_notifications) {
+			return Route.DeleteNotifications;
 		}
 		return Route.Unknown;
 	}
@@ -914,6 +956,7 @@ public final class Routing {
 		Back,
 		BackConfirm,
 		Home,
+		Radar,
 		Settings,
 		Feedback,
 		Cancel,
@@ -938,6 +981,6 @@ public final class Routing {
 		PhotoFromCamera,
 		PhotoSearch,
 		PhotoPlaceSearch,
-		Tune,
+		Tune, NewFor, DeleteNotifications, Notifications
 	}
 }

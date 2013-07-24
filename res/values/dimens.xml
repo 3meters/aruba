@@ -47,4 +47,9 @@
     <dimen name="dialog_body_padding">10dp</dimen>
     <dimen name="dialog_body_padding_top">15dp</dimen>
 
+    <!-- Sliding Menus -->
+
+    <dimen name="sliding_menu_shadow_width">15dp</dimen>
+    <dimen name="sliding_menu_offset">60dp</dimen>
+    
 </resources>

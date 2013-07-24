@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    android:id="@+id/left_drawer"
+    android:layout_width="240dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="?attr/backgroundActionBar"
+    android:clickable="true"
+    android:paddingTop="20dp" >
+
+    <com.aircandi.ui.widgets.SectionLayout
+        android:id="@+id/section_navigation"
+        style="@style/candi_form_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        aircandi:layoutHeader="@layout/temp_section_header_menu"
+        android:orientation="vertical" >
+
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/radar"
+            style="@style/menu_button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/form_button_height"
+            android:clickable="true"
+            android:gravity="center_vertical"
+            android:onClick="onMenuItemClick"
+            android:paddingLeft="10dp"
+            android:text="@string/menu_radar_item" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?attr/ruleColor" />
+
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/profile"
+            style="@style/menu_button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/form_button_height"
+            android:clickable="true"
+            android:gravity="center_vertical"
+            android:onClick="onMenuItemClick"
+            android:paddingLeft="10dp"
+            android:text="@string/menu_profile_item" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?attr/ruleColor" />
+
+        <LinearLayout
+            android:id="@+id/notifications"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_button"
+            android:clickable="true"
+            android:onClick="onMenuItemClick"
+            android:orientation="horizontal" >
+
+            <com.aircandi.ui.widgets.AirTextView
+                style="@style/menu_button"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/form_button_height"
+                android:layout_marginLeft="-3dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:paddingLeft="10dp"
+                android:text="@string/menu_notifications_item" />
+
+            <com.aircandi.ui.widgets.AirTextView
+                android:id="@+id/notifications_count"
+                style="@style/menu_count"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_weight="0"
+                android:gravity="center"
+                android:text="0" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?attr/ruleColor" />
+    </com.aircandi.ui.widgets.SectionLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical" >
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?attr/ruleColor" />
+
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/settings"
+            style="@style/menu_button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/form_button_height"
+            android:clickable="true"
+            android:gravity="center_vertical"
+            android:onClick="onMenuItemClick"
+            android:paddingLeft="10dp"
+            android:text="@string/menu_settings_item" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?attr/ruleColor" />
+
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/invite"
+            style="@style/menu_button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/form_button_height"
+            android:clickable="true"
+            android:gravity="center_vertical"
+            android:onClick="onMenuItemClick"
+            android:paddingLeft="10dp"
+            android:text="@string/menu_invite_item" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?attr/ruleColor" />
+
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/feedback"
+            style="@style/menu_button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/form_button_height"
+            android:clickable="true"
+            android:gravity="center_vertical"
+            android:onClick="onMenuItemClick"
+            android:paddingLeft="10dp"
+            android:text="@string/menu_feedback_item" />
+    </LinearLayout>
+
+</RelativeLayout>

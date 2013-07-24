@@ -14,35 +14,16 @@
         android:showAsAction="always"
         android:title="@string/menu_refresh_item"/>
     <item
+        android:id="@+id/add"
+        android:icon="?attr/iconAdd"
+        android:orderInCategory="1"
+        android:showAsAction="always"
+        android:title="@string/menu_add_entity_item"/>
+    <item
         android:id="@+id/help"
         android:icon="?attr/iconHelp"
         android:orderInCategory="1"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_help_item"/>
-    <item
-        android:id="@+id/profile"
-        android:orderInCategory="1"
-        android:showAsAction="never"
-        android:title="@string/menu_profile_item"/>
-    <item
-        android:id="@+id/watching"
-        android:orderInCategory="1"
-        android:showAsAction="never"
-        android:title="@string/menu_watching_item"/>
-    <item
-        android:id="@+id/settings"
-        android:orderInCategory="1"
-        android:showAsAction="never"
-        android:title="@string/menu_settings_item"/>
-    <item
-        android:id="@+id/signout"
-        android:orderInCategory="2"
-        android:showAsAction="never"
-        android:title="@string/menu_signout_item"/>
-    <item
-        android:id="@+id/feedback"
-        android:orderInCategory="1"
-        android:showAsAction="never"
-        android:title="@string/menu_feedback_item"/>
 
 </menu>

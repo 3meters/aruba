@@ -12,8 +12,6 @@ import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.applications.Places;
 import com.aircandi.applications.Posts;
@@ -99,9 +97,11 @@ public class UserForm extends BaseEntityForm {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
-						result = EntityManager.getInstance().getUserStats(mEntityId);
-						if (result.serviceResponse.responseCode == ResponseCode.Success) {
-							((User) mEntity).stats = (List<Stat>) result.data;
+						if (refresh) {
+							result = EntityManager.getInstance().getUserStats(mEntityId);
+							if (result.serviceResponse.responseCode == ResponseCode.Success) {
+								((User) mEntity).stats = (List<Stat>) result.data;
+							}
 						}
 					}
 				}
@@ -117,9 +117,12 @@ public class UserForm extends BaseEntityForm {
 					if (result.data != null) {
 						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
-						mActionBar.setTitle(mEntity.name);
+						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
 							mMenuItemEdit.setVisible(canEdit());
+						}
+						if (mMenuItemSignout != null) {
+							mMenuItemSignout.setVisible(canEdit());
 						}
 						draw();
 					}
@@ -381,23 +384,18 @@ public class UserForm extends BaseEntityForm {
 	// Menus
 	// --------------------------------------------------------------------------------------------
 
-	@Override
+		@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		/*
-		 * Make sure profile item isn't visible if we are showing the
-		 * logged in users profile.
-		 */
-		MenuItem menuItem = menu.findItem(R.id.profile);
-		if (menuItem != null) {
-			if (mEntityId.equals(Aircandi.getInstance().getUser().id)) {
-				menuItem.setVisible(false);
-			}
+
+		mMenuItemSignout = menu.findItem(R.id.signout);
+		if (mMenuItemSignout != null) {
+			mMenuItemSignout.setVisible(canEdit());
 		}
 
 		return true;
 	}
-
+	
 	// --------------------------------------------------------------------------------------------
 	// Misc
 	// --------------------------------------------------------------------------------------------

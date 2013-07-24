@@ -1,14 +1,11 @@
 package com.aircandi.components;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.http.HttpStatus;
 
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -28,6 +25,7 @@ import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Device;
+import com.aircandi.service.objects.Place;
 import com.aircandi.ui.RadarForm;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -35,9 +33,9 @@ import com.google.android.gcm.GCMRegistrar;
 public class NotificationManager {
 
 	private Device									mDevice;
-	private final List<AirNotification>				mNotifications	= Collections.synchronizedList(new ArrayList<AirNotification>());
 
 	public static android.app.NotificationManager	mNotificationManager;
+	private Integer									mNewCount	= 0;
 
 	private NotificationManager() {
 		mNotificationManager = (android.app.NotificationManager) Aircandi.applicationContext.getSystemService(Service.NOTIFICATION_SERVICE);
@@ -139,6 +137,54 @@ public class NotificationManager {
 		BusProvider.getInstance().post(new MessageEvent(notification));
 	}
 
+	public void decorateNotification(AirNotification notification) {
+		/*
+		 * Title and subtitle properties are added base on the context
+		 * of the notification.
+		 */
+		if (notification.type.equals("watch")) {
+			if (notification.action.equals("insert")) {
+				notification.title = notification.user.name;
+				String category = null;
+				if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					Place place = (Place) notification.entity;
+					if (place.category != null && place.category.name != null) {
+						category = place.category.name;
+					}
+				}
+				if (category == null) {
+					category = notification.entity.schema;
+				}
+				notification.subtitle = "Added a " + category;
+				if (notification.entity.name != null) {
+					notification.subtitle += " called \"" + notification.entity.name + "\"";
+				}								
+				if (notification.toEntity != null && notification.toEntity.name != null) {
+					notification.subtitle += " to \"" + notification.toEntity.name + "\"";
+				}
+			}
+		}
+		else if (notification.type.equals("nearby")) {
+			if (notification.action.equals("insert")) {
+				notification.title = notification.user.name;
+				String category = null;
+				if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					Place place = (Place) notification.entity;
+					if (place.category != null && place.category.name != null) {
+						category = place.category.name;
+					}
+				}
+				if (category == null) {
+					category = notification.entity.schema;
+				}
+				notification.subtitle = "Added a new " + category + " near you";
+				if (notification.entity.name != null) {
+					notification.subtitle += " called \"" + notification.entity.name + "\"";
+				}
+			}
+		}
+	}
+
 	public void showNotification(final AirNotification airNotification, Context context) {
 		/*
 		 * Small icon displays on left unless a large icon is specified
@@ -173,10 +219,10 @@ public class NotificationManager {
 				.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS)
 				.setWhen(System.currentTimeMillis());
 
-		if (airNotification.message != null) {
+		if (airNotification.entity.description != null) {
 			NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle();
 			style.setBigContentTitle(airNotification.title);
-			style.bigText(airNotification.message);
+			style.bigText(airNotification.entity.description);
 			style.setSummaryText(airNotification.subtitle);
 			builder.setStyle(style);
 		}
@@ -220,6 +266,15 @@ public class NotificationManager {
 
 	}
 
+	public void storeNotification(final AirNotification notification, String jsonNotification) {
+
+		ContentValues values = new ContentValues();
+		values.put(NotificationTable.COLUMN_SENT_DATE, notification.sentDate.longValue());
+		values.put(NotificationTable.COLUMN_OBJECT, jsonNotification);
+		Aircandi.applicationContext.getContentResolver().insert(NotificationsContentProvider.CONTENT_URI, values);
+		mNewCount++;
+	}
+
 	public Device getDevice() {
 		return mDevice;
 	}
@@ -228,7 +283,11 @@ public class NotificationManager {
 		this.mDevice = device;
 	}
 
-	public List<AirNotification> getNotifications() {
-		return mNotifications;
+	public Integer getNewCount() {
+		return mNewCount;
+	}
+
+	public void setNewCount(Integer newCount) {
+		mNewCount = newCount;
 	}
 }

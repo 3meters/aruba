@@ -77,7 +77,9 @@
     <color name="overlay_end">#aa000000</color>
     <color name="overlay_photo_detail">#66000000</color>
     <color name="overlay_help">#aa000000</color>
-
+    <color name="overlay_navigation_drawer_light">#55333333</color>
+    <color name="overlay_navigation_drawer_dark">#55000000</color>
+    
     <!-- Darken bars: mostly transparent -->
 
     <color name="background_actionbar_light">@color/gray_10_pcnt</color>

@@ -99,6 +99,7 @@ public class SplashForm extends SherlockActivity {
 				}
 				else {
 					Routing.serviceError(SplashForm.this, result.serviceResponse);
+					findViewById(R.id.button_holder).setVisibility(View.VISIBLE);
 				}
 			}
 

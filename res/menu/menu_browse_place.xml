@@ -11,13 +11,19 @@
         android:id="@+id/edit"
         android:icon="?attr/iconEdit"
         android:orderInCategory="1"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_edit_item"/>
-
+    <item
+        android:id="@+id/add"
+        android:icon="?attr/iconAdd"
+        android:orderInCategory="1"
+        android:showAsAction="always"
+        android:title="@string/menu_add_entity_item"/>
     <item
         android:id="@+id/help"
         android:icon="?attr/iconHelp"
         android:orderInCategory="1"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_help_item"/>
+
 </menu>

@@ -62,6 +62,14 @@ public class PlaceForm extends BaseEntityForm {
 	}
 
 	@Override
+	protected void configureNavigationDrawer() {
+		super.configureNavigationDrawer();
+		if (mDrawerLayout != null) {
+			mDrawerToggle.setDrawerIndicatorEnabled(false);
+		}
+	}
+
+	@Override
 	protected void databind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
@@ -102,7 +110,7 @@ public class PlaceForm extends BaseEntityForm {
 						mEntity = (Entity) result.data;
 						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
-						mActionBar.setTitle(mEntity.name);
+						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
 							mMenuItemEdit.setVisible(canEdit());
 						}
@@ -202,9 +210,11 @@ public class PlaceForm extends BaseEntityForm {
 	@Override
 	public void onAdd() {
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
-			Bundle extras = new Bundle();
-			extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mEntityId);
-			Routing.route(this, Route.New, null, Constants.SCHEMA_ENTITY_POST, extras);
+			Routing.route(this, Route.NewFor, mEntity);
+//
+//			Bundle extras = new Bundle();
+//			extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mEntityId);
+//			Routing.route(this, Route.New, null, Constants.SCHEMA_ENTITY_POST, extras);
 		}
 		else {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
@@ -229,9 +239,11 @@ public class PlaceForm extends BaseEntityForm {
 		}
 	}
 
+	@Override
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
+		super.onMessage(event);
 		/*
 		 * Refresh the form because something new has been added to it
 		 * like a comment or post.

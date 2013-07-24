@@ -1,5 +1,6 @@
 package com.aircandi.ui;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,10 +9,13 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.Tracker;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
 
 public class Preferences extends SherlockPreferenceActivity {
@@ -51,6 +55,11 @@ public class Preferences extends SherlockPreferenceActivity {
 
 	@SuppressWarnings("deprecation")
 	private void initialize() {
+
+		/* Configure action bar */
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setDisplayShowHomeEnabled(true);
+
 		/* Listen for theme change */
 		Preference pref = findPreference("Pref_Theme");
 		if (pref != null) {
@@ -115,6 +124,10 @@ public class Preferences extends SherlockPreferenceActivity {
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Methods
+	// --------------------------------------------------------------------------------------------
+
 	private void doInfoClick() {
 		final String title = getString(R.string.alert_about_title);
 		final String message = getString(R.string.alert_about_label_version) + " "
@@ -133,6 +146,28 @@ public class Preferences extends SherlockPreferenceActivity {
 		Tracker.sendEvent("ui_action", "open_dialog", "about", 0, Aircandi.getInstance().getUser());
 
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Menus
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == android.R.id.home) {
+			/*
+			 * We aren't using Routing because pref activity doesn't derive
+			 * from BaseActivity.
+			 */
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			Animate.doOverridePendingTransition(this, TransitionType.PageToPage);
+		}
+		return true;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle
+	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected void onStop() {

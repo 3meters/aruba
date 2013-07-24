@@ -20,6 +20,7 @@ ic_action_heart_dark.png
 ic_action_info_dark.png
 ic_action_key_dark.png
 ic_action_like_dark.png
+ic_action_list_dark.png
 ic_action_location_dark.png
 ic_action_lock_closed_dark.png
 ic_action_map_dark.png

@@ -43,6 +43,7 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
@@ -167,13 +168,21 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 	@Override
 	protected void configureActionBar() {
+		super.configureActionBar();
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
 		final Entity entity = EntityManager.getEntity(mEntityId);
-		mActionBar.setDisplayHomeAsUpEnabled(true);
 		if (entity != null) {
-			mActionBar.setTitle(entity.name);
+			setActivityTitle(entity.name);
+		}
+	}
+
+	@Override
+	protected void configureNavigationDrawer() {
+		super.configureNavigationDrawer();
+		if (mDrawerLayout != null) {
+			mDrawerToggle.setDrawerIndicatorEnabled(false);
 		}
 	}
 
@@ -583,7 +592,12 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 				if (holder.photoView != null) {
 					holder.photoView.setTag(entity);
-					UI.drawPhoto(holder.photoView, entity.getPhoto());
+					Photo photo = entity.getPhoto();
+					if (entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+						photo = entity.creator.getPhoto();
+					}
+
+					UI.drawPhoto(holder.photoView, photo);
 				}
 
 				view.setClickable(true);

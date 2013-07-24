@@ -55,15 +55,15 @@ public class GCMIntentService extends GCMBaseIntentService {
 				notification.intent = intentBuilder.create();
 			}
 		}
+		
+		/* Customize title and subtitle before storing and broadcasting */
+		NotificationManager.getInstance().decorateNotification(notification);
 
-		/* Stash in our queue */
-		NotificationManager.getInstance().getNotifications().add(notification);
+		/* Stash in our local database */
+		NotificationManager.getInstance().storeNotification(notification, jsonNotification);
 
 		/* Trigger event so subscribers can decide if they should refresh */
 		NotificationManager.getInstance().broadcastNotification(notification);
-
-		/* Pass to the cache */
-		EntityManager.getInstance().processNotification(notification);
 
 		/* Display */
 		NotificationManager.getInstance().showNotification(notification, context);

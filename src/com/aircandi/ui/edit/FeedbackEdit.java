@@ -34,7 +34,6 @@ public class FeedbackEdit extends BaseEntityEdit {
 		 * Feedback are not really an entity type so we handle
 		 * all the expected initialization.
 		 */
-		mActionBar.setDisplayHomeAsUpEnabled(true);
 		mBusyManager = new BusyManager(this);
 		mDescription = (TextView) findViewById(R.id.description);
 

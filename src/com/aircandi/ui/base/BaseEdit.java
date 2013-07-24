@@ -45,8 +45,15 @@ public abstract class BaseEdit extends BaseActivity {
 	}
 
 	protected void initialize(Bundle savedInstanceState) {
-		mActionBar.setDisplayHomeAsUpEnabled(true);
 		mBusyManager = new BusyManager(this);
+	}
+
+	@Override
+	protected void configureActionBar() {
+		super.configureActionBar();
+		if (mActionBar != null) {
+			mActionBar.setDisplayHomeAsUpEnabled(true);
+		}
 	}
 
 	protected void databind() {}

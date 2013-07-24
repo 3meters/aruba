@@ -41,18 +41,20 @@ public class HelpForm extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 
 	private void updateRunOnce() {
-		if (mHelpResId == R.layout.radar_help) {
-			final Boolean runOnce = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, false);
-			if (!runOnce) {
-				Aircandi.settingsEditor.putBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, true);
-				Aircandi.settingsEditor.commit();
+		if (mHelpResId != null) {
+			if (mHelpResId == R.layout.radar_help) {
+				final Boolean runOnce = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, false);
+				if (!runOnce) {
+					Aircandi.settingsEditor.putBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, true);
+					Aircandi.settingsEditor.commit();
+				}
 			}
-		}
-		else if (mHelpResId == R.layout.place_help) {
-			final Boolean runOnce = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_CANDI_PLACE, false);
-			if (!runOnce) {
-				Aircandi.settingsEditor.putBoolean(Constants.SETTING_RUN_ONCE_HELP_CANDI_PLACE, true);
-				Aircandi.settingsEditor.commit();
+			else if (mHelpResId == R.layout.place_help) {
+				final Boolean runOnce = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_CANDI_PLACE, false);
+				if (!runOnce) {
+					Aircandi.settingsEditor.putBoolean(Constants.SETTING_RUN_ONCE_HELP_CANDI_PLACE, true);
+					Aircandi.settingsEditor.commit();
+				}
 			}
 		}
 	}
@@ -64,11 +66,10 @@ public class HelpForm extends BaseBrowse {
 
 	@Override
 	protected int getLayoutId() {
-		if (mHelpResId == null) {
-			final Bundle extras = this.getIntent().getExtras();
-			if (extras != null) {
-				mHelpResId = extras.getInt(Constants.EXTRA_HELP_ID);
-			}
+		Integer mHelpResId = 0;
+		final Bundle extras = this.getIntent().getExtras();
+		if (extras != null) {
+			mHelpResId = extras.getInt(Constants.EXTRA_HELP_ID);
 		}
 		return mHelpResId;
 	}

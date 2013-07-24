@@ -116,7 +116,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			place.provider = new ProviderMap();
 			place.provider.aircandi = Aircandi.getInstance().getUser().id;
 			place.category = new Category();
-			place.category.id = "generic";			
+			place.category.id = "generic";
 			place.category.photo = new Photo(ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES + "generic_88.png", null, null, null,
 					PhotoSource.assets_categories);
 			place.category.photo.colorize = true;
@@ -485,27 +485,46 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	}
 
 	public List<Shortcut> getClientShortcuts() {
+
 		List<Shortcut> shortcuts = new ArrayList<Shortcut>();
-		Shortcut shortcut = Shortcut.builder(this
-				, Constants.SCHEMA_ENTITY_APPLINK
-				, Constants.TYPE_APP_POST
-				, Constants.ACTION_VIEW_FOR
-				, "posts"
-				, "resource:ic_launcher"
-				, 10
-				, false
-				, true);
-		Link link = getLinkByType(Constants.TYPE_LINK_POST, null, Direction.in);
-		if (link != null) {
-			shortcut.photo = link.shortcut.getPhoto();
+
+		if (this.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			Shortcut shortcut = Shortcut.builder(this
+					, Constants.SCHEMA_ENTITY_APPLINK
+					, Constants.TYPE_APP_POST
+					, Constants.ACTION_VIEW_FOR
+					, "posts"
+					, "resource:ic_launcher"
+					, 10
+					, false
+					, true);
+			Link link = getLinkByType(Constants.TYPE_LINK_POST, null, Direction.in);
+			if (link != null) {
+				shortcut.photo = link.shortcut.getPhoto();
+			}
+			shortcuts.add(shortcut);
 		}
-		shortcuts.add(shortcut);
-		shortcuts
-				.add(Shortcut.builder(
-						this, Constants.SCHEMA_ENTITY_APPLINK, Constants.TYPE_APP_COMMENT, Constants.ACTION_VIEW_FOR, "comments", "resource:img_post", 20,
-						false, true));
-		shortcuts.add(Shortcut.builder(
-				this, Constants.SCHEMA_ENTITY_APPLINK, Constants.TYPE_APP_MAP, Constants.ACTION_VIEW, "map", "resource:img_map", 30, false, true));
+
+		shortcuts.add(Shortcut.builder(this
+				, Constants.SCHEMA_ENTITY_APPLINK
+				, Constants.TYPE_APP_COMMENT
+				, Constants.ACTION_VIEW_FOR
+				, "comments"
+				, "resource:img_post"
+				, 20
+				, false
+				, true));
+		
+		shortcuts.add(Shortcut.builder(this
+				, Constants.SCHEMA_ENTITY_APPLINK
+				, Constants.TYPE_APP_MAP
+				, Constants.ACTION_VIEW
+				, "map"
+				, "resource:img_map"
+				, 30
+				, false
+				, true));
+		
 		return shortcuts;
 	}
 

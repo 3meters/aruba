@@ -256,7 +256,8 @@ public abstract class BaseEntityForm extends BaseBrowse {
 					Animate.doOverridePendingTransition(this, TransitionType.PageToRadarAfterDelete);
 				}
 			}
-			else if (requestCode == Constants.ACTIVITY_TEMPLATE_PICK) {
+			else if (requestCode == Constants.ACTIVITY_APPLICATION_PICK) {
+				
 				if (intent != null && intent.getExtras() != null) {
 
 					final Bundle extras = intent.getExtras();
@@ -558,6 +559,11 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			mMenuItemEdit.setVisible(canEdit());
 		}
 
+		mMenuItemEdit = menu.findItem(R.id.edit);
+		if (mMenuItemEdit != null) {
+			mMenuItemEdit.setVisible(canEdit());
+		}
+		
 		MenuItem refresh = menu.findItem(R.id.refresh);
 		if (refresh != null) {
 			if (mBusyManager != null) {
@@ -577,12 +583,27 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		return Routing.route(this, Routing.routeForMenu(menuItem), mEntity);
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		if (item.getItemId() == android.R.id.home) {
+			if (mDrawerLayout != null) {
+				if (mDrawerToggle.isDrawerIndicatorEnabled()) {
+					if (mDrawerLayout.isDrawerOpen(mDrawerView)) {
+						mDrawerLayout.closeDrawer(mDrawerView);
+					}
+					else {
+						mDrawerLayout.openDrawer(mDrawerView);
+					}
+					return true;
+				}
+			}
+		}
+		
+		return Routing.route(this, Routing.routeForMenuId(item.getItemId()), mEntity);
 	}
 
 	protected Boolean canEdit() {
-		if (mEntity != null && mEntity.ownerId != null) {
+		if (mEntity != null && mEntity.ownerId != null && Aircandi.getInstance().getUser() != null) {
 			if (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 				return true;
 			}

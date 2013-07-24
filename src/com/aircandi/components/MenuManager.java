@@ -2,7 +2,7 @@ package com.aircandi.components;
 
 import android.app.Activity;
 
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.aircandi.beta.R;
 
@@ -11,7 +11,7 @@ public class MenuManager {
 	public static boolean onCreateOptionsMenu(Activity activity, Menu menu) {
 
 		String activityName = activity.getClass().getSimpleName();
-		final SherlockActivity sherlock = (SherlockActivity) activity;
+		final SherlockFragmentActivity sherlock = (SherlockFragmentActivity) activity;
 
 		/* Browsing */
 
@@ -20,17 +20,19 @@ public class MenuManager {
 		}
 		else if (activityName.equals("PlaceForm")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_place, menu);
-			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
 		}
-		else if (activityName.equals("PostForm")
-				|| activityName.equals("UserForm")) {
+		else if (activityName.equals("PostForm")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_entity, menu);
-			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
+		}
+		else if (activityName.equals("UserForm")) {
+			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_user, menu);
 		}
 		else if (activityName.equals("EntityList")
 				|| activityName.equals("EntityGrid")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_entity_list, menu);
-			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base, menu);
+		}
+		else if (activityName.equals("NotificationList")) {
+			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_notification_list, menu);
 		}
 		else if (activityName.equals("HelpForm")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_help, menu);
@@ -47,7 +49,8 @@ public class MenuManager {
 		}
 		else if (activityName.equals("ApplinkEdit")
 				|| activityName.equals("UserEdit")
-				|| activityName.equals("PasswordEdit")) {
+				|| activityName.equals("PasswordEdit")
+				|| activityName.equals("TuningEdit")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_edit_builder, menu);
 		}
 		else if (activityName.contains("Edit")) {

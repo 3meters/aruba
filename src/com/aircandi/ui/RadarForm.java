@@ -133,11 +133,11 @@ public class RadarForm extends BaseBrowse {
 	private final List<Entity>		mEntities				= new ArrayList<Entity>();
 	private RadarListAdapter		mRadarAdapter;
 	private Boolean					mFreshWindow			= false;
+	private Boolean					mNavigationShown		= false;
 
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 
-		mActionBar.setDisplayHomeAsUpEnabled(false);
 		mBusyManager = new BusyManager(this);
 
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
@@ -433,6 +433,13 @@ public class RadarForm extends BaseBrowse {
 
 				/* Add some sparkle */
 				if (previousCount == 0 && entities.size() > 0) {
+					if (!mNavigationShown && mDrawerLayout != null) {
+						final Boolean userOpened = Aircandi.settings.getBoolean(Constants.SETTING_NAVIGATION_DRAWER_OPENED_BY_USER, false);
+						if (!userOpened) {
+							mDrawerLayout.openDrawer(mDrawerView);
+						}
+						mNavigationShown = true;
+					}
 					if (Aircandi.settings.getBoolean(Constants.PREF_SOUND_EFFECTS, Constants.PREF_SOUND_EFFECTS_DEFAULT)) {
 						new AsyncTask() {
 
@@ -451,9 +458,11 @@ public class RadarForm extends BaseBrowse {
 
 	}
 
+	@Override
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
+		super.onMessage(event);
 		/*
 		 * Refreshes radar so newly created place can pop in.
 		 */
@@ -468,7 +477,7 @@ public class RadarForm extends BaseBrowse {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Methods
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -480,6 +489,21 @@ public class RadarForm extends BaseBrowse {
 		Tracker.sendEvent("ui_action", "refresh_radar", null, 0, Aircandi.getInstance().getUser());
 		mList.setRefreshing();
 	}
+
+	public void onAddPlaceButtonClick(View view) {
+		onAdd();
+	}
+
+	@Override
+	public void onAdd() {
+		if (Aircandi.getInstance().getUser() != null) {
+			Routing.route(this, Route.New, null, Constants.SCHEMA_ENTITY_PLACE, null);
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Methods
+	// --------------------------------------------------------------------------------------------
 
 	private void searchForPlaces() {
 
@@ -555,28 +579,6 @@ public class RadarForm extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 	// UI
 	// --------------------------------------------------------------------------------------------
-
-	public void onAddPlaceButtonClick(View view) {
-		onAdd();
-	}
-
-	@Override
-	public void onAdd() {
-		if (Aircandi.getInstance().getUser() != null) {
-			Routing.route(this, Route.New, null, Constants.SCHEMA_ENTITY_PLACE, null);
-		}
-	}
-
-	@SuppressWarnings("unused")
-	private void scrollToTop() {
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				mList.getRefreshableView().setSelection(0);
-			}
-		});
-	}
 
 	private void tetherAlert() {
 		/*
@@ -759,14 +761,6 @@ public class RadarForm extends BaseBrowse {
 		return true;
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		/*
-		 * Routing.route return false if it can't handle the menu item.
-		 */
-		return Routing.route(this, Routing.routeForMenu(menuItem));
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
@@ -781,6 +775,8 @@ public class RadarForm extends BaseBrowse {
 
 		if (mPrefChangeReloadNeeded) {
 			final Intent intent = getIntent();
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			startActivity(intent);
 			finish();
 			return;
@@ -856,7 +852,7 @@ public class RadarForm extends BaseBrowse {
 		 */
 		super.onResume();
 		Logger.d(this, "onResume called");
-		if (!mInitialized) return;
+		if (!mInitialized || isFinishing()) return;
 		mFreshWindow = true;
 
 		/* Run help if it hasn't been run yet */
@@ -878,7 +874,7 @@ public class RadarForm extends BaseBrowse {
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
 
-		if (!mInitialized) return;
+		if (!mInitialized || isFinishing()) return;
 
 		if (hasFocus && mFreshWindow) {
 
@@ -916,7 +912,7 @@ public class RadarForm extends BaseBrowse {
 			 * we have never completed even the first search for entities.
 			 */
 			Logger.d(this, "Start first place search");
-			mList.setRefreshing();
+			mList.setRefreshing(false);
 		}
 		else if (mPrefChangeNewSearchNeeded) {
 			/*
@@ -983,7 +979,7 @@ public class RadarForm extends BaseBrowse {
 		else if ((ProximityManager.getInstance().getLastBeaconLockedDate() != null && mEntityModelBeaconDate != null)
 				&& (ProximityManager.getInstance().getLastBeaconLockedDate().longValue() > mEntityModelBeaconDate.longValue())) {
 			/*
-			 * The beacons we are locked to have changed while we were away so we need to 
+			 * The beacons we are locked to have changed while we were away so we need to
 			 * search for new places linked to beacons.
 			 */
 			Logger.d(this, "Refresh places for beacons because beacon date has changed");
