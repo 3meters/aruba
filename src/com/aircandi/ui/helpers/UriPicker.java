@@ -276,7 +276,7 @@ public class UriPicker extends BaseBrowse {
 
 	@Override
 	protected int getLayoutId() {
-		return R.layout.picker_uri;
+		return R.layout.uri_picker;
 	}
 
 	@Override

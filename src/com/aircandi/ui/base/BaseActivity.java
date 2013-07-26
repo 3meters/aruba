@@ -50,7 +50,6 @@ import com.google.android.gcm.GCMRegistrar;
 public abstract class BaseActivity extends SherlockFragmentActivity {
 
 	protected ActionBar			mActionBar;
-	protected String			mPageName;
 	protected String			mActivityTitle;
 
 	protected Boolean			mPrefChangeNewSearchNeeded	= false;
@@ -60,13 +59,15 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 	public static BusyManager	mBusyManager;
 
 	/* Theme */
-	public String				mPrefTheme;
+	private String				mPrefTheme;
 	public String				mThemeTone;
-	protected Boolean			mIsDialog;
+	private Boolean			mIsDialog;
 
 	/* Menus */
 	protected MenuItem			mMenuItemEdit;
+	@SuppressWarnings("ucd")
 	protected MenuItem			mMenuItemDelete;
+	@SuppressWarnings("ucd")
 	protected MenuItem			mMenuItemAdd;
 	protected MenuItem			mMenuItemSignout;
 
@@ -100,7 +101,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 
 			/* Stash the action bar */
 			mActionBar = getSupportActionBar();
-			mPageName = getClass().getSimpleName();
 
 			/* Fonts */
 			final Integer titleId = getActionBarTitleId();
@@ -161,6 +161,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 		super.onConfigurationChanged(newConfig);
 	}
 
+	@SuppressWarnings("ucd")
 	public void onCancelButtonClick(View view) {
 		Routing.route(this, Route.Cancel);
 	}

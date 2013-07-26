@@ -35,6 +35,7 @@ import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateTime;
 
+@SuppressWarnings("ucd")
 public class EntityCache implements Map<String, Entity> {
 
 	private Number						mLastActivityDate	= DateTime.nowDate().getTime();
@@ -67,7 +68,7 @@ public class EntityCache implements Map<String, Entity> {
 		 * Adds client applinks before entity is pushed to the cache.
 		 */
 		if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)
-				|| entity.schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+				|| entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 
 			List<Shortcut> shortcuts = entity.getClientShortcuts();
 
@@ -346,7 +347,7 @@ public class EntityCache implements Map<String, Entity> {
 	// Cache updates
 	// --------------------------------------------------------------------------------------------	
 
-	public void upsertEntities(List<Entity> entities) {
+	private void upsertEntities(List<Entity> entities) {
 		for (Entity entity : entities) {
 			upsertEntity(entity);
 		}
@@ -542,6 +543,7 @@ public class EntityCache implements Map<String, Entity> {
 		return entities;
 	}
 
+	@SuppressWarnings("ucd")
 	public synchronized List<? extends Entity> getEntitiesForEntity(String entityId, String schema, String type, Boolean synthetic, Integer radius,
 			Boolean proximity) {
 		/*

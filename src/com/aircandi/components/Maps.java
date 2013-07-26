@@ -3,6 +3,7 @@ package com.aircandi.components;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("ucd")
 public class Maps {
 	public static final <K, V> HashMap<K, V> asHashMap(K[] keys, V[] values) {
 		HashMap<K, V> result = new HashMap<K, V>();

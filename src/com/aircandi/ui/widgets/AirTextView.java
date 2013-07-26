@@ -8,6 +8,7 @@ import com.aircandi.components.FontManager;
 
 public class AirTextView extends TextView {
 
+	@SuppressWarnings("ucd")
 	public AirTextView(Context context) {
 		super(context);
 		if (!isInEditMode()) {
@@ -15,6 +16,7 @@ public class AirTextView extends TextView {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public AirTextView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		if (!isInEditMode()) {
@@ -22,6 +24,7 @@ public class AirTextView extends TextView {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public AirTextView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		if (!isInEditMode()) {

@@ -62,7 +62,7 @@ public class ApplicationPicker extends BaseBrowse implements OnItemClickListener
 
 		if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_edit_light : R.drawable.ic_action_edit_dark
-					, getString(R.string.dialog_application_post_new), null, Constants.SCHEMA_ENTITY_POST));
+					, getString(R.string.dialog_application_picture_new), null, Constants.SCHEMA_ENTITY_PICTURE));
 
 			listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_monolog_light : R.drawable.ic_action_monolog_dark
 					, getString(R.string.dialog_application_comment_new), null, Constants.SCHEMA_ENTITY_COMMENT));
@@ -129,6 +129,6 @@ public class ApplicationPicker extends BaseBrowse implements OnItemClickListener
 
 	@Override
 	protected int getLayoutId() {
-		return R.layout.picker_application;
+		return R.layout.application_picker;
 	}
 }

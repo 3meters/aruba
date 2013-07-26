@@ -49,12 +49,14 @@ public class Comments  {
 		return intentBuilder.create();
 	}
 
+	@SuppressWarnings("ucd")
 	public static void edit(Context context, Entity entity) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, CommentEdit.class).setEntity(entity);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 
+	@SuppressWarnings("ucd")
 	public static void insert(Context context) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, CommentEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_COMMENT);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);

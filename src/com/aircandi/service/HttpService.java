@@ -1015,7 +1015,7 @@ public class HttpService {
 		return null;
 	}
 
-	public static Object mapsToObjects(List<LinkedHashMap<String, Object>> maps, final ObjectType objectType, Boolean nameMapping) {
+	private static Object mapsToObjects(List<LinkedHashMap<String, Object>> maps, final ObjectType objectType, Boolean nameMapping) {
 
 		try {
 
@@ -1040,7 +1040,7 @@ public class HttpService {
 					else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 						list.add(Place.setPropertiesFromMap(new Place(), (HashMap) map, nameMapping));
 					}
-					else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+					else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 						list.add(Post.setPropertiesFromMap(new Post(), (HashMap) map, nameMapping));
 					}
 					else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
@@ -1125,7 +1125,7 @@ public class HttpService {
 		return json;
 	}
 
-	public static Map<String, Object> objectToMap(Object object, UseAnnotations useAnnotations, ExcludeNulls excludeNullsProposed) {
+	private static Map<String, Object> objectToMap(Object object, UseAnnotations useAnnotations, ExcludeNulls excludeNullsProposed) {
 		final Map<String, Object> map = new HashMap<String, Object>();
 
 		/*
@@ -1244,6 +1244,7 @@ public class HttpService {
 		False
 	}
 
+	@SuppressWarnings("ucd")
 	public static enum ExcludeNulls {
 		True,
 		False
@@ -1272,7 +1273,6 @@ public class HttpService {
 		AirLocation,
 		Category,
 		None,
-		Location,
 		Stat,
 		ServiceEntry,
 		Applink,

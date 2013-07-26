@@ -10,15 +10,15 @@ import com.aircandi.components.IntentBuilder;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.ui.EntityGrid;
-import com.aircandi.ui.PostForm;
-import com.aircandi.ui.edit.PostEdit;
+import com.aircandi.ui.PictureForm;
+import com.aircandi.ui.edit.PictureEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 
-public class Posts {
+public class Pictures {
 
 	public static void view(Context context, String entityId) {
-		IntentBuilder intentBuilder = new IntentBuilder(context, PostForm.class).setEntityId(entityId);
+		IntentBuilder intentBuilder = new IntentBuilder(context, PictureForm.class).setEntityId(entityId);
 		context.startActivity(intentBuilder.create());
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
@@ -31,7 +31,7 @@ public class Posts {
 				.setEntityId(entityId)
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
-				.setListLinkSchema(Constants.SCHEMA_ENTITY_POST)
+				.setListLinkSchema(Constants.SCHEMA_ENTITY_PICTURE)
 				.setListItemResId(R.layout.temp_griditem_entity)
 				.setListNewEnabled(true);
 
@@ -47,21 +47,23 @@ public class Posts {
 				.setEntityId(entityId)
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
-				.setListLinkSchema(Constants.SCHEMA_ENTITY_POST)
+				.setListLinkSchema(Constants.SCHEMA_ENTITY_PICTURE)
 				.setListItemResId(R.layout.temp_griditem_entity)
 				.setListNewEnabled(true);
 
 		return intentBuilder.create();
 	}
 
+	@SuppressWarnings("ucd")
 	public static void edit(Context context, Entity entity) {
-		IntentBuilder intentBuilder = new IntentBuilder(context, PostEdit.class).setEntity(entity);
+		IntentBuilder intentBuilder = new IntentBuilder(context, PictureEdit.class).setEntity(entity);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
 		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
 	}
 
+	@SuppressWarnings("ucd")
 	public static void insert(Context context) {
-		IntentBuilder intentBuilder = new IntentBuilder(context, PostEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_POST);
+		IntentBuilder intentBuilder = new IntentBuilder(context, PictureEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_PICTURE);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
 		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
 	}

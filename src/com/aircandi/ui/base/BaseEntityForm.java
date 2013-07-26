@@ -31,7 +31,7 @@ import com.aircandi.ProxiConstants;
 import com.aircandi.applications.Applinks;
 import com.aircandi.applications.Comments;
 import com.aircandi.applications.Places;
-import com.aircandi.applications.Posts;
+import com.aircandi.applications.Pictures;
 import com.aircandi.applications.Users;
 import com.aircandi.beta.R;
 import com.aircandi.components.AndroidManager;
@@ -47,7 +47,7 @@ import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutMeta;
 import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.PlaceForm;
-import com.aircandi.ui.PostForm;
+import com.aircandi.ui.PictureForm;
 import com.aircandi.ui.user.UserForm;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.ComboButton;
@@ -63,17 +63,16 @@ import com.aircandi.utilities.UI;
 public abstract class BaseEntityForm extends BaseBrowse {
 
 	protected ScrollView			mScrollView;
-	protected ViewGroup				mBodyHolder;
-	protected ViewGroup				mFormHolder;
 	protected ViewGroup				mFooterHolder;
 	protected Entity				mEntity;
 	protected Number				mEntityModelRefreshDate;
 	protected Number				mEntityModelActivityDate;
 
 	/* Inputs */
-	protected Boolean				mForceRefresh		= false;
+	@SuppressWarnings("ucd")
 	public String					mParentId;
 	public String					mEntityId;
+	@SuppressWarnings("ucd")
 	public String					mMessage;
 
 	protected final PackageReceiver	mPackageReceiver	= new PackageReceiver();
@@ -94,8 +93,6 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
-		mFormHolder = (ViewGroup) findViewById(R.id.form_holder);
-		mBodyHolder = (ViewGroup) findViewById(R.id.body_holder);
 		mFooterHolder = (ViewGroup) findViewById(R.id.footer_holder);
 		mScrollView = (ScrollView) findViewById(R.id.scroll_view);
 	}
@@ -109,6 +106,12 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		Tracker.sendEvent("ui_action", "like_" + mEntity.schema, null, 0, Aircandi.getInstance().getUser());
 
 		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				mBusyManager.showBusy();
+				mBusyManager.startBodyBusyIndicator();
+			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
@@ -161,6 +164,12 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		new AsyncTask() {
 
 			@Override
+			protected void onPreExecute() {
+				mBusyManager.showBusy();
+				mBusyManager.startBodyBusyIndicator();
+			}
+
+			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("WatchEntity");
 				ModelResult result = new ModelResult();
@@ -202,6 +211,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 	}
 
+	@SuppressWarnings("ucd")
 	public void onMoreButtonClick(View view) {
 		Intent intent = (Intent) view.getTag();
 		Routing.intent(this, intent);
@@ -213,6 +223,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		Routing.route(this, Route.Shortcut, mEntity, shortcut, null, null);
 	}
 
+	@SuppressWarnings("ucd")
 	public void onUserClick(View view) {
 		Entity entity = (Entity) view.getTag();
 		Routing.route(this, Route.Profile, entity);
@@ -257,7 +268,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				}
 			}
 			else if (requestCode == Constants.ACTIVITY_APPLICATION_PICK) {
-				
+
 				if (intent != null && intent.getExtras() != null) {
 
 					final Bundle extras = intent.getExtras();
@@ -320,7 +331,6 @@ public abstract class BaseEntityForm extends BaseBrowse {
 					final int color = Aircandi.getInstance().getResources().getColor(R.color.brand_pink_lighter);
 					watched.setLabel(getString(R.string.button_unwatch));
 					watched.setDrawableId(R.drawable.ic_action_show_dark);
-					watched.setAlpha(1);
 					watched.getImageIcon().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
 				}
 				else {
@@ -380,7 +390,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			View footer = LayoutInflater.from(this).inflate(R.layout.temp_section_footer, null);
 			Button button = (Button) footer.findViewById(R.id.button_more);
 			button.setText(moreResId);
-			
+
 			Intent intent = null;
 			if (settings.appClass.equals(Applinks.class)) {
 				intent = Applinks.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
@@ -391,8 +401,8 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			if (settings.appClass.equals(Places.class)) {
 				intent = Places.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
 			}
-			if (settings.appClass.equals(Posts.class)) {
-				intent = Posts.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
+			if (settings.appClass.equals(Pictures.class)) {
+				intent = Pictures.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
 			}
 			if (settings.appClass.equals(Users.class)) {
 				intent = Users.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
@@ -535,8 +545,8 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			return PlaceForm.class;
 		}
-		else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
-			return PostForm.class;
+		else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+			return PictureForm.class;
 		}
 		else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
 			return UserForm.class;
@@ -563,7 +573,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		if (mMenuItemEdit != null) {
 			mMenuItemEdit.setVisible(canEdit());
 		}
-		
+
 		MenuItem refresh = menu.findItem(R.id.refresh);
 		if (refresh != null) {
 			if (mBusyManager != null) {
@@ -584,7 +594,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
+
 		if (item.getItemId() == android.R.id.home) {
 			if (mDrawerLayout != null) {
 				if (mDrawerToggle.isDrawerIndicatorEnabled()) {
@@ -598,7 +608,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				}
 			}
 		}
-		
+
 		return Routing.route(this, Routing.routeForMenuId(item.getItemId()), mEntity);
 	}
 

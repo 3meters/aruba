@@ -203,10 +203,6 @@ public class PlaceForm extends BaseEntityForm {
 		AndroidManager.getInstance().callDialerActivity(this, ((Place) mEntity).phone);
 	}
 
-	public void onAddPostButtonClick(View view) {
-		onAdd();
-	}
-
 	@Override
 	public void onAdd() {
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
@@ -214,7 +210,7 @@ public class PlaceForm extends BaseEntityForm {
 //
 //			Bundle extras = new Bundle();
 //			extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mEntityId);
-//			Routing.route(this, Route.New, null, Constants.SCHEMA_ENTITY_POST, extras);
+//			Routing.route(this, Route.New, null, Constants.SCHEMA_ENTITY_PICTURE, extras);
 		}
 		else {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
@@ -411,7 +407,7 @@ public class PlaceForm extends BaseEntityForm {
 				}
 			}
 			else {
-				if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+				if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 					userView.setLabel(getString(R.string.candi_label_user_added_by));
 				}
 				else {

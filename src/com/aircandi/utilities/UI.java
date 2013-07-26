@@ -1,5 +1,6 @@
 package com.aircandi.utilities;
 
+import android.app.Service;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -10,6 +11,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -23,7 +25,7 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.ui.widgets.AirImageView;
 
 public class UI {
-	
+
 	public static Boolean photosEqual(Photo photoCurrent, Photo photoNew) {
 		if (photoCurrent != null && photoNew != null && photoNew.getUri().equals(photoCurrent.getUri())) {
 			return true;
@@ -57,7 +59,7 @@ public class UI {
 
 			final int color = Place.getCategoryColor(photo.colorizeKey, true, Aircandi.muteColor, false);
 			view.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-			
+
 			Integer colorResId = Place.getCategoryColorResId(photo.colorizeKey, true, Aircandi.muteColor, false);
 			if (view.findViewById(R.id.color_layer) != null) {
 				(view.findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
@@ -172,4 +174,8 @@ public class UI {
 		}
 	}
 
+	public static void hideSoftInput(Context context) {
+		InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);
+		inputManager.hideSoftInputFromWindow(new View(context).getWindowToken(), 0);
+	}
 }

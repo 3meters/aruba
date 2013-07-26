@@ -5,6 +5,7 @@ import java.util.Map;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class ServiceEntry extends ServiceBase {
 
 	private static final long	serialVersionUID	= -4468666434251114969L;

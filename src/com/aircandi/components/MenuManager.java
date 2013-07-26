@@ -21,7 +21,7 @@ public class MenuManager {
 		else if (activityName.equals("PlaceForm")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_place, menu);
 		}
-		else if (activityName.equals("PostForm")) {
+		else if (activityName.equals("PictureForm")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_entity, menu);
 		}
 		else if (activityName.equals("UserForm")) {

@@ -35,7 +35,7 @@ public final class Constants {
 	public static final String	EXTRA_CATEGORY								= "com.aircandi.EXTRA_CATEGORY";															//$NON-NLS-1$
 	public static final String	EXTRA_VERIFY_URI							= "com.aircandi.EXTRA_VERIFY_URI";															//$NON-NLS-1$
 	public static final String	EXTRA_SEARCH_PHRASE							= "com.aircandi.EXTRA_SEARCH_PHRASE";														//$NON-NLS-1$
-	public static final String	EXTRA_PICTURE_SOURCE						= "com.aircandi.EXTRA_PICTURE_SOURCE";														//$NON-NLS-1$
+	public static final String	EXTRA_PHOTO_SOURCE							= "com.aircandi.EXTRA_PHOTO_SOURCE";														//$NON-NLS-1$
 	public static final String	EXTRA_UPSIZE_SYNTHETIC						= "com.aircandi.EXTRA_UPSIZE_SYNTHETIC";													//$NON-NLS-1$
 	public static final String	EXTRA_PAGING_ENABLED						= "com.aircandi.EXTRA_PAGING_ENABLED";														//$NON-NLS-1$
 	public static final String	EXTRA_PHOTO									= "com.aircandi.EXTRA_PHOTO";																//$NON-NLS-1$
@@ -106,7 +106,7 @@ public final class Constants {
 	public static final String	S3_BUCKET_IMAGES							= "aircandi-images";																		// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
 
 	public static final String	SCHEMA_ANY									= "any";																					//$NON-NLS-1$
-	public static final String	SCHEMA_ENTITY_POST							= "post";																					//$NON-NLS-1$
+	public static final String	SCHEMA_ENTITY_PICTURE						= "post";																					//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_PLACE							= "place";																					//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_COMMENT						= "comment";																				//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_APPLINK						= "applink";																				//$NON-NLS-1$
@@ -144,6 +144,7 @@ public final class Constants {
 
 	/* Entity types */
 	public static final String	TYPE_APP_COMMENT							= "comment";																				//$NON-NLS-1$
+	public static final String	TYPE_APP_PICTURE							= "picture";																				//$NON-NLS-1$
 	public static final String	TYPE_APP_POST								= "post";																					//$NON-NLS-1$
 	public static final String	TYPE_APP_PLACE								= "place";																					//$NON-NLS-1$
 	public static final String	TYPE_APP_USER								= "user";																					//$NON-NLS-1$
@@ -152,7 +153,7 @@ public final class Constants {
 	public static final String	TYPE_LINK_LIKE								= "like";																					//$NON-NLS-1$
 	public static final String	TYPE_LINK_WATCH								= "watch";																					//$NON-NLS-1$
 	public static final String	TYPE_LINK_APPLINK							= "applink";																				//$NON-NLS-1$
-	public static final String	TYPE_LINK_POST								= "post";																					//$NON-NLS-1$
+	public static final String	TYPE_LINK_PICTURE							= "post";																					//$NON-NLS-1$
 	public static final String	TYPE_LINK_CREATE							= "create";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_COMMENT							= "comment";																				//$NON-NLS-1$
 
@@ -223,7 +224,7 @@ public final class Constants {
 	public static final String	PREF_SEARCH_RADIUS							= "Pref_Search_Radius";
 	public static final String	PREF_SOUND_EFFECTS							= "Pref_Sound_Effects";
 	public static final String	PREF_NOTIFICATIONS_COMMENTS					= "Pref_Notifications_Comments";
-	public static final String	PREF_NOTIFICATIONS_POSTS					= "Pref_Notifications_Posts";
+	public static final String	PREF_NOTIFICATIONS_PICTURES					= "Pref_Notifications_Pictures";
 	public static final String	PREF_NOTIFICATIONS_NEARBY					= "Pref_Notifications_Nearby";
 
 	/* Prefs - dev only */
@@ -238,6 +239,7 @@ public final class Constants {
 	public static final String	SETTING_USER								= "Setting_User";
 	public static final String	SETTING_USER_SESSION						= "Setting_User_Session";
 	public static final String	SETTING_PICTURE_SEARCH						= "Setting_Picture_Search";
+	public static final String	SETTING_PICTURE_SEARCHES					= "Setting_Picture_Searches";
 	public static final String	SETTING_LAST_EMAIL							= "Setting_Last_Email";
 	public static final String	SETTING_RUN_ONCE_HELP_RADAR					= "Setting_Run_Once_Help_Radar";
 	public static final String	SETTING_RUN_ONCE_HELP_CANDI_PLACE			= "Setting_Run_Once_Help_Candi_Place";
@@ -248,7 +250,7 @@ public final class Constants {
 	public static final String	PREF_SEARCH_RADIUS_DEFAULT					= "8047";																					// five miles
 	public static final Boolean	PREF_SOUND_EFFECTS_DEFAULT					= true;
 	public static final Boolean	PREF_NOTIFICATIONS_COMMENTS_DEFAULT			= true;
-	public static final Boolean	PREF_NOTIFICATIONS_POSTS_DEFAULT			= true;
+	public static final Boolean	PREF_NOTIFICATIONS_PICTURES_DEFAULT			= true;
 	public static final Boolean	PREF_NOTIFICATIONS_NEARBY_DEFAULT			= true;
 
 	public static final Boolean	PREF_ENABLE_DEV_DEFAULT						= false;

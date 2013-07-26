@@ -38,7 +38,7 @@
                     aircandi:layout="@layout/widget_webimageview_framed"
                     aircandi:sizeHint="@dimen/image_medium"
                     android:clickable="true"
-                    android:onClick="onChangePictureButtonClick"
+                    android:onClick="onChangePhotoButtonClick"
                     android:scaleType="centerCrop" />
 
                 <com.aircandi.ui.widgets.AirButton
@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="0"
-                    android:onClick="onChangePictureButtonClick"
+                    android:onClick="onChangePhotoButtonClick"
                     android:text="@string/form_button_change_picture" />
 
                 <View
@@ -64,6 +64,7 @@
                 style="@style/form_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
+                android:drawableRight="?attr/iconClear"
                 android:hint="@string/form_label_fullname"
                 android:inputType="textCapWords"
                 android:textSize="18sp" />
@@ -73,6 +74,7 @@
                 style="@style/form_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
+                android:drawableRight="?attr/iconClear"
                 android:hint="@string/form_label_email"
                 android:inputType="textEmailAddress"
                 android:textSize="18sp" />
@@ -82,6 +84,7 @@
                 style="@style/form_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
+                android:drawableRight="?attr/iconClear"
                 android:hint="@string/form_label_password"
                 android:inputType="textPassword"
                 android:textSize="18sp" />
@@ -92,17 +95,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:layout_marginBottom="10dp"
+                android:drawableRight="?attr/iconClear"
                 android:hint="@string/form_label_password_confirm"
-                android:inputType="textPassword"
                 android:imeOptions="actionGo"
+                android:inputType="textPassword"
                 android:textSize="18sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
-                android:layout_marginBottom="10dp"
                 android:orientation="horizontal" >
 
                 <com.aircandi.ui.widgets.AirTextView

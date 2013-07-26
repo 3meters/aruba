@@ -104,6 +104,7 @@
         <item name="iconHelp">@drawable/ic_action_help_dark</item>
         <item name="iconLike">@drawable/ic_action_heart_dark</item>
         <item name="iconWatch">@drawable/ic_action_show_dark</item>
+        <item name="iconClear">@drawable/ic_action_cancel_dark</item>
         
         <!-- Actionbar Sherlock -->
 
@@ -213,6 +214,7 @@
         <item name="iconHelp">@drawable/ic_action_help_light</item>
         <item name="iconLike">@drawable/ic_action_heart_light</item>
         <item name="iconWatch">@drawable/ic_action_show_light</item>
+        <item name="iconClear">@drawable/ic_action_cancel_light</item>
         
         <!-- Actionbar Sherlock -->
 

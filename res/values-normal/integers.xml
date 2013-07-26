@@ -2,5 +2,5 @@
 <resources>
 
     <integer name="shortcuts_flow_limit">8</integer>
-
+    
 </resources>

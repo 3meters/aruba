@@ -45,12 +45,7 @@ public class NetworkManager {
 
 	public static final String				EXTRA_WIFI_AP_STATE				= "wifi_state";
 	public static final String				WIFI_AP_STATE_CHANGED_ACTION	= "android.net.wifi.WIFI_AP_STATE_CHANGED";
-
-	public static final int					WIFI_AP_STATE_DISABLING			= 0;
-	public static final int					WIFI_AP_STATE_DISABLED			= 1;
-	public static final int					WIFI_AP_STATE_ENABLING			= 2;
 	public static final int					WIFI_AP_STATE_ENABLED			= 3;
-	public static final int					WIFI_AP_STATE_FAILED			= 4;
 
 	private NetworkManager() {}
 
@@ -311,7 +306,7 @@ public class NetworkManager {
 	public Integer getWifiApState() {
 		return mWifiApState;
 	}
-	
+
 	public ConnectedState getConnectedState() {
 		return mConnectedState;
 	}

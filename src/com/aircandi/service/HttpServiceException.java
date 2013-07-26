@@ -112,10 +112,6 @@ public class HttpServiceException extends HttpClientException {
 		private static final long	serialVersionUID	= -8228623746732379029L;
 	}
 
-	public static class UpdateException extends RuntimeException {
-		private static final long	serialVersionUID	= 3288778010235251672L;
-	}
-
 	public static class AircandiServiceException extends RuntimeException {
 		private static final long	serialVersionUID	= -713258658623534414L;
 	}

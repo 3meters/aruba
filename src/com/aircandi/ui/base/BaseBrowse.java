@@ -162,6 +162,7 @@ public abstract class BaseBrowse extends BaseActivity {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public void onMenuItemClick(View view) {
 		Integer id = view.getId();
 		Boolean ignore = false;

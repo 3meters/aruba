@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -97,6 +96,7 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 		mBusyManager.hideBusy();
 	}
 
+	@SuppressWarnings("ucd")
 	public void doRefresh() {
 		/* Called from AircandiCommon */
 		databind(true);
@@ -246,7 +246,6 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 				holder.subtitle = (TextView) view.findViewById(R.id.subtitle);
 				holder.type = (TextView) view.findViewById(R.id.type);
 				holder.description = (TextView) view.findViewById(R.id.description);
-				holder.area = (TextView) view.findViewById(R.id.area);
 				holder.date = (TextView) view.findViewById(R.id.timesince);
 				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
 				holder.photoUserView = (AirImageView) view.findViewById(R.id.photo_user);
@@ -348,12 +347,11 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 		public TextView		subtitle;
 		public TextView		description;
 		public TextView		type;
-		public TextView		area;
 		public TextView		date;
 
+		@SuppressWarnings("ucd")
 		public String		photoUri;		// Used for verification after fetching image
 		public Object		data;			// Object binding to
-		public Button		buttonComments;
 	}
 
 }

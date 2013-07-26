@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -15,6 +16,7 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -419,7 +421,7 @@ public class RadarForm extends BaseBrowse {
 			public void run() {
 				Logger.d(RadarForm.this, "Entities changed event: updating radar");
 				Aircandi.stopwatch1.segmentTime("Entities changed: start radar display");
-				Aircandi.stopwatch4.stop("Aircandi initialization finished and got first entities");
+				Aircandi.stopwatch3.stop("Aircandi initialization finished and got first entities");
 
 				mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 				mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
@@ -490,10 +492,6 @@ public class RadarForm extends BaseBrowse {
 		mList.setRefreshing();
 	}
 
-	public void onAddPlaceButtonClick(View view) {
-		onAdd();
-	}
-
 	@Override
 	public void onAdd() {
 		if (Aircandi.getInstance().getUser() != null) {
@@ -542,8 +540,8 @@ public class RadarForm extends BaseBrowse {
 				protected void onPostExecute(Object result) {
 					ConnectedState connectedState = (ConnectedState) result;
 					if (connectedState != ConnectedState.Normal) {
-						if (Aircandi.stopwatch4.isStarted()) {
-							Aircandi.stopwatch4.stop("Aircandi initialization finished: network problem");
+						if (Aircandi.stopwatch3.isStarted()) {
+							Aircandi.stopwatch3.stop("Aircandi initialization finished: network problem");
 						}
 						mBusyManager.hideBusy();
 						mList.onRefreshComplete();
@@ -765,6 +763,7 @@ public class RadarForm extends BaseBrowse {
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	protected void onStart() {
 		/*
@@ -776,7 +775,10 @@ public class RadarForm extends BaseBrowse {
 		if (mPrefChangeReloadNeeded) {
 			final Intent intent = getIntent();
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			if (Constants.SUPPORTS_HONEYCOMB) {
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			}
+			
 			startActivity(intent);
 			finish();
 			return;

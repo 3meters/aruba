@@ -56,7 +56,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 			else if (schema.equals(Constants.SCHEMA_ENTITY_BEACON)) {
 				notification.entity = Beacon.setPropertiesFromMap(new Beacon(), entityMap, nameMapping);
 			}
-			else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 				notification.entity = Post.setPropertiesFromMap(new Post(), entityMap, nameMapping);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
@@ -79,7 +79,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 			else if (schema.equals(Constants.SCHEMA_ENTITY_BEACON)) {
 				notification.toEntity = Beacon.setPropertiesFromMap(new Beacon(), entityMap, nameMapping);
 			}
-			else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 				notification.toEntity = Post.setPropertiesFromMap(new Post(), entityMap, nameMapping);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {

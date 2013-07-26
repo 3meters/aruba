@@ -10,7 +10,7 @@ import com.aircandi.beta.R;
 import com.aircandi.components.TabManager;
 import com.aircandi.ui.base.BaseEntityEdit;
 
-public class PostEdit extends BaseEntityEdit {
+public class PictureEdit extends BaseEntityEdit {
 
 	private TabManager	mTabManager;
 
@@ -39,7 +39,7 @@ public class PostEdit extends BaseEntityEdit {
 
 	@Override
 	protected String getLinkType() {
-		return Constants.TYPE_LINK_POST;
+		return Constants.TYPE_LINK_PICTURE;
 	};
 
 	// --------------------------------------------------------------------------------------------

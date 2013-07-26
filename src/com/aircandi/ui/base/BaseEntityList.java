@@ -93,8 +93,14 @@ public abstract class BaseEntityList extends BaseBrowse {
 			 * Could be any link type: place, post, comment, applink, create, like, watch
 			 */
 			mListLinkSchema = extras.getString(Constants.EXTRA_LIST_LINK_SCHEMA);
-			mListLinkType = extras.getString(Constants.EXTRA_LIST_LINK_TYPE, mListLinkSchema);
-			mListLinkDirection = extras.getString(Constants.EXTRA_LIST_LINK_DIRECTION, "in");
+			mListLinkType = extras.getString(Constants.EXTRA_LIST_LINK_TYPE);
+			if (mListLinkType == null) {
+				mListLinkType = mListLinkSchema;
+			}
+			mListLinkDirection = extras.getString(Constants.EXTRA_LIST_LINK_DIRECTION);
+			if (mListLinkDirection == null) {
+				mListLinkDirection = "in";
+			}
 			mListNewEnabled = extras.getBoolean(Constants.EXTRA_LIST_NEW_ENABLED, false);
 			mListItemResId = extras.getInt(Constants.EXTRA_LIST_ITEM_RESID, getListItemResId(mListLinkSchema));
 		}
@@ -113,7 +119,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 			if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 				return LinkOptions.getDefault(DefaultType.NoLinks);
 			}
-			else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 				return LinkOptions.getDefault(DefaultType.LinksForPost);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
@@ -141,8 +147,8 @@ public abstract class BaseEntityList extends BaseBrowse {
 		if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 			mButtonNewEntity.setText(R.string.entity_button_comment_first);
 		}
-		else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_POST)) {
-			mButtonNewEntity.setText(R.string.entity_button_post_first);
+		else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+			mButtonNewEntity.setText(R.string.entity_button_picture_first);
 		}
 		else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 			mButtonNewEntity.setText(R.string.entity_button_applink_first);
@@ -194,6 +200,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 			@Override
 			protected void onPreExecute() {
 				mBusyManager.showBusy();
+				mBusyManager.startBodyBusyIndicator();
 			}
 
 			@Override
@@ -287,6 +294,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 	// Events
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("ucd")
 	public void onNewEntityButtonClick(View view) {
 		onAdd();
 	}
@@ -330,8 +338,8 @@ public abstract class BaseEntityList extends BaseBrowse {
 			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 				menuItem.setTitle(R.string.menu_add_comment_item);
 			}
-			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_POST)) {
-				menuItem.setTitle(R.string.menu_add_post_item);
+			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+				menuItem.setTitle(R.string.menu_add_picture_item);
 			}
 			menuItem.setVisible(true);
 		}
@@ -653,8 +661,10 @@ public abstract class BaseEntityList extends BaseBrowse {
 		public TextView		createdDate;
 		public UserView		creator;
 		public CheckBox		checked;
+		@SuppressWarnings("ucd")
 		public int			position;
 
+		@SuppressWarnings("ucd")
 		public String		photoUri;		// Used for verification after fetching image
 		public Object		data;			// Object binding to
 		public Button		buttonComments;

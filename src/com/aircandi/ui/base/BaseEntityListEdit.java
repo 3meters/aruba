@@ -45,7 +45,6 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 	protected TextView			mMessage;
 
 	protected Entity			mEntityEditing;
-	protected List<String>		mJsonEntitiesOriginal;
 
 	/* Inputs */
 	protected String			mEntityId;
@@ -60,7 +59,6 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 		if (extras != null) {
 			final List<String> jsonEntities = extras.getStringArrayList(Constants.EXTRA_ENTITIES);
 			if (jsonEntities != null) {
-				mJsonEntitiesOriginal = jsonEntities;
 				for (String jsonEntity : jsonEntities) {
 					Entity entity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
 					mEntities.add(entity);
@@ -137,6 +135,7 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public void onCheckedClick(View view) {
 		CheckBox check = (CheckBox) view.findViewById(R.id.checked);
 		check.setChecked(!check.isChecked());

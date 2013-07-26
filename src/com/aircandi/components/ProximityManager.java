@@ -55,7 +55,7 @@ public class ProximityManager {
 		mEntityCache = EntityManager.getEntityCache();
 	}
 
-	public static class ProxiManagerHolder {
+	private static class ProxiManagerHolder {
 		public static final ProximityManager	instance	= new ProximityManager();
 	}
 

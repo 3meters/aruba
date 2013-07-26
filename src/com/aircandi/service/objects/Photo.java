@@ -252,7 +252,6 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		public static String	facebook			= "facebook";
 		public static String	twitter				= "twitter";
 		public static String	resource			= "resource";
-		public static String	website				= "website";
 		public static String	cache				= "cache";
 	}
 }

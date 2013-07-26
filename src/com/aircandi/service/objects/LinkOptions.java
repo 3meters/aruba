@@ -14,6 +14,7 @@ import com.aircandi.service.objects.Link.Direction;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class LinkOptions extends ServiceObject {
 
 	private static final long	serialVersionUID	= -274203160211174564L;
@@ -83,11 +84,11 @@ public class LinkOptions extends ServiceObject {
 			LinkOptions linkOptions = new LinkOptions().setActive(new ArrayList<LinkSettings>());
 			
 			if (defaultType == DefaultType.LinksForPlace) {
-				linkOptions.setShortcuts(true);
+				linkOptions.shortcuts = true;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, true, false, true, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_POST, true, false, true, 1)); // just one so we can preview
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PICTURE, true, false, true, 1)); // just one so we can preview
 				if (user != null) {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, limit, Maps.asMap("_from", user.id)));
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit, Maps.asMap("_from", user.id)));
@@ -101,7 +102,7 @@ public class LinkOptions extends ServiceObject {
 				linkOptions = getDefault(DefaultType.LinksForPlace);
 			}
 			else if (defaultType == DefaultType.LinksForPost) {
-				linkOptions.setShortcuts(true);
+				linkOptions.shortcuts = true;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
 				if (user != null) {
@@ -115,7 +116,7 @@ public class LinkOptions extends ServiceObject {
 			}
 			/* For now we grab enough links to support both user browse and user watching */
 			else if (defaultType == DefaultType.LinksForUser) {
-				linkOptions.setShortcuts(true);
+				linkOptions.shortcuts = true;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, limit).setDirection(Direction.out));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit).setDirection(Direction.both));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit).setDirection(Direction.both));
@@ -129,8 +130,6 @@ public class LinkOptions extends ServiceObject {
 		LinksForPlace,
 		LinksForPost,
 		LinksForUser,
-		LinksWatchingUser,
-		LinksLikesUser,
 		NoLinks,
 	}
 }

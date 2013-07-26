@@ -67,16 +67,16 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 
 		/* Everyone gets these options */
 		listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_search_light : R.drawable.ic_action_search_dark
-				, getString(R.string.dialog_picture_source_search), null, Constants.PHOTO_SOURCE_SEARCH));
+				, getString(R.string.dialog_photo_source_search), null, Constants.PHOTO_SOURCE_SEARCH));
 
 		listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_tiles_large_light : R.drawable.ic_action_tiles_large_dark
-				, getString(R.string.dialog_picture_source_gallery), null, Constants.PHOTO_SOURCE_GALLERY));
+				, getString(R.string.dialog_photo_source_gallery), null, Constants.PHOTO_SOURCE_GALLERY));
 
 		/* Only show the camera choice if there is one and there is a place to store the image */
 		if (AndroidManager.isIntentAvailable(this, MediaStore.ACTION_IMAGE_CAPTURE)) {
 			if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 				listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_camera_light : R.drawable.ic_action_camera_dark
-						, getString(R.string.dialog_picture_source_camera), null, Constants.PHOTO_SOURCE_CAMERA));
+						, getString(R.string.dialog_photo_source_camera), null, Constants.PHOTO_SOURCE_CAMERA));
 			}
 		}
 
@@ -85,14 +85,14 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 			Place place = (Place) mEntity;
 			if (place.getProvider().type != null && place.getProvider().type.equals(Constants.TYPE_PROVIDER_FOURSQUARE)) {
 				listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
-						, getString(R.string.dialog_picture_source_place), null, Constants.PHOTO_SOURCE_PLACE));
+						, getString(R.string.dialog_photo_source_place), null, Constants.PHOTO_SOURCE_PLACE));
 			}
 			else {
 				
 				List<String> schemas = new ArrayList<String>();
-				schemas.add(Constants.SCHEMA_ENTITY_POST);
+				schemas.add(Constants.SCHEMA_ENTITY_PICTURE);
 				List<String> linkTypes = new ArrayList<String>();
-				linkTypes.add(Constants.TYPE_LINK_POST);
+				linkTypes.add(Constants.TYPE_LINK_PICTURE);
 				
 				List<Entity> entities = (List<Entity>) mEntity.getLinkedEntitiesByLinkTypes(linkTypes
 						, schemas
@@ -103,7 +103,7 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 					if (post.photo != null) {
 						listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_location_light
 								: R.drawable.ic_action_location_dark
-								, getString(R.string.dialog_picture_source_place), null, Constants.PHOTO_SOURCE_PLACE));
+								, getString(R.string.dialog_photo_source_place), null, Constants.PHOTO_SOURCE_PLACE));
 						break;
 					}
 				}
@@ -114,20 +114,20 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 			if (applink.appId != null) {
 				if (applink.type.equals(Constants.TYPE_APP_FACEBOOK)) {
 					listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_facebook_light : R.drawable.ic_action_facebook_dark
-							, getString(R.string.dialog_picture_source_facebook), null, Constants.PHOTO_SOURCE_FACEBOOK));
+							, getString(R.string.dialog_photo_source_facebook), null, Constants.PHOTO_SOURCE_FACEBOOK));
 				}
 				else if (applink.type.equals(Constants.TYPE_APP_TWITTER)) {
 					listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_twitter_light : R.drawable.ic_action_twitter_dark
-							, getString(R.string.dialog_picture_source_twitter), null, Constants.PHOTO_SOURCE_TWITTER));
+							, getString(R.string.dialog_photo_source_twitter), null, Constants.PHOTO_SOURCE_TWITTER));
 				}
 			}
 		}
 
 		/* Everyone gets the default option */
 		listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
-				, getString(R.string.dialog_picture_source_default), null, Constants.PHOTO_SOURCE_DEFAULT));
+				, getString(R.string.dialog_photo_source_default), null, Constants.PHOTO_SOURCE_DEFAULT));
 
-		mName.setText(R.string.dialog_picture_source_title);
+		mName.setText(R.string.dialog_photo_source_title);
 
 		mListAdapter = new ListAdapter(this, listData);
 		mListView.setAdapter(mListAdapter);
@@ -142,7 +142,7 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		final AirApplication choice = (AirApplication) view.getTag();
 		final Intent intent = new Intent();
-		intent.putExtra(Constants.EXTRA_PICTURE_SOURCE, choice.schema);
+		intent.putExtra(Constants.EXTRA_PHOTO_SOURCE, choice.schema);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
 	}
@@ -190,7 +190,7 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 
 	@Override
 	protected int getLayoutId() {
-		return R.layout.picker_picture_source;
+		return R.layout.photo_source_picker;
 	}
 
 }

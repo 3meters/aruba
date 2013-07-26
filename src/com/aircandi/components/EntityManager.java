@@ -34,7 +34,6 @@ import com.aircandi.service.HttpService.UseAnnotations;
 import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.AirLocation;
-import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Cursor;
@@ -264,7 +263,7 @@ public class EntityManager {
 
 	}
 
-	public ModelResult getDocumentId(String collection) {
+	private ModelResult getDocumentId(String collection) {
 
 		final ModelResult result = new ModelResult();
 
@@ -478,12 +477,8 @@ public class EntityManager {
 	// Entity updates
 	// --------------------------------------------------------------------------------------------
 
-	public ModelResult insertEntity(Entity entity) {
-		return insertEntity(entity, null, null);
-	}
-
-	public ModelResult insertEntity(Entity entity, Link link, Bitmap bitmap) {
-		return insertEntity(entity, link, null, null, bitmap);
+	private ModelResult insertEntity(Entity entity) {
+		return insertEntity(entity, null, null, null, null);
 	}
 
 	public ModelResult insertEntity(Entity entity, Link link, List<Beacon> beacons, Beacon primaryBeacon, Bitmap bitmap) {
@@ -610,7 +605,7 @@ public class EntityManager {
 				if (entity.schema.equals(Constants.SCHEMA_ENTITY_BEACON)) serviceDataType = ObjectType.Beacon;
 				if (entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) serviceDataType = ObjectType.Comment;
 				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) serviceDataType = ObjectType.Place;
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_POST)) serviceDataType = ObjectType.Post;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) serviceDataType = ObjectType.Post;
 
 				final String jsonResponse = (String) result.serviceResponse.data;
 				final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, serviceDataType, ServiceDataWrapper.True);
@@ -969,8 +964,6 @@ public class EntityManager {
 	// Other service tasks
 	// --------------------------------------------------------------------------------------------
 
-	public void processNotification(AirNotification notification) {}
-
 	public ModelResult registerDevice(Device device) {
 		ModelResult result = new ModelResult();
 
@@ -1027,7 +1020,7 @@ public class EntityManager {
 		return result;
 	}
 
-	ServiceResponse storeImageAtS3(Entity entity, User user, Bitmap bitmap) {
+	private ServiceResponse storeImageAtS3(Entity entity, User user, Bitmap bitmap) {
 		/*
 		 * TODO: We are going with a garbage collection scheme for orphaned
 		 * images. We need to use an extended property on S3 items that is set to a date when collection is ok. This

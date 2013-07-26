@@ -304,11 +304,6 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	// Classes
 	// --------------------------------------------------------------------------------------------
 
-	public enum IconStyle {
-		normal,
-		inset,
-	}
-
 	public static class SortByPositionModifiedDate implements Comparator<Shortcut> {
 
 		@Override

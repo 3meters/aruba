@@ -30,6 +30,7 @@
         <com.aircandi.ui.widgets.AirEditText
             android:id="@+id/uri"
             android:layout_width="0dip"
+                    android:drawableRight="?attr/iconClear"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center|left"

@@ -116,7 +116,7 @@ public class ShortcutPicker extends BaseBrowse {
 
 	@Override
 	protected int getLayoutId() {
-		return R.layout.picker_link;
+		return R.layout.link_picker;
 	}
 
 }

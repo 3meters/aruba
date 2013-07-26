@@ -181,7 +181,6 @@ public abstract class ServiceBase extends ServiceObject {
 	 * 
 	 */
 	public static enum UpdateScope {
-		Undefined,
 		Object,
 		Property
 	}

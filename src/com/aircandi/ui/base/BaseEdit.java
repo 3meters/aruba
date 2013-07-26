@@ -177,10 +177,4 @@ public abstract class BaseEdit extends BaseActivity {
 
 	protected void beforeInsert(Entity entity) {}
 
-	protected void afterInsert(Entity entity) {}
-
-	protected void beforeUpdate(Entity entity) {}
-
-	protected void afterUpdate(Entity entity) {}
-
 }

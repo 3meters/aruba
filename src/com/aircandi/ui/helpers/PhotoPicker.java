@@ -11,8 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.json.JSONException;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -26,13 +29,15 @@ import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
+import android.widget.AutoCompleteTextView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -67,6 +72,7 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.base.BaseBrowse;
+import com.aircandi.ui.widgets.AirAutoCompleteTextView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
@@ -80,25 +86,27 @@ public class PhotoPicker extends BaseBrowse {
 	private DrawableManager			mDrawableManager;
 
 	private GridView				mGridView;
-	private EditText				mSearch;
-	private final List<ImageResult>	mImages			= new ArrayList<ImageResult>();
+	private AirAutoCompleteTextView	mSearch;
+	private final List<ImageResult>	mImages				= new ArrayList<ImageResult>();
 	private TextView				mMessage;
 	private Entity					mEntity;
-	public String					mEntityId;
+	private String					mEntityId;
 
-	private long					mOffset			= 0;
+	private long					mOffset				= 0;
 	private String					mQuery;
 	private String					mDefaultSearch;
+	private List<String>			mPreviousSearches	= new ArrayList<String>();
+	private ArrayAdapter<String>	mSearchAdapter;
 	private String					mTitleOptional;
-	private Boolean					mPlacePhotoMode	= false;
+	private Boolean					mPlacePhotoMode		= false;
 	private Provider				mProvider;
 	private Integer					mPhotoWidthPixels;
 	private Integer					mPhotoMarginPixels;
 
-	private static final long		PAGE_SIZE		= 30L;
-	private static final long		LIST_MAX		= 300L;
-	private static final String		QUERY_PREFIX	= "";
-	private static final String		QUERY_DEFAULT	= "wallpaper unusual places";
+	private static final long		PAGE_SIZE			= 30L;
+	private static final long		LIST_MAX			= 300L;
+	private static final String		QUERY_PREFIX		= "";
+	private static final String		QUERY_DEFAULT		= "wallpaper unusual places";
 
 	@Override
 	protected void unpackIntent() {
@@ -110,6 +118,14 @@ public class PhotoPicker extends BaseBrowse {
 		}
 	}
 
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		if (!isFinishing()) {
+			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+		}
+	}
+	
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
@@ -130,12 +146,12 @@ public class PhotoPicker extends BaseBrowse {
 			if (extras != null) {
 				mDefaultSearch = extras.getString(Constants.EXTRA_SEARCH_PHRASE);
 			}
-			mSearch = (EditText) findViewById(R.id.search_text);
+			mSearch = (AirAutoCompleteTextView) findViewById(R.id.search_text);
 			mSearch.setOnKeyListener(new OnKeyListener() {
 				@Override
 				public boolean onKey(View view, int keyCode, KeyEvent event) {
 					if (keyCode == KeyEvent.KEYCODE_ENTER) {
-						onSearchClick(view);
+						startSearch(view);
 						return true;
 					}
 					else {
@@ -143,14 +159,19 @@ public class PhotoPicker extends BaseBrowse {
 					}
 				}
 			});
-			if (mDefaultSearch != null) {
-				mSearch.setText(mDefaultSearch);
-			}
-			else {
-				mSearch.setText(Aircandi.settings.getString(Constants.SETTING_PICTURE_SEARCH, null));
-			}
-			mQuery = mSearch.getText().toString();
+
+			mSearch.setOnItemClickListener(new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+					startSearch(view);
+				}
+			});
+
+			mSearch.requestFocus();
 		}
+
+		mBusyManager.hideBusy();
 
 		/* Stash some sizing info */
 		mGridView = (GridView) findViewById(R.id.grid);
@@ -169,7 +190,7 @@ public class PhotoPicker extends BaseBrowse {
 			setActivityTitle(mEntity.name);
 		}
 		else {
-			setActivityTitle(getString(R.string.dialog_picture_picker_search_title));
+			setActivityTitle(getString(R.string.dialog_photo_picker_search_title));
 		}
 
 		mMessage = (TextView) findViewById(R.id.message);
@@ -195,6 +216,10 @@ public class PhotoPicker extends BaseBrowse {
 				}
 			}
 		});
+
+		/* Autocomplete */
+		loadPreviousSearches();
+		bindSearchAdapter();
 	}
 
 	@Override
@@ -203,11 +228,11 @@ public class PhotoPicker extends BaseBrowse {
 		 * First check to see if there are any candi picture children.
 		 */
 		if (mPlacePhotoMode && mEntity != null) {
-			
+
 			List<String> schemas = new ArrayList<String>();
-			schemas.add(Constants.SCHEMA_ENTITY_POST);
+			schemas.add(Constants.SCHEMA_ENTITY_PICTURE);
 			List<String> linkTypes = new ArrayList<String>();
-			linkTypes.add(Constants.TYPE_LINK_POST);
+			linkTypes.add(Constants.TYPE_LINK_PICTURE);
 
 			List<Entity> entities = (List<Entity>) mEntity.getLinkedEntitiesByLinkTypes(linkTypes
 					, schemas
@@ -225,7 +250,9 @@ public class PhotoPicker extends BaseBrowse {
 			}
 		}
 
-		mGridView.setAdapter(new EndlessImageAdapter(mImages));
+		if (mQuery != null && !mQuery.equals("")) {
+			mGridView.setAdapter(new EndlessImageAdapter(mImages));
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -234,19 +261,45 @@ public class PhotoPicker extends BaseBrowse {
 
 	@SuppressWarnings("ucd")
 	public void onSearchClick(View view) {
-		mQuery = mSearch.getText().toString();
-		mMessage.setVisibility(View.VISIBLE);
-		Aircandi.settingsEditor.putString(Constants.SETTING_PICTURE_SEARCH, mQuery);
-		Aircandi.settingsEditor.commit();
-		mOffset = 0;
-		mTitleOptional = mQuery;
-		mImages.clear();
-		((EndlessImageAdapter) mGridView.getAdapter()).notifyDataSetChanged();
+		startSearch(view);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
+
+	private void startSearch(View view) {
+		mQuery = mSearch.getText().toString();
+		mMessage.setVisibility(View.VISIBLE);
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);		
+
+		try {
+			org.json.JSONObject jsonSearchMap = new org.json.JSONObject(Aircandi.settings.getString(Constants.SETTING_PICTURE_SEARCHES, "{}"));
+			jsonSearchMap.put(mQuery, mQuery);
+			Aircandi.settingsEditor.putString(Constants.SETTING_PICTURE_SEARCHES, jsonSearchMap.toString());
+			Aircandi.settingsEditor.commit();
+		}
+		catch (JSONException exception) {
+			exception.printStackTrace();
+		}
+
+		mOffset = 0;
+		mTitleOptional = mQuery;
+		mImages.clear();
+		mBusyManager.showBusy();
+		mBusyManager.startBodyBusyIndicator();
+		if (mGridView.getAdapter() == null) {
+			mGridView.setAdapter(new EndlessImageAdapter(mImages));
+		}
+		else {
+			((EndlessImageAdapter) mGridView.getAdapter()).notifyDataSetChanged();
+		}
+		
+		/* Make sure the latest search appears in suggestions */
+		loadPreviousSearches();
+		bindSearchAdapter();
+	}
 
 	private String getBingKey() {
 		final Properties properties = new Properties();
@@ -258,6 +311,34 @@ public class PhotoPicker extends BaseBrowse {
 		catch (IOException exception) {
 			throw new IllegalStateException("Unable to retrieve bing appKey");
 		}
+	}
+
+	private void loadPreviousSearches() {
+		try {
+			//			Aircandi.settingsEditor.remove(Constants.SETTING_PICTURE_SEARCHES);
+			//			Aircandi.settingsEditor.commit();
+			org.json.JSONObject jsonSearchMap = new org.json.JSONObject(Aircandi.settings.getString(Constants.SETTING_PICTURE_SEARCHES, "{}"));
+			mPreviousSearches.clear();
+			if (mDefaultSearch != null) {
+				jsonSearchMap.put(mDefaultSearch, mDefaultSearch);
+			}
+			org.json.JSONArray jsonSearches = jsonSearchMap.names();
+			for (int i = 0; i < jsonSearches.length(); i++) {
+				String name = jsonSearches.getString(i);
+				mPreviousSearches.add(jsonSearchMap.getString(name));
+			}
+		}
+		catch (JSONException exception) {
+			exception.printStackTrace();
+		}
+	}
+
+	private void bindSearchAdapter() {
+		mSearchAdapter = new ArrayAdapter<String>(this
+				, android.R.layout.simple_dropdown_item_1line
+				, mPreviousSearches);
+		AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.search_text);
+		textView.setAdapter(mSearchAdapter);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -318,7 +399,7 @@ public class PhotoPicker extends BaseBrowse {
 
 	@Override
 	protected int getLayoutId() {
-		return R.layout.picker_picture;
+		return R.layout.photo_picker;
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -61,7 +61,8 @@
         <attr name="iconSend" format="reference" />
         <attr name="iconSave" format="reference" />
         <attr name="iconAccept" format="reference" />
-		<attr name="iconCancel" format="reference" />
+        <attr name="iconCancel" format="reference" />
+        <attr name="iconClear" format="reference" />
 		<attr name="iconSuggest" format="reference" />
 		<attr name="iconStarOn" format="reference" />
 		<attr name="iconStarOff" format="reference" />
@@ -76,7 +77,8 @@
         <attr name="layout" />
         <attr name="drawable" format="reference" />
         <attr name="label" format="string" />
-    </declare-styleable>
+        <attr name="drawableScale" format="float" />
+        </declare-styleable>
     <declare-styleable name="UserLayout">
         <attr name="layout" />
     </declare-styleable>
@@ -105,9 +107,6 @@
     <declare-styleable name="BuilderButton">
         <attr name="layout" />
         <attr name="hint" format="string" />
-    </declare-styleable>
-    <declare-styleable name="ComboButton">
-        <attr name="drawableScale" format="float" />
     </declare-styleable>
     <declare-styleable name="ListPreferenceMultiSelect">
         <attr name="checkAll" format="string" />

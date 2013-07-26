@@ -15,14 +15,24 @@
 
     <uses-sdk
         android:minSdkVersion="9"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="18" />
 
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="false" />
+
+    <permission
+        android:name="com.aircandi.beta.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.aircandi.beta.permission.MAPS_RECEIVE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <!-- To support GCM -->
 
@@ -46,6 +56,10 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/name_app"
         android:theme="@style/aircandi_theme_midnight" >
+        
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyCZhNFIwY7NqM0A0sN_1LLhaTgc6ou_wMs" />
 
         <!-- Services -->
 
@@ -74,7 +88,8 @@
 
         <provider
             android:name="com.aircandi.components.NotificationsContentProvider"
-            android:authorities="com.aircandi.beta.notifications.contentprovider" >
+            android:authorities="com.aircandi.beta.notifications.contentprovider"
+            android:exported="false" >
         </provider>
 
         <!-- Activities -->
@@ -102,15 +117,21 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name="com.aircandi.ui.PostForm"
+            android:name="com.aircandi.ui.PictureForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name="com.aircandi.ui.WatchForm"
+            android:name="com.aircandi.ui.MapForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_watching"
+            android:label="@string/name_app"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="com.aircandi.ui.MapSimpleForm"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
@@ -154,7 +175,7 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name="com.aircandi.ui.edit.PostEdit"
+            android:name="com.aircandi.ui.edit.PictureEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
@@ -298,7 +319,6 @@
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
     <uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS" />
     <uses-permission android:name="android.permission.READ_LOGS" />
-
 
 
 

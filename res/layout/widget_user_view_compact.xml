@@ -14,7 +14,6 @@
         android:layout_width="@dimen/image_extra_small"
         android:layout_height="@dimen/image_extra_small"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/candi_user_label"
         android:layout_marginRight="5dp"
         aircandi:layout="@layout/widget_webimageview"
         aircandi:sizeHint="@dimen/image_extra_small"

@@ -36,7 +36,7 @@ import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
-public class PostForm extends BaseEntityForm {
+public class PictureForm extends BaseEntityForm {
 	
 	@Override
 	protected void configureNavigationDrawer() {
@@ -95,7 +95,7 @@ public class PostForm extends BaseEntityForm {
 					}
 				}
 				else {
-					Routing.serviceError(PostForm.this, result.serviceResponse);
+					Routing.serviceError(PictureForm.this, result.serviceResponse);
 				}
 				mBusyManager.hideBusy();
 			}
@@ -259,7 +259,7 @@ public class PostForm extends BaseEntityForm {
 				}
 			}
 			else {
-				if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+				if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 					user.setLabel(getString(R.string.candi_label_user_added_by));
 				}
 				else {

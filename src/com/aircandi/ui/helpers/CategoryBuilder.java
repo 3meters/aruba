@@ -98,6 +98,12 @@ public class CategoryBuilder extends BaseEdit {
 		new AsyncTask() {
 
 			@Override
+			protected void onPreExecute() {
+				mBusyManager.showBusy();
+				mBusyManager.startBodyBusyIndicator();
+			}
+
+			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LoadCategories");
 				final ModelResult result = EntityManager.getInstance().loadCategories();
@@ -116,6 +122,7 @@ public class CategoryBuilder extends BaseEdit {
 						initCategorySpinner();
 					}
 				}
+				mBusyManager.hideBusy();
 			}
 
 		}.execute();

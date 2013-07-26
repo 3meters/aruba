@@ -151,7 +151,7 @@
                         aircandi:sizeHint="@dimen/image_large"
                         android:clickable="true"
                         android:minWidth="@dimen/image_large"
-                        android:onClick="onChangePictureButtonClick"
+                        android:onClick="onChangePhotoButtonClick"
                         android:scaleType="centerCrop" />
 
                     <com.aircandi.ui.widgets.AirButton

@@ -8,6 +8,7 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class Cursor extends ServiceObject {
 
 	private static final long	serialVersionUID	= -8424707925181657940L;

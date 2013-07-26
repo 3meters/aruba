@@ -211,6 +211,12 @@ public class TuningEdit extends BaseEntityEdit {
 		new AsyncTask() {
 
 			@Override
+			protected void onPreExecute() {
+				mBusyManager.showBusy();
+				mBusyManager.startBodyBusyIndicator();
+			}
+
+			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("TrackEntityProximity");
 

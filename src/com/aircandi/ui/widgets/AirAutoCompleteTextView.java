@@ -8,31 +8,30 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.EditText;
+import android.widget.AutoCompleteTextView;
 
 import com.aircandi.components.FontManager;
 import com.aircandi.ui.base.BaseActivity.SimpleTextWatcher;
 
-public class AirEditText extends EditText {
+public class AirAutoCompleteTextView extends AutoCompleteTextView {
 
 	private Boolean	mEnableClearButton	= false;
 
 	private Drawable	mClearDrawable;
+	private Drawable	mSearchDrawable;
 
 	@SuppressWarnings("ucd")
-	public AirEditText(Context context) {
-		super(context);
-		initialize(context);
+	public AirAutoCompleteTextView(Context context) {
+		this(context, null);
 	}
 
 	@SuppressWarnings("ucd")
-	public AirEditText(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		initialize(context);
+	public AirAutoCompleteTextView(Context context, AttributeSet attrs) {
+		this(context, attrs, android.R.attr.autoCompleteTextViewStyle);
 	}
 
 	@SuppressWarnings("ucd")
-	public AirEditText(Context context, AttributeSet attrs, int defStyle) {
+	public AirAutoCompleteTextView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		initialize(context);
 	}
@@ -46,17 +45,22 @@ public class AirEditText extends EditText {
 		final Drawable[] drawables = getCompoundDrawables();
 		if (drawables != null && drawables.length == 4) {
 			mClearDrawable = drawables[2];
+			mSearchDrawable = drawables[0];
 			if (mClearDrawable != null) {
 				mEnableClearButton = true;
 				Bitmap bitmap = ((BitmapDrawable) mClearDrawable).getBitmap();
-				mClearDrawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 25, 25, true));
+				mClearDrawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 30, 30, true));
+			}
+			if (mSearchDrawable != null) {
+				Bitmap bitmap = ((BitmapDrawable) mSearchDrawable).getBitmap();
+				mSearchDrawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 30, 30, true));
 			}
 		}
 
 		if (mEnableClearButton) {
 
 			/* Set the bounds of the button */
-			this.setCompoundDrawablesWithIntrinsicBounds(null, null, mClearDrawable, null);
+			this.setCompoundDrawablesWithIntrinsicBounds(mSearchDrawable, null, mClearDrawable, null);
 
 			// button should be hidden on first draw
 			clearButtonHandler();
@@ -65,13 +69,13 @@ public class AirEditText extends EditText {
 			this.setOnTouchListener(new OnTouchListener() {
 				@Override
 				public boolean onTouch(View view, MotionEvent event) {
-					if (AirEditText.this.getCompoundDrawables()[2] == null || event.getAction() != MotionEvent.ACTION_UP) {
+					if (AirAutoCompleteTextView.this.getCompoundDrawables()[2] == null || event.getAction() != MotionEvent.ACTION_UP) {
 						return false;
 					}
 
-					if (event.getX() > AirEditText.this.getWidth() - AirEditText.this.getPaddingRight() - mClearDrawable.getIntrinsicWidth()) {
-						AirEditText.this.setText("");
-						AirEditText.this.clearButtonHandler();
+					if (event.getX() > AirAutoCompleteTextView.this.getWidth() - AirAutoCompleteTextView.this.getPaddingRight() - mClearDrawable.getIntrinsicWidth()) {
+						AirAutoCompleteTextView.this.setText("");
+						AirAutoCompleteTextView.this.clearButtonHandler();
 					}
 					return false;
 				}
@@ -90,11 +94,11 @@ public class AirEditText extends EditText {
 	private void clearButtonHandler() {
 		if (this == null || !this.hasFocus() || this.getText().toString().equals("") || this.getText().toString().length() == 0) {
 			/* Remove clear button */
-			this.setCompoundDrawables(null, null, null, null);
+			this.setCompoundDrawables(mSearchDrawable, null, null, null);
 		}
 		else {
 			/* Add clear button */
-			this.setCompoundDrawablesWithIntrinsicBounds(null, null, mClearDrawable, null);
+			this.setCompoundDrawablesWithIntrinsicBounds(mSearchDrawable, null, mClearDrawable, null);
 		}
 	}
 

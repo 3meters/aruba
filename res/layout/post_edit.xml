@@ -67,6 +67,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:layout_weight="0"
+                    android:drawableRight="?attr/iconClear"
                     android:hint="@string/form_title_hint"
                     android:inputType="textCapWords|textAutoCorrect" />
 
@@ -85,6 +86,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
+                    android:baselineAligned="false"
                     android:gravity="bottom"
                     android:orientation="horizontal" >
 

@@ -39,8 +39,8 @@
                 android:id="@+id/Pref_Notifications_Posts"
                 android:defaultValue="true"
                 android:key="Pref_Notifications_Posts"
-                android:summary="@string/Pref_Notifications_Posts_summary"
-                android:title="@string/Pref_Notifications_Posts_title" />
+                android:summary="@string/Pref_Notifications_Pictures_summary"
+                android:title="@string/Pref_Notifications_Pictures_title" />
             <CheckBoxPreference
                 android:id="@+id/Pref_Notifications_Nearby"
                 android:defaultValue="true"

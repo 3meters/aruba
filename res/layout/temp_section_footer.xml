@@ -2,38 +2,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:baselineAligned="false"
     android:orientation="horizontal"
     android:paddingTop="5dp" >
 
-    <FrameLayout
+    <com.aircandi.ui.widgets.AirButton
+        android:id="@+id/button_more"
+        style="@style/form_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
+        android:layout_marginRight="2dp"
+        android:layout_weight="1"
+        android:onClick="onMoreButtonClick"
+        android:text="@string/button_more" />
 
-        <com.aircandi.ui.widgets.AirButton
-            android:id="@+id/button_more"
-            style="@style/form_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="2dp"
-            android:onClick="onMoreButtonClick"
-            android:text="@string/button_more" />
-    </FrameLayout>
+    <!-- Here to provide spacing only -->
 
-    <FrameLayout
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
-
-        <com.aircandi.ui.widgets.AirButton
-            android:id="@+id/button_footer_new_candigram"
-            style="@style/form_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="2dp"
-            android:onClick="onNewCandigramButtonClick"
-            android:text="@string/form_button_new_candigram"
-            android:visibility="gone" />
-    </FrameLayout>
+        android:layout_weight="1" />
 
 </LinearLayout>

@@ -66,7 +66,7 @@ import com.aircandi.service.objects.User;
 import com.aircandi.ui.edit.ApplinkEdit;
 import com.aircandi.ui.edit.CommentEdit;
 import com.aircandi.ui.edit.PlaceEdit;
-import com.aircandi.ui.edit.PostEdit;
+import com.aircandi.ui.edit.PictureEdit;
 import com.aircandi.ui.user.UserEdit;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.BuilderButton;
@@ -88,18 +88,18 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	protected ViewGroup			mPhotoHolder;
 	protected CheckBox			mLocked;
 
-	protected String			mImageUriOriginal;
 	protected RequestListener	mImageRequestListener;
 	protected AirImageView		mImageRequestWebImageView;
 	protected Uri				mMediaFileUri;
-	protected String			mMediaFilePath;
 	protected File				mMediaFile;
 
 	/* Inputs */
 	protected Entity			mEntity;
 	public String				mParentId;
+	@SuppressWarnings("ucd")
 	public String				mEntityId;
 	public String				mEntitySchema;
+	@SuppressWarnings("ucd")
 	public String				mMessage;
 
 	@Override
@@ -388,6 +388,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		};
 	}
 
+	@SuppressWarnings("ucd")
 	public void onUserClick(View view) {
 		Entity entity = (Entity) view.getTag();
 		Routing.route(this, Route.Profile, entity);
@@ -406,10 +407,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		 */
 		if (resultCode != Activity.RESULT_CANCELED) {
 			if (requestCode == Constants.ACTIVITY_PICTURE_SOURCE_PICK) {
-				
+
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String pictureSource = extras.getString(Constants.EXTRA_PICTURE_SOURCE);
+					final String pictureSource = extras.getString(Constants.EXTRA_PHOTO_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
 
 						if (pictureSource.equals(Constants.PHOTO_SOURCE_SEARCH)) {
@@ -622,8 +623,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			return PlaceEdit.class;
 		}
-		else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
-			return PostEdit.class;
+		else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+			return PictureEdit.class;
 		}
 		else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 			return ApplinkEdit.class;
@@ -647,6 +648,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				@Override
 				protected void onPreExecute() {
 					mBusyManager.showBusy();
+					mBusyManager.startBodyBusyIndicator();
 				}
 
 				@Override
@@ -728,7 +730,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		Bundle extras = new Bundle();
 		mMediaFile = AndroidManager.getOutputMediaFile(AndroidManager.MEDIA_TYPE_IMAGE);
 		if (mMediaFile != null) {
-			mMediaFilePath = mMediaFile.getAbsolutePath();
 			mMediaFileUri = Uri.fromFile(mMediaFile);
 			extras.putParcelable(MediaStore.EXTRA_OUTPUT, mMediaFileUri);
 			Routing.route(this, Route.PhotoFromCamera, mEntity, null, null, extras);
@@ -870,9 +871,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 								final String jsonUser = HttpService.objectToJson(mEntity);
 								Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
 								Aircandi.settingsEditor.commit();
-								
+
 								/* Update the global user but retain the session info */
-								((User)mEntity).session = Aircandi.getInstance().getUser().session;
+								((User) mEntity).session = Aircandi.getInstance().getUser().session;
 								Aircandi.getInstance().setUser((User) mEntity);
 							}
 						}

@@ -87,6 +87,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:layout_below="@+id/body_holder"
+                    android:baselineAligned="false"
                     android:gravity="bottom"
                     android:orientation="horizontal" >
 

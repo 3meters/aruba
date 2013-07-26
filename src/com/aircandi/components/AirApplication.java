@@ -4,6 +4,7 @@ public class AirApplication {
 
 	public Integer	iconResId;
 	public String	title;
+	@SuppressWarnings("ucd")
 	public String	description;
 	public String	schema;
 

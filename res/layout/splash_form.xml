@@ -62,7 +62,7 @@
                     android:id="@+id/message"
                     style="@style/splash_message"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:layout_weight="3.83"
                     android:text="@string/splash_message" />
             </LinearLayout>
@@ -72,7 +72,6 @@
             android:id="@+id/button_holder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:orientation="horizontal"
             android:visibility="visible" >
 

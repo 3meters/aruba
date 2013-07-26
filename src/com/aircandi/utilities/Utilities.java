@@ -137,6 +137,7 @@ public class Utilities {
 		return stringValue;
 	}
 
+	@SuppressWarnings("ucd")
 	public static void writeStringToFile(String fileName, String data, Context context) {
 
 		File root = Environment.getExternalStorageDirectory();

@@ -93,7 +93,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			entity = new Place();
 		}
-		else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+		else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 			entity = new Post();
 		}
 		else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
@@ -493,12 +493,12 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, Constants.SCHEMA_ENTITY_APPLINK
 					, Constants.TYPE_APP_POST
 					, Constants.ACTION_VIEW_FOR
-					, "posts"
+					, "pictures"
 					, "resource:ic_launcher"
 					, 10
 					, false
 					, true);
-			Link link = getLinkByType(Constants.TYPE_LINK_POST, null, Direction.in);
+			Link link = getLinkByType(Constants.TYPE_LINK_PICTURE, null, Direction.in);
 			if (link != null) {
 				shortcut.photo = link.shortcut.getPhoto();
 			}
@@ -608,7 +608,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 						else if (schema.equals(Constants.SCHEMA_ENTITY_BEACON)) {
 							entity.entities.add(Beacon.setPropertiesFromMap(new Beacon(), childMap, nameMapping));
 						}
-						else if (schema.equals(Constants.SCHEMA_ENTITY_POST)) {
+						else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 							entity.entities.add(Post.setPropertiesFromMap(new Post(), childMap, nameMapping));
 						}
 						else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {

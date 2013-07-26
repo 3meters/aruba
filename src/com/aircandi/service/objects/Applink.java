@@ -87,13 +87,6 @@ public class Applink extends Entity implements Cloneable, Serializable {
 	// Inner classes
 	// --------------------------------------------------------------------------------------------	
 
-	public static class SourceType {
-		public static String	foursquare	= "foursquare";
-		public static String	facebook	= "facebook";
-		public static String	twitter		= "twitter";
-		public static String	website		= "website";
-	}
-
 	public static Applink builder(Entity entity, String type, String name, String image, Boolean synthetic) {
 
 		final Applink applink = (Applink) EntityManager.getInstance().loadEntityFromResources(R.raw.applink_entity, ObjectType.Applink);

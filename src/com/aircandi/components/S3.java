@@ -34,10 +34,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
  */
 public class S3 {
 
-	//	private static ObjectListing	objListing	= null;
-	public static final String	BUCKET_NAME	= "_bucket_name";
-	public static final String	OBJECT_NAME	= "_object_name";
-
 	static {
 		System.setProperty("org.xml.sax.driver", "org.xmlpull.v1.sax2.Driver");
 		try {
@@ -96,6 +92,7 @@ public class S3 {
 	 * @param bitmapBytes
 	 * @throws HttpServiceException
 	 */
+	@SuppressWarnings("ucd")
 	public static void putImageByteArray(String imageKey, byte[] bitmapBytes, String imageFormat) throws HttpServiceException {
 		final ByteArrayInputStream inputStream = new ByteArrayInputStream(bitmapBytes);
 		final ObjectMetadata metadata = new ObjectMetadata();

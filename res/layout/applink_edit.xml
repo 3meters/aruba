@@ -26,11 +26,11 @@
                 android:id="@+id/type"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:layout_marginTop="5dp"
                 android:layout_marginBottom="8dp"
                 android:layout_marginLeft="4dp"
-                android:textAppearance="@style/app_text_appearance_medium_accent"
+                android:layout_marginTop="5dp"
                 android:text="@string/dummy_name"
+                android:textAppearance="@style/app_text_appearance_medium_accent"
                 android:visibility="visible" />
 
             <Spinner
@@ -46,7 +46,7 @@
             <LinearLayout
                 android:id="@+id/photo_holder"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_marginBottom="10dp"
                 android:layout_weight="0"
                 android:visibility="gone" >
@@ -84,6 +84,7 @@
                 style="@style/form_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
+                android:drawableRight="?attr/iconClear"
                 android:inputType="textCapWords|textNoSuggestions"
                 android:visibility="gone" />
 
@@ -92,6 +93,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:layout_marginBottom="10dp"
+                android:drawableRight="?attr/iconClear"
                 android:inputType="textNoSuggestions"
                 android:textAppearance="@style/app_text_appearance_small"
                 android:visibility="gone" />
@@ -101,6 +103,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
+                android:drawableRight="?attr/iconClear"
                 android:inputType="textMultiLine|textNoSuggestions|textUri"
                 android:maxLines="5"
                 android:minHeight="@dimen/form_field_height"
@@ -113,6 +116,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                android:baselineAligned="false"
                 android:gravity="bottom"
                 android:orientation="horizontal"
                 android:visibility="gone" >

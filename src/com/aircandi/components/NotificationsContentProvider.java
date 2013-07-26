@@ -13,6 +13,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
+@SuppressWarnings("ucd")
 public class NotificationsContentProvider extends ContentProvider {
 
 	// Used for the UriMacher

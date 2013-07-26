@@ -14,7 +14,7 @@ import android.widget.ViewFlipper;
 import com.actionbarsherlock.view.Menu;
 import com.aircandi.Constants;
 import com.aircandi.applications.Places;
-import com.aircandi.applications.Posts;
+import com.aircandi.applications.Pictures;
 import com.aircandi.applications.Users;
 import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
@@ -267,7 +267,7 @@ public class UserForm extends BaseEntityForm {
 			}
 
 			if (postInsertCount > 0) {
-				statString.append("Posts: " + String.valueOf(postInsertCount) + "<br/>");
+				statString.append("Pictures: " + String.valueOf(postInsertCount) + "<br/>");
 			}
 
 			if (commentInsertCount > 0) {
@@ -279,7 +279,7 @@ public class UserForm extends BaseEntityForm {
 			}
 
 			if (postEditCount > 0) {
-				statString.append("Posts edited: " + String.valueOf(postEditCount) + "<br/>");
+				statString.append("Pictures edited: " + String.valueOf(postEditCount) + "<br/>");
 			}
 
 			if (tuneCount > 0) {
@@ -311,15 +311,15 @@ public class UserForm extends BaseEntityForm {
 		}
 
 		/* Shortcuts for post entities created by user */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_POST, Direction.out, false, false);
-		settings.appClass = Posts.class;
+		settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PICTURE, Direction.out, false, false);
+		settings.appClass = Pictures.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 			drawShortcuts(shortcuts
 					, settings
-					, R.string.section_user_shortcuts_posts_created
-					, R.string.section_posts_more
+					, R.string.section_user_shortcuts_pictures_created
+					, R.string.section_pictures_more
 					, mResources.getInteger(R.integer.shortcuts_flow_limit)
 					, R.id.shortcut_holder
 					, R.layout.temp_place_switchboard_item);
@@ -344,15 +344,15 @@ public class UserForm extends BaseEntityForm {
 		}
 
 		/* Watching posts */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_POST, Direction.out, false, false);
-		settings.appClass = Posts.class;
+		settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, Direction.out, false, false);
+		settings.appClass = Pictures.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 			drawShortcuts(shortcuts
 					, settings
-					, R.string.section_user_shortcuts_posts_watching
-					, R.string.section_posts_more
+					, R.string.section_user_shortcuts_pictures_watching
+					, R.string.section_pictures_more
 					, mResources.getInteger(R.integer.shortcuts_flow_limit)
 					, R.id.shortcut_watching_holder
 					, R.layout.temp_place_switchboard_item);

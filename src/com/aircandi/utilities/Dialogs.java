@@ -29,7 +29,7 @@ import com.aircandi.utilities.Routing.Route;
 
 public class Dialogs {
 
-	public static AlertDialog	mWifiAlertDialog;
+	private static AlertDialog	mWifiAlertDialog;
 
 	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	public static AlertDialog alertDialog(Integer iconResource // $codepro.audit.disable largeNumberOfParameters

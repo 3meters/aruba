@@ -8,6 +8,7 @@ import com.aircandi.service.objects.Link.Direction;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class LinkSettings extends ServiceObject {
 
 	private static final long	serialVersionUID	= 4371355790668325686L;

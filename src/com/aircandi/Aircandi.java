@@ -89,7 +89,6 @@ public class Aircandi extends Application {
 	public static Stopwatch					stopwatch1;
 	public static Stopwatch					stopwatch2;
 	public static Stopwatch					stopwatch3;
-	public static Stopwatch					stopwatch4;
 
 	public static Boolean					firstStartApp				= true;
 	public static Boolean					usingEmulator				= false;
@@ -97,10 +96,7 @@ public class Aircandi extends Application {
 
 	public static Boolean					muteColor					= false;
 
-	public static Boolean					applicationUpdateNeeded		= false;
 	public static Boolean					applicationUpdateRequired	= false;
-	public static String					applicationUpdateUri;
-	public static Number					lastApplicationUpdateCheckDate;
 
 	private User							mUser;
 	public static Boolean					LAUNCHED_NORMALLY;
@@ -135,7 +131,7 @@ public class Aircandi extends Application {
 		stopwatch1 = new Stopwatch("Stopwatch1"); // $codepro.audit.disable stringLiterals
 		stopwatch2 = new Stopwatch("Stopwatch2"); // $codepro.audit.disable stringLiterals
 		stopwatch3 = new Stopwatch("Stopwatch3"); // $codepro.audit.disable stringLiterals
-		stopwatch4 = new Stopwatch("Stopwatch4"); // $codepro.audit.disable stringLiterals
+		stopwatch3 = new Stopwatch("Stopwatch4"); // $codepro.audit.disable stringLiterals
 
 		/* The following line triggers the initialization of ACRA */
 		ACRA.init(this);

@@ -11,7 +11,7 @@ import com.aircandi.beta.R;
 
 public class TabManager implements ActionBar.TabListener {
 
-	public ActionBar	mActionBar;
+	private ActionBar	mActionBar;
 	private ViewFlipper	mViewFlipper;
 	private Integer		mTabsProfileId;
 

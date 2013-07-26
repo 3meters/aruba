@@ -203,7 +203,7 @@ public class NotificationManager {
 					}
 				}
 				else {
-					if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_POSTS, Constants.PREF_NOTIFICATIONS_POSTS_DEFAULT)) {
+					if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_PICTURES, Constants.PREF_NOTIFICATIONS_PICTURES_DEFAULT)) {
 						return;
 					}
 				}
@@ -239,7 +239,7 @@ public class NotificationManager {
 			final BitmapRequest bitmapRequest = new BitmapRequest();
 			bitmapRequest.setImageUri(airNotification.user.getPhotoUri());
 			bitmapRequest.setImageRequestor(airNotification);
-			bitmapRequest.setImageSize((int) Aircandi.applicationContext.getResources().getDimension(android.R.dimen.notification_large_icon_width));
+			bitmapRequest.setImageSize((int) Aircandi.applicationContext.getResources().getDimensionPixelSize(R.dimen.notification_large_icon_width));
 			bitmapRequest.setRequestListener(new RequestListener() {
 
 				@Override

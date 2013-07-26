@@ -179,8 +179,8 @@ public class CandiView extends RelativeLayout {
 				final int marginPixels = UI.getRawPixels(this.getContext(), 3);
 
 				/* Post indicator always goes first */
-				Count count = entity.getCount(Constants.TYPE_LINK_POST, Direction.in);
-				if (count != null && entity.getCount(Constants.TYPE_LINK_POST, Direction.in).count.intValue() > 0) {
+				Count count = entity.getCount(Constants.TYPE_LINK_PICTURE, Direction.in);
+				if (count != null && entity.getCount(Constants.TYPE_LINK_PICTURE, Direction.in).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_candi_dark", null, sizePixels, marginPixels);
 				}
 

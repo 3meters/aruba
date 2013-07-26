@@ -5,6 +5,7 @@
         android:id="@+id/cancel"
         android:icon="?attr/iconCancel"
         android:orderInCategory="1"
+        android:title="@string/menu_cancel_item"
         android:showAsAction="always"/>
 
 </menu>

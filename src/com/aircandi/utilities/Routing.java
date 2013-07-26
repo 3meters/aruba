@@ -12,9 +12,11 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.conn.ConnectTimeoutException;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -24,8 +26,9 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.applications.Comments;
+import com.aircandi.applications.Maps;
+import com.aircandi.applications.Pictures;
 import com.aircandi.applications.Places;
-import com.aircandi.applications.Posts;
 import com.aircandi.applications.Users;
 import com.aircandi.beta.R;
 import com.aircandi.components.AndroidManager;
@@ -41,7 +44,6 @@ import com.aircandi.service.HttpService.UseAnnotations;
 import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.HttpServiceException.ErrorType;
 import com.aircandi.service.WalledGardenException;
-import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
@@ -153,6 +155,7 @@ public final class Routing {
 		}
 	}
 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public static boolean route(final Activity activity, Route route, Entity entity, String schema, Bundle extras) {
 
 		if (route == Route.Radar) {
@@ -470,7 +473,9 @@ public final class Routing {
 
 			final Intent intent = new Intent(activity, SplashForm.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			if (Constants.SUPPORTS_HONEYCOMB) {
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			}
 			activity.startActivity(intent);
 			activity.finish();
 			Animate.doOverridePendingTransition(activity, TransitionType.FormToPage);
@@ -569,12 +574,12 @@ public final class Routing {
 
 		if (shortcut.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 
-			if (shortcut.app.equals(Constants.TYPE_APP_POST)) {
+			if (shortcut.app.equals(Constants.TYPE_APP_PICTURE) || shortcut.app.equals(Constants.TYPE_APP_POST)) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					Posts.view(activity, entity.id);
+					Pictures.view(activity, entity.id);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
-					Posts.viewFor(activity, entity.id, shortcut.linkType, direction);
+					Pictures.viewFor(activity, entity.id, shortcut.linkType, direction);
 				}
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_COMMENT)) {
@@ -611,12 +616,15 @@ public final class Routing {
 				AndroidManager.getInstance().callFacebookActivity(activity, (shortcut.appId != null) ? shortcut.appId : shortcut.appUrl);
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_MAP) && entity != null) {
-				Tracker.sendEvent("ui_action", "map_place", null, 0, Aircandi.getInstance().getUser());
-				final AirLocation location = entity.getLocation();
-				AndroidManager.getInstance().callMapActivity(activity
-						, String.valueOf(location.lat.doubleValue())
-						, String.valueOf(location.lng.doubleValue())
-						, entity.name);
+//				Tracker.sendEvent("ui_action", "map_place", null, 0, Aircandi.getInstance().getUser());
+//				final AirLocation location = entity.getLocation();
+//				AndroidManager.getInstance().callMapActivity(activity
+//						, String.valueOf(location.lat.doubleValue())
+//						, String.valueOf(location.lng.doubleValue())
+//						, entity.name);
+				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
+					Maps.view(activity, entity.id);
+				}
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_YELP)) {
 				AndroidManager.getInstance().callYelpActivity(activity, shortcut.appId, shortcut.appUrl);
@@ -647,8 +655,8 @@ public final class Routing {
 		else {
 			if (shortcut.isContent()) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					if (shortcut.app.equals(Constants.TYPE_APP_POST)) {
-						Posts.view(activity, shortcut.getId());
+					if (shortcut.app.equals(Constants.TYPE_APP_PICTURE)) {
+						Pictures.view(activity, shortcut.getId());
 					}
 					else if (shortcut.app.equals(Constants.TYPE_APP_COMMENT)) {
 						Comments.view(activity, shortcut.getId());
@@ -953,8 +961,6 @@ public final class Routing {
 		CommentNew,
 		Shortcut,
 		EntityList,
-		Back,
-		BackConfirm,
 		Home,
 		Radar,
 		Settings,

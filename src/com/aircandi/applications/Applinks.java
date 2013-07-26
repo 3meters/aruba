@@ -16,8 +16,7 @@ import com.aircandi.utilities.Animate.TransitionType;
 
 public class Applinks  {
 
-	public static void view(Context context, String entityId) {}
-
+	@SuppressWarnings("ucd")
 	public static void viewFor(Context context, String entityId, String linkType, Direction direction) {
 		if (direction == null) {
 			direction = Direction.in;
@@ -49,12 +48,14 @@ public class Applinks  {
 		return intentBuilder.create();
 	}
 
+	@SuppressWarnings("ucd")
 	public static void edit(Context context, Entity entity) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceEdit.class).setEntity(entity);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
 		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
 	}
 
+	@SuppressWarnings("ucd")
 	public static void insert(Context context) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_PLACE);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
