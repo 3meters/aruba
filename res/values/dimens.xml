@@ -52,5 +52,6 @@
 
     <dimen name="sliding_menu_shadow_width">15dp</dimen>
     <dimen name="sliding_menu_offset">60dp</dimen>
-    
+    <dimen name="sliding_menu_current_marker_width">5dp</dimen>
+        
 </resources>

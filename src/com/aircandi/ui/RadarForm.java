@@ -146,6 +146,9 @@ public class RadarForm extends BaseBrowse {
 			Routing.route(this, Route.SettingsLocation);
 		}
 
+		/* Current navigation view */
+		Aircandi.getInstance().setNavigationDrawerCurrentView(RadarForm.class);
+
 		/* Always reset the entity cache */
 		EntityManager.getEntityCache().clear();
 
@@ -499,6 +502,15 @@ public class RadarForm extends BaseBrowse {
 		}
 	}
 
+	@Override
+	@SuppressWarnings("ucd")
+	public void onMenuItemClick(View view) {
+		Integer id = view.getId();
+		if (id != R.id.radar) {
+			super.onMenuItemClick(view);
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
@@ -778,7 +790,7 @@ public class RadarForm extends BaseBrowse {
 			if (Constants.SUPPORTS_HONEYCOMB) {
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			}
-			
+
 			startActivity(intent);
 			finish();
 			return;

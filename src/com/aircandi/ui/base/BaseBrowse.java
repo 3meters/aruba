@@ -16,8 +16,11 @@ import com.aircandi.beta.R;
 import com.aircandi.components.BusyManager;
 import com.aircandi.components.MessageEvent;
 import com.aircandi.components.NotificationManager;
+import com.aircandi.service.objects.Count;
+import com.aircandi.service.objects.Link.Direction;
+import com.aircandi.ui.CreatedForm;
 import com.aircandi.ui.RadarForm;
-import com.aircandi.ui.user.UserForm;
+import com.aircandi.ui.WatchingForm;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.AirTextView;
 import com.aircandi.ui.widgets.SectionLayout;
@@ -92,6 +95,9 @@ public abstract class BaseBrowse extends BaseActivity {
 			/* Set the over that covers primary content when drawer is visible */
 			mDrawerLayout.setScrimColor(mResources.getColor(R.color.overlay_navigation_drawer_dark));
 
+			/* Highlight current view */
+			updateCurrentViewMarker();
+
 			mDrawerToggle = new ActionBarDrawerToggle(this
 					, mDrawerLayout 					// DrawerLayout object 
 					, R.drawable.ic_drawer 				// nav drawer image to replace 'Up' caret 
@@ -109,6 +115,7 @@ public abstract class BaseBrowse extends BaseActivity {
 				public void onDrawerOpened(View drawerView) {
 					super.onDrawerOpened(drawerView);
 					updateNotificationCount();
+					updateNavigationViewCounts();
 					mActionBar.setTitle("aircandi");
 					invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
 				}
@@ -164,17 +171,7 @@ public abstract class BaseBrowse extends BaseActivity {
 
 	@SuppressWarnings("ucd")
 	public void onMenuItemClick(View view) {
-		Integer id = view.getId();
-		Boolean ignore = false;
-		if (id == R.id.radar && this instanceof RadarForm) {
-			ignore = true;
-		}
-		else if (id == R.id.profile && this instanceof UserForm) {
-			ignore = true;
-		}
-		if (!ignore) {
-			Routing.route(this, Routing.routeForMenuId(view.getId()));
-		}
+		Routing.route(this, Routing.routeForMenuId(view.getId()));
 		mDrawerLayout.closeDrawer(mDrawerView);
 	}
 
@@ -193,6 +190,53 @@ public abstract class BaseBrowse extends BaseActivity {
 		if (mDrawerView != null) {
 			Integer newCount = NotificationManager.getInstance().getNewCount();
 			((AirTextView) mDrawerView.findViewById(R.id.notifications_count)).setText(String.valueOf(newCount));
+			if (newCount > 0) {
+				mDrawerView.findViewById(R.id.notifications_count).setVisibility(View.VISIBLE);
+			}
+			else {
+				mDrawerView.findViewById(R.id.notifications_count).setVisibility(View.INVISIBLE);
+			}
+		}
+	}
+
+	public void updateNavigationViewCounts() {
+		if (mDrawerView != null) {
+			if (Aircandi.getInstance().getUser() != null) {
+				Count count = Aircandi.getInstance().getUser().getCount(Constants.TYPE_LINK_WATCH, Direction.out);
+				if (count != null) {
+					if (count.count.intValue() > 0) {
+						((AirTextView) mDrawerView.findViewById(R.id.watching_count)).setText(String.valueOf(count.count.intValue()));
+						mDrawerView.findViewById(R.id.watching_count).setVisibility(View.VISIBLE);
+					}
+					else {
+						mDrawerView.findViewById(R.id.watching_count).setVisibility(View.INVISIBLE);
+					}
+				}
+
+				count = Aircandi.getInstance().getUser().getCount(Constants.TYPE_LINK_CREATE, Direction.out);
+				if (count != null) {
+					if (count.count.intValue() > 0) {
+						((AirTextView) mDrawerView.findViewById(R.id.created_count)).setText(String.valueOf(count.count.intValue()));
+						mDrawerView.findViewById(R.id.created_count).setVisibility(View.VISIBLE);
+					}
+					else {
+						mDrawerView.findViewById(R.id.created_count).setVisibility(View.INVISIBLE);
+					}
+				}
+			}
+		}
+	}
+
+	public void updateCurrentViewMarker() {
+
+		if (Aircandi.getInstance().getNavigationDrawerCurrentView() == RadarForm.class) {
+			mDrawerView.findViewById(R.id.radar_marker).setBackgroundColor(mResources.getColor(R.color.accent_blue));
+		}
+		else if (Aircandi.getInstance().getNavigationDrawerCurrentView() == CreatedForm.class) {
+			mDrawerView.findViewById(R.id.created_marker).setBackgroundColor(mResources.getColor(R.color.accent_blue));
+		}
+		else if (Aircandi.getInstance().getNavigationDrawerCurrentView() == WatchingForm.class) {
+			mDrawerView.findViewById(R.id.watching_marker).setBackgroundColor(mResources.getColor(R.color.accent_blue));
 		}
 	}
 

@@ -114,8 +114,19 @@ public class LinkOptions extends ServiceObject {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit));
 				}
 			}
-			/* For now we grab enough links to support both user browse and user watching */
 			else if (defaultType == DefaultType.LinksForUser) {
+				linkOptions.shortcuts = true;
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, false, false, true, limit).setDirection(Direction.out));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit).setDirection(Direction.both));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit).setDirection(Direction.both));
+			}
+			else if (defaultType == DefaultType.LinksForWatching) {
+				linkOptions.shortcuts = true;
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, limit).setDirection(Direction.out));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit).setDirection(Direction.both));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit).setDirection(Direction.both));
+			}
+			else if (defaultType == DefaultType.LinksForCreated) {
 				linkOptions.shortcuts = true;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, limit).setDirection(Direction.out));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit).setDirection(Direction.both));
@@ -130,6 +141,8 @@ public class LinkOptions extends ServiceObject {
 		LinksForPlace,
 		LinksForPost,
 		LinksForUser,
+		LinksForWatching,
+		LinksForCreated,
 		NoLinks,
 	}
 }

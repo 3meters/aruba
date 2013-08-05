@@ -17,22 +17,35 @@ public class MenuManager {
 
 		if (activityName.equals("RadarForm")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_radar, menu);
+			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base_end, menu);
+			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base_help, menu);
 		}
 		else if (activityName.equals("PlaceForm")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_place, menu);
+			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base_end, menu);
+			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base_help, menu);
 		}
 		else if (activityName.equals("PictureForm")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_entity, menu);
+			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base_end, menu);
 		}
 		else if (activityName.equals("UserForm")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_user, menu);
+			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base_end, menu);
+		}
+		else if (activityName.equals("CreatedForm") 
+				|| activityName.equals("WatchingForm")) {
+			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_user, menu);
+			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base_end, menu);
 		}
 		else if (activityName.equals("EntityList")
 				|| activityName.equals("EntityGrid")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_entity_list, menu);
+			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base_end, menu);
 		}
 		else if (activityName.equals("NotificationList")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_notification_list, menu);
+			sherlock.getSupportMenuInflater().inflate(R.menu.menu_base_end, menu);
 		}
 		else if (activityName.equals("HelpForm")) {
 			sherlock.getSupportMenuInflater().inflate(R.menu.menu_browse_help, menu);

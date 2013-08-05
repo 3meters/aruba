@@ -261,13 +261,16 @@ public class CandiView extends RelativeLayout {
 		if (mDistance != null) {
 
 			String info = "here";
-			final float distance = entity.getDistance(true); // In meters
+			final Float distance = entity.getDistance(true); // In meters
 			final String target = entity.hasActiveProximityLink() ? "B:" : "L:";
 			/*
 			 * If distance = -1 then we don't have the location info
 			 * yet needed to correctly determine distance.
 			 */
-			if (distance == -1f) { // $codepro.audit.disable floatComparison
+			if (distance == null) {
+				info = "--";
+			}
+			else if (distance == -1f) { // $codepro.audit.disable floatComparison
 				info = "--";
 			}
 			else {

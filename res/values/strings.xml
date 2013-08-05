@@ -18,6 +18,7 @@
     <string name="menu_edit_item">Edit</string>
     <string name="menu_profile_item">Profile</string>
     <string name="menu_watching_item">Watching</string>
+    <string name="menu_created_item">Created</string>
     <string name="menu_home_item">Home</string>
     <string name="menu_radar_item">Radar</string>
     <string name="menu_settings_item">Settings</string>
@@ -348,6 +349,7 @@
     <!-- Forms.titles -->
 
     <string name="form_title_watching">watching</string>
+    <string name="form_title_created">created</string>
     <string name="form_title_picture">picture</string>
     <string name="form_title_applink">link</string>
     <string name="form_title_place">place</string>

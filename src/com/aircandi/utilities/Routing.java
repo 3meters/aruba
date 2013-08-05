@@ -52,6 +52,7 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutMeta;
 import com.aircandi.service.objects.ShortcutSettings;
+import com.aircandi.ui.CreatedForm;
 import com.aircandi.ui.EntityList;
 import com.aircandi.ui.HelpForm;
 import com.aircandi.ui.NotificationList;
@@ -59,6 +60,7 @@ import com.aircandi.ui.PhotoForm;
 import com.aircandi.ui.Preferences;
 import com.aircandi.ui.RadarForm;
 import com.aircandi.ui.SplashForm;
+import com.aircandi.ui.WatchingForm;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.ui.base.BaseActivity.ServiceOperation;
 import com.aircandi.ui.base.BaseBrowse;
@@ -162,6 +164,43 @@ public final class Routing {
 
 			Intent intent = new Intent(activity, RadarForm.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+			activity.startActivity(intent);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			return true;
+		}
+
+		else if (route == Route.Watching) {
+
+			entity = Aircandi.getInstance().getUser();
+
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, WatchingForm.class)
+					.setEntityId(Aircandi.getInstance().getUser().id);
+
+			Intent intent = intentBuilder.create();
+			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+			activity.startActivity(intent);
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			return true;
+		}
+
+		else if (route == Route.Created) {
+
+			entity = Aircandi.getInstance().getUser();
+
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, CreatedForm.class)
+					.setEntityId(Aircandi.getInstance().getUser().id);
+
+			Intent intent = intentBuilder.create();
+			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
 			activity.startActivity(intent);
 			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
 			return true;
@@ -286,25 +325,6 @@ public final class Routing {
 
 			activity.startActivity(intentBuilder.create());
 			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
-			return true;
-		}
-
-		else if (route == Route.Watching) {
-
-			entity = Aircandi.getInstance().getUser();
-			if (entity == null) {
-				throw new IllegalArgumentException("valid user entity required for selected route");
-			}
-			Bundle stuff = new Bundle();
-			stuff.putInt(Constants.EXTRA_TAB_POSITION, 2);
-			final IntentBuilder intentBuilder = new IntentBuilder(activity, UserForm.class)
-					.setEntityId(entity.id)
-					.setExtras(stuff);
-
-			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
-			//			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			//			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 			return true;
 		}
 
@@ -616,12 +636,12 @@ public final class Routing {
 				AndroidManager.getInstance().callFacebookActivity(activity, (shortcut.appId != null) ? shortcut.appId : shortcut.appUrl);
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_MAP) && entity != null) {
-//				Tracker.sendEvent("ui_action", "map_place", null, 0, Aircandi.getInstance().getUser());
-//				final AirLocation location = entity.getLocation();
-//				AndroidManager.getInstance().callMapActivity(activity
-//						, String.valueOf(location.lat.doubleValue())
-//						, String.valueOf(location.lng.doubleValue())
-//						, entity.name);
+				//				Tracker.sendEvent("ui_action", "map_place", null, 0, Aircandi.getInstance().getUser());
+				//				final AirLocation location = entity.getLocation();
+				//				AndroidManager.getInstance().callMapActivity(activity
+				//						, String.valueOf(location.lat.doubleValue())
+				//						, String.valueOf(location.lng.doubleValue())
+				//						, entity.name);
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
 					Maps.view(activity, entity.id);
 				}
@@ -655,7 +675,7 @@ public final class Routing {
 		else {
 			if (shortcut.isContent()) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					if (shortcut.app.equals(Constants.TYPE_APP_PICTURE)) {
+					if (shortcut.app.equals(Constants.TYPE_APP_PICTURE) || shortcut.app.equals(Constants.TYPE_APP_POST)) {
 						Pictures.view(activity, shortcut.getId());
 					}
 					else if (shortcut.app.equals(Constants.TYPE_APP_COMMENT)) {
@@ -914,6 +934,9 @@ public final class Routing {
 		else if (itemId == R.id.watching) {
 			return Route.Watching;
 		}
+		else if (itemId == R.id.created) {
+			return Route.Created;
+		}
 		else if (itemId == android.R.id.home) {
 			return Route.Cancel;
 		}
@@ -987,6 +1010,6 @@ public final class Routing {
 		PhotoFromCamera,
 		PhotoSearch,
 		PhotoPlaceSearch,
-		Tune, NewFor, DeleteNotifications, Notifications
+		Tune, NewFor, DeleteNotifications, Notifications, Created
 	}
 }

@@ -219,7 +219,7 @@ public class NotificationManager {
 				.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS)
 				.setWhen(System.currentTimeMillis());
 
-		if (airNotification.entity.description != null) {
+		if (airNotification.entity != null && airNotification.entity.description != null) {
 			NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle();
 			style.setBigContentTitle(airNotification.title);
 			style.bigText(airNotification.entity.description);
@@ -261,7 +261,8 @@ public class NotificationManager {
 		else {
 			Notification notification = builder.build();
 			notification.contentIntent = pendingIntent;
-			mNotificationManager.notify(airNotification.entity.schema, 0, notification);
+			String tag = airNotification.entity != null ? airNotification.entity.schema : "network";
+			mNotificationManager.notify(tag, 0, notification);
 		}
 
 	}

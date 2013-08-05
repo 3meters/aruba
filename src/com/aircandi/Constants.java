@@ -44,6 +44,7 @@ public final class Constants {
 	public static final String	EXTRA_SHORTCUTS								= "com.aircandi.EXTRA_SHORTCUTS";															//$NON-NLS-1$
 	public static final String	EXTRA_SKIP_SAVE								= "com.aircandi.EXTRA_EDIT_ONLY";															//$NON-NLS-1$
 	public static final String	EXTRA_TAB_POSITION							= "com.aircandi.EXTRA_TAB_POSITION";														//$NON-NLS-1$
+	public static final String	EXTRA_SHORTCUT_TYPE							= "com.aircandi.EXTRA_SHORTCUT_TYPE";														//$NON-NLS-1$
 
 	/* Activity parameters: lists */
 	public static final String	EXTRA_LIST_LINK_TYPE						= "com.aircandi.EXTRA_LIST_LINK_TYPE";														//$NON-NLS-1$

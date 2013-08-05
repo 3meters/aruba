@@ -5,7 +5,7 @@
         android:id="@+id/beacons"
         android:actionLayout="@layout/actionbar_beacons"
         android:orderInCategory="1"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_beacons_item"/>
     <item
         android:id="@+id/refresh"
@@ -19,11 +19,5 @@
         android:orderInCategory="1"
         android:showAsAction="always"
         android:title="@string/menu_add_entity_item"/>
-    <item
-        android:id="@+id/help"
-        android:icon="?attr/iconHelp"
-        android:orderInCategory="1"
-        android:showAsAction="ifRoom"
-        android:title="@string/menu_help_item"/>
 
 </menu>

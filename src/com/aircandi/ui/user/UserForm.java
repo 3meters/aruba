@@ -1,35 +1,25 @@
 package com.aircandi.ui.user;
 
-import java.util.Collections;
 import java.util.List;
 
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.text.Html;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.ViewFlipper;
 
 import com.actionbarsherlock.view.Menu;
 import com.aircandi.Constants;
-import com.aircandi.applications.Places;
-import com.aircandi.applications.Pictures;
-import com.aircandi.applications.Users;
 import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.TabManager;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.service.objects.Photo;
-import com.aircandi.service.objects.Shortcut;
-import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEntityForm;
@@ -40,33 +30,6 @@ import com.aircandi.utilities.UI;
 
 @SuppressWarnings("ucd")
 public class UserForm extends BaseEntityForm {
-
-	private TabManager	mTabManager;
-	private Integer		mTabPosition;
-
-	@Override
-	protected void unpackIntent() {
-		super.unpackIntent();
-
-		final Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			mTabPosition = extras.getInt(Constants.EXTRA_TAB_POSITION, 0);
-		}
-	}
-
-	@Override
-	protected void initialize(Bundle savedInstanceState) {
-		super.initialize(savedInstanceState);
-
-		mTabManager = new TabManager(Constants.TABS_USER_FORM_ID, mActionBar, (ViewFlipper) findViewById(R.id.flipper_form));
-		mTabManager.initialize();
-		if (mTabPosition == null) {
-			mTabManager.doRestoreInstanceState(savedInstanceState);
-		}
-		else {
-			mTabManager.setActiveTab(mTabPosition);
-		}
-	}
 
 	@Override
 	protected void databind(final Boolean refreshProposed) {
@@ -139,6 +102,15 @@ public class UserForm extends BaseEntityForm {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
+	
+	@Override
+	@SuppressWarnings("ucd")
+	public void onMenuItemClick(View view) {
+		Integer id = view.getId();
+		if (id != R.id.profile) {
+			super.onMenuItemClick(view);
+		}
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// UI routines
@@ -290,89 +262,6 @@ public class UserForm extends BaseEntityForm {
 			UI.setVisibility(stats, View.VISIBLE);
 		}
 
-		/* Shortcuts */
-
-		/* Clear shortcut holder */
-		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();
-
-		/* Shortcuts for place entities created by user */
-		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
-		settings.appClass = Places.class;
-		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
-		if (shortcuts.size() > 0) {
-			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
-			drawShortcuts(shortcuts
-					, settings
-					, R.string.section_user_shortcuts_places_created
-					, R.string.section_places_more
-					, mResources.getInteger(R.integer.shortcuts_flow_limit)
-					, R.id.shortcut_holder
-					, R.layout.temp_place_switchboard_item);
-		}
-
-		/* Shortcuts for post entities created by user */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PICTURE, Direction.out, false, false);
-		settings.appClass = Pictures.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
-		if (shortcuts.size() > 0) {
-			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
-			drawShortcuts(shortcuts
-					, settings
-					, R.string.section_user_shortcuts_pictures_created
-					, R.string.section_pictures_more
-					, mResources.getInteger(R.integer.shortcuts_flow_limit)
-					, R.id.shortcut_holder
-					, R.layout.temp_place_switchboard_item);
-		}
-
-		/* Clear shortcut holder */
-		((ViewGroup) findViewById(R.id.shortcut_watching_holder)).removeAllViews();
-
-		/* Watching places */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
-		settings.appClass = Places.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
-		if (shortcuts.size() > 0) {
-			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
-			drawShortcuts(shortcuts
-					, settings
-					, R.string.section_user_shortcuts_places_watching
-					, R.string.section_places_more
-					, mResources.getInteger(R.integer.shortcuts_flow_limit)
-					, R.id.shortcut_watching_holder
-					, R.layout.temp_place_switchboard_item);
-		}
-
-		/* Watching posts */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, Direction.out, false, false);
-		settings.appClass = Pictures.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
-		if (shortcuts.size() > 0) {
-			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
-			drawShortcuts(shortcuts
-					, settings
-					, R.string.section_user_shortcuts_pictures_watching
-					, R.string.section_pictures_more
-					, mResources.getInteger(R.integer.shortcuts_flow_limit)
-					, R.id.shortcut_watching_holder
-					, R.layout.temp_place_switchboard_item);
-		}
-
-		/* Watching users */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, Direction.out, false, false);
-		settings.appClass = Users.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
-		if (shortcuts.size() > 0) {
-			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
-			drawShortcuts(shortcuts
-					, settings
-					, R.string.section_user_shortcuts_users_watching
-					, R.string.section_users_more
-					, mResources.getInteger(R.integer.shortcuts_flow_limit)
-					, R.id.shortcut_watching_holder
-					, R.layout.temp_place_switchboard_item);
-		}
-
 		drawButtons();
 
 		if (mScrollView != null) {
@@ -384,7 +273,7 @@ public class UserForm extends BaseEntityForm {
 	// Menus
 	// --------------------------------------------------------------------------------------------
 
-		@Override
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 
@@ -395,7 +284,7 @@ public class UserForm extends BaseEntityForm {
 
 		return true;
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Misc
 	// --------------------------------------------------------------------------------------------

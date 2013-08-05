@@ -23,6 +23,7 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.ReportSenderBugsense;
 import com.aircandi.components.Stopwatch;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.RadarForm;
 import com.amazonaws.auth.BasicAWSCredentials;
 
 @ReportsCrashes(formUri = "http://www.bugsense.com/api/acra?api_key=342354ad"
@@ -104,6 +105,7 @@ public class Aircandi extends Application {
 	/* Common preferences */
 	private String							mPrefTheme;
 	private String							mPrefSearchRadius;
+	private Class<?>						mNavigationDrawerCurrentView = RadarForm.class;
 
 	/* Dev preferences */
 	private Boolean							mPrefEnableDev;
@@ -234,5 +236,13 @@ public class Aircandi extends Application {
 
 	public void setUsingEmulator(boolean usingEmulator) {
 		mUsingEmulator = usingEmulator;
+	}
+
+	public Class<?> getNavigationDrawerCurrentView() {
+		return mNavigationDrawerCurrentView;
+	}
+
+	public void setNavigationDrawerCurrentView(Class<?> navigationDrawerCurrentView) {
+		mNavigationDrawerCurrentView = navigationDrawerCurrentView;
 	}
 }
