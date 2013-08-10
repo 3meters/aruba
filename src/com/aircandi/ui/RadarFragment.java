@@ -5,7 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import android.annotation.TargetApi;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.DefaultHeaderTransformer;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -16,12 +17,12 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
@@ -29,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
@@ -36,11 +38,9 @@ import com.aircandi.ScanService;
 import com.aircandi.beta.R;
 import com.aircandi.components.BeaconsLockedEvent;
 import com.aircandi.components.BusProvider;
-import com.aircandi.components.BusyManager;
+import com.aircandi.components.EntitiesByProximityFinishedEvent;
 import com.aircandi.components.EntitiesChangedEvent;
-import com.aircandi.components.EntitiesForBeaconsFinishedEvent;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.Exceptions;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.LocationChangedEvent;
 import com.aircandi.components.LocationLockedEvent;
@@ -60,59 +60,20 @@ import com.aircandi.components.ProximityManager.WifiScanResult;
 import com.aircandi.components.QueryWifiScanReceivedEvent;
 import com.aircandi.components.RadarListAdapter;
 import com.aircandi.components.Tracker;
-import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
-import com.aircandi.ui.base.BaseBrowse;
+import com.aircandi.ui.base.BaseActivity;
+import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
-import com.handmark.pulltorefresh.library.PullToRefreshBase;
-import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
-import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.squareup.otto.Subscribe;
 
-/*
- * Library Notes
- * 
- * - AWS: We are using the minimum libraries: core and S3. We could do the work to call AWS without their
- * libraries which should give us the biggest savings.
- */
-
-/*
- * Threading Notes
- * 
- * - AsyncTasks: AsyncTask uses a static internal work queue with a hard-coded limit of 10 elements.
- * Once we have 10 tasks going concurrently, task 11 causes a RejectedExecutionException. ThreadPoolExecutor is a way to
- * get more control over thread pooling but it requires Android version 11/3.0 (we currently target 8/2.2 and higher).
- * AsyncTasks are hard-coded with a low priority and continue their work even if the activity is paused.
- */
-
-/*
- * Lifecycle event sequences from Radar
- * 
- * First Launch: onCreate->onStart->onResume
- * Home: Pause->Stop->||Restart->Start->Resume
- * Back: Pause->Stop->Destroyed
- * Other Candi Activity: Pause->Stop||Restart->Start->Resume
- * 
- * Alert Dialog: None
- * Dialog Activity: Pause||Resume
- * Overflow menu: None
- * ProgressIndicator: None
- * 
- * Preferences: Pause->Stop->||Restart->Start->Resume
- * Profile: Pause->Stop->||Restart->Start->Resume
- * 
- * Power off with Aircandi in foreground: Pause->Stop
- * Power on with Aircandi in foreground: Nothing
- * Unlock screen with Aircandi in foreground: Restart->Start->Resume
- */
-
-public class RadarForm extends BaseBrowse {
+public class RadarFragment extends BaseFragment implements
+		PullToRefreshAttacher.OnRefreshListener {
 
 	private final Handler			mHandler				= new Handler();
 
@@ -120,82 +81,173 @@ public class RadarForm extends BaseBrowse {
 	private Number					mEntityModelActivityDate;
 	private Number					mEntityModelBeaconDate;
 	private Integer					mEntityModelWifiState	= WifiManager.WIFI_STATE_UNKNOWN;
-	private Number					mPauseDate;
 
-	private PullToRefreshListView	mList;
+	private ListView				mList;
+	private MenuItem				mMenuItemBeacons;
 	private TextView				mBeaconIndicator;
 	private String					mDebugWifi;
 	private String					mDebugLocation			= "--";
-	private MenuItem				mMenuItemBeacons;
+	private PullToRefreshAttacher	mPullToRefreshAttacher;
 
 	private SoundPool				mSoundPool;
 	private int						mNewCandiSoundId;
-	private Boolean					mInitialized			= false;
-
 	private final List<Entity>		mEntities				= new ArrayList<Entity>();
 	private RadarListAdapter		mRadarAdapter;
-	private Boolean					mFreshWindow			= false;
-	private Boolean					mNavigationShown		= false;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-		mBusyManager = new BusyManager(this);
+		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
+		mNewCandiSoundId = mSoundPool.load(getSherlockActivity(), R.raw.notification_candi_discovered, 1);
+	}
 
-		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
-			Routing.route(this, Route.SettingsLocation);
-		}
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		
+		if (getSherlockActivity().isDestroyed()) return null;
+		
+		View view = super.onCreateView(inflater, container, savedInstanceState);
+		mList = (ListView) view.findViewById(R.id.radar_list);
 
-		/* Current navigation view */
-		Aircandi.getInstance().setNavigationDrawerCurrentView(RadarForm.class);
+		// Now get the PullToRefresh attacher from the Activity. An exercise to the reader
+		// is to create an implicit interface instead of casting to the concrete Activity
+		mPullToRefreshAttacher = ((AircandiForm) getSherlockActivity()).getPullToRefreshAttacher();
 
-		/* Always reset the entity cache */
-		EntityManager.getEntityCache().clear();
+		// Now set the ScrollView as the refreshable view, and the refresh listener (this)
+		mPullToRefreshAttacher.addRefreshableView(mList, this);
+
+		DefaultHeaderTransformer header = (DefaultHeaderTransformer) mPullToRefreshAttacher.getHeaderTransformer();
+		header.setRefreshingText(getString(R.string.refresh_scanning_for_location));
+		header.setPullText(getString(R.string.refresh_label_pull));
+		header.setReleaseText(getString(R.string.refresh_label_release));
+		FontManager.getInstance().setTypefaceDefault((TextView) getSherlockActivity().findViewById(R.id.ptr_text));
 
 		/* Other UI references */
-		mList = (PullToRefreshListView) findViewById(R.id.radar_list);
-		mList.getRefreshableView().setOnItemClickListener(new OnItemClickListener() {
+		mList.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				final Place entity = (Place) mRadarAdapter.getItems().get(position - 1);
+				final Place entity = (Place) mRadarAdapter.getItems().get(position);
 				Bundle extras = null;
 				if (entity.synthetic) {
 					extras = new Bundle();
 					extras.putBoolean(Constants.EXTRA_UPSIZE_SYNTHETIC, true);
 				}
-				Routing.route(RadarForm.this, Route.Browse, entity, null, extras);
+				Routing.route(getSherlockActivity(), Route.Browse, entity, null, extras);
 			}
 		});
+
+		return view;
+	}
+
+	public void databind() {
+		/*
+		 * Cases that trigger a search
+		 * 
+		 * - First time radar is run
+		 * - Preference change
+		 * - Didn't complete location fix before user switched away from radar
+		 * - While away, user enabled wifi
+		 * - Beacons we used for last fix have changed
+		 * - Beacon fix is thirty minutes old or more
+		 * 
+		 * Cases that trigger a ui refresh
+		 * 
+		 * - Preference change
+		 * - EntityModel has changed since last search
+		 */
 
 		/* Adapter snapshots the items in mEntities */
-		mRadarAdapter = new RadarListAdapter(this, mEntities);
-		mList.getRefreshableView().setAdapter(mRadarAdapter);
+		if (mRadarAdapter == null) {
+			Logger.d(getSherlockActivity(), "Start first place search");
 
-		/* Refresh listener */
-		mList.setOnRefreshListener(new OnRefreshListener<ListView>() {
-
-			@Override
-			public void onRefresh(PullToRefreshBase<ListView> refreshView) {
-				searchForPlaces();
+			mRadarAdapter = new RadarListAdapter(getSherlockActivity(), mEntities);
+			mList.setAdapter(mRadarAdapter);
+			searchForPlaces();
+		}
+		else if (LocationManager.getInstance().getLocationLocked() == null) {
+			/*
+			 * Gets set everytime we accept a location change in onLocationChange. Means
+			 * we didn't get an acceptable fix yet from either the network or gps providers.
+			 */
+			Logger.d(getSherlockActivity(), "Start place search because didn't complete location fix");
+			LocationManager.getInstance().lockLocationBurst();
+		}
+		else if (ProximityManager.getInstance().beaconRefreshNeeded(LocationManager.getInstance().getLocationLocked())) {
+			/*
+			 * We check to see if it's been awhile since the last search.
+			 */
+			Logger.d(getSherlockActivity(), "Start place search because of staleness");
+			searchForPlaces();
+		}
+		else if (NetworkManager.getInstance().getWifiState() == WifiManager.WIFI_STATE_DISABLED
+				&& mEntityModelWifiState == WifiManager.WIFI_STATE_ENABLED) {
+			/*
+			 * Wifi has been disabled since our last search
+			 */
+			Integer wifiApState = NetworkManager.getInstance().getWifiApState();
+			if (wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED
+					|| wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED + 10) {
+				Logger.d(getSherlockActivity(), "Wifi Ap enabled, clearing beacons");
+				UI.showToastNotification("Hotspot or tethering enabled", Toast.LENGTH_SHORT);
 			}
+			else {
+				UI.showToastNotification("Wifi disabled", Toast.LENGTH_SHORT);
+			}
+			ProximityManager.getInstance().getWifiList().clear();
+			EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null);
+			LocationManager.getInstance().setLocationLocked(null);
+		}
+		else if (NetworkManager.getInstance().getWifiState() == WifiManager.WIFI_STATE_ENABLED
+				&& mEntityModelWifiState == WifiManager.WIFI_STATE_DISABLED) {
+			/*
+			 * Wifi has been enabled since our last search
+			 */
+			UI.showToastNotification("Wifi enabled", Toast.LENGTH_SHORT);
+			searchForPlaces();
+		}
+		else if ((ProximityManager.getInstance().getLastBeaconLockedDate() != null && mEntityModelBeaconDate != null)
+				&& (ProximityManager.getInstance().getLastBeaconLockedDate().longValue() > mEntityModelBeaconDate.longValue())) {
+			/*
+			 * The beacons we are locked to have changed while we were away so we need to
+			 * search for new places linked to beacons.
+			 */
+			Logger.d(getSherlockActivity(), "Refresh places for beacons because beacon date has changed");
+			mEntityModelBeaconDate = ProximityManager.getInstance().getLastBeaconLockedDate();
+			new AsyncTask() {
 
-		});
+				@Override
+				protected Object doInBackground(Object... params) {
+					Thread.currentThread().setName("GetEntitiesForBeacons");
+					final ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesByProximity();
+					return serviceResponse;
+				}
 
-		mList.getLoadingLayoutProxy().setPullLabel(getString(R.string.refresh_label_pull));
-		mList.getLoadingLayoutProxy().setReleaseLabel(getString(R.string.refresh_label_release));
-		mList.getLoadingLayoutProxy().setRefreshingLabel(getString(R.string.refresh_scanning_for_location));
-		mList.getLoadingLayoutProxy().setLoadingDrawable(null);
-		mList.getLoadingLayoutProxy().setTextTypeface(FontManager.getFontRobotoRegular());
-
-		/* Store sounds */
-		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
-		mNewCandiSoundId = mSoundPool.load(this, R.raw.notification_candi_discovered, 1);
-
-		/* Check if the device is tethered */
-		tetherAlert();
-
-		mInitialized = true;
+			}.execute();
+		}
+		else if (mList.getAdapter() == null) {
+			/*
+			 * View is being recreated but we already have data.
+			 */
+			mList.setAdapter(mRadarAdapter);
+			mRadarAdapter.notifyDataSetChanged();
+		}
+		else if ((ProximityManager.getInstance().getLastBeaconLoadDate() != null && mEntityModelRefreshDate != null
+				&& ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue())
+				|| (EntityManager.getEntityCache().getLastActivityDate() != null && mEntityModelActivityDate != null
+				&& EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue())) {
+			/*
+			 * Everytime we show details for a place, we fetch place details from the service
+			 * when in turn get pushed into the cache and activityDate gets tickled.
+			 */
+			Logger.d(getSherlockActivity(), "Update radar ui because of detected entity model change");
+			mBusyManager.showBusy();
+			mRadarAdapter.getItems().clear();
+			mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
+			mRadarAdapter.notifyDataSetChanged();
+			mBusyManager.hideBusy();
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -206,19 +258,19 @@ public class RadarForm extends BaseBrowse {
 	@SuppressWarnings("ucd")
 	public void onQueryWifiScanReceived(final QueryWifiScanReceivedEvent event) {
 
-		runOnUiThread(new Runnable() {
+		getSherlockActivity().runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Wifi scan received event fired");
 				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "wifi_scan_received", null, Aircandi.getInstance().getUser());
-				Logger.d(RadarForm.this, "Query wifi scan received event: locking beacons");
+				Logger.d(getSherlockActivity(), "Query wifi scan received event: locking beacons");
 
 				if (event.wifiList != null) {
 					ProximityManager.getInstance().lockBeacons();
 				}
 				else {
-					BusProvider.getInstance().post(new EntitiesForBeaconsFinishedEvent());
+					BusProvider.getInstance().post(new EntitiesByProximityFinishedEvent());
 				}
 			}
 		});
@@ -228,7 +280,7 @@ public class RadarForm extends BaseBrowse {
 	@SuppressWarnings("ucd")
 	public void onBeaconsLocked(BeaconsLockedEvent event) {
 
-		runOnUiThread(new Runnable() {
+		getSherlockActivity().runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -247,7 +299,7 @@ public class RadarForm extends BaseBrowse {
 					protected void onPostExecute(Object result) {
 						final ServiceResponse serviceResponse = (ServiceResponse) result;
 						if (serviceResponse.responseCode != ResponseCode.Success) {
-							Routing.serviceError(RadarForm.this, serviceResponse);
+							Routing.serviceError(getSherlockActivity(), serviceResponse);
 							mBusyManager.hideBusy();
 						}
 					}
@@ -259,31 +311,19 @@ public class RadarForm extends BaseBrowse {
 
 	@Subscribe
 	@SuppressWarnings("ucd")
-	public void onEntitiesForBeaconsFinished(EntitiesForBeaconsFinishedEvent event) {
+	public void onEntitiesByProximityFinished(EntitiesByProximityFinishedEvent event) {
 
-		runOnUiThread(new Runnable() {
+		getSherlockActivity().runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
-				Aircandi.stopwatch1.segmentTime("Entities for beacons finished event fired");
+				Aircandi.stopwatch1.segmentTime("Entities by proximity finished event fired");
 				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "entities_for_beacons", null, Aircandi.getInstance().getUser());
-				Logger.d(RadarForm.this, "Entities for beacons finished event: ** done **");
-				mList.getLoadingLayoutProxy().setRefreshingLabel(getString(R.string.refresh_scanning_for_location));
+				Logger.d(getSherlockActivity(), "Entities for beacons finished event: ** done **");
 				mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
+				mPullToRefreshAttacher.setRefreshComplete();
 			}
 		});
-	}
-
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
-		updateDevIndicator(event.wifiList, null);
-	}
-
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onWifiQueryReceived(QueryWifiScanReceivedEvent event) {
-		updateDevIndicator(event.wifiList, null);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -298,13 +338,13 @@ public class RadarForm extends BaseBrowse {
 
 			@Override
 			public void run() {
-				Logger.d(RadarForm.this, "Location fix attempt aborted: timeout: ** done **");
+				Logger.d(getSherlockActivity(), "Location fix attempt aborted: timeout: ** done **");
 				if (LocationManager.getInstance().getLocationLocked() == null) {
 					/* We only show toast if we timeout without getting any location fix */
 					UI.showToastNotification(getString(R.string.error_location_poor), Toast.LENGTH_SHORT);
 				}
 				mBusyManager.hideBusy();
-				mList.onRefreshComplete();
+				mPullToRefreshAttacher.setRefreshComplete();
 			}
 		});
 	}
@@ -313,7 +353,7 @@ public class RadarForm extends BaseBrowse {
 	@SuppressWarnings("ucd")
 	public void onLocationChanged(final LocationChangedEvent event) {
 
-		runOnUiThread(new Runnable() {
+		getSherlockActivity().runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -341,9 +381,7 @@ public class RadarForm extends BaseBrowse {
 					}
 
 					LocationManager.getInstance().setLocationLocked(locationCandidate);
-					if (mBusyManager != null) {
-						mBusyManager.updateAccuracyIndicator();
-					}
+					mBusyManager.updateAccuracyIndicator();
 					BusProvider.getInstance().post(new LocationLockedEvent(LocationManager.getInstance().getLocationLocked()));
 
 					if (Aircandi.stopwatch2.isStarted()) {
@@ -361,7 +399,7 @@ public class RadarForm extends BaseBrowse {
 							@Override
 							protected Object doInBackground(Object... params) {
 
-								Logger.d(RadarForm.this, "Location changed event: getting places near location");
+								Logger.d(getSherlockActivity(), "Location changed event: getting places near location");
 								Thread.currentThread().setName("GetPlacesNearLocation");
 								Aircandi.stopwatch2.start("Get places near location");
 
@@ -373,7 +411,7 @@ public class RadarForm extends BaseBrowse {
 							protected void onPostExecute(Object result) {
 								final ServiceResponse serviceResponse = (ServiceResponse) result;
 								if (serviceResponse.responseCode != ResponseCode.Success) {
-									Routing.serviceError(RadarForm.this, serviceResponse);
+									Routing.serviceError(getSherlockActivity(), serviceResponse);
 									mBusyManager.hideBusy();
 								}
 							}
@@ -397,17 +435,10 @@ public class RadarForm extends BaseBrowse {
 
 			@Override
 			public void run() {
-				Logger.d(RadarForm.this, "Places near location finished event: ** done **");
+				Logger.d(getSherlockActivity(), "Places near location finished event: ** done **");
 				mBusyManager.hideBusy();
-				mList.onRefreshComplete();
 			}
 		});
-	}
-
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onLocationLocked(LocationLockedEvent event) {
-		updateDevIndicator(null, event.location);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -418,11 +449,11 @@ public class RadarForm extends BaseBrowse {
 	@SuppressWarnings("ucd")
 	public void onEntitiesChanged(final EntitiesChangedEvent event) {
 
-		runOnUiThread(new Runnable() {
+		getSherlockActivity().runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
-				Logger.d(RadarForm.this, "Entities changed event: updating radar");
+				Logger.d(getSherlockActivity(), "Entities changed event: updating radar");
 				Aircandi.stopwatch1.segmentTime("Entities changed: start radar display");
 				Aircandi.stopwatch3.stop("Aircandi initialization finished and got first entities");
 
@@ -438,13 +469,6 @@ public class RadarForm extends BaseBrowse {
 
 				/* Add some sparkle */
 				if (previousCount == 0 && entities.size() > 0) {
-					if (!mNavigationShown && mDrawerLayout != null) {
-						final Boolean userOpened = Aircandi.settings.getBoolean(Constants.SETTING_NAVIGATION_DRAWER_OPENED_BY_USER, false);
-						if (!userOpened) {
-							mDrawerLayout.openDrawer(mDrawerView);
-						}
-						mNavigationShown = true;
-					}
 					if (Aircandi.settings.getBoolean(Constants.PREF_SOUND_EFFECTS, Constants.PREF_SOUND_EFFECTS_DEFAULT)) {
 						new AsyncTask() {
 
@@ -463,16 +487,32 @@ public class RadarForm extends BaseBrowse {
 
 	}
 
-	@Override
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onLocationLocked(LocationLockedEvent event) {
+		updateDevIndicator(null, event.location);
+	}
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
+		updateDevIndicator(event.wifiList, null);
+	}
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onWifiQueryReceived(QueryWifiScanReceivedEvent event) {
+		updateDevIndicator(event.wifiList, null);
+	}
+
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
-		super.onMessage(event);
 		/*
 		 * Refreshes radar so newly created place can pop in.
 		 */
 		if (event.notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-			runOnUiThread(new Runnable() {
+			getSherlockActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					onRefresh();
@@ -486,29 +526,32 @@ public class RadarForm extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
+	public void onRefreshStarted(View view) {
+		onRefresh();
+	}
+
+	@Override
 	public void onRefresh() {
 		/*
 		 * This only gets called by a user clicking the refresh button.
 		 */
-		Logger.d(this, "Starting refresh");
+		Logger.d(getSherlockActivity(), "Starting refresh");
 		Tracker.sendEvent("ui_action", "refresh_radar", null, 0, Aircandi.getInstance().getUser());
-		mList.setRefreshing();
+		searchForPlaces();
 	}
 
 	@Override
 	public void onAdd() {
 		if (Aircandi.getInstance().getUser() != null) {
-			Routing.route(this, Route.New, null, Constants.SCHEMA_ENTITY_PLACE, null);
+			Routing.route(getSherlockActivity(), Route.New, null, Constants.SCHEMA_ENTITY_PLACE, null);
 		}
 	}
 
 	@Override
-	@SuppressWarnings("ucd")
-	public void onMenuItemClick(View view) {
-		Integer id = view.getId();
-		if (id != R.id.radar) {
-			super.onMenuItemClick(view);
-		}
+	public void onHelp() {
+		Bundle extras = new Bundle();
+		extras.putInt(Constants.EXTRA_HELP_ID, R.layout.radar_help);
+		Routing.route(getSherlockActivity(), Route.Help, null, null, extras);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -519,13 +562,14 @@ public class RadarForm extends BaseBrowse {
 
 		/* We won't perform a search if location access is disabled */
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
-			Routing.route(this, Route.SettingsLocation);
+			Routing.route(getSherlockActivity(), Route.SettingsLocation);
 		}
 		else {
 			new AsyncTask() {
 
 				@Override
 				protected void onPreExecute() {
+					mPullToRefreshAttacher.setRefreshing(true);
 					mBusyManager.showBusy();
 				}
 
@@ -556,13 +600,13 @@ public class RadarForm extends BaseBrowse {
 							Aircandi.stopwatch3.stop("Aircandi initialization finished: network problem");
 						}
 						mBusyManager.hideBusy();
-						mList.onRefreshComplete();
+						mPullToRefreshAttacher.setRefreshing(false);
 
 						if (connectedState == ConnectedState.WalledGarden) {
-							Dialogs.alertDialogSimple(RadarForm.this, null, getString(R.string.error_connection_walled_garden));
+							Dialogs.alertDialogSimple(getSherlockActivity(), null, getString(R.string.error_connection_walled_garden));
 						}
 						else if (connectedState == ConnectedState.None) {
-							Dialogs.alertDialogSimple(RadarForm.this, null, getString(R.string.error_connection_none));
+							Dialogs.alertDialogSimple(getSherlockActivity(), null, getString(R.string.error_connection_none));
 						}
 					}
 				}
@@ -586,24 +630,37 @@ public class RadarForm extends BaseBrowse {
 
 	}
 
+	@SuppressWarnings("ucd")
+	public void startScanService(int scanInterval) {
+
+		/* Start first scan right away */
+		Logger.d(this, "Starting wifi scan service");
+		final Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
+		getSherlockActivity().startService(scanIntent);
+
+		/* Setup a scanning schedule */
+		if (scanInterval > 0) {
+			final AlarmManager alarmManager = (AlarmManager) getSherlockActivity().getSystemService(Service.ALARM_SERVICE);
+			final PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
+			alarmManager.cancel(pendingIntent);
+			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP
+					, SystemClock.elapsedRealtime() + scanInterval
+					, scanInterval, pendingIntent);
+		}
+	}
+
+	@SuppressWarnings("ucd")
+	public void stopScanService() {
+		final AlarmManager alarmManager = (AlarmManager) getSherlockActivity().getSystemService(Service.ALARM_SERVICE);
+		final Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
+		final PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
+		alarmManager.cancel(pendingIntent);
+		Logger.d(this, "Stopped wifi scan service");
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// UI
 	// --------------------------------------------------------------------------------------------
-
-	private void tetherAlert() {
-		/*
-		 * We alert that wifi isn't enabled. If the user ends up enabling wifi,
-		 * we will get that event and refresh radar with beacon support.
-		 */
-		if (NetworkManager.getInstance().isWifiTethered()
-				|| (!NetworkManager.getInstance().isWifiEnabled() && !Aircandi.usingEmulator)) {
-
-			Dialogs.wifi(RadarForm.this, NetworkManager.getInstance().isWifiTethered()
-					? R.string.alert_wifi_tethered
-					: R.string.alert_wifi_disabled
-					, null);
-		}
-	}
 
 	private void doBeaconIndicatorClick() {
 		if (mBeaconIndicator != null) {
@@ -643,7 +700,7 @@ public class RadarForm extends BaseBrowse {
 					, getString(R.string.alert_beacons_title)
 					, beaconMessage.toString()
 					, null
-					, this
+					, getSherlockActivity()
 					, android.R.string.ok
 					, null
 					, null
@@ -666,7 +723,7 @@ public class RadarForm extends BaseBrowse {
 				/*
 				 * In case we get called from a background thread.
 				 */
-				runOnUiThread(new Runnable() {
+				getSherlockActivity().runOnUiThread(new Runnable() {
 
 					@Override
 					public void run() {
@@ -698,7 +755,7 @@ public class RadarForm extends BaseBrowse {
 					mBeaconIndicator.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.accent_blue));
 				}
 				else {
-					if (mThemeTone.equals("dark")) {
+					if (((BaseActivity) getSherlockActivity()).getThemeTone().equals("dark")) {
 						mBeaconIndicator.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.text_dark));
 					}
 					else {
@@ -725,8 +782,8 @@ public class RadarForm extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------	
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
 		/*
 		 * Setup menu items local to radar.
 		 */
@@ -742,10 +799,12 @@ public class RadarForm extends BaseBrowse {
 			}
 			else {
 				mBeaconIndicator = (TextView) mMenuItemBeacons.getActionView().findViewById(R.id.beacon_indicator);
+				mMenuItemBeacons.getActionView().findViewById(R.id.beacon_frame).setTag(mMenuItemBeacons);
 				mMenuItemBeacons.getActionView().findViewById(R.id.beacon_frame).setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View view) {
-						doBeaconIndicatorClick();
+						MenuItem item = (MenuItem) view.getTag();
+						onOptionsItemSelected(item);
 					}
 				});
 			}
@@ -755,70 +814,73 @@ public class RadarForm extends BaseBrowse {
 		if (refresh != null) {
 			if (mBusyManager != null) {
 				mBusyManager.setAccuracyIndicator(refresh.getActionView().findViewById(R.id.accuracy_indicator));
-				mBusyManager.setRefreshImage(refresh.getActionView().findViewById(R.id.refresh_image));
-				mBusyManager.setRefreshProgress(refresh.getActionView().findViewById(R.id.refresh_progress));
 				mBusyManager.updateAccuracyIndicator();
 			}
-
-			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					onRefresh();
-				}
-			});
 		}
+	}
 
-		return true;
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		/*
+		 * The action bar home/up action should open or close the drawer.
+		 * ActionBarDrawerToggle will take care of this.
+		 */
+		if (item.getItemId() == R.id.beacons) {
+			doBeaconIndicatorClick();
+			return true;
+		}
+		else if (item.getItemId() == R.id.add) {
+			onAdd();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
-	protected void onStart() {
+	public void onStart() {
 		/*
-		 * Called everytime the activity is started or restarted.
+		 * Called everytime the fragment is started or restarted.
 		 */
-		Logger.d(this, "CandiRadarActivity starting");
 		super.onStart();
-
-		if (mPrefChangeReloadNeeded) {
-			final Intent intent = getIntent();
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			if (Constants.SUPPORTS_HONEYCOMB) {
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-			}
-
-			startActivity(intent);
-			finish();
-			return;
-		}
-
-		if (!mInitialized) return;
-
-		/* Check for location service */
+		/*
+		 * Check for location service everytime we start.
+		 */
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 			/* We won't continue if location services are disabled */
-			Routing.route(this, Route.SettingsLocation);
-			finish();
-		}
-
-		if (Constants.DEBUG_TRACE) {
-			Debug.startMethodTracing("aircandi", 100000000);
-		}
-
-		/* Reset the accuracy indicator */
-		if (mBusyManager != null) {
-			mBusyManager.updateAccuracyIndicator();
+			Routing.route(getSherlockActivity(), Route.SettingsLocation);
+			getSherlockActivity().finish();
 		}
 	}
 
 	@Override
-	protected void onStop() {
+	public void onResume() {
+		super.onResume();
+		if (getSherlockActivity().isFinishing()) return;
+
+		if (Aircandi.getInstance().getUser() != null
+				&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+				&& Aircandi.getInstance().getUser().developer != null
+				&& Aircandi.getInstance().getUser().developer) {
+			startScanService(Constants.INTERVAL_SCAN_WIFI);
+		}
+
+		databind();
+	}
+
+	@Override
+	public void onPause() {
+		stopScanService();
+		super.onPause();
+	}
+
+	@Override
+	public void onStop() {
 		/*
-		 * Fired when starting another activity and we lose our window.
+		 * Fired when fragment is being deactivated.
 		 */
 
 		/*
@@ -827,269 +889,21 @@ public class RadarForm extends BaseBrowse {
 		 * is a race condition that can stop location burst after it
 		 * has been started by the reload.
 		 */
-		if (!mPrefChangeReloadNeeded) {
-			LocationManager.getInstance().stopLocationBurst();
-		}
+		LocationManager.getInstance().stopLocationBurst();
 
 		/* Kill busy */
+		mPullToRefreshAttacher.setRefreshComplete();
 		mBusyManager.hideBusy();
-		mList.onRefreshComplete();
-
-		Logger.d(this, "CandiRadarActivity stopped");
-		if (Constants.DEBUG_TRACE) {
-			Debug.stopMethodTracing();
-		}
-
+		hideBusy();
 		super.onStop();
-	}
-
-	@Override
-	protected void onPause() {
-		/*
-		 * - Fires when we lose focus and have been moved into the background. This will
-		 * be followed by onStop if we are not visible. Does not fire if the activity window
-		 * loses focus but the activity is still active.
-		 */
-		stopScanService();
-		mPauseDate = DateTime.nowDate().getTime();
-
-		super.onPause();
-	}
-
-	@Override
-	protected void onResume() {
-		/*
-		 * Lifecycle ordering: (onCreate/onRestart)->onStart->onResume->onAttachedToWindow->onWindowFocusChanged
-		 * 
-		 * OnResume gets called after OnCreate (always) and whenever the activity is being brought back to the
-		 * foreground. Not guaranteed but is usually called just before the activity receives focus.
-		 */
-		super.onResume();
-		Logger.d(this, "onResume called");
-		if (!mInitialized || isFinishing()) return;
-		mFreshWindow = true;
-
-		/* Run help if it hasn't been run yet */
-		//		final Boolean runOnceHelp = Aircandi.settings.getBoolean(Constants.SETTING_RUN_ONCE_HELP_RADAR, false);
-		//		if (!runOnceHelp) {
-		//			doHelpClick();
-		//			return;
-		//		}
-
-		if (Aircandi.getInstance().getUser() != null
-				&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-				&& Aircandi.getInstance().getUser().developer != null
-				&& Aircandi.getInstance().getUser().developer) {
-			startScanService(Constants.INTERVAL_SCAN_WIFI);
-		}
-	}
-
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-		super.onWindowFocusChanged(hasFocus);
-
-		if (!mInitialized || isFinishing()) return;
-
-		if (hasFocus && mFreshWindow) {
-
-			if (mPauseDate != null) {
-				final Long interval = DateTime.nowDate().getTime() - mPauseDate.longValue();
-				if (interval > Constants.INTERVAL_TETHER_ALERT) {
-					tetherAlert();
-				}
-			}
-
-			manageData();
-			mFreshWindow = false;
-		}
-	}
-
-	private void manageData() {
-		/*
-		 * Cases that trigger a search
-		 * 
-		 * - First time radar is run
-		 * - Preference change
-		 * - Didn't complete location fix before user switched away from radar
-		 * - While away, user enabled wifi
-		 * - Beacons we used for last fix have changed
-		 * - Beacon fix is thirty minutes old or more
-		 * 
-		 * Cases that trigger a ui refresh
-		 * 
-		 * - Preference change
-		 * - EntityModel has changed since last search
-		 */
-		if (mEntityModelActivityDate == null) {
-			/*
-			 * Get set everytime onEntitiesChanged gets called. Means
-			 * we have never completed even the first search for entities.
-			 */
-			Logger.d(this, "Start first place search");
-			mList.setRefreshing(false);
-		}
-		else if (mPrefChangeNewSearchNeeded) {
-			/*
-			 * Gets set based on evaluation of pref changes
-			 */
-			Logger.d(this, "Start place search because of preference change");
-			mPrefChangeNewSearchNeeded = false;
-			mList.setRefreshing();
-		}
-		else if (mPrefChangeRefreshUiNeeded) {
-			/*
-			 * Gets set based on evaluation of pref changes
-			 */
-			Logger.d(this, "Refresh Ui because of preference change");
-			mPrefChangeRefreshUiNeeded = false;
-			mBusyManager.showBusy();
-			invalidateOptionsMenu();
-			mRadarAdapter.getItems().clear();
-			mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
-			mRadarAdapter.notifyDataSetChanged();
-			mBusyManager.hideBusy();
-		}
-		else if (LocationManager.getInstance().getLocationLocked() == null) {
-			/*
-			 * Gets set everytime we accept a location change in onLocationChange. Means
-			 * we didn't get an acceptable fix yet from either the network or gps providers.
-			 */
-			Logger.d(this, "Start place search because didn't complete location fix");
-			LocationManager.getInstance().lockLocationBurst();
-		}
-		else if (ProximityManager.getInstance().beaconRefreshNeeded(LocationManager.getInstance().getLocationLocked())) {
-			/*
-			 * We check to see if it's been awhile since the last search.
-			 */
-			Logger.d(this, "Start place search because of staleness");
-			mList.setRefreshing();
-		}
-		else if (NetworkManager.getInstance().getWifiState() == WifiManager.WIFI_STATE_DISABLED
-				&& mEntityModelWifiState == WifiManager.WIFI_STATE_ENABLED) {
-			/*
-			 * Wifi has been disabled since our last search
-			 */
-			Integer wifiApState = NetworkManager.getInstance().getWifiApState();
-			if (wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED
-					|| wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED + 10) {
-				Logger.d(this, "Wifi Ap enabled, clearing beacons");
-				UI.showToastNotification("Hotspot or tethering enabled", Toast.LENGTH_SHORT);
-			}
-			else {
-				UI.showToastNotification("Wifi disabled", Toast.LENGTH_SHORT);
-			}
-			ProximityManager.getInstance().getWifiList().clear();
-			EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null);
-			LocationManager.getInstance().setLocationLocked(null);
-		}
-		else if (NetworkManager.getInstance().getWifiState() == WifiManager.WIFI_STATE_ENABLED
-				&& mEntityModelWifiState == WifiManager.WIFI_STATE_DISABLED) {
-			/*
-			 * Wifi has been enabled since our last search
-			 */
-			UI.showToastNotification("Wifi enabled", Toast.LENGTH_SHORT);
-			mList.setRefreshing();
-		}
-		else if ((ProximityManager.getInstance().getLastBeaconLockedDate() != null && mEntityModelBeaconDate != null)
-				&& (ProximityManager.getInstance().getLastBeaconLockedDate().longValue() > mEntityModelBeaconDate.longValue())) {
-			/*
-			 * The beacons we are locked to have changed while we were away so we need to
-			 * search for new places linked to beacons.
-			 */
-			Logger.d(this, "Refresh places for beacons because beacon date has changed");
-			mEntityModelBeaconDate = ProximityManager.getInstance().getLastBeaconLockedDate();
-			new AsyncTask() {
-
-				@Override
-				protected Object doInBackground(Object... params) {
-					Thread.currentThread().setName("GetEntitiesForBeacons");
-					final ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesByProximity();
-					return serviceResponse;
-				}
-
-			}.execute();
-		}
-		else if ((ProximityManager.getInstance().getLastBeaconLoadDate() != null && mEntityModelRefreshDate != null
-				&& ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue())
-				|| (EntityManager.getEntityCache().getLastActivityDate() != null && mEntityModelActivityDate != null
-				&& EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue())) {
-			/*
-			 * Everytime we show details for a place, we fetch place details from the service
-			 * when in turn get pushed into the cache and activityDate gets tickled.
-			 */
-			Logger.d(this, "Update radar ui because of detected entity model change");
-			mHandler.postDelayed(new Runnable() {
-
-				@Override
-				public void run() {
-					mBusyManager.showBusy();
-					invalidateOptionsMenu();
-					mRadarAdapter.getItems().clear();
-					mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
-					mRadarAdapter.notifyDataSetChanged();
-					mBusyManager.hideBusy();
-				}
-			}, 100);
-		}
-	}
-
-	@Override
-	protected void onDestroy() {
-		/*
-		 * The activity is getting destroyed but the application level state
-		 * like singletons, statics, etc will continue as long as the application
-		 * is running.
-		 */
-		Logger.d(this, "CandiRadarActivity destroyed");
-		super.onDestroy();
-
-		/* This is the only place we manually stop the analytics session. */
-		Tracker.stopSession(Aircandi.getInstance().getUser());
-
-		/* Don't count on this always getting called when this activity is killed */
-		try {
-			BitmapManager.getInstance().stopBitmapLoaderThread();
-		}
-		catch (Exception exception) {
-			Exceptions.handle(exception);
-		}
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc
 	// --------------------------------------------------------------------------------------------
 
-	@SuppressWarnings("ucd")
-	public void startScanService(int scanInterval) {
-
-		/* Start first scan right away */
-		Logger.d(this, "Starting wifi scan service");
-		final Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
-		startService(scanIntent);
-
-		/* Setup a scanning schedule */
-		if (scanInterval > 0) {
-			final AlarmManager alarmManager = (AlarmManager) getSystemService(Service.ALARM_SERVICE);
-			final PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
-			alarmManager.cancel(pendingIntent);
-			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP
-					, SystemClock.elapsedRealtime() + scanInterval
-					, scanInterval, pendingIntent);
-		}
-	}
-
-	@SuppressWarnings("ucd")
-	public void stopScanService() {
-		final AlarmManager alarmManager = (AlarmManager) getSystemService(Service.ALARM_SERVICE);
-		final Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
-		final PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
-		alarmManager.cancel(pendingIntent);
-		Logger.d(this, "Stopped wifi scan service");
-	}
-
 	@Override
 	protected int getLayoutId() {
-		return R.layout.radar_form;
+		return R.layout.radar_fragment;
 	}
-
 }

@@ -57,7 +57,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 	// --------------------------------------------------------------------------------------------
 
 	private void suggestApplinks(final List<Entity> applinks, final Boolean autoInsert, final Place entity) {
-		
+
 		new AsyncTask() {
 
 			@Override
@@ -100,12 +100,13 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 				}
 				databind();
 				mBusyManager.hideBusy();
+				mBusyManager.stopBodyBusyIndicator();
 			}
 		}.execute();
 	}
 
 	private void refreshApplinks(final List<Entity> applinks) {
-		
+
 		new AsyncTask() {
 
 			@Override
@@ -149,6 +150,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 				}
 				databind();
 				mBusyManager.hideBusy();
+				mBusyManager.stopBodyBusyIndicator();
 			}
 		}.execute();
 	}
@@ -248,6 +250,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 				if (holder.photoView != null) {
 					holder.photoView.setTag(applink);
+					holder.photoView.getImageView().setImageDrawable(null);
 					UI.drawPhoto(holder.photoView, applink.getPhoto());
 				}
 			}

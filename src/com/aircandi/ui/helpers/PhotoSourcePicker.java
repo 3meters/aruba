@@ -66,16 +66,16 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 		final List<Object> listData = new ArrayList<Object>();
 
 		/* Everyone gets these options */
-		listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_search_light : R.drawable.ic_action_search_dark
+		listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_search_light : R.drawable.ic_action_search_dark
 				, getString(R.string.dialog_photo_source_search), null, Constants.PHOTO_SOURCE_SEARCH));
 
-		listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_tiles_large_light : R.drawable.ic_action_tiles_large_dark
+		listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_tiles_large_light : R.drawable.ic_action_tiles_large_dark
 				, getString(R.string.dialog_photo_source_gallery), null, Constants.PHOTO_SOURCE_GALLERY));
 
 		/* Only show the camera choice if there is one and there is a place to store the image */
 		if (AndroidManager.isIntentAvailable(this, MediaStore.ACTION_IMAGE_CAPTURE)) {
 			if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-				listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_camera_light : R.drawable.ic_action_camera_dark
+				listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_camera_light : R.drawable.ic_action_camera_dark
 						, getString(R.string.dialog_photo_source_camera), null, Constants.PHOTO_SOURCE_CAMERA));
 			}
 		}
@@ -84,7 +84,7 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 		if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			Place place = (Place) mEntity;
 			if (place.getProvider().type != null && place.getProvider().type.equals(Constants.TYPE_PROVIDER_FOURSQUARE)) {
-				listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
+				listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
 						, getString(R.string.dialog_photo_source_place), null, Constants.PHOTO_SOURCE_PLACE));
 			}
 			else {
@@ -101,7 +101,7 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 				
 				for (Entity post : entities) {
 					if (post.photo != null) {
-						listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_location_light
+						listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_location_light
 								: R.drawable.ic_action_location_dark
 								, getString(R.string.dialog_photo_source_place), null, Constants.PHOTO_SOURCE_PLACE));
 						break;
@@ -113,18 +113,18 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 			Applink applink = (Applink) mEntity;
 			if (applink.appId != null) {
 				if (applink.type.equals(Constants.TYPE_APP_FACEBOOK)) {
-					listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_facebook_light : R.drawable.ic_action_facebook_dark
+					listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_facebook_light : R.drawable.ic_action_facebook_dark
 							, getString(R.string.dialog_photo_source_facebook), null, Constants.PHOTO_SOURCE_FACEBOOK));
 				}
 				else if (applink.type.equals(Constants.TYPE_APP_TWITTER)) {
-					listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_twitter_light : R.drawable.ic_action_twitter_dark
+					listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_twitter_light : R.drawable.ic_action_twitter_dark
 							, getString(R.string.dialog_photo_source_twitter), null, Constants.PHOTO_SOURCE_TWITTER));
 				}
 			}
 		}
 
 		/* Everyone gets the default option */
-		listData.add(new AirApplication(mThemeTone.equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
+		listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
 				, getString(R.string.dialog_photo_source_default), null, Constants.PHOTO_SOURCE_DEFAULT));
 
 		mName.setText(R.string.dialog_photo_source_title);

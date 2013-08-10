@@ -16,16 +16,12 @@
         android:dividerHeight="1px"
         android:listSelector="#00000000" />
 
-    <com.aircandi.ui.widgets.AirButton
-        android:id="@+id/button_new_entity"
-        style="@style/form_button"
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:onClick="onNewEntityButtonClick"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:text="@string/entity_button_comment_first"
+        android:text="@string/list_notifications_empty"
         android:visibility="gone" />
 
     <ProgressBar

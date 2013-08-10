@@ -4,9 +4,9 @@
 
     <gradient
         android:angle="270"
-        android:centerColor="@color/overlay_photo_detail"
-        android:endColor="@color/overlay_photo_detail"
-        android:startColor="@color/overlay_photo_detail"
+        android:centerColor="@color/overlay_center"
+        android:endColor="@color/overlay_end"
+        android:startColor="@color/overlay_start"
         android:type="linear" />
 
     <corners

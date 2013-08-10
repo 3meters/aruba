@@ -141,7 +141,6 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
 				setSupportProgressBarIndeterminateVisibility(false);
-				mBusyManager.hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					databind(false);
 				}
@@ -153,6 +152,8 @@ public abstract class BaseEntityForm extends BaseBrowse {
 						Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
 					}
 				}
+				mBusyManager.hideBusy();
+				mBusyManager.stopBodyBusyIndicator();
 			}
 		}.execute();
 
@@ -198,6 +199,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
 				mBusyManager.hideBusy();
+				mBusyManager.stopBodyBusyIndicator();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					draw();
 				}
@@ -336,7 +338,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				else {
 					watched.setLabel(getString(R.string.button_watch));
 					watched.getImageIcon().setColorFilter(null);
-					if (mThemeTone.equals("dark")) {
+					if (getThemeTone().equals("dark")) {
 						watched.setDrawableId(R.drawable.ic_action_show_dark);
 					}
 					else {
@@ -356,7 +358,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				else {
 					liked.setLabel(getString(R.string.button_like));
 					liked.getImageIcon().setColorFilter(null);
-					if (mThemeTone.equals("dark")) {
+					if (getThemeTone().equals("dark")) {
 						liked.setDrawableId(R.drawable.ic_action_heart_dark);
 					}
 					else {
@@ -474,25 +476,25 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 				if (shortcut.app.equals(Constants.TYPE_APP_FACEBOOK)) {
 					badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_dark);
-					if (mThemeTone.equals("light")) {
+					if (getThemeTone().equals("light")) {
 						badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_light);
 					}
 				}
 				else if (shortcut.app.equals(Constants.TYPE_APP_TWITTER)) {
 					badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_dark);
-					if (mThemeTone.equals("light")) {
+					if (getThemeTone().equals("light")) {
 						badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_light);
 					}
 				}
 				else if (shortcut.app.equals(Constants.TYPE_APP_WEBSITE)) {
 					badgeLower.setBackgroundResource(R.drawable.ic_action_website_dark);
-					if (mThemeTone.equals("light")) {
+					if (getThemeTone().equals("light")) {
 						badgeLower.setBackgroundResource(R.drawable.ic_action_website_light);
 					}
 				}
 				else if (shortcut.app.equals(Constants.TYPE_APP_FOURSQUARE)) {
 					badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
-					if (mThemeTone.equals("light")) {
+					if (getThemeTone().equals("light")) {
 						badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
 					}
 				}
@@ -591,25 +593,10 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 		return true;
 	}
-
+	
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		if (item.getItemId() == android.R.id.home) {
-			if (mDrawerLayout != null) {
-				if (mDrawerToggle.isDrawerIndicatorEnabled()) {
-					if (mDrawerLayout.isDrawerOpen(mDrawerView)) {
-						mDrawerLayout.closeDrawer(mDrawerView);
-					}
-					else {
-						mDrawerLayout.openDrawer(mDrawerView);
-					}
-					return true;
-				}
-			}
-		}
-
-		return Routing.route(this, Routing.routeForMenuId(item.getItemId()), mEntity);
+	public boolean onOptionsItemSelected(MenuItem menuItem) {
+		return Routing.route(this, Routing.routeForMenuId(menuItem.getItemId()), mEntity);
 	}
 
 	protected Boolean canEdit() {

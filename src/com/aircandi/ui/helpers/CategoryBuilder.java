@@ -72,7 +72,7 @@ public class CategoryBuilder extends BaseEdit {
 		mSpinnerSubCategory = (Spinner) findViewById(R.id.sub_category);
 		mSpinnerSubSubCategory = (Spinner) findViewById(R.id.sub_sub_category);
 
-		mSpinnerItem = mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
+		mSpinnerItem = getThemeTone().equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
 		setActivityTitle(getString(R.string.dialog_category_builder_title));
 
@@ -123,6 +123,7 @@ public class CategoryBuilder extends BaseEdit {
 					}
 				}
 				mBusyManager.hideBusy();
+				mBusyManager.stopBodyBusyIndicator();
 			}
 
 		}.execute();
@@ -221,7 +222,7 @@ public class CategoryBuilder extends BaseEdit {
 				, categories
 				, R.string.form_place_category_hint);
 
-		if (mThemeTone.equals("dark")) {
+		if (getThemeTone().equals("dark")) {
 			if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 				adapter.setDropDownViewResource(R.layout.spinner_item_light);
 			}
@@ -238,7 +239,7 @@ public class CategoryBuilder extends BaseEdit {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-				if (mThemeTone.equals("dark")) {
+				if (getThemeTone().equals("dark")) {
 					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 						((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));
 					}
@@ -283,7 +284,7 @@ public class CategoryBuilder extends BaseEdit {
 					, categories
 					, R.string.form_place_sub_category_hint);
 
-			if (mThemeTone.equals("dark")) {
+			if (getThemeTone().equals("dark")) {
 				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 					adapter.setDropDownViewResource(R.layout.spinner_item_light);
 				}
@@ -314,7 +315,7 @@ public class CategoryBuilder extends BaseEdit {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-					if (mThemeTone.equals("dark")) {
+					if (getThemeTone().equals("dark")) {
 						if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 							((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));
 						}
@@ -357,7 +358,7 @@ public class CategoryBuilder extends BaseEdit {
 					, categories
 					, R.string.form_place_sub_category_hint);
 
-			if (mThemeTone.equals("dark")) {
+			if (getThemeTone().equals("dark")) {
 				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 					adapter.setDropDownViewResource(R.layout.spinner_item_light);
 				}
@@ -388,7 +389,7 @@ public class CategoryBuilder extends BaseEdit {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-					if (mThemeTone.equals("dark")) {
+					if (getThemeTone().equals("dark")) {
 						if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 							((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));
 						}
@@ -434,7 +435,7 @@ public class CategoryBuilder extends BaseEdit {
 			final View view = super.getView(position, convertView, parent);
 
 			final TextView text = (TextView) view.findViewById(R.id.spinner_name);
-			if (mThemeTone.equals("dark")) {
+			if (getThemeTone().equals("dark")) {
 				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 					text.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.text_dark));
 				}

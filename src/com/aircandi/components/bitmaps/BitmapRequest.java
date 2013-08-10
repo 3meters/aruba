@@ -48,8 +48,9 @@ public class BitmapRequest {
 		return mRequestListener;
 	}
 
-	public void setRequestListener(RequestListener requestListener) {
+	public BitmapRequest setRequestListener(RequestListener requestListener) {
 		mRequestListener = requestListener;
+		return this;
 	}
 
 	public ImageView getImageView() {

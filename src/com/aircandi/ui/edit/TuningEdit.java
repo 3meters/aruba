@@ -123,7 +123,7 @@ public class TuningEdit extends BaseEntityEdit {
 
 			@Override
 			public void run() {
-				if (mThemeTone.equals("dark")) {
+				if (getThemeTone().equals("dark")) {
 					((ImageView) findViewById(starId)).setImageResource(R.drawable.ic_action_star_10_dark);
 				}
 				else {
@@ -232,6 +232,7 @@ public class TuningEdit extends BaseEntityEdit {
 			protected void onPostExecute(Object response) {
 				setSupportProgressBarIndeterminateVisibility(false);
 				mBusyManager.hideBusy();
+				mBusyManager.stopBodyBusyIndicator();
 				if (mUntuning) {
 					mButtonUntune.setText(R.string.form_button_tuning_tuned);
 					mUntuned = true;

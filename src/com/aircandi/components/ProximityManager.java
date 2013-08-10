@@ -227,7 +227,7 @@ public class ProximityManager {
 			final List<Entity> entitiesForEvent = (List<Entity>) EntityManager.getInstance().getPlaces(null, null);
 			Aircandi.stopwatch1.segmentTime("Entities for beacons: objects processed");
 
-			BusProvider.getInstance().post(new EntitiesForBeaconsFinishedEvent());
+			BusProvider.getInstance().post(new EntitiesByProximityFinishedEvent());
 			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
 		}
 

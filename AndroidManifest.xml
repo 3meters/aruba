@@ -103,19 +103,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.aircandi.ui.RadarForm"
+            android:name="com.aircandi.ui.AircandiForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app" />
-        <activity
-            android:name="com.aircandi.ui.CreatedForm"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_created"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name="com.aircandi.ui.WatchingForm"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_watching"
-            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name="com.aircandi.ui.PlaceForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -145,11 +135,6 @@
             android:name="com.aircandi.ui.EntityGrid"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_browse"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name="com.aircandi.ui.NotificationList"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_notifications"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name="com.aircandi.ui.HelpForm"

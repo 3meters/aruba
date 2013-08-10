@@ -8,6 +8,7 @@ import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
@@ -38,14 +39,6 @@ import com.squareup.otto.Subscribe;
 
 public class PictureForm extends BaseEntityForm {
 	
-	@Override
-	protected void configureNavigationDrawer() {
-		super.configureNavigationDrawer();
-		if (mDrawerLayout != null) {
-			mDrawerToggle.setDrawerIndicatorEnabled(false);
-		}
-	}
-
 	@Override
 	protected void databind(final Boolean refreshProposed) {
 		/*
@@ -93,11 +86,16 @@ public class PictureForm extends BaseEntityForm {
 						}
 						draw();
 					}
+					else {
+						UI.showToastNotification("This item has been deleted", Toast.LENGTH_SHORT);
+						finish();
+					}
 				}
 				else {
 					Routing.serviceError(PictureForm.this, result.serviceResponse);
 				}
 				mBusyManager.hideBusy();
+				mBusyManager.stopBodyBusyIndicator();
 			}
 
 		}.execute();
@@ -107,11 +105,9 @@ public class PictureForm extends BaseEntityForm {
 	// Events
 	// --------------------------------------------------------------------------------------------
 
-	@Override
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
-		super.onMessage(event);
 		/*
 		 * Refresh the form because something new has been added to it
 		 * like a comment or post.

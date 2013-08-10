@@ -3,7 +3,10 @@ package com.aircandi.components.bitmaps;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -28,15 +31,28 @@ import com.aircandi.utilities.UI;
 @SuppressWarnings("ucd")
 public class BitmapLoader {
 
-	private final BitmapQueue	mBitmapQueue	= new BitmapQueue();
-	private BitmapLoaderThread	mBitmapLoaderThread;
+	private final BitmapQueue			mBitmapQueue	= new BitmapQueue();
+	@SuppressWarnings("unused")
+	private BitmapLoaderThread			mBitmapLoaderThread;
+	private List<BitmapLoaderThread>	mThreads		= Collections.synchronizedList(new ArrayList<BitmapLoaderThread>());
 
 	public BitmapLoader() {
-
-		/* Make the background thead low priority so it doesn't effect the UI performance. */
-		mBitmapLoaderThread = new BitmapLoaderThread(mBitmapQueue);
-		mBitmapLoaderThread.setPriority(Thread.MIN_PRIORITY);
-		mBitmapLoaderThread.start();
+		
+		/*
+		 * This is a very basic thread pool implementation. We are pre-starting three worker threads
+		 * to handle image downloads and processing. This could be much better using dynamic
+		 * thread allocation with ThreadPoolExecutor.
+		 *  
+		 * see-> http://http://developer.android.com/training/multiple-threads/index.html
+		 */
+		
+		mThreads.add(new BitmapLoaderThread(mBitmapQueue, Thread.MIN_PRIORITY));
+		mThreads.add(new BitmapLoaderThread(mBitmapQueue, Thread.MIN_PRIORITY));
+		mThreads.add(new BitmapLoaderThread(mBitmapQueue, Thread.MIN_PRIORITY));
+		
+		for (Thread thread : mThreads){
+			thread.start();
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -60,12 +76,10 @@ public class BitmapLoader {
 	}
 
 	public void stopBitmapLoaderThread() {
-		/*
-		 * We call this when the search activity is being destroyed.
-		 */
-		mBitmapLoaderThread.interrupt();
+		for (Thread thread : mThreads){
+			thread.interrupt();
+		}		
 		mBitmapQueue.mQueue.clear();
-		mBitmapLoaderThread = new BitmapLoaderThread(mBitmapQueue);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -154,9 +168,10 @@ public class BitmapLoader {
 
 		private final BitmapQueue	mBitmapQueue;
 
-		public BitmapLoaderThread(BitmapQueue bitmapQueue) {
+		public BitmapLoaderThread(BitmapQueue bitmapQueue, int priority) {
 			super();
 			mBitmapQueue = bitmapQueue;
+			setPriority(priority);
 		}
 
 		@Override
@@ -183,15 +198,15 @@ public class BitmapLoader {
 
 			while (!mBitmapQueue.mQueue.isEmpty()) {
 
-				final BitmapRequest imageRequest = mBitmapQueue.mQueue.poll();
+				final BitmapRequest bitmapRequest = mBitmapQueue.mQueue.poll();
 
-				if (imageRequest != null) {
+				if (bitmapRequest != null) {
 
 					/* Make sure this is still a valid request */
 					ServiceResponse serviceResponse = new ServiceResponse();
-					if (imageRequest.getImageView() == null || imageRequest.getImageView().getTag().equals(imageRequest.getImageUri())) {
+					if (bitmapRequest.getImageView() == null || bitmapRequest.getImageView().getTag().equals(bitmapRequest.getImageUri())) {
 
-						Logger.v(BitmapLoader.this, imageRequest.getImageUri() + ": Download started...");
+						Logger.v(BitmapLoader.this, bitmapRequest.getImageUri() + ": Download started...");
 						Bitmap bitmap = null;
 
 						long startTime = System.nanoTime();
@@ -201,14 +216,14 @@ public class BitmapLoader {
 						 * size in
 						 * memory.
 						 */
-						serviceResponse = downloadAsByteArray(imageRequest.getImageUri(), new RequestListener() {
+						serviceResponse = downloadAsByteArray(bitmapRequest.getImageUri(), new RequestListener() {
 
 							@Override
 							public void onProgressChanged(int progress) {
-								if (imageRequest.getRequestListener() != null) {
+								if (bitmapRequest.getRequestListener() != null) {
 									if (progress > 0) {
-										if (imageRequest.getRequestListener() != null) {
-											imageRequest.getRequestListener().onProgressChanged((int) (70 * ((float) progress / 100f)));
+										if (bitmapRequest.getRequestListener() != null) {
+											bitmapRequest.getRequestListener().onProgressChanged((int) (70 * ((float) progress / 100f)));
 										}
 									}
 								}
@@ -217,10 +232,10 @@ public class BitmapLoader {
 
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 
-							if (imageRequest.getImageView() == null || imageRequest.getImageView().getTag().equals(imageRequest.getImageUri())) {
+							if (bitmapRequest.getImageView() == null || bitmapRequest.getImageView().getTag().equals(bitmapRequest.getImageUri())) {
 
 								Logger.v(BitmapLoader.this,
-										imageRequest.getImageUri() + ": Download finished: " + String.valueOf(estimatedTime / 1000000)
+										bitmapRequest.getImageUri() + ": Download finished: " + String.valueOf(estimatedTime / 1000000)
 												+ "ms");
 
 								estimatedTime = System.nanoTime() - startTime;
@@ -229,7 +244,7 @@ public class BitmapLoader {
 								estimatedTime = System.nanoTime() - startTime;
 								startTime = System.nanoTime();
 								Logger.v(BitmapLoader.this,
-										imageRequest.getImageUri() + ": Post processing: " + String.valueOf(estimatedTime / 1000000)
+										bitmapRequest.getImageUri() + ": Post processing: " + String.valueOf(estimatedTime / 1000000)
 												+ "ms");
 								/*
 								 * Stuff it into the cache. Overwrites if it already exists. This is a perf hit in
@@ -238,28 +253,28 @@ public class BitmapLoader {
 								 * We aren't doing anything to shrink the raw size of the image before storing it to
 								 * disk. We also aren't handling the case where the image format is gif.
 								 */
-								Logger.v(BitmapLoader.this, imageRequest.getImageUri() + ": Pushing into cache...");
-								bitmap = BitmapManager.getInstance().putImageBytes(imageRequest.getImageUri(), (byte[]) serviceResponse.data,
-										imageRequest.getImageSize());
+								Logger.v(BitmapLoader.this, bitmapRequest.getImageUri() + ": Pushing into cache...");
+								bitmap = BitmapManager.getInstance().putImageBytes(bitmapRequest.getImageUri(), (byte[]) serviceResponse.data,
+										bitmapRequest.getImageSize());
 
 								/* Update progress */
-								if (imageRequest.getRequestListener() != null) {
-									imageRequest.getRequestListener().onProgressChanged(80);
+								if (bitmapRequest.getRequestListener() != null) {
+									bitmapRequest.getRequestListener().onProgressChanged(80);
 								}
 
-								Logger.v(BitmapLoader.this, imageRequest.getImageUri() + ": Progress complete");
-								serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
+								Logger.v(BitmapLoader.this, bitmapRequest.getImageUri() + ": Progress complete");
+								serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
 
-								if (imageRequest.getRequestListener() != null) {
-									imageRequest.getRequestListener().onProgressChanged(100);
+								if (bitmapRequest.getRequestListener() != null) {
+									bitmapRequest.getRequestListener().onProgressChanged(100);
 								}
 
-								if (imageRequest.getRequestListener() != null) {
-									imageRequest.getRequestListener().onComplete(serviceResponse);
+								if (bitmapRequest.getRequestListener() != null) {
+									bitmapRequest.getRequestListener().onComplete(serviceResponse);
 								}
 
-								if (imageRequest.getImageView() != null) {
-									if (imageRequest.getImageView().getTag().equals(imageRequest.getImageUri())) {
+								if (bitmapRequest.getImageView() != null) {
+									if (bitmapRequest.getImageView().getTag().equals(bitmapRequest.getImageUri())) {
 
 										final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
 										/* Put this on the main thread */
@@ -267,7 +282,7 @@ public class BitmapLoader {
 
 											@Override
 											public void run() {
-												UI.showDrawableInImageView(bitmapDrawable, imageRequest.getImageView(), true,
+												UI.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true,
 														Animate.fadeInMedium());
 											}
 										});
@@ -278,8 +293,8 @@ public class BitmapLoader {
 
 					}
 					else {
-						if (imageRequest.getRequestListener() != null) {
-							imageRequest.getRequestListener().onComplete(serviceResponse);
+						if (bitmapRequest.getRequestListener() != null) {
+							bitmapRequest.getRequestListener().onComplete(serviceResponse);
 						}
 					}
 				}

@@ -93,13 +93,6 @@ public class BitmapManager {
 	// Public cache routines
 	// --------------------------------------------------------------------------------------------
 
-	public static Boolean isDrawable(BitmapRequest bitmapRequest) {
-		if (bitmapRequest.getImageUri().toLowerCase(Locale.US).startsWith("resource:")) {
-			return true;
-		}
-		return false;
-	}
-
 	public void masterFetch(final BitmapRequest bitmapRequest) {
 		if (BitmapManager.isDrawable(bitmapRequest)) {
 			BitmapManager.getInstance().fetchDrawable(bitmapRequest);
@@ -107,9 +100,20 @@ public class BitmapManager {
 		else {
 			final ServiceResponse serviceResponse = BitmapManager.getInstance().fetchBitmap(bitmapRequest);
 			if (serviceResponse.responseCode != ResponseCode.Success) {
+				if (bitmapRequest.getRequestListener() != null) {
+					bitmapRequest.getRequestListener().onStart();
+				}
+								
 				BitmapManager.getInstance().downloadBitmap(bitmapRequest);
 			}
 		}
+	}
+
+	public static Boolean isDrawable(BitmapRequest bitmapRequest) {
+		if (bitmapRequest.getImageUri().toLowerCase(Locale.US).startsWith("resource:")) {
+			return true;
+		}
+		return false;
 	}
 
 	public ServiceResponse fetchDrawable(final BitmapRequest bitmapRequest) {
@@ -291,7 +295,7 @@ public class BitmapManager {
 			return mMemoryCache.remove(key);
 		}
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Load routines
 	// --------------------------------------------------------------------------------------------
@@ -469,7 +473,7 @@ public class BitmapManager {
 		return bitmapSampled;
 	}
 
-	private String resolveResourceName(String rawResourceName) {
+	public String resolveResourceName(String rawResourceName) {
 		int resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "drawable", Aircandi.getInstance().getPackageName());
 		if (resourceId == 0) {
 			resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "attr", Aircandi.getInstance().getPackageName());
@@ -514,6 +518,9 @@ public class BitmapManager {
 	}
 
 	public void stopBitmapLoaderThread() {
+		/*
+		 * Called when AircandiForm is being destroyed.
+		 */
 		mBitmapLoader.stopBitmapLoaderThread();
 	}
 

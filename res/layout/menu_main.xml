@@ -18,179 +18,16 @@
         aircandi:layoutHeader="@layout/temp_section_header_menu"
         android:orientation="vertical" >
 
-        <LinearLayout
-            android:id="@+id/radar"
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/home"
+            style="@style/menu_button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/selector_button"
+            android:layout_height="@dimen/form_button_height"
             android:clickable="true"
+            android:gravity="center_vertical"
             android:onClick="onMenuItemClick"
-            android:orientation="horizontal" >
-
-            <View
-                android:id="@+id/radar_marker"
-                android:layout_width="@dimen/sliding_menu_current_marker_width"
-                android:layout_height="match_parent" />
-
-            <com.aircandi.ui.widgets.AirTextView
-                style="@style/menu_button"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/form_button_height"
-                android:layout_marginLeft="-3dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:paddingLeft="10dp"
-                android:text="@string/menu_radar_item" />
-
-            <com.aircandi.ui.widgets.AirTextView
-                android:id="@+id/radar_count"
-                style="@style/menu_count"
-                android:layout_width="50dp"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="5dp"
-                android:layout_weight="0"
-                android:gravity="center"
-                android:text="@string/menu_count_zero"
-                android:visibility="invisible" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="?attr/ruleColor" />
-
-        <LinearLayout
-            android:id="@+id/created"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/selector_button"
-            android:clickable="true"
-            android:onClick="onMenuItemClick"
-            android:orientation="horizontal" >
-
-            <View
-                android:id="@+id/created_marker"
-                android:layout_width="@dimen/sliding_menu_current_marker_width"
-                android:layout_height="match_parent" />
-
-            <com.aircandi.ui.widgets.AirTextView
-                style="@style/menu_button"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/form_button_height"
-                android:layout_marginLeft="-3dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:paddingLeft="10dp"
-                android:text="@string/menu_created_item" />
-
-            <com.aircandi.ui.widgets.AirTextView
-                android:id="@+id/created_count"
-                style="@style/menu_count"
-                android:layout_width="50dp"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="5dp"
-                android:layout_weight="0"
-                android:gravity="center"
-                android:text="@string/menu_count_zero"
-                android:visibility="invisible" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="?attr/ruleColor" />
-
-        <LinearLayout
-            android:id="@+id/watching"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/selector_button"
-            android:clickable="true"
-            android:onClick="onMenuItemClick"
-            android:orientation="horizontal" >
-
-            <View
-                android:id="@+id/watching_marker"
-                android:layout_width="@dimen/sliding_menu_current_marker_width"
-                android:layout_height="match_parent" />
-
-            <com.aircandi.ui.widgets.AirTextView
-                style="@style/menu_button"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/form_button_height"
-                android:layout_marginLeft="-3dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:paddingLeft="10dp"
-                android:text="@string/menu_watching_item" />
-
-            <com.aircandi.ui.widgets.AirTextView
-                android:id="@+id/watching_count"
-                style="@style/menu_count"
-                android:layout_width="50dp"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="5dp"
-                android:layout_weight="0"
-                android:gravity="center"
-                android:text="@string/menu_count_zero"
-                android:visibility="invisible" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="?attr/ruleColor" />
-    </com.aircandi.ui.widgets.SectionLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical" >
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="?attr/ruleColor" />
-
-        <LinearLayout
-            android:id="@+id/notifications"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/selector_button"
-            android:clickable="true"
-            android:onClick="onMenuItemClick"
-            android:orientation="horizontal" >
-
-            <com.aircandi.ui.widgets.AirTextView
-                style="@style/menu_button"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/form_button_height"
-                android:layout_marginLeft="-3dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:paddingLeft="10dp"
-                android:text="@string/menu_notifications_item" />
-
-            <com.aircandi.ui.widgets.AirTextView
-                android:id="@+id/notifications_count"
-                style="@style/menu_count"
-                android:layout_width="50dp"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="5dp"
-                android:layout_weight="0"
-                android:gravity="center"
-                android:text="@string/menu_count_zero"
-                android:visibility="invisible" />
-        </LinearLayout>
+            android:paddingLeft="10dp"
+            android:text="@string/menu_home_item" />
 
         <View
             android:layout_width="match_parent"
@@ -224,6 +61,10 @@
             android:paddingLeft="10dp"
             android:text="@string/menu_invite_item" />
 
-    </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?attr/ruleColor" />
+    </com.aircandi.ui.widgets.SectionLayout>
 
 </RelativeLayout>

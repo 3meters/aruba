@@ -82,7 +82,7 @@ public class LinkOptions extends ServiceObject {
 			User user = Aircandi.getInstance().getUser();
 			Number limit = ProxiConstants.LIMIT_CHILD_ENTITIES;
 			LinkOptions linkOptions = new LinkOptions().setActive(new ArrayList<LinkSettings>());
-			
+
 			if (defaultType == DefaultType.LinksForPlace) {
 				linkOptions.shortcuts = true;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, true, false, true, limit));
@@ -116,18 +116,6 @@ public class LinkOptions extends ServiceObject {
 			}
 			else if (defaultType == DefaultType.LinksForUser) {
 				linkOptions.shortcuts = true;
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, false, false, true, limit).setDirection(Direction.out));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit).setDirection(Direction.both));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit).setDirection(Direction.both));
-			}
-			else if (defaultType == DefaultType.LinksForWatching) {
-				linkOptions.shortcuts = true;
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, limit).setDirection(Direction.out));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit).setDirection(Direction.both));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit).setDirection(Direction.both));
-			}
-			else if (defaultType == DefaultType.LinksForCreated) {
-				linkOptions.shortcuts = true;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, limit).setDirection(Direction.out));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit).setDirection(Direction.both));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit).setDirection(Direction.both));
@@ -141,8 +129,6 @@ public class LinkOptions extends ServiceObject {
 		LinksForPlace,
 		LinksForPost,
 		LinksForUser,
-		LinksForWatching,
-		LinksForCreated,
 		NoLinks,
 	}
 }

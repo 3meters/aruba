@@ -10,7 +10,6 @@ import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.beta.R;
-import com.aircandi.components.BusyManager;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -34,7 +33,6 @@ public class FeedbackEdit extends BaseEntityEdit {
 		 * Feedback are not really an entity type so we handle
 		 * all the expected initialization.
 		 */
-		mBusyManager = new BusyManager(this);
 		mDescription = (TextView) findViewById(R.id.description);
 
 		if (mDescription != null) {

@@ -99,7 +99,7 @@ import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
-import com.aircandi.ui.RadarForm;
+import com.aircandi.ui.AircandiForm;
 
 /*
  * Http 1.1 Status Codes (subset)
@@ -308,7 +308,7 @@ public class HttpService {
 						 * We think anything json is coming from the Aircandi service (except Bing)
 						 */
 						ServiceData serviceData = (ServiceData) HttpService.jsonToObject((String) response, ObjectType.None, ServiceDataWrapper.True);
-						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, RadarForm.class);
+						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
 						if (serviceData != null && serviceData.androidMinimumVersion != null) {
 							if (serviceData.androidMinimumVersion.intValue() > clientVersionCode) {
 								HttpServiceException exception = new HttpServiceException("Invalid client version", ErrorType.Service,
@@ -356,7 +356,7 @@ public class HttpService {
 						 * We think anything json is coming from the Aircandi service.
 						 */
 						ServiceData serviceData = (ServiceData) HttpService.jsonToObject(responseContent, ObjectType.None, ServiceDataWrapper.True);
-						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, RadarForm.class);
+						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
 						if (serviceData != null) {
 							if (serviceData.androidMinimumVersion != null && serviceData.androidMinimumVersion.intValue() > clientVersionCode) {
 								HttpServiceException exception = new HttpServiceException("Invalid client version", ErrorType.Service,
@@ -1252,6 +1252,8 @@ public class HttpService {
 
 	public static class RequestListener {
 
+		public void onStart() {}
+		
 		public void onComplete() {}
 
 		public void onComplete(Object response) {}

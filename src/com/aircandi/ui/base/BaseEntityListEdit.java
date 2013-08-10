@@ -101,6 +101,7 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 			}
 		}
 		mBusyManager.hideBusy(); // visible by default
+		mBusyManager.stopBodyBusyIndicator();
 	}
 
 	@Override
@@ -351,7 +352,7 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		
+
 		MenuItem refresh = menu.findItem(R.id.refresh);
 		if (refresh != null) {
 			if (mBusyManager != null) {
@@ -369,7 +370,7 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 
 		return true;
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Misc
 	// --------------------------------------------------------------------------------------------
@@ -464,6 +465,7 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 
 				if (holder.photoView != null) {
 					holder.photoView.setTag(entity);
+					holder.photoView.getImageView().setImageDrawable(null);
 					UI.drawPhoto(holder.photoView, entity.getPhoto());
 				}
 			}

@@ -52,15 +52,12 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutMeta;
 import com.aircandi.service.objects.ShortcutSettings;
-import com.aircandi.ui.CreatedForm;
+import com.aircandi.ui.AircandiForm;
 import com.aircandi.ui.EntityList;
 import com.aircandi.ui.HelpForm;
-import com.aircandi.ui.NotificationList;
 import com.aircandi.ui.PhotoForm;
 import com.aircandi.ui.Preferences;
-import com.aircandi.ui.RadarForm;
 import com.aircandi.ui.SplashForm;
-import com.aircandi.ui.WatchingForm;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.ui.base.BaseActivity.ServiceOperation;
 import com.aircandi.ui.base.BaseBrowse;
@@ -160,9 +157,9 @@ public final class Routing {
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public static boolean route(final Activity activity, Route route, Entity entity, String schema, Bundle extras) {
 
-		if (route == Route.Radar) {
+		if (route == Route.Home) {
 
-			Intent intent = new Intent(activity, RadarForm.class);
+			Intent intent = new Intent(activity, AircandiForm.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -176,7 +173,7 @@ public final class Routing {
 
 			entity = Aircandi.getInstance().getUser();
 
-			final IntentBuilder intentBuilder = new IntentBuilder(activity, WatchingForm.class)
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, AircandiForm.class)
 					.setEntityId(Aircandi.getInstance().getUser().id);
 
 			Intent intent = intentBuilder.create();
@@ -193,7 +190,7 @@ public final class Routing {
 
 			entity = Aircandi.getInstance().getUser();
 
-			final IntentBuilder intentBuilder = new IntentBuilder(activity, CreatedForm.class)
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, AircandiForm.class)
 					.setEntityId(Aircandi.getInstance().getUser().id);
 
 			Intent intent = intentBuilder.create();
@@ -225,7 +222,7 @@ public final class Routing {
 
 		else if (route == Route.Notifications) {
 
-			Intent intent = new Intent(activity, NotificationList.class);
+			Intent intent = new Intent(activity, AircandiForm.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			activity.startActivity(intent);
 			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
@@ -299,18 +296,14 @@ public final class Routing {
 		}
 
 		else if (route == Route.Help) {
-			/*
-			 * Extra constructed here because this gets routed from menus.
-			 */
-			Intent intent = new Intent(activity, HelpForm.class);
-			if (activity.getClass().getSimpleName().equals("RadarForm")) {
-				intent.putExtra(Constants.EXTRA_HELP_ID, R.layout.radar_help);
+
+			if (extras == null) {
+				((BaseBrowse) activity).onHelp();
 			}
-			else if (activity.getClass().getSimpleName().equals("PlaceForm")) {
-				intent.putExtra(Constants.EXTRA_HELP_ID, R.layout.place_help);
-			}
-			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToHelp);
+			else {
+				IntentBuilder intentBuilder = new IntentBuilder(activity, HelpForm.class).setExtras(extras);
+				activity.startActivity(intentBuilder.create());
+				Animate.doOverridePendingTransition(activity, TransitionType.PageToHelp);			}
 			return true;
 		}
 
@@ -708,7 +701,7 @@ public final class Routing {
 
 				@Override
 				public void run() {
-					BaseActivity.mBusyManager.hideBusy();
+					((BaseActivity) activity).mBusyManager.hideBusy();
 				}
 			});
 		}
@@ -738,7 +731,7 @@ public final class Routing {
 					/*
 					 * We don't have a network connection.
 					 */
-					final Intent intent = new Intent(activity, RadarForm.class);
+					final Intent intent = new Intent(activity, AircandiForm.class);
 					AirNotification airNotification = new AirNotification();
 					airNotification.title = activity.getString(R.string.error_connection_none_notification_title);
 					airNotification.subtitle = activity.getString(R.string.error_connection_none_notification_message);
@@ -934,20 +927,11 @@ public final class Routing {
 		else if (itemId == R.id.watching) {
 			return Route.Watching;
 		}
-		else if (itemId == R.id.created) {
-			return Route.Created;
-		}
 		else if (itemId == android.R.id.home) {
 			return Route.Cancel;
 		}
 		else if (itemId == R.id.home) {
 			return Route.Home;
-		}
-		else if (itemId == R.id.radar) {
-			return Route.Radar;
-		}
-		else if (itemId == R.id.notifications) {
-			return Route.Notifications;
 		}
 		else if (itemId == R.id.signout) {
 			return Route.Signout;

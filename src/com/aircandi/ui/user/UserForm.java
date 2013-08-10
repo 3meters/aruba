@@ -56,16 +56,9 @@ public class UserForm extends BaseEntityForm {
 						, refresh
 						, LinkOptions.getDefault(DefaultType.LinksForUser));
 
-				/* Get user stats using rest api */
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
-						if (refresh) {
-							result = EntityManager.getInstance().getUserStats(mEntityId);
-							if (result.serviceResponse.responseCode == ResponseCode.Success) {
-								((User) mEntity).stats = (List<Stat>) result.data;
-							}
-						}
 					}
 				}
 
@@ -78,6 +71,7 @@ public class UserForm extends BaseEntityForm {
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					if (result.data != null) {
+						mEntity = (Entity) result.data;
 						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 						setActivityTitle(mEntity.name);
@@ -88,6 +82,48 @@ public class UserForm extends BaseEntityForm {
 							mMenuItemSignout.setVisible(canEdit());
 						}
 						draw();
+					}
+					loadStats();
+					mBusyManager.stopBodyBusyIndicator();
+				}
+				else {
+					Routing.serviceError(UserForm.this, result.serviceResponse);
+					mBusyManager.hideBusy();
+					mBusyManager.stopBodyBusyIndicator();
+				}
+			}
+
+		}.execute();
+	}
+
+	protected void loadStats() {
+
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				mBusyManager.showBusy();
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("GetStats");
+
+				/* Get user stats using rest api */
+				ModelResult result = EntityManager.getInstance().getUserStats(mEntityId);
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					((User) mEntity).stats = (List<Stat>) result.data;
+				}
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object modelResult) {
+				final ModelResult result = (ModelResult) modelResult;
+
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					if (result.data != null) {
+						drawStats();
 					}
 				}
 				else {
@@ -102,15 +138,6 @@ public class UserForm extends BaseEntityForm {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
-	
-	@Override
-	@SuppressWarnings("ucd")
-	public void onMenuItemClick(View view) {
-		Integer id = view.getId();
-		if (id != R.id.profile) {
-			super.onMenuItemClick(view);
-		}
-	}
 
 	// --------------------------------------------------------------------------------------------
 	// UI routines
@@ -125,7 +152,6 @@ public class UserForm extends BaseEntityForm {
 		final TextView area = (TextView) findViewById(R.id.area);
 		final TextView webUri = (TextView) findViewById(R.id.web_uri);
 		final TextView bio = (TextView) findViewById(R.id.bio);
-		final TextView stats = (TextView) findViewById(R.id.stats);
 
 		UI.setVisibility(photoView, View.GONE);
 		if (photoView != null) {
@@ -168,7 +194,21 @@ public class UserForm extends BaseEntityForm {
 			UI.setVisibility(findViewById(R.id.section_details), View.VISIBLE);
 		}
 
-		/* Stats */
+		if (user.stats != null) {
+			drawStats();
+		}
+
+		drawButtons();
+
+		if (mScrollView != null) {
+			mScrollView.setVisibility(View.VISIBLE);
+		}
+	}
+
+	private void drawStats() {
+
+		User user = (User) mEntity;
+		final TextView stats = (TextView) findViewById(R.id.stats);
 
 		UI.setVisibility(stats, View.GONE);
 		final StringBuilder statString = new StringBuilder(500);
@@ -260,12 +300,6 @@ public class UserForm extends BaseEntityForm {
 
 			stats.setText(Html.fromHtml(statString.toString()));
 			UI.setVisibility(stats, View.VISIBLE);
-		}
-
-		drawButtons();
-
-		if (mScrollView != null) {
-			mScrollView.setVisibility(View.VISIBLE);
 		}
 	}
 

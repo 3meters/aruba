@@ -4,4 +4,6 @@
     android:id="@+id/candi_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    aircandi:layout="@layout/widget_candi_view_radar" />
+    android:padding="3dp"
+    aircandi:layout="@layout/widget_candi_view_radar"
+    android:background="@drawable/selector_image" />

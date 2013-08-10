@@ -8,7 +8,6 @@ import android.os.Bundle;
 
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.BusyManager;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
@@ -44,9 +43,7 @@ public abstract class BaseEdit extends BaseActivity {
 		}
 	}
 
-	protected void initialize(Bundle savedInstanceState) {
-		mBusyManager = new BusyManager(this);
-	}
+	protected void initialize(Bundle savedInstanceState) {}
 
 	@Override
 	protected void configureActionBar() {

@@ -682,6 +682,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 						Routing.serviceError(BaseEntityEdit.this, result.serviceResponse);
 					}
 					mBusyManager.hideBusy();
+					mBusyManager.stopBodyBusyIndicator();
 				}
 
 			}.execute();

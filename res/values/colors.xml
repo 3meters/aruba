@@ -70,13 +70,15 @@
 
     <!-- Overlays -->
 
-    <color name="overlay_gray_light">#55333333</color>
-    <color name="overlay_gray_dark">#ff555555</color>
     <color name="overlay_start">#00000000</color>
     <color name="overlay_center">#88000000</color>
     <color name="overlay_end">#aa000000</color>
+    
+    <color name="overlay_gray_light">#55333333</color>
+    <color name="overlay_gray_dark">#ff555555</color>
     <color name="overlay_photo_detail">#66000000</color>
     <color name="overlay_help">#aa000000</color>
+    
     <color name="overlay_navigation_drawer_light">#55333333</color>
     <color name="overlay_navigation_drawer_dark">#88000000</color>
     

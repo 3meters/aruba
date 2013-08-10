@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <item android:drawable="@drawable/overlay_picture"/>
+    <item android:drawable="@drawable/overlay_picture_fadeout"/>
     <item>
         <shape
             android:innerRadiusRatio="3.4"

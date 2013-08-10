@@ -72,14 +72,6 @@ public class PhotoForm extends BaseBrowse {
 	}
 
 	@Override
-	protected void configureNavigationDrawer() {
-		super.configureNavigationDrawer();
-		if (mDrawerLayout != null) {
-			mDrawerToggle.setDrawerIndicatorEnabled(false);
-		}
-	}
-
-	@Override
 	protected void databind(Boolean refresh) {
 		List<Photo> photos = EntityManager.getInstance().getPhotos();
 		final Photo photo = EntityManager.getInstance().getPhoto(mImageUri);

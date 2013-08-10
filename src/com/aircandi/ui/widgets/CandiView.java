@@ -115,9 +115,6 @@ public class CandiView extends RelativeLayout {
 			drawPhoto();
 
 			if (mCandiViewGroup != null) {
-				final Integer padding = UI.getRawPixels(this.getContext(), 3);
-				this.setPadding(padding, padding, padding, padding);
-				this.setBackgroundResource(R.drawable.selector_image);
 				String colorizeKey = null;
 				if (((Place) mEntity).category != null) {
 					colorizeKey = ((Place) mEntity).category.name;
@@ -249,7 +246,7 @@ public class CandiView extends RelativeLayout {
 
 			/* Don't use gradient if we are not using a photo */
 			if (mInfoHolder != null) {
-				mInfoHolder.setBackgroundResource((mEntity.photo != null) ? R.drawable.overlay_picture : 0);
+				mInfoHolder.setBackgroundResource((mEntity.photo != null) ? R.drawable.overlay_picture_fadeout : 0);
 			}
 
 			UI.drawPhoto(mPhotoView, mEntity.getPhoto());

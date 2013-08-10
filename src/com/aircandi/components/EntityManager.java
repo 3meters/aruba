@@ -104,7 +104,12 @@ public class EntityManager {
 		final ModelResult result = getEntities(Arrays.asList(entityId), refresh, linkOptions);
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final List<Entity> entities = (List<Entity>) result.data;
-			result.data = entities.get(0);
+			if (entities.size() > 0) {
+				result.data = entities.get(0);
+			}
+			else {
+				result.data = null;
+			}
 		}
 		return result;
 	}
@@ -205,7 +210,7 @@ public class EntityManager {
 		}
 		return result;
 	}
-	
+
 	public ModelResult suggestApplinks(List<Entity> applinks, Place place) {
 
 		final ModelResult result = new ModelResult();
@@ -446,8 +451,8 @@ public class EntityManager {
 		// http://ariseditions.com:8080/data/actions?countBy=_user,type&find={"_user":"us.000000.00000.000.000001"}
 		try {
 			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST 
-							+ "actions?countBy=" 
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST
+							+ "actions?countBy="
 							+ URLEncoder.encode("_user,type", "utf-8")
 							+ "&find="
 							+ URLEncoder.encode("{\"_user\":\"" + entityId + "\"}", "utf-8"))
@@ -465,7 +470,7 @@ public class EntityManager {
 				final List<Stat> stats = (List<Stat>) serviceData.data;
 				result.data = stats;
 			}
-			
+
 		}
 		catch (UnsupportedEncodingException exception) {
 			exception.printStackTrace();
@@ -674,7 +679,7 @@ public class EntityManager {
 			entity.activityDate = DateTime.nowDate().getTime();
 			mEntityCache.upsertEntity(entity);
 			if (entity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
-				mEntityCache.updateEntityUser(entity);				
+				mEntityCache.updateEntityUser(entity);
 			}
 		}
 

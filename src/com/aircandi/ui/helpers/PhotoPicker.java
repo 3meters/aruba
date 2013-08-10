@@ -125,7 +125,7 @@ public class PhotoPicker extends BaseBrowse {
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 		}
 	}
-	
+
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
@@ -142,11 +142,18 @@ public class PhotoPicker extends BaseBrowse {
 			((ViewGroup) findViewById(R.id.search_group)).setVisibility(View.GONE);
 		}
 		else {
+			
 			final Bundle extras = this.getIntent().getExtras();
 			if (extras != null) {
 				mDefaultSearch = extras.getString(Constants.EXTRA_SEARCH_PHRASE);
 			}
+			
 			mSearch = (AirAutoCompleteTextView) findViewById(R.id.search_text);
+			
+			if (mDefaultSearch != null) {
+				mSearch.setText(mDefaultSearch);
+			}
+			
 			mSearch.setOnKeyListener(new OnKeyListener() {
 				@Override
 				public boolean onKey(View view, int keyCode, KeyEvent event) {
@@ -172,6 +179,7 @@ public class PhotoPicker extends BaseBrowse {
 		}
 
 		mBusyManager.hideBusy();
+		mBusyManager.stopBodyBusyIndicator();
 
 		/* Stash some sizing info */
 		mGridView = (GridView) findViewById(R.id.grid);
@@ -269,10 +277,11 @@ public class PhotoPicker extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 
 	private void startSearch(View view) {
+		
 		mQuery = mSearch.getText().toString();
 		mMessage.setVisibility(View.VISIBLE);
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);		
+		imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
 
 		try {
 			org.json.JSONObject jsonSearchMap = new org.json.JSONObject(Aircandi.settings.getString(Constants.SETTING_PICTURE_SEARCHES, "{}"));
@@ -295,7 +304,7 @@ public class PhotoPicker extends BaseBrowse {
 		else {
 			((EndlessImageAdapter) mGridView.getAdapter()).notifyDataSetChanged();
 		}
-		
+
 		/* Make sure the latest search appears in suggestions */
 		loadPreviousSearches();
 		bindSearchAdapter();
@@ -315,17 +324,17 @@ public class PhotoPicker extends BaseBrowse {
 
 	private void loadPreviousSearches() {
 		try {
-			//			Aircandi.settingsEditor.remove(Constants.SETTING_PICTURE_SEARCHES);
-			//			Aircandi.settingsEditor.commit();
 			org.json.JSONObject jsonSearchMap = new org.json.JSONObject(Aircandi.settings.getString(Constants.SETTING_PICTURE_SEARCHES, "{}"));
 			mPreviousSearches.clear();
 			if (mDefaultSearch != null) {
 				jsonSearchMap.put(mDefaultSearch, mDefaultSearch);
 			}
 			org.json.JSONArray jsonSearches = jsonSearchMap.names();
-			for (int i = 0; i < jsonSearches.length(); i++) {
-				String name = jsonSearches.getString(i);
-				mPreviousSearches.add(jsonSearchMap.getString(name));
+			if (jsonSearches != null) {
+				for (int i = 0; i < jsonSearches.length(); i++) {
+					String name = jsonSearches.getString(i);
+					mPreviousSearches.add(jsonSearchMap.getString(name));
+				}
 			}
 		}
 		catch (JSONException exception) {
@@ -467,6 +476,7 @@ public class PhotoPicker extends BaseBrowse {
 						@Override
 						public void run() {
 							mBusyManager.hideBusy();
+							mBusyManager.stopBodyBusyIndicator();
 						}
 					});
 					return mMoreImages.size() >= PAGE_SIZE;
@@ -477,6 +487,7 @@ public class PhotoPicker extends BaseBrowse {
 						@Override
 						public void run() {
 							mBusyManager.hideBusy();
+							mBusyManager.stopBodyBusyIndicator();
 						}
 					});
 					return false;
@@ -519,6 +530,7 @@ public class PhotoPicker extends BaseBrowse {
 					@Override
 					public void run() {
 						mBusyManager.hideBusy();
+						mBusyManager.stopBodyBusyIndicator();
 					}
 				});
 				return (getWrappedAdapter().getCount() + mMoreImages.size()) < LIST_MAX;

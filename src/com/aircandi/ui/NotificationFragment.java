@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -34,8 +35,8 @@ import com.aircandi.components.NotificationsContentProvider;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirNotification;
-import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.ui.base.BaseEntityForm;
+import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Dialogs;
@@ -43,63 +44,75 @@ import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
-public class NotificationList extends BaseBrowse implements LoaderManager.LoaderCallbacks<Cursor> {
+public class NotificationFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
 	protected ListView			mListView;
 	protected OnClickListener	mClickListener;
 	private ListAdapter			mAdapter;
-
-	protected Integer getListItemResId(String notificationType) {
-		Integer itemResId = R.layout.temp_listitem_news;
-		return itemResId;
-	}
+	private Handler				mHandler	= new Handler();
+	private static final int	LOADER_ID	= 1;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
-		super.initialize(savedInstanceState);
-
-		mListView = (ListView) findViewById(R.id.list);
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
 		mClickListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				final AirNotification notification = (AirNotification) ((ViewHolder) v.getTag()).data;
-				
+
 				/* Build intent that can be used in association with the notification */
 				if (notification.entity != null) {
 					if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-						notification.intent = Comments.viewForGetIntent(NotificationList.this, notification.entity.toId, Constants.TYPE_LINK_COMMENT, null);
+						notification.intent = Comments.viewForGetIntent(getSherlockActivity(), notification.entity.toId, Constants.TYPE_LINK_COMMENT, null);
 					}
 					else {
 						Class<?> clazz = BaseEntityForm.viewFormBySchema(notification.entity.schema);
-						IntentBuilder intentBuilder = new IntentBuilder(NotificationList.this, clazz)
+						IntentBuilder intentBuilder = new IntentBuilder(getSherlockActivity(), clazz)
 								.setEntityId(notification.entity.id)
 								.setEntitySchema(notification.entity.schema)
 								.setForceRefresh(true);
 						notification.intent = intentBuilder.create();
 					}
 				}
-				
-				Routing.intent(NotificationList.this, notification.intent);
+
+				Routing.intent(getSherlockActivity(), notification.intent);
 			}
 		};
 	}
 
 	@Override
-	protected void databind(final Boolean refresh) {
-		NotificationManager.getInstance().setNewCount(0);
-		//		if (mAdapter == null) {
-		getSupportLoaderManager().initLoader(0, null, this);
-		mAdapter = new ListAdapter(this, null, false);
-		mListView.setAdapter(mAdapter);
-		//		}
-		mBusyManager.hideBusy();
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View view = super.onCreateView(inflater, container, savedInstanceState);
+		mListView = (ListView) view.findViewById(R.id.list);
+		return view;
 	}
 
-	@SuppressWarnings("ucd")
-	public void doRefresh() {
-		/* Called from AircandiCommon */
-		databind(true);
+	protected void databind(final Boolean refresh) {
+		Logger.d(this, "databinding...");
+
+		showBusy();
+
+		/* Slight delay so the busy indicator has a chance to run */
+		mHandler.postDelayed(new Runnable() {
+
+			@Override
+			public void run() {
+				NotificationManager.getInstance().setNewCount(0);
+				if (mAdapter == null || refresh) {
+					mAdapter = new ListAdapter(getSherlockActivity(), null, false);
+					getSherlockActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, NotificationFragment.this);
+					mListView.setAdapter(mAdapter);
+				}
+				else {
+					mListView.setAdapter(mAdapter);
+					showMessage(mAdapter.getCount() == 0);
+					hideBusy();
+					mBusyManager.hideBusy();
+				}
+			}
+		}, 200);
+
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -107,23 +120,40 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 	// --------------------------------------------------------------------------------------------
 
 	@Override
+	public void onRefresh() {
+		mBusyManager.showBusy();
+		databind(true);
+	}
+
+	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		String[] projection = { NotificationTable.COLUMN_ID, NotificationTable.COLUMN_SENT_DATE, NotificationTable.COLUMN_OBJECT };
-		CursorLoader cursorLoader = new CursorLoader(this, NotificationsContentProvider.CONTENT_URI, projection, null, null, NotificationTable.COLUMN_SENT_DATE + " desc");
+		CursorLoader cursorLoader = new CursorLoader(getSherlockActivity()
+				, NotificationsContentProvider.CONTENT_URI
+				, projection
+				, null
+				, null
+				, NotificationTable.COLUMN_SENT_DATE + " desc");
 		return cursorLoader;
+	}
+
+	private void showMessage(Boolean visible) {
+		if (visible) {
+			getView().findViewById(R.id.message).setVisibility(View.VISIBLE);
+		}
+		else {
+			getView().findViewById(R.id.message).setVisibility(View.GONE);
+		}
 	}
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 		if (mAdapter != null && cursor != null) {
-			if (cursor.getCount() == 0) {
-				findViewById(R.id.message).setVisibility(View.VISIBLE);
-			}
-			else {
-				findViewById(R.id.message).setVisibility(View.GONE);
-			}
+			showMessage(cursor.getCount() == 0);
 			mAdapter.swapCursor(cursor);
 		}
+		hideBusy();
+		mBusyManager.hideBusy();
 	}
 
 	@Override
@@ -134,12 +164,10 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 
 	}
 
-	@Override
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
-		super.onMessage(event);
-		runOnUiThread(new Runnable() {
+		getSherlockActivity().runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				databind(true);
@@ -157,7 +185,7 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 				, getResources().getString(R.string.alert_delete_title)
 				, getResources().getString(R.string.alert_notifications_delete_message)
 				, null
-				, this
+				, getSherlockActivity()
 				, android.R.string.ok
 				, android.R.string.cancel
 				, null
@@ -170,13 +198,18 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 							Integer deleteCount = database.delete(NotificationTable.TABLE_NOTIFICATIONS, "1", null);
 							UI.showToastNotification("Items deleted: " + String.valueOf(deleteCount), Toast.LENGTH_SHORT);
 							databind(true);
-							findViewById(R.id.message).setVisibility(View.VISIBLE);
+							getView().findViewById(R.id.message).setVisibility(View.VISIBLE);
 						}
 					}
 				}
 				, null);
 		dialog.setCanceledOnTouchOutside(false);
 
+	}
+
+	protected Integer getListItemResId(String notificationType) {
+		Integer itemResId = R.layout.temp_listitem_news;
+		return itemResId;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -201,11 +234,10 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected void onResume() {
+	public void onResume() {
 		super.onResume();
-		if (!isFinishing()) {
-			//databind(true);
-		}
+		hideBusy();
+		databind(false);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -214,7 +246,7 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 
 	@Override
 	protected int getLayoutId() {
-		return R.layout.notification_list;
+		return R.layout.notification_list_fragment;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -231,7 +263,7 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 
 		@Override
 		public View newView(final Context context, Cursor cursor, ViewGroup parent) {
-			View view = LayoutInflater.from(NotificationList.this).inflate(getListItemResId(null), null);
+			View view = LayoutInflater.from(getSherlockActivity()).inflate(getListItemResId(null), null);
 			return view;
 		}
 
@@ -259,7 +291,7 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 			Long sentDate = cursor.getLong(sentDateIndex);
 			String jsonObject = cursor.getString(objectIndex);
 			AirNotification notification = (AirNotification) HttpService.jsonToObject(jsonObject, ObjectType.AirNotification);
-			
+
 			/* Decorate again in case the logic has changed since the notification was stored */
 			NotificationManager.getInstance().decorateNotification(notification);
 
@@ -290,9 +322,9 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 					if (notification.entity.photo == null && !notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 						holder.photoView.setVisibility(View.GONE);
 					}
-					else {
-						UI.drawPhoto(holder.photoView, notification.entity.getPhoto());
-					}
+
+					holder.photoView.getImageView().setImageDrawable(null);
+					UI.drawPhoto(holder.photoView, notification.entity.getPhoto());
 				}
 
 				UI.setVisibility(holder.description, View.GONE);
@@ -310,6 +342,7 @@ public class NotificationList extends BaseBrowse implements LoaderManager.Loader
 
 				if (holder.photoUserView != null) {
 					holder.photoUserView.setTag(notification);
+					holder.photoUserView.getImageView().setImageDrawable(null);
 					UI.drawPhoto(holder.photoUserView, notification.user.getPhoto());
 				}
 

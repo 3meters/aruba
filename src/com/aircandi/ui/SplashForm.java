@@ -27,6 +27,8 @@ import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
+import com.aircandi.service.objects.LinkOptions;
+import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.Dialogs;
@@ -38,6 +40,8 @@ import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.android.gcm.GCMRegistrar;
 
 public class SplashForm extends SherlockActivity {
+
+	private Boolean	startingMain	= false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -173,7 +177,7 @@ public class SplashForm extends SherlockActivity {
 
 	private void initialize() {
 		((ImageView) findViewById(R.id.image_background)).setBackgroundResource(R.drawable.img_splash_v);
-		findViewById(R.id.button_holder).setVisibility(View.VISIBLE);
+		showButtons(!startingMain);
 	}
 
 	private void signinAuto() {
@@ -196,10 +200,53 @@ public class SplashForm extends SherlockActivity {
 		}
 	}
 
+	private void showButtons(Boolean visible) {
+		if (visible) {
+			findViewById(R.id.button_holder).setVisibility(View.VISIBLE);
+		}
+		else {
+			findViewById(R.id.button_holder).setVisibility(View.GONE);
+		}
+	}
+
 	private void startMainApp() {
-		final Intent intent = new Intent(this, RadarForm.class);
-		startActivity(intent);
-		finish();
+
+		startingMain = true;
+
+		/* Always reset the entity cache */
+		EntityManager.getEntityCache().clear();
+
+		new AsyncTask() {
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				ModelResult result = new ModelResult();
+
+				if (Aircandi.getInstance().getUser() != null) {
+					LinkOptions options = LinkOptions.getDefault(DefaultType.LinksForUser);
+					result = EntityManager.getInstance().getEntity(Aircandi.getInstance().getUser().id, true, options);
+				}
+
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				final ModelResult result = (ModelResult) response;
+
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					final Intent intent = new Intent(SplashForm.this, AircandiForm.class);
+					startActivity(intent);
+					finish();
+				}
+				else {
+					Routing.serviceError(SplashForm.this, result.serviceResponse);
+					showButtons(true);
+				}
+			}
+
+		}.execute();
+
 	}
 
 	private void updateRequired() {

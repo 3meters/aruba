@@ -92,7 +92,7 @@ public class AirImageView extends RelativeLayout {
 
 		if (!isInEditMode()) {
 			mImageZoom = (ImageView) view.findViewById(R.id.image_zoom);
-			mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+			mProgressBar = (ProgressBar) view.findViewById(R.id.image_progress);
 		}
 
 		if (mImageMain != null) {
@@ -176,14 +176,7 @@ public class AirImageView extends RelativeLayout {
 					/*
 					 * Show broken image
 					 */
-					mThreadHandler.post(new Runnable() {
-
-						@Override
-						public void run() {
-							final Drawable drawable = AirImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
-							UI.showDrawableInImageView(drawable, mImageMain, true, Animate.fadeInMedium());
-						}
-					});
+					showBroken();
 				}
 
 				mThreadHandler.post(new Runnable() {
@@ -213,22 +206,40 @@ public class AirImageView extends RelativeLayout {
 
 			@Override
 			public void run() {
-				UI.clearImageInImageView(mImageMain, animate, Animate.fadeOutMedium());
+				final Drawable drawable = AirImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
+				UI.showDrawableInImageView(drawable, mImageMain, true, Animate.fadeInMedium());
 			}
 		});
 	}
 
-	private void showLoading() {
-		mProgressBar.setVisibility(View.VISIBLE);
-	}
-
-	public void hideLoading() {
-		mProgressBar.post(new Runnable() {
+	public void showBroken() {
+		mThreadHandler.post(new Runnable() {
 
 			@Override
 			public void run() {
-				final Animation animation = Animate.fadeOutMedium();
-				mProgressBar.startAnimation(animation);
+				mProgressBar.setVisibility(View.VISIBLE);
+			}
+		});
+	}
+	
+	public void showLoading() {
+		mThreadHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				mProgressBar.setVisibility(View.VISIBLE);
+			}
+		});
+	}
+
+	public void hideLoading() {
+		mThreadHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				mProgressBar.setVisibility(View.GONE);
+//				final Animation animation = Animate.fadeOutMedium();
+//				mProgressBar.startAnimation(animation);
 			}
 		});
 	}

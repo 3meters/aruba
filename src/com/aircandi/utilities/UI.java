@@ -18,8 +18,11 @@ import android.widget.Toast;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
+import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
+import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.widgets.AirImageView;
@@ -33,24 +36,17 @@ public class UI {
 		return false;
 	}
 
-	public static void drawPhoto(AirImageView view, Photo photo) {
+	public static void drawPhoto(final AirImageView photoView, Photo photo) {
 
 		if (photo != null && photo.hasBitmap()) {
-			view.hideLoading();
-			UI.showImageInImageView(photo.getBitmap(), view.getImageView(), true, Animate.fadeInMedium());
-			view.setVisibility(View.VISIBLE);
+			photoView.hideLoading();
+			UI.showImageInImageView(photo.getBitmap(), photoView.getImageView(), true, Animate.fadeInMedium());
+			photoView.setVisibility(View.VISIBLE);
 		}
 		else {
-			/* Don't do anything if the image is already set to the one we want */
-			final String photoUri = photo.getUri();
-			if (!UI.photosEqual(view.getPhoto(), photo)) {
-				final BitmapRequest bitmapRequest = new BitmapRequest(photoUri, view.getImageView());
-				bitmapRequest.setImageSize(view.getSizeHint());
-				bitmapRequest.setImageRequestor(view.getImageView());
-				view.getImageView().setTag(photoUri);
-				view.setPhoto(photo);
-				BitmapManager.getInstance().masterFetch(bitmapRequest);
-			}
+			photoView.getImageView().setTag(photo.getUri());
+			photoView.setPhoto(photo);
+			aircandi(photoView, photo);
 		}
 		/*
 		 * Special color treatment if enabled.
@@ -58,28 +54,124 @@ public class UI {
 		if (photo.colorize != null && photo.colorize) {
 
 			final int color = Place.getCategoryColor(photo.colorizeKey, true, Aircandi.muteColor, false);
-			view.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+			photoView.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 
 			Integer colorResId = Place.getCategoryColorResId(photo.colorizeKey, true, Aircandi.muteColor, false);
-			if (view.findViewById(R.id.color_layer) != null) {
-				(view.findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
-				(view.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
-				(view.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
+			if (photoView.findViewById(R.id.color_layer) != null) {
+				(photoView.findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
+				(photoView.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
+				(photoView.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
 			}
 			else {
-				view.getImageView().setBackgroundResource(colorResId);
+				photoView.getImageView().setBackgroundResource(colorResId);
 			}
 		}
 		else {
-			view.getImageView().clearColorFilter();
-			view.getImageView().setBackgroundResource(0);
-			if (view.findViewById(R.id.color_layer) != null) {
-				(view.findViewById(R.id.color_layer)).setBackgroundResource(0);
-				(view.findViewById(R.id.color_layer)).setVisibility(View.GONE);
-				(view.findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
+			photoView.getImageView().clearColorFilter();
+			photoView.getImageView().setBackgroundResource(0);
+			if (photoView.findViewById(R.id.color_layer) != null) {
+				(photoView.findViewById(R.id.color_layer)).setBackgroundResource(0);
+				(photoView.findViewById(R.id.color_layer)).setVisibility(View.GONE);
+				(photoView.findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
 			}
 		}
 	}
+
+	public static void aircandi(final AirImageView photoView, Photo photo) {
+		final BitmapRequest bitmapRequest = new BitmapRequest(photo.getUri(), photoView.getImageView())
+				.setImageSize(photoView.getSizeHint())
+				.setImageRequestor(photoView)
+				.setRequestListener(new RequestListener() {
+
+					@Override
+					public void onStart() {
+						photoView.showLoading();
+					}
+
+					@Override
+					public void onComplete(Object response) {
+
+						final ServiceResponse serviceResponse = (ServiceResponse) response;
+						photoView.hideLoading();
+						if (serviceResponse.responseCode != ResponseCode.Success) {
+							photoView.showBroken();
+						}
+					}
+
+				});
+
+		BitmapManager.getInstance().masterFetch(bitmapRequest);
+	}
+
+//	public static void picasso(final AirImageView photoView, Photo photo) {
+//
+//		String photoUri = photo.getUri();
+//
+//		if (photoUri.toLowerCase(Locale.US).startsWith("resource:")) {
+//			final String rawResourceName = photoUri.substring(photoUri.indexOf("resource:") + 9);
+//			final String resolvedResourceName = BitmapManager.getInstance().resolveResourceName(rawResourceName);
+//			final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable",
+//					Aircandi.getInstance().getPackageName());
+//
+//			Picasso.with(Aircandi.applicationContext)
+//					.load(resourceId)
+//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
+//					.centerCrop()
+//					.into(photoView.getImageView());
+//		}
+//		else {
+//			Picasso.with(Aircandi.applicationContext)
+//					.load(photoUri)
+//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
+//					.centerCrop()
+//					.into(photoView.getImageView());
+//		}
+//	}
+//
+//	public static void picassoFancy(final AirImageView photoView, Photo photo) {
+//
+//		String photoUri = photo.getUri();
+//
+//		if (photoUri.toLowerCase(Locale.US).startsWith("resource:")) {
+//			final String rawResourceName = photoUri.substring(photoUri.indexOf("resource:") + 9);
+//			final String resolvedResourceName = BitmapManager.getInstance().resolveResourceName(rawResourceName);
+//			final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable",
+//					Aircandi.getInstance().getPackageName());
+//
+//			Picasso.with(Aircandi.applicationContext)
+//					.load(resourceId)
+//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
+//					.centerCrop()
+//					.into(new Target() {
+//
+//						@Override
+//						public void onError() {}
+//
+//						@Override
+//						public void onSuccess(Bitmap bitmap) {
+//							final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+//							UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
+//						}
+//					});
+//		}
+//		else {
+//			Picasso.with(Aircandi.applicationContext)
+//					.load(photoUri)
+//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
+//					.centerCrop()
+//					.into(new Target() {
+//
+//						@Override
+//						public void onError() {}
+//
+//						@Override
+//						public void onSuccess(Bitmap bitmap) {
+//							final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+//							UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
+//						}
+//					});
+//		}
+//	}
 
 	public static void showToastNotification(final String message, final int duration) {
 		Aircandi.mainThreadHandler.post(new Runnable() {
@@ -142,6 +234,7 @@ public class UI {
 			});
 			imageView.startAnimation(animation);
 		}
+		imageView.postInvalidate();
 	}
 
 	public static void clearImageInImageView(ImageView imageView, boolean animate, Animation animation) {

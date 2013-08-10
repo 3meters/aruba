@@ -26,7 +26,7 @@ import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Device;
 import com.aircandi.service.objects.Place;
-import com.aircandi.ui.RadarForm;
+import com.aircandi.ui.AircandiForm;
 import com.google.android.gcm.GCMRegistrar;
 
 @SuppressWarnings("ucd")
@@ -79,8 +79,8 @@ public class NotificationManager {
 					Logger.i(this, "GCM: Registering device with Aircandi notification service");
 
 					Device device = new Device(Aircandi.getInstance().getUser().id, GCMRegistrar.getRegistrationId(Aircandi.applicationContext));
-					device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, RadarForm.class);
-					device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, RadarForm.class);
+					device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, AircandiForm.class);
+					device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
 
 					ModelResult result = EntityManager.getInstance().registerDevice(device);
 

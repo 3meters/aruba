@@ -31,7 +31,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 	protected DefaultType	mLinkOptions;
 
 	@Override
-	protected void databind(final Boolean refreshProposed) {
+	public void databind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
 
@@ -75,6 +75,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 					Routing.serviceError(BaseShortcutForm.this, result.serviceResponse);
 				}
 				mBusyManager.hideBusy();
+				mBusyManager.stopBodyBusyIndicator();
 			}
 
 		}.execute();

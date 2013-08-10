@@ -41,6 +41,13 @@
     <string name="menu_drawer_close">Close drawer</string>
     <string name="menu_count_zero">0</string>
     
+    <!-- Tabs -->
+
+    <string name="tab_radar_item">radar</string>
+    <string name="tab_notifications_item">feed</string>
+    <string name="tab_watching_item">watch</string>
+    <string name="tab_created_item">mine</string>
+        
     <!-- Preferences -->
 
     <string name="pref_dialog_ok">OK</string>
@@ -61,7 +68,7 @@
     <string name="help_radar_browse_places">Radar finds places nearby you can browse and interact with</string>
     <string name="help_radar_add_places">Use the action bar to create and share custom places</string>
     <string name="help_place_tune">Tune places to make them better</string>
-    <string name="help_place_add">Use the action bar to add posts and comments</string>
+    <string name="help_place_add">Use the action bar to add pictures and comments</string>
 
     <!-- Prefs: notifications -->
 

@@ -1,47 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/drawer_layout"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <RelativeLayout
+    <com.aircandi.ui.widgets.BounceGridView
+        android:id="@+id/grid"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:horizontalSpacing="4dp"
+        android:numColumns="auto_fit"
+        android:padding="1dp"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="4dp" />
 
-        <com.aircandi.ui.widgets.BounceGridView
-            android:id="@+id/grid"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="2dp"
-            android:gravity="center"
-            android:horizontalSpacing="4dp"
-            android:numColumns="auto_fit"
-            android:padding="1dp"
-            android:stretchMode="columnWidth"
-            android:verticalSpacing="4dp" />
+    <com.aircandi.ui.widgets.AirButton
+        android:id="@+id/button_new_entity"
+        style="@style/form_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:onClick="onNewEntityButtonClick"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/entity_button_comment_first"
+        android:visibility="gone" />
 
-        <com.aircandi.ui.widgets.AirButton
-            android:id="@+id/button_new_entity"
-            style="@style/form_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:onClick="onNewEntityButtonClick"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="@string/entity_button_comment_first"
-            android:visibility="gone" />
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="35dp"
+        android:background="?attr/backgroundProgress"
+        android:padding="10dp"
+        android:visibility="gone" />
 
-        <ProgressBar
-            android:id="@+id/progress"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_centerInParent="true"
-            android:layout_marginTop="35dp"
-            android:background="?attr/backgroundProgress"
-            android:padding="10dp" />
-    </RelativeLayout>
-
-    <include layout="@layout/menu_main" />
-
-</android.support.v4.widget.DrawerLayout>
+</RelativeLayout>

@@ -62,14 +62,6 @@ public class PlaceForm extends BaseEntityForm {
 	}
 
 	@Override
-	protected void configureNavigationDrawer() {
-		super.configureNavigationDrawer();
-		if (mDrawerLayout != null) {
-			mDrawerToggle.setDrawerIndicatorEnabled(false);
-		}
-	}
-
-	@Override
 	protected void databind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
@@ -152,6 +144,7 @@ public class PlaceForm extends BaseEntityForm {
 					Routing.serviceError(PlaceForm.this, result.serviceResponse);
 				}
 				mBusyManager.hideBusy();
+				mBusyManager.stopBodyBusyIndicator();
 			}
 
 		}.execute();
@@ -181,6 +174,7 @@ public class PlaceForm extends BaseEntityForm {
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
 				mBusyManager.hideBusy();
+				mBusyManager.stopBodyBusyIndicator();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					final Entity upsizedEntity = (Entity) result.data;
 					mEntityId = upsizedEntity.id;
@@ -207,10 +201,6 @@ public class PlaceForm extends BaseEntityForm {
 	public void onAdd() {
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 			Routing.route(this, Route.NewFor, mEntity);
-//
-//			Bundle extras = new Bundle();
-//			extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mEntityId);
-//			Routing.route(this, Route.New, null, Constants.SCHEMA_ENTITY_PICTURE, extras);
 		}
 		else {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
@@ -219,6 +209,13 @@ public class PlaceForm extends BaseEntityForm {
 					, null
 					, this, android.R.string.ok, null, null, null, null);
 		}
+	}
+
+	@Override
+	public void onHelp() {
+		Bundle extras = new Bundle();
+		extras.putInt(Constants.EXTRA_HELP_ID, R.layout.place_help);
+		Routing.route(this, Route.Help, null, null, extras);
 	}
 
 	@SuppressWarnings("ucd")
@@ -235,11 +232,9 @@ public class PlaceForm extends BaseEntityForm {
 		}
 	}
 
-	@Override
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
-		super.onMessage(event);
 		/*
 		 * Refresh the form because something new has been added to it
 		 * like a comment or post.

@@ -355,7 +355,10 @@ public class Place extends Entity implements Cloneable, Serializable {
 				return 1;
 			}
 			else {
-				if (object1.distance < object2.distance.intValue()) {
+				if (object1.distance == null || object2.distance == null) {
+					return 0;
+				}
+				else if (object1.distance < object2.distance.intValue()) {
 					return -1;
 				}
 				else if (object1.distance.intValue() > object2.distance.intValue()) {
@@ -374,7 +377,10 @@ public class Place extends Entity implements Cloneable, Serializable {
 		@Override
 		public int compare(Entity object1, Entity object2) {
 
-			if (object1.distance < object2.distance.intValue()) {
+			if (object1.distance == null || object2.distance == null) {
+				return 0;
+			}
+			else if (object1.distance < object2.distance.intValue()) {
 				return -1;
 			}
 			else if (object1.distance.intValue() > object2.distance.intValue()) {

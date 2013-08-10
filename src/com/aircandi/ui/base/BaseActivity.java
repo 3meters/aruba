@@ -36,7 +36,6 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.MenuManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NotificationManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.ui.SplashForm;
@@ -49,27 +48,27 @@ import com.google.android.gcm.GCMRegistrar;
 
 public abstract class BaseActivity extends SherlockFragmentActivity {
 
-	protected ActionBar			mActionBar;
-	protected String			mActivityTitle;
+	protected ActionBar	mActionBar;
+	protected String	mActivityTitle;
 
-	protected Boolean			mPrefChangeNewSearchNeeded	= false;
-	protected Boolean			mPrefChangeRefreshUiNeeded	= false;
-	protected Boolean			mPrefChangeReloadNeeded		= false;
-	protected static Resources	mResources;
-	public static BusyManager	mBusyManager;
+	protected Boolean	mPrefChangeNewSearchNeeded	= false;
+	protected Boolean	mPrefChangeRefreshUiNeeded	= false;
+	protected Boolean	mPrefChangeReloadNeeded		= false;
+	public Resources	mResources;
+	public BusyManager	mBusyManager;
 
 	/* Theme */
-	private String				mPrefTheme;
-	public String				mThemeTone;
-	private Boolean			mIsDialog;
+	private String		mPrefTheme;
+	private String		mThemeTone;
+	private Boolean		mIsDialog;
 
 	/* Menus */
-	protected MenuItem			mMenuItemEdit;
+	protected MenuItem	mMenuItemEdit;
 	@SuppressWarnings("ucd")
-	protected MenuItem			mMenuItemDelete;
+	protected MenuItem	mMenuItemDelete;
 	@SuppressWarnings("ucd")
-	protected MenuItem			mMenuItemAdd;
-	protected MenuItem			mMenuItemSignout;
+	protected MenuItem	mMenuItemAdd;
+	protected MenuItem	mMenuItemSignout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +90,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 			 * their create/initialize processing.
 			 */
 			mResources = getResources();
+			mBusyManager = new BusyManager(this);
 			/*
 			 * Theme must be set before contentView is processed.
 			 */
@@ -105,10 +105,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 			/* Fonts */
 			final Integer titleId = getActionBarTitleId();
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(titleId));
-
-			/* Make sure we have successfully registered this device with aircandi service */
-			/* FIXME: This might be getting called too often */
-			NotificationManager.getInstance().registerDeviceWithAircandi();
 
 			/* Theme info */
 			final TypedValue resourceName = new TypedValue();
@@ -138,8 +134,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 			// Ignore
 		}
 	}
-
-	protected void configureNavigationDrawer() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Events
@@ -173,6 +167,8 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 	}
 
 	public void onAdd() {}
+
+	public void onHelp() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Preferences
@@ -340,9 +336,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 					@Override
 					protected void onPreExecute() {
 						if (!silent) {
-							if (mBusyManager != null) {
-								mBusyManager.showBusy(R.string.progress_signing_out);
-							}
+							((BaseActivity) activity).mBusyManager.showBusy(R.string.progress_signing_out);
 						}
 					}
 
@@ -381,9 +375,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 
 							/* Notify interested parties */
 							UI.showToastNotification(Aircandi.applicationContext.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
-							if (mBusyManager != null) {
-								mBusyManager.hideBusy();
-							}
+							((BaseActivity) activity).mBusyManager.hideBusy();
 							Routing.route(activity, Route.Splash);
 						}
 
@@ -391,7 +383,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 				}.execute();
 			}
 		};
-		
+
 		if (!silent && activity != null) {
 			activity.runOnUiThread(task);
 		}
@@ -409,7 +401,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 		 * 
 		 * Behavior might be modified because we are using ABS.
 		 */
-		return MenuManager.onCreateOptionsMenu(this, menu);
+		return MenuManager.onCreateOptionsMenu(this, null, menu, null);
 	}
 
 	@Override
@@ -441,14 +433,15 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 
 	@Override
 	protected void onStart() {
-		super.onStart();
-		Tracker.activityStart(this, Aircandi.getInstance().getUser());
-		if (mPrefChangeReloadNeeded) {
-			final Intent intent = getIntent();
-			startActivity(intent);
-			finish();
-			return;
+		if (!isFinishing()) {
+			Tracker.activityStart(this, Aircandi.getInstance().getUser());
+			if (mPrefChangeReloadNeeded) {
+				final Intent intent = getIntent();
+				startActivity(intent);
+				finish();
+			}
 		}
+		super.onStart();
 	}
 
 	@Override
@@ -486,6 +479,14 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 	// --------------------------------------------------------------------------------------------
 	// Classes
 	// --------------------------------------------------------------------------------------------
+
+	public String getThemeTone() {
+		return mThemeTone;
+	}
+
+	public void setThemeTone(String themeTone) {
+		mThemeTone = themeTone;
+	}
 
 	public enum ServiceOperation {
 		Signin,

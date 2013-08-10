@@ -29,7 +29,6 @@ import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.applications.Comments;
 import com.aircandi.beta.R;
-import com.aircandi.components.BusyManager;
 import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
@@ -168,8 +167,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 				}
 			}
 		};
-
-		mBusyManager = new BusyManager(this);
 	}
 
 	@Override
@@ -181,14 +178,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 		final Entity entity = EntityManager.getEntity(mEntityId);
 		if (entity != null) {
 			setActivityTitle(entity.name);
-		}
-	}
-
-	@Override
-	protected void configureNavigationDrawer() {
-		super.configureNavigationDrawer();
-		if (mDrawerLayout != null) {
-			mDrawerToggle.setDrawerIndicatorEnabled(false);
 		}
 	}
 
@@ -221,6 +210,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 						}
 						else {
 							mBusyManager.hideBusy();
+							mBusyManager.stopBodyBusyIndicator();
 							onBackPressed();
 						}
 					}
@@ -250,6 +240,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 					Routing.serviceError(BaseEntityList.this, result.serviceResponse);
 				}
 				mBusyManager.hideBusy();
+				mBusyManager.stopBodyBusyIndicator();
 			}
 
 		}.execute();
@@ -605,6 +596,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 						photo = entity.creator.getPhoto();
 					}
 
+					holder.photoView.getImageView().setImageDrawable(null);
 					UI.drawPhoto(holder.photoView, photo);
 				}
 

@@ -55,7 +55,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 		mAppUrl = (EditText) findViewById(R.id.app_url);
 		mButtonTest = (Button) findViewById(R.id.button_test);
 
-		mSpinnerItemResId = mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
+		mSpinnerItemResId = getThemeTone().equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
 		/* Turn on test button if user has something to test */
 
@@ -174,7 +174,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 				final View view = super.getView(position, convertView, parent);
 
 				final TextView text = (TextView) view.findViewById(R.id.spinner_name);
-				if (mThemeTone.equals("dark")) {
+				if (getThemeTone().equals("dark")) {
 					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 						text.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.text_dark));
 					}
@@ -194,7 +194,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 			}
 		};
 
-		if (mThemeTone.equals("dark")) {
+		if (getThemeTone().equals("dark")) {
 			if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 				adapter.setDropDownViewResource(R.layout.spinner_item_light);
 			}
@@ -211,7 +211,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-				if (mThemeTone.equals("dark")) {
+				if (getThemeTone().equals("dark")) {
 					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 						((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));
 					}

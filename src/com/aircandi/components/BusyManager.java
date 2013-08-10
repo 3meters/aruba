@@ -86,7 +86,9 @@ public class BusyManager {
 
 		try {
 
-			startActionbarBusyIndicator();
+			if (mActivity != null) {
+				startActionbarBusyIndicator();
+			}
 
 			if (messageResId != null) {
 				final ProgressDialog progressDialog = getProgressDialog();
@@ -125,8 +127,9 @@ public class BusyManager {
 			}
 		}
 
-		stopActionbarBusyIndicator();
-		stopBodyBusyIndicator();
+		if (mActivity != null) {
+			stopActionbarBusyIndicator();
+		}
 	}
 
 	private void startActionbarBusyIndicator() {
@@ -150,7 +153,7 @@ public class BusyManager {
 		}
 	}
 
-	private void stopBodyBusyIndicator() {
+	public void stopBodyBusyIndicator() {
 		final View progress = mActivity.findViewById(R.id.progress);
 		if (progress != null) {
 			progress.setVisibility(View.GONE);
