@@ -1254,6 +1254,10 @@ public class HttpService {
 
 		public void onStart() {}
 		
+		public void onError(Object response) {}
+		
+		public void onError() {}
+		
 		public void onComplete() {}
 
 		public void onComplete(Object response) {}

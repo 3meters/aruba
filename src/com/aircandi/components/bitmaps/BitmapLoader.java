@@ -204,6 +204,7 @@ public class BitmapLoader {
 
 					/* Make sure this is still a valid request */
 					ServiceResponse serviceResponse = new ServiceResponse();
+					
 					if (bitmapRequest.getImageView() == null || bitmapRequest.getImageView().getTag().equals(bitmapRequest.getImageUri())) {
 
 						Logger.v(BitmapLoader.this, bitmapRequest.getImageUri() + ": Download started...");
@@ -290,7 +291,11 @@ public class BitmapLoader {
 								}
 							}
 						}
-
+						else {
+							if (bitmapRequest.getRequestListener() != null) {
+								bitmapRequest.getRequestListener().onError(serviceResponse);
+							}
+						}
 					}
 					else {
 						if (bitmapRequest.getRequestListener() != null) {

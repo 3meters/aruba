@@ -2,29 +2,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/home"
-        android:orderInCategory="1"
-        android:showAsAction="never"
-        android:title="@string/menu_home_item"/>
-    <item
         android:id="@+id/profile"
-        android:orderInCategory="1"
+        android:orderInCategory="9980"
         android:icon="?attr/iconUser"
         android:showAsAction="ifRoom"
         android:title="@string/menu_profile_item"/>
     <item
-        android:id="@+id/watching"
-        android:orderInCategory="1"
+        android:id="@+id/invite"
+        android:orderInCategory="9985"
         android:showAsAction="never"
-        android:title="@string/menu_watching_item"/>
+        android:title="@string/menu_invite_item"/>
     <item
         android:id="@+id/settings"
-        android:orderInCategory="1"
+        android:orderInCategory="9990"
         android:showAsAction="never"
         android:title="@string/menu_settings_item"/>
     <item
         android:id="@+id/feedback"
-        android:orderInCategory="1"
+        android:orderInCategory="9995"
         android:showAsAction="never"
         android:title="@string/menu_feedback_item"/>
 

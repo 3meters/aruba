@@ -104,7 +104,7 @@ public class PlaceForm extends BaseEntityForm {
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
-							mMenuItemEdit.setVisible(canEdit());
+							mMenuItemEdit.setVisible(canUserEdit());
 						}
 
 						/* Action bar icon */
@@ -459,7 +459,7 @@ public class PlaceForm extends BaseEntityForm {
 		}
 
 		/* Add post button in footer */
-		UI.setVisibility(findViewById(R.id.button_tune), canAdd() ? View.VISIBLE : View.GONE);
+		UI.setVisibility(findViewById(R.id.button_tune), canUserAdd() ? View.VISIBLE : View.GONE);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -467,7 +467,7 @@ public class PlaceForm extends BaseEntityForm {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected Boolean canEdit() {
+	protected Boolean canUserEdit() {
 		if (mEntity != null && mEntity.ownerId != null) {
 			if (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 				return true;

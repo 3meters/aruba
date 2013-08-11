@@ -29,13 +29,17 @@ public abstract class BaseFragment extends SherlockFragment {
 	public void onAttach(Activity activity) {
 		/* Called when the fragment has been associated with the activity. */
 		super.onAttach(activity);
+		mBusyManager = new BusyManager(activity);
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		/*
+		 * Triggers fragment menu construction in some android versions
+		 * so mBusyManager must have already been created.
+		 */
 		setHasOptionsMenu(true);
-		mBusyManager = new BusyManager(getSherlockActivity());
 		mExtras = getSherlockActivity().getIntent().getExtras();
 		mResources = getResources();
 	}
@@ -98,7 +102,7 @@ public abstract class BaseFragment extends SherlockFragment {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		MenuManager.onCreateOptionsMenu(null, this, menu, inflater);
+		MenuManager.onCreateOptionsMenu(this, menu, inflater);
 
 		MenuItem refresh = menu.findItem(R.id.refresh);
 		if (refresh != null) {

@@ -18,8 +18,6 @@ import android.widget.Toast;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.beta.R;
-import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.HttpService.RequestListener;
@@ -36,7 +34,7 @@ public class UI {
 		return false;
 	}
 
-	public static void drawPhoto(final AirImageView photoView, Photo photo) {
+	public static void drawPhoto(final AirImageView photoView, final Photo photo) {
 
 		if (photo != null && photo.hasBitmap()) {
 			photoView.hideLoading();
@@ -77,7 +75,7 @@ public class UI {
 		}
 	}
 
-	public static void aircandi(final AirImageView photoView, Photo photo) {
+	public static void aircandi(final AirImageView photoView, final Photo photo) {
 		final BitmapRequest bitmapRequest = new BitmapRequest(photo.getUri(), photoView.getImageView())
 				.setImageSize(photoView.getSizeHint())
 				.setImageRequestor(photoView)
@@ -89,13 +87,21 @@ public class UI {
 					}
 
 					@Override
-					public void onComplete(Object response) {
-
-						final ServiceResponse serviceResponse = (ServiceResponse) response;
-						photoView.hideLoading();
-						if (serviceResponse.responseCode != ResponseCode.Success) {
+					public void onError(Object response) {
+						if (photoView.getBrokenPhoto() != null) {
+							photoView.getImageView().setTag(photo.getUri());
+							photoView.setPhoto(photo);
+							aircandi(photoView, photoView.getBrokenPhoto());
+						}
+						else {
+							photoView.hideLoading();
 							photoView.showBroken();
 						}
+					}
+
+					@Override
+					public void onComplete(Object response) {
+						photoView.hideLoading();
 					}
 
 				});
@@ -103,75 +109,75 @@ public class UI {
 		BitmapManager.getInstance().masterFetch(bitmapRequest);
 	}
 
-//	public static void picasso(final AirImageView photoView, Photo photo) {
-//
-//		String photoUri = photo.getUri();
-//
-//		if (photoUri.toLowerCase(Locale.US).startsWith("resource:")) {
-//			final String rawResourceName = photoUri.substring(photoUri.indexOf("resource:") + 9);
-//			final String resolvedResourceName = BitmapManager.getInstance().resolveResourceName(rawResourceName);
-//			final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable",
-//					Aircandi.getInstance().getPackageName());
-//
-//			Picasso.with(Aircandi.applicationContext)
-//					.load(resourceId)
-//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
-//					.centerCrop()
-//					.into(photoView.getImageView());
-//		}
-//		else {
-//			Picasso.with(Aircandi.applicationContext)
-//					.load(photoUri)
-//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
-//					.centerCrop()
-//					.into(photoView.getImageView());
-//		}
-//	}
-//
-//	public static void picassoFancy(final AirImageView photoView, Photo photo) {
-//
-//		String photoUri = photo.getUri();
-//
-//		if (photoUri.toLowerCase(Locale.US).startsWith("resource:")) {
-//			final String rawResourceName = photoUri.substring(photoUri.indexOf("resource:") + 9);
-//			final String resolvedResourceName = BitmapManager.getInstance().resolveResourceName(rawResourceName);
-//			final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable",
-//					Aircandi.getInstance().getPackageName());
-//
-//			Picasso.with(Aircandi.applicationContext)
-//					.load(resourceId)
-//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
-//					.centerCrop()
-//					.into(new Target() {
-//
-//						@Override
-//						public void onError() {}
-//
-//						@Override
-//						public void onSuccess(Bitmap bitmap) {
-//							final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
-//							UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
-//						}
-//					});
-//		}
-//		else {
-//			Picasso.with(Aircandi.applicationContext)
-//					.load(photoUri)
-//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
-//					.centerCrop()
-//					.into(new Target() {
-//
-//						@Override
-//						public void onError() {}
-//
-//						@Override
-//						public void onSuccess(Bitmap bitmap) {
-//							final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
-//							UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
-//						}
-//					});
-//		}
-//	}
+	//	public static void picasso(final AirImageView photoView, Photo photo) {
+	//
+	//		String photoUri = photo.getUri();
+	//
+	//		if (photoUri.toLowerCase(Locale.US).startsWith("resource:")) {
+	//			final String rawResourceName = photoUri.substring(photoUri.indexOf("resource:") + 9);
+	//			final String resolvedResourceName = BitmapManager.getInstance().resolveResourceName(rawResourceName);
+	//			final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable",
+	//					Aircandi.getInstance().getPackageName());
+	//
+	//			Picasso.with(Aircandi.applicationContext)
+	//					.load(resourceId)
+	//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
+	//					.centerCrop()
+	//					.into(photoView.getImageView());
+	//		}
+	//		else {
+	//			Picasso.with(Aircandi.applicationContext)
+	//					.load(photoUri)
+	//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
+	//					.centerCrop()
+	//					.into(photoView.getImageView());
+	//		}
+	//	}
+	//
+	//	public static void picassoFancy(final AirImageView photoView, Photo photo) {
+	//
+	//		String photoUri = photo.getUri();
+	//
+	//		if (photoUri.toLowerCase(Locale.US).startsWith("resource:")) {
+	//			final String rawResourceName = photoUri.substring(photoUri.indexOf("resource:") + 9);
+	//			final String resolvedResourceName = BitmapManager.getInstance().resolveResourceName(rawResourceName);
+	//			final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable",
+	//					Aircandi.getInstance().getPackageName());
+	//
+	//			Picasso.with(Aircandi.applicationContext)
+	//					.load(resourceId)
+	//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
+	//					.centerCrop()
+	//					.into(new Target() {
+	//
+	//						@Override
+	//						public void onError() {}
+	//
+	//						@Override
+	//						public void onSuccess(Bitmap bitmap) {
+	//							final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+	//							UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
+	//						}
+	//					});
+	//		}
+	//		else {
+	//			Picasso.with(Aircandi.applicationContext)
+	//					.load(photoUri)
+	//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
+	//					.centerCrop()
+	//					.into(new Target() {
+	//
+	//						@Override
+	//						public void onError() {}
+	//
+	//						@Override
+	//						public void onSuccess(Bitmap bitmap) {
+	//							final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+	//							UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
+	//						}
+	//					});
+	//		}
+	//	}
 
 	public static void showToastNotification(final String message, final int duration) {
 		Aircandi.mainThreadHandler.post(new Runnable() {

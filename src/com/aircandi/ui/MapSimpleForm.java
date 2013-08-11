@@ -1,11 +1,14 @@
 package com.aircandi.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.view.View;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Window;
@@ -20,15 +23,21 @@ import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.ui.fragments.MapFragment;
 import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapSimpleForm extends SherlockFragmentActivity {
 
-	MapFragment	mMapFragment;
-	Entity		mEntity;
-	String		mEntityId;
+	SupportMapFragment			mMapFragment;
+	Entity						mEntity;
+	String						mEntityId;
+	private static final int	REQUEST_CODE_RECOVER_PLAY_SERVICES	= 1001;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -37,9 +46,9 @@ public class MapSimpleForm extends SherlockFragmentActivity {
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.map_form);
 
+		setSupportProgressBarIndeterminateVisibility(Boolean.FALSE);
 		FragmentManager fm = getSupportFragmentManager();
 		mMapFragment = (MapFragment) fm.findFragmentByTag("tag_fragment_map");
-		databind(false);
 	}
 
 	protected void unpackIntent() {
@@ -97,6 +106,10 @@ public class MapSimpleForm extends SherlockFragmentActivity {
 	}
 
 	protected void draw() {
+		if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
+			UI.showToastNotification("Google Play Services not available", Toast.LENGTH_SHORT);
+			return;
+		}
 		if (getVersionFromPackageManager(this) >= 2) {
 			setUpMap();
 		}
@@ -105,6 +118,19 @@ public class MapSimpleForm extends SherlockFragmentActivity {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+			case REQUEST_CODE_RECOVER_PLAY_SERVICES:
+				if (resultCode == RESULT_CANCELED) {
+					Toast.makeText(this, "Google Play Services must be installed and up-to-date.", Toast.LENGTH_SHORT).show();
+					finish();
+				}
+				return;
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Methods
@@ -119,18 +145,51 @@ public class MapSimpleForm extends SherlockFragmentActivity {
 	private void setUpMap() {
 		AirLocation location = mEntity.getLocation();
 		if (location != null) {
-			MarkerOptions marker = new MarkerOptions().position(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()));
+			MarkerOptions options = new MarkerOptions().position(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()));
 			if (mEntity.name != null) {
-				marker.title(mEntity.name);
+				options.title(mEntity.name);
 			}
-			mMapFragment.getMap().addMarker(marker);
-			mMapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()), 17));
+			Marker marker = mMapFragment.getMap().addMarker(options);
+			marker.showInfoWindow();
+			mMapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()), 16));
 		}
+	}
+
+	private boolean checkPlayServices() {
+		int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+		if (status != ConnectionResult.SUCCESS) {
+			if (GooglePlayServicesUtil.isUserRecoverableError(status)) {
+				showErrorDialog(status);
+			}
+			else {
+				UI.showToastNotification("Maps are not supported for this device", Toast.LENGTH_LONG);
+				finish();
+			}
+			return false;
+		}
+		return true;
+	}
+
+	void showErrorDialog(int code) {
+		GooglePlayServicesUtil.getErrorDialog(code, this, REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Menus
 	// --------------------------------------------------------------------------------------------
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (checkPlayServices()) {
+			findViewById(R.id.map_holder).setVisibility(View.VISIBLE);
+			databind(false);
+		}
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc

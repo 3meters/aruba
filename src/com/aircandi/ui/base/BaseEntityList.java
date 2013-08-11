@@ -322,17 +322,19 @@ public abstract class BaseEntityList extends BaseBrowse {
 		/*
 		 * Setup menu items that are common to entity list browsing.
 		 */
-		MenuItem menuItem = menu.findItem(R.id.add);
-		menuItem.setVisible(false);
-		if (mListNewEnabled) {
-			menuItem.setTitle(R.string.menu_add_entity_item);
-			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-				menuItem.setTitle(R.string.menu_add_comment_item);
+		MenuItem add = menu.findItem(R.id.add);
+		if (add != null) {
+			add.setVisible(false);
+			if (mListNewEnabled) {
+				add.setTitle(R.string.menu_add_entity_item);
+				if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+					add.setTitle(R.string.menu_add_comment_item);
+				}
+				else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+					add.setTitle(R.string.menu_add_picture_item);
+				}
+				add.setVisible(true);
 			}
-			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-				menuItem.setTitle(R.string.menu_add_picture_item);
-			}
-			menuItem.setVisible(true);
 		}
 
 		MenuItem refresh = menu.findItem(R.id.refresh);

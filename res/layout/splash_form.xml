@@ -79,7 +79,7 @@
                 android:id="@+id/button_signup"
                 style="@style/form_button"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/form_button_height"
                 android:layout_marginRight="3dp"
                 android:layout_weight="1"
                 android:onClick="onSignupButtonClick"
@@ -89,7 +89,7 @@
                 android:id="@+id/button_signin"
                 style="@style/form_button"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/form_button_height"
                 android:layout_weight="1"
                 android:onClick="onSigninButtonClick"
                 android:text="@string/splash_button_signin" />

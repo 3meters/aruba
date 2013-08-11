@@ -33,7 +33,13 @@ public class Applink extends Entity implements Cloneable, Serializable {
 
 	// --------------------------------------------------------------------------------------------
 	// Set and get
-	// --------------------------------------------------------------------------------------------	
+	// --------------------------------------------------------------------------------------------
+	
+	public static Photo getDefaultPhoto(String type) {
+		String photoUri = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + type + ".png";
+		Photo photo = new Photo(photoUri, null, null, null, PhotoSource.assets);
+		return photo;
+	}
 
 	@Override
 	public Photo getDefaultPhoto() {

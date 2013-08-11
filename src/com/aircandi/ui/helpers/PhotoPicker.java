@@ -142,18 +142,24 @@ public class PhotoPicker extends BaseBrowse {
 			((ViewGroup) findViewById(R.id.search_group)).setVisibility(View.GONE);
 		}
 		else {
-			
+
 			final Bundle extras = this.getIntent().getExtras();
 			if (extras != null) {
 				mDefaultSearch = extras.getString(Constants.EXTRA_SEARCH_PHRASE);
 			}
-			
+
 			mSearch = (AirAutoCompleteTextView) findViewById(R.id.search_text);
-			
-			if (mDefaultSearch != null) {
+
+			if (mDefaultSearch != null && !mDefaultSearch.equals("")) {
 				mSearch.setText(mDefaultSearch);
 			}
-			
+			else {
+				String lastSearch = Aircandi.settings.getString(Constants.SETTING_PICTURE_SEARCH_LAST, null);
+				if (lastSearch != null && !lastSearch.equals("")) {
+					mSearch.setText(lastSearch);
+				}
+			}
+
 			mSearch.setOnKeyListener(new OnKeyListener() {
 				@Override
 				public boolean onKey(View view, int keyCode, KeyEvent event) {
@@ -277,8 +283,13 @@ public class PhotoPicker extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 
 	private void startSearch(View view) {
+
 		
-		mQuery = mSearch.getText().toString();
+		mQuery = mSearch.getText().toString().trim();
+
+		Aircandi.settingsEditor.putString(Constants.SETTING_PICTURE_SEARCH_LAST, mQuery);
+		Aircandi.settingsEditor.commit();
+				
 		mMessage.setVisibility(View.VISIBLE);
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);

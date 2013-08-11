@@ -157,7 +157,11 @@ public final class Routing {
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public static boolean route(final Activity activity, Route route, Entity entity, String schema, Bundle extras) {
 
-		if (route == Route.Home) {
+		if (route == Route.Unknown) {
+			
+			return false;
+		}
+		else if (route == Route.Home) {
 
 			Intent intent = new Intent(activity, AircandiForm.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -395,8 +399,8 @@ public final class Routing {
 		}
 
 		else if (route == Route.DeleteNotifications) {
-
-			return true;
+			
+			return false;
 		}
 
 		else if (route == Route.CancelHelp) {
@@ -924,9 +928,6 @@ public final class Routing {
 		else if (itemId == R.id.profile) {
 			return Route.SigninProfile;
 		}
-		else if (itemId == R.id.watching) {
-			return Route.Watching;
-		}
 		else if (itemId == android.R.id.home) {
 			return Route.Cancel;
 		}
@@ -947,9 +948,6 @@ public final class Routing {
 		}
 		else if (itemId == R.id.delete) {
 			return Route.Delete;
-		}
-		else if (itemId == R.id.delete_notifications) {
-			return Route.DeleteNotifications;
 		}
 		return Route.Unknown;
 	}
@@ -994,6 +992,10 @@ public final class Routing {
 		PhotoFromCamera,
 		PhotoSearch,
 		PhotoPlaceSearch,
-		Tune, NewFor, DeleteNotifications, Notifications, Created
+		Tune, 
+		NewFor, 
+		DeleteNotifications, 
+		Notifications, 
+		Created
 	}
 }

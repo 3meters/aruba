@@ -14,7 +14,7 @@
         <com.aircandi.ui.widgets.AirAutoCompleteTextView
             android:id="@+id/search_text"
             style="@style/form_edit"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="@dimen/form_field_height"
             android:layout_weight="1"
             android:completionThreshold="1"

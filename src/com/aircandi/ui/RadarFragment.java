@@ -105,8 +105,6 @@ public class RadarFragment extends BaseFragment implements
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		
-		if (getSherlockActivity().isDestroyed()) return null;
-		
 		View view = super.onCreateView(inflater, container, savedInstanceState);
 		mList = (ListView) view.findViewById(R.id.radar_list);
 

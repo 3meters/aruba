@@ -82,7 +82,7 @@ public class PictureForm extends BaseEntityForm {
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
-							mMenuItemEdit.setVisible(canEdit());
+							mMenuItemEdit.setVisible(canUserEdit());
 						}
 						draw();
 					}

@@ -96,14 +96,18 @@
                 <com.aircandi.ui.widgets.AirTextView
                     android:id="@+id/area"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp" />
 
                 <!-- Web link -->
 
                 <com.aircandi.ui.widgets.AirTextView
                     android:id="@+id/web_uri"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:autoLink="all"
+                    android:linksClickable="true" />
 
                 <!-- Bio -->
 
@@ -122,7 +126,7 @@
         android:layout_centerInParent="true"
         android:layout_marginTop="35dp"
         android:background="?attr/backgroundProgress"
-        android:padding="10dp" 
-        android:visibility="gone"/>
+        android:padding="10dp"
+        android:visibility="gone" />
 
 </RelativeLayout>

@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ProgressBar;
@@ -41,6 +40,7 @@ public class AirImageView extends RelativeLayout {
 	private boolean						mShowBusy;
 	private Integer						mLayoutId;
 	private Integer						mBrokenDrawable;
+	private Photo						mBrokenPhoto;
 	private ScaleType					mScaleType			= ScaleType.CENTER_CROP;
 
 	private static final String			androidNamespace	= "http://schemas.android.com/apk/res/android";
@@ -206,8 +206,7 @@ public class AirImageView extends RelativeLayout {
 
 			@Override
 			public void run() {
-				final Drawable drawable = AirImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
-				UI.showDrawableInImageView(drawable, mImageMain, true, Animate.fadeInMedium());
+				UI.clearImageInImageView(mImageMain, animate, Animate.fadeOutMedium());
 			}
 		});
 	}
@@ -217,7 +216,8 @@ public class AirImageView extends RelativeLayout {
 
 			@Override
 			public void run() {
-				mProgressBar.setVisibility(View.VISIBLE);
+				final Drawable drawable = AirImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
+				UI.showDrawableInImageView(drawable, mImageMain, true, Animate.fadeInMedium());
 			}
 		});
 	}
@@ -238,8 +238,6 @@ public class AirImageView extends RelativeLayout {
 			@Override
 			public void run() {
 				mProgressBar.setVisibility(View.GONE);
-//				final Animation animation = Animate.fadeOutMedium();
-//				mProgressBar.startAnimation(animation);
 			}
 		});
 	}
@@ -295,5 +293,17 @@ public class AirImageView extends RelativeLayout {
 
 	public void setPhoto(Photo photo) {
 		mPhoto = photo;
+	}
+
+	public void setBrokenDrawable(Integer brokenDrawable) {
+		mBrokenDrawable = brokenDrawable;
+	}
+
+	public Photo getBrokenPhoto() {
+		return mBrokenPhoto;
+	}
+
+	public void setBrokenPhoto(Photo brokenPhoto) {
+		mBrokenPhoto = brokenPhoto;
 	}
 }

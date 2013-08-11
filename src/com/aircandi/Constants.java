@@ -239,7 +239,7 @@ public final class Constants {
 	/* Settings */
 	public static final String	SETTING_USER								= "Setting_User";
 	public static final String	SETTING_USER_SESSION						= "Setting_User_Session";
-	public static final String	SETTING_PICTURE_SEARCH						= "Setting_Picture_Search";
+	public static final String	SETTING_PICTURE_SEARCH_LAST					= "Setting_Picture_Search_Last";
 	public static final String	SETTING_PICTURE_SEARCHES					= "Setting_Picture_Searches";
 	public static final String	SETTING_LAST_EMAIL							= "Setting_Last_Email";
 	public static final String	SETTING_RUN_ONCE_HELP_RADAR					= "Setting_Run_Once_Help_Radar";

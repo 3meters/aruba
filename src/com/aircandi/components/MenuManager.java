@@ -10,68 +10,71 @@ import com.aircandi.beta.R;
 
 public class MenuManager {
 
-	public static boolean onCreateOptionsMenu(Activity activity, Fragment fragment, Menu menu, MenuInflater inflater) {
+	public static boolean onCreateOptionsMenu(Activity activity, Menu menu) {
 
 		/* Browsing */
 
-		if (activity != null) {
+		String activityName = activity.getClass().getSimpleName();
+		final SherlockFragmentActivity sherlock = (SherlockFragmentActivity) activity;
+		MenuInflater menuInflater = sherlock.getSupportMenuInflater();
 
-			String activityName = activity.getClass().getSimpleName();
-			final SherlockFragmentActivity sherlock = (SherlockFragmentActivity) activity;
-			MenuInflater menuInflater = sherlock.getSupportMenuInflater();
+		/* Editing */
 
-			if (activityName.equals("AircandiForm")) {
-				menuInflater.inflate(R.menu.menu_base_end, menu);
-			}
-			else if (activityName.equals("PlaceForm")) {
-				menuInflater.inflate(R.menu.menu_browse_place, menu);
-				menuInflater.inflate(R.menu.menu_base_end, menu);
-				menuInflater.inflate(R.menu.menu_base_help, menu);
-			}
-			else if (activityName.equals("PictureForm")) {
-				menuInflater.inflate(R.menu.menu_browse_entity, menu);
-				menuInflater.inflate(R.menu.menu_base_end, menu);
-			}
-			else if (activityName.equals("UserForm")) {
-				menuInflater.inflate(R.menu.menu_browse_user, menu);
-				menuInflater.inflate(R.menu.menu_base_end, menu);
-			}
-			else if (activityName.equals("EntityList")
-					|| activityName.equals("EntityGrid")) {
-				menuInflater.inflate(R.menu.menu_browse_entity_list, menu);
-				menuInflater.inflate(R.menu.menu_base_end, menu);
-			}
-			else if (activityName.equals("HelpForm")) {
+		if (activityName.equals("CommentEdit")
+				|| activityName.equals("FeedbackEdit")) {
+			menuInflater.inflate(R.menu.menu_insert_entity, menu);
+		}
+		else if (activityName.equals("ApplinkListEdit")) {
+			menuInflater.inflate(R.menu.menu_edit_list, menu);
+		}
+		else if (activityName.equals("ApplinkEdit")
+				|| activityName.equals("UserEdit")
+				|| activityName.equals("PasswordEdit")
+				|| activityName.equals("TuningEdit")
+				|| activityName.contains("SignInEdit")) {
+			menuInflater.inflate(R.menu.menu_edit_builder, menu);
+		}
+		else if (activityName.contains("Edit")) {
+			menuInflater.inflate(R.menu.menu_edit_entity, menu);
+		}
+		else if (activityName.contains("Builder")) {
+			menuInflater.inflate(R.menu.menu_edit_builder, menu);
+		}
+		else {
+
+			/* Browse */
+
+			if (activityName.equals("HelpForm")) {
 				menuInflater.inflate(R.menu.menu_browse_help, menu);
 			}
-
-			/* Editing */
-
-			else if (activityName.equals("CommentEdit")
-					|| activityName.equals("FeedbackEdit")) {
-				menuInflater.inflate(R.menu.menu_insert_entity, menu);
-			}
-			else if (activityName.equals("ApplinkListEdit")) {
-				menuInflater.inflate(R.menu.menu_edit_list, menu);
-			}
-			else if (activityName.equals("ApplinkEdit")
-					|| activityName.equals("UserEdit")
-					|| activityName.equals("PasswordEdit")
-					|| activityName.equals("TuningEdit")
-					|| activityName.contains("SignInEdit")) {
-				menuInflater.inflate(R.menu.menu_edit_builder, menu);
-			}
-			else if (activityName.contains("Edit")) {
-				menuInflater.inflate(R.menu.menu_edit_entity, menu);
-			}
-			else if (activityName.contains("Builder")) {
-				menuInflater.inflate(R.menu.menu_edit_builder, menu);
-			}
 			else {
-				return false;
+				menuInflater.inflate(R.menu.menu_base, menu);
+				
+				if (!activityName.equals("AircandiForm")) {
+					menuInflater.inflate(R.menu.menu_home, menu);
+				}
+
+				if (activityName.equals("PlaceForm")) {
+					menuInflater.inflate(R.menu.menu_browse_place, menu);
+					menuInflater.inflate(R.menu.menu_help, menu);
+				}
+				else if (activityName.equals("PictureForm")) {
+					menuInflater.inflate(R.menu.menu_browse_entity, menu);
+				}
+				else if (activityName.equals("UserForm")) {
+					menuInflater.inflate(R.menu.menu_browse_user, menu);
+				}
+				else if (activityName.equals("EntityList")
+						|| activityName.equals("EntityGrid")) {
+					menuInflater.inflate(R.menu.menu_browse_entity_list, menu);
+				}
 			}
-			return true;
 		}
+
+		return true;
+	}
+
+	public static boolean onCreateOptionsMenu(Fragment fragment, Menu menu, MenuInflater inflater) {
 
 		/* Fragments */
 
@@ -82,7 +85,7 @@ public class MenuManager {
 
 			if (fragmentName.equals("RadarFragment")) {
 				menuInflater.inflate(R.menu.menu_browse_radar, menu);
-				menuInflater.inflate(R.menu.menu_base_help, menu);
+				menuInflater.inflate(R.menu.menu_help, menu);
 			}
 			else if (fragmentName.equals("CreatedFragment")) {
 				menuInflater.inflate(R.menu.menu_browse_created, menu);

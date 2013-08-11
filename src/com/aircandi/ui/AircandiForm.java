@@ -87,25 +87,26 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 
 		// The attacher should always be created in the Activity's onCreate
 		mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
-
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-		actionBar.setDisplayShowTitleEnabled(true);
-		actionBar.setDisplayShowHomeEnabled(true);
-
-		addTab(getString(R.string.tab_radar_item), getString(R.string.tab_radar_item), RadarFragment.class, null);
-		addTab(getString(R.string.tab_watching_item), getString(R.string.tab_watching_item), WatchingFragment.class, null);
-		addTab(getString(R.string.tab_created_item), getString(R.string.tab_created_item), CreatedFragment.class, null);
-		addTab(getString(R.string.tab_notifications_item), getString(R.string.tab_notifications_item), NotificationFragment.class, null);
-		
-		actionBar.selectTab(actionBar.getTabAt(0));
 	}
 
 	@Override
 	protected void configureActionBar() {
 		super.configureActionBar();
 		if (mActionBar != null) {
+			
+			mActionBar.setDisplayShowTitleEnabled(true);
+			mActionBar.setDisplayShowHomeEnabled(true);
+			
+			mActionBar.setHomeButtonEnabled(false);
 			mActionBar.setDisplayHomeAsUpEnabled(false);
+
+			mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+			addTab(getString(R.string.tab_radar_item), getString(R.string.tab_radar_item), RadarFragment.class, null);
+			addTab(getString(R.string.tab_watching_item), getString(R.string.tab_watching_item), WatchingFragment.class, null);
+			addTab(getString(R.string.tab_created_item), getString(R.string.tab_created_item), CreatedFragment.class, null);
+			addTab(getString(R.string.tab_notifications_item), getString(R.string.tab_notifications_item), NotificationFragment.class, null);
+
+			mActionBar.selectTab(mActionBar.getTabAt(0));
 		}
 	}
 
@@ -145,7 +146,7 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 		if (info.clss.getName().equals("com.aircandi.ui.RadarFragment")) {
 			mRadarFragment = fragment;
 		}
-		
+
 		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
 		/* Replace whatever is in the fragment_container view with this fragment */

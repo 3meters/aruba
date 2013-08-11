@@ -415,8 +415,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 						if (pictureSource.equals(Constants.PHOTO_SOURCE_SEARCH)) {
 							String defaultSearch = null;
-							if (findViewById(R.id.name) != null) {
-								defaultSearch = Utilities.emptyAsNull(((TextView) findViewById(R.id.name)).getText().toString().trim());
+							if (mEntity.name != null) {
+								defaultSearch = mEntity.name.trim();
 							}
 							photoSearch(defaultSearch);
 						}
@@ -976,8 +976,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		return Routing.route(this, Routing.routeForMenuId(menuItem.getItemId()), mEntity);
+	public boolean onOptionsItemSelected(MenuItem item) {
+		return Routing.route(this, Routing.routeForMenuId(item.getItemId()), mEntity);
 	}
 
 }

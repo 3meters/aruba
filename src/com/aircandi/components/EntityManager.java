@@ -589,6 +589,10 @@ public class EntityManager {
 
 				/* Entity */
 				parameters.putString("entity", "object:" + HttpService.objectToJson(entity, UseAnnotations.True, ExcludeNulls.True));
+				
+				if (entity.synthetic) {
+					parameters.putBoolean("skipNotifications", true);
+				}
 
 				final ServiceRequest serviceRequest = new ServiceRequest()
 						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity")

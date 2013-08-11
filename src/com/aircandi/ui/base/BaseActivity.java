@@ -76,7 +76,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 			/*
 			 * We restarting after a crash or after being killed by Android
 			 */
-			super.onCreate(savedInstanceState);
+			super.onCreate(null); // null prevents fragment auto creation
 			Logger.d(this, "Aircandi not launched normally, routing to splash activity");
 			Intent intent = new Intent(this, SplashForm.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -401,7 +401,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 		 * 
 		 * Behavior might be modified because we are using ABS.
 		 */
-		return MenuManager.onCreateOptionsMenu(this, null, menu, null);
+		return MenuManager.onCreateOptionsMenu(this, menu);
 	}
 
 	@Override

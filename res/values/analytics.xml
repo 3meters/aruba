@@ -33,12 +33,11 @@
     <string name="com.aircandi.ui.EntityGrid">EntityGrid</string>
     <string name="com.aircandi.ui.EntityList">EntityList</string>
     <string name="com.aircandi.ui.HelpForm">HelpForm</string>
-    <string name="com.aircandi.ui.NotificationList">NotificationList</string>
+    <string name="com.aircandi.ui.AircandiForm">AircandiForm</string>
     <string name="com.aircandi.ui.PictureForm">PhotoForm</string>
     <string name="com.aircandi.ui.PlaceForm">PlaceForm</string>
     <string name="com.aircandi.ui.PhotoForm">PhotoDetailForm</string>
     <string name="com.aircandi.ui.Preferences">Preferences</string>
-    <string name="com.aircandi.ui.RadarForm">RadarForm</string>
     <string name="com.aircandi.ui.SplashForm">SplashForm</string>
 
     <!-- Edit -->

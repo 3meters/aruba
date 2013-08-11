@@ -47,6 +47,10 @@ import com.squareup.otto.Subscribe;
 public class NotificationFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
 	protected ListView			mListView;
+	protected Integer			mLastViewedPosition;
+	protected Integer			mTopOffset;
+	protected Integer			mSavedScrollPositionX;
+	protected Integer			mSavedScrollPositionY;
 	protected OnClickListener	mClickListener;
 	private ListAdapter			mAdapter;
 	private Handler				mHandler	= new Handler();
@@ -55,7 +59,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		mClickListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -93,7 +97,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 
 		showBusy();
 
-		/* Slight delay so the busy indicator has a chance to run */
+		/* Usability Hack: Slight delay so the busy indicator has a chance to run */
 		mHandler.postDelayed(new Runnable() {
 
 			@Override
@@ -110,6 +114,8 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 					hideBusy();
 					mBusyManager.hideBusy();
 				}
+				setListPosition();
+
 			}
 		}, 200);
 
@@ -122,6 +128,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	@Override
 	public void onRefresh() {
 		mBusyManager.showBusy();
+		saveListPosition();
 		databind(true);
 	}
 
@@ -152,6 +159,16 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 			showMessage(cursor.getCount() == 0);
 			mAdapter.swapCursor(cursor);
 		}
+
+		if (mSavedScrollPositionY != null) {
+			mListView.post(new Runnable() {
+				@Override
+				public void run() {
+					mListView.scrollTo(mSavedScrollPositionX, mSavedScrollPositionY);
+				}
+			});
+		}
+
 		hideBusy();
 		mBusyManager.hideBusy();
 	}
@@ -212,6 +229,18 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 		return itemResId;
 	}
 
+	private void saveListPosition() {
+		mLastViewedPosition = mListView.getFirstVisiblePosition();
+		View view = mListView.getChildAt(0);
+		mTopOffset = (view == null) ? 0 : view.getTop();
+	}
+
+	private void setListPosition() {
+		if (mLastViewedPosition != null) {
+			mListView.setSelectionFromTop(mLastViewedPosition, mTopOffset);
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Menus
 	// --------------------------------------------------------------------------------------------
@@ -232,6 +261,12 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		saveListPosition();
+	}
 
 	@Override
 	public void onResume() {

@@ -398,6 +398,7 @@
     <string name="form_button_tuning_tune">i\'m here</string>
     <string name="form_button_tuning_untune">i\'m not here</string>
     <string name="form_button_tuning_tuned">thanks!</string>
+    <string name="form_button_tuning_undo">undo</string>
     <string name="form_button_tuning_add_candi">add candigram</string>
     <string name="form_button_tuning_edit">edit</string>
 

@@ -41,6 +41,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
+import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
@@ -526,6 +527,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 			photoView.setTag(shortcut);
 			photoView.setSizeHint(candiWidthPixels);
+			photoView.setBrokenPhoto(Applink.getDefaultPhoto(shortcut.app));
 			UI.drawPhoto(photoView, shortcut.getPhoto());
 
 			FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(candiWidthPixels, LayoutParams.WRAP_CONTENT);
@@ -568,12 +570,12 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		 */
 		mMenuItemEdit = menu.findItem(R.id.edit);
 		if (mMenuItemEdit != null) {
-			mMenuItemEdit.setVisible(canEdit());
+			mMenuItemEdit.setVisible(canUserEdit());
 		}
 
 		mMenuItemEdit = menu.findItem(R.id.edit);
 		if (mMenuItemEdit != null) {
-			mMenuItemEdit.setVisible(canEdit());
+			mMenuItemEdit.setVisible(canUserEdit());
 		}
 
 		MenuItem refresh = menu.findItem(R.id.refresh);
@@ -595,11 +597,11 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	}
 	
 	@Override
-	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		return Routing.route(this, Routing.routeForMenuId(menuItem.getItemId()), mEntity);
+	public boolean onOptionsItemSelected(MenuItem item) {
+		return Routing.route(this, Routing.routeForMenuId(item.getItemId()), mEntity);
 	}
 
-	protected Boolean canEdit() {
+	protected Boolean canUserEdit() {
 		if (mEntity != null && mEntity.ownerId != null && Aircandi.getInstance().getUser() != null) {
 			if (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 				return true;
@@ -611,7 +613,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		return false;
 	}
 
-	protected Boolean canAdd() {
+	protected Boolean canUserAdd() {
 		if (mEntity != null && mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			return true;
 		}

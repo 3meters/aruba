@@ -2,12 +2,10 @@ package com.aircandi.ui.edit;
 
 import java.util.List;
 
-import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 
 import com.aircandi.Aircandi;
 import com.aircandi.ProxiConstants;
@@ -37,6 +35,7 @@ public class TuningEdit extends BaseEntityEdit {
 	private Boolean	mUntuned			= false;
 	private Boolean	mTuningInProcess	= false;
 	private Boolean	mUntuning			= false;
+	private Boolean	mFirstTune 			= true;
 
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
@@ -53,14 +52,12 @@ public class TuningEdit extends BaseEntityEdit {
 
 			/* Color */
 
-			((ImageView) findViewById(R.id.image_star_banner)).setColorFilter(getResources().getColor(R.color.accent), PorterDuff.Mode.SRC_ATOP);
-			((ImageView) findViewById(R.id.image_star_tune)).setColorFilter(getResources().getColor(R.color.accent), PorterDuff.Mode.SRC_ATOP);
-
 			final Entity entity = mEntity;
 
 			/* Tuning buttons */
 			final Boolean hasActiveProximityLink = entity.hasActiveProximityLink();
 			if (hasActiveProximityLink) {
+				mFirstTune = false;
 				mButtonUntune.setVisibility(View.VISIBLE);
 			}
 
@@ -118,22 +115,6 @@ public class TuningEdit extends BaseEntityEdit {
 		return null;
 	}
 
-	private void toggleStarOn(final Integer starId) {
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				if (getThemeTone().equals("dark")) {
-					((ImageView) findViewById(starId)).setImageResource(R.drawable.ic_action_star_10_dark);
-				}
-				else {
-					((ImageView) findViewById(starId)).setImageResource(R.drawable.ic_action_star_10_light);
-				}
-
-			}
-		});
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
@@ -165,7 +146,6 @@ public class TuningEdit extends BaseEntityEdit {
 							mButtonTune.setText(R.string.form_button_tuning_tuned);
 							mTuned = true;
 						}
-						toggleStarOn(R.id.image_star_tune);
 						mTuningInProcess = false;
 					}
 				}
@@ -233,18 +213,36 @@ public class TuningEdit extends BaseEntityEdit {
 				setSupportProgressBarIndeterminateVisibility(false);
 				mBusyManager.hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
-				if (mUntuning) {
-					mButtonUntune.setText(R.string.form_button_tuning_tuned);
-					mUntuned = true;
-				}
-				else {
-					mButtonTune.setText(R.string.form_button_tuning_tuned);
-					mTuned = true;
-					if (mButtonUntune.getVisibility() != View.VISIBLE) {
+				
+				if (mTuned || mUntuned) {
+					/* Undoing a tuning */
+					mButtonTune.setText(R.string.form_button_tuning_tune);
+					mButtonUntune.setText(R.string.form_button_tuning_untune);
+					mUntuned = false;
+					mTuned = false;
+					if (!mFirstTune) {
 						mButtonUntune.setVisibility(View.VISIBLE);
 					}
+					else {
+						mButtonUntune.setVisibility(View.GONE);
+					}
 				}
-				toggleStarOn(R.id.image_star_tune);
+				else {
+					/* Tuning or untuning */
+					if (mUntuning) {
+						mButtonUntune.setText(R.string.form_button_tuning_tuned);
+						mButtonTune.setText(R.string.form_button_tuning_undo);
+						mUntuned = true;
+					}
+					else {
+						mButtonTune.setText(R.string.form_button_tuning_tuned);
+						mButtonUntune.setText(R.string.form_button_tuning_undo);
+						mTuned = true;
+						if (mButtonUntune.getVisibility() != View.VISIBLE) {
+							mButtonUntune.setVisibility(View.VISIBLE);
+						}
+					}
+				}
 				mTuningInProcess = false;
 			}
 		}.execute();

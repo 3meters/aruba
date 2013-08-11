@@ -78,14 +78,6 @@
                         android:visibility="gone" />
                 </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/image_star_tune"
-                    style="@style/actionbar_beacons"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="?attr/iconStarOff"
-                    android:tint="@color/brand_pink" />
             </TableRow>
 
             <TableRow
@@ -165,14 +157,6 @@
                         android:text="@string/form_button_change_picture" />
                 </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/image_star_banner"
-                    style="@style/actionbar_beacons"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="?attr/iconStarOff"
-                    android:tint="@color/accent" />
             </TableRow>
 
             <TableRow

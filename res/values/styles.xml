@@ -140,12 +140,14 @@
     <style name="form_button">
         <item name="android:paddingLeft">@dimen/form_button_padding</item>
         <item name="android:paddingRight">@dimen/form_button_padding</item>
+        <item name="android:minHeight">@dimen/form_button_height</item>
         <item name="android:background">?attr/backgroundButton</item>
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
         <item name="android:textColor">?attr/textColorButtonLink</item>
     </style>
 
     <style name="form_button_floating" parent="form_button">
+        <item name="android:minHeight">@dimen/form_button_height</item>
         <item name="android:minWidth">@dimen/form_button_floating_width_min</item>
     </style>
 
