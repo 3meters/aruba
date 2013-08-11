@@ -57,7 +57,7 @@ public class BusyManager {
 						Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));
 					}
 
-					final int sizePixels = UI.getRawPixels(mActivity, sizeDip);
+					final int sizePixels = UI.getRawPixelsForDisplayPixels(mActivity, sizeDip);
 					final FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(sizePixels, sizePixels, Gravity.CENTER);
 					mAccuracyIndicator.setLayoutParams(layoutParams);
 					mAccuracyIndicator.setBackgroundResource(R.drawable.bg_accuracy_indicator);

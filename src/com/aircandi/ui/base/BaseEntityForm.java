@@ -431,12 +431,12 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		final View parentView = (View) layout.getParent();
 		Integer layoutWidthPixels = metrics.widthPixels
 				- (parentView.getPaddingLeft() + parentView.getPaddingRight() + layout.getPaddingLeft() + layout.getPaddingRight());
-		final Integer bonusPadding = UI.getRawPixels(this, 20);
+		final Integer bonusPadding = UI.getRawPixelsForDisplayPixels(this, 20);
 		layoutWidthPixels -= bonusPadding;
 
 		final Integer spacing = 3;
-		final Integer spacingHorizontalPixels = UI.getRawPixels(this, spacing);
-		final Integer spacingVerticalPixels = UI.getRawPixels(this, spacing);
+		final Integer spacingHorizontalPixels = UI.getRawPixelsForDisplayPixels(this, spacing);
+		final Integer spacingVerticalPixels = UI.getRawPixelsForDisplayPixels(this, spacing);
 
 		Integer desiredWidthPixels = (int) (metrics.density * 75);
 		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {

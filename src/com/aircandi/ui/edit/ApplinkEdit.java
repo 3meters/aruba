@@ -26,6 +26,7 @@ import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
 import com.aircandi.utilities.Utilities;
 
 public class ApplinkEdit extends BaseEntityEdit {
@@ -42,7 +43,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 		super.onCreate(savedInstanceState);
 	}
 
@@ -105,13 +106,22 @@ public class ApplinkEdit extends BaseEntityEdit {
 		/* Spinners */
 
 		if (mEditing) {
-			((TextView) findViewById(R.id.type)).setText("Type: " + applink.type);
-			findViewById(R.id.type).setVisibility(View.VISIBLE);
-			findViewById(R.id.type_picker).setVisibility(View.GONE);
+			((TextView) findViewById(R.id.type)).setText("Link type: " + applink.type);
+			UI.setVisibility(findViewById(R.id.type), View.VISIBLE);
+			UI.setVisibility(findViewById(R.id.type_picker), View.GONE);
+			UI.setVisibility(mPhotoHolder, View.VISIBLE);
+			UI.setVisibility(findViewById(R.id.name_holder), View.VISIBLE);
+			UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
+			UI.setVisibility(findViewById(R.id.app_url_holder), View.VISIBLE);
+
+			mName.setHint(R.string.form_applink_name_hint);
+			mAppId.setText(applink.appId);
+			mAppUrl.setText(applink.appUrl);
+			drawPhoto();
 		}
 		else {
-			findViewById(R.id.type).setVisibility(View.GONE);
-			findViewById(R.id.type_picker).setVisibility(View.VISIBLE);
+			UI.setVisibility(findViewById(R.id.type), View.GONE);
+			UI.setVisibility(findViewById(R.id.type_picker), View.VISIBLE);
 			if (mTypePicker.getAdapter() == null) {
 				mApplinkSuggestionStrings = new ArrayList<String>();
 				mApplinkSuggestionStrings.add("website");
@@ -121,46 +131,46 @@ public class ApplinkEdit extends BaseEntityEdit {
 				mApplinkSuggestionStrings.add(getString(R.string.form_applink_type_hint));
 				initializeSpinner(mApplinkSuggestionStrings);
 			}
-		}
 
-		if (mEntity.type != null) {
-			mPhotoHolder.setVisibility(View.VISIBLE);
-			mName.setVisibility(View.VISIBLE);
-			mName.setHint(R.string.form_applink_name_hint);
-			mAppId.setVisibility(View.GONE);
-			mAppUrl.setVisibility(View.GONE);
+			if (mEntity.type != null) {
+				mPhotoHolder.setVisibility(View.VISIBLE);
+				mName.setHint(R.string.form_applink_name_hint);
+				UI.setVisibility(findViewById(R.id.app_id_holder), View.GONE);
+				UI.setVisibility(findViewById(R.id.app_url_holder), View.GONE);
 
-			if (mEntity.type.equals(Constants.TYPE_APP_WEBSITE)) {
-				mAppUrl.setVisibility(View.VISIBLE);
-				mAppUrl.setHint(R.string.form_applink_url_website_hint);
-				mMissingResId = R.string.error_missing_applink_url_website;
-			}
-			else if (mEntity.type.equals(Constants.TYPE_APP_EMAIL)) {
-				mAppId.setVisibility(View.VISIBLE);
-				mAppId.setHint(R.string.form_applink_id_email_hint);
-				mMissingResId = R.string.error_missing_applink_id_email;
-			}
-			else if (mEntity.type.equals(Constants.TYPE_APP_FACEBOOK)) {
-				mAppId.setVisibility(View.VISIBLE);
-				mAppId.setHint(R.string.form_applink_id_facebook_hint);
-				mMissingResId = R.string.error_missing_applink_id_facebook;
-			}
-			else if (mEntity.type.equals(Constants.TYPE_APP_TWITTER)) {
-				mAppId.setVisibility(View.VISIBLE);
-				mAppId.setHint(R.string.form_applink_id_twitter_hint);
-				mMissingResId = R.string.error_missing_applink_id_twitter;
-			}
-			if (applink.appId != null && !applink.appId.equals("")) {
-				if (mAppId != null) {
-					mAppId.setText(applink.appId);
+				if (mEntity.type.equals(Constants.TYPE_APP_WEBSITE)) {
+					UI.setVisibility(findViewById(R.id.app_url_holder), View.VISIBLE);
+					mAppUrl.setHint(R.string.form_applink_url_website_hint);
+					mMissingResId = R.string.error_missing_applink_url_website;
 				}
-			}
-			if (applink.appUrl != null && !applink.appUrl.equals("")) {
-				if (mAppUrl != null) {
-					mAppUrl.setText(applink.appUrl);
+				else if (mEntity.type.equals(Constants.TYPE_APP_EMAIL)) {
+					UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
+					mAppId.setHint(R.string.form_applink_id_email_hint);
+					mMissingResId = R.string.error_missing_applink_id_email;
 				}
+				else if (mEntity.type.equals(Constants.TYPE_APP_FACEBOOK)) {
+					UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
+					mAppId.setHint(R.string.form_applink_id_facebook_hint);
+					mMissingResId = R.string.error_missing_applink_id_facebook;
+				}
+				else if (mEntity.type.equals(Constants.TYPE_APP_TWITTER)) {
+					UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
+					mAppId.setHint(R.string.form_applink_id_twitter_hint);
+					mMissingResId = R.string.error_missing_applink_id_twitter;
+				}
+				if (applink.appId != null && !applink.appId.equals("")) {
+					if (mAppId != null) {
+						mAppId.setText(applink.appId);
+					}
+				}
+				if (applink.appUrl != null && !applink.appUrl.equals("")) {
+					if (mAppUrl != null) {
+						mAppUrl.setText(applink.appUrl);
+					}
+				}
+
+				drawPhoto();
 			}
-			drawPhoto();
 		}
 	}
 
@@ -316,7 +326,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 			return false;
 		}
 
-		if (mAppId != null && mAppId.getText().length() == 0 && mAppId.getVisibility() == View.VISIBLE) {
+		if (!mEditing && mAppId != null && mAppId.getText().length() == 0 && findViewById(R.id.app_id_holder).getVisibility() == View.VISIBLE) {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(mMissingResId)
@@ -327,7 +337,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 			return false;
 		}
 
-		if (mAppUrl != null && mAppUrl.getVisibility() == View.VISIBLE) {
+		if (!mEditing && mAppUrl != null && findViewById(R.id.app_url_holder).getVisibility() == View.VISIBLE) {
 			final String url = mAppUrl.getEditableText().toString();
 			if (url == null || url.length() == 0) {
 				Dialogs.alertDialog(android.R.drawable.ic_dialog_alert

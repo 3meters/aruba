@@ -17,7 +17,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -101,7 +100,6 @@ public class PhotoPicker extends BaseBrowse {
 	private Boolean					mPlacePhotoMode		= false;
 	private Provider				mProvider;
 	private Integer					mPhotoWidthPixels;
-	private Integer					mPhotoMarginPixels;
 
 	private static final long		PAGE_SIZE			= 30L;
 	private static final long		LIST_MAX			= 300L;
@@ -121,7 +119,7 @@ public class PhotoPicker extends BaseBrowse {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (!isFinishing()) {
+		if (!isFinishing() && !mPlacePhotoMode) {
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 		}
 	}
@@ -189,16 +187,27 @@ public class PhotoPicker extends BaseBrowse {
 
 		/* Stash some sizing info */
 		mGridView = (GridView) findViewById(R.id.grid);
-		final DisplayMetrics metrics = getResources().getDisplayMetrics();
-		final Integer layoutWidthPixels = metrics.widthPixels - (mGridView.getPaddingLeft() + mGridView.getPaddingRight());
+		
+		/* Set spacing */
+		Integer requestedHorizontalSpacing = mResources.getDimensionPixelSize(R.dimen.grid_spacing_horizontal);
+		Integer requestedVerticalSpacing = mResources.getDimensionPixelSize(R.dimen.grid_spacing_vertical);
+		mGridView.setHorizontalSpacing(requestedHorizontalSpacing);
+		mGridView.setVerticalSpacing(requestedVerticalSpacing);
 
-		Integer desiredWidthPixels = (int) (metrics.xdpi * 0.60f);
-		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			desiredWidthPixels = (int) (metrics.ydpi * 0.60f);
+		/* Stash some sizing info */
+		final DisplayMetrics metrics = mResources.getDisplayMetrics();
+		final Integer availableSpace = metrics.widthPixels - mGridView.getPaddingLeft() - mGridView.getPaddingRight();
+
+		Integer requestedColumnWidth = mResources.getDimensionPixelSize(R.dimen.grid_column_width_requested_medium);
+
+		Integer mNumColumns = (availableSpace + requestedHorizontalSpacing) / (requestedColumnWidth + requestedHorizontalSpacing);
+		if (mNumColumns <= 0) {
+			mNumColumns = 1;
 		}
-		final Integer count = (int) Math.ceil(layoutWidthPixels / desiredWidthPixels);
-		mPhotoMarginPixels = UI.getRawPixels(this, 2);
-		mPhotoWidthPixels = (layoutWidthPixels / count) - (mPhotoMarginPixels * (count - 1));
+
+		int spaceLeftOver = availableSpace - (mNumColumns * requestedColumnWidth) - ((mNumColumns - 1) * requestedHorizontalSpacing);
+
+		mPhotoWidthPixels = requestedColumnWidth + spaceLeftOver / mNumColumns;
 
 		if (mPlacePhotoMode) {
 			setActivityTitle(mEntity.name);
@@ -264,9 +273,9 @@ public class PhotoPicker extends BaseBrowse {
 			}
 		}
 
-		if (mQuery != null && !mQuery.equals("")) {
+		if (mPlacePhotoMode || (mQuery != null && !mQuery.equals(""))) {
 			mGridView.setAdapter(new EndlessImageAdapter(mImages));
-		}
+		}	
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -575,7 +584,8 @@ public class PhotoPicker extends BaseBrowse {
 				view = LayoutInflater.from(PhotoPicker.this).inflate(R.layout.temp_picture_search_item, null);
 				holder = new ViewHolder();
 				holder.photoView = (ImageView) view.findViewById(R.id.photo);
-				final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mPhotoWidthPixels, mPhotoWidthPixels);
+				Integer nudge = mResources.getDimensionPixelSize(R.dimen.grid_item_height_nudge);
+				final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mPhotoWidthPixels, mPhotoWidthPixels - nudge);
 				holder.photoView.setLayoutParams(params);
 				view.setTag(holder);
 			}

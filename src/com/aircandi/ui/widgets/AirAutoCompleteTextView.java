@@ -10,12 +10,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 
+import com.aircandi.Constants;
+import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 import com.aircandi.ui.base.BaseActivity.SimpleTextWatcher;
 
 public class AirAutoCompleteTextView extends AutoCompleteTextView {
 
-	private Boolean	mEnableClearButton	= false;
+	private Boolean		mEnableClearButton	= false;
 
 	private Drawable	mClearDrawable;
 	private Drawable	mSearchDrawable;
@@ -46,14 +48,23 @@ public class AirAutoCompleteTextView extends AutoCompleteTextView {
 		if (drawables != null && drawables.length == 4) {
 			mClearDrawable = drawables[2];
 			mSearchDrawable = drawables[0];
+			Integer drawableWidth = getResources().getDimensionPixelSize(R.dimen.drawable_width);
+
 			if (mClearDrawable != null) {
+				if (!Constants.SUPPORTS_HONEYCOMB) {
+					mClearDrawable = getResources().getDrawable(R.drawable.ic_action_cancel_light);
+				}
+
 				mEnableClearButton = true;
 				Bitmap bitmap = ((BitmapDrawable) mClearDrawable).getBitmap();
-				mClearDrawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 30, 30, true));
+				mClearDrawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, drawableWidth, drawableWidth, true));
 			}
 			if (mSearchDrawable != null) {
+				if (!Constants.SUPPORTS_HONEYCOMB) {
+					mSearchDrawable = getResources().getDrawable(R.drawable.ic_action_search_light);
+				}
 				Bitmap bitmap = ((BitmapDrawable) mSearchDrawable).getBitmap();
-				mSearchDrawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 30, 30, true));
+				mSearchDrawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, drawableWidth, drawableWidth, true));
 			}
 		}
 
@@ -73,7 +84,8 @@ public class AirAutoCompleteTextView extends AutoCompleteTextView {
 						return false;
 					}
 
-					if (event.getX() > AirAutoCompleteTextView.this.getWidth() - AirAutoCompleteTextView.this.getPaddingRight() - mClearDrawable.getIntrinsicWidth()) {
+					if (event.getX() > AirAutoCompleteTextView.this.getWidth() - AirAutoCompleteTextView.this.getPaddingRight()
+							- mClearDrawable.getIntrinsicWidth()) {
 						AirAutoCompleteTextView.this.setText("");
 						AirAutoCompleteTextView.this.clearButtonHandler();
 					}

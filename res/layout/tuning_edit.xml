@@ -51,33 +51,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
+                <com.aircandi.ui.widgets.AirButton
+                    android:id="@+id/button_tune"
+                    style="@style/form_button"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0" >
+                    android:layout_marginRight="2dp"
+                    android:layout_weight="0.5"
+                    android:onClick="onTuneButtonClick"
+                    android:text="@string/form_button_tuning_tune" />
 
-                    <com.aircandi.ui.widgets.AirButton
-                        android:id="@+id/button_tune"
-                        style="@style/form_button"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="2dp"
-                        android:layout_weight="0.5"
-                        android:onClick="onTuneButtonClick"
-                        android:text="@string/form_button_tuning_tune" />
-
-                    <com.aircandi.ui.widgets.AirButton
-                        android:id="@+id/button_untune"
-                        style="@style/form_button"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:layout_weight="0.5"
-                        android:onClick="onUntuneButtonClick"
-                        android:text="@string/form_button_tuning_untune"
-                        android:visibility="gone" />
-                </LinearLayout>
-
+                <com.aircandi.ui.widgets.AirButton
+                    android:id="@+id/button_untune"
+                    style="@style/form_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="2dp"
+                    android:layout_weight="0.5"
+                    android:onClick="onUntuneButtonClick"
+                    android:text="@string/form_button_tuning_untune"
+                    android:visibility="gone" />
             </TableRow>
 
             <TableRow
@@ -127,36 +120,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
 
-                <LinearLayout
+                <com.aircandi.ui.widgets.AirImageView
+                    android:id="@+id/photo"
+                    style="@style/picture_framed"
+                    android:layout_width="@dimen/image_large"
+                    android:layout_height="@dimen/image_large"
+                    android:layout_marginRight="10dp"
+                    aircandi:layout="@layout/widget_webimageview_candi_view"
+                    aircandi:showBusy="true"
+                    aircandi:sizeHint="@dimen/image_large"
+                    android:clickable="true"
+                    android:minWidth="@dimen/image_large"
+                    android:onClick="onChangePhotoButtonClick"
+                    android:scaleType="centerCrop" />
+
+                <com.aircandi.ui.widgets.AirButton
+                    android:id="@+id/button_change_image"
+                    style="@style/form_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0" >
-
-                    <com.aircandi.ui.widgets.AirImageView
-                        android:id="@+id/photo"
-                        style="@style/picture_framed"
-                        android:layout_width="@dimen/image_large"
-                        android:layout_height="@dimen/image_large"
-                        android:layout_marginRight="10dp"
-                        aircandi:layout="@layout/widget_webimageview_candi_view"
-                        aircandi:showBusy="true"
-                        aircandi:sizeHint="@dimen/image_large"
-                        android:clickable="true"
-                        android:minWidth="@dimen/image_large"
-                        android:onClick="onChangePhotoButtonClick"
-                        android:scaleType="centerCrop" />
-
-                    <com.aircandi.ui.widgets.AirButton
-                        android:id="@+id/button_change_image"
-                        style="@style/form_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
-                        android:onClick="onChangePhotoButtonClick"
-                        android:text="@string/form_button_change_picture" />
-                </LinearLayout>
-
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:onClick="onChangePhotoButtonClick"
+                    android:text="@string/form_button_change_picture" />
             </TableRow>
 
             <TableRow

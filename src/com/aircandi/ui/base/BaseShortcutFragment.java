@@ -294,12 +294,12 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 		final View parentView = (View) layout.getParent();
 		Integer layoutWidthPixels = metrics.widthPixels
 				- (parentView.getPaddingLeft() + parentView.getPaddingRight() + layout.getPaddingLeft() + layout.getPaddingRight());
-		final Integer bonusPadding = UI.getRawPixels(getSherlockActivity(), 20);
+		final Integer bonusPadding = UI.getRawPixelsForDisplayPixels(getSherlockActivity(), 20);
 		layoutWidthPixels -= bonusPadding;
 
 		final Integer spacing = 3;
-		final Integer spacingHorizontalPixels = UI.getRawPixels(getSherlockActivity(), spacing);
-		final Integer spacingVerticalPixels = UI.getRawPixels(getSherlockActivity(), spacing);
+		final Integer spacingHorizontalPixels = UI.getRawPixelsForDisplayPixels(getSherlockActivity(), spacing);
+		final Integer spacingVerticalPixels = UI.getRawPixelsForDisplayPixels(getSherlockActivity(), spacing);
 
 		Integer desiredWidthPixels = (int) (metrics.density * 75);
 		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {

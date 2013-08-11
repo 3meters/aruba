@@ -5,7 +5,6 @@ import java.util.HashMap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
@@ -17,6 +16,7 @@ import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.Document;
 import com.aircandi.ui.base.BaseEntityEdit;
+import com.aircandi.ui.widgets.AirEditText;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Dialogs;
@@ -33,7 +33,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 		 * Feedback are not really an entity type so we handle
 		 * all the expected initialization.
 		 */
-		mDescription = (TextView) findViewById(R.id.description);
+		mDescription = (AirEditText) findViewById(R.id.description);
 
 		if (mDescription != null) {
 			mDescription.addTextChangedListener(new SimpleTextWatcher() {

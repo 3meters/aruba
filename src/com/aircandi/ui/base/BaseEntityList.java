@@ -60,6 +60,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 	protected OnClickListener	mClickListener;
 	protected Integer			mPhotoWidthPixels;
 	protected Integer			mPhotoMarginPixels;
+	protected Integer			mNumColumns;
 
 	private List<Entity>		mEntities	= new ArrayList<Entity>();
 	private Cursor				mCursorSettings;
@@ -103,35 +104,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 			mListNewEnabled = extras.getBoolean(Constants.EXTRA_LIST_NEW_ENABLED, false);
 			mListItemResId = extras.getInt(Constants.EXTRA_LIST_ITEM_RESID, getListItemResId(mListLinkSchema));
 		}
-	}
-
-	protected Integer getListItemResId(String schema) {
-		Integer itemResId = R.layout.temp_listitem_entity;
-		if (schema != null && schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-			itemResId = R.layout.temp_listitem_comment;
-		}
-		return itemResId;
-	}
-
-	private LinkOptions getLinkOptions(String schema) {
-		if (schema != null) {
-			if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-				return LinkOptions.getDefault(DefaultType.NoLinks);
-			}
-			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-				return LinkOptions.getDefault(DefaultType.LinksForPost);
-			}
-			else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-				return LinkOptions.getDefault(DefaultType.LinksForPlace);
-			}
-			else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
-				return LinkOptions.getDefault(DefaultType.LinksForUser);
-			}
-			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-				return LinkOptions.getDefault(DefaultType.NoLinks);
-			}
-		}
-		return LinkOptions.getDefault(DefaultType.NoLinks);
 	}
 
 	@Override
@@ -276,11 +248,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 		return result;
 	}
 
-	public void doRefresh() {
-		/* Called from AircandiCommon */
-		databind(true);
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
@@ -308,8 +275,37 @@ public abstract class BaseEntityList extends BaseBrowse {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// UI
+	// Methods
 	// --------------------------------------------------------------------------------------------
+
+	protected Integer getListItemResId(String schema) {
+		Integer itemResId = R.layout.temp_listitem_entity;
+		if (schema != null && schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			itemResId = R.layout.temp_listitem_comment;
+		}
+		return itemResId;
+	}
+
+	private LinkOptions getLinkOptions(String schema) {
+		if (schema != null) {
+			if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+				return LinkOptions.getDefault(DefaultType.NoLinks);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+				return LinkOptions.getDefault(DefaultType.LinksForPost);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				return LinkOptions.getDefault(DefaultType.LinksForPlace);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+				return LinkOptions.getDefault(DefaultType.LinksForUser);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+				return LinkOptions.getDefault(DefaultType.NoLinks);
+			}
+		}
+		return LinkOptions.getDefault(DefaultType.NoLinks);
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Menus
@@ -347,7 +343,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					doRefresh();
+					onRefresh();
 				}
 			});
 		}
@@ -494,7 +490,8 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
 				if (mGridView != null) {
-					final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mPhotoWidthPixels, mPhotoWidthPixels);
+					Integer nudge = mResources.getDimensionPixelSize(R.dimen.grid_item_height_nudge);
+					final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mPhotoWidthPixels, mPhotoWidthPixels - nudge);
 					holder.photoView.getImageView().setLayoutParams(params);
 				}
 

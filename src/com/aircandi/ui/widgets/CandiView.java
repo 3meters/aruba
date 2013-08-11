@@ -154,7 +154,7 @@ public class CandiView extends RelativeLayout {
 						mCategoryPhoto.setTag(category.photo);
 						final BitmapRequest bitmapRequest = new BitmapRequest(category.photo.getUri(), mCategoryPhoto);
 						bitmapRequest.setImageRequestor(mCategoryPhoto);
-						bitmapRequest.setImageSize(UI.getRawPixels(this.getContext(), 50));
+						bitmapRequest.setImageSize(UI.getRawPixelsForDisplayPixels(this.getContext(), 50));
 						BitmapManager.getInstance().masterFetch(bitmapRequest);
 					}
 					mCategoryPhoto.setVisibility(View.VISIBLE);
@@ -172,8 +172,8 @@ public class CandiView extends RelativeLayout {
 			if (mShortcuts != null && !entity.synthetic) {
 
 				mShortcuts.removeAllViews();
-				final int sizePixels = UI.getRawPixels(this.getContext(), 20);
-				final int marginPixels = UI.getRawPixels(this.getContext(), 3);
+				final int sizePixels = UI.getRawPixelsForDisplayPixels(this.getContext(), 20);
+				final int marginPixels = UI.getRawPixelsForDisplayPixels(this.getContext(), 3);
 
 				/* Post indicator always goes first */
 				Count count = entity.getCount(Constants.TYPE_LINK_PICTURE, Direction.in);

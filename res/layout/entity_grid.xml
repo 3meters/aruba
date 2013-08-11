@@ -7,13 +7,11 @@
         android:id="@+id/grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="2dp"
-        android:gravity="center"
-        android:horizontalSpacing="4dp"
+        android:listSelector="@null"        
         android:numColumns="auto_fit"
-        android:padding="1dp"
-        android:stretchMode="columnWidth"
-        android:verticalSpacing="4dp" />
+        android:clipToPadding="false"
+        android:padding="@dimen/grid_padding"
+        android:stretchMode="columnWidth" />
 
     <com.aircandi.ui.widgets.AirButton
         android:id="@+id/button_new_entity"

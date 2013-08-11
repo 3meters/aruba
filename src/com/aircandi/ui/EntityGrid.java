@@ -1,13 +1,11 @@
 package com.aircandi.ui;
 
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 
 import com.aircandi.beta.R;
 import com.aircandi.components.MessageEvent;
 import com.aircandi.ui.base.BaseEntityList;
-import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
 public class EntityGrid extends BaseEntityList {
@@ -15,21 +13,29 @@ public class EntityGrid extends BaseEntityList {
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-		
-		/* Stash some sizing info */
-		final DisplayMetrics metrics = getResources().getDisplayMetrics();
-		final Integer layoutWidthPixels = metrics.widthPixels - (mGridView.getPaddingLeft() + mGridView.getPaddingRight());
 
-		Integer desiredWidthPixels = (int) (metrics.xdpi * 1.1f);
-		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			desiredWidthPixels = (int) (metrics.ydpi * 1.1f);
+		/* Set spacing */
+		Integer requestedHorizontalSpacing = mResources.getDimensionPixelSize(R.dimen.grid_spacing_horizontal);
+		Integer requestedVerticalSpacing = mResources.getDimensionPixelSize(R.dimen.grid_spacing_vertical);
+		mGridView.setHorizontalSpacing(requestedHorizontalSpacing);
+		mGridView.setVerticalSpacing(requestedVerticalSpacing);
+
+		/* Stash some sizing info */
+		final DisplayMetrics metrics = mResources.getDisplayMetrics();
+		final Integer availableSpace = metrics.widthPixels - mGridView.getPaddingLeft() - mGridView.getPaddingRight();
+
+		Integer requestedColumnWidth = mResources.getDimensionPixelSize(R.dimen.grid_column_width_requested_large);
+
+		Integer mNumColumns = (availableSpace + requestedHorizontalSpacing) / (requestedColumnWidth + requestedHorizontalSpacing);
+		if (mNumColumns <= 0) {
+			mNumColumns = 1;
 		}
-		final Integer count = (int) Math.max(2, Math.ceil(layoutWidthPixels / desiredWidthPixels));
-		mPhotoMarginPixels = UI.getRawPixels(this, 2);
-		mPhotoWidthPixels = (layoutWidthPixels / count) - (mPhotoMarginPixels * (count - 1));
+
+		int spaceLeftOver = availableSpace - (mNumColumns * requestedColumnWidth) - ((mNumColumns - 1) * requestedHorizontalSpacing);
+
+		mPhotoWidthPixels = requestedColumnWidth + spaceLeftOver / mNumColumns;
 		mGridView.setColumnWidth(mPhotoWidthPixels);
 	}
-
 
 	@Subscribe
 	@SuppressWarnings("ucd")

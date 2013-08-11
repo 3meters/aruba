@@ -40,6 +40,9 @@ public class MenuManager {
 		else if (activityName.contains("Builder")) {
 			menuInflater.inflate(R.menu.menu_edit_builder, menu);
 		}
+		else if (activityName.contains("Picker")) {
+			menuInflater.inflate(R.menu.menu_edit_builder, menu);
+		}
 		else {
 
 			/* Browse */

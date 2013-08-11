@@ -46,10 +46,10 @@
             <LinearLayout
                 android:id="@+id/photo_holder"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_weight="0"
-                android:visibility="gone" >
+                android:visibility="visible" >
 
                 <com.aircandi.ui.widgets.AirImageView
                     android:id="@+id/photo"
@@ -62,6 +62,7 @@
                     aircandi:showBusy="true"
                     aircandi:sizeHint="@dimen/image_medium"
                     android:clickable="true"
+                    aircandi:brokenDrawable="@drawable/img_placeholder_logo"
                     android:minWidth="@dimen/image_medium"
                     android:onClick="onChangePhotoButtonClick"
                     android:scaleType="centerCrop" />
@@ -79,37 +80,103 @@
 
             <!-- Title and Content -->
 
-            <com.aircandi.ui.widgets.AirEditText
-                android:id="@+id/name"
-                style="@style/form_edit"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/form_field_height"
-                android:drawableRight="?attr/iconClear"
-                android:inputType="textCapWords|textNoSuggestions"
-                android:visibility="gone" />
-
-            <com.aircandi.ui.widgets.AirEditText
-                android:id="@+id/app_id"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/form_field_height"
-                android:layout_marginBottom="10dp"
-                android:drawableRight="?attr/iconClear"
-                android:inputType="textNoSuggestions"
-                android:textAppearance="@style/app_text_appearance_small"
-                android:visibility="gone" />
-
-            <com.aircandi.ui.widgets.AirEditText
-                android:id="@+id/app_url"
+            <LinearLayout
+                android:id="@+id/name_holder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:drawableRight="?attr/iconClear"
-                android:inputType="textMultiLine|textNoSuggestions|textUri"
-                android:maxLines="5"
-                android:minHeight="@dimen/form_field_height"
-                android:minLines="1"
-                android:textAppearance="@style/app_text_appearance_small"
-                android:visibility="gone" />
+                android:orientation="vertical" >
+
+                <com.aircandi.ui.widgets.AirLabel
+                    style="@style/form_label_fancy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:text="label" />
+
+                <View
+                    android:id="@+id/rule"
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:layout_marginLeft="4dp"
+                    android:background="@color/accent_blue" />
+
+                <com.aircandi.ui.widgets.AirEditText
+                    android:id="@+id/name"
+                    style="@style/form_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/form_field_height"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginRight="15dp"
+                    android:drawableRight="?attr/iconClear"
+                    android:inputType="textCapWords|textNoSuggestions" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/app_id_holder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone" >
+
+                <com.aircandi.ui.widgets.AirLabel
+                    style="@style/form_label_fancy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:text="username or id" />
+
+                <View
+                    android:id="@+id/rule"
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:layout_marginLeft="4dp"
+                    android:background="@color/accent_blue" />
+
+                <com.aircandi.ui.widgets.AirEditText
+                    android:id="@+id/app_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/form_field_height"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginRight="15dp"
+                    android:drawableRight="?attr/iconClear"
+                    android:inputType="textNoSuggestions"
+                    android:textAppearance="@style/app_text_appearance_small" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/app_url_holder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone" >
+
+                <com.aircandi.ui.widgets.AirLabel
+                    style="@style/form_label_fancy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:text="web address (optional)" />
+
+                <View
+                    android:id="@+id/rule"
+                    android:layout_width="match_parent"
+                    android:layout_height="1px"
+                    android:layout_marginLeft="4dp"
+                    android:background="@color/accent_blue" />
+
+                <com.aircandi.ui.widgets.AirEditText
+                    android:id="@+id/app_url"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginRight="15dp"
+                    android:drawableRight="?attr/iconClear"
+                    android:inputType="textMultiLine|textNoSuggestions|textUri"
+                    android:maxLines="5"
+                    android:minHeight="@dimen/form_field_height"
+                    android:minLines="1"
+                    android:textAppearance="@style/app_text_appearance_small" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/authoring_holder"

@@ -10,6 +10,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 
+import com.aircandi.Constants;
+import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 import com.aircandi.ui.base.BaseActivity.SimpleTextWatcher;
 
@@ -41,49 +43,53 @@ public class AirEditText extends EditText {
 
 		if (!isInEditMode()) {
 			FontManager.getInstance().setTypefaceDefault(this);
-		}
-
-		final Drawable[] drawables = getCompoundDrawables();
-		if (drawables != null && drawables.length == 4) {
-			mClearDrawable = drawables[2];
-			if (mClearDrawable != null) {
-				mEnableClearButton = true;
-				Bitmap bitmap = ((BitmapDrawable) mClearDrawable).getBitmap();
-				mClearDrawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 25, 25, true));
+			final Drawable[] drawables = getCompoundDrawables();
+			if (drawables != null && drawables.length == 4) {
+				mClearDrawable = drawables[2];
+				
+				if (mClearDrawable != null) {
+					if (!Constants.SUPPORTS_HONEYCOMB) {
+						mClearDrawable = getResources().getDrawable(R.drawable.ic_action_cancel_light);
+					}
+					mEnableClearButton = true;
+					Bitmap bitmap = ((BitmapDrawable) mClearDrawable).getBitmap();
+					Integer drawableWidth = getResources().getDimensionPixelSize(R.dimen.drawable_width);
+					mClearDrawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, drawableWidth, drawableWidth, true));
+				}
 			}
-		}
 
-		if (mEnableClearButton) {
+			if (mEnableClearButton) {
 
-			/* Set the bounds of the button */
-			this.setCompoundDrawablesWithIntrinsicBounds(null, null, mClearDrawable, null);
+				/* Set the bounds of the button */
+				this.setCompoundDrawablesWithIntrinsicBounds(null, null, mClearDrawable, null);
 
-			// button should be hidden on first draw
-			clearButtonHandler();
+				// button should be hidden on first draw
+				clearButtonHandler();
 
-			//if the clear button is pressed, clear it. Otherwise do nothing
-			this.setOnTouchListener(new OnTouchListener() {
-				@Override
-				public boolean onTouch(View view, MotionEvent event) {
-					if (AirEditText.this.getCompoundDrawables()[2] == null || event.getAction() != MotionEvent.ACTION_UP) {
+				//if the clear button is pressed, clear it. Otherwise do nothing
+				this.setOnTouchListener(new OnTouchListener() {
+					@Override
+					public boolean onTouch(View view, MotionEvent event) {
+						if (AirEditText.this.getCompoundDrawables()[2] == null || event.getAction() != MotionEvent.ACTION_UP) {
+							return false;
+						}
+
+						if (event.getX() > AirEditText.this.getWidth() - AirEditText.this.getPaddingRight() - mClearDrawable.getIntrinsicWidth()) {
+							AirEditText.this.setText("");
+							AirEditText.this.clearButtonHandler();
+						}
 						return false;
 					}
+				});
 
-					if (event.getX() > AirEditText.this.getWidth() - AirEditText.this.getPaddingRight() - mClearDrawable.getIntrinsicWidth()) {
-						AirEditText.this.setText("");
-						AirEditText.this.clearButtonHandler();
+				this.addTextChangedListener(new SimpleTextWatcher() {
+
+					@Override
+					public void onTextChanged(CharSequence s, int start, int before, int count) {
+						clearButtonHandler();
 					}
-					return false;
-				}
-			});
-
-			this.addTextChangedListener(new SimpleTextWatcher() {
-
-				@Override
-				public void onTextChanged(CharSequence s, int start, int before, int count) {
-					clearButtonHandler();
-				}
-			});
+				});
+			}
 		}
 	}
 

@@ -127,6 +127,14 @@
         <item name="android:paddingLeft">2dp</item>
     </style>
 
+    <style name="form_label_fancy">
+        <item name="android:textAppearance">@style/app_text_appearance_micro</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/accent_blue</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
     <style name="form_text">
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
         <item name="android:paddingLeft">2dp</item>

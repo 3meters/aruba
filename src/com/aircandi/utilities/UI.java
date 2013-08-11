@@ -191,7 +191,7 @@ public class UI {
 		});
 	}
 
-	public static int getRawPixels(Context context, int displayPixels) {
+	public static int getRawPixelsForDisplayPixels(Context context, int displayPixels) {
 		final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 		final int pixels = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) displayPixels, metrics);
 		return pixels;

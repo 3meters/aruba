@@ -68,6 +68,7 @@ import com.aircandi.ui.edit.CommentEdit;
 import com.aircandi.ui.edit.PictureEdit;
 import com.aircandi.ui.edit.PlaceEdit;
 import com.aircandi.ui.user.UserEdit;
+import com.aircandi.ui.widgets.AirEditText;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.BuilderButton;
 import com.aircandi.ui.widgets.UserView;
@@ -83,8 +84,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	protected AirImageView		mPhotoView;
 	protected List<Entity>		mApplinks;
 
-	protected TextView			mName;
-	protected TextView			mDescription;
+	protected AirEditText		mName;
+	protected AirEditText		mDescription;
 	protected ViewGroup			mPhotoHolder;
 	protected CheckBox			mLocked;
 
@@ -129,8 +130,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
-		mName = (EditText) findViewById(R.id.name);
-		mDescription = (TextView) findViewById(R.id.description);
+		mName = (AirEditText) findViewById(R.id.name);
+		mDescription = (AirEditText) findViewById(R.id.description);
 		mPhotoView = (AirImageView) findViewById(R.id.photo);
 		mPhotoHolder = (ViewGroup) findViewById(R.id.photo_holder);
 		mLocked = (CheckBox) findViewById(R.id.chk_locked);
@@ -291,8 +292,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				button.getViewGroup().setVisibility(View.VISIBLE);
 				button.getViewGroup().removeAllViews();
 				final LayoutInflater inflater = LayoutInflater.from(this);
-				final int sizePixels = UI.getRawPixels(this, 30);
-				final int marginPixels = UI.getRawPixels(this, 5);
+				final int sizePixels = UI.getRawPixelsForDisplayPixels(this, 30);
+				final int marginPixels = UI.getRawPixelsForDisplayPixels(this, 5);
 
 				/* We only show the first five */
 				int shortcutCount = 0;

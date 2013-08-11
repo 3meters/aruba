@@ -100,7 +100,9 @@
     <string name="dummy_tags">Coffee Shop, Cafe, Tea Room</string>
     <string name="dummy_button_label">Watch</string>
     <string name="dummy_description">Ever wonder why Aircandi fans refuse to use anything else? For more than four days, Aircandi has attracted a growing family of loyal, almost zealous customers, known as “Candiniks”. By remaining true to the quality tenets of our founder – emphasizing knowledge, taste, and using the senses to evaluate quality at every step – Aircandi defines the gold standard by which all other proximity applications are judged.</string>
-
+    <string name="dummy_username">jay.massena</string>
+    <string name="dummy_web_address">http://massenamodern.com</string>
+    
     <!-- Alerts general -->
 
     <string name="alert_entity_locked">This candigram has been locked by the owner.</string>
