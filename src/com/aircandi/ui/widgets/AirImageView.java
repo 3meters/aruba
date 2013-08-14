@@ -97,11 +97,10 @@ public class AirImageView extends RelativeLayout {
 
 		if (mImageMain != null) {
 			mImageMain.setScaleType(mScaleType);
-			mImageMain.invalidate();
-
 			if (isInEditMode()) {
 				mImageMain.setImageResource(R.drawable.img_placeholder_logo);
 			}
+			mImageMain.invalidate();
 		}
 
 		if (mProgressBar != null) {

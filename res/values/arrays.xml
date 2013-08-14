@@ -36,12 +36,12 @@
         <item>lucky</item>
     </string-array>
     
-    <string-array name="testing_place_provider_entries">
+    <string-array name="place_provider_entries">
         <item>Foursquare</item>
         <item>Factual</item>
         <item>Google</item>
 	</string-array>
-    <string-array name="testing_place_provider_values">
+    <string-array name="place_provider_values">
         <item>foursquare</item>
         <item>factual</item>
         <item>google</item>
@@ -66,5 +66,13 @@
         <item>32188</item>
 		<item>80470</item>
 	</string-array>
-
+    <string-array name="candigram_type_entries">
+        <item>Bouncing</item>
+        <item>Touring</item>
+    </string-array>
+    <string-array name="candigram_type_values">
+        <item>bounce</item>
+        <item>tour</item>
+    </string-array>
+    
 </resources>

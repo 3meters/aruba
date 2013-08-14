@@ -149,12 +149,23 @@ public abstract class BaseEntityList extends BaseBrowse {
 		 */
 		final Entity entity = EntityManager.getEntity(mEntityId);
 		if (entity != null) {
-			setActivityTitle(entity.name);
+			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+				mActionBar.setIcon(R.drawable.img_picture);
+				setActivityTitle("pictures");
+			}
+			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+				mActionBar.setIcon(R.drawable.img_comment);
+				setActivityTitle("comments");
+			}
+			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+				mActionBar.setIcon(R.drawable.img_candigram);
+				setActivityTitle("candigrams");
+			}
 		}
 	}
 
 	@Override
-	protected void databind(final Boolean refresh) {
+	public void onDatabind(final Boolean refresh) {
 
 		new AsyncTask() {
 
@@ -375,7 +386,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 					|| ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()
 					|| EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
-				databind(true);
+				onDatabind(true);
 			}
 		}
 	}

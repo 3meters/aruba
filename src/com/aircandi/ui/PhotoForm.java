@@ -72,7 +72,7 @@ public class PhotoForm extends BaseBrowse {
 	}
 
 	@Override
-	protected void databind(Boolean refresh) {
+	public void onDatabind(Boolean refresh) {
 		List<Photo> photos = EntityManager.getInstance().getPhotos();
 		final Photo photo = EntityManager.getInstance().getPhoto(mImageUri);
 		if (!mPagingEnabled) {

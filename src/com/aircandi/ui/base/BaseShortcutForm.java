@@ -31,7 +31,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 	protected DefaultType	mLinkOptions;
 
 	@Override
-	public void databind(final Boolean refreshProposed) {
+	public void onDatabind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
 

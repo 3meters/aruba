@@ -3,6 +3,9 @@ package com.aircandi.ui;
 import java.util.Collections;
 import java.util.List;
 
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,7 +21,6 @@ import com.aircandi.applications.Applinks;
 import com.aircandi.beta.R;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.MessageEvent;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager;
@@ -27,6 +29,7 @@ import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
+import com.aircandi.events.MessageEvent;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Entity;
@@ -62,7 +65,7 @@ public class PlaceForm extends BaseEntityForm {
 	}
 
 	@Override
-	protected void databind(final Boolean refreshProposed) {
+	public void onDatabind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
 
@@ -124,7 +127,13 @@ public class PlaceForm extends BaseEntityForm {
 											@Override
 											public void run() {
 												final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-												mActionBar.setIcon(new BitmapDrawable(Aircandi.applicationContext.getResources(), imageResponse.bitmap));
+												final int color = mResources.getColor(getThemeTone().equals("dark") ? R.color.gray_00_pcnt : R.color.gray_90_pcnt);
+												ColorFilter colorFilter = new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY);
+												BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(),
+														imageResponse.bitmap);
+												bitmapDrawable.setColorFilter(colorFilter);
+												bitmapDrawable.setAlpha(getThemeTone().equals("dark") ? 204 : 153);
+												mActionBar.setIcon(bitmapDrawable);
 											}
 										});
 									}
@@ -178,7 +187,7 @@ public class PlaceForm extends BaseEntityForm {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					final Entity upsizedEntity = (Entity) result.data;
 					mEntityId = upsizedEntity.id;
-					databind(false);
+					onDatabind(false);
 				}
 				else {
 					Routing.serviceError(PlaceForm.this, result.serviceResponse);

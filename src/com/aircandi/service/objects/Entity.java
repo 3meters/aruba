@@ -96,6 +96,9 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 			entity = new Post();
 		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			entity = new Candigram();
+		}
 		else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 			entity = new Applink();
 		}
@@ -492,17 +495,35 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			Shortcut shortcut = Shortcut.builder(this
 					, Constants.SCHEMA_ENTITY_APPLINK
 					, Constants.TYPE_APP_POST
-					, Constants.ACTION_VIEW_FOR
+					, Constants.ACTION_VIEW_AUTO
 					, "pictures"
-					, "resource:ic_launcher"
+					, "resource:img_picture"
 					, 10
 					, false
 					, true);
 			Link link = getLinkByType(Constants.TYPE_LINK_PICTURE, null, Direction.in);
 			if (link != null) {
 				shortcut.photo = link.shortcut.getPhoto();
+				shortcut.appId = link.fromId;
 			}
 			shortcuts.add(shortcut);
+
+			shortcut = Shortcut.builder(this
+					, Constants.SCHEMA_ENTITY_APPLINK
+					, Constants.TYPE_APP_CANDIGRAM
+					, Constants.ACTION_VIEW_AUTO
+					, "candigrams"
+					, "resource:ic_launcher"
+					, 10
+					, false
+					, true);
+			link = getLinkByType(Constants.TYPE_LINK_CANDIGRAM, null, Direction.in);
+			if (link != null) {
+				shortcut.photo = link.shortcut.getPhoto();
+				shortcut.appId = link.fromId;
+			}
+			shortcuts.add(shortcut);
+
 		}
 
 		shortcuts.add(Shortcut.builder(this
@@ -510,11 +531,11 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				, Constants.TYPE_APP_COMMENT
 				, Constants.ACTION_VIEW_FOR
 				, "comments"
-				, "resource:img_post"
+				, "resource:img_comment"
 				, 20
 				, false
 				, true));
-		
+
 		shortcuts.add(Shortcut.builder(this
 				, Constants.SCHEMA_ENTITY_APPLINK
 				, Constants.TYPE_APP_MAP
@@ -524,7 +545,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				, 30
 				, false
 				, true));
-		
+
 		return shortcuts;
 	}
 
@@ -610,6 +631,9 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 						}
 						else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 							entity.entities.add(Post.setPropertiesFromMap(new Post(), childMap, nameMapping));
+						}
+						else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+							entity.entities.add(Candigram.setPropertiesFromMap(new Candigram(), childMap, nameMapping));
 						}
 						else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 							entity.entities.add(Applink.setPropertiesFromMap(new Applink(), childMap, nameMapping));

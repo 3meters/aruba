@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.aircandi.Constants;
 import com.aircandi.applications.Applinks;
+import com.aircandi.applications.Candigrams;
 import com.aircandi.applications.Comments;
 import com.aircandi.applications.Pictures;
 import com.aircandi.applications.Places;
@@ -98,7 +99,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 							mEntity = (Entity) result.data;
 							mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 							mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
-							draw();
+							onDraw();
 						}
 					}
 					else {
@@ -133,7 +134,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected void draw() {
+	public void onDraw() {
 
 		/* Clear shortcut holder */
 		((ViewGroup) getView().findViewById(R.id.shortcut_holder)).removeAllViews();
@@ -149,6 +150,21 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_places_created
+						, R.string.section_places_more
+						, mResources.getInteger(R.integer.shortcuts_flow_limit)
+						, R.id.shortcut_holder
+						, R.layout.temp_place_switchboard_item);
+			}
+
+			/* Shortcuts for place entities created by user */
+			settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_CANDIGRAM, Direction.out, false, false);
+			settings.appClass = Candigrams.class;
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			if (shortcuts.size() > 0) {
+				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
+				drawShortcuts(shortcuts
+						, settings
+						, R.string.section_user_shortcuts_candigrams_created
 						, R.string.section_places_more
 						, mResources.getInteger(R.integer.shortcuts_flow_limit)
 						, R.id.shortcut_holder
@@ -188,7 +204,22 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, R.layout.temp_place_switchboard_item);
 			}
 
-			/* Watching posts */
+			/* Watching candigrams */
+			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_CANDIGRAM, Direction.out, false, false);
+			settings.appClass = Candigrams.class;
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			if (shortcuts.size() > 0) {
+				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
+				drawShortcuts(shortcuts
+						, settings
+						, R.string.section_user_shortcuts_candigrams_watching
+						, R.string.section_pictures_more
+						, mResources.getInteger(R.integer.shortcuts_flow_limit)
+						, R.id.shortcut_holder
+						, R.layout.temp_place_switchboard_item);
+			}
+
+			/* Watching pictures */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, Direction.out, false, false);
 			settings.appClass = Pictures.class;
 			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
@@ -264,17 +295,32 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			if (settings.appClass.equals(Users.class)) {
 				intent = Users.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction);
 			}
-			button.setTag(intent);
-			button.setOnClickListener(new OnClickListener() {
 
-				@Override
-				public void onClick(View view) {
-					Intent intent = (Intent) view.getTag();
-					Routing.intent(getSherlockActivity(), intent);
+			/*
+			 * Make button shortcut
+			 */
+			Shortcut shortcut = Shortcut.builder(mEntity
+					, Constants.SCHEMA_INTENT
+					, Constants.TYPE_APP_INTENT
+					, null
+					, getString(moreResId)
+					, "resource:img_more_iii"
+					, 10
+					, false
+					, true);
+			shortcut.intent = intent;
+			shortcuts = shortcuts.subList(0, flowLimit - 1);
+			shortcuts.add(shortcut);
 
-				}
-			});
-			section.setFooter(footer); // Replaces if there already is one.
+			//			button.setOnClickListener(new OnClickListener() {
+			//
+			//				@Override
+			//				public void onClick(View view) {
+			//					Intent intent = (Intent) view.getTag();
+			//					Routing.intent(getSherlockActivity(), intent);
+			//
+			//				}
+			//			});
 		}
 
 		final FlowLayout flow = (FlowLayout) section.findViewById(R.id.flow_shortcuts);
@@ -427,7 +473,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			databind(false);
 		}
 		else {
-			draw();
+			onDraw();
 			hideBusy();
 		}
 	}

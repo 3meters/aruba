@@ -270,7 +270,7 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 			 */
 			BaseFragment fragment = getCurrentFragment();
 			if (fragment != null && fragment instanceof RadarFragment) {
-				((RadarFragment) fragment).databind();
+				((RadarFragment) fragment).onDatabind(false);
 			}
 			mFreshWindow = false;
 		}

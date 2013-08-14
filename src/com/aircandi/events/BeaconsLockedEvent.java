@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.events;
 
 public class BeaconsLockedEvent {
 

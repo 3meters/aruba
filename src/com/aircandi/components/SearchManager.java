@@ -122,6 +122,7 @@ public class SearchManager {
 	}
 
 	@SuppressWarnings("ucd")
+	public
 	enum SearchItemType {
 		Bookmarks, Suggestions
 	}

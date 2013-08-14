@@ -11,7 +11,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
@@ -83,6 +82,7 @@ import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Beacon;
+import com.aircandi.service.objects.Candigram;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Device;
@@ -257,7 +257,7 @@ public class HttpService {
 				ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
 
 				if (connectedState == ConnectedState.None) {
-					final HttpServiceException proxibaseException = makeHttpServiceException(null, null, new ConnectException());
+					final HttpServiceException proxibaseException = makeHttpServiceException(null, null, new SocketException());
 					throw proxibaseException;
 				}
 				else if (connectedState == ConnectedState.WalledGarden) {
@@ -418,7 +418,7 @@ public class HttpService {
 					ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
 
 					if (connectedState == ConnectedState.None) {
-						final HttpServiceException proxibaseException = makeHttpServiceException(null, null, new ConnectException());
+						final HttpServiceException proxibaseException = makeHttpServiceException(null, null, new SocketException());
 						throw proxibaseException;
 					}
 					else if (connectedState == ConnectedState.WalledGarden) {
@@ -1042,6 +1042,9 @@ public class HttpService {
 					}
 					else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 						list.add(Post.setPropertiesFromMap(new Post(), (HashMap) map, nameMapping));
+					}
+					else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+						list.add(Candigram.setPropertiesFromMap(new Candigram(), (HashMap) map, nameMapping));
 					}
 					else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
 						list.add(User.setPropertiesFromMap(new User(), (HashMap) map, nameMapping));

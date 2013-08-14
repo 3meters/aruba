@@ -54,14 +54,17 @@ public class ApplicationPicker extends BaseBrowse implements OnItemClickListener
 	}
 
 	@Override
-	protected void databind(Boolean refresh) {
+	public void onDatabind(Boolean refresh) {
 		mName.setText(R.string.dialog_template_picker_title);
 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();
 
 		if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-			listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_edit_light : R.drawable.ic_action_edit_dark
+			listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_logo_holo_light : R.drawable.ic_logo_holo_dark
+					, getString(R.string.dialog_application_candigram_new), null, Constants.SCHEMA_ENTITY_CANDIGRAM));
+			
+			listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
 					, getString(R.string.dialog_application_picture_new), null, Constants.SCHEMA_ENTITY_PICTURE));
 
 			listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_monolog_light : R.drawable.ic_action_monolog_dark

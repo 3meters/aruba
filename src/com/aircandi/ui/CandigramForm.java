@@ -37,7 +37,7 @@ import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
-public class PictureForm extends BaseEntityForm {
+public class CandigramForm extends BaseEntityForm {
 	
 	@Override
 	public void onDatabind(final Boolean refreshProposed) {
@@ -92,7 +92,7 @@ public class PictureForm extends BaseEntityForm {
 					}
 				}
 				else {
-					Routing.serviceError(PictureForm.this, result.serviceResponse);
+					Routing.serviceError(CandigramForm.this, result.serviceResponse);
 				}
 				mBusyManager.hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
@@ -305,7 +305,7 @@ public class PictureForm extends BaseEntityForm {
 
 	@Override
 	protected int getLayoutId() {
-		return R.layout.post_form;
+		return R.layout.candigram_form;
 	}
 
 }

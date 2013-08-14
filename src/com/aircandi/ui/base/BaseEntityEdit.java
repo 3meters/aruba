@@ -64,6 +64,7 @@ import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.edit.ApplinkEdit;
+import com.aircandi.ui.edit.CandigramEdit;
 import com.aircandi.ui.edit.CommentEdit;
 import com.aircandi.ui.edit.PictureEdit;
 import com.aircandi.ui.edit.PlaceEdit;
@@ -626,6 +627,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		}
 		else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 			return PictureEdit.class;
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			return CandigramEdit.class;
 		}
 		else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 			return ApplinkEdit.class;

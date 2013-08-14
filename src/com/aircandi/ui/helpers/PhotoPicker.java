@@ -36,7 +36,6 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -134,10 +133,13 @@ public class PhotoPicker extends BaseBrowse {
 			mPlacePhotoMode = true;
 		}
 
+		mSearch = (AirAutoCompleteTextView) findViewById(R.id.search_text);
+
 		if (mPlacePhotoMode) {
 			mEntity = EntityManager.getEntity(mEntityId);
 			mProvider = ((Place) mEntity).getProvider();
-			((ViewGroup) findViewById(R.id.search_group)).setVisibility(View.GONE);
+			mSearch.setVisibility(View.GONE);
+			mBusyManager.startBodyBusyIndicator();
 		}
 		else {
 
@@ -145,8 +147,6 @@ public class PhotoPicker extends BaseBrowse {
 			if (extras != null) {
 				mDefaultSearch = extras.getString(Constants.EXTRA_SEARCH_PHRASE);
 			}
-
-			mSearch = (AirAutoCompleteTextView) findViewById(R.id.search_text);
 
 			if (mDefaultSearch != null && !mDefaultSearch.equals("")) {
 				mSearch.setText(mDefaultSearch);
@@ -182,12 +182,9 @@ public class PhotoPicker extends BaseBrowse {
 			mSearch.requestFocus();
 		}
 
-		mBusyManager.hideBusy();
-		mBusyManager.stopBodyBusyIndicator();
-
-		/* Stash some sizing info */
+		mMessage = (TextView) findViewById(R.id.message);
 		mGridView = (GridView) findViewById(R.id.grid);
-		
+
 		/* Set spacing */
 		Integer requestedHorizontalSpacing = mResources.getDimensionPixelSize(R.dimen.grid_spacing_horizontal);
 		Integer requestedVerticalSpacing = mResources.getDimensionPixelSize(R.dimen.grid_spacing_vertical);
@@ -216,7 +213,6 @@ public class PhotoPicker extends BaseBrowse {
 			setActivityTitle(getString(R.string.dialog_photo_picker_search_title));
 		}
 
-		mMessage = (TextView) findViewById(R.id.message);
 		mGridView.setColumnWidth(mPhotoWidthPixels);
 		mGridView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -241,12 +237,12 @@ public class PhotoPicker extends BaseBrowse {
 		});
 
 		/* Autocomplete */
-		loadPreviousSearches();
-		bindSearchAdapter();
+		initAutoComplete();
+		bindAutoCompleteAdapter();
 	}
 
 	@Override
-	protected void databind(Boolean refresh) {
+	public void onDatabind(Boolean refresh) {
 		/*
 		 * First check to see if there are any candi picture children.
 		 */
@@ -275,7 +271,7 @@ public class PhotoPicker extends BaseBrowse {
 
 		if (mPlacePhotoMode || (mQuery != null && !mQuery.equals(""))) {
 			mGridView.setAdapter(new EndlessImageAdapter(mImages));
-		}	
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -293,16 +289,23 @@ public class PhotoPicker extends BaseBrowse {
 
 	private void startSearch(View view) {
 
-		
 		mQuery = mSearch.getText().toString().trim();
 
-		Aircandi.settingsEditor.putString(Constants.SETTING_PICTURE_SEARCH_LAST, mQuery);
-		Aircandi.settingsEditor.commit();
-				
-		mMessage.setVisibility(View.VISIBLE);
+		/* Prep the UI */
+		mMessage.setVisibility(View.GONE);
+		mImages.clear();
+		mBusyManager.showBusy();
+		mBusyManager.startBodyBusyIndicator();
+
+		/* Hide soft keyboard */
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
 
+		/* Stash query so we can restore it in the future */
+		Aircandi.settingsEditor.putString(Constants.SETTING_PICTURE_SEARCH_LAST, mQuery);
+		Aircandi.settingsEditor.commit();
+
+		/* Add query to auto complete array */
 		try {
 			org.json.JSONObject jsonSearchMap = new org.json.JSONObject(Aircandi.settings.getString(Constants.SETTING_PICTURE_SEARCHES, "{}"));
 			jsonSearchMap.put(mQuery, mQuery);
@@ -313,21 +316,15 @@ public class PhotoPicker extends BaseBrowse {
 			exception.printStackTrace();
 		}
 
+		/* Make sure the latest search appears in auto complete */
+		initAutoComplete();
+		bindAutoCompleteAdapter();
+
 		mOffset = 0;
 		mTitleOptional = mQuery;
-		mImages.clear();
-		mBusyManager.showBusy();
-		mBusyManager.startBodyBusyIndicator();
-		if (mGridView.getAdapter() == null) {
-			mGridView.setAdapter(new EndlessImageAdapter(mImages));
-		}
-		else {
-			((EndlessImageAdapter) mGridView.getAdapter()).notifyDataSetChanged();
-		}
 
-		/* Make sure the latest search appears in suggestions */
-		loadPreviousSearches();
-		bindSearchAdapter();
+		/* Trigger the adapter */
+		mGridView.setAdapter(new EndlessImageAdapter(mImages));
 	}
 
 	private String getBingKey() {
@@ -342,7 +339,7 @@ public class PhotoPicker extends BaseBrowse {
 		}
 	}
 
-	private void loadPreviousSearches() {
+	private void initAutoComplete() {
 		try {
 			org.json.JSONObject jsonSearchMap = new org.json.JSONObject(Aircandi.settings.getString(Constants.SETTING_PICTURE_SEARCHES, "{}"));
 			mPreviousSearches.clear();
@@ -362,12 +359,11 @@ public class PhotoPicker extends BaseBrowse {
 		}
 	}
 
-	private void bindSearchAdapter() {
+	private void bindAutoCompleteAdapter() {
 		mSearchAdapter = new ArrayAdapter<String>(this
 				, android.R.layout.simple_dropdown_item_1line
 				, mPreviousSearches);
-		AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.search_text);
-		textView.setAdapter(mSearchAdapter);
+		mSearch.setAdapter(mSearchAdapter);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -434,6 +430,13 @@ public class PhotoPicker extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 	// Classes
 	// --------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------
+	// Adapter
+	// --------------------------------------------------------------------------------------------
+
+	// --------------------------------------------------------------------------------------------
+	// Adapter
+	// --------------------------------------------------------------------------------------------
 
 	private class EndlessImageAdapter extends EndlessAdapter {
 
@@ -444,37 +447,43 @@ public class PhotoPicker extends BaseBrowse {
 		}
 
 		@Override
-		protected View getPendingView(ViewGroup parent) {
-			if (mImages.size() == 0) {
-				return new View(PhotoPicker.this);
-			}
-			return LayoutInflater.from(PhotoPicker.this).inflate(R.layout.temp_picture_search_item_placeholder, null);
-		}
-
-		@Override
 		protected boolean cacheInBackground() {
 			/*
-			 * This is called on background thread from an AsyncTask started by EndlessAdapter
+			 * Triggered first time the adapter runs and when this function reported
+			 * more available and the special pending view is being rendered by getView.
+			 * Returning true means we think there are more items available to query for.
+			 * 
+			 * This is called on background thread from an AsyncTask started by EndlessAdapter.
+			 * We load some data plus report whether there is more data available. If more data is
+			 * available, the pending view is appended.
 			 */
 			mMoreImages.clear();
 			ServiceResponse serviceResponse = new ServiceResponse();
 			if (mPlacePhotoMode) {
 
 				Place place = (Place) mEntity;
+				/*
+				 * Place provider is foursquare
+				 */
 				if (place.getProvider().type != null && place.getProvider().type.equals("foursquare")) {
+
 					serviceResponse = loadPlaceImages(PAGE_SIZE, mOffset);
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						final List<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
-						if (mOffset == 0 && photos.size() == 0) {
-							runOnUiThread(new Runnable() {
+						if (photos.size() == 0) {
+							if (mOffset == 0) {
+								runOnUiThread(new Runnable() {
 
-								@Override
-								public void run() {
-									mMessage.setText(getString(R.string.picture_picker_places_empty) + " " + mEntity.name);
-									mMessage.setVisibility(View.VISIBLE);
+									@Override
+									public void run() {
+										mMessage.setText(getString(R.string.picture_picker_places_empty) + " " + mEntity.name);
+										mMessage.setVisibility(View.VISIBLE);
 
-								}
-							});
+									}
+								});
+							}
+							hideBusy();
+							return false;
 						}
 						else {
 							mMoreImages = new ArrayList<ImageResult>();
@@ -484,32 +493,20 @@ public class PhotoPicker extends BaseBrowse {
 								imageResult.getThumbnail().setUrl(photo.getSizedUri(100, 100));
 								mMoreImages.add(imageResult);
 							}
+							mOffset += PAGE_SIZE;
+							hideBusy();
+							return mMoreImages.size() >= PAGE_SIZE;
 						}
 					}
 					else {
+						hideBusy();
 						Routing.serviceError(PhotoPicker.this, serviceResponse);
 						return false;
 					}
-					mOffset += PAGE_SIZE;
-					runOnUiThread(new Runnable() {
 
-						@Override
-						public void run() {
-							mBusyManager.hideBusy();
-							mBusyManager.stopBodyBusyIndicator();
-						}
-					});
-					return mMoreImages.size() >= PAGE_SIZE;
 				}
 				else {
-					runOnUiThread(new Runnable() {
-
-						@Override
-						public void run() {
-							mBusyManager.hideBusy();
-							mBusyManager.stopBodyBusyIndicator();
-						}
-					});
+					hideBusy();
 					return false;
 				}
 			}
@@ -519,46 +516,75 @@ public class PhotoPicker extends BaseBrowse {
 					queryDecorated = QUERY_DEFAULT;
 				}
 				else {
-					queryDecorated = QUERY_PREFIX + " " + queryDecorated;
+					queryDecorated = (QUERY_PREFIX + " " + queryDecorated).trim();
 				}
 
 				serviceResponse = loadSearchImages(queryDecorated, PAGE_SIZE, mOffset);
+
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+
 					mMoreImages = (ArrayList<ImageResult>) serviceResponse.data;
-					if (mOffset == 0 && mMoreImages.size() == 0) {
-						runOnUiThread(new Runnable() {
 
-							@Override
-							public void run() {
-								mMessage.setText(getString(R.string.picture_picker_search_empty) + " " + mQuery);
-								mMessage.setVisibility(View.VISIBLE);
+					if (mMoreImages.size() == 0) {
+						if (mOffset == 0) {
+							runOnUiThread(new Runnable() {
 
-							}
-						});
+								@Override
+								public void run() {
+									mMessage.setText(getString(R.string.picture_picker_search_empty) + " " + mQuery);
+									mMessage.setVisibility(View.VISIBLE);
+
+								}
+							});
+						}
+
+						hideBusy();
+						return false;
 					}
-					Logger.d(this, "Query Bing for more images: start = " + String.valueOf(mOffset)
-							+ " new total = "
-							+ String.valueOf(getWrappedAdapter().getCount() + mMoreImages.size()));
+					else {
+						Logger.d(this, "Query Bing for more images: start = " + String.valueOf(mOffset)
+								+ " new total = "
+								+ String.valueOf(getWrappedAdapter().getCount() + mMoreImages.size()));
+
+						if (mMoreImages.size() < PAGE_SIZE) {
+							hideBusy();
+							return false;
+						}
+						else {
+							mOffset += PAGE_SIZE;
+							hideBusy();
+							return (getWrappedAdapter().getCount() + mMoreImages.size()) < LIST_MAX;
+						}
+					}
 				}
 				else {
+					hideBusy();
 					Routing.serviceError(PhotoPicker.this, serviceResponse);
 					return false;
 				}
-				mOffset += PAGE_SIZE;
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						mBusyManager.hideBusy();
-						mBusyManager.stopBodyBusyIndicator();
-					}
-				});
-				return (getWrappedAdapter().getCount() + mMoreImages.size()) < LIST_MAX;
 			}
 		}
 
 		@Override
+		protected View getPendingView(ViewGroup parent) {
+			/*
+			 * Gets called when adapter is being asked for a view for the last position
+			 * and the previous call to cacheInBackground reported that more = true. Also starts
+			 * another call to cacheInBackground().
+			 */
+			if (mImages.size() == 0) {
+				/* If nothing to show, return something empty. */
+				return new View(PhotoPicker.this);
+			}
+			return LayoutInflater.from(PhotoPicker.this).inflate(R.layout.temp_picture_search_item_placeholder, null);
+		}
+
+		@Override
 		protected void appendCachedData() {
+			/*
+			 * Is called immediately after cacheInBackground regardless
+			 * of whether it returned true/false.
+			 */
 			final ArrayAdapter<ImageResult> list = (ArrayAdapter<ImageResult>) getWrappedAdapter();
 			for (ImageResult imageResult : mMoreImages) {
 				list.add(imageResult);
@@ -605,6 +631,10 @@ public class PhotoPicker extends BaseBrowse {
 			return view;
 		}
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Classes
+	// --------------------------------------------------------------------------------------------
 
 	private class DrawableManager {
 		/*

@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 
 import com.aircandi.beta.R;
-import com.aircandi.components.MessageEvent;
+import com.aircandi.events.MessageEvent;
 import com.aircandi.ui.base.BaseEntityList;
 import com.squareup.otto.Subscribe;
 

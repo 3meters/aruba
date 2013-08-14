@@ -51,10 +51,10 @@ public abstract class EndlessAdapter extends AdapterWrapper {
 
 	protected abstract void appendCachedData();
 
-	private View			pendingView		= null;
+	private View				pendingView		= null;
 	private final AtomicBoolean	keepOnAppending	= new AtomicBoolean(true);
-	private Context			context;
-	private final int				pendingResource	= -1;
+	private Context				context;
+	private final int			pendingResource	= -1;
 
 	/**
 	 * Constructor wrapping a supplied ListAdapter
@@ -196,5 +196,4 @@ public abstract class EndlessAdapter extends AdapterWrapper {
 		throw new RuntimeException("You must either override getPendingView() or supply a pending View resource via the constructor");
 	}
 
-	
 }

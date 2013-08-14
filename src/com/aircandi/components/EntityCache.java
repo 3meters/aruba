@@ -257,8 +257,8 @@ public class EntityCache implements Map<String, Entity> {
 		parameters.putInt("limit", 50);
 		parameters.putString("provider",
 				Aircandi.settings.getString(
-						Constants.PREF_TESTING_PLACE_PROVIDER,
-						Constants.PREF_TESTING_PLACE_PROVIDER_DEFAULT));
+						Constants.PREF_PLACE_PROVIDER,
+						Constants.PREF_PLACE_PROVIDER_DEFAULT));
 		parameters.putInt("radius", Integer.parseInt(
 				Aircandi.settings.getString(
 						Constants.PREF_SEARCH_RADIUS,

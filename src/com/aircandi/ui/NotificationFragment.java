@@ -28,10 +28,10 @@ import com.aircandi.beta.R;
 import com.aircandi.components.DatabaseHelper;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
-import com.aircandi.components.MessageEvent;
 import com.aircandi.components.NotificationManager;
 import com.aircandi.components.NotificationTable;
 import com.aircandi.components.NotificationsContentProvider;
+import com.aircandi.events.MessageEvent;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirNotification;
@@ -92,7 +92,8 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 		return view;
 	}
 
-	protected void databind(final Boolean refresh) {
+	@Override
+	public void onDatabind(final Boolean refresh) {
 		Logger.d(this, "databinding...");
 
 		showBusy();
@@ -129,7 +130,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	public void onRefresh() {
 		mBusyManager.showBusy();
 		saveListPosition();
-		databind(true);
+		onDatabind(true);
 	}
 
 	@Override
@@ -187,7 +188,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 		getSherlockActivity().runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				databind(true);
+				onDatabind(true);
 			}
 		});
 	}
@@ -214,7 +215,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 							SQLiteDatabase database = DatabaseHelper.getInstance().getWritableDatabase();
 							Integer deleteCount = database.delete(NotificationTable.TABLE_NOTIFICATIONS, "1", null);
 							UI.showToastNotification("Items deleted: " + String.valueOf(deleteCount), Toast.LENGTH_SHORT);
-							databind(true);
+							onDatabind(true);
 							getView().findViewById(R.id.message).setVisibility(View.VISIBLE);
 						}
 					}
@@ -272,7 +273,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	public void onResume() {
 		super.onResume();
 		hideBusy();
-		databind(false);
+		onDatabind(false);
 	}
 
 	// --------------------------------------------------------------------------------------------

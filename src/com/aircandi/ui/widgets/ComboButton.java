@@ -9,18 +9,20 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.ViewAnimator;
 
 import com.aircandi.beta.R;
 
 @SuppressWarnings("ucd")
 public class ComboButton extends RelativeLayout {
 
-	private Integer		mLayoutId;
-	private Integer		mDrawableId;
-	private String		mLabel;
-	private ViewGroup	mLayout;
-	private ImageView	mImageIcon;
-	private TextView	mTextLabel;
+	private Integer			mLayoutId;
+	private Integer			mDrawableId;
+	private String			mLabel;
+	private ViewGroup		mLayout;
+	private ImageView		mImageIcon;
+	private TextView		mTextLabel;
+	private ViewAnimator	mViewAnimator;
 
 	public ComboButton(Context context) {
 		this(context, null);
@@ -52,8 +54,9 @@ public class ComboButton extends RelativeLayout {
 
 		mLayout = (ViewGroup) LayoutInflater.from(this.getContext()).inflate(mLayoutId, this, true);
 		if (!this.isInEditMode()) {
-			mTextLabel = (TextView) mLayout.findViewById(R.id.label);
-			mImageIcon = (ImageView) mLayout.findViewById(R.id.image);
+			mTextLabel = (TextView) mLayout.findViewById(R.id.button_label);
+			mImageIcon = (ImageView) mLayout.findViewById(R.id.button_image);
+			mViewAnimator = (ViewAnimator) mLayout.findViewById(R.id.button_animator);
 		}
 	}
 
@@ -108,4 +111,7 @@ public class ComboButton extends RelativeLayout {
 		mImageIcon = imageIcon;
 	}
 
+	public ViewAnimator getViewAnimator() {
+		return mViewAnimator;
+	}
 }

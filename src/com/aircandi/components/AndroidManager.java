@@ -17,6 +17,7 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Environment;
+import android.text.Html;
 
 import com.aircandi.Aircandi;
 import com.aircandi.beta.BuildConfig;
@@ -86,14 +87,14 @@ public class AndroidManager {
 		final String uri = "geo:0,0?q="
 				+ latitude
 				+ "," + longitude;
-		
-//		final String uri = "geo:" + latitude + "," + longitude + "?q="
-//				+ Uri.encode(latitude
-//				+ "," + longitude
-//				+ "(" + label + ")");
-		
+
+		//		final String uri = "geo:" + latitude + "," + longitude + "?q="
+		//				+ Uri.encode(latitude
+		//				+ "," + longitude
+		//				+ "(" + label + ")");
+
 		//		final String uri = "geo:" + latitude + "," + longitude;
-		
+
 		final Intent searchAddress = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
 		context.startActivity(searchAddress);
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
@@ -142,15 +143,45 @@ public class AndroidManager {
 
 	public void callSendToActivity(Context context, String placeName, String emailAddress, String subject, String body) {
 		final StringBuilder uriText = new StringBuilder(500);
-		uriText.append("mailto:" + Uri.encode(emailAddress));
 		if (subject != null) {
 			uriText.append("?subject=" + subject);
 		}
 		if (body != null) {
 			uriText.append("&body=" + body);
 		}
-		final Intent intent = new Intent(android.content.Intent.ACTION_SENDTO, Uri.parse(uriText.toString()));
-		context.startActivity(intent);
+		final Intent intent = new Intent(android.content.Intent.ACTION_SENDTO, Uri.fromParts("mailto", emailAddress, uriText.toString()));
+		context.startActivity(Intent.createChooser(intent, "Send invite..."));
+	}
+
+	public void callSendActivity(Context context, String subject, String bodyHtml) {
+		/*
+		 * Activity Action: Deliver some data to someone else. Who the data is being delivered to is not specified; it
+		 * is up to the receiver of this action to ask the user where the data should be sent.
+		 * When launching a SEND intent, you should usually wrap it in a chooser (through createChooser), which will
+		 * give the proper interface for the user to pick how to send your data and allow you to specify a prompt
+		 * indicating what they are doing.
+		 * 
+		 * Input: getType is the MIME type of the data being sent. get*Extra can have either a EXTRA_TEXT or
+		 * EXTRA_STREAM field, containing the data to be sent. If using EXTRA_TEXT, the MIME type should be
+		 * "text/plain"; otherwise it should be the MIME type of the data in EXTRA_STREAM. If using EXTRA_TEXT, you can
+		 * also optionally supply EXTRA_HTML_TEXT for clients to retrieve your text with HTML formatting.
+		 * 
+		 * As of android.os.Build.VERSION_CODES.JELLY_BEAN, the data being sent can be supplied through
+		 * setClipData(ClipData). This allows you to use FLAG_GRANT_READ_URI_PERMISSION when sharing content: URIs and
+		 * other advanced features of ClipData. If using this approach, you still must supply the same data through the
+		 * EXTRA_TEXT or EXTRA_STREAM fields described below for compatibility with old applications. If you don't set a
+		 * ClipData, it will be copied there for you when calling Context.startActivity(Intent).
+		 * 
+		 * Optional standard extras, which may be interpreted by some recipients as appropriate, are: EXTRA_EMAIL,
+		 * EXTRA_CC, EXTRA_BCC, EXTRA_SUBJECT.
+		 * 
+		 * Output: nothing.
+		 */
+		final Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+		intent.setType("text/html");
+		intent.putExtra(android.content.Intent.EXTRA_SUBJECT, subject);
+		intent.putExtra(android.content.Intent.EXTRA_TEXT, Html.fromHtml(bodyHtml));		
+		context.startActivity(Intent.createChooser(intent, "Send invite..."));
 	}
 
 	public void callTwitterActivity(Context context, String twitterHandle) {

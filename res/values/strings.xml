@@ -54,12 +54,18 @@
     <string name="pref_dialog_cancel">Cancel</string>
     <string name="pref_general_category_title">General settings</string>
     <string name="pref_reporting_category_title">Reporting settings</string>
+    
     <string name="pref_search_radius_title">Scanning</string>
     <string name="pref_search_radius_summary">Scanning distance</string>
+    <string name="pref_search_radius_default">500 yards</string>
     <string name="pref_search_radius_dialog_title">Select scanning distance</string>
+    
+    <string name="pref_theme_default">Midnight</string>
     <string name="pref_theme_title">Themes</string>
     <string name="pref_theme_summary">Choose a theme</string>
+    <string name="pref_theme_default">Midnight</string>
     <string name="pref_theme_dialog_title">Select theme</string>
+    
     <string name="pref_sound_effects_summary">Play sound notifications and effects</string>
     <string name="pref_sound_effects_title">Sounds</string>
 
@@ -298,6 +304,7 @@
     <string name="dialog_update_ok">update</string>
     <string name="dialog_update_cancel">no thanks</string>
 
+    <string name="dialog_application_candigram_new">Add a candigram</string>
     <string name="dialog_application_picture_new">Add a picture</string>
     <string name="dialog_application_comment_new">Add a comment</string>
     
@@ -322,7 +329,6 @@
     <string name="button_unwatch">watching</string>
     <string name="button_edit">edit</string>
     <string name="button_polish">polish</string>
-    <string name="button_add_picture">add picture</string>
     
     <string name="section_place_shortcuts_applinks">links</string>
     
@@ -346,7 +352,9 @@
 
     <string name="section_user_shortcuts_places_created">places created</string>
     <string name="section_user_shortcuts_pictures_created">pictures created</string>
+    <string name="section_user_shortcuts_candigrams_created">candigrams created</string>
     <string name="section_user_shortcuts_places_watching">places watching</string>
+    <string name="section_user_shortcuts_candigrams_watching">candigrams watching</string>
     <string name="section_user_shortcuts_pictures_watching">pictures watching</string>
     <string name="section_user_shortcuts_users_watching">users watching</string>
 
@@ -354,7 +362,8 @@
 
     <string name="splash_button_signin">sign in</string>
     <string name="splash_button_signup">register</string>
-
+    <string name="splash_button_retry">retry</string>
+    
     <!-- Forms.titles -->
 
     <string name="form_title_watching">watching</string>
@@ -406,6 +415,10 @@
 
     <!-- Forms.labels -->
 
+    <string name="form_label_applink_edit_name">LABEL</string>
+    <string name="form_label_applink_edit_app_id">USERNAME OR ID</string>
+    <string name="form_label_applink_edit_app_url">WEB ADDRESS (OPTIONAL)</string>
+    
     <string name="form_label_fullname">full name</string>
     <string name="form_label_bio">bio</string>
     <string name="form_label_link">web</string>

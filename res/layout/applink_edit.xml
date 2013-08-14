@@ -3,7 +3,7 @@
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/backgroundForm" >
+    android:background="?attr/backgroundForm" xmlns:tools="http://schemas.android.com/tools">
 
     <com.aircandi.ui.widgets.BounceScrollView
         android:layout_width="match_parent"
@@ -49,7 +49,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_weight="0"
-                android:visibility="visible" >
+                android:visibility="visible"
+                tools:ignore="InefficientWeight" >
 
                 <com.aircandi.ui.widgets.AirImageView
                     android:id="@+id/photo"
@@ -69,7 +70,7 @@
 
                 <com.aircandi.ui.widgets.AirButton
                     android:id="@+id/button_change_image"
-                    style="@style/form_button"
+                    style="@style/form_button_floating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -91,10 +92,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="6dp"
-                    android:text="label" />
+                    android:text="@string/form_label_applink_edit_name" />
 
                 <View
-                    android:id="@+id/rule"
                     android:layout_width="match_parent"
                     android:layout_height="1px"
                     android:layout_marginLeft="4dp"
@@ -123,10 +123,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="6dp"
-                    android:text="username or id" />
+                    android:text="@string/form_label_applink_edit_app_id" />
 
                 <View
-                    android:id="@+id/rule"
                     android:layout_width="match_parent"
                     android:layout_height="1px"
                     android:layout_marginLeft="4dp"
@@ -155,10 +154,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="6dp"
-                    android:text="web address (optional)" />
+                    android:text="@string/form_label_applink_edit_app_url" />
 
                 <View
-                    android:id="@+id/rule"
                     android:layout_width="match_parent"
                     android:layout_height="1px"
                     android:layout_marginLeft="4dp"

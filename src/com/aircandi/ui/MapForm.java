@@ -1,42 +1,72 @@
 package com.aircandi.ui;
 
-import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.FeatureInfo;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
 
+import com.aircandi.Constants;
 import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.DefaultType;
-import com.aircandi.ui.base.BaseEntityForm;
-import com.aircandi.utilities.Animate;
-import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.utilities.Routing;
-import com.google.android.gms.maps.GoogleMap;
+import com.aircandi.utilities.UI;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapForm extends BaseEntityForm {
+public class MapForm extends BaseActivity {
 
-	private GoogleMap	mMap;
-	
-	
+	SupportMapFragment			mMapFragment;
+	Entity						mEntity;
+	String						mEntityId;
+	private static final int	REQUEST_CODE_RECOVER_PLAY_SERVICES	= 1001;
 
 	@Override
-	protected void databind(final Boolean refreshProposed) {
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		if (!isFinishing()) {
+			unpackIntent();
+			initialize(savedInstanceState);
+			configureActionBar();
+		}
+	}
+
+	@Override
+	protected void unpackIntent() {
+		final Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
+		}
+	}
+	
+	protected void initialize(Bundle savedInstanceState) {
+		
+        mMapFragment = new MapFragment();
+        getSupportFragmentManager().beginTransaction().add(R.id.fragment_holder, mMapFragment).commit();		
+	}
+
+	@Override
+	public void onDatabind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
 
 			@Override
-			protected void onPreExecute() {
-				mBusyManager.showBusy();
-			}
+			protected void onPreExecute() {}
 
 			@Override
 			protected Object doInBackground(Object... params) {
@@ -66,25 +96,27 @@ public class MapForm extends BaseEntityForm {
 
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
-						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 						setActivityTitle(mEntity.name);
-
 						draw();
 					}
 				}
 				else {
 					Routing.serviceError(MapForm.this, result.serviceResponse);
 				}
-				mBusyManager.hideBusy();
+				setSupportProgressBarIndeterminateVisibility(Boolean.FALSE);
 			}
 
 		}.execute();
 	}
 
-	@Override
 	protected void draw() {
-		setUpMapIfNeeded();
+		if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
+			UI.showToastNotification("Google Play Services not available", Toast.LENGTH_SHORT);
+			return;
+		}
+		if (getVersionFromPackageManager(this) >= 2) {
+			setUpMap();
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -92,41 +124,21 @@ public class MapForm extends BaseEntityForm {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	public void onCancel(Boolean force) {
-		setResult(Activity.RESULT_CANCELED);
-		finish();
-		Animate.doOverridePendingTransition(this, TransitionType.HelpToPage);
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+			case REQUEST_CODE_RECOVER_PLAY_SERVICES:
+				if (resultCode == RESULT_CANCELED) {
+					Toast.makeText(this, "Google Play Services must be installed and up-to-date.", Toast.LENGTH_SHORT).show();
+					finish();
+				}
+				return;
+		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
-
-	/**
-	 * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
-	 * installed) and the map has not already been instantiated.. This will ensure that we only ever
-	 * call {@link #setUpMap()} once when {@link #mMap} is not null.
-	 * <p>
-	 * If it isn't installed {@link SupportMapFragment} (and {@link com.google.android.gms.maps.MapView MapView}) will
-	 * show a prompt for the user to install/update the Google Play services APK on their device.
-	 * <p>
-	 * A user can return to this FragmentActivity after following the prompt and correctly installing/updating/enabling
-	 * the Google Play services. Since the FragmentActivity may not have been completely destroyed during this process
-	 * (it is likely that it would only be stopped or paused), {@link #onCreate(Bundle)} may not be called again so we
-	 * should call this method in {@link #onResume()} to guarantee that it will be called.
-	 */
-	private void setUpMapIfNeeded() {
-		// Do a null check to confirm that we have not already instantiated the map.
-		if (mMap == null) {
-			// Try to obtain the map from the SupportMapFragment.
-			mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-					.getMap();
-			// Check if we were successful in obtaining the map.
-			if (mMap != null) {
-				setUpMap();
-			}
-		}
-	}
 
 	/**
 	 * This is where we can add markers or lines, add listeners or move the camera. In this case, we
@@ -137,12 +149,33 @@ public class MapForm extends BaseEntityForm {
 	private void setUpMap() {
 		AirLocation location = mEntity.getLocation();
 		if (location != null) {
-			MarkerOptions marker = new MarkerOptions().position(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()));
+			MarkerOptions options = new MarkerOptions().position(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()));
 			if (mEntity.name != null) {
-				marker.title(mEntity.name);
+				options.title(mEntity.name);
 			}
-			mMap.addMarker(marker);
+			Marker marker = mMapFragment.getMap().addMarker(options);
+			marker.showInfoWindow();
+			mMapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()), 16));
 		}
+	}
+
+	private boolean checkPlayServices() {
+		int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+		if (status != ConnectionResult.SUCCESS) {
+			if (GooglePlayServicesUtil.isUserRecoverableError(status)) {
+				showErrorDialog(status);
+			}
+			else {
+				UI.showToastNotification("Maps are not supported for this device", Toast.LENGTH_LONG);
+				finish();
+			}
+			return false;
+		}
+		return true;
+	}
+
+	void showErrorDialog(int code) {
+		GooglePlayServicesUtil.getErrorDialog(code, this, REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -150,12 +183,48 @@ public class MapForm extends BaseEntityForm {
 	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
-	// Misc
+	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (checkPlayServices()) {
+			findViewById(R.id.fragment_holder).setVisibility(View.VISIBLE);
+			onDatabind(false);
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Misc
+	// --------------------------------------------------------------------------------------------
+	
 	@Override
 	protected int getLayoutId() {
 		return R.layout.map_form;
 	}
 
+	private static int getVersionFromPackageManager(Context context) {
+		PackageManager packageManager = context.getPackageManager();
+		FeatureInfo[] featureInfos = packageManager.getSystemAvailableFeatures();
+		if (featureInfos != null && featureInfos.length > 0) {
+			for (FeatureInfo featureInfo : featureInfos) {
+				// Null feature name means this feature is the open gl es version feature.
+				if (featureInfo.name == null) {
+					if (featureInfo.reqGlEsVersion != FeatureInfo.GL_ES_VERSION_UNDEFINED) {
+						return getMajorVersion(featureInfo.reqGlEsVersion);
+					}
+					else {
+						return 1; // Lack of property means OpenGL ES version 1
+					}
+				}
+			}
+		}
+		return 1;
+	}
+
+	/** @see FeatureInfo#getGlEsVersion() */
+	private static int getMajorVersion(int glEsVersion) {
+		return ((glEsVersion & 0xffff0000) >> 16);
+	}
 }

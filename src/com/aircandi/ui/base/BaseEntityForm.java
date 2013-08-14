@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
@@ -110,8 +109,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 			@Override
 			protected void onPreExecute() {
-				mBusyManager.showBusy();
-				mBusyManager.startBodyBusyIndicator();
+				((ComboButton) findViewById(R.id.button_like)).getViewAnimator().setDisplayedChild(1);
 			}
 
 			@Override
@@ -143,7 +141,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				ModelResult result = (ModelResult) response;
 				setSupportProgressBarIndeterminateVisibility(false);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					databind(false);
+					onDatabind(false);
 				}
 				else {
 					if (result.serviceResponse.exception.getStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
@@ -153,8 +151,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 						Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
 					}
 				}
-				mBusyManager.hideBusy();
-				mBusyManager.stopBodyBusyIndicator();
+				((ComboButton) findViewById(R.id.button_like)).getViewAnimator().setDisplayedChild(0);
 			}
 		}.execute();
 
@@ -167,8 +164,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 			@Override
 			protected void onPreExecute() {
-				mBusyManager.showBusy();
-				mBusyManager.startBodyBusyIndicator();
+				((ComboButton) findViewById(R.id.button_watch)).getViewAnimator().setDisplayedChild(1);
 			}
 
 			@Override
@@ -199,8 +195,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			@Override
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
-				mBusyManager.hideBusy();
-				mBusyManager.stopBodyBusyIndicator();
+				((ComboButton) findViewById(R.id.button_watch)).getViewAnimator().setDisplayedChild(0);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					draw();
 				}
@@ -390,9 +385,6 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		}
 
 		if (shortcuts.size() > flowLimit) {
-			View footer = LayoutInflater.from(this).inflate(R.layout.temp_section_footer, null);
-			Button button = (Button) footer.findViewById(R.id.button_more);
-			button.setText(moreResId);
 
 			Intent intent = null;
 			if (settings.appClass.equals(Applinks.class)) {
@@ -410,15 +402,26 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			if (settings.appClass.equals(Users.class)) {
 				intent = Users.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
 			}
-			button.setTag(intent);
-			section.setFooter(footer); // Replaces if there already is one.
+
+			/*
+			 * Make button shortcut
+			 */
+			Shortcut shortcut = Shortcut.builder(mEntity
+					, Constants.SCHEMA_INTENT
+					, Constants.TYPE_APP_INTENT
+					, null
+					, getString(moreResId)
+					, "resource:img_more"
+					, 10
+					, false
+					, true);
+			shortcut.intent = intent;
+			shortcuts = shortcuts.subList(0, flowLimit - 1);
+			shortcuts.add(shortcut);
 		}
 
 		final FlowLayout flow = (FlowLayout) section.findViewById(R.id.flow_shortcuts);
-		flowShortcuts(flow, shortcuts.size() > flowLimit
-				? shortcuts.subList(0, flowLimit)
-				: shortcuts, flowItemResId);
-
+		flowShortcuts(flow, shortcuts, flowItemResId);
 		((ViewGroup) findViewById(holderId)).addView(holder);
 
 	}
@@ -595,7 +598,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return Routing.route(this, Routing.routeForMenuId(item.getItemId()), mEntity);
@@ -644,13 +647,13 @@ public abstract class BaseEntityForm extends BaseBrowse {
 					&& ProximityManager.getInstance().getLastBeaconLoadDate() != null
 					&& ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()) {
 				invalidateOptionsMenu();
-				databind(true);
+				onDatabind(true);
 			}
 			else if (mEntityModelActivityDate != null
 					&& EntityManager.getEntityCache().getLastActivityDate() != null
 					&& EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
-				databind(true);
+				onDatabind(true);
 			}
 
 			/* Package receiver */
@@ -688,7 +691,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 						@Override
 						public void run() {
-							databind(false);
+							onDatabind(false);
 						}
 					}, 1500);
 				}

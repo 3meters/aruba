@@ -4,14 +4,13 @@
     <PreferenceCategory android:title="@string/pref_general_category_title" >
         <ListPreference
             android:id="@+id/Pref_Search_Radius"
-            android:defaultValue="8047"
+            android:defaultValue="457"
             android:dialogTitle="@string/pref_search_radius_dialog_title"
             android:entries="@array/search_radius_entries"
             android:entryValues="@array/search_radius_values"
             android:key="Pref_Search_Radius"
             android:negativeButtonText="@string/pref_dialog_cancel"
             android:positiveButtonText="@string/pref_dialog_ok"
-            android:summary="@string/pref_search_radius_summary"
             android:title="@string/pref_search_radius_title" />
         <ListPreference
             android:id="@+id/Pref_Theme"
@@ -22,7 +21,6 @@
             android:key="Pref_Theme"
             android:negativeButtonText="@string/pref_dialog_cancel"
             android:positiveButtonText="@string/pref_dialog_ok"
-            android:summary="@string/pref_theme_summary"
             android:title="@string/pref_theme_title" />
 
         <PreferenceScreen
@@ -54,6 +52,21 @@
                 android:title="@string/pref_sound_effects_title" />
         </PreferenceScreen>
 
+        <ListPreference
+            android:id="@+id/Pref_Place_Provider"
+            android:defaultValue="foursquare"
+            android:dialogTitle="Place provider to use"
+            android:entries="@array/place_provider_entries"
+            android:entryValues="@array/place_provider_values"
+            android:key="Pref_Place_Provider"
+            android:negativeButtonText="Cancel"
+            android:positiveButtonText="OK"
+            android:summary="Specify which place provider should be used when scanning for nearby places"
+            android:title="Place provider" />
+
+        <Preference
+            android:key="Pref_Feedback"
+            android:title="Feedback" />
         <Preference
             android:key="Pref_About"
             android:title="About" />

@@ -2,21 +2,27 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" >
 
-    <LinearLayout
+    <ViewAnimator
+        android:id="@+id/button_animator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center" >
+        android:layout_centerInParent="true" >
 
         <ImageView
-            android:id="@+id/image"
+            android:id="@+id/button_image"
             android:layout_width="@dimen/image_combo_button"
             android:layout_height="@dimen/image_combo_button"
-            android:layout_marginRight="2dp"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_launcher"
-            android:scaleType="fitCenter" />
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_launcher" />
 
-    </LinearLayout>
+        <ProgressBar
+            android:id="@+id/button_progress"
+            android:layout_width="@dimen/image_combo_button"
+            android:layout_height="@dimen/image_combo_button"
+            android:focusable="true"
+            android:maxHeight="30dp"
+            android:minHeight="30dp" />
+    </ViewAnimator>
 
 </merge>

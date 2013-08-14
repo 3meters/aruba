@@ -35,8 +35,8 @@
     <!-- Grids -->
 
     <dimen name="grid_spacing_horizontal">0dp</dimen>
-    <dimen name="grid_padding">4dp</dimen>
     <dimen name="grid_spacing_vertical">0dp</dimen>
+    <dimen name="grid_padding">0dp</dimen>
     <dimen name="grid_item_height_nudge">10dp</dimen>
     <dimen name="grid_column_width_requested_large">150dp</dimen>
     <dimen name="grid_column_width_requested_medium">100dp</dimen>
@@ -51,8 +51,14 @@
     <dimen name="form_button_floating_width_min">96dp</dimen>
     <dimen name="form_button_stroke_width">1px</dimen>
     <dimen name="form_button_corner_radius">0dp</dimen>
-    <dimen name="form_button_padding">4dp</dimen>
     <dimen name="action_button_min_width">56dp</dimen>
+    
+    <!-- 
+    	This controls how much extra room is added around buttons and
+    	images so selection feedback can show around the view 
+    -->
+    
+    <dimen name="form_button_padding">2dp</dimen>    
     
     <!-- Balloons -->
 

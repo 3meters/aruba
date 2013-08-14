@@ -2,63 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta" >
 
-    <PreferenceCategory android:title="@string/pref_general_category_title" >
-        <ListPreference
-            android:id="@+id/Pref_Search_Radius"
-            android:defaultValue="8047"
-            android:dialogTitle="@string/pref_search_radius_dialog_title"
-            android:entries="@array/search_radius_entries"
-            android:entryValues="@array/search_radius_values"
-            android:key="Pref_Search_Radius"
-            android:negativeButtonText="@string/pref_dialog_cancel"
-            android:positiveButtonText="@string/pref_dialog_ok"
-            android:summary="@string/pref_search_radius_summary"
-            android:title="@string/pref_search_radius_title" />
-        <ListPreference
-            android:id="@+id/Pref_Theme"
-            android:defaultValue="aircandi_theme_midnight"
-            android:dialogTitle="@string/pref_theme_dialog_title"
-            android:entries="@array/theme_entries"
-            android:entryValues="@array/theme_values"
-            android:key="Pref_Theme"
-            android:negativeButtonText="@string/pref_dialog_cancel"
-            android:positiveButtonText="@string/pref_dialog_ok"
-            android:summary="@string/pref_theme_summary"
-            android:title="@string/pref_theme_title" />
-
-        <PreferenceScreen
-            android:key="Pref_Notifications_Screen"
-            android:title="Notifications" >
-            <CheckBoxPreference
-                android:id="@+id/Pref_Notifications_Comments"
-                android:defaultValue="true"
-                android:key="Pref_Notifications_Comments"
-                android:summary="@string/pref_notifications_comments_summary"
-                android:title="@string/pref_notifications_comments_title" />
-            <CheckBoxPreference
-                android:id="@+id/Pref_Notifications_Posts"
-                android:defaultValue="true"
-                android:key="Pref_Notifications_Posts"
-                android:summary="@string/Pref_Notifications_Pictures_summary"
-                android:title="@string/Pref_Notifications_Pictures_title" />
-            <CheckBoxPreference
-                android:id="@+id/Pref_Notifications_Nearby"
-                android:defaultValue="true"
-                android:key="Pref_Notifications_Nearby"
-                android:summary="@string/pref_notifications_nearby_summary"
-                android:title="@string/pref_notifications_nearby_title" />
-            <CheckBoxPreference
-                android:id="@+id/Pref_Sound_Effects"
-                android:defaultValue="true"
-                android:key="Pref_Sound_Effects"
-                android:summary="@string/pref_sound_effects_summary"
-                android:title="@string/pref_sound_effects_title" />
-        </PreferenceScreen>
-
-        <Preference
-            android:key="Pref_About"
-            android:title="About" />
-    </PreferenceCategory>
     <PreferenceCategory
         android:id="@+id/Pref_Category_Dev"
         android:title="Development preferences" >
@@ -66,8 +9,7 @@
             android:id="@+id/Pref_Enable_Dev"
             android:defaultValue="false"
             android:key="Pref_Enable_Dev"
-            android:summary="Enable all developer features"
-            android:title="Developer features" />
+            android:title="Enable developer features" />
 
         <PreferenceScreen
             android:key="Pref_Testing_Screen"
@@ -94,44 +36,13 @@
                 android:positiveButtonText="OK"
                 android:summary="Specify which location should be used for places"
                 android:title="Location testing" />
-            <ListPreference
-                android:id="@+id/Pref_Testing_Place_Provider"
-                android:defaultValue="foursquare"
-                android:dialogTitle="Place provider to use"
-                android:entries="@array/testing_place_provider_entries"
-                android:entryValues="@array/testing_place_provider_values"
-                android:key="Pref_Testing_Place_Provider"
-                android:negativeButtonText="Cancel"
-                android:positiveButtonText="OK"
-                android:summary="Specify which place provider should be used for places near location"
-                android:title="Place provider" />
         </PreferenceScreen>
 
         <CheckBoxPreference
             android:id="@+id/Pref_Entity_Fencing"
             android:defaultValue="true"
             android:key="Pref_Entity_Fencing"
-            android:summary="Use fence settings to filter entities"
-            android:title="Entity fencing" />
-        <CheckBoxPreference
-            android:id="@+id/Pref_Show_Place_Rank_Score"
-            android:defaultValue="false"
-            android:key="Pref_Show_Place_Rank_Score"
-            android:summary="Show place rank score"
-            android:title="Place rank score" />
-    </PreferenceCategory>
-    <PreferenceCategory android:title="Error reporting" >
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="acra.enable"
-            android:summaryOff="@string/pref_acra_disabled"
-            android:summaryOn="@string/pref_acra_enabled"
-            android:title="@string/pref_disable_acra" />
-
-        <EditTextPreference
-            android:key="acra.user.email"
-            android:summary="@string/pref_acra_user_email_summary"
-            android:title="@string/pref_acra_user_email" />
+            android:title="Enable entity fencing" />
     </PreferenceCategory>
 
 </PreferenceScreen>

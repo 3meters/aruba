@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.content.Intent;
+
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.components.AndroidManager;
@@ -52,6 +54,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	public List<Shortcut>							group;
 	public Boolean									synthetic			= false;
 	public String									linkType;
+	public Intent									intent;
 
 	public Shortcut() {}
 

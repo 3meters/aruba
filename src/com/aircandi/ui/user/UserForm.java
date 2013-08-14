@@ -32,7 +32,7 @@ import com.aircandi.utilities.UI;
 public class UserForm extends BaseEntityForm {
 
 	@Override
-	protected void databind(final Boolean refreshProposed) {
+	public void onDatabind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
 

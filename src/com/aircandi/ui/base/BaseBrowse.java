@@ -18,7 +18,7 @@ public abstract class BaseBrowse extends BaseActivity {
 			unpackIntent();
 			initialize(savedInstanceState);
 			configureActionBar();
-			databind(mForceRefresh);
+			onDatabind(mForceRefresh);
 		}
 	}
 
@@ -40,7 +40,8 @@ public abstract class BaseBrowse extends BaseActivity {
 		}
 	}
 
-	protected void databind(final Boolean refreshProposed) {}
+	@Override
+	public void onDatabind(final Boolean refreshProposed) {}
 
 	// --------------------------------------------------------------------------------------------
 	// Events
@@ -48,9 +49,9 @@ public abstract class BaseBrowse extends BaseActivity {
 
 	@Override
 	public void onRefresh() {
-		databind(true); // Called from Routing
+		onDatabind(true); // Called from Routing
 	}
-
+	
 	// --------------------------------------------------------------------------------------------
 	// UI
 	// --------------------------------------------------------------------------------------------

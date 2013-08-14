@@ -8,14 +8,19 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Filterable;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -24,18 +29,20 @@ import com.aircandi.beta.R;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.SearchAdapter;
-import com.aircandi.components.SearchAdapter.SearchListViewHolder;
 import com.aircandi.components.SearchManager;
 import com.aircandi.components.SearchManager.SearchItem;
+import com.aircandi.components.bitmaps.BitmapRequest;
+import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService.RequestType;
 import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.ui.base.BaseBrowse;
+import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.UI;
 import com.aircandi.utilities.Utilities;
 
 @SuppressWarnings("ucd")
@@ -52,7 +59,7 @@ public class UriPicker extends BaseBrowse {
 	private Boolean					mVerifyUri		= false;
 	private final List<SearchItem>	mSearchItems	= new ArrayList<SearchItem>();
 	private SearchAdapter			mSearchAdapter;
-	
+
 	@Override
 	protected void unpackIntent() {
 		final Bundle extras = getIntent().getExtras();
@@ -88,7 +95,7 @@ public class UriPicker extends BaseBrowse {
 	}
 
 	@Override
-	protected void databind(Boolean refresh) {
+	public void onDatabind(Boolean refresh) {
 
 		new AsyncTask() {
 
@@ -119,7 +126,7 @@ public class UriPicker extends BaseBrowse {
 
 	@SuppressWarnings("ucd")
 	public void onListItemClick(View view) {
-		final SearchItem searchItem = (SearchItem) ((SearchListViewHolder) view.getTag()).data;
+		final SearchItem searchItem = (SearchItem) ((SearchAdapter.SearchListViewHolder) view.getTag()).data;
 		mUri = searchItem.uri;
 		mUriTitle = searchItem.name;
 		mTextUri.setText(mUri);
@@ -284,4 +291,149 @@ public class UriPicker extends BaseBrowse {
 		return true;
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Classes
+	// --------------------------------------------------------------------------------------------
+
+	private static class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterable {
+
+		private final List<SearchItem>	mListItems;
+		private final LayoutInflater	mInflater;
+		private Integer					mItemLayoutId	= R.layout.temp_listitem_search;
+
+		public SearchAdapter(Context context, List<SearchItem> searchItems, Integer itemLayoutId) {
+			super(context, 0, searchItems);
+			mListItems = searchItems;
+			mInflater = LayoutInflater.from(context);
+			if (itemLayoutId != null) {
+				mItemLayoutId = itemLayoutId;
+			}
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View view = convertView;
+			final SearchListViewHolder holder;
+			final SearchItem itemData = mListItems.get(position);
+
+			if (view == null) {
+				view = mInflater.inflate(mItemLayoutId, null);
+				holder = new SearchListViewHolder();
+
+				holder.name = (TextView) view.findViewById(R.id.name);
+				holder.categoryName = (TextView) view.findViewById(R.id.category_name);
+				holder.uri = (TextView) view.findViewById(R.id.uri);
+				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
+
+				view.setTag(holder);
+			}
+			else {
+				holder = (SearchListViewHolder) view.getTag();
+			}
+
+			if (itemData != null) {
+				final SearchItem searchItem = itemData;
+				holder.data = searchItem;
+				Boolean needSeparator = false;
+				if (position == 0) {
+					needSeparator = true;
+				}
+				else if (getItem(position - 1).type != searchItem.type) {
+					needSeparator = true;
+				}
+
+				if (!needSeparator) {
+					((TextView) view.findViewById(R.id.type)).setVisibility(View.GONE);
+				}
+				else {
+					((TextView) view.findViewById(R.id.type)).setVisibility(View.VISIBLE);
+					((TextView) view.findViewById(R.id.type)).setText(searchItem.type.name());
+				}
+
+				if (holder.name != null) {
+					if (searchItem.name != null && searchItem.name.length() > 0) {
+						holder.name.setText(searchItem.name);
+						holder.name.setVisibility(View.VISIBLE);
+					}
+					else {
+						holder.name.setVisibility(View.GONE);
+					}
+				}
+
+				if (holder.categoryName != null) {
+					if (searchItem.categoryName != null && searchItem.categoryName.length() > 0) {
+						holder.categoryName.setText(searchItem.categoryName);
+						holder.categoryName.setVisibility(View.VISIBLE);
+					}
+					else {
+						holder.categoryName.setVisibility(View.GONE);
+					}
+				}
+
+				if (holder.uri != null) {
+					if (searchItem.uri != null && searchItem.uri.length() > 0) {
+						holder.uri.setText(searchItem.uri);
+						holder.uri.setVisibility(View.VISIBLE);
+					}
+					else {
+						holder.uri.setVisibility(View.GONE);
+					}
+				}
+
+				if (holder.photoView != null) {
+					/*
+					 * The WebImageView sets the current bitmap ref being held
+					 * by the internal image view to null before doing the work
+					 * to satisfy the new request.
+					 */
+					if (searchItem.icon != null) {
+						UI.showImageInImageView(searchItem.icon, holder.photoView.getImageView(), true, Animate.fadeInMedium());
+					}
+					else if (searchItem.categoryIconUri != null) {
+
+						final String photoUri = searchItem.categoryIconUri;
+						final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.photoView).setImageUri(photoUri);
+						final BitmapRequest imageRequest = builder.create();
+
+						holder.categoryIconUri = photoUri;
+						holder.photoView.setBitmapRequest(imageRequest);
+					}
+					else {
+						holder.photoView.getImageView().setImageResource(R.drawable.img_globe);
+					}
+				}
+			}
+			return view;
+		}
+
+		@Override
+		public SearchItem getItem(int position) {
+			return mListItems.get(position);
+		}
+
+		@Override
+		public int getCount() {
+			return mListItems.size();
+		}
+
+		@Override
+		public boolean areAllItemsEnabled() {
+			return false;
+		}
+
+		@Override
+		public boolean isEnabled(int position) {
+			return true;
+		}
+
+		@SuppressWarnings("unused")
+		private class SearchListViewHolder {
+			private TextView		name;
+			private TextView		uri;
+			private TextView		categoryName;
+			private AirImageView	photoView;
+			public String			categoryIconUri;
+			public Object			data;
+		}
+	}
 }

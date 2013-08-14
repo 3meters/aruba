@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.events;
 
 import com.aircandi.service.objects.AirNotification;
 

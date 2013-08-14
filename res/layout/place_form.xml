@@ -59,6 +59,7 @@
 
             <LinearLayout
                 android:id="@+id/authoring_holder"
+                style="@style/form_content_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
@@ -110,7 +111,7 @@
         android:layout_centerInParent="true"
         android:layout_marginTop="35dp"
         android:background="?attr/backgroundProgress"
-        android:padding="10dp" 
-        android:visibility="gone"/>
+        android:padding="10dp"
+        android:visibility="gone" />
 
 </RelativeLayout>

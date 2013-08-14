@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.location.Location;
 
 import com.aircandi.PlacesConstants;
+import com.aircandi.events.LocationReceivedEvent;
 
 
 /**

@@ -16,9 +16,9 @@ import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
 import android.widget.Toast;
 
-import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.beta.BuildConfig;
+import com.aircandi.components.NotificationManager.NotificationType;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.ServiceRequest;
@@ -106,7 +106,7 @@ public class NetworkManager {
 		 */
 		ServiceResponse serviceResponse = new ServiceResponse();
 		if (NotificationManager.mNotificationManager != null) {
-			NotificationManager.mNotificationManager.cancel(Constants.NOTIFICATION_NETWORK);
+			NotificationManager.getInstance().cancelNotification(NotificationType.network);
 		}
 
 		try {

@@ -60,7 +60,7 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 	}
 
 	@Override
-	protected void databind(Boolean refresh) {
+	public void onDatabind(Boolean refresh) {
 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();

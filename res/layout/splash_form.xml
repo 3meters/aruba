@@ -21,10 +21,10 @@
         android:background="#cc111111"
         android:gravity="center"
         android:orientation="vertical"
+        android:paddingBottom="10dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="25dp"
-        android:paddingBottom="10dp"
         android:visibility="visible"
         tools:ignore="UselessParent" >
 
@@ -73,7 +73,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:visibility="visible" >
+            android:visibility="gone" >
 
             <com.aircandi.ui.widgets.AirButton
                 android:id="@+id/button_signup"
@@ -93,6 +93,25 @@
                 android:layout_weight="1"
                 android:onClick="onSigninButtonClick"
                 android:text="@string/splash_button_signin" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/button_retry_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
+            <com.aircandi.ui.widgets.AirButton
+                android:id="@+id/button_retry"
+                style="@style/form_button"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/form_button_height"
+                android:layout_marginRight="3dp"
+                android:layout_weight="1"
+                android:onClick="onRetryButtonClick"
+                android:text="@string/splash_button_retry" />
+
         </LinearLayout>
     </LinearLayout>
 

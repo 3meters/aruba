@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
+import com.aircandi.applications.Candigrams;
 import com.aircandi.applications.Comments;
 import com.aircandi.applications.Maps;
 import com.aircandi.applications.Pictures;
@@ -36,7 +37,6 @@ import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.NotificationManager;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ExcludeNulls;
@@ -44,7 +44,6 @@ import com.aircandi.service.HttpService.UseAnnotations;
 import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.HttpServiceException.ErrorType;
 import com.aircandi.service.WalledGardenException;
-import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Photo;
@@ -158,7 +157,7 @@ public final class Routing {
 	public static boolean route(final Activity activity, Route route, Entity entity, String schema, Bundle extras) {
 
 		if (route == Route.Unknown) {
-			
+
 			return false;
 		}
 		else if (route == Route.Home) {
@@ -248,6 +247,13 @@ public final class Routing {
 			return true;
 		}
 
+		else if (route == Route.Invite) {
+			String subject = "You/'ve been invited to join Aircandi";
+			String body = Utilities.loadStringFromRaw(R.raw.temp_invite);
+			AndroidManager.getInstance().callSendActivity(activity, subject, body);
+			return true;
+		}
+		
 		else if (route == Route.Browse) {
 
 			if (entity == null) {
@@ -307,7 +313,8 @@ public final class Routing {
 			else {
 				IntentBuilder intentBuilder = new IntentBuilder(activity, HelpForm.class).setExtras(extras);
 				activity.startActivity(intentBuilder.create());
-				Animate.doOverridePendingTransition(activity, TransitionType.PageToHelp);			}
+				Animate.doOverridePendingTransition(activity, TransitionType.PageToHelp);
+			}
 			return true;
 		}
 
@@ -399,7 +406,7 @@ public final class Routing {
 		}
 
 		else if (route == Route.DeleteNotifications) {
-			
+
 			return false;
 		}
 
@@ -591,12 +598,37 @@ public final class Routing {
 
 		if (shortcut.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 
-			if (shortcut.app.equals(Constants.TYPE_APP_PICTURE) || shortcut.app.equals(Constants.TYPE_APP_POST)) {
+			if (shortcut.app.equals(Constants.TYPE_APP_PICTURE) 
+					|| shortcut.app.equals(Constants.TYPE_APP_POST)) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
 					Pictures.view(activity, entity.id);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
 					Pictures.viewFor(activity, entity.id, shortcut.linkType, direction);
+				}
+				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_AUTO)) {
+					if (shortcut.count == 1) {
+						Pictures.view(activity, shortcut.appId);
+					}
+					else {
+						Pictures.viewFor(activity, entity.id, shortcut.linkType, direction);
+					}
+				}
+			}
+			else if (shortcut.app.equals(Constants.TYPE_APP_CANDIGRAM)) {
+				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
+					Candigrams.view(activity, entity.id);
+				}
+				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
+					Candigrams.viewFor(activity, entity.id, shortcut.linkType, direction);
+				}
+				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_AUTO)) {
+					if (shortcut.count == 1) {
+						Candigrams.view(activity, shortcut.appId);
+					}
+					else {
+						Candigrams.viewFor(activity, entity.id, shortcut.linkType, direction);
+					}
 				}
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_COMMENT)) {
@@ -686,7 +718,20 @@ public final class Routing {
 					}
 				}
 			}
+			else if (shortcut.intent != null) {
+				Routing.intent(activity, shortcut.intent);
+			}
 		}
+	}
+
+	public static Boolean isNetworkError(ServiceResponse serviceResponse) {
+		final ErrorType errorType = serviceResponse.exception.getErrorType();
+		if (errorType == ErrorType.Client) {
+			if (serviceResponse.exception.getInnerException() instanceof IOException) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static void serviceError(final Activity activity, ServiceResponse serviceResponse) {
@@ -735,13 +780,13 @@ public final class Routing {
 					/*
 					 * We don't have a network connection.
 					 */
-					final Intent intent = new Intent(activity, AircandiForm.class);
-					AirNotification airNotification = new AirNotification();
-					airNotification.title = activity.getString(R.string.error_connection_none_notification_title);
-					airNotification.subtitle = activity.getString(R.string.error_connection_none_notification_message);
-					airNotification.intent = intent;
-					airNotification.type = "network";
-					NotificationManager.getInstance().showNotification(airNotification, activity);
+//					final Intent intent = new Intent(activity, activity.getClass());
+//					AirNotification airNotification = new AirNotification();
+//					airNotification.title = activity.getString(R.string.error_connection_none_notification_title);
+//					airNotification.subtitle = activity.getString(R.string.error_connection_none_notification_message);
+//					airNotification.intent = intent;
+//					airNotification.type = "network";
+//					NotificationManager.getInstance().showNotification(airNotification, activity);
 
 					Dialogs.alertDialogSimple(activity, null, activity.getString(R.string.error_connection_none));
 				}
@@ -922,9 +967,6 @@ public final class Routing {
 		else if (itemId == R.id.settings) {
 			return Route.Settings;
 		}
-		else if (itemId == R.id.feedback) {
-			return Route.Feedback;
-		}
 		else if (itemId == R.id.profile) {
 			return Route.SigninProfile;
 		}
@@ -936,6 +978,9 @@ public final class Routing {
 		}
 		else if (itemId == R.id.signout) {
 			return Route.Signout;
+		}
+		else if (itemId == R.id.invite) {
+			return Route.Invite;
 		}
 		else if (itemId == R.id.cancel) {
 			return Route.Cancel;
@@ -992,10 +1037,10 @@ public final class Routing {
 		PhotoFromCamera,
 		PhotoSearch,
 		PhotoPlaceSearch,
-		Tune, 
-		NewFor, 
-		DeleteNotifications, 
-		Notifications, 
-		Created
+		Tune,
+		NewFor,
+		DeleteNotifications,
+		Notifications,
+		Created, Invite
 	}
 }

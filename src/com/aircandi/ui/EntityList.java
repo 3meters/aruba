@@ -1,6 +1,6 @@
 package com.aircandi.ui;
 
-import com.aircandi.components.MessageEvent;
+import com.aircandi.events.MessageEvent;
 import com.aircandi.ui.base.BaseEntityList;
 import com.squareup.otto.Subscribe;
 

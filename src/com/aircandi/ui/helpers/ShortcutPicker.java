@@ -68,7 +68,7 @@ public class ShortcutPicker extends BaseBrowse {
 	}
 
 	@Override
-	protected void databind(Boolean refresh) {
+	public void onDatabind(Boolean refresh) {
 
 		/* We use this to access the source suggestions */
 

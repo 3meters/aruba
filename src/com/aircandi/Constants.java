@@ -108,15 +108,18 @@ public final class Constants {
 
 	public static final String	SCHEMA_ANY									= "any";																					//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_PICTURE						= "post";																					//$NON-NLS-1$
+	public static final String	SCHEMA_ENTITY_CANDIGRAM						= "candigram";																					//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_PLACE							= "place";																					//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_COMMENT						= "comment";																				//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_APPLINK						= "applink";																				//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_BEACON						= "beacon";																				//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_USER							= "user";																					//$NON-NLS-1$
 	public static final String	SCHEMA_LINK									= "link";																					//$NON-NLS-1$
+	public static final String	SCHEMA_INTENT								= "intent";																				//$NON-NLS-1$
 
 	public static final String	ACTION_VIEW									= "view";
 	public static final String	ACTION_VIEW_FOR								= "view_for";
+	public static final String	ACTION_VIEW_AUTO							= "view_auto";
 
 	public static final String	TYPE_ANY									= "any";																					//$NON-NLS-1$
 	public static final String	TYPE_APP_FACEBOOK							= "facebook";																				//$NON-NLS-1$
@@ -138,6 +141,7 @@ public final class Constants {
 
 	/* Local app */
 	public static final String	TYPE_APP_MAP								= "map";																					//$NON-NLS-1$
+	public static final String	TYPE_APP_INTENT								= "intent";																				//$NON-NLS-1$
 
 	/* Verb types */
 	public static final String	TYPE_APP_LIKE								= "like";																					//$NON-NLS-1$
@@ -146,6 +150,7 @@ public final class Constants {
 	/* Entity types */
 	public static final String	TYPE_APP_COMMENT							= "comment";																				//$NON-NLS-1$
 	public static final String	TYPE_APP_PICTURE							= "picture";																				//$NON-NLS-1$
+	public static final String	TYPE_APP_CANDIGRAM							= "candigram";																				//$NON-NLS-1$
 	public static final String	TYPE_APP_POST								= "post";																					//$NON-NLS-1$
 	public static final String	TYPE_APP_PLACE								= "place";																					//$NON-NLS-1$
 	public static final String	TYPE_APP_USER								= "user";																					//$NON-NLS-1$
@@ -155,6 +160,7 @@ public final class Constants {
 	public static final String	TYPE_LINK_WATCH								= "watch";																					//$NON-NLS-1$
 	public static final String	TYPE_LINK_APPLINK							= "applink";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_PICTURE							= "post";																					//$NON-NLS-1$
+	public static final String	TYPE_LINK_CANDIGRAM							= "candigram";																					//$NON-NLS-1$
 	public static final String	TYPE_LINK_CREATE							= "create";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_COMMENT							= "comment";																				//$NON-NLS-1$
 
@@ -208,11 +214,6 @@ public final class Constants {
 	public static final int		RESULT_PROFILE_UPDATED						= 310;
 	public static final int		RESULT_USER_SIGNED_IN						= 400;
 
-	public static final int		NOTIFICATION_NETWORK						= 1000;
-	public static final int		NOTIFICATION_UPDATE_AIRCANDI				= 2000;
-	public static final int		NOTIFICATION_COMMENT						= 3000;
-	public static final int		NOTIFICATION_CANDI_ADDED					= 4000;
-
 	public static final boolean	SUPPORTS_ECLAIR								= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ECLAIR;
 	public static final boolean	SUPPORTS_FROYO								= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO;
 	public static final boolean	SUPPORTS_GINGERBREAD						= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD;
@@ -223,6 +224,7 @@ public final class Constants {
 	/* Prefs - users */
 	public static final String	PREF_THEME									= "Pref_Theme";
 	public static final String	PREF_SEARCH_RADIUS							= "Pref_Search_Radius";
+	public static final String	PREF_PLACE_PROVIDER							= "Pref_Place_Provider";
 	public static final String	PREF_SOUND_EFFECTS							= "Pref_Sound_Effects";
 	public static final String	PREF_NOTIFICATIONS_COMMENTS					= "Pref_Notifications_Comments";
 	public static final String	PREF_NOTIFICATIONS_PICTURES					= "Pref_Notifications_Pictures";
@@ -234,7 +236,6 @@ public final class Constants {
 	public static final String	PREF_SHOW_PLACE_RANK_SCORE					= "Pref_Show_Place_Rank_Score";
 	public static final String	PREF_TESTING_BEACONS						= "Pref_Testing_Beacons";
 	public static final String	PREF_TESTING_LOCATION						= "Pref_Testing_Location";
-	public static final String	PREF_TESTING_PLACE_PROVIDER					= "Pref_Testing_Place_Provider";
 
 	/* Settings */
 	public static final String	SETTING_USER								= "Setting_User";
@@ -259,7 +260,7 @@ public final class Constants {
 	public static final Boolean	PREF_SHOW_PLACE_RANK_SCORE_DEFAULT			= false;
 	public static final String	PREF_TESTING_BEACONS_DEFAULT				= "natural";
 	public static final String	PREF_TESTING_LOCATION_DEFAULT				= "natural";
-	public static final String	PREF_TESTING_PLACE_PROVIDER_DEFAULT			= TYPE_PROVIDER_FOURSQUARE;
+	public static final String	PREF_PLACE_PROVIDER_DEFAULT					= TYPE_PROVIDER_FOURSQUARE;
 
 	private Constants() {}; // $codepro.audit.disable emptyMethod
 }

@@ -1,9 +1,12 @@
 package com.aircandi.utilities;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Writer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -14,6 +17,7 @@ import android.content.Context;
 import android.os.Environment;
 import android.widget.Toast;
 
+import com.aircandi.Aircandi;
 import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.Logger;
 
@@ -135,6 +139,35 @@ public class Utilities {
 			return null;
 		}
 		return stringValue;
+	}
+
+	public static String loadStringFromRaw(Integer resId) {
+		InputStream inputStream = null;
+		BufferedReader reader = null;
+		try {
+			inputStream = Aircandi.applicationContext.getResources().openRawResource(resId);
+			reader = new BufferedReader(new InputStreamReader(inputStream));
+			final StringBuilder text = new StringBuilder(10000);
+			String line;
+			while ((line = reader.readLine()) != null) {
+				text.append(line);
+			}
+			return text.toString();
+		}
+		catch (IOException exception) {
+			return null;
+		}
+		finally {
+			try {
+				inputStream.close();
+				reader.close();
+			}
+			catch (IOException e) {
+				if (BuildConfig.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	@SuppressWarnings("ucd")

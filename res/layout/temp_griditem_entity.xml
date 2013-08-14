@@ -31,13 +31,14 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="@string/dummy_title_short" />
+            android:text="@string/dummy_title_short"
+            android:textColor="@color/text_dark" />
 
         <com.aircandi.ui.widgets.UserView
             android:id="@+id/creator"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            aircandi:layout="@layout/widget_user_view_text_only_stacked" />
+            aircandi:layout="@layout/widget_user_view_grid_overlay" />
     </LinearLayout>
 
 </RelativeLayout>

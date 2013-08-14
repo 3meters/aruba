@@ -10,6 +10,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.DefaultH
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,35 +38,36 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ScanService;
 import com.aircandi.beta.R;
-import com.aircandi.components.BeaconsLockedEvent;
 import com.aircandi.components.BusProvider;
-import com.aircandi.components.EntitiesByProximityFinishedEvent;
-import com.aircandi.components.EntitiesChangedEvent;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.LocationChangedEvent;
-import com.aircandi.components.LocationLockedEvent;
 import com.aircandi.components.LocationManager;
-import com.aircandi.components.LocationTimeoutEvent;
 import com.aircandi.components.Logger;
-import com.aircandi.components.MessageEvent;
-import com.aircandi.components.MonitoringWifiScanReceivedEvent;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ConnectedState;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.PlacesNearLocationFinishedEvent;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ScanReason;
 import com.aircandi.components.ProximityManager.WifiScanResult;
-import com.aircandi.components.QueryWifiScanReceivedEvent;
-import com.aircandi.components.RadarListAdapter;
 import com.aircandi.components.Tracker;
+import com.aircandi.events.BeaconsLockedEvent;
+import com.aircandi.events.EntitiesByProximityFinishedEvent;
+import com.aircandi.events.EntitiesChangedEvent;
+import com.aircandi.events.LocationChangedEvent;
+import com.aircandi.events.LocationLockedEvent;
+import com.aircandi.events.LocationTimeoutEvent;
+import com.aircandi.events.MessageEvent;
+import com.aircandi.events.MonitoringWifiScanReceivedEvent;
+import com.aircandi.events.PlacesNearLocationFinishedEvent;
+import com.aircandi.events.QueryWifiScanReceivedEvent;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.ui.base.BaseFragment;
+import com.aircandi.ui.base.IDatabind;
+import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
@@ -72,7 +75,7 @@ import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
-public class RadarFragment extends BaseFragment implements
+public class RadarFragment extends BaseFragment implements IDatabind,
 		PullToRefreshAttacher.OnRefreshListener {
 
 	private final Handler			mHandler				= new Handler();
@@ -104,7 +107,7 @@ public class RadarFragment extends BaseFragment implements
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		
+
 		View view = super.onCreateView(inflater, container, savedInstanceState);
 		mList = (ListView) view.findViewById(R.id.radar_list);
 
@@ -139,7 +142,8 @@ public class RadarFragment extends BaseFragment implements
 		return view;
 	}
 
-	public void databind() {
+	@Override
+	public void onDatabind(Boolean refresh) {
 		/*
 		 * Cases that trigger a search
 		 * 
@@ -162,7 +166,14 @@ public class RadarFragment extends BaseFragment implements
 
 			mRadarAdapter = new RadarListAdapter(getSherlockActivity(), mEntities);
 			mList.setAdapter(mRadarAdapter);
-			searchForPlaces();
+			mHandler.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					searchForPlaces();
+				}
+			}, 500);
+
 		}
 		else if (LocationManager.getInstance().getLocationLocked() == null) {
 			/*
@@ -185,8 +196,8 @@ public class RadarFragment extends BaseFragment implements
 			 * Wifi has been disabled since our last search
 			 */
 			Integer wifiApState = NetworkManager.getInstance().getWifiApState();
-			if (wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED
-					|| wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED + 10) {
+			if (wifiApState != null && (wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED
+					|| wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED + 10)) {
 				Logger.d(getSherlockActivity(), "Wifi Ap enabled, clearing beacons");
 				UI.showToastNotification("Hotspot or tethering enabled", Toast.LENGTH_SHORT);
 			}
@@ -256,6 +267,7 @@ public class RadarFragment extends BaseFragment implements
 	@SuppressWarnings("ucd")
 	public void onQueryWifiScanReceived(final QueryWifiScanReceivedEvent event) {
 
+		updateDevIndicator(event.wifiList, null);
 		getSherlockActivity().runOnUiThread(new Runnable() {
 
 			@Override
@@ -298,7 +310,7 @@ public class RadarFragment extends BaseFragment implements
 						final ServiceResponse serviceResponse = (ServiceResponse) result;
 						if (serviceResponse.responseCode != ResponseCode.Success) {
 							Routing.serviceError(getSherlockActivity(), serviceResponse);
-							mBusyManager.hideBusy();
+							onError();
 						}
 					}
 
@@ -410,7 +422,7 @@ public class RadarFragment extends BaseFragment implements
 								final ServiceResponse serviceResponse = (ServiceResponse) result;
 								if (serviceResponse.responseCode != ResponseCode.Success) {
 									Routing.serviceError(getSherlockActivity(), serviceResponse);
-									mBusyManager.hideBusy();
+									onError();
 								}
 							}
 
@@ -499,12 +511,6 @@ public class RadarFragment extends BaseFragment implements
 
 	@Subscribe
 	@SuppressWarnings("ucd")
-	public void onWifiQueryReceived(QueryWifiScanReceivedEvent event) {
-		updateDevIndicator(event.wifiList, null);
-	}
-
-	@Subscribe
-	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
 		/*
 		 * Refreshes radar so newly created place can pop in.
@@ -552,6 +558,32 @@ public class RadarFragment extends BaseFragment implements
 		Routing.route(getSherlockActivity(), Route.Help, null, null, extras);
 	}
 
+	@Override
+	public void onError() {
+		/*
+		 * Location updates can trigger service calls. Gets restarted
+		 * when the user manually triggers a refresh.
+		 */
+		LocationManager.getInstance().stopLocationBurst();
+
+		/* Kill busy */
+		mPullToRefreshAttacher.setRefreshComplete();
+		mBusyManager.hideBusy();
+		hideBusy();
+	}
+
+	@Override
+	public void showBusy() {
+		super.hideBusy();
+	}
+
+	@Override
+	public void hideBusy() {
+		super.hideBusy();
+		mBusyManager.hideBusy();
+		mPullToRefreshAttacher.setRefreshing(false);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
@@ -573,7 +605,12 @@ public class RadarFragment extends BaseFragment implements
 
 				@Override
 				protected Object doInBackground(Object... params) {
-
+					/*
+					 * We have special handling for connected state because search triggers a wifi scan which
+					 * which in turn seems to have its own need to access the network. Their logic works for quite
+					 * awhile before giving up.
+					 * 
+					 */
 					ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
 					if (connectedState == ConnectedState.Normal) {
 						searchForPlacesByBeacon();
@@ -593,11 +630,12 @@ public class RadarFragment extends BaseFragment implements
 				@Override
 				protected void onPostExecute(Object result) {
 					ConnectedState connectedState = (ConnectedState) result;
+					
 					if (connectedState != ConnectedState.Normal) {
 						if (Aircandi.stopwatch3.isStarted()) {
 							Aircandi.stopwatch3.stop("Aircandi initialization finished: network problem");
 						}
-						mBusyManager.hideBusy();
+						hideBusy();
 						mPullToRefreshAttacher.setRefreshing(false);
 
 						if (connectedState == ConnectedState.WalledGarden) {
@@ -866,7 +904,7 @@ public class RadarFragment extends BaseFragment implements
 			startScanService(Constants.INTERVAL_SCAN_WIFI);
 		}
 
-		databind();
+		onDatabind(false);
 	}
 
 	@Override
@@ -904,4 +942,71 @@ public class RadarFragment extends BaseFragment implements
 	protected int getLayoutId() {
 		return R.layout.radar_fragment;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Classes
+	// --------------------------------------------------------------------------------------------
+
+	private class RadarListAdapter extends ArrayAdapter<Entity> {
+
+		private final LayoutInflater	mInflater;
+		private final Integer			mItemLayoutId	= R.layout.temp_listitem_radar;
+		private List<Entity>			mItems;
+
+		public RadarListAdapter(Context context, List<Entity> entities) {
+			super(context, 0, entities);
+			mItems = entities;
+			mInflater = LayoutInflater.from(context);
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View view = convertView;
+			final RadarViewHolder holder;
+			final Entity itemData = mItems.get(position);
+			Logger.v(this, "getView: position = " + String.valueOf(position) + " name = " + itemData.name);
+
+			if (view == null) {
+				view = mInflater.inflate(mItemLayoutId, null);
+				holder = new RadarViewHolder();
+				holder.candiView = (CandiView) view.findViewById(R.id.candi_view);
+				/* Need this line so clicks bubble up to the listview click handler */
+				holder.candiView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+				view.setTag(holder);
+			}
+			else {
+				holder = (RadarViewHolder) view.getTag();
+			}
+
+			if (itemData != null) {
+				final Place entity = (Place) itemData;
+				holder.candiView.databind(entity);
+			}
+			return view;
+		}
+
+		@Override
+		public Entity getItem(int position) {
+			return mItems.get(position);
+		}
+
+		@Override
+		public int getCount() {
+			return mItems.size();
+		}
+
+		public List<Entity> getItems() {
+			return mItems;
+		}
+
+		public void setItems(List<Entity> items) {
+			mItems = items;
+		}
+
+		@SuppressWarnings("ucd")
+		private class RadarViewHolder {
+			private CandiView	candiView;
+		}
+	}
+
 }

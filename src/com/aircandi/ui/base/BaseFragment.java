@@ -19,7 +19,7 @@ import com.aircandi.components.BusyManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.MenuManager;
 
-public abstract class BaseFragment extends SherlockFragment {
+public abstract class BaseFragment extends SherlockFragment implements IDatabind {
 
 	protected Bundle		mExtras;
 	protected Resources		mResources;
@@ -50,24 +50,41 @@ public abstract class BaseFragment extends SherlockFragment {
 		return inflater.inflate(getLayoutId(), container, false);
 	}
 
-	protected void draw() {}
-
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
 
+	@Override
+	public void onDatabind(Boolean refresh) {}
+
+	public void onDraw() {}
+
+	@Override
 	public void onRefresh() {}
 
+	@Override
 	public void onAdd() {}
 
+	@Override
 	public void onHelp() {}
 
+	@Override
+	public void onError() {}
+
+	@Override
 	public void showBusy() {
 		startBodyBusyIndicator();
+		if (mBusyManager != null) {
+			mBusyManager.showBusy();
+		}
 	}
 
+	@Override
 	public void hideBusy() {
 		stopBodyBusyIndicator();
+		if (mBusyManager != null) {
+			mBusyManager.hideBusy();
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-package com.aircandi.ui.fragments;
+package com.aircandi.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

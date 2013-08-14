@@ -20,6 +20,7 @@ import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
+import com.aircandi.events.MessageEvent;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.HttpService.RequestListener;
@@ -252,7 +253,7 @@ public class NotificationManager {
 						builder.setLargeIcon(imageResponse.bitmap);
 						Notification notification = builder.build();
 						notification.contentIntent = pendingIntent;
-						mNotificationManager.notify(airNotification.entity.schema, 0, notification);
+						mNotificationManager.notify(airNotification.type, 0, notification);
 					}
 				}
 			});
@@ -261,10 +262,13 @@ public class NotificationManager {
 		else {
 			Notification notification = builder.build();
 			notification.contentIntent = pendingIntent;
-			String tag = airNotification.entity != null ? airNotification.entity.schema : "network";
-			mNotificationManager.notify(tag, 0, notification);
+			mNotificationManager.notify(airNotification.type, 0, notification);
 		}
 
+	}
+	
+	public void cancelNotification(NotificationType type) {
+		mNotificationManager.cancel(type.name(), 0);
 	}
 
 	public void storeNotification(final AirNotification notification, String jsonNotification) {
@@ -291,4 +295,15 @@ public class NotificationManager {
 	public void setNewCount(Integer newCount) {
 		mNewCount = newCount;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Classes
+	// --------------------------------------------------------------------------------------------	
+
+	public enum NotificationType {
+		network,
+		nearby,
+		watch
+	}
+
 }

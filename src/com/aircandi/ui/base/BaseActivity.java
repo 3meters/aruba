@@ -46,7 +46,7 @@ import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.google.android.gcm.GCMRegistrar;
 
-public abstract class BaseActivity extends SherlockFragmentActivity {
+public abstract class BaseActivity extends SherlockFragmentActivity implements IDatabind {
 
 	protected ActionBar	mActionBar;
 	protected String	mActivityTitle;
@@ -139,6 +139,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 	// Events
 	// --------------------------------------------------------------------------------------------
 
+	@Override
 	public void onRefresh() {}
 
 	@Override
@@ -166,9 +167,45 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 		Animate.doOverridePendingTransition(this, TransitionType.PageBack);
 	}
 
+	@Override
 	public void onAdd() {}
 
+	@Override
 	public void onHelp() {}
+
+	@Override
+	public void showBusy() {
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (mBusyManager != null) {
+					mBusyManager.showBusy();
+					mBusyManager.startBodyBusyIndicator();
+				}
+			}
+		});
+	}
+
+	@Override
+	public void hideBusy() {
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (mBusyManager != null) {
+					mBusyManager.hideBusy();
+					mBusyManager.stopBodyBusyIndicator();
+				}
+			}
+		});
+	};
+
+	@Override
+	public void onDatabind(Boolean refresh) {}
+
+	@Override
+	public void onError() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Preferences
@@ -225,8 +262,8 @@ public abstract class BaseActivity extends SherlockFragmentActivity {
 			Logger.d(this, "Pref change: testing location");
 		}
 
-		if (!Aircandi.getInstance().getPrefTestingPlaceProvider().equals(Aircandi.settings.getString(Constants.PREF_TESTING_PLACE_PROVIDER,
-				Constants.PREF_TESTING_PLACE_PROVIDER_DEFAULT))) {
+		if (!Aircandi.getInstance().getPrefTestingPlaceProvider().equals(Aircandi.settings.getString(Constants.PREF_PLACE_PROVIDER,
+				Constants.PREF_PLACE_PROVIDER_DEFAULT))) {
 			mPrefChangeNewSearchNeeded = true;
 			Logger.d(this, "Pref change: place provider");
 		}

@@ -11,6 +11,8 @@ import android.location.Location;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.PlacesConstants;
+import com.aircandi.events.LocationChangedEvent;
+import com.aircandi.events.LocationTimeoutEvent;
 import com.aircandi.service.objects.AirLocation;
 
 @SuppressWarnings("ucd")

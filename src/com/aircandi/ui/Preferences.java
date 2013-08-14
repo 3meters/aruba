@@ -3,10 +3,17 @@ package com.aircandi.ui;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.PreferenceGroup;
+import android.preference.PreferenceManager;
+import android.text.InputType;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.MenuItem;
@@ -17,43 +24,32 @@ import com.aircandi.components.Tracker;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 
-public class Preferences extends SherlockPreferenceActivity {
+@SuppressWarnings("deprecation")
+public class Preferences extends SherlockPreferenceActivity implements OnSharedPreferenceChangeListener {
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		/*
 		 * We need to set the theme so ActionBarSherlock behaves correctly on API < V14
-		 */
-		/*
-		 * Set theme.
 		 * TODO: Switch over to using the preferenceStyle attribute for the current theme.
 		 */
-		final String prefTheme = Aircandi.settings.getString(Constants.PREF_THEME, Constants.PREF_THEME_DEFAULT);
-		if (prefTheme.equals("aircandi_theme_snow")) {
-			setTheme(R.style.aircandi_theme_light);
-		}
-		else {
-			setTheme(R.style.aircandi_theme_dark);
-		}
-
+		setTheme();
 		super.onCreate(savedInstanceState);
 
 		/* Load preferences layout */
+		addPreferencesFromResource(R.xml.preferences);
 		if (Aircandi.getInstance().getUser() != null
 				&& Aircandi.getInstance().getUser().developer != null
 				&& Aircandi.getInstance().getUser().developer) {
 			addPreferencesFromResource(R.xml.preferences_dev);
 		}
-		else {
-			addPreferencesFromResource(R.xml.preferences);
-		}
 
 		initialize();
 	}
 
-	@SuppressWarnings("deprecation")
 	private void initialize() {
 
 		/* Configure action bar */
@@ -122,11 +118,87 @@ public class Preferences extends SherlockPreferenceActivity {
 				}
 			});
 		}
+
+		/* Listen for feedback click */
+		pref = findPreference("Pref_Feedback");
+		if (pref != null) {
+			pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+
+				@Override
+				public boolean onPreferenceClick(Preference preference) {
+					Routing.route(Preferences.this, Route.Feedback);
+					return true;
+				}
+			});
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Events
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		Preference pref = findPreference(key);
+
+		if (pref instanceof ListPreference) {
+			ListPreference listPref = (ListPreference) pref;
+			pref.setSummary(listPref.getEntry());
+		}
+		else if (pref instanceof EditTextPreference) {
+			if (((EditTextPreference) pref).getEditText().getInputType() == (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)) {
+				EditTextPreference etPref = (EditTextPreference) pref;
+				String maskedPw = "";
+				if (etPref.getText() != null) {
+					for (int j = 0; j < etPref.getText().length(); j++) {
+						maskedPw = maskedPw + "*";
+					}
+					pref.setSummary(maskedPw);
+				}
+			}
+			else {
+				EditTextPreference etPref = (EditTextPreference) pref;
+				pref.setSummary(etPref.getText());
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
+
+	private void setSummaries(PreferenceGroup prefGroup) {
+		/*
+		 * Walk and set the current pref values in the UI
+		 */
+		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+		for (int i = 0; i < prefGroup.getPreferenceCount(); i++) {
+			Preference pref = prefGroup.getPreference(i);
+			if (pref instanceof ListPreference) {
+				ListPreference listPref = (ListPreference) pref;
+				pref.setSummary(listPref.getEntry());
+			}
+			else if (pref instanceof EditTextPreference) {
+				if (((EditTextPreference) pref).getEditText().getInputType() == (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)) {
+					EditTextPreference etPref = (EditTextPreference) pref;
+					String maskedPw = "";
+					if (etPref.getText() != null) {
+						for (int j = 0; j < etPref.getText().length(); j++) {
+							maskedPw = maskedPw + "*";
+						}
+						pref.setSummary(maskedPw);
+					}
+				}
+				else {
+					EditTextPreference etPref = (EditTextPreference) pref;
+					pref.setSummary(etPref.getText());
+				}
+			}
+			else if (pref instanceof PreferenceGroup) {
+				setSummaries((PreferenceGroup) pref);
+			}
+		}
+	}
 
 	private void doInfoClick() {
 		final String title = getString(R.string.alert_about_title);
@@ -145,6 +217,16 @@ public class Preferences extends SherlockPreferenceActivity {
 				}, null);
 		Tracker.sendEvent("ui_action", "open_dialog", "about", 0, Aircandi.getInstance().getUser());
 
+	}
+
+	private void setTheme() {
+		final String prefTheme = Aircandi.settings.getString(Constants.PREF_THEME, Constants.PREF_THEME_DEFAULT);
+		if (prefTheme.equals("aircandi_theme_snow")) {
+			setTheme(R.style.aircandi_theme_light);
+		}
+		else {
+			setTheme(R.style.aircandi_theme_dark);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -168,6 +250,19 @@ public class Preferences extends SherlockPreferenceActivity {
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		setSummaries((PreferenceGroup) getPreferenceScreen());
+		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+	}
 
 	@Override
 	protected void onStop() {

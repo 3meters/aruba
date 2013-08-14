@@ -20,7 +20,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	@Expose
 	public String				action;
 	@Expose
-	public String				type;
+	public String				type;	// watch, nearby, network
 	@Expose
 	public Entity				entity;
 	@Expose
@@ -58,6 +58,9 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 				notification.entity = Post.setPropertiesFromMap(new Post(), entityMap, nameMapping);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+				notification.entity = Candigram.setPropertiesFromMap(new Candigram(), entityMap, nameMapping);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 				notification.entity = Applink.setPropertiesFromMap(new Applink(), entityMap, nameMapping);
