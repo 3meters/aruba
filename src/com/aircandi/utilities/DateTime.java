@@ -24,26 +24,43 @@ public class DateTime {
 		return cal.getTime();
 	}
 
+	public static String timeTill(Long dateOldMs, Long dateNewMs) {
+		String since = interval(dateOldMs, dateNewMs);
+		return since;
+	}
+
+	public static String intervalSince(Date dateOld, Date dateNew) {
+		String since = interval(dateOld.getTime(), dateNew.getTime());
+		if (!since.equals("now")) {
+			since += " ago";
+		}
+		return since;
+	}
+
+	public static String timeSince(Long dateOldMs, Long dateNewMs) {
+		String since = interval(dateOldMs, dateNewMs);
+		if (!since.equals("now")) {
+			since += " ago";
+		}
+		return since;
+	}
+
 	@SuppressWarnings("deprecation")
-	public static String timeSince(Long dateOldMillis, Long dateNewMillis) {
+	public static String interval(Long oldDateMs, Long newDateMs) {
 
-		final Long dateNewLong = dateNewMillis;
-		final Long dateOldLong = dateOldMillis;
+		final Date dateOld = new Date(oldDateMs);
 
-		final Date dateNew = new Date(dateNewLong);
-		final Date dateOld = new Date(dateOldLong);
-
-		final Long diff = dateNew.getTime() - dateOld.getTime();
+		final Long diff = newDateMs - oldDateMs;
 
 		if (diff <= 0) {
-			return "just now";
+			return "now";
 		}
 		final int seconds = (int) (diff / 1000);
 		final int minutes = (int) ((diff / 1000) / 60);
 		final int hours = (int) ((diff / 1000) / (60 * 60));
 		final int days = (int) ((diff / 1000) / (60 * 60 * 24));
 
-		String interval = "just now";
+		String interval = "now";
 		if (days >= 1) {
 			SimpleDateFormat datePart = new SimpleDateFormat(DATE_FORMAT_TIME_SINCE, Locale.US);
 			if (dateOld.getYear() != DateTime.nowDate().getYear()) {
@@ -60,81 +77,27 @@ public class DateTime {
 		}
 		else if (hours == 1) /* x hours x minutes ago */
 		{
-			interval = "1 hour ago";
+			interval = "1 hour";
 		}
 		else if (hours > 1) /* x hours x minutes ago */
 		{
-			interval = String.valueOf(hours) + " hours ago";
+			interval = String.valueOf(hours) + " hours";
 		}
 		else if (minutes == 1) /* x hours x minutes ago */
 		{
-			interval = "1 minute ago";
+			interval = "1 minute";
 		}
 		else if (minutes > 1) /* x hours x minutes ago */
 		{
-			interval = String.valueOf(minutes) + " minutes ago";
+			interval = String.valueOf(minutes) + " minutes";
 		}
 		else if (seconds == 1) /* 1 second ago */
 		{
-			interval = "1 second ago";
+			interval = "1 second";
 		}
 		else if (seconds > 1) /* x hours x minutes ago */
 		{
-			interval = String.valueOf(seconds) + " seconds ago";
-		}
-		return interval;
-	}
-
-	public static String intervalSince(Date dateOld, Date dateNew) {
-		final Long diff = dateNew.getTime() - dateOld.getTime();
-		final int seconds = (int) (diff / 1000);
-		final int minutes = (int) ((diff / 1000) / 60);
-		final int hours = (int) ((diff / 1000) / (60 * 60));
-		final int days = (int) ((diff / 1000) / (60 * 60 * 24));
-		final int hoursPart = hours - (days * 24);
-
-		String interval = "";
-		if (days >= 2) {
-			interval += String.valueOf(days) + " days ago";
-		}
-		else if (days >= 1) /* x days ago 1 day and x hour ago */
-		{
-			interval += "1 day";
-			if (hoursPart == 1) {
-				interval += " " + String.valueOf(hoursPart) + " hour";
-			}
-			else if (hoursPart >= 2) {
-				interval += " " + String.valueOf(hoursPart) + " hours";
-			}
-			interval += " ago";
-		}
-		else if (hours == 1) /* x hours x minutes ago */
-		{
-			interval = "1 hour ago";
-		}
-		else if (hours > 1) /* x hours x minutes ago */
-		{
-			interval = String.valueOf(hours) + " hours ago";
-		}
-		else if (minutes == 1) /* x hours x minutes ago */
-		{
-			interval = "1 minute ago";
-		}
-		else if (minutes > 1) /* x hours x minutes ago */
-		{
-			interval = String.valueOf(minutes) + " minutes ago";
-		}
-		else if (seconds == 1) /* 1 second ago */
-		{
-			interval = "1 second ago";
-		}
-		else if (seconds > 1) /* x hours x minutes ago */
-		{
-			interval = String.valueOf(seconds) + " seconds ago";
-		}
-		else if (seconds < 1) /* x hours x minutes ago */
-		{
-			interval = String.valueOf(seconds) + " seconds ago";
+			interval = String.valueOf(seconds) + " seconds";
 		}
 		return interval;
 	}

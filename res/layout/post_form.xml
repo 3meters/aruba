@@ -31,6 +31,27 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
+                <LinearLayout
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="10dp" >
+
+                    <com.aircandi.ui.widgets.AirTextView
+                        style="@style/app_text_appearance_large_accent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/form_title_picture" />
+
+                    <View
+                        android:id="@+id/rule"
+                        android:layout_width="match_parent"
+                        android:layout_height="1px"
+                        android:background="?attr/ruleColorStrong" />
+                </LinearLayout>
+                
                 <com.aircandi.ui.widgets.AirImageView
                     android:id="@+id/photo"
                     android:layout_width="@dimen/image_extra_large"
@@ -49,7 +70,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="3dp"
                     android:layout_marginLeft="3dp"
-                    layout="@layout/widget_candi_header_compact" />
+                    layout="@layout/widget_candi_header_post" />
 
                 <com.aircandi.ui.widgets.SectionLayout
                     android:id="@+id/section_description"

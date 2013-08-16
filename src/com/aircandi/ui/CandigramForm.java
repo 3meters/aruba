@@ -4,22 +4,29 @@ import java.util.Collections;
 import java.util.List;
 
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
 import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.applications.Applinks;
+import com.aircandi.applications.Places;
 import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
+import com.aircandi.components.Tracker;
 import com.aircandi.events.MessageEvent;
+import com.aircandi.service.objects.Candigram;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
@@ -33,12 +40,32 @@ import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.UserView;
+import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
 public class CandigramForm extends BaseEntityForm {
-	
+
+	Handler		mHandler	= new Handler();
+	Runnable	mTimer;
+	Button		mButtonCountdown;
+
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+
+		mTimer = new Runnable() {
+
+			@Override
+			public void run() {
+				setCountdownText();
+				mHandler.postDelayed(mTimer, 1000);
+			}
+		};
+	}
+
 	@Override
 	public void onDatabind(final Boolean refreshProposed) {
 		/*
@@ -66,7 +93,7 @@ public class CandigramForm extends BaseEntityForm {
 
 				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId
 						, refresh
-						, LinkOptions.getDefault(DefaultType.LinksForPost));
+						, LinkOptions.getDefault(DefaultType.LinksForCandigram));
 				return result;
 			}
 
@@ -120,6 +147,43 @@ public class CandigramForm extends BaseEntityForm {
 				}
 			});
 		}
+	}
+
+	@SuppressWarnings("ucd")
+	public void onNudgeButtonClick(View view) {
+
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("NudgeEntity");
+				Tracker.sendEvent("ui_action", "nudge_entity", null, 0, Aircandi.getInstance().getUser());
+				/*
+				 * Call service routine to trigger a nudge
+				 */
+				return new ModelResult();
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ModelResult result = (ModelResult) response;
+				setSupportProgressBarIndeterminateVisibility(false);
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {}
+				else {
+					Routing.serviceError(CandigramForm.this, result.serviceResponse);
+				}
+			}
+		}.execute();
+
+	}
+
+	@SuppressWarnings("ucd")
+	public void onCountdownButtonClick(View view) {
+		StringBuilder preamble = new StringBuilder(getString(R.string.alert_candigram_countdown));
+		Dialogs.alertDialogSimple(this, null, preamble.toString());
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -179,6 +243,16 @@ public class CandigramForm extends BaseEntityForm {
 			}
 		}
 
+		/* Set header */
+		Candigram candigram = (Candigram) mEntity;
+		if (candigram.type.equals(Constants.TYPE_APP_TOUR)) {
+			((TextView) findViewById(R.id.header)).setText("touring " + getString(R.string.form_title_candigram));
+			UI.setVisibility(findViewById(R.id.action_hint), View.GONE);
+		}
+		else if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {
+			((TextView) findViewById(R.id.header)).setText("bouncing " + getString(R.string.form_title_candigram));
+		}
+
 		/* Primary candi image */
 
 		description.setText(null);
@@ -214,7 +288,7 @@ public class CandigramForm extends BaseEntityForm {
 			Collections.sort(shortcuts, new Shortcut.SortByPosition());
 			drawShortcuts(shortcuts
 					, settings
-					, R.string.section_place_shortcuts_applinks
+					, R.string.section_candigram_shortcuts_applinks
 					, R.string.section_links_more
 					, mResources.getInteger(R.integer.shortcuts_flow_limit)
 					, R.id.shortcut_holder
@@ -231,6 +305,21 @@ public class CandigramForm extends BaseEntityForm {
 					, settings
 					, null
 					, R.string.section_links_more
+					, mResources.getInteger(R.integer.shortcuts_flow_limit)
+					, R.id.shortcut_holder
+					, R.layout.temp_place_switchboard_item);
+		}
+
+		/* Shortcuts for places linked to this candigram */
+		settings = new ShortcutSettings(Constants.TYPE_LINK_CANDIGRAM, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
+		settings.appClass = Places.class;
+		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+		if (shortcuts.size() > 0) {
+			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
+			drawShortcuts(shortcuts
+					, settings
+					, R.string.section_candigram_shortcuts_places
+					, R.string.section_pictures_more
 					, mResources.getInteger(R.integer.shortcuts_flow_limit)
 					, R.id.shortcut_holder
 					, R.layout.temp_place_switchboard_item);
@@ -293,6 +382,28 @@ public class CandigramForm extends BaseEntityForm {
 	@Override
 	protected void drawButtons() {
 		super.drawButtons();
+
+		Candigram candigram = (Candigram) mEntity;
+
+		UI.setVisibility(findViewById(R.id.button_nudge), View.GONE);
+		UI.setVisibility(findViewById(R.id.button_countdown), View.GONE);
+
+		if (candigram.type.equals(Constants.TYPE_APP_TOUR)) {
+			mButtonCountdown = (Button) findViewById(R.id.button_countdown);
+			UI.setVisibility(mButtonCountdown, View.VISIBLE);
+			mButtonCountdown.setText(getString(R.string.button_countdown));
+			mHandler.post(mTimer);
+		}
+		else if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {
+			UI.setVisibility(findViewById(R.id.button_nudge), View.VISIBLE);
+		}
+	}
+
+	private void setCountdownText() {
+		Long now = DateTime.nowDate().getTime();
+		Long next = ((Candigram) mEntity).nextHopDate.longValue();
+		String timeTill = DateTime.timeTill(now, next);
+		mButtonCountdown.setText(getString(R.string.button_countdown) + "\n" + timeTill);
 	}
 
 	// --------------------------------------------------------------------------------------------

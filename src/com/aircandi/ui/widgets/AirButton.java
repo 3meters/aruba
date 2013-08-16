@@ -9,17 +9,11 @@ import com.aircandi.components.FontManager;
 public class AirButton extends Button {
 
 	public AirButton(Context context) {
-		super(context);
-		if (!isInEditMode()) {
-			FontManager.getInstance().setTypefaceRegular(this);
-		}
+		this(context, null);
 	}
 
 	public AirButton(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		if (!isInEditMode()) {
-			FontManager.getInstance().setTypefaceRegular(this);
-		}
+		this(context, attrs, android.R.attr.buttonStyle);
 	}
 
 	public AirButton(Context context, AttributeSet attrs, int defStyle) {

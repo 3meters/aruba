@@ -108,7 +108,7 @@ public final class Constants {
 
 	public static final String	SCHEMA_ANY									= "any";																					//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_PICTURE						= "post";																					//$NON-NLS-1$
-	public static final String	SCHEMA_ENTITY_CANDIGRAM						= "candigram";																					//$NON-NLS-1$
+	public static final String	SCHEMA_ENTITY_CANDIGRAM						= "candigram";																				//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_PLACE							= "place";																					//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_COMMENT						= "comment";																				//$NON-NLS-1$
 	public static final String	SCHEMA_ENTITY_APPLINK						= "applink";																				//$NON-NLS-1$
@@ -154,13 +154,15 @@ public final class Constants {
 	public static final String	TYPE_APP_POST								= "post";																					//$NON-NLS-1$
 	public static final String	TYPE_APP_PLACE								= "place";																					//$NON-NLS-1$
 	public static final String	TYPE_APP_USER								= "user";																					//$NON-NLS-1$
+	public static final String	TYPE_APP_BOUNCE								= "bounce";																				//$NON-NLS-1$
+	public static final String	TYPE_APP_TOUR								= "tour";																					//$NON-NLS-1$
 
 	public static final String	TYPE_LINK_PROXIMITY							= "proximity";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_LIKE								= "like";																					//$NON-NLS-1$
 	public static final String	TYPE_LINK_WATCH								= "watch";																					//$NON-NLS-1$
 	public static final String	TYPE_LINK_APPLINK							= "applink";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_PICTURE							= "post";																					//$NON-NLS-1$
-	public static final String	TYPE_LINK_CANDIGRAM							= "candigram";																					//$NON-NLS-1$
+	public static final String	TYPE_LINK_CANDIGRAM							= "candigram";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_CREATE							= "create";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_COMMENT							= "comment";																				//$NON-NLS-1$
 

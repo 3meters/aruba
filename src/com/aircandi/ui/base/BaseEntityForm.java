@@ -210,12 +210,6 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	}
 
 	@SuppressWarnings("ucd")
-	public void onMoreButtonClick(View view) {
-		Intent intent = (Intent) view.getTag();
-		Routing.intent(this, intent);
-	}
-
-	@SuppressWarnings("ucd")
 	public void onShortcutClick(View view) {
 		final Shortcut shortcut = (Shortcut) view.getTag();
 		Routing.route(this, Route.Shortcut, mEntity, shortcut, null, null);

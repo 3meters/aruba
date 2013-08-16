@@ -786,6 +786,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				if (mParentId != null) {
 					mEntity.toId = mParentId;
 					link = new Link(mParentId, getLinkType(), true);
+					if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+						link.strong = false;
+					}
 				}
 				else {
 					mEntity.toId = null;

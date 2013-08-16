@@ -168,6 +168,12 @@
         <item name="android:textColorHint">@color/edit_hint</item>
     </style>
 
+    <style name="form_edit_hint" parent="form_text">
+        <item name="android:textAppearance">@style/app_text_appearance_tiny</item>
+        <item name="android:textColor">@color/edit_hint</item>
+        <item name="android:paddingLeft">6dp</item>
+    </style>
+    
     <style name="form_picture">
         <item name="android:adjustViewBounds">true</item>
         <item name="android:padding">3dp</item>

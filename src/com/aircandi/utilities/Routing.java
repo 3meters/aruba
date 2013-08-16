@@ -601,14 +601,14 @@ public final class Routing {
 			if (shortcut.app.equals(Constants.TYPE_APP_PICTURE) 
 					|| shortcut.app.equals(Constants.TYPE_APP_POST)) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					Pictures.view(activity, entity.id);
+					Pictures.view(activity, shortcut.appId, entity.id);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
 					Pictures.viewFor(activity, entity.id, shortcut.linkType, direction);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_AUTO)) {
 					if (shortcut.count == 1) {
-						Pictures.view(activity, shortcut.appId);
+						Pictures.view(activity, shortcut.appId, entity.id);
 					}
 					else {
 						Pictures.viewFor(activity, entity.id, shortcut.linkType, direction);
@@ -617,14 +617,14 @@ public final class Routing {
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_CANDIGRAM)) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					Candigrams.view(activity, entity.id);
+					Candigrams.view(activity, entity.id, entity.id);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
 					Candigrams.viewFor(activity, entity.id, shortcut.linkType, direction);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_AUTO)) {
 					if (shortcut.count == 1) {
-						Candigrams.view(activity, shortcut.appId);
+						Candigrams.view(activity, shortcut.appId, entity.id);
 					}
 					else {
 						Candigrams.viewFor(activity, entity.id, shortcut.linkType, direction);
@@ -704,8 +704,12 @@ public final class Routing {
 		else {
 			if (shortcut.isContent()) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					if (shortcut.app.equals(Constants.TYPE_APP_PICTURE) || shortcut.app.equals(Constants.TYPE_APP_POST)) {
-						Pictures.view(activity, shortcut.getId());
+					if (shortcut.app.equals(Constants.TYPE_APP_PICTURE) 
+							|| shortcut.app.equals(Constants.TYPE_APP_POST)) {
+						Pictures.view(activity, shortcut.getId(), entity.id);
+					}
+					else if (shortcut.app.equals(Constants.TYPE_APP_CANDIGRAM)) {
+						Candigrams.view(activity, shortcut.getId(), entity.id);
 					}
 					else if (shortcut.app.equals(Constants.TYPE_APP_COMMENT)) {
 						Comments.view(activity, shortcut.getId());

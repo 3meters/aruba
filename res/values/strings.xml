@@ -107,6 +107,7 @@
     <string name="dummy_button_label">Watch</string>
     <string name="dummy_description">Ever wonder why Aircandi fans refuse to use anything else? For more than four days, Aircandi has attracted a growing family of loyal, almost zealous customers, known as “Candiniks”. By remaining true to the quality tenets of our founder – emphasizing knowledge, taste, and using the senses to evaluate quality at every step – Aircandi defines the gold standard by which all other proximity applications are judged.</string>
     <string name="dummy_username">jay.massena</string>
+    <string name="dummy_edit_hint">How long a candigram will stay someplace before moving on</string>
     <string name="dummy_web_address">http://massenamodern.com</string>
     
     <!-- Alerts general -->
@@ -165,6 +166,11 @@
     <string name="alert_source_delete_message_single">Are you sure you want to delete this link?</string>
     <string name="alert_source_delete_message_multiple">Are you sure you want to delete these links?</string>
 
+    <!-- Alerts: confirm dirty -->
+
+    <string name="alert_candigram_countdown">Touring candigrams warp from place to place gathering pictures and comments as they go.</string>
+    <string name="alert_candigram_nudge">Discard</string>
+    
     <!-- Errors: network -->
 
     <string name="error_signup_missmatched_passwords_title">Password</string>
@@ -322,6 +328,8 @@
     <string name="button_map">map</string>
     <string name="button_more">more</string>
     <string name="button_tune">tune</string>
+    <string name="button_nudge">nudge</string>
+    <string name="button_countdown">traveling in</string>
     <string name="button_call">call</string>
     <string name="button_like">like</string>
     <string name="button_unlike">liked</string>
@@ -378,6 +386,7 @@
     <string name="form_title_picture_browse">picture browse</string>
     <string name="form_title_preferences">aircandi settings</string>
     <string name="form_title_comment">comment</string>
+    <string name="form_title_candigram">candigram</string>
     <string name="form_title_feedback">feedback</string>
     <string name="form_title_links">links</string>
     <string name="form_title_tune">tune</string>
@@ -439,6 +448,19 @@
     <string name="form_label_tuning_add_candi">Add a candigram and make your mark.</string>
     <string name="form_label_tuning_edit">Update place details like the address or customize links.</string>
 
+    <!-- Candigrams -->
+    
+    <string name="candigram_type_hint_bouncing">Candigram warps to a new place when nudged</string>
+    <string name="candigram_type_hint_touring">Candigram warps to a new place when time runs out</string>
+    <string name="candigram_range_hint">How far a candigram can travel when it wraps</string>
+    <string name="candigram_duration_hint">How long a touring candigram waits before warping to a new place</string>
+    <string name="candigram_capture_hint">Allow users to capture and release the candigram</string>
+    <string name="candigram_locked_hint">Allow users to add pictures and comments</string>
+    <string name="candigram_label_capture">Allow capture</string>
+    <string name="candigram_action_hint">Use nudge to warp this candigram to a new place</string>
+    <string name="section_candigram_shortcuts_places">places visited</string>
+    <string name="section_candigram_shortcuts_applinks">add a picture or comment</string>
+    
     <!-- Forms.hints -->
 
     <string name="form_applink_type_hint">type of link</string>

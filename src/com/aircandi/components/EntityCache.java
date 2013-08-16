@@ -68,7 +68,8 @@ public class EntityCache implements Map<String, Entity> {
 		 * Adds client applinks before entity is pushed to the cache.
 		 */
 		if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)
-				|| entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+				|| entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)
+				|| entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 
 			List<Shortcut> shortcuts = entity.getClientShortcuts();
 

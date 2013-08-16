@@ -58,10 +58,13 @@ public class MenuManager {
 				}
 
 				if (activityName.equals("PlaceForm")) {
-					menuInflater.inflate(R.menu.menu_browse_place, menu);
+					menuInflater.inflate(R.menu.menu_browse_entity, menu);
 					menuInflater.inflate(R.menu.menu_help, menu);
 				}
 				else if (activityName.equals("PictureForm")) {
+					menuInflater.inflate(R.menu.menu_browse_entity, menu);
+				}
+				else if (activityName.equals("CandigramForm")) {
 					menuInflater.inflate(R.menu.menu_browse_entity, menu);
 				}
 				else if (activityName.equals("UserForm")) {

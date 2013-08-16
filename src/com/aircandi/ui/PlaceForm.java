@@ -55,15 +55,15 @@ public class PlaceForm extends BaseEntityForm {
 	private Boolean	mUpsize;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
-		super.initialize(savedInstanceState);
+	protected void unpackIntent() {
+		super.unpackIntent();
 
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mUpsize = extras.getBoolean(Constants.EXTRA_UPSIZE_SYNTHETIC);
 		}
 	}
-
+	
 	@Override
 	public void onDatabind(final Boolean refreshProposed) {
 
@@ -457,18 +457,6 @@ public class PlaceForm extends BaseEntityForm {
 		if (!place.synthetic) {
 			UI.setVisibility(findViewById(R.id.button_tune), View.VISIBLE);
 		}
-
-		/* Footer */
-		if (place.synthetic) {
-			UI.setVisibility(findViewById(R.id.form_footer), View.GONE);
-			return;
-		}
-		else {
-			UI.setVisibility(findViewById(R.id.form_footer), View.VISIBLE);
-		}
-
-		/* Add post button in footer */
-		UI.setVisibility(findViewById(R.id.button_tune), canUserAdd() ? View.VISIBLE : View.GONE);
 	}
 
 	// --------------------------------------------------------------------------------------------

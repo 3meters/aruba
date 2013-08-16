@@ -20,23 +20,23 @@
         android:layout_marginBottom="10dp"
         android:orientation="horizontal" >
 
-        <com.aircandi.ui.widgets.ComboButton
-            android:id="@+id/button_tune"
-            style="@style/form_button"
-            android:layout_width="@dimen/form_button_width_min"
-            android:layout_height="@dimen/form_button_height"
-            android:layout_marginRight="3dp"
-            aircandi:drawable="?attr/iconTune"
-            aircandi:label="@string/button_tune"
-            aircandi:layout="@layout/widget_combo_button"
-            android:minWidth="@dimen/form_button_width_min"
-            android:onClick="onTuneButtonClick" />
-
         <LinearLayout
             android:id="@+id/button_holder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal" >
+
+            <com.aircandi.ui.widgets.ComboButton
+                android:id="@+id/button_tune"
+                style="@style/form_button"
+                android:layout_width="@dimen/form_button_width_min"
+                android:layout_height="@dimen/form_button_height"
+                android:layout_marginRight="3dp"
+                aircandi:drawable="?attr/iconTune"
+                aircandi:label="@string/button_tune"
+                aircandi:layout="@layout/widget_combo_button"
+                android:minWidth="@dimen/form_button_width_min"
+                android:onClick="onTuneButtonClick" />
 
             <com.aircandi.ui.widgets.ComboButton
                 android:id="@+id/button_like"

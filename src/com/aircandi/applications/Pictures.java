@@ -17,8 +17,10 @@ import com.aircandi.utilities.Animate.TransitionType;
 
 public class Pictures {
 
-	public static void view(Context context, String entityId) {
-		IntentBuilder intentBuilder = new IntentBuilder(context, PictureForm.class).setEntityId(entityId);
+	public static void view(Context context, String entityId, String parentId) {
+		IntentBuilder intentBuilder = new IntentBuilder(context, PictureForm.class)
+				.setEntityId(entityId)
+				.setEntityParentId(parentId);
 		context.startActivity(intentBuilder.create());
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
@@ -36,7 +38,7 @@ public class Pictures {
 				.setListNewEnabled(true);
 
 		context.startActivity(intentBuilder.create());
-		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 
 	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction) {
@@ -58,13 +60,13 @@ public class Pictures {
 	public static void edit(Context context, Entity entity) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PictureEdit.class).setEntity(entity);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
-		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 
 	@SuppressWarnings("ucd")
 	public static void insert(Context context) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PictureEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_PICTURE);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
-		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 }

@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:fillViewport="true" >
 
-        <ViewAnimator
+        <ViewFlipper
             android:id="@+id/flipper_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -28,17 +28,6 @@
                 android:layout_height="match_parent"
                 android:gravity="center_vertical|top"
                 android:orientation="vertical" >
-
-                <!-- Type -->
-
-                <Spinner
-                    android:id="@+id/type_picker"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/form_field_height"
-                    android:layout_marginBottom="10dp"
-                    android:entries="@array/candigram_type_entries"
-                    android:spinnerMode="dialog"
-                    android:visibility="visible" />
 
                 <!-- Public Image -->
 
@@ -146,9 +135,9 @@
                 android:gravity="center_vertical|top"
                 android:orientation="vertical" >
 
-                <include layout="@layout/temp_form_settings" />
+                <include layout="@layout/temp_candigram_settings" />
             </LinearLayout>
-        </ViewAnimator>
+        </ViewFlipper>
     </com.aircandi.ui.widgets.BounceScrollView>
 
 </RelativeLayout>

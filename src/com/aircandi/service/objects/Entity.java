@@ -525,6 +525,24 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			shortcuts.add(shortcut);
 
 		}
+		else if (this.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			Shortcut shortcut = Shortcut.builder(this
+					, Constants.SCHEMA_ENTITY_APPLINK
+					, Constants.TYPE_APP_POST
+					, Constants.ACTION_VIEW_AUTO
+					, "pictures"
+					, "resource:img_picture"
+					, 10
+					, false
+					, true);
+			Link link = getLinkByType(Constants.TYPE_LINK_PICTURE, null, Direction.in);
+			if (link != null) {
+				shortcut.photo = link.shortcut.getPhoto();
+				shortcut.appId = link.fromId;
+			}
+			shortcuts.add(shortcut);
+
+		}
 
 		shortcuts.add(Shortcut.builder(this
 				, Constants.SCHEMA_ENTITY_APPLINK

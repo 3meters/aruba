@@ -10,18 +10,12 @@ public class AirLabel extends TextView {
 
 	@SuppressWarnings("ucd")
 	public AirLabel(Context context) {
-		super(context);
-		if (!isInEditMode()) {
-			FontManager.getInstance().setTypefaceBoldDefault(this);
-		}
+		this(context, null);
 	}
 
 	@SuppressWarnings("ucd")
 	public AirLabel(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		if (!isInEditMode()) {
-			FontManager.getInstance().setTypefaceBoldDefault(this);
-		}
+		this(context, attrs, android.R.attr.textViewStyle);
 	}
 
 	@SuppressWarnings("ucd")

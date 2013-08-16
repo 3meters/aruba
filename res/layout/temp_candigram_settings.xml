@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <LinearLayout
+        android:id="@+id/panel_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <!-- Type -->
+
+        <LinearLayout
+            android:id="@+id/type_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="vertical" >
+
+            <Spinner
+                android:id="@+id/spinner_type"
+                android:layout_width="200dp"
+                android:layout_height="@dimen/form_field_height"
+                android:spinnerMode="dialog" />
+
+            <com.aircandi.ui.widgets.AirTextView
+                android:id="@+id/hint_type"
+                style="@style/form_edit_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/candigram_type_hint_touring"
+                android:textColor="@color/edit_hint" />
+        </LinearLayout>
+
+        <!-- Range -->
+
+        <LinearLayout
+            android:id="@+id/range_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="vertical" >
+
+            <Spinner
+                android:id="@+id/spinner_range"
+                android:layout_width="200dp"
+                android:layout_height="@dimen/form_field_height"
+                android:entries="@array/candigram_range_entries"
+                android:spinnerMode="dialog" />
+
+            <com.aircandi.ui.widgets.AirTextView
+                style="@style/form_edit_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/candigram_range_hint"
+                android:textColor="@color/edit_hint" />
+        </LinearLayout>
+
+        <!-- Visit duration -->
+
+        <LinearLayout
+            android:id="@+id/duration_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="vertical" >
+
+            <Spinner
+                android:id="@+id/spinner_duration"
+                android:layout_width="200dp"
+                android:layout_height="@dimen/form_field_height"
+                android:entries="@array/candigram_duration_entries"
+                android:spinnerMode="dialog" />
+
+            <com.aircandi.ui.widgets.AirTextView
+                style="@style/form_edit_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/candigram_duration_hint"
+                android:textColor="@color/edit_hint" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="vertical" >
+
+            <CheckBox
+                android:id="@+id/chk_capture"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/form_field_height"
+                android:text="@string/candigram_label_capture" />
+
+            <com.aircandi.ui.widgets.AirTextView
+                style="@style/form_edit_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="@string/candigram_capture_hint"
+                android:textColor="@color/edit_hint" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="vertical" >
+
+            <CheckBox
+                android:id="@+id/chk_locked"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/form_field_height"
+                android:text="@string/form_label_locked" />
+
+            <com.aircandi.ui.widgets.AirTextView
+                style="@style/form_edit_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/candigram_range_hint"
+                android:textColor="@color/edit_hint" />
+        </LinearLayout>
+    </LinearLayout>
+
+</merge>

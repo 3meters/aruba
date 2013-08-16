@@ -19,15 +19,19 @@ public class Candigram extends Entity implements Cloneable, Serializable {
 	// --------------------------------------------------------------------------------------------
 
 	@Expose
-	public String				range;
+	public Number				range;
 	@Expose
-	public Number				timeout;
+	public Number				duration;
 	@Expose
-	public Boolean				nudgeable;
+	public Boolean				nudge;
 	@Expose
-	public Boolean				capturable;
+	public Boolean				capture;
 	@Expose
 	public Number				maxHops;
+	@Expose
+	public Number				lastHopDate;
+	@Expose
+	public Number				nextHopDate;
 	@Expose
 	public Boolean				moveOnRead;
 	@Expose
@@ -46,11 +50,13 @@ public class Candigram extends Entity implements Cloneable, Serializable {
 		synchronized (entity) {
 			entity = (Candigram) Entity.setPropertiesFromMap(entity, map, nameMapping);
 
-			entity.range = (String) map.get("range");
-			entity.timeout = (Number) map.get("timeout");
-			entity.nudgeable = (Boolean) map.get("nudgeable");
-			entity.capturable = (Boolean) map.get("capturable");
+			entity.range = (Number) map.get("range");
+			entity.duration = (Number) map.get("duration");
+			entity.nudge = (Boolean) map.get("nudge");
+			entity.capture = (Boolean) map.get("capture");
 			entity.maxHops = (Number) map.get("maxHops");
+			entity.lastHopDate = (Number) map.get("lastHopDate");
+			entity.nextHopDate = (Number) map.get("nextHopDate");
 			entity.moveOnRead = (Boolean) map.get("moveOnRead");
 			entity.cloneOnLike = (Boolean) map.get("cloneOnLike");
 		}

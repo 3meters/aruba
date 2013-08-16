@@ -23,14 +23,12 @@ public class AirEditText extends EditText {
 
 	@SuppressWarnings("ucd")
 	public AirEditText(Context context) {
-		super(context);
-		initialize(context);
+		this(context, null);
 	}
 
 	@SuppressWarnings("ucd")
 	public AirEditText(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		initialize(context);
+		this(context, attrs, android.R.attr.editTextStyle);
 	}
 
 	@SuppressWarnings("ucd")

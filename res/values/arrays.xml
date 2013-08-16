@@ -35,17 +35,16 @@
         <item>zoka</item>
         <item>lucky</item>
     </string-array>
-    
     <string-array name="place_provider_entries">
         <item>Foursquare</item>
         <item>Factual</item>
         <item>Google</item>
-	</string-array>
+    </string-array>
     <string-array name="place_provider_values">
         <item>foursquare</item>
         <item>factual</item>
         <item>google</item>
-	</string-array>
+    </string-array>
     <string-array name="search_radius_entries">
         <item>100 yards</item>
         <item>250 yards</item>
@@ -64,15 +63,42 @@
         <item>3219</item>
         <item>8047</item>
         <item>32188</item>
-		<item>80470</item>
-	</string-array>
+        <item>80470</item>
+    </string-array>
+
+    <!-- Candigrams -->
+
     <string-array name="candigram_type_entries">
-        <item>Bouncing</item>
         <item>Touring</item>
+        <item>Bouncing</item>
     </string-array>
     <string-array name="candigram_type_values">
-        <item>bounce</item>
         <item>tour</item>
+        <item>bounce</item>
     </string-array>
-    
+    <string-array name="candigram_range_entries">
+        <item>Local area</item>
+        <item>Region</item>
+        <item>Worldwide</item>
+    </string-array>
+    <string-array name="candigram_range_values">
+        <item>1609</item>
+        <item>80470</item>
+        <item>40075000</item>
+    </string-array>
+    <string-array name="candigram_duration_entries">
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>8 hours</item>
+        <item>24 hours</item>
+        <item>1 week</item>
+    </string-array>
+    <string-array name="candigram_duration_values">
+        <item>30000</item>
+        <item>60000</item>
+        <item>480000</item>
+        <item>1440000</item>
+        <item>10080000</item>
+    </string-array>
+
 </resources>

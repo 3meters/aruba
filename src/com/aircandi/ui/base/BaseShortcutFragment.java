@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
@@ -121,12 +120,6 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	public void onRefresh() {
 		mBusyManager.showBusy();
 		databind(true);
-	}
-
-	@SuppressWarnings("ucd")
-	public void onMoreButtonClick(View view) {
-		Intent intent = (Intent) view.getTag();
-		Routing.intent(getSherlockActivity(), intent);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -275,9 +268,6 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 		}
 
 		if (shortcuts.size() > flowLimit) {
-			View footer = LayoutInflater.from(getSherlockActivity()).inflate(R.layout.temp_section_footer, null);
-			Button button = (Button) footer.findViewById(R.id.button_more);
-			button.setText(moreResId);
 
 			Intent intent = null;
 			if (settings.appClass.equals(Applinks.class)) {
@@ -304,23 +294,13 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 					, Constants.TYPE_APP_INTENT
 					, null
 					, getString(moreResId)
-					, "resource:img_more_iii"
+					, "resource:img_more"
 					, 10
 					, false
 					, true);
 			shortcut.intent = intent;
 			shortcuts = shortcuts.subList(0, flowLimit - 1);
 			shortcuts.add(shortcut);
-
-			//			button.setOnClickListener(new OnClickListener() {
-			//
-			//				@Override
-			//				public void onClick(View view) {
-			//					Intent intent = (Intent) view.getTag();
-			//					Routing.intent(getSherlockActivity(), intent);
-			//
-			//				}
-			//			});
 		}
 
 		final FlowLayout flow = (FlowLayout) section.findViewById(R.id.flow_shortcuts);
