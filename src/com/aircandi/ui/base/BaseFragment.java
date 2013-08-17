@@ -57,7 +57,7 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 	@Override
 	public void onDatabind(Boolean refresh) {}
 
-	public void onDraw() {}
+	public void draw() {}
 
 	@Override
 	public void onRefresh() {}

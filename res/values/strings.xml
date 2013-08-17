@@ -63,7 +63,6 @@
     <string name="pref_theme_default">Midnight</string>
     <string name="pref_theme_title">Themes</string>
     <string name="pref_theme_summary">Choose a theme</string>
-    <string name="pref_theme_default">Midnight</string>
     <string name="pref_theme_dialog_title">Select theme</string>
     
     <string name="pref_sound_effects_summary">Play sound notifications and effects</string>

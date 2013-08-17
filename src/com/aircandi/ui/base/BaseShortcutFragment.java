@@ -98,7 +98,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 							mEntity = (Entity) result.data;
 							mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 							mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
-							onDraw();
+							draw();
 						}
 					}
 					else {
@@ -127,7 +127,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	public void onDraw() {
+	public void draw() {
 
 		/* Clear shortcut holder */
 		((ViewGroup) getView().findViewById(R.id.shortcut_holder)).removeAllViews();
@@ -453,7 +453,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			databind(false);
 		}
 		else {
-			onDraw();
+			draw();
 			hideBusy();
 		}
 	}
