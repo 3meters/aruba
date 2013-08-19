@@ -23,8 +23,8 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Constants;
+import com.aircandi.R;
 import com.aircandi.applications.Comments;
-import com.aircandi.beta.R;
 import com.aircandi.components.DatabaseHelper;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;

@@ -8,7 +8,7 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Dialogs;
 

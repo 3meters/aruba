@@ -23,9 +23,9 @@ public class Candigram extends Entity implements Cloneable, Serializable {
 	@Expose
 	public Number				duration;
 	@Expose
-	public Boolean				nudge;
+	public Boolean				nudge = false;
 	@Expose
-	public Boolean				capture;
+	public Boolean				capture = false;
 	@Expose
 	public Number				maxHops;
 	@Expose

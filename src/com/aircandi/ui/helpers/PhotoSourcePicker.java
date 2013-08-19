@@ -20,7 +20,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.aircandi.Constants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.components.AirApplication;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.service.HttpService;

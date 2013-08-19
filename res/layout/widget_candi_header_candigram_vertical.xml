@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="3dp" >
+
+    <com.aircandi.ui.widgets.AirButton
+        android:id="@+id/button_nudge"
+        style="@style/form_button_floating"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/form_button_height"
+        android:layout_marginBottom="3dp"
+        android:onClick="onNudgeButtonClick"
+        android:text="@string/button_nudge" />
+
+    <com.aircandi.ui.widgets.AirButton
+        android:id="@+id/button_capture"
+        style="@style/form_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/form_button_height"
+        android:layout_marginBottom="3dp"
+        android:minWidth="@dimen/form_button_width_min"
+        android:onClick="onCaptureButtonClick"
+        android:text="@string/button_capture" />
+
+    <LinearLayout
+        android:id="@+id/button_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="3dp"
+        android:orientation="horizontal" >
+
+        <com.aircandi.ui.widgets.ComboButton
+            android:id="@+id/button_like"
+            style="@style/form_button"
+            android:layout_width="@dimen/form_button_height"
+            android:layout_height="@dimen/form_button_height"
+            android:layout_marginRight="3dp"
+            aircandi:drawable="?attr/iconLike"
+            aircandi:layout="@layout/widget_combo_button_no_text"
+            android:minWidth="@dimen/form_button_height"
+            android:onClick="onLikeButtonClick" />
+
+        <com.aircandi.ui.widgets.ComboButton
+            android:id="@+id/button_watch"
+            style="@style/form_button"
+            android:layout_width="@dimen/form_button_height"
+            android:layout_height="@dimen/form_button_height"
+            aircandi:drawable="?attr/iconWatch"
+            aircandi:layout="@layout/widget_combo_button_no_text"
+            android:minWidth="@dimen/form_button_height"
+            android:onClick="onWatchButtonClick" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/form_button_height"
+        android:layout_marginLeft="5dp"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/like_stats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dummy_like_stat"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/watching_stats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dummy_watch_stat"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+    </LinearLayout>
+
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/action_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:text="leaving in 18 minutes"
+        android:textColor="?attr/textColorButtonLink" />
+
+</LinearLayout>

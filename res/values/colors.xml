@@ -14,11 +14,11 @@
 
     <color name="text_dark">#ffffffff</color>
     <color name="text_light">#ff000000</color>
-    <color name="text_secondary">#ffaaaaaa</color>
+    <color name="text_secondary_dark">@android:color/secondary_text_dark</color>
+    <color name="text_secondary_light">@android:color/secondary_text_light</color>
     <color name="text_unfocused_dark">#ffcccccc</color>
     <color name="text_unfocused_light">#ff666666</color>
     <color name="text_pressed">#ff000000</color>
-    <color name="edit_hint">#ff888888</color>
 
     <!-- Accuracy -->
 

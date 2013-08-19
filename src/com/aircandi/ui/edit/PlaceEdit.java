@@ -11,7 +11,7 @@ import android.widget.ViewFlipper;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.TabManager;
 import com.aircandi.service.HttpService;

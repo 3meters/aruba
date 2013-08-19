@@ -45,7 +45,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.Scroller;
 
-import com.aircandi.beta.R;
+import com.aircandi.R;
 
 @SuppressWarnings("ucd")
 public class HorizontalListView extends AdapterView<ListAdapter> {

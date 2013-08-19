@@ -12,14 +12,15 @@
 
         <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/name"
-            style="@style/app_text_appearance_large_accent"
+            style="?android:attr/textAppearanceLarge"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginBottom="5dp"
             android:layout_weight="1"
             android:gravity="bottom"
             android:paddingLeft="10dp"
-            android:text="@string/dummy_section_title" />
+            android:text="@string/dummy_section_title"
+            android:textColor="@color/accent_blue" />
     </LinearLayout>
 
     <View

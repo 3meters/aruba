@@ -19,7 +19,7 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 
 import com.aircandi.Aircandi;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 
 public class Animate {
 

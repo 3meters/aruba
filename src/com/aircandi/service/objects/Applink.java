@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.service.Expose;
 import com.aircandi.service.HttpService.ObjectType;

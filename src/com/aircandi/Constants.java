@@ -4,8 +4,6 @@ package com.aircandi;
 import android.graphics.Bitmap.Config;
 import android.util.Log;
 
-import com.aircandi.beta.BuildConfig;
-
 @SuppressWarnings("ucd")
 public final class Constants {
 
@@ -14,7 +12,7 @@ public final class Constants {
 	public static final boolean	TRACKING_ENABLED							= true;
 
 	public static final String	APP_NAME									= "Aircandi";																				//$NON-NLS-1$
-	public static final String	APP_MARKET_URI								= "market://details?id=com.aircandi.beta&referrer=utm_source%3Daircandi_app";
+	public static final String	APP_MARKET_URI								= "market://details?id=com.aircandi&referrer=utm_source%3Daircandi_app";
 	public static final String	SENDER_ID									= "657673071389";																			// google Api project number for aircandi
 
 	/* Activity parameters */

@@ -21,8 +21,7 @@
                 android:layout_height="@dimen/form_field_height"
                 android:drawableRight="?attr/iconClear"
                 android:hint="@string/form_address_hint"
-                android:inputType="textPostalAddress"
-                android:textAppearance="@style/app_text_appearance_small" />
+                android:inputType="textPostalAddress" />
 
             <com.aircandi.ui.widgets.AirEditText
                 android:id="@+id/city"
@@ -31,8 +30,7 @@
                 android:drawableRight="?attr/iconClear"
                 android:hint="@string/form_city_hint"
                 android:inputType="textCapWords|textNoSuggestions"
-                android:nextFocusDown="@+id/state"
-                android:textAppearance="@style/app_text_appearance_small" />
+                android:nextFocusDown="@+id/state" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -47,8 +45,7 @@
                     android:drawableRight="?attr/iconClear"
                     android:hint="@string/form_state_hint"
                     android:inputType="textCapCharacters|textNoSuggestions"
-                    android:nextFocusDown="@+id/zip_code"
-                    android:textAppearance="@style/app_text_appearance_small" />
+                    android:nextFocusDown="@+id/zip_code" />
 
                 <com.aircandi.ui.widgets.AirEditText
                     android:id="@+id/zip_code"
@@ -58,8 +55,7 @@
                     android:drawableRight="?attr/iconClear"
                     android:hint="@string/form_zipcode_hint"
                     android:inputType="number"
-                    android:nextFocusDown="@+id/phone"
-                    android:textAppearance="@style/app_text_appearance_small" />
+                    android:nextFocusDown="@+id/phone" />
             </LinearLayout>
 
             <com.aircandi.ui.widgets.AirEditText
@@ -68,8 +64,7 @@
                 android:layout_height="@dimen/form_field_height"
                 android:drawableRight="?attr/iconClear"
                 android:hint="@string/form_phone_hint"
-                android:inputType="phone"
-                android:textAppearance="@style/app_text_appearance_small" />
+                android:inputType="phone" />
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
 

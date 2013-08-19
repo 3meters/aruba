@@ -7,7 +7,7 @@ import android.widget.ViewFlipper;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.aircandi.Constants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 
 public class TabManager implements ActionBar.TabListener {
 

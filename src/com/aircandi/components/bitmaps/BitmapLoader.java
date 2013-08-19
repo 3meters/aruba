@@ -14,7 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
 import com.aircandi.Aircandi;
-import com.aircandi.beta.BuildConfig;
+import com.aircandi.BuildConfig;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;

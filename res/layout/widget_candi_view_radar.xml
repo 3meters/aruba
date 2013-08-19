@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:id="@+id/candi_view_group"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
@@ -24,23 +24,26 @@
         android:paddingRight="10dp"
         android:paddingTop="10dp" >
 
-        <com.aircandi.ui.widgets.AirTextView
+        <com.aircandi.ui.widgets.AirTitle
             android:id="@+id/name"
-            style="@style/candi_view_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="@string/dummy_title_short" />
+            android:text="@string/dummy_title_short"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="?attr/textColorCandiView"
+            android:textStyle="bold" />
 
         <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/subtitle"
-            style="@style/candi_view_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="@string/dummy_tags" />
+            android:text="@string/dummy_tags"
+            android:textAppearance="?attr/textAppearanceExtraSmall"
+            android:textColor="?attr/textColorCandiView" />
     </LinearLayout>
 
     <LinearLayout
@@ -56,22 +59,13 @@
 
     <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/distance"
-        style="@style/candi_view_distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/photo"
         android:layout_alignParentRight="true"
         android:paddingBottom="12dp"
-        android:paddingRight="10dp" />
-
-    <com.aircandi.ui.widgets.AirTextView
-        android:id="@+id/place_rank_score"
-        style="@style/candi_view_distance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/photo"
         android:paddingRight="10dp"
-        android:paddingTop="12dp" />
+        android:textAppearance="?attr/textAppearanceSmall"
+        android:textColor="?attr/textColorCandiView" />
 
 </RelativeLayout>

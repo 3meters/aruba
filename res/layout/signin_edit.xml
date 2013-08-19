@@ -23,7 +23,7 @@
 
     <com.aircandi.ui.widgets.AirEditText
         android:id="@+id/email"
-        style="@style/form_edit"
+        
         android:layout_width="match_parent"
         android:layout_height="@dimen/form_field_height"
         android:drawableRight="?attr/iconClear"
@@ -33,7 +33,7 @@
 
     <com.aircandi.ui.widgets.AirEditText
         android:id="@+id/password"
-        style="@style/form_edit"
+        
         android:layout_width="match_parent"
         android:layout_height="@dimen/form_field_height"
         android:layout_marginBottom="10dp"

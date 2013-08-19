@@ -16,8 +16,8 @@ import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
 import android.widget.Toast;
 
+import com.aircandi.BuildConfig;
 import com.aircandi.ProxiConstants;
-import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.NotificationManager.NotificationType;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpServiceException;

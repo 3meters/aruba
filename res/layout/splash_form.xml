@@ -18,7 +18,7 @@
         android:layout_width="280dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="#cc111111"
+        android:background="#aa111111"
         android:gravity="center"
         android:orientation="vertical"
         android:paddingBottom="10dp"
@@ -50,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <com.aircandi.ui.widgets.AirTextView
+                <com.aircandi.ui.widgets.AirTitle
                     android:id="@+id/name"
                     style="@style/splash_title"
                     android:layout_width="match_parent"

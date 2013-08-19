@@ -19,7 +19,7 @@ import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.components.Tracker;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;

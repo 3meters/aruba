@@ -3,7 +3,7 @@ package com.aircandi.ui;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.events.MessageEvent;
 import com.aircandi.ui.base.BaseEntityList;
 import com.squareup.otto.Subscribe;

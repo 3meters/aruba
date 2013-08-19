@@ -2,14 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-    
+
     <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:padding="15sp"
-        android:textAppearance="@style/app_text_appearance_large"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/accent_blue" />
 
     <View
@@ -17,12 +17,12 @@
         android:layout_height="1dp"
         android:layout_below="@+id/name"
         android:background="@color/accent_blue" />
-    
+
     <LinearLayout
         android:id="@+id/group_uri"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/name" 
+        android:layout_below="@+id/name"
         android:layout_marginBottom="5dp"
         android:orientation="horizontal"
         android:padding="5dp" >
@@ -30,14 +30,13 @@
         <com.aircandi.ui.widgets.AirEditText
             android:id="@+id/uri"
             android:layout_width="0dip"
-                    android:drawableRight="?attr/iconClear"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:drawableRight="?attr/iconClear"
             android:gravity="center|left"
             android:hint="@string/form_uri_hint"
             android:inputType="textUri"
-            android:singleLine="true"
-            android:textAppearance="@style/app_text_appearance_small" />
+            android:singleLine="true" />
 
         <com.aircandi.ui.widgets.AirButton
             android:id="@+id/button_test"
@@ -53,8 +52,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
-        android:layout_below="@+id/group_uri" 
-        >
+        android:layout_below="@+id/group_uri" >
 
         <!-- Preview: listitem=@layout/temp_listitem_bookmark -->
     </com.aircandi.ui.widgets.BounceListView>

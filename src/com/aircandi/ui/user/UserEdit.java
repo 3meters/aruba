@@ -13,7 +13,7 @@ import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.aircandi.Constants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.components.TabManager;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEntityEdit;

@@ -14,7 +14,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Window;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;

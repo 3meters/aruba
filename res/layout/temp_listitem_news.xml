@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/selector_button"
@@ -25,22 +25,22 @@
 
         <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/name"
-            style="?attr/candiListTitleStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/dummy_title_short" 
-            />
+            android:text="@string/dummy_title_short"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textStyle="bold" />
 
         <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/subtitle"
-            style="@style/candi_list_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:textStyle="italic"
             android:ellipsize="end"
             android:maxLines="2"
-            android:layout_marginBottom="8dp"
             android:text="@string/dummy_subtitle"
-            android:textColor="@color/text_secondary" />
+            android:textColor="?attr/textColorSecondary" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -58,7 +58,6 @@
 
             <com.aircandi.ui.widgets.AirTextView
                 android:id="@+id/description"
-                style="@style/candi_list_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
@@ -73,7 +72,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/dummy_timesince"
-            android:textColor="@color/text_secondary" />
+            android:textColor="?attr/textColorSecondary" />
     </LinearLayout>
 
     <ImageView

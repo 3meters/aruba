@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.aircandi.Constants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;

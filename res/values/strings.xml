@@ -74,7 +74,9 @@
     <string name="help_radar_add_places">Use the action bar to create and share custom places</string>
     <string name="help_place_tune">Tune places to make them better</string>
     <string name="help_place_add">Use the action bar to add pictures and comments</string>
-
+    <string name="help_candigram_touring">Touring candigrams travel from place to place gathering pictures and comments as they go! Watch this candigram and follow it on it\'s tour.</string>
+    <string name="help_candigram_bouncing">A kick sends a bouncing candigram traveling to a new place. Add a picture or comment and watch this candigram go!</string>
+    
     <!-- Prefs: notifications -->
 
     <string name="pref_notifications_comments_title">Notify about comments</string>
@@ -167,7 +169,8 @@
 
     <!-- Alerts: confirm dirty -->
 
-    <string name="alert_candigram_countdown">Touring candigrams warp from place to place gathering pictures and comments as they go.</string>
+    <string name="alert_candigram_countdown">Touring candigrams travel from place to place gathering pictures and comments as they go.</string>
+    <string name="alert_candigram_capture">Capture lets you carry a candigram to another place and release it. If the candigram isn\'t released in 12 hours, it will return to where you captured it.</string>
     <string name="alert_candigram_nudge">Discard</string>
     
     <!-- Errors: network -->
@@ -200,7 +203,8 @@
     <string name="error_missing_message">Enter a message.</string>
     <string name="error_missing_source_id_facebook">Enter a Facebook user id and then select picture again.</string>
     <string name="error_missing_source_id_twitter">Enter a Twitter user id and then select picture again.</string>
-
+    <string name="error_missing_candigram_type">Select a candigram type.</string>
+    
     <!-- Errors: network or location -->
 
     <string name="error_location_poor">Location service is poor or unavailable, retry later</string>
@@ -327,8 +331,8 @@
     <string name="button_map">map</string>
     <string name="button_more">more</string>
     <string name="button_tune">tune</string>
-    <string name="button_nudge">nudge</string>
-    <string name="button_countdown">traveling in</string>
+    <string name="button_nudge">kick</string>
+    <string name="button_capture">capture</string>
     <string name="button_call">call</string>
     <string name="button_like">like</string>
     <string name="button_unlike">liked</string>
@@ -449,15 +453,19 @@
 
     <!-- Candigrams -->
     
-    <string name="candigram_type_hint_bouncing">Candigram warps to a new place when nudged</string>
-    <string name="candigram_type_hint_touring">Candigram warps to a new place when time runs out</string>
-    <string name="candigram_range_hint">How far a candigram can travel when it wraps</string>
-    <string name="candigram_duration_hint">How long a touring candigram waits before warping to a new place</string>
-    <string name="candigram_capture_hint">Allow users to capture and release the candigram</string>
+    <string name="candigram_label_capture">allow capture</string>
+    
+    <string name="candigram_type_hint">What type of candigram this is</string>
+    <string name="candigram_range_hint">How far this candigram can go when it travels</string>
+    <string name="candigram_duration_hint">How long a touring candigram stays before traveling to a new place</string>
+    <string name="candigram_capture_hint">Allow users to capture and release this candigram</string>
     <string name="candigram_locked_hint">Allow users to add pictures and comments</string>
-    <string name="candigram_label_capture">Allow capture</string>
-    <string name="candigram_action_hint">Use nudge to warp this candigram to a new place</string>
-    <string name="section_candigram_shortcuts_places">places visited</string>
+    
+    <string name="candigram_action_hint">Use kick to send this candigram traveling to a new place</string>
+    <string name="candigram_capture_true_hint">Allow users to capture and release this candigram</string>
+    <string name="candigram_capture_false_hint">Do not allow users to capture this candigram</string>
+    
+    <string name="section_candigram_shortcuts_places">places visited so far</string>
     <string name="section_candigram_shortcuts_applinks">add a picture or comment</string>
     
     <!-- Forms.hints -->

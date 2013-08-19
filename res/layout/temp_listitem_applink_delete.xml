@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="5dp" >
@@ -25,6 +25,6 @@
         android:maxLines="1"
         android:text="@string/dummy_name"
         android:textColor="?attr/textColor"
-        android:textAppearance="@style/app_text_appearance_tiny" />
+        android:textAppearance="@style/textAppearanceExtraSmall" />
 
 </RelativeLayout>

@@ -18,7 +18,7 @@ import android.os.Environment;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
-import com.aircandi.beta.BuildConfig;
+import com.aircandi.BuildConfig;
 import com.aircandi.components.Logger;
 
 public class Utilities {

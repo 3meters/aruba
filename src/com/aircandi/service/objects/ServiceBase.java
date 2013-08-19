@@ -53,7 +53,7 @@ public abstract class ServiceBase extends ServiceObject {
 	@Expose
 	public Boolean				system				= false;
 
-	/* Property bags */
+	/* PropertyValue bags */
 
 	@Expose
 	public Map<String, Object>	data;
@@ -175,7 +175,7 @@ public abstract class ServiceBase extends ServiceObject {
 
 	/**
 	 * Object: All properties are serialized including nulls.</br>
-	 * Property: Only non-null properties are serialized.</br>
+	 * PropertyValue: Only non-null properties are serialized.</br>
 	 * 
 	 * @author Jayma
 	 * 

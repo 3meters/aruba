@@ -42,10 +42,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aircandi.Aircandi;
+import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
-import com.aircandi.beta.BuildConfig;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;

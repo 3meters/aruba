@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Text -->
-
-    <dimen name="text_size_large">24sp</dimen>
-    <dimen name="text_size_medium">18sp</dimen>
-    <dimen name="text_size_small">16sp</dimen>
-    <dimen name="text_size_tiny">13sp</dimen>
-    <dimen name="text_size_micro">11sp</dimen>
-
     <!-- Edit Drawables -->
 
     <dimen name="drawable_width">20dp</dimen>

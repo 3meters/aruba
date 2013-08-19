@@ -37,7 +37,6 @@
             android:layout_marginLeft="2dp"
             android:gravity="center_vertical"
             android:text="@string/dummy_button_label"
-            android:textAppearance="@style/app_text_appearance_small"
             android:textColor="?attr/textColorButtonLink" />
     </LinearLayout>
 

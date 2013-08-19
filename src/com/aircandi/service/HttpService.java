@@ -68,9 +68,9 @@ import org.apache.http.protocol.HttpContext;
 import android.graphics.Bitmap;
 
 import com.aircandi.Aircandi;
+import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
-import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ConnectedState;
@@ -1133,7 +1133,7 @@ public class HttpService {
 
 		/*
 		 * Order of precedent
-		 * 1. object.updateScope: Property = exclude nulls, Object = include nulls.
+		 * 1. object.updateScope: PropertyValue = exclude nulls, Object = include nulls.
 		 * 2. excludeNulls parameter: forces exclusion even if updateScope = Object.
 		 */
 		Boolean excludeNulls = (excludeNullsProposed == ExcludeNulls.True);

@@ -10,18 +10,12 @@ public class AirTextView extends TextView {
 
 	@SuppressWarnings("ucd")
 	public AirTextView(Context context) {
-		super(context);
-		if (!isInEditMode()) {
-			FontManager.getInstance().setTypefaceDefault(this);
-		}
+		this(context, null);
 	}
 
 	@SuppressWarnings("ucd")
 	public AirTextView(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		if (!isInEditMode()) {
-			FontManager.getInstance().setTypefaceDefault(this);
-		}
+		this(context, attrs, android.R.attr.textViewStyle);
 	}
 
 	@SuppressWarnings("ucd")

@@ -11,7 +11,7 @@ import android.telephony.PhoneNumberUtils;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.service.Expose;
 
 /**

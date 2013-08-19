@@ -3,10 +3,11 @@
 
     <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/builder_text"
-        style="@style/form_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
+        android:textAppearance="?android:attr/textAppearance"
+        android:paddingLeft="2dp"
         android:layout_toLeftOf="@+id/image_more"
         android:ellipsize="end"
         android:maxLines="1" />

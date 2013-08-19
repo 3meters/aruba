@@ -11,7 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 
-import com.aircandi.beta.R;
+import com.aircandi.R;
 
 @SuppressWarnings("ucd")
 public class ComboButton extends RelativeLayout {

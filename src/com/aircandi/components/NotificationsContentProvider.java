@@ -20,7 +20,7 @@ public class NotificationsContentProvider extends ContentProvider {
 	private static final int		NOTIFICATIONS		= 10;
 	private static final int		NOTIFICATION_ID		= 20;
 
-	private static final String		AUTHORITY			= "com.aircandi.beta.notifications.contentprovider";
+	private static final String		AUTHORITY			= "com.aircandi.notifications.contentprovider";
 
 	private static final String		BASE_PATH			= "notifications";
 

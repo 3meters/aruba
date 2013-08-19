@@ -3,61 +3,65 @@
 
     <!-- Application text styles -->
 
-    <style name="app_text_appearance" parent="@android:style/TextAppearance">
-        <item name="android:textSize">@dimen/text_size_small</item>
+
+    <!--
+    	Android defaults
+    	
+    	textAppearance: 16sp
+    	textAppearanceLarge: 22sp
+    	textAppearanceMedium: 18sp
+    	textAppearanceSmall: 14sp 
+    	textAppearanceSearchResultTitle: 18sp
+    	textAppearanceSearchResultSubtitle: 14sp
+    	textAppearanceButton: 14sp
+    	
+    	dialogWindowTitle: 18sp
+    	tabWidget: 14sp
+    	popupMenu: 18sp
+    	popupMenuLarge: 22sp
+    	popupMenuSmall: 14sp
+    	dropDownHint: 14sp
+    	windowTitle: 14sp
+    	holoActionBarTabText: 12sp
+    	holoButtonBorderlessSmall: 14sp
+    -->
+
+    <style name="textAppearance" parent="@android:style/TextAppearance">
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">?attr/textColor</item>
     </style>
 
-    <style name="app_text_appearance_outlined" parent="app_text_appearance">
-        <item name="android:textColor">#ffffffff</item>
-        <item name="android:shadowColor">#000000</item>
-        <item name="android:shadowDx">1</item>
-        <item name="android:shadowDy">1</item>
-        <item name="android:shadowRadius">1</item>
+    <style name="textAppearanceExtraLarge" parent="textAppearance">
+        <item name="android:textSize">24sp</item>
     </style>
 
-    <style name="app_text_appearance_title1" parent="app_text_appearance_large">
-        <item name="android:textStyle">bold</item>
+    <style name="textAppearanceLarge" parent="textAppearance">
+        <item name="android:textSize">22sp</item>
     </style>
 
-    <style name="app_text_appearance_title2" parent="app_text_appearance_medium">
-        <item name="android:textStyle">bold</item>
+    <style name="textAppearanceMedium" parent="textAppearance">
+        <item name="android:textSize">18sp</item>
     </style>
 
-    <style name="app_text_appearance_large" parent="app_text_appearance">
-        <item name="android:textSize">@dimen/text_size_large</item>
+    <style name="textAppearanceSmall" parent="textAppearance">
+        <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="app_text_appearance_large_accent" parent="app_text_appearance_large">
-        <item name="android:textColor">@color/accent_blue</item>
+    <style name="textAppearanceExtraSmall" parent="textAppearance">
+        <item name="android:textSize">12sp</item>
     </style>
 
-    <style name="app_text_appearance_medium" parent="app_text_appearance">
-        <item name="android:textSize">@dimen/text_size_medium</item>
-    </style>
-
-    <style name="app_text_appearance_medium_accent" parent="app_text_appearance_medium">
-        <item name="android:textColor">@color/accent_blue</item>
-    </style>
-
-    <style name="app_text_appearance_small" parent="app_text_appearance">
-        <item name="android:textSize">@dimen/text_size_small</item>
-    </style>
-
-    <style name="app_text_appearance_outlined_small" parent="app_text_appearance_outlined">
-        <item name="android:textSize">@dimen/text_size_small</item>
-    </style>
-
-    <style name="app_text_appearance_tiny" parent="app_text_appearance">
-        <item name="android:textSize">@dimen/text_size_tiny</item>
-    </style>
-
-    <style name="app_text_appearance_micro" parent="app_text_appearance">
-        <item name="android:textSize">@dimen/text_size_micro</item>
+    <style name="textAppearanceTiny" parent="textAppearance">
+        <item name="android:textSize">11sp</item>
     </style>
 
     <!-- App wide styles -->
 
+    <style name="text_view" parent="android:Widget.TextView">
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
+        <item name="android:paddingLeft">2dp</item>
+    </style>
+    
     <style name="picture">
         <item name="android:adjustViewBounds">true</item>
         <item name="android:focusable">true</item>
@@ -77,7 +81,6 @@
     </style>
 
     <style name="balloon">
-        <item name="android:textAppearance">@style/app_text_appearance_medium</item>
         <item name="android:gravity">center</item>
         <item name="android:padding">20dp</item>
         <item name="android:minWidth">200dp</item>
@@ -86,16 +89,15 @@
     </style>
 
     <style name="bullet">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">?attr/textColorBullet</item>
     </style>
 
     <style name="notification_text">
-        <item name="android:textAppearance">@style/app_text_appearance_tiny</item>
+        <item name="android:textAppearance">?attr/textAppearanceExtraSmall</item>
     </style>
 
     <style name="notification_title">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -114,7 +116,6 @@
     </style>
 
     <!-- Edit forms -->
-
     <style name="form_title" parent="android:Widget.TextView">
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
@@ -123,33 +124,32 @@
     </style>
 
     <style name="form_label">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:paddingLeft">2dp</item>
     </style>
 
     <style name="form_label_fancy">
-        <item name="android:textAppearance">@style/app_text_appearance_micro</item>
+        <item name="android:textAppearance">?attr/textAppearanceTiny</item>
         <item name="android:paddingLeft">12dp</item>
         <item name="android:textColor">@color/accent_blue</item>
         <item name="android:textStyle">bold</item>
     </style>
-    
+
     <style name="form_text">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
         <item name="android:paddingLeft">2dp</item>
     </style>
 
     <style name="form_text_small">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:paddingLeft">2dp</item>
     </style>
 
     <style name="form_button">
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
         <item name="android:paddingLeft">@dimen/form_button_padding</item>
         <item name="android:paddingRight">@dimen/form_button_padding</item>
         <item name="android:minHeight">@dimen/form_button_height</item>
         <item name="android:background">?attr/backgroundButton</item>
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
         <item name="android:textColor">?attr/textColorButtonLink</item>
     </style>
 
@@ -159,21 +159,15 @@
     </style>
 
     <style name="form_button_borderless" parent="Widget.Sherlock.ActionButton">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">?attr/textColor</item>
     </style>
 
     <style name="form_edit" parent="@android:style/Widget.EditText">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:textColorHint">@color/edit_hint</item>
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
+        <item name="android:textColorHint">?android:attr/textColorHint</item>
     </style>
 
-    <style name="form_edit_hint" parent="form_text">
-        <item name="android:textAppearance">@style/app_text_appearance_tiny</item>
-        <item name="android:textColor">@color/edit_hint</item>
-        <item name="android:paddingLeft">6dp</item>
-    </style>
-    
     <style name="form_picture">
         <item name="android:adjustViewBounds">true</item>
         <item name="android:padding">3dp</item>
@@ -188,18 +182,18 @@
     </style>
 
     <style name="form_checkbox" parent="android:Widget.CompoundButton.CheckBox">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
     </style>
 
-    <style name="form_spinner">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+    <style name="form_spinner" parent="Widget.Sherlock.DropDownItem.Spinner">
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">10dp</item>
         <item name="android:paddingRight">10dp</item>
     </style>
 
-    <style name="form_spinner_item">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+    <style name="form_spinner_item" parent="Widget.Sherlock.TextView.SpinnerItem">
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">10dp</item>
         <item name="android:paddingRight">10dp</item>
@@ -207,110 +201,29 @@
     </style>
 
     <style name="form_text_placeholder">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:background">?attr/backgroundTabBar</item>
     </style>
 
     <!-- Splash -->
 
     <style name="splash_title">
-        <item name="android:textAppearance">@style/app_text_appearance_large</item>
+        <item name="android:textAppearance">?attr/textAppearanceExtraLarge</item>
     </style>
 
     <style name="splash_message">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:textColor">@color/text_secondary</item>
-    </style>
-
-    <!-- Candi radar -->
-
-    <style name="candi_view_name" parent="android:Widget.TextView">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">?attr/textColorCandiView</item>
-    </style>
-
-    <style name="candi_view_subtitle" parent="candi_view_name">
-        <item name="android:textAppearance">@style/app_text_appearance_tiny</item>
-        <item name="android:textStyle">normal</item>
-    </style>
-
-    <style name="candi_view_distance" parent="candi_view_name" />
-
-    <style name="candi_view_count" parent="candi_view_name" />
-
-    <style name="candi_view_name_synthetic" parent="candi_view_name">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:textColor">?attr/textColorCandiViewSynthetic</item>
-        <item name="android:textSize">14sp</item>
-    </style>
-
-    <style name="candi_view_distance_synthetic" parent="candi_view_name">
-        <item name="android:textAppearance">@style/app_text_appearance_tiny</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?attr/textColorCandiViewSynthetic</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">?attr/textColorSecondary</item>
     </style>
 
     <!-- Candi forms -->
 
     <style name="candi_user" parent="android:Widget.TextView">
-        <item name="android:textAppearance">@style/app_text_appearance_tiny</item>
-    </style>
-
-    <style name="candi_form_title">
-        <item name="android:textAppearance">@style/app_text_appearance_title1</item>
-    </style>
-
-    <style name="candi_form_subtitle">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:textStyle">italic</item>
-    </style>
-
-    <style name="candi_form_description">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textAppearance">?attr/textAppearanceExtraSmall</item>
     </style>
 
     <style name="candi_form_section">
         <item name="android:background">@android:color/transparent</item>
-    </style>
-
-    <style name="place_phrase_stats">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:textColor">@android:color/darker_gray</item>
-    </style>
-
-    <style name="place_phrase">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-    </style>
-
-    <!-- Candi lists -->
-
-    <style name="candi_list_title">
-        <item name="android:textAppearance">@style/app_text_appearance_title2</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="candi_list_subtitle">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:textStyle">italic</item>
-    </style>
-
-    <style name="candi_list_description">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-    </style>
-
-    <!-- Navigation drawer -->
-
-    <style name="menu_button" parent="Widget.Sherlock.ActionButton">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:textColor">?attr/textColor</item>
-        <item name="android:background">@drawable/selector_button</item>
-    </style>
-
-    <style name="menu_count">
-        <item name="android:background">?attr/backgroundButton</item>
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:textColor">?attr/textColorButtonLink</item>
     </style>
 
     <!-- Actionbar -->
@@ -349,14 +262,14 @@
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical|left</item>
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">?attr/textColor</item>
     </style>
 
     <style name="actionbar_debug">
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical|left</item>
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">?attr/textColor</item>
     </style>
 

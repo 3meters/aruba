@@ -18,9 +18,9 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 
 import com.aircandi.Aircandi;
+import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
-import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;

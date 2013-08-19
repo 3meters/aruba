@@ -32,7 +32,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
@@ -131,6 +131,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
+		mEditing = (mEntity == null ? false : true);
+
 		mName = (AirEditText) findViewById(R.id.name);
 		mDescription = (AirEditText) findViewById(R.id.description);
 		mPhotoView = (AirImageView) findViewById(R.id.photo);
@@ -174,14 +176,12 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 	@Override
 	protected void databind() {
-		if (mEntity == null) {
-			mEntity = Entity.makeEntity(mEntitySchema);
-			mEditing = false;
-			setActivityTitle(mEntity.schema);
+		if (mEditing) {
+			setActivityTitle(mEntity.name);
 		}
 		else {
-			mEditing = true;
-			setActivityTitle(mEntity.name);
+			mEntity = Entity.makeEntity(mEntitySchema);
+			setActivityTitle(mEntity.schema);
 		}
 	}
 

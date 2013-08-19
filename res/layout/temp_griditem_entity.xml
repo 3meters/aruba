@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/selector_button" >
@@ -26,13 +26,14 @@
 
         <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/name"
-            style="?attr/candiListTitleStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@string/dummy_title_short"
-            android:textColor="@color/text_dark" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/text_dark"
+            android:textStyle="bold" />
 
         <com.aircandi.ui.widgets.UserView
             android:id="@+id/creator"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:id="@+id/item_row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -16,14 +16,13 @@
 
     <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/type"
-        style="@style/app_text_appearance_medium"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:gravity="center_vertical"
         android:padding="5dp"
         android:text="@string/dummy_name"
-        android:textColor="@color/text_secondary"
+        android:textColor="?attr/textColorSecondary"
         android:visibility="gone" />
 
     <com.aircandi.ui.widgets.AirImageView
@@ -40,36 +39,31 @@
 
     <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/name"
-        style="@style/candi_list_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/type"
         android:layout_marginTop="3dp"
         android:layout_toRightOf="@+id/photo"
         android:maxLines="1"
-        android:text="@string/dummy_title"
-        android:textAppearance="@style/app_text_appearance_small" />
+        android:text="@string/dummy_title" />
 
     <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/category_name"
-        style="@style/candi_list_subtitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/name"
         android:layout_toRightOf="@+id/photo"
         android:text="@string/dummy_category_name"
-        android:textAppearance="@style/app_text_appearance_small" />
+        android:textStyle="italic" />
 
     <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/uri"
-        style="@style/candi_list_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/category_name"
         android:layout_toRightOf="@+id/photo"
         android:maxLines="1"
         android:paddingBottom="3dp"
-        android:text="@string/dummy_uri"
-        android:textAppearance="@style/app_text_appearance_small" />
+        android:text="@string/dummy_uri" />
 
 </RelativeLayout>

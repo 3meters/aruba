@@ -19,13 +19,13 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.aircandi.Constants;
+import com.aircandi.R;
 import com.aircandi.applications.Applinks;
 import com.aircandi.applications.Candigrams;
 import com.aircandi.applications.Comments;
 import com.aircandi.applications.Pictures;
 import com.aircandi.applications.Places;
 import com.aircandi.applications.Users;
-import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager;

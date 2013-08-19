@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -72,14 +72,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/dummy_like_stat"
-                android:textAppearance="@style/app_text_appearance_tiny" />
+                android:textAppearance="@style/textAppearanceSmall" />
 
             <com.aircandi.ui.widgets.AirTextView
                 android:id="@+id/watching_stats"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/dummy_watch_stat"
-                android:textAppearance="@style/app_text_appearance_tiny" />
+                android:textAppearance="@style/textAppearanceSmall" />
         </LinearLayout>
     </LinearLayout>
 
@@ -94,7 +94,6 @@
 
         <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/candi_form_description"
-            style="@style/candi_form_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/dummy_description"

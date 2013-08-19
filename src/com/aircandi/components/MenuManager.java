@@ -6,7 +6,7 @@ import android.support.v4.app.Fragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 
 public class MenuManager {
 
@@ -66,6 +66,7 @@ public class MenuManager {
 				}
 				else if (activityName.equals("CandigramForm")) {
 					menuInflater.inflate(R.menu.menu_browse_entity, menu);
+					menuInflater.inflate(R.menu.menu_help, menu);
 				}
 				else if (activityName.equals("UserForm")) {
 					menuInflater.inflate(R.menu.menu_browse_user, menu);

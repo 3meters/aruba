@@ -8,10 +8,10 @@
 
     <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/label"
-        style="@style/app_text_appearance_medium_accent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/dummy_section_title" />
+        android:text="@string/dummy_section_title"
+        android:textColor="@color/accent_blue" />
 
     <View
         android:id="@+id/rule"

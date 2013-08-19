@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -12,20 +12,21 @@
         android:layout_marginBottom="10dp"
         android:orientation="vertical" >
 
-        <com.aircandi.ui.widgets.AirTextView
+        <com.aircandi.ui.widgets.AirTitle
             android:id="@+id/name"
-            style="?attr/candiFormTitleStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/dummy_name" />
+            android:text="@string/dummy_name"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textStyle="bold" />
 
         <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/subtitle"
-            style="@style/candi_form_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="3dp"
-            android:text="@string/dummy_tags" />
+            android:text="@string/dummy_tags"
+            android:textStyle="italic" />
     </LinearLayout>
 
     <LinearLayout
@@ -60,7 +61,7 @@
                 android:layout_marginRight="3dp"
                 android:minWidth="@dimen/form_button_width_min"
                 android:onClick="onCountdownButtonClick" />
-            
+
             <com.aircandi.ui.widgets.ComboButton
                 android:id="@+id/button_like"
                 style="@style/form_button"
@@ -95,24 +96,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/dummy_like_stat"
-                android:textAppearance="@style/app_text_appearance_tiny" />
+                android:textAppearance="@style/textAppearanceExtraSmall" />
 
             <com.aircandi.ui.widgets.AirTextView
                 android:id="@+id/watching_stats"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/dummy_watch_stat"
-                android:textAppearance="@style/app_text_appearance_tiny" />
+                android:textAppearance="@style/textAppearanceExtraSmall" />
         </LinearLayout>
     </LinearLayout>
 
     <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/action_hint"
-        style="@style/form_edit_hint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="0dp"
         android:text="@string/candigram_action_hint"
-        android:textColor="@color/edit_hint" />
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="?attr/textColorSecondary"
+        android:visibility="gone" />
 
 </LinearLayout>

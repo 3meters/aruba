@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/backgroundForm" xmlns:tools="http://schemas.android.com/tools">
@@ -30,7 +30,7 @@
                 android:layout_marginLeft="4dp"
                 android:layout_marginTop="5dp"
                 android:text="@string/dummy_name"
-                android:textAppearance="@style/app_text_appearance_medium_accent"
+                        android:textColor="@color/accent_blue"
                 android:visibility="visible" />
 
             <Spinner
@@ -102,7 +102,6 @@
 
                 <com.aircandi.ui.widgets.AirEditText
                     android:id="@+id/name"
-                    style="@style/form_edit"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:layout_marginBottom="8dp"
@@ -138,8 +137,7 @@
                     android:layout_marginBottom="8dp"
                     android:layout_marginRight="15dp"
                     android:drawableRight="?attr/iconClear"
-                    android:inputType="textNoSuggestions"
-                    android:textAppearance="@style/app_text_appearance_small" />
+                    android:inputType="textNoSuggestions" />
             </LinearLayout>
 
             <LinearLayout
@@ -172,8 +170,7 @@
                     android:inputType="textMultiLine|textNoSuggestions|textUri"
                     android:maxLines="5"
                     android:minHeight="@dimen/form_field_height"
-                    android:minLines="1"
-                    android:textAppearance="@style/app_text_appearance_small" />
+                    android:minLines="1" />
             </LinearLayout>
 
             <LinearLayout

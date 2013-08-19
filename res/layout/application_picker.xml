@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:padding="15sp"
-        android:textAppearance="@style/app_text_appearance_large"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/accent_blue" />
 
     <View

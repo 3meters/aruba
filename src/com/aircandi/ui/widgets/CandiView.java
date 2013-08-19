@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
@@ -44,7 +44,6 @@ public class CandiView extends RelativeLayout {
 	private TextView		mName;
 	private TextView		mSubtitle;
 	private TextView		mDistance;
-	private TextView		mPlaceRankScore;
 	private View			mCandiViewGroup;
 	private LinearLayout	mShortcuts;
 	private LinearLayout	mInfoHolder;
@@ -77,7 +76,6 @@ public class CandiView extends RelativeLayout {
 		mName = (TextView) mLayout.findViewById(R.id.name);
 		mSubtitle = (TextView) mLayout.findViewById(R.id.subtitle);
 		mDistance = (TextView) mLayout.findViewById(R.id.distance);
-		mPlaceRankScore = (TextView) mLayout.findViewById(R.id.place_rank_score);
 		mCategoryPhoto = (ImageView) mLayout.findViewById(R.id.subtitle_badge);
 		mShortcuts = (LinearLayout) mLayout.findViewById(R.id.shortcuts);
 		mInfoHolder = (LinearLayout) mLayout.findViewById(R.id.info_holder);
@@ -347,13 +345,5 @@ public class CandiView extends RelativeLayout {
 
 	public void setTextGroup(LinearLayout textGroup) {
 		mInfoHolder = textGroup;
-	}
-
-	public TextView getPlaceRankScore() {
-		return mPlaceRankScore;
-	}
-
-	public void setPlaceRankScore(TextView placeRankScore) {
-		mPlaceRankScore = placeRankScore;
 	}
 }

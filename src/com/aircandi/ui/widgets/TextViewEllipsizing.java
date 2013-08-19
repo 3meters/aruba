@@ -12,7 +12,7 @@ import android.text.StaticLayout;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 
-import com.aircandi.beta.R;
+import com.aircandi.R;
 
 @SuppressWarnings("ucd")
 public class TextViewEllipsizing extends AirTextView {

@@ -6,12 +6,16 @@
     <declare-styleable name="Global">
         <attr name="themeTone" format="string" />
         <attr name="busy" format="reference" />
+        <attr name="textAppearanceExtraLarge" format="reference" />
+        <attr name="textAppearanceExtraSmall" format="reference" />
+        <attr name="textAppearanceTiny" format="reference" />
         <attr name="buttonBarStyle" format="reference" />
         <attr name="candiFormTitleStyle" format="reference" />
         <attr name="candiListTitleStyle" format="reference" />
         <attr name="ruleColor" format="color|reference" />
         <attr name="ruleColorStrong" format="color|reference" />
         <attr name="textColor" format="color|reference" />
+        <attr name="textColorSecondary" format="color|reference" />
         <attr name="textColorSpinner" format="color|reference" />
         <attr name="textColorUnfocused" format="color|reference" />
         <attr name="textColorButtonLink" format="color|reference" />

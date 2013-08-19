@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.components.Logger;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.HttpService.RequestListener;
@@ -178,7 +178,7 @@ public class Dialogs {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
-								Tracker.sendEvent("ui_action", "update_aircandi", "com.aircandi.beta", 0, Aircandi.getInstance().getUser());
+								Tracker.sendEvent("ui_action", "update_aircandi", "com.aircandi", 0, Aircandi.getInstance().getUser());
 								Logger.d(this, "Update: navigating to market install/update page");
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(Constants.APP_MARKET_URI));
 								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -191,7 +191,7 @@ public class Dialogs {
 								 */
 								Logger.d(this, "Install: navigating to play website install page");
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://play.google.com/store/apps/details?id="
-										+ "com.aircandi.beta&referrer=utm_source%3Dcom.aircandi"));
+										+ "com.aircandi&referrer=utm_source%3Dcom.aircandi"));
 								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 								activity.startActivityForResult(intent, Constants.ACTIVITY_MARKET);
 							}

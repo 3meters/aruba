@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:id="@+id/form_holder"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
@@ -39,8 +39,9 @@
                     android:paddingBottom="10dp" >
 
                     <com.aircandi.ui.widgets.AirTextView
-                        style="@style/app_text_appearance_large_accent"
+                        style="?android:attr/textAppearanceLarge"
                         android:layout_width="match_parent"
+                        android:textColor="@color/accent_blue"
                         android:layout_height="wrap_content"
                         android:text="@string/form_title_picture" />
 
@@ -81,7 +82,6 @@
 
                     <com.aircandi.ui.widgets.AirTextView
                         android:id="@+id/description"
-                        style="@style/candi_form_description"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/dummy_description"

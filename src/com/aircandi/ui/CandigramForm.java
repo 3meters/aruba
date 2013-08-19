@@ -9,16 +9,15 @@ import android.os.Handler;
 import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
+import com.aircandi.R;
 import com.aircandi.applications.Applinks;
 import com.aircandi.applications.Places;
-import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -43,6 +42,7 @@ import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
@@ -50,17 +50,19 @@ public class CandigramForm extends BaseEntityForm {
 
 	Handler		mHandler	= new Handler();
 	Runnable	mTimer;
-	Button		mButtonCountdown;
+	TextView	mActionInfo;
 
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
+		
+		mActionInfo = (TextView) findViewById(R.id.action_info);
 
 		mTimer = new Runnable() {
 
 			@Override
 			public void run() {
-				setCountdownText();
+				setActionText();
 				mHandler.postDelayed(mTimer, 1000);
 			}
 		};
@@ -181,9 +183,23 @@ public class CandigramForm extends BaseEntityForm {
 	}
 
 	@SuppressWarnings("ucd")
-	public void onCountdownButtonClick(View view) {
-		StringBuilder preamble = new StringBuilder(getString(R.string.alert_candigram_countdown));
+	public void onCaptureButtonClick(View view) {
+		StringBuilder preamble = new StringBuilder(getString(R.string.alert_candigram_capture));
 		Dialogs.alertDialogSimple(this, null, preamble.toString());
+	}
+
+	@Override
+	public void onHelp() {
+		Bundle extras = new Bundle();
+		Integer helpResId = null;
+		if (mEntity.type.equals(Constants.TYPE_APP_BOUNCE)) {
+			helpResId = R.layout.candigram_bouncing_help;
+		}
+		else if (mEntity.type.equals(Constants.TYPE_APP_TOUR)) {
+			helpResId = R.layout.candigram_touring_help;
+		}
+		extras.putInt(Constants.EXTRA_HELP_ID, helpResId);
+		Routing.route(this, Route.Help, null, null, extras);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -245,12 +261,14 @@ public class CandigramForm extends BaseEntityForm {
 
 		/* Set header */
 		Candigram candigram = (Candigram) mEntity;
-		if (candigram.type.equals(Constants.TYPE_APP_TOUR)) {
+		if (candigram.type.equals(Constants.TYPE_APP_TOUR)) {			
+			/* Start updating the countdown in action info */
+			mHandler.post(mTimer);
 			((TextView) findViewById(R.id.header)).setText("touring " + getString(R.string.form_title_candigram));
-			UI.setVisibility(findViewById(R.id.action_hint), View.GONE);
 		}
 		else if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {
 			((TextView) findViewById(R.id.header)).setText("bouncing " + getString(R.string.form_title_candigram));
+			UI.setVisibility(mActionInfo, View.GONE);
 		}
 
 		/* Primary candi image */
@@ -365,7 +383,7 @@ public class CandigramForm extends BaseEntityForm {
 				UI.setVisibility(user, View.VISIBLE);
 			}
 		}
-
+		
 		/* Buttons */
 		drawButtons();
 
@@ -386,24 +404,32 @@ public class CandigramForm extends BaseEntityForm {
 		Candigram candigram = (Candigram) mEntity;
 
 		UI.setVisibility(findViewById(R.id.button_nudge), View.GONE);
-		UI.setVisibility(findViewById(R.id.button_countdown), View.GONE);
-
-		if (candigram.type.equals(Constants.TYPE_APP_TOUR)) {
-			mButtonCountdown = (Button) findViewById(R.id.button_countdown);
-			UI.setVisibility(mButtonCountdown, View.VISIBLE);
-			mButtonCountdown.setText(getString(R.string.button_countdown));
-			mHandler.post(mTimer);
+		UI.setVisibility(findViewById(R.id.button_capture), View.GONE);
+		
+		if (candigram.capture == null || !candigram.capture) {
+			UI.setVisibility(findViewById(R.id.button_capture), View.VISIBLE);
 		}
-		else if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {
+
+		if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {
 			UI.setVisibility(findViewById(R.id.button_nudge), View.VISIBLE);
 		}
+		else if (candigram.type.equals(Constants.TYPE_APP_TOUR)) {
+		}
+		
+
 	}
 
-	private void setCountdownText() {
-		Long now = DateTime.nowDate().getTime();
-		Long next = ((Candigram) mEntity).nextHopDate.longValue();
-		String timeTill = DateTime.timeTill(now, next);
-		mButtonCountdown.setText(getString(R.string.button_countdown) + "\n" + timeTill);
+	private void setActionText() {
+		if (((Candigram) mEntity).nextHopDate != null) {
+			Long now = DateTime.nowDate().getTime();
+			Long next = ((Candigram) mEntity).nextHopDate.longValue();
+			String timeTill = DateTime.timeTill(now, next);
+			mActionInfo.setText("leaving in" + "\n" + timeTill);
+		}
+		else {
+			/* Dummy text for now */
+			mActionInfo.setText("leaving in" + "\n" + "22 minutes");
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

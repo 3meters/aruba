@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.aircandi.beta.R;
+import com.aircandi.R;
 
 @SuppressWarnings("ucd")
 public class BuilderButton extends RelativeLayout {
@@ -51,7 +51,12 @@ public class BuilderButton extends RelativeLayout {
 		mViewGroup = (LinearLayout) view.findViewById(R.id.builder_images);
 
 		if (mTextView != null && mHint != null) {
-			mTextView.setTextColor(getResources().getColor(R.color.edit_hint));
+			if (mThemeTone.equals("dark")) {
+				mTextView.setTextColor(getResources().getColor(R.color.text_secondary_dark));
+			}
+			else {
+				mTextView.setTextColor(getResources().getColor(R.color.text_secondary_light));
+			}
 			mTextView.setText(mHint);
 		}
 	}
@@ -68,7 +73,12 @@ public class BuilderButton extends RelativeLayout {
 				mTextView.setText(text);
 			}
 			else {
-				mTextView.setTextColor(getResources().getColor(R.color.edit_hint));
+				if (mThemeTone.equals("dark")) {
+					mTextView.setTextColor(getResources().getColor(R.color.text_secondary_dark));
+				}
+				else {
+					mTextView.setTextColor(getResources().getColor(R.color.text_secondary_light));
+				}
 				mTextView.setText(mHint);
 			}
 		}

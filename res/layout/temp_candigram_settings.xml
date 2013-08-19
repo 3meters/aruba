@@ -24,11 +24,12 @@
 
             <com.aircandi.ui.widgets.AirTextView
                 android:id="@+id/hint_type"
-                style="@style/form_edit_hint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/candigram_type_hint_touring"
-                android:textColor="@color/edit_hint" />
+                android:paddingLeft="6dp"
+                android:text="@string/candigram_type_hint"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?attr/textColorSecondary" />
         </LinearLayout>
 
         <!-- Range -->
@@ -48,11 +49,13 @@
                 android:spinnerMode="dialog" />
 
             <com.aircandi.ui.widgets.AirTextView
-                style="@style/form_edit_hint"
+                android:id="@+id/hint_range"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingLeft="6dp"
                 android:text="@string/candigram_range_hint"
-                android:textColor="@color/edit_hint" />
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?attr/textColorSecondary" />
         </LinearLayout>
 
         <!-- Visit duration -->
@@ -72,11 +75,13 @@
                 android:spinnerMode="dialog" />
 
             <com.aircandi.ui.widgets.AirTextView
-                style="@style/form_edit_hint"
+                android:id="@+id/hint_duration"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingLeft="6dp"
                 android:text="@string/candigram_duration_hint"
-                android:textColor="@color/edit_hint" />
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?attr/textColorSecondary" />
         </LinearLayout>
 
         <LinearLayout
@@ -85,19 +90,21 @@
             android:layout_marginBottom="8dp"
             android:orientation="vertical" >
 
-            <CheckBox
+            <com.aircandi.ui.widgets.AirCheckBox
                 android:id="@+id/chk_capture"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:text="@string/candigram_label_capture" />
 
             <com.aircandi.ui.widgets.AirTextView
-                style="@style/form_edit_hint"
+                android:id="@+id/hint_capture"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:includeFontPadding="false"
+                android:paddingLeft="6dp"
                 android:text="@string/candigram_capture_hint"
-                android:textColor="@color/edit_hint" />
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?attr/textColorSecondary" />
         </LinearLayout>
 
         <LinearLayout
@@ -106,18 +113,20 @@
             android:layout_marginBottom="8dp"
             android:orientation="vertical" >
 
-            <CheckBox
+            <com.aircandi.ui.widgets.AirCheckBox
                 android:id="@+id/chk_locked"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:text="@string/form_label_locked" />
 
             <com.aircandi.ui.widgets.AirTextView
-                style="@style/form_edit_hint"
+                android:id="@+id/hint_locked"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/candigram_range_hint"
-                android:textColor="@color/edit_hint" />
+                android:paddingLeft="6dp"
+                android:text="@string/candigram_locked_hint"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?attr/textColorSecondary" />
         </LinearLayout>
     </LinearLayout>
 

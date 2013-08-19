@@ -66,7 +66,7 @@
         <item>80470</item>
     </string-array>
 
-    <!-- Candigrams -->
+    <!-- Candigram type -->
 
     <string-array name="candigram_type_entries">
         <item>Touring</item>
@@ -76,16 +76,33 @@
         <item>tour</item>
         <item>bounce</item>
     </string-array>
+    <string-array name="candigram_type_descriptions">
+        <item>Candigram travels to a new place when time runs out</item>
+        <item>Candigram travels to a new place when nudged</item>
+    </string-array>
+
+    <!-- Candigram range -->
+
     <string-array name="candigram_range_entries">
         <item>Local area</item>
         <item>Region</item>
         <item>Worldwide</item>
     </string-array>
+
     <string-array name="candigram_range_values">
         <item>1609</item>
         <item>80470</item>
         <item>40075000</item>
     </string-array>
+
+    <string-array name="candigram_range_descriptions">
+        <item>The candigram travels in the local area</item>
+        <item>The candigram travels in the region</item>
+        <item>The candigram travels anywhere in the world</item>
+    </string-array>
+
+    <!-- Candigram duration -->
+
     <string-array name="candigram_duration_entries">
         <item>30 minutes</item>
         <item>1 hour</item>
@@ -93,6 +110,7 @@
         <item>24 hours</item>
         <item>1 week</item>
     </string-array>
+
     <string-array name="candigram_duration_values">
         <item>30000</item>
         <item>60000</item>
@@ -101,4 +119,12 @@
         <item>10080000</item>
     </string-array>
 
+    <string-array name="candigram_duration_descriptions">
+        <item>The candigram travels to a new place every 30 minutes</item>
+        <item>The candigram travels to a new place every hour</item>
+        <item>The candigram travels to a new place every 8 hours</item>
+        <item>The candigram travels to a new place every day</item>
+        <item>The candigram travels to a new place every week</item>
+    </string-array>
+        
 </resources>

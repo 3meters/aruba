@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -21,11 +21,12 @@
 
         <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/subtitle"
-            style="@style/candi_form_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="3dp"
-            android:text="@string/dummy_tags" />
+            android:text="@string/dummy_tags"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textStyle="italic" />
     </LinearLayout>
 
     <LinearLayout
@@ -74,14 +75,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/dummy_like_stat"
-                android:textAppearance="@style/app_text_appearance_tiny" />
+                android:textAppearance="@style/textAppearanceExtraSmall" />
 
             <com.aircandi.ui.widgets.AirTextView
                 android:id="@+id/watching_stats"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/dummy_watch_stat"
-                android:textAppearance="@style/app_text_appearance_tiny" />
+                android:textAppearance="@style/textAppearanceExtraSmall" />
         </LinearLayout>
     </LinearLayout>
 

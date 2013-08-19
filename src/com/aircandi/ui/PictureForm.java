@@ -12,8 +12,8 @@ import android.widget.Toast;
 
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
+import com.aircandi.R;
 import com.aircandi.applications.Applinks;
-import com.aircandi.beta.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;

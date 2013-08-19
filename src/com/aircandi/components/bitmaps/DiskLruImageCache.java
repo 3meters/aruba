@@ -14,7 +14,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 
-import com.aircandi.beta.BuildConfig;
+import com.aircandi.BuildConfig;
 import com.aircandi.components.Logger;
 
 @SuppressWarnings("ucd")

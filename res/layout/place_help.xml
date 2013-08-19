@@ -7,32 +7,22 @@
     android:clickable="true"
     android:onClick="onHelpClick" >
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/add_places"
+        style="@style/balloon"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="10dp"
-        android:orientation="vertical" >
-
-        <View
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
-            android:layout_marginRight="5dp"
-            android:background="@drawable/ic_action_arrow_top_dark" />
-
-        <com.aircandi.ui.widgets.AirTextView
-            style="@style/balloon"
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:text="@string/help_place_add" />
-    </LinearLayout>
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/help_place_add" />
 
     <com.aircandi.ui.widgets.AirTextView
         style="@style/balloon"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_below="@+id/add_places"
         android:layout_centerInParent="true"
         android:text="@string/help_place_tune" />
 

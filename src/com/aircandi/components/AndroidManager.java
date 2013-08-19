@@ -20,7 +20,7 @@ import android.os.Environment;
 import android.text.Html;
 
 import com.aircandi.Aircandi;
-import com.aircandi.beta.BuildConfig;
+import com.aircandi.BuildConfig;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 

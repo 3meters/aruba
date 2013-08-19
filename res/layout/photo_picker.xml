@@ -13,7 +13,6 @@
 
         <com.aircandi.ui.widgets.AirAutoCompleteTextView
             android:id="@+id/search_text"
-            style="@style/form_edit"
             android:layout_width="0dp"
             android:layout_height="@dimen/form_field_height"
             android:layout_weight="1"
@@ -25,8 +24,7 @@
             android:hint="@string/picture_search_query_hint"
             android:imeOptions="actionSearch"
             android:inputType="textAutoCorrect"
-            android:singleLine="true"
-            android:textAppearance="@style/app_text_appearance_small" />
+            android:singleLine="true" />
     </LinearLayout>
 
     <GridView

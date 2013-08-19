@@ -24,7 +24,7 @@ import android.widget.TextView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Constants;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ExcludeNulls;
 import com.aircandi.service.HttpService.ObjectType;

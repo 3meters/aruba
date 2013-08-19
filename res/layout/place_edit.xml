@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/backgroundForm" >
@@ -72,7 +72,6 @@
 
                     <com.aircandi.ui.widgets.AirEditText
                         android:id="@+id/name"
-                        style="@style/form_edit"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/form_field_height"
                         android:layout_marginBottom="1dp"
@@ -80,7 +79,8 @@
                         android:layout_weight="0"
                         android:drawableRight="?attr/iconClear"
                         android:hint="@string/form_place_title_hint"
-                        android:inputType="textCapWords|textNoSuggestions" />
+                        android:inputType="textCapWords|textNoSuggestions"
+                        android:textAppearance="?android:attr/textAppearance" />
 
                     <com.aircandi.ui.widgets.BuilderButton
                         android:id="@+id/address"
@@ -122,7 +122,6 @@
 
                     <com.aircandi.ui.widgets.AirEditText
                         android:id="@+id/description"
-                        style="@style/form_edit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"

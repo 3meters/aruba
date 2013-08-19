@@ -10,7 +10,7 @@ import android.view.WindowManager.BadTokenException;
 import android.widget.FrameLayout;
 
 import com.aircandi.Aircandi;
-import com.aircandi.beta.R;
+import com.aircandi.R;
 import com.aircandi.utilities.UI;
 
 public class BusyManager {

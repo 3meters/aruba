@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/selector_button"
@@ -36,27 +36,28 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@string/dummy_name"
-            android:textAppearance="@style/app_text_appearance_medium_accent" />
+            android:textColor="@color/accent_blue" />
 
         <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/name"
-            style="?attr/candiListTitleStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@string/dummy_title_short"
-            android:textColor="?attr/textColor" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="?attr/textColor"
+            android:textStyle="bold" />
 
         <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/subtitle"
-            style="@style/candi_list_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textStyle="italic"
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@string/dummy_subtitle"
-            android:textColor="@color/text_secondary" />
+            android:textColor="?attr/textColorSecondary" />
     </LinearLayout>
 
     <ImageView
