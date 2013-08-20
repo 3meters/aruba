@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
     <LinearLayout
-        android:id="@+id/panel_content"
+        style="@style/form_content_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:orientation="vertical" >
 
-        <!--
-        <Spinner
-            android:id="@+id/cbo_visibility"
-            android:layout_width="160dp"
-            android:layout_height="wrap_content"
-            android:drawSelectorOnTop="true"
-            android:entries="@array/form_visibility_values_list"
-            android:prompt="@string/form_label_visibility" />
-        -->
-
-        <CheckBox
+        <com.aircandi.ui.widgets.AirCheckBox
             android:id="@+id/chk_locked"
             android:layout_width="match_parent"
             android:layout_height="@dimen/form_field_height"
             android:text="@string/form_label_locked"
-            android:visibility="gone" />
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/hint_locked"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/hint_indent_spinner"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?attr/textColorSecondary" />
     </LinearLayout>
 
-</merge>
+</RelativeLayout>

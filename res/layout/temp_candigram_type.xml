@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/type_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:background="?attr/backgroundButtonBar"
+        android:padding="20dp"
+        android:text="@string/candigram_wizard_type"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="?attr/textColorSecondary" />
+
+    <!-- Type -->
+
+    <Spinner
+        android:id="@+id/wizard_spinner_type"
+        style="@style/form_content_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/form_field_height"
+        android:layout_below="@+id/type_message"
+        android:layout_marginBottom="30dp"
+        android:spinnerMode="dialog" />
+
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/help_touring"
+        style="@style/balloon"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_below="@+id/wizard_spinner_type"
+        android:layout_centerHorizontal="true"
+        android:text="@string/help_candigram_touring"
+        android:visibility="gone" />
+
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/help_bouncing"
+        style="@style/balloon"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_below="@+id/wizard_spinner_type"
+        android:layout_centerHorizontal="true"
+        android:text="@string/help_candigram_bouncing"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/type_image_next"
+        android:layout_width="@dimen/image_small"
+        android:layout_height="@dimen/image_small"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/form_body_padding"
+        android:background="@drawable/selector_image_round"
+        android:clickable="true"
+        android:minWidth="@dimen/image_small"
+        android:onClick="onNextButtonClick"
+        android:scaleType="centerCrop"
+        android:src="@drawable/img_next_temp"
+        android:visibility="gone" />
+
+</RelativeLayout>

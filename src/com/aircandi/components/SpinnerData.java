@@ -1,5 +1,6 @@
 package com.aircandi.components;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class SpinnerData {
 	}
 
 	public void setDescriptions(int descriptionsResId) {
-		mDescriptions = Arrays.asList(mContext.getResources().getStringArray(descriptionsResId));
+		mDescriptions = new ArrayList(Arrays.asList(mContext.getResources().getStringArray(descriptionsResId)));
 	}
 
 	public List<String> getEntries() {
@@ -30,7 +31,7 @@ public class SpinnerData {
 	}
 
 	public void setEntries(int entriesResId) {
-		mEntries = Arrays.asList(mContext.getResources().getStringArray(entriesResId));
+		mEntries = new ArrayList(Arrays.asList(mContext.getResources().getStringArray(entriesResId)));
 	}
 
 	public List<String> getEntryValues() {
@@ -38,6 +39,6 @@ public class SpinnerData {
 	}
 
 	public void setEntryValues(int entryValuesResId) {
-		mEntryValues = Arrays.asList(mContext.getResources().getStringArray(entryValuesResId));
+		mEntryValues = new ArrayList(Arrays.asList(mContext.getResources().getStringArray(entryValuesResId)));
 	}
 }

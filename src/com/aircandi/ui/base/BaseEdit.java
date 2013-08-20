@@ -17,11 +17,12 @@ import com.aircandi.utilities.Routing.Route;
 
 public abstract class BaseEdit extends BaseActivity {
 
-	protected Boolean	mEditing	= false;
-	protected Boolean	mDirty		= false;
+	protected Boolean	mEditing		= false;
+	protected Boolean	mDirty			= false;
+	protected Boolean	mFirstDraw		= true;
 
 	/* Inputs */
-	protected Boolean	mSkipSave	= false;
+	protected Boolean	mSkipSave		= false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,7 @@ public abstract class BaseEdit extends BaseActivity {
 			configureActionBar();
 			databind();
 			draw();
+			mFirstDraw = false;
 		}
 	}
 

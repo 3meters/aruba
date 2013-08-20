@@ -1,0 +1,27 @@
+-------------------------------------------------------------------------------
+GOOGLE MAPS
+-------------------------------------------------------------------------------
+
+Accessing google maps requires an Google api key for android apps. I create an
+api key that includes both debug and release for aircandi.
+
+DEBUG
+
+API key: AIzaSyCF9Nlm-CGETdgwP1ktNyAoKVgcUGuMzTA 
+
+Android apps:   
+
+9D:CB:2E:05:32:71:46:83:0D:9E:7F:3C:AC:03:A7:7A:55:F9:F2:28;com.aircandi
+59:36:79:A3:9E:A1:E5:1F:88:26:7F:8C:08:DE:DE:01:F2:2F:1C:ED;com.aircandi
+
+Activated on:
+Aug 19, 2013 9:38 AM
+
+Activated by:
+admin@3meters.com  
+
+NOTES
+
+When switching api keys, make sure the application version using the old api key is uninstalled. I was
+having a problem getting the new api key to work until I started with fresh install.
+

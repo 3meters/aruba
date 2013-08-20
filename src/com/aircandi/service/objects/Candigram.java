@@ -27,11 +27,11 @@ public class Candigram extends Entity implements Cloneable, Serializable {
 	@Expose
 	public Boolean				capture = false;
 	@Expose
-	public Number				maxHops;
+	public Number				hopsMax;
 	@Expose
-	public Number				lastHopDate;
+	public Number				hopLastDate;
 	@Expose
-	public Number				nextHopDate;
+	public Number				hopNextDate;
 	@Expose
 	public Boolean				moveOnRead;
 	@Expose
@@ -54,9 +54,9 @@ public class Candigram extends Entity implements Cloneable, Serializable {
 			entity.duration = (Number) map.get("duration");
 			entity.nudge = (Boolean) map.get("nudge");
 			entity.capture = (Boolean) map.get("capture");
-			entity.maxHops = (Number) map.get("maxHops");
-			entity.lastHopDate = (Number) map.get("lastHopDate");
-			entity.nextHopDate = (Number) map.get("nextHopDate");
+			entity.hopsMax = (Number) map.get("hopsMax");
+			entity.hopLastDate = (Number) map.get("hopLastDate");
+			entity.hopNextDate = (Number) map.get("hopNextDate");
 			entity.moveOnRead = (Boolean) map.get("moveOnRead");
 			entity.cloneOnLike = (Boolean) map.get("cloneOnLike");
 		}

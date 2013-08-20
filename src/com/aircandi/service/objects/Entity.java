@@ -12,6 +12,10 @@ import java.util.Map;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
+import com.aircandi.applications.Candigrams;
+import com.aircandi.applications.Comments;
+import com.aircandi.applications.Maps;
+import com.aircandi.applications.Pictures;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.service.Expose;
@@ -497,7 +501,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, Constants.TYPE_APP_POST
 					, Constants.ACTION_VIEW_AUTO
 					, "pictures"
-					, "resource:img_picture"
+					, "resource:img_picture_temp"
 					, 10
 					, false
 					, true);
@@ -506,6 +510,10 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				shortcut.photo = link.shortcut.getPhoto();
 				shortcut.appId = link.fromId;
 			}
+			else {
+				shortcut.photo.colorize = true;
+				shortcut.photo.color = Aircandi.getInstance().getResources().getColor(Pictures.ICON_COLOR);
+			}
 			shortcuts.add(shortcut);
 
 			shortcut = Shortcut.builder(this
@@ -513,7 +521,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, Constants.TYPE_APP_CANDIGRAM
 					, Constants.ACTION_VIEW_AUTO
 					, "candigrams"
-					, "resource:ic_launcher"
+					, "resource:img_candigram_temp"
 					, 10
 					, false
 					, true);
@@ -521,6 +529,10 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			if (link != null) {
 				shortcut.photo = link.shortcut.getPhoto();
 				shortcut.appId = link.fromId;
+			}
+			else {
+				shortcut.photo.colorize = true;
+				shortcut.photo.color = Aircandi.getInstance().getResources().getColor(Candigrams.ICON_COLOR);
 			}
 			shortcuts.add(shortcut);
 
@@ -531,7 +543,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, Constants.TYPE_APP_POST
 					, Constants.ACTION_VIEW_AUTO
 					, "pictures"
-					, "resource:img_picture"
+					, "resource:img_picture_temp"
 					, 10
 					, false
 					, true);
@@ -540,29 +552,39 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				shortcut.photo = link.shortcut.getPhoto();
 				shortcut.appId = link.fromId;
 			}
+			else {
+				shortcut.photo.colorize = true;
+				shortcut.photo.color = Aircandi.getInstance().getResources().getColor(Pictures.ICON_COLOR);
+			}
 			shortcuts.add(shortcut);
 
 		}
 
-		shortcuts.add(Shortcut.builder(this
+		Shortcut shortcut = Shortcut.builder(this
 				, Constants.SCHEMA_ENTITY_APPLINK
 				, Constants.TYPE_APP_COMMENT
 				, Constants.ACTION_VIEW_FOR
 				, "comments"
-				, "resource:img_comment"
+				, "resource:img_comment_temp"
 				, 20
 				, false
-				, true));
+				, true);
+		shortcut.photo.colorize = true;
+		shortcut.photo.color = Aircandi.getInstance().getResources().getColor(Comments.ICON_COLOR);
+		shortcuts.add(shortcut);
 
-		shortcuts.add(Shortcut.builder(this
+		shortcut = Shortcut.builder(this
 				, Constants.SCHEMA_ENTITY_APPLINK
 				, Constants.TYPE_APP_MAP
 				, Constants.ACTION_VIEW
 				, "map"
-				, "resource:img_map"
+				, "resource:img_map_temp"
 				, 30
 				, false
-				, true));
+				, true);
+		shortcut.photo.colorize = true;
+		shortcut.photo.color = Aircandi.getInstance().getResources().getColor(Maps.ICON_COLOR);
+		shortcuts.add(shortcut);
 
 		return shortcuts;
 	}

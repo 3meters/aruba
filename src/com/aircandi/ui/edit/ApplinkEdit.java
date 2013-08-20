@@ -66,7 +66,9 @@ public class ApplinkEdit extends BaseEntityEdit {
 				@Override
 				public void afterTextChanged(Editable s) {
 					if (((Applink) mEntity).appId == null || !s.toString().equals(((Applink) mEntity).appId)) {
-						mDirty = true;
+						if (!mFirstDraw) {
+							mDirty = true;
+						}
 					}
 					if (s.toString() != "") {
 						mButtonTest.setVisibility(View.VISIBLE);
@@ -84,7 +86,9 @@ public class ApplinkEdit extends BaseEntityEdit {
 				@Override
 				public void afterTextChanged(Editable s) {
 					if (((Applink) mEntity).appUrl == null || !s.toString().equals(((Applink) mEntity).appUrl)) {
-						mDirty = true;
+						if (!mFirstDraw) {
+							mDirty = true;
+						}
 					}
 					if (s.toString() != "") {
 						mButtonTest.setVisibility(View.VISIBLE);

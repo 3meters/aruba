@@ -46,6 +46,7 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutMeta;
 import com.aircandi.service.objects.ShortcutSettings;
+import com.aircandi.ui.CandigramForm;
 import com.aircandi.ui.PictureForm;
 import com.aircandi.ui.PlaceForm;
 import com.aircandi.ui.user.UserForm;
@@ -267,7 +268,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 					final String entitySchema = extras.getString(Constants.EXTRA_ENTITY_SCHEMA);
 					if (entitySchema != null && !entitySchema.equals("")) {
 
-						final IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.editFormBySchema(entitySchema))
+						final IntentBuilder intentBuilder = new IntentBuilder(this, BaseEntityEdit.insertFormBySchema(entitySchema))
 								.setEntitySchema(entitySchema)
 								.setEntityParentId(mEntityId);
 
@@ -545,6 +546,9 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	public static Class<?> viewFormBySchema(String schema) {
 		if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			return PlaceForm.class;
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			return CandigramForm.class;
 		}
 		else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 			return PictureForm.class;

@@ -50,18 +50,28 @@ public class UI {
 		 * Special color treatment if enabled.
 		 */
 		if (photo.colorize != null && photo.colorize) {
-
-			final int color = Place.getCategoryColor(photo.colorizeKey, true, Aircandi.muteColor, false);
-			photoView.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-
-			Integer colorResId = Place.getCategoryColorResId(photo.colorizeKey, true, Aircandi.muteColor, false);
-			if (photoView.findViewById(R.id.color_layer) != null) {
-				(photoView.findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
-				(photoView.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
-				(photoView.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
+			if (photo.color != null) {
+				photoView.getImageView().setColorFilter(photo.color, PorterDuff.Mode.SRC_ATOP);
+				photoView.getImageView().setBackgroundResource(0);
+				if (photoView.findViewById(R.id.color_layer) != null) {
+					(photoView.findViewById(R.id.color_layer)).setBackgroundResource(0);
+					(photoView.findViewById(R.id.color_layer)).setVisibility(View.GONE);
+					(photoView.findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
+				}
 			}
 			else {
-				photoView.getImageView().setBackgroundResource(colorResId);
+				final int color = Place.getCategoryColor(photo.colorizeKey, true, Aircandi.muteColor, false);
+				photoView.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+
+				Integer colorResId = Place.getCategoryColorResId(photo.colorizeKey, true, Aircandi.muteColor, false);
+				if (photoView.findViewById(R.id.color_layer) != null) {
+					(photoView.findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
+					(photoView.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
+					(photoView.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
+				}
+				else {
+					photoView.getImageView().setBackgroundResource(colorResId);
+				}
 			}
 		}
 		else {

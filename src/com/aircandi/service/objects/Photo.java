@@ -46,6 +46,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	/* client only */
 	public String				name;
 	public Boolean				usingDefault = false;
+	public Integer				color;
 
 	/* Used to stash temp bitmaps. Always access using set/getBitmap() */
 	protected String			bitmapKey;

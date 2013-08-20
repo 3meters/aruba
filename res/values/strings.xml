@@ -74,7 +74,7 @@
     <string name="help_radar_add_places">Use the action bar to create and share custom places</string>
     <string name="help_place_tune">Tune places to make them better</string>
     <string name="help_place_add">Use the action bar to add pictures and comments</string>
-    <string name="help_candigram_touring">Touring candigrams travel from place to place gathering pictures and comments as they go! Watch this candigram and follow it on it\'s tour.</string>
+    <string name="help_candigram_touring">Touring candigrams travel place to place gathering pictures and comments as they go! Watch this candigram and follow it on it\'s tour.</string>
     <string name="help_candigram_bouncing">A kick sends a bouncing candigram traveling to a new place. Add a picture or comment and watch this candigram go!</string>
     
     <!-- Prefs: notifications -->
@@ -169,7 +169,7 @@
 
     <!-- Alerts: confirm dirty -->
 
-    <string name="alert_candigram_countdown">Touring candigrams travel from place to place gathering pictures and comments as they go.</string>
+    <string name="alert_candigram_countdown">Touring candigrams travel place to place gathering pictures and comments as they go.</string>
     <string name="alert_candigram_capture">Capture lets you carry a candigram to another place and release it. If the candigram isn\'t released in 12 hours, it will return to where you captured it.</string>
     <string name="alert_candigram_nudge">Discard</string>
     
@@ -204,6 +204,9 @@
     <string name="error_missing_source_id_facebook">Enter a Facebook user id and then select picture again.</string>
     <string name="error_missing_source_id_twitter">Enter a Twitter user id and then select picture again.</string>
     <string name="error_missing_candigram_type">Select a candigram type.</string>
+    <string name="error_missing_candigram_range">Select the travel range.</string>
+    <string name="error_missing_candigram_duration">Select the length of visit.</string>
+    <string name="error_missing_candigram_photo">Select a photo.</string>
     
     <!-- Errors: network or location -->
 
@@ -455,11 +458,14 @@
     
     <string name="candigram_label_capture">allow capture</string>
     
-    <string name="candigram_type_hint">What type of candigram this is</string>
-    <string name="candigram_range_hint">How far this candigram can go when it travels</string>
-    <string name="candigram_duration_hint">How long a touring candigram stays before traveling to a new place</string>
-    <string name="candigram_capture_hint">Allow users to capture and release this candigram</string>
-    <string name="candigram_locked_hint">Allow users to add pictures and comments</string>
+    <string name="candigram_type_hint">select candigram type</string>
+    <string name="candigram_range_hint">travel range</string>
+    <string name="candigram_duration_hint">length of visit</string>
+    
+    <string name="candigram_type_help">What type of candigram this is</string>
+    <string name="candigram_range_help">How far this candigram can go when it travels</string>
+    <string name="candigram_duration_help">How long a touring candigram stays before traveling to a new place</string>
+    <string name="candigram_capture_help">Allow users to capture and release this candigram</string>
     
     <string name="candigram_action_hint">Use kick to send this candigram traveling to a new place</string>
     <string name="candigram_capture_true_hint">Allow users to capture and release this candigram</string>
@@ -467,6 +473,11 @@
     
     <string name="section_candigram_shortcuts_places">places visited so far</string>
     <string name="section_candigram_shortcuts_applinks">add a picture or comment</string>
+    <string name="candigram_wizard_type">Candigrams travel place to place gathering pictures and comments as they go. Select the type of candigram you want to start!</string>
+    <string name="candigram_wizard_content">Add a picture, subject or message to your candigram.</string>
+    <string name="candigram_wizard_settings">Choose how your candigram travels and what other aircandi users can do with it.</string>
+    
+    <string name="candigram_button_finish">send</string>
     
     <!-- Forms.hints -->
 
@@ -494,6 +505,10 @@
     <string name="picture_search_query_hint">search</string>
     <string name="form_do_not_track_on_hint">All browsing activity is anonymous but editing, creating and commenting are public.</string>
     <string name="form_do_not_track_off_hint">All browsing, editing, creating and commenting activities are public.</string>
+    
+    <string name="form_locked_true_help">Users can\'t add pictures or comments</string>
+    <string name="form_locked_false_help">Users can add pictures and comments</string>
+    
 
     <!-- Forms.messages -->
 

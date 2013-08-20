@@ -34,6 +34,9 @@ public class MenuManager {
 				|| activityName.contains("SignInEdit")) {
 			menuInflater.inflate(R.menu.menu_edit_builder, menu);
 		}
+		else if (activityName.contains("CandigramWizard")) {
+			menuInflater.inflate(R.menu.menu_cancel, menu);
+		}
 		else if (activityName.contains("Edit")) {
 			menuInflater.inflate(R.menu.menu_edit_entity, menu);
 		}
@@ -48,7 +51,7 @@ public class MenuManager {
 			/* Browse */
 
 			if (activityName.equals("HelpForm")) {
-				menuInflater.inflate(R.menu.menu_browse_help, menu);
+				menuInflater.inflate(R.menu.menu_cancel, menu);
 			}
 			else {
 				menuInflater.inflate(R.menu.menu_base, menu);

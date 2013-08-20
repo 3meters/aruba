@@ -66,7 +66,9 @@ public class UserEdit extends BaseEntityEdit {
 				@Override
 				public void afterTextChanged(Editable s) {
 					if (!s.toString().equals(((User) mEntity).bio)) {
-						mDirty = true;
+						if (!mFirstDraw) {
+							mDirty = true;
+						}
 					}
 				}
 			});
@@ -77,7 +79,9 @@ public class UserEdit extends BaseEntityEdit {
 				@Override
 				public void afterTextChanged(Editable s) {
 					if (!s.toString().equals(((User) mEntity).webUri)) {
-						mDirty = true;
+						if (!mFirstDraw) {
+							mDirty = true;
+						}
 					}
 				}
 			});
@@ -88,7 +92,9 @@ public class UserEdit extends BaseEntityEdit {
 				@Override
 				public void afterTextChanged(Editable s) {
 					if (!s.toString().equals(((User) mEntity).area)) {
-						mDirty = true;
+						if (!mFirstDraw) {
+							mDirty = true;
+						}
 					}
 				}
 			});
@@ -99,7 +105,9 @@ public class UserEdit extends BaseEntityEdit {
 				@Override
 				public void afterTextChanged(Editable s) {
 					if (!s.toString().equals(((User) mEntity).email)) {
-						mDirty = true;
+						if (!mFirstDraw) {
+							mDirty = true;
+						}
 					}
 				}
 			});
@@ -110,7 +118,9 @@ public class UserEdit extends BaseEntityEdit {
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 					if (((User) mEntity).doNotTrack != isChecked) {
-						mDirty = true;
+						if (!mFirstDraw) {
+							mDirty = true;
+						}
 					}
 
 					if (isChecked) {

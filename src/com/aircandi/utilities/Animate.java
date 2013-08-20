@@ -56,6 +56,7 @@ public class Animate {
 		FormToPageAfterDelete,
 		PageToRadarAfterDelete,
 		PageToHelp,
+		CandigramOut,
 		HelpToPage,
 		None,
 	}
@@ -109,6 +110,9 @@ public class Animate {
 		 */
 		if (transitionType == TransitionType.PageToHelp) {
 			activity.overridePendingTransition(R.anim.fade_in_short, R.anim.hold);
+		}
+		else if (transitionType == TransitionType.CandigramOut) {
+			activity.overridePendingTransition(R.anim.fade_in, R.anim.slide_out_right);
 		}
 		else if (transitionType == TransitionType.HelpToPage) {
 			activity.overridePendingTransition(R.anim.hold, R.anim.fade_out_short);

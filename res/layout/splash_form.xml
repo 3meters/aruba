@@ -52,18 +52,19 @@
 
                 <com.aircandi.ui.widgets.AirTitle
                     android:id="@+id/name"
-                    style="@style/splash_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
+                    android:textAppearance="?attr/textAppearanceExtraLarge"
                     android:text="@string/name_app" />
 
-                <com.aircandi.ui.widgets.AirTextView
+                <com.aircandi.ui.widgets.AirTitle
                     android:id="@+id/message"
-                    style="@style/splash_message"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="3.83"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="?attr/textColorSecondary"
                     android:text="@string/splash_message" />
             </LinearLayout>
         </LinearLayout>

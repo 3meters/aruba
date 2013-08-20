@@ -19,7 +19,7 @@
 
     <uses-feature
         android:glEsVersion="0x00020000"
-        android:required="false" />
+        android:required="true" />
 
     <permission
         android:name="com.aircandi.permission.MAPS_RECEIVE"
@@ -58,7 +58,7 @@
         android:theme="@style/aircandi_theme_midnight" >
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyCZhNFIwY7NqM0A0sN_1LLhaTgc6ou_wMs" />
+            android:value="AIzaSyCF9Nlm-CGETdgwP1ktNyAoKVgcUGuMzTA" />
 
         <!-- Services -->
 
@@ -162,6 +162,11 @@
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name="com.aircandi.ui.edit.CandigramEdit"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/name_app"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name="com.aircandi.ui.edit.CandigramWizard"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" />
@@ -286,7 +291,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
     <uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS" />
-    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
     -->
 
 </manifest>

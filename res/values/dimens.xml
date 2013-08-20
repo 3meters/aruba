@@ -23,7 +23,8 @@
     <dimen name="form_body_padding">10dp</dimen>
     <dimen name="form_body_padding_top">10dp</dimen>
     <dimen name="form_field_height">48dp</dimen>
-
+    <dimen name="hint_indent_spinner">12dp</dimen>
+    
     <!-- Grids -->
 
     <dimen name="grid_spacing_horizontal">0dp</dimen>

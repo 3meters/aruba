@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -28,7 +30,9 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
+import com.aircandi.applications.Candigrams;
 import com.aircandi.applications.Comments;
+import com.aircandi.applications.Pictures;
 import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
@@ -150,15 +154,21 @@ public abstract class BaseEntityList extends BaseBrowse {
 		final Entity entity = EntityManager.getEntity(mEntityId);
 		if (entity != null) {
 			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-				mActionBar.setIcon(R.drawable.img_picture);
+				Drawable icon = getResources().getDrawable(R.drawable.img_picture_temp);
+				icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Pictures.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
+				mActionBar.setIcon(icon);
 				setActivityTitle("pictures");
 			}
 			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-				mActionBar.setIcon(R.drawable.img_comment);
+				Drawable icon = getResources().getDrawable(R.drawable.img_comment_temp);
+				icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Comments.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
+				mActionBar.setIcon(icon);
 				setActivityTitle("comments");
 			}
 			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
-				mActionBar.setIcon(R.drawable.img_candigram);
+				Drawable icon = getResources().getDrawable(R.drawable.img_candigram_temp);
+				icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Candigrams.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
+				mActionBar.setIcon(icon);
 				setActivityTitle("candigrams");
 			}
 		}
@@ -469,6 +479,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+			
 			View view = convertView;
 			final ViewHolder holder;
 			final Entity entity = mEntities.get(position);

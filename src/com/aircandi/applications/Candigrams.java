@@ -16,6 +16,7 @@ import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.ui.CandigramForm;
 import com.aircandi.ui.EntityGrid;
 import com.aircandi.ui.edit.CandigramEdit;
+import com.aircandi.ui.edit.CandigramWizard;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 
@@ -24,6 +25,7 @@ public class Candigrams {
 	public static int TYPE_DEFAULT_POSITION = 0;
 	public static int RANGE_DEFAULT_POSITION = 2;
 	public static int DURATION_DEFAULT_POSITION = 1;
+	public static int ICON_COLOR = R.color.brand_pink_lighter;
 	
 
 	public static void view(Context context, String entityId, String parentId) {
@@ -74,7 +76,7 @@ public class Candigrams {
 
 	@SuppressWarnings("ucd")
 	public static void insert(Context context) {
-		IntentBuilder intentBuilder = new IntentBuilder(context, CandigramEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_CANDIGRAM);
+		IntentBuilder intentBuilder = new IntentBuilder(context, CandigramWizard.class).setEntitySchema(Constants.SCHEMA_ENTITY_CANDIGRAM);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}

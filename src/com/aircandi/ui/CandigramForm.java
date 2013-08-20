@@ -420,9 +420,9 @@ public class CandigramForm extends BaseEntityForm {
 	}
 
 	private void setActionText() {
-		if (((Candigram) mEntity).nextHopDate != null) {
+		if (((Candigram) mEntity).hopNextDate != null) {
 			Long now = DateTime.nowDate().getTime();
-			Long next = ((Candigram) mEntity).nextHopDate.longValue();
+			Long next = ((Candigram) mEntity).hopNextDate.longValue();
 			String timeTill = DateTime.timeTill(now, next);
 			mActionInfo.setText("leaving in" + "\n" + timeTill);
 		}

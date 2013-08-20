@@ -65,6 +65,7 @@ import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.edit.ApplinkEdit;
 import com.aircandi.ui.edit.CandigramEdit;
+import com.aircandi.ui.edit.CandigramWizard;
 import com.aircandi.ui.edit.CommentEdit;
 import com.aircandi.ui.edit.PictureEdit;
 import com.aircandi.ui.edit.PlaceEdit;
@@ -89,6 +90,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	protected AirEditText		mDescription;
 	protected ViewGroup			mPhotoHolder;
 	protected CheckBox			mLocked;
+	private TextView			mHintLocked;
 
 	protected RequestListener	mImageRequestListener;
 	protected AirImageView		mImageRequestWebImageView;
@@ -138,6 +140,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		mPhotoView = (AirImageView) findViewById(R.id.photo);
 		mPhotoHolder = (ViewGroup) findViewById(R.id.photo_holder);
 		mLocked = (CheckBox) findViewById(R.id.chk_locked);
+		mHintLocked = (TextView) findViewById(R.id.hint_locked);
 
 		if (mName != null) {
 			mName.addTextChangedListener(new SimpleTextWatcher() {
@@ -145,7 +148,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				@Override
 				public void afterTextChanged(Editable s) {
 					if (mEntity.name == null || !s.toString().equals(mEntity.name)) {
-						mDirty = true;
+						if (!mFirstDraw) {
+							mDirty = true;
+						}
 					}
 				}
 			});
@@ -156,7 +161,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				@Override
 				public void afterTextChanged(Editable s) {
 					if (mEntity.description == null || !s.toString().equals(mEntity.description)) {
-						mDirty = true;
+						if (!mFirstDraw) {
+							mDirty = true;
+						}
 					}
 				}
 			});
@@ -166,8 +173,11 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					mHintLocked.setText(getString(isChecked ? R.string.form_locked_true_help : R.string.form_locked_false_help));
 					if (mEntity.locked != isChecked) {
-						mDirty = true;
+						if (!mFirstDraw) {
+							mDirty = true;
+						}
 					}
 				}
 			});
@@ -181,7 +191,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		}
 		else {
 			mEntity = Entity.makeEntity(mEntitySchema);
-			setActivityTitle(mEntity.schema);
+			setActivityTitle("new " + mEntity.schema);
 		}
 	}
 
@@ -211,6 +221,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			if (findViewById(R.id.chk_locked) != null) {
 				((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
 				((CheckBox) findViewById(R.id.chk_locked)).setChecked(entity.locked);
+				mHintLocked.setText(getString(entity.locked ? R.string.form_locked_true_help : R.string.form_locked_false_help));
 			}
 
 			/* Shortcuts */
@@ -337,7 +348,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					final IntentBuilder intentBuilder = new IntentBuilder().setEntity(mEntity);
 					setResult(Constants.RESULT_ENTITY_EDITED, intentBuilder.create());
 					finish();
-					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
+					Animate.doOverridePendingTransition(this, TransitionType.FormToPage);
 				}
 				else {
 					if (mEditing) {
@@ -642,6 +653,28 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		}
 		return null;
 	}
+	
+	public static Class<?> insertFormBySchema(String schema) {
+		if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			return PlaceEdit.class;
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+			return PictureEdit.class;
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			return CandigramWizard.class;
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+			return ApplinkEdit.class;
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+			return UserEdit.class;
+		}
+		else if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			return CommentEdit.class;
+		}
+		return null;
+	}
 
 	private void loadApplinks() {
 		if (mApplinks != null) {
@@ -830,7 +863,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				mBusyManager.hideBusy();
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					finish();
-					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
+					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.CandigramOut);
 				}
 				else {
 					Routing.serviceError(BaseEntityEdit.this, serviceResponse);

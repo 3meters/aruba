@@ -15,6 +15,8 @@ import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 
 public class Comments  {
+	
+	public static int ICON_COLOR = R.color.accent_orange_dark;
 
 	public static void view(Context context, String entityId) {}
 
