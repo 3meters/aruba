@@ -38,10 +38,10 @@
                     android:orientation="vertical"
                     android:paddingBottom="10dp" >
 
-                    <com.aircandi.ui.widgets.AirTextView
-                        style="?android:attr/textAppearanceLarge"
+                    <com.aircandi.ui.widgets.AirTitle
                         android:layout_width="match_parent"
                         android:textColor="@color/accent_blue"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
                         android:layout_height="wrap_content"
                         android:text="@string/form_title_picture" />
 

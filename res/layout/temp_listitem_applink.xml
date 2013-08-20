@@ -38,7 +38,7 @@
             android:text="@string/dummy_name"
             android:textColor="@color/accent_blue" />
 
-        <com.aircandi.ui.widgets.AirTextView
+        <com.aircandi.ui.widgets.AirTitle
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

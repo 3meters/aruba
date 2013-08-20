@@ -36,6 +36,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
                     android:layout_marginLeft="2dp"
+                    android:layout_marginTop="5dp"
                     android:gravity="left"
                     android:orientation="horizontal" >
 
@@ -71,9 +72,9 @@
 
                 <com.aircandi.ui.widgets.AirEditText
                     android:id="@+id/name"
-                    android:drawableRight="?attr/iconClear"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
+                    android:drawableRight="?attr/iconClear"
                     android:hint="@string/form_label_fullname"
                     android:inputType="textCapWords|textPersonName|textNoSuggestions" />
 
@@ -82,8 +83,8 @@
                 <com.aircandi.ui.widgets.AirEditText
                     android:id="@+id/area"
                     android:layout_width="match_parent"
-                    android:drawableRight="?attr/iconClear"
                     android:layout_height="@dimen/form_field_height"
+                    android:drawableRight="?attr/iconClear"
                     android:hint="@string/form_label_location"
                     android:inputType="textPostalAddress|textAutoCorrect" />
 
@@ -91,9 +92,9 @@
 
                 <com.aircandi.ui.widgets.AirEditText
                     android:id="@+id/web_uri"
-                    android:drawableRight="?attr/iconClear"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
+                    android:drawableRight="?attr/iconClear"
                     android:hint="@string/form_label_link"
                     android:inputType="textUri" />
 
@@ -155,7 +156,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="?attr/textColorSecondary" />
-
             </LinearLayout>
         </ViewFlipper>
     </com.aircandi.ui.widgets.BounceScrollView>

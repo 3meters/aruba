@@ -42,9 +42,9 @@
 
                     <com.aircandi.ui.widgets.AirTitle
                         android:id="@+id/header"
-                        style="?android:attr/textAppearanceLarge"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
                         android:text="@string/form_title_candigram"
                         android:textColor="@color/accent_blue" />
 

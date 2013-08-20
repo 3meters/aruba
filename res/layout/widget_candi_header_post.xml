@@ -12,9 +12,9 @@
         android:layout_marginBottom="10dp"
         android:orientation="vertical" >
 
-        <com.aircandi.ui.widgets.AirTextView
+        <com.aircandi.ui.widgets.AirTitle
             android:id="@+id/name"
-            style="?attr/candiFormTitleStyle"
+            style="@style/form_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/dummy_name" />

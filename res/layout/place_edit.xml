@@ -32,7 +32,8 @@
                     android:id="@+id/photo_holder"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp" >
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="5dp" >
 
                     <com.aircandi.ui.widgets.AirImageView
                         android:id="@+id/photo"

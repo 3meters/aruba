@@ -41,7 +41,7 @@
         android:orientation="vertical"
         android:padding="10dp" >
 
-        <com.aircandi.ui.widgets.AirTextView
+        <com.aircandi.ui.widgets.AirTitle
             android:id="@+id/name"
             style="@style/form_title"
             android:layout_width="match_parent"
