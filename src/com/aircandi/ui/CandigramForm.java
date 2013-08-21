@@ -55,7 +55,7 @@ public class CandigramForm extends BaseEntityForm {
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-		
+
 		mActionInfo = (TextView) findViewById(R.id.action_info);
 
 		mTimer = new Runnable() {
@@ -261,7 +261,7 @@ public class CandigramForm extends BaseEntityForm {
 
 		/* Set header */
 		Candigram candigram = (Candigram) mEntity;
-		if (candigram.type.equals(Constants.TYPE_APP_TOUR)) {			
+		if (candigram.type.equals(Constants.TYPE_APP_TOUR)) {
 			/* Start updating the countdown in action info */
 			mHandler.post(mTimer);
 			((TextView) findViewById(R.id.header)).setText("touring " + getString(R.string.form_title_candigram));
@@ -383,7 +383,7 @@ public class CandigramForm extends BaseEntityForm {
 				UI.setVisibility(user, View.VISIBLE);
 			}
 		}
-		
+
 		/* Buttons */
 		drawButtons();
 
@@ -405,7 +405,7 @@ public class CandigramForm extends BaseEntityForm {
 
 		UI.setVisibility(findViewById(R.id.button_nudge), View.GONE);
 		UI.setVisibility(findViewById(R.id.button_capture), View.GONE);
-		
+
 		if (candigram.capture == null || !candigram.capture) {
 			UI.setVisibility(findViewById(R.id.button_capture), View.VISIBLE);
 		}
@@ -413,23 +413,29 @@ public class CandigramForm extends BaseEntityForm {
 		if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {
 			UI.setVisibility(findViewById(R.id.button_nudge), View.VISIBLE);
 		}
-		else if (candigram.type.equals(Constants.TYPE_APP_TOUR)) {
-		}
-		
-
 	}
 
 	private void setActionText() {
-		if (((Candigram) mEntity).hopNextDate != null) {
+		Candigram candigram = (Candigram) mEntity;
+		String action = "ready to leave";
+
+		if (candigram.hopNextDate != null) {
 			Long now = DateTime.nowDate().getTime();
-			Long next = ((Candigram) mEntity).hopNextDate.longValue();
+			Long next = candigram.hopNextDate.longValue();
 			String timeTill = DateTime.timeTill(now, next);
-			mActionInfo.setText("leaving in" + "\n" + timeTill);
+			if (!timeTill.equals("now")) {
+				mActionInfo.setText("leaving in" + "\n" + timeTill);
+			}
 		}
-		else {
-			/* Dummy text for now */
-			mActionInfo.setText("leaving in" + "\n" + "22 minutes");
+		else if (candigram.hopLastDate != null) {
+			Long now = DateTime.nowDate().getTime();
+			Long next = candigram.hopLastDate.longValue() + candigram.duration.longValue();
+			String timeTill = DateTime.timeTill(now, next);
+			if (!timeTill.equals("now")) {
+				mActionInfo.setText("leaving in" + "\n" + timeTill);
+			}
 		}
+		mActionInfo.setText(action);
 	}
 
 	// --------------------------------------------------------------------------------------------

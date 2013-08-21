@@ -66,6 +66,7 @@ import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.edit.ApplinkListEdit;
 import com.aircandi.ui.edit.CommentEdit;
 import com.aircandi.ui.edit.FeedbackEdit;
+import com.aircandi.ui.edit.InviteEdit;
 import com.aircandi.ui.edit.TuningEdit;
 import com.aircandi.ui.helpers.AddressBuilder;
 import com.aircandi.ui.helpers.ApplicationPicker;
@@ -248,9 +249,10 @@ public final class Routing {
 		}
 
 		else if (route == Route.Invite) {
-			String subject = "You/'ve been invited to join Aircandi";
-			String body = Utilities.loadStringFromRaw(R.raw.temp_invite);
-			AndroidManager.getInstance().callSendActivity(activity, subject, body);
+			
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, InviteEdit.class);
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
 			return true;
 		}
 		

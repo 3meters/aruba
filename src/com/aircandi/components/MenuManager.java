@@ -21,8 +21,9 @@ public class MenuManager {
 		/* Editing */
 
 		if (activityName.equals("CommentEdit")
-				|| activityName.equals("FeedbackEdit")) {
-			menuInflater.inflate(R.menu.menu_insert_entity, menu);
+				|| activityName.equals("FeedbackEdit")
+				|| activityName.equals("InviteEdit")) {
+			menuInflater.inflate(R.menu.menu_send, menu);
 		}
 		else if (activityName.equals("ApplinkListEdit")) {
 			menuInflater.inflate(R.menu.menu_edit_list, menu);

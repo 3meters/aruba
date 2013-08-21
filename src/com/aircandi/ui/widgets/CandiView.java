@@ -174,11 +174,16 @@ public class CandiView extends RelativeLayout {
 				final int marginPixels = UI.getRawPixelsForDisplayPixels(this.getContext(), 3);
 
 				/* Post indicator always goes first */
-				Count count = entity.getCount(Constants.TYPE_LINK_PICTURE, Direction.in);
-				if (count != null && entity.getCount(Constants.TYPE_LINK_PICTURE, Direction.in).count.intValue() > 0) {
-					addApplinkIndicator("resource:ic_candi_dark", null, sizePixels, marginPixels);
+				Count count = entity.getCount(Constants.TYPE_LINK_CANDIGRAM, Direction.in);
+				if (count != null && entity.getCount(Constants.TYPE_LINK_CANDIGRAM, Direction.in).count.intValue() > 0) {
+					addApplinkIndicator("resource:ic_candigrams_dark", null, sizePixels, marginPixels);
 				}
 
+				count = entity.getCount(Constants.TYPE_LINK_PICTURE, Direction.in);
+				if (count != null && entity.getCount(Constants.TYPE_LINK_PICTURE, Direction.in).count.intValue() > 0) {
+					addApplinkIndicator("resource:ic_pictures_dark", null, sizePixels, marginPixels);
+				}
+				
 				count = entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.in);
 				if (count != null && entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.in).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_comments_dark", null, sizePixels, marginPixels);

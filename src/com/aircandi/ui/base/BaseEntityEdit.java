@@ -190,8 +190,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			setActivityTitle(mEntity.name);
 		}
 		else {
-			mEntity = Entity.makeEntity(mEntitySchema);
-			setActivityTitle("new " + mEntity.schema);
+			if (mEntitySchema != null) {
+				mEntity = Entity.makeEntity(mEntitySchema);
+				setActivityTitle("new " + mEntity.schema);
+			}
 		}
 	}
 
@@ -653,7 +655,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		}
 		return null;
 	}
-	
+
 	public static Class<?> insertFormBySchema(String schema) {
 		if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			return PlaceEdit.class;

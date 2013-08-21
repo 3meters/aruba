@@ -136,7 +136,8 @@
     <string name="alert_send_password_title">forgot password</string>
     <string name="alert_send_password_message">A message has been sent to your email address with your current password.</string>
     <string name="alert_feedback_sent">Thank you for the feedback!</string>
-
+    <string name="alert_invite_sent">Your invitation has been sent. Thank you!</string>
+    
     <!-- Alerts: confirm dirty -->
 
     <string name="alert_dirty_save">Save</string>
@@ -207,6 +208,7 @@
     <string name="error_missing_candigram_range">Select the travel range.</string>
     <string name="error_missing_candigram_duration">Select the length of visit.</string>
     <string name="error_missing_candigram_photo">Select a photo.</string>
+    <string name="error_missing_invite_email">Enter at least one email address.</string>
     
     <!-- Errors: network or location -->
 
@@ -394,6 +396,7 @@
     <string name="form_title_comment">comment</string>
     <string name="form_title_candigram">candigram</string>
     <string name="form_title_feedback">feedback</string>
+    <string name="form_title_invite">invitation</string>
     <string name="form_title_links">links</string>
     <string name="form_title_tune">tune</string>
     <string name="form_title_notifications">notifications</string>
@@ -479,6 +482,10 @@
     
     <string name="candigram_button_finish">send</string>
     
+    <!-- Invite -->
+    
+    <string name="invite_heading">invite your friends to Aircandi</string>
+    
     <!-- Forms.hints -->
 
     <string name="form_applink_type_hint">type of link</string>
@@ -509,7 +516,9 @@
     <string name="form_locked_true_help">Users can\'t add pictures or comments</string>
     <string name="form_locked_false_help">Users can add pictures and comments</string>
     
-
+    <string name="form_invite_email_hint">email address</string>
+    <string name="form_invite_message_hint">add a personal note (optional)</string>
+    
     <!-- Forms.messages -->
 
     <string name="signin_message_general">Sign in to create and share candi with other Aircandi users!</string>

@@ -589,7 +589,7 @@ public class EntityManager {
 
 				/* Entity */
 				parameters.putString("entity", "object:" + HttpService.objectToJson(entity, UseAnnotations.True, ExcludeNulls.True));
-				
+
 				if (entity.synthetic) {
 					parameters.putBoolean("skipNotifications", true);
 				}
@@ -1025,6 +1025,38 @@ public class EntityManager {
 
 			result.serviceResponse = dispatch(serviceRequest);
 		}
+
+		return result;
+	}
+
+	@SuppressWarnings("unused")
+	public ModelResult sendInvite(String email, String fullname, String message) {
+
+		ModelResult result = new ModelResult();
+
+		final Bundle parameters = new Bundle();
+		parameters.putString("email", email); 		// required
+		if (fullname != null) {
+			parameters.putString("fullname", fullname);
+		}
+		if (message != null) {
+			parameters.putString("message", message);
+		}
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_APPLINKS)
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
+				.setSession(Aircandi.getInstance().getUser().session)
+				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setRetry(false)
+				.setResponseFormat(ResponseFormat.Json);
+
+		/*
+		 * Turn this on when the service is ready for calls.
+		 * 
+		 * result.serviceResponse = dispatch(serviceRequest);
+		 */
 
 		return result;
 	}
