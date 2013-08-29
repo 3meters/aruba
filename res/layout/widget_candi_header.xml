@@ -13,7 +13,8 @@
         android:layout_height="@dimen/form_button_height"
         android:layout_marginBottom="3dp"
         android:onClick="onNudgeButtonClick"
-        android:text="@string/button_nudge" />
+        android:text="@string/button_nudge"
+        android:visibility="gone" />
 
     <com.aircandi.ui.widgets.AirButton
         android:id="@+id/button_capture"
@@ -23,7 +24,8 @@
         android:layout_marginBottom="3dp"
         android:minWidth="@dimen/form_button_width_min"
         android:onClick="onCaptureButtonClick"
-        android:text="@string/button_capture" />
+        android:text="@string/button_capture"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/button_holder"
@@ -82,6 +84,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dp"
         android:text="leaving in 18 minutes"
-        android:textColor="?attr/textColorButtonLink" />
+        android:textColor="?attr/textColorButtonLink"
+        android:visibility="gone" />
 
 </LinearLayout>

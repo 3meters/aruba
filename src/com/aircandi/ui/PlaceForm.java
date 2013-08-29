@@ -63,7 +63,7 @@ public class PlaceForm extends BaseEntityForm {
 			mUpsize = extras.getBoolean(Constants.EXTRA_UPSIZE_SYNTHETIC);
 		}
 	}
-	
+
 	@Override
 	public void onDatabind(final Boolean refreshProposed) {
 
@@ -103,11 +103,12 @@ public class PlaceForm extends BaseEntityForm {
 
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
+						Aircandi.currentPlace = mEntity;
 						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
-							mMenuItemEdit.setVisible(canUserEdit());
+							mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
 						}
 
 						/* Action bar icon */
@@ -127,7 +128,8 @@ public class PlaceForm extends BaseEntityForm {
 											@Override
 											public void run() {
 												final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-												final int color = mResources.getColor(getThemeTone().equals("dark") ? R.color.gray_00_pcnt : R.color.gray_90_pcnt);
+												final int color = mResources.getColor(getThemeTone().equals("dark") ? R.color.gray_00_pcnt
+														: R.color.gray_90_pcnt);
 												ColorFilter colorFilter = new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY);
 												BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(),
 														imageResponse.bitmap);
@@ -246,9 +248,10 @@ public class PlaceForm extends BaseEntityForm {
 	public void onMessage(final MessageEvent event) {
 		/*
 		 * Refresh the form because something new has been added to it
-		 * like a comment or post.
+		 * like a comment or post. Or something has moved like a candigram.
 		 */
-		if (mEntityId.equals(event.notification.entity.toId)) {
+		if (mEntityId.equals(event.notification.entity.toId)
+				|| (event.notification.fromEntity != null && mEntityId.equals(event.notification.fromEntity.id))) {
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -346,7 +349,7 @@ public class PlaceForm extends BaseEntityForm {
 		/* Synthetic applink shortcuts */
 		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
 		settings.appClass = Applinks.class;
-		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());
 			drawShortcuts(shortcuts
@@ -361,7 +364,7 @@ public class PlaceForm extends BaseEntityForm {
 		/* Service applink shortcuts */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 		settings.appClass = Applinks.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());
 			drawShortcuts(shortcuts
@@ -462,22 +465,6 @@ public class PlaceForm extends BaseEntityForm {
 	// --------------------------------------------------------------------------------------------
 	// Menus
 	// --------------------------------------------------------------------------------------------
-
-	@Override
-	protected Boolean canUserEdit() {
-		if (mEntity != null && mEntity.ownerId != null) {
-			if (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
-				return true;
-			}
-			else if (mEntity.ownerId.equals(ProxiConstants.ADMIN_USER_ID)) {
-				return true;
-			}
-			else if (!mEntity.ownerId.equals(ProxiConstants.ADMIN_USER_ID) && !mEntity.locked) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc

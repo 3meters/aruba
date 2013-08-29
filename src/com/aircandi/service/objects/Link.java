@@ -1,6 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,6 +33,8 @@ public class Link extends ServiceBase {
 	public String				toCollectionId;
 	@Expose
 	public Boolean				strong;
+	@Expose
+	public Boolean				inactive = false;
 
 	@Expose
 	public Proximity			proximity;
@@ -133,6 +136,7 @@ public class Link extends ServiceBase {
 		link.fromCollectionId = (String) map.get("fromCollectionId");
 		link.toCollectionId = (String) map.get("toCollectionId");
 		link.strong = (Boolean) map.get("strong");
+		link.inactive = (Boolean) map.get("inactive");
 
 		if (map.get("proximity") != null) {
 			link.proximity = Proximity.setPropertiesFromMap(new Proximity(), (HashMap<String, Object>) map.get("proximity"), nameMapping);
@@ -165,9 +169,24 @@ public class Link extends ServiceBase {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Inner classes
-	// --------------------------------------------------------------------------------------------	
-	
+	// Classes
+	// --------------------------------------------------------------------------------------------
+
+	public static class SortByModifiedDate implements Comparator<Link> {
+
+		@Override
+		public int compare(Link object1, Link object2) {
+
+			if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
+				return 1;
+			}
+			else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
+				return 0;
+			}
+			return -1;
+		}
+	}
+
 	public enum Direction {
 		in,
 		out,

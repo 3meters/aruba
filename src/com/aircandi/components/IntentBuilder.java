@@ -80,7 +80,7 @@ public class IntentBuilder {
 		if (mListLinkDirection != null) {
 			intent.putExtra(Constants.EXTRA_LIST_LINK_DIRECTION, mListLinkDirection);
 		}
-		
+
 		if (mListItemResId != null) {
 			intent.putExtra(Constants.EXTRA_LIST_ITEM_RESID, mListItemResId);
 		}
@@ -175,4 +175,5 @@ public class IntentBuilder {
 		mListLinkDirection = listLinkDirection;
 		return this;
 	}
+
 }

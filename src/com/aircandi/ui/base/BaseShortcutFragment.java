@@ -1,6 +1,5 @@
 package com.aircandi.ui.base;
 
-import java.util.Collections;
 import java.util.List;
 
 import android.content.Intent;
@@ -31,6 +30,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.DefaultType;
@@ -63,7 +63,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 		return view;
 	}
 
-	protected void databind(final Boolean refreshProposed) {
+	@Override
+	public void onDatabind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
 
@@ -85,6 +86,11 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, refresh
 						, LinkOptions.getDefault(mLinkOptions));
 
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
+					mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
+				}
+
 				return result;
 			}
 
@@ -96,8 +102,6 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						if (result.data != null) {
 							mEntity = (Entity) result.data;
-							mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-							mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 							draw();
 						}
 					}
@@ -105,7 +109,6 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						Routing.serviceError(getSherlockActivity(), result.serviceResponse);
 					}
 					hideBusy();
-					mBusyManager.hideBusy();
 				}
 			}
 
@@ -118,8 +121,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 
 	@Override
 	public void onRefresh() {
-		mBusyManager.showBusy();
-		databind(true);
+		showBusy();
+		onDatabind(true);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -130,6 +133,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	public void draw() {
 
 		/* Clear shortcut holder */
+		if (getView() == null) return;
+
 		((ViewGroup) getView().findViewById(R.id.shortcut_holder)).removeAllViews();
 
 		if (mShortcutType.equals(Constants.TYPE_LINK_CREATE)) {
@@ -137,9 +142,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* Shortcuts for place entities created by user */
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 			settings.appClass = Places.class;
-			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
 			if (shortcuts.size() > 0) {
-				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_places_created
@@ -152,9 +156,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* Shortcuts for place entities created by user */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_CANDIGRAM, Direction.out, false, false);
 			settings.appClass = Candigrams.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
 			if (shortcuts.size() > 0) {
-				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_candigrams_created
@@ -167,9 +170,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* Shortcuts for post entities created by user */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PICTURE, Direction.out, false, false);
 			settings.appClass = Pictures.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
 			if (shortcuts.size() > 0) {
-				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_pictures_created
@@ -185,9 +187,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* Watching places */
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 			settings.appClass = Places.class;
-			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
 			if (shortcuts.size() > 0) {
-				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_places_watching
@@ -200,9 +201,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* Watching candigrams */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_CANDIGRAM, Direction.out, false, false);
 			settings.appClass = Candigrams.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
 			if (shortcuts.size() > 0) {
-				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_candigrams_watching
@@ -215,9 +215,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* Watching pictures */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, Direction.out, false, false);
 			settings.appClass = Pictures.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
 			if (shortcuts.size() > 0) {
-				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_pictures_watching
@@ -230,9 +229,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* Watching users */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, Direction.out, false, false);
 			settings.appClass = Users.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
 			if (shortcuts.size() > 0) {
-				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_users_watching
@@ -308,7 +306,9 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 				? shortcuts.subList(0, flowLimit)
 				: shortcuts, flowItemResId);
 
-		((ViewGroup) getView().findViewById(holderId)).addView(holder);
+		if (getView() != null) {
+			((ViewGroup) getView().findViewById(holderId)).addView(holder);
+		}
 
 	}
 
@@ -450,11 +450,25 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	public void onResume() {
 		super.onResume();
 		if (mEntity == null) {
-			databind(false);
+			onDatabind(false);
 		}
 		else {
-			draw();
-			hideBusy();
+
+			if (mEntityModelRefreshDate != null
+					&& ProximityManager.getInstance().getLastBeaconLoadDate() != null
+					&& ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()) {
+				onDatabind(false);
+			}
+			else if (mEntityModelActivityDate != null
+					&& EntityManager.getEntityCache().getLastActivityDate() != null
+					&& EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+				onDatabind(false);
+			}
+			else {
+				draw();
+				hideBusy();
+			}
+
 		}
 	}
 

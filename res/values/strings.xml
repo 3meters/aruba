@@ -137,6 +137,7 @@
     <string name="alert_send_password_message">A message has been sent to your email address with your current password.</string>
     <string name="alert_feedback_sent">Thank you for the feedback!</string>
     <string name="alert_invite_sent">Your invitation has been sent. Thank you!</string>
+    <string name="alert_invite_sent_plural">Your invitations have been sent. Thank you!</string>
     
     <!-- Alerts: confirm dirty -->
 
@@ -158,7 +159,6 @@
     <!-- Alerts: confirm delete -->
 
     <string name="alert_delete_title">Confirm delete</string>
-    <string name="alert_notifications_delete_message">Are you sure you want to clear all notifications?</string>
     <string name="alert_delete_message_single">Are you sure you want to delete this?</string>
     <string name="alert_delete_message_multiple">Are you sure you want to delete these?</string>
     <string name="alert_entity_delete_title">Confirm delete</string>
@@ -167,7 +167,9 @@
     <string name="alert_source_delete_title">Delete link</string>
     <string name="alert_source_delete_message_single">Are you sure you want to delete this link?</string>
     <string name="alert_source_delete_message_multiple">Are you sure you want to delete these links?</string>
-
+    <string name="alert_notifications_delete_title">Confirm clear</string>
+    <string name="alert_notifications_delete_message">Are you sure you want to clear all notifications?</string>
+    
     <!-- Alerts: confirm dirty -->
 
     <string name="alert_candigram_countdown">Touring candigrams travel place to place gathering pictures and comments as they go.</string>
@@ -257,7 +259,9 @@
     <string name="progress_searching">Searching&#8230;</string>
     <string name="progress_signing_in">Signing in&#8230;</string>
     <string name="progress_signing_up">Creating&#8230;</string>
-
+    <string name="progress_sending_invite">Sending invitation&#8230;</string>
+    <string name="progress_sending_invite_plural">Sending invitatiosn&#8230;</string>
+    
     <!-- Pull to refresh -->
 
     <string name="refresh_label_pull">Pull to scan&#8230;</string>
@@ -475,16 +479,27 @@
     <string name="candigram_capture_false_hint">Do not allow users to capture this candigram</string>
     
     <string name="section_candigram_shortcuts_places">places visited so far</string>
-    <string name="section_candigram_shortcuts_applinks">add a picture or comment</string>
+    <string name="section_candigram_shortcuts_applinks">pictures and comments</string>
+    <string name="section_candigram_shortcuts_applinks_can_add">add a picture or comment</string>
     <string name="candigram_wizard_type">Candigrams travel place to place gathering pictures and comments as they go. Select the type of candigram you want to start!</string>
     <string name="candigram_wizard_content">Add a picture, subject or message to your candigram.</string>
     <string name="candigram_wizard_settings">Choose how your candigram travels and what other aircandi users can do with it.</string>
     
     <string name="candigram_button_finish">send</string>
+    <string name="alert_kicked_candigram">Bouncing candigram</string>
     
     <!-- Invite -->
     
     <string name="invite_heading">invite your friends to Aircandi</string>
+    <string name="invite_message_default">I enjoy Aircandi. I thought you might like it too.</string>
+    
+    <!-- Picture -->
+    
+    <string name="picture_label_place">picture added from:</string>
+    
+    <!-- Comment -->
+    
+    <string name="comment_label_place">comment added from:</string>
     
     <!-- Forms.hints -->
 

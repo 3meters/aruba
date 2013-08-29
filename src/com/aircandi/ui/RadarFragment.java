@@ -69,6 +69,7 @@ import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.ui.base.IDatabind;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
@@ -714,13 +715,13 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 							}
 						}
 						beaconMessage.append(System.getProperty("line.separator"));
-						beaconMessage.append("Wifi fix: " + DateTime.intervalSince(ProximityManager.getInstance().mLastWifiUpdate, DateTime.nowDate()));
+						beaconMessage.append("Wifi fix: " + DateTime.interval(ProximityManager.getInstance().mLastWifiUpdate.getTime(), DateTime.nowDate().getTime(), IntervalContext.past));
 					}
 
 					final Location location = LocationManager.getInstance().getLocationLocked();
 					if (location != null) {
 						final Date fixDate = new Date(location.getTime());
-						beaconMessage.append(System.getProperty("line.separator") + "Location fix: " + DateTime.intervalSince(fixDate, DateTime.nowDate()));
+						beaconMessage.append(System.getProperty("line.separator") + "Location fix: " + DateTime.interval(fixDate.getTime(), DateTime.nowDate().getTime(), IntervalContext.past));
 						beaconMessage.append(System.getProperty("line.separator") + "Location accuracy: " + String.valueOf(location.getAccuracy()));
 						beaconMessage.append(System.getProperty("line.separator") + "Location provider: " + location.getProvider());
 					}

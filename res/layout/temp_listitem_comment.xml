@@ -65,11 +65,12 @@
         android:text="@string/dummy_description" />
 
     <LinearLayout
-        android:id="@+id/holder_actions"
+        android:id="@+id/actions_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/holder_author"
         android:layout_below="@+id/description"
+        android:layout_marginBottom="5dp"
         android:orientation="horizontal" >
 
         <com.aircandi.ui.widgets.AirTextView
@@ -78,6 +79,51 @@
             android:layout_height="wrap_content"
             android:text="@string/dummy_datetime"
             android:textColor="?attr/textColorSecondary" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/place_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/holder_author"
+        android:layout_below="@+id/actions_holder"
+        android:orientation="horizontal"
+        android:visibility="visible" >
+
+        <com.aircandi.ui.widgets.AirImageView
+            android:id="@+id/place_photo"
+            android:layout_width="@dimen/image_extra_small"
+            android:layout_height="@dimen/image_extra_small"
+            android:layout_marginRight="5dp"
+            aircandi:showBusy="true"
+            aircandi:sizeHint="@dimen/image_extra_small"
+            android:background="@drawable/selector_image"
+            android:scaleType="centerCrop" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical" >
+
+            <com.aircandi.ui.widgets.AirTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:text="@string/comment_label_place"
+                android:textAppearance="@style/textAppearanceSmall"
+                android:textColor="?attr/textColorSecondary" />
+
+            <com.aircandi.ui.widgets.AirTextView
+                android:id="@+id/place_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="top"
+                android:maxLines="2"
+                android:text="@string/dummy_title"
+                android:textAppearance="@style/textAppearanceSmall" />
+        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>

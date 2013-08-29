@@ -18,6 +18,7 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.UI;
 
 @SuppressWarnings("ucd")
@@ -114,7 +115,7 @@ public class UserView extends RelativeLayout {
 
 			if (mTimeSince != null) {
 				if (mDate != null) {
-					mTimeSince.setText(DateTime.timeSince(mDate, DateTime.nowDate().getTime()));
+					mTimeSince.setText(DateTime.interval(mDate, DateTime.nowDate().getTime(), IntervalContext.past));
 				}
 				else {
 					mTimeSince.setVisibility(View.GONE);

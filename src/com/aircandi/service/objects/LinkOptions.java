@@ -26,6 +26,8 @@ public class LinkOptions extends ServiceObject {
 	@Expose
 	public Boolean				shortcuts;
 	@Expose
+	public Boolean				ignoreInactive;
+	@Expose
 	public List<LinkSettings>	active;
 
 	public LinkOptions(Map loadSort, Map loadWhere, Boolean shortcuts, List<LinkSettings> active) {
@@ -80,7 +82,7 @@ public class LinkOptions extends ServiceObject {
 		}
 		else {
 			User user = Aircandi.getInstance().getUser();
-			Number limit = ProxiConstants.LIMIT_CHILD_ENTITIES;
+			Number limit = ProxiConstants.LIMIT_USER_OWNED_ENTITIES;
 			LinkOptions linkOptions = new LinkOptions().setActive(new ArrayList<LinkSettings>());
 
 			if (defaultType == DefaultType.LinksForPlace) {
@@ -138,6 +140,15 @@ public class LinkOptions extends ServiceObject {
 			}
 			return linkOptions;
 		}
+	}
+
+	public Boolean getIgnoreInactive() {
+		return ignoreInactive;
+	}
+
+	public LinkOptions setIgnoreInactive(Boolean ignoreInactive) {
+		this.ignoreInactive = ignoreInactive;
+		return this;
 	}
 
 	public enum DefaultType {

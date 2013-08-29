@@ -119,12 +119,14 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				ModelResult result = new ModelResult();
 				if (!mEntity.byAppUser(Constants.TYPE_LINK_LIKE)) {
 					Tracker.sendEvent("ui_action", "like_entity", null, 0, Aircandi.getInstance().getUser());
-					Shortcut shortcut = Aircandi.getInstance().getUser().getShortcut();
+					Shortcut fromShortcut = Aircandi.getInstance().getUser().getShortcut();
+					Shortcut toShortcut = mEntity.getShortcut();
 					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_LIKE
 							, false
-							, shortcut
+							, toShortcut
+							, fromShortcut
 							, Constants.TYPE_LINK_LIKE);
 				}
 				else {
@@ -174,13 +176,15 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				ModelResult result = new ModelResult();
 				if (!mEntity.byAppUser(Constants.TYPE_LINK_WATCH)) {
 					Tracker.sendEvent("ui_action", "watch_" + mEntity.schema, null, 0, Aircandi.getInstance().getUser());
-					Shortcut shortcut = Aircandi.getInstance().getUser().getShortcut();
+					Shortcut fromShortcut = Aircandi.getInstance().getUser().getShortcut();
+					Shortcut toShortcut = mEntity.getShortcut();
 					result = EntityManager.getInstance().insertLink(
 							Aircandi.getInstance().getUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_WATCH
 							, false
-							, shortcut
+							, toShortcut
+							, fromShortcut
 							, Constants.TYPE_LINK_WATCH);
 				}
 				else {
@@ -213,6 +217,9 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	@SuppressWarnings("ucd")
 	public void onShortcutClick(View view) {
 		final Shortcut shortcut = (Shortcut) view.getTag();
+		if (!shortcut.app.equals(Constants.TYPE_APP_MAP)) {
+			if (shortcut.count != null && shortcut.count == 0 && !EntityManager.canUserAdd(mEntity)) return;
+		}
 		Routing.route(this, Route.Shortcut, mEntity, shortcut, null, null);
 	}
 
@@ -569,14 +576,14 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		/*
 		 * Setup menu items that are common for entity forms.
 		 */
-		mMenuItemEdit = menu.findItem(R.id.edit);
-		if (mMenuItemEdit != null) {
-			mMenuItemEdit.setVisible(canUserEdit());
+		mMenuItemAdd = menu.findItem(R.id.add);
+		if (mMenuItemAdd != null) {
+			mMenuItemAdd.setVisible(EntityManager.canUserAdd(mEntity));
 		}
 
 		mMenuItemEdit = menu.findItem(R.id.edit);
 		if (mMenuItemEdit != null) {
-			mMenuItemEdit.setVisible(canUserEdit());
+			mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
 		}
 
 		MenuItem refresh = menu.findItem(R.id.refresh);
@@ -602,25 +609,6 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		return Routing.route(this, Routing.routeForMenuId(item.getItemId()), mEntity);
 	}
 
-	protected Boolean canUserEdit() {
-		if (mEntity != null && mEntity.ownerId != null && Aircandi.getInstance().getUser() != null) {
-			if (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
-				return true;
-			}
-			else if (mEntity.ownerId.equals(ProxiConstants.ADMIN_USER_ID)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	protected Boolean canUserAdd() {
-		if (mEntity != null && mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-			return true;
-		}
-		return false;
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
@@ -640,6 +628,10 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		 * - User profile could have been updated and we don't catch that.
 		 */
 		if (!isFinishing()) {
+			if (mEntity instanceof Place) {
+				Aircandi.currentPlace = mEntity;
+			}
+
 			Animate.doOverridePendingTransition(this, TransitionType.PageBack);
 			if (mEntityModelRefreshDate != null
 					&& ProximityManager.getInstance().getLastBeaconLoadDate() != null

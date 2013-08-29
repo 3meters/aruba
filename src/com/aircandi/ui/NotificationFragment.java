@@ -31,7 +31,6 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NotificationManager;
 import com.aircandi.components.NotificationTable;
 import com.aircandi.components.NotificationsContentProvider;
-import com.aircandi.events.MessageEvent;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirNotification;
@@ -39,10 +38,10 @@ import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
-import com.squareup.otto.Subscribe;
 
 public class NotificationFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -59,7 +58,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		mClickListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -104,19 +103,15 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 			@Override
 			public void run() {
 				NotificationManager.getInstance().setNewCount(0);
-				if (mAdapter == null || refresh) {
+				if (mAdapter == null) {
 					mAdapter = new ListAdapter(getSherlockActivity(), null, false);
 					getSherlockActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, NotificationFragment.this);
 					mListView.setAdapter(mAdapter);
 				}
 				else {
-					mListView.setAdapter(mAdapter);
-					showMessage(mAdapter.getCount() == 0);
-					hideBusy();
-					mBusyManager.hideBusy();
+					getSherlockActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, NotificationFragment.this);
 				}
 				setListPosition();
-
 			}
 		}, 200);
 
@@ -128,7 +123,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 
 	@Override
 	public void onRefresh() {
-		mBusyManager.showBusy();
+		showBusy();
 		saveListPosition();
 		onDatabind(true);
 	}
@@ -146,16 +141,19 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	}
 
 	private void showMessage(Boolean visible) {
-		if (visible) {
-			getView().findViewById(R.id.message).setVisibility(View.VISIBLE);
-		}
-		else {
-			getView().findViewById(R.id.message).setVisibility(View.GONE);
+		if (getView() != null) {
+			View view = getView().findViewById(R.id.message);
+			if (view != null) {
+				view.setVisibility(visible ? View.VISIBLE : View.GONE);
+			}
 		}
 	}
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+		/*
+		 * This gets called if the content provider has an update.
+		 */
 		if (mAdapter != null && cursor != null) {
 			showMessage(cursor.getCount() == 0);
 			mAdapter.swapCursor(cursor);
@@ -171,7 +169,6 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 		}
 
 		hideBusy();
-		mBusyManager.hideBusy();
 	}
 
 	@Override
@@ -179,18 +176,6 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 		if (mAdapter != null) {
 			mAdapter.swapCursor(null);
 		}
-
-	}
-
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onMessage(final MessageEvent event) {
-		getSherlockActivity().runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				onDatabind(true);
-			}
-		});
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -200,7 +185,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	public void clearNotifications() {
 
 		final AlertDialog dialog = Dialogs.alertDialog(null
-				, getResources().getString(R.string.alert_delete_title)
+				, getResources().getString(R.string.alert_notifications_delete_title)
 				, getResources().getString(R.string.alert_notifications_delete_message)
 				, null
 				, getSherlockActivity()
@@ -215,7 +200,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 							SQLiteDatabase database = DatabaseHelper.getInstance().getWritableDatabase();
 							Integer deleteCount = database.delete(NotificationTable.TABLE_NOTIFICATIONS, "1", null);
 							UI.showToastNotification("Items deleted: " + String.valueOf(deleteCount), Toast.LENGTH_SHORT);
-							onDatabind(true);
+							getSherlockActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, NotificationFragment.this);
 							getView().findViewById(R.id.message).setVisibility(View.VISIBLE);
 						}
 					}
@@ -372,7 +357,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 
 				UI.setVisibility(holder.date, View.GONE);
 				if (holder.date != null && notification.sentDate != null) {
-					holder.date.setText(DateTime.timeSince(notification.sentDate.longValue(), DateTime.nowDate().getTime()));
+					holder.date.setText(DateTime.interval(notification.sentDate.longValue(), DateTime.nowDate().getTime(), IntervalContext.past));
 					UI.setVisibility(holder.date, View.VISIBLE);
 				}
 

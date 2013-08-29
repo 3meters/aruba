@@ -633,8 +633,17 @@ public class EntityManager {
 				}
 
 				if (link != null) {
-					mEntityCache.addLinkTo(link.toId, link.type, insertedEntity.id, insertedEntity.getShortcut());
+					mEntityCache.addLink(link.toId, link.type, insertedEntity.id, null, insertedEntity.getShortcut());
 				}
+
+				/*
+				 * Add 'create' link
+				 */
+				mEntityCache.addLink(insertedEntity.id
+						, Constants.TYPE_LINK_CREATE
+						, Aircandi.getInstance().getUser().id
+						, insertedEntity.getShortcut()
+						, Aircandi.getInstance().getUser().getShortcut());
 
 				result.data = mEntityCache.get(insertedEntity.id);
 			}
@@ -719,6 +728,15 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			mEntityCache.removeEntityTree(entityId);
+			/* 
+			 * Remove 'create' link
+			 * 
+			 * FIXME: This needs to be generalized to hunt down all links that have
+			 * this entity at either end and clean them up including any counts.
+			 * 
+			 */
+			mEntityCache.removeLink(entityId, Constants.TYPE_LINK_CREATE, Aircandi.getInstance().getUser().id);
+			
 		}
 		return result;
 	}
@@ -805,7 +823,7 @@ public class EntityManager {
 			if (beacons != null) {
 				for (Beacon beacon : beacons) {
 					Boolean primary = (primaryBeacon != null && primaryBeacon.id.equals(beacon.id));
-					Link link = entity.getLinkByType(Constants.TYPE_LINK_PROXIMITY, beacon.id, Direction.out);
+					Link link = entity.getLink(Constants.TYPE_LINK_PROXIMITY, beacon.id, Direction.out);
 					if (link != null) {
 						if (primary) {
 							if (untuning) {
@@ -853,7 +871,7 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult insertLink(String fromId, String toId, String type, Boolean strong, Shortcut shortcut, String actionType) {
+	public ModelResult insertLink(String fromId, String toId, String type, Boolean strong, Shortcut toShortcut, Shortcut fromShortcut, String actionType) {
 		final ModelResult result = new ModelResult();
 
 		final Bundle parameters = new Bundle();
@@ -881,7 +899,7 @@ public class EntityManager {
 			 * Fail could be because of ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
 			 * prevents any user from liking the same entity more than once.
 			 */
-			mEntityCache.addLinkTo(toId, type, fromId, shortcut);
+			mEntityCache.addLink(toId, type, fromId, toShortcut, fromShortcut);
 		}
 
 		return result;
@@ -914,7 +932,7 @@ public class EntityManager {
 			 * Fail could be because of ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
 			 * prevents any user from liking the same entity more than once.
 			 */
-			mEntityCache.removeLinkTo(toId, type, fromId);
+			mEntityCache.removeLink(toId, type, fromId);
 		}
 
 		return result;
@@ -966,6 +984,47 @@ public class EntityManager {
 				mEntityCache.setLastActivityDate(DateTime.nowDate().getTime());
 			}
 		}
+		return result;
+	}
+
+	public ModelResult moveCandigram(Entity entity) {
+
+		final ModelResult result = new ModelResult();
+
+		/* Construct entity, link, and observation */
+		final Bundle parameters = new Bundle();
+		parameters.putString("method", "proximity");
+		parameters.putStringArrayList("entityIds", new ArrayList(Arrays.asList(entity.id)));
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "moveCandigrams")
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
+				.setSession(Aircandi.getInstance().getUser().session)
+				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setRetry(false)
+				.setResponseFormat(ResponseFormat.Json);
+
+		result.serviceResponse = dispatch(serviceRequest);
+
+		/* Reproduce the service call effect locally */
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			final String jsonResponse = (String) result.serviceResponse.data;
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Entity, ServiceDataWrapper.True);
+			result.data = serviceData.data;
+
+			/*
+			 * Remove candigram to force it to be refreshed from the service.
+			 * If in cache, make sure parent place know it needs to refresh.
+			 */
+			Long activityDate = DateTime.nowDate().getTime();
+			Entity parent = entity.getParent(Constants.TYPE_LINK_CANDIGRAM);
+			if (parent != null) {
+				parent.activityDate = activityDate;
+			}
+			mEntityCache.removeEntityTree(entity.id);
+		}
+
 		return result;
 	}
 
@@ -1029,22 +1088,23 @@ public class EntityManager {
 		return result;
 	}
 
-	@SuppressWarnings("unused")
-	public ModelResult sendInvite(String email, String fullname, String message) {
+	public ModelResult sendInvite(List<String> emails, String invitor, String message) {
 
 		ModelResult result = new ModelResult();
 
 		final Bundle parameters = new Bundle();
-		parameters.putString("email", email); 		// required
-		if (fullname != null) {
-			parameters.putString("fullname", fullname);
+		parameters.putStringArrayList("emails", (ArrayList<String>) emails);
+
+		if (invitor != null) {
+			parameters.putString("name", invitor);
 		}
+
 		if (message != null) {
 			parameters.putString("message", message);
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_APPLINKS)
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "invite")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setSession(Aircandi.getInstance().getUser().session)
@@ -1052,11 +1112,7 @@ public class EntityManager {
 				.setRetry(false)
 				.setResponseFormat(ResponseFormat.Json);
 
-		/*
-		 * Turn this on when the service is ready for calls.
-		 * 
-		 * result.serviceResponse = dispatch(serviceRequest);
-		 */
+		result.serviceResponse = dispatch(serviceRequest);
 
 		return result;
 	}
@@ -1098,6 +1154,43 @@ public class EntityManager {
 		final Entity entity = Place.upsizeFromSynthetic(synthetic);
 		ModelResult result = EntityManager.getInstance().insertEntity(entity);
 		return result;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Utilities
+	// --------------------------------------------------------------------------------------------
+
+	public static Boolean canUserAdd(Entity entity) {
+		if (entity == null) return false;
+
+		/* Schema doesn't support it */
+		if (entity.schema.equals(Constants.SCHEMA_ENTITY_USER)
+				|| entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)
+				|| entity.schema.equals(Constants.SCHEMA_ENTITY_BEACON)
+				|| entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			return false;
+		}
+
+		/* Current user is owner */
+		if (entity.isOwnedByCurrentUser() || entity.isOwnedBySystem()) {
+			return true;
+		}
+
+		/* Not owner and not nearby */
+		if (Aircandi.currentPlace == null || (Aircandi.currentPlace != null && !Aircandi.currentPlace.hasActiveProximity())) {
+			return false;
+		}
+		/* Not owner and nearby */
+		return true;
+	}
+
+	public static Boolean canUserEdit(Entity entity) {
+		if (entity == null) return false;
+
+		if (entity.isOwnedByCurrentUser() || entity.isOwnedBySystem()) {
+			return true;
+		}
+		return false;
 	}
 
 	// --------------------------------------------------------------------------------------------

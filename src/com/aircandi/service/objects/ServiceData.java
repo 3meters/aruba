@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.aircandi.service.Expose;
 
-
 /**
  * @author Jayma
  */
@@ -15,7 +14,7 @@ public class ServiceData {
 	@Expose
 	public Object		data;
 	@Expose
-	public Object		d;			/* for Bing */
+	public Object		d;						/* for Bing */
 	@Expose
 	public Number		date;
 	@Expose

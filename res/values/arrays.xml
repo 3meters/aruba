@@ -90,14 +90,14 @@
     </string-array>
 
     <string-array name="candigram_range_values">
-        <item>1609</item>
-        <item>80470</item>
-        <item>40075000</item>
+        <item>32187</item>
+        <item>160934</item>
+        <item>-1</item>
     </string-array>
 
     <string-array name="candigram_range_descriptions">
-        <item>The candigram travels in the local area</item>
-        <item>The candigram travels in the region</item>
+        <item>The candigram travels in the local area (20 mile range)</item>
+        <item>The candigram travels in the region (100 mile range)</item>
         <item>The candigram travels anywhere in the world</item>
     </string-array>
 

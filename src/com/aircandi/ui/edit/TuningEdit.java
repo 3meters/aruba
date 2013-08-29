@@ -55,7 +55,7 @@ public class TuningEdit extends BaseEntityEdit {
 			final Entity entity = mEntity;
 
 			/* Tuning buttons */
-			final Boolean hasActiveProximityLink = entity.hasActiveProximityLink();
+			final Boolean hasActiveProximityLink = entity.hasActiveProximity();
 			if (hasActiveProximityLink) {
 				mFirstTune = false;
 				mButtonUntune.setVisibility(View.VISIBLE);

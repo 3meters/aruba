@@ -17,6 +17,8 @@ public class Proximity extends ServiceObject implements Cloneable, Serializable 
 	public Boolean				primary;
 	@Expose
 	public Number				signal;
+	@Expose
+	public Boolean				inactive;
 
 	public Proximity() {}
 
@@ -33,6 +35,7 @@ public class Proximity extends ServiceObject implements Cloneable, Serializable 
 
 	public static Proximity setPropertiesFromMap(Proximity object, Map map, Boolean nameMapping) {
 		object.primary = (Boolean) map.get("primary");
+		object.inactive = (Boolean) map.get("inactive");
 		object.signal = (Number) map.get("signal");
 		return object;
 	}

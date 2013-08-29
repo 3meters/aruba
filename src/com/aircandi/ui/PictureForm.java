@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
@@ -33,7 +34,9 @@ import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.UserView;
+import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
@@ -67,6 +70,7 @@ public class PictureForm extends BaseEntityForm {
 				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId
 						, refresh
 						, LinkOptions.getDefault(DefaultType.LinksForPost));
+				
 				return result;
 			}
 
@@ -82,7 +86,7 @@ public class PictureForm extends BaseEntityForm {
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
-							mMenuItemEdit.setVisible(canUserEdit());
+							mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
 						}
 						draw();
 					}
@@ -122,6 +126,20 @@ public class PictureForm extends BaseEntityForm {
 		}
 	}
 
+	@Override
+	public void onAdd() {
+		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
+			Routing.route(this, Route.NewFor, mEntity);
+		}
+		else {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.alert_entity_locked)
+					, null
+					, this, android.R.string.ok, null, null, null, null);
+		}
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	// UI
 	// --------------------------------------------------------------------------------------------
@@ -139,7 +157,9 @@ public class PictureForm extends BaseEntityForm {
 		 */
 		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);
 		final AirImageView photoView = (AirImageView) findViewById(R.id.photo);
+		final AirImageView placePhotoView = (AirImageView) findViewById(R.id.place_photo);
 		final TextView name = (TextView) findViewById(R.id.name);
+		final TextView placeName = (TextView) findViewById(R.id.place_name);
 		final TextView subtitle = (TextView) findViewById(R.id.subtitle);
 
 		final TextView description = (TextView) findViewById(R.id.description);
@@ -188,6 +208,22 @@ public class PictureForm extends BaseEntityForm {
 			description.setText(Html.fromHtml(mEntity.description));
 			UI.setVisibility(findViewById(R.id.section_description), View.VISIBLE);
 		}
+		
+		/* Place context */
+		UI.setVisibility(findViewById(R.id.place_holder), View.GONE);
+		if (mEntity.place != null) {
+			if (placePhotoView != null) {
+				Photo photo = mEntity.place.getPhoto();
+				UI.drawPhoto(placePhotoView, photo);
+				UI.setVisibility(placePhotoView, View.VISIBLE);
+			}
+			UI.setVisibility(placeName, View.GONE);
+			if (placeName != null && mEntity.place.name != null && !mEntity.place.name.equals("")) {
+				placeName.setText(Html.fromHtml(mEntity.place.name));
+				UI.setVisibility(placeName, View.VISIBLE);
+			}
+			UI.setVisibility(findViewById(R.id.place_holder), View.VISIBLE);
+		}
 
 		/* Stats */
 
@@ -209,7 +245,7 @@ public class PictureForm extends BaseEntityForm {
 		/* Synthetic applink shortcuts */
 		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
 		settings.appClass = Applinks.class;
-		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByPosition());
 			drawShortcuts(shortcuts
@@ -224,7 +260,7 @@ public class PictureForm extends BaseEntityForm {
 		/* Service applink shortcuts */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 		settings.appClass = Applinks.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByPosition());
 			drawShortcuts(shortcuts

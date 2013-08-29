@@ -21,6 +21,7 @@ import android.util.DisplayMetrics;
 import com.aircandi.components.Logger;
 import com.aircandi.components.ReportSenderBugsense;
 import com.aircandi.components.Stopwatch;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.AircandiForm;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -74,7 +75,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 		, resDialogOkToast = R.string.crash_dialog_ok_toast)
 public class Aircandi extends Application {
 
-	public static BasicAWSCredentials		awsCredentials				= null;
+	public static BasicAWSCredentials		awsCredentials					= null;
 
 	private static Aircandi					singletonObject;
 
@@ -90,21 +91,24 @@ public class Aircandi extends Application {
 	public static Stopwatch					stopwatch2;
 	public static Stopwatch					stopwatch3;
 
-	public static Boolean					firstStartApp				= true;
-	public static Boolean					usingEmulator				= false;
-	public static Integer					wifiCount					= 0;
+	public static Boolean					firstStartApp					= true;
+	public static Boolean					usingEmulator					= false;
+	public static Integer					wifiCount						= 0;
 
-	public static Boolean					muteColor					= false;
+	public static Boolean					muteColor						= false;
 
-	public static Boolean					applicationUpdateRequired	= false;
+	public static Boolean					applicationUpdateRequired		= false;
 
 	private User							mUser;
 	public static Boolean					LAUNCHED_NORMALLY;
 
+	/* Hack to share the current place context */
+	public static Entity					currentPlace;
+
 	/* Common preferences */
 	private String							mPrefTheme;
 	private String							mPrefSearchRadius;
-	private Class<?>						mNavigationDrawerCurrentView = AircandiForm.class;
+	private Class<?>						mNavigationDrawerCurrentView	= AircandiForm.class;
 
 	/* Dev preferences */
 	private Boolean							mPrefEnableDev;
@@ -114,7 +118,7 @@ public class Aircandi extends Application {
 	private String							mPrefTestingLocation;
 	private String							mPrefPlaceProvider;
 
-	private boolean							mUsingEmulator				= false;
+	private boolean							mUsingEmulator					= false;
 
 	public static Aircandi getInstance() {
 		return singletonObject;

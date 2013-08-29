@@ -9,6 +9,8 @@ import android.widget.TextView.OnEditorActionListener;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.service.objects.Comment;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Dialogs;
 
@@ -53,10 +55,6 @@ public class CommentEdit extends BaseEntityEdit {
 		return Constants.TYPE_LINK_COMMENT;
 	};
 
-	// --------------------------------------------------------------------------------------------
-	// Services
-	// --------------------------------------------------------------------------------------------
-
 	@Override
 	protected boolean validate() {
 		if (!super.validate()) {
@@ -73,6 +71,13 @@ public class CommentEdit extends BaseEntityEdit {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	protected void beforeInsert(Entity entity) {
+		if (Aircandi.currentPlace != null) {
+			((Comment) entity).placeId = Aircandi.currentPlace.id;
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

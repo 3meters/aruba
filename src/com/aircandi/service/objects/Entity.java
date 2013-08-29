@@ -2,6 +2,7 @@ package com.aircandi.service.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,6 +20,7 @@ import com.aircandi.applications.Pictures;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.service.Expose;
+import com.aircandi.service.SerializedName;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.utilities.DateTime;
@@ -51,6 +53,9 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public Number				signalFence			= -100.0f;
 	@Expose
 	public Number				position;
+	@Expose
+	@SerializedName(name = "_place")
+	public String				placeId;
 
 	/* Synthetic fields */
 
@@ -70,6 +75,13 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	@Expose(serialize = false, deserialize = true)
 	public List<Entity>			entities;
+
+	/* Place (synthesized for the client) */
+
+	@Expose(serialize = false, deserialize = true)
+	public Place				place;
+	@Expose(serialize = false, deserialize = true)
+	public Number				linkModifiedDate;
 
 	// --------------------------------------------------------------------------------------------
 	// Client fields (none are transferred)
@@ -139,6 +151,9 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				.setPhoto(getPhoto())
 				.setSchema(schema != null ? schema : null)
 				.setApp(schema != null ? schema : null);
+		shortcut.modifiedDate = DateTime.nowDate().getTime();
+		shortcut.content = true;
+		shortcut.action = Constants.ACTION_VIEW;
 		return shortcut;
 	}
 
@@ -151,6 +166,18 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			return true;
 		}
 		return false;
+	}
+
+	public Boolean isOwnedByCurrentUser() {
+		Boolean owned = (ownerId != null
+				&& Aircandi.getInstance().getUser() != null
+				&& ownerId.equals(Aircandi.getInstance().getUser().id));
+		return owned;
+	}
+
+	public Boolean isOwnedBySystem() {
+		Boolean owned = (ownerId != null && ownerId.equals(ProxiConstants.ADMIN_USER_ID));
+		return owned;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -234,10 +261,15 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	public AirLocation getLocation() {
 		AirLocation loc = null;
-		Beacon parent = null;
-		if (getParent() instanceof Beacon) {
-			parent = (Beacon) getParent();
+		Entity parent = null;
+		
+		if (this.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			parent = getParent(Constants.TYPE_LINK_CANDIGRAM);
 		}
+		else {
+			parent = getParent(null);
+		}
+		
 		if (parent != null) {
 			loc = parent.location;
 		}
@@ -341,11 +373,21 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return entities;
 	}
 
-	public Entity getParent() {
-		return EntityManager.getEntity(toId);
+	public Entity getParent(String linkType) {
+		if (toId == null && linksOut != null) {
+			for (Link link : linksOut) {
+				if (!link.inactive && (linkType == null || link.type.equals(linkType))) {
+					return EntityManager.getEntity(link.toId);
+				}
+			}
+			return null;
+		}
+		else {
+			return EntityManager.getEntity(toId);
+		}
 	}
 
-	public Boolean hasActiveProximityLink() {
+	public Boolean hasActiveProximity() {
 		if (linksOut != null) {
 			for (Link link : linksOut) {
 				if (link.proximity != null && link.type.equals("proximity")) {
@@ -391,14 +433,14 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return count;
 	}
 
-	public Link getLinkByType(String linkType, String otherId, Direction direction) {
+	public Link getLink(String linkType, String otherId, Direction direction) {
 		List<Link> links = linksIn;
 		if (direction == Direction.out) {
 			links = linksOut;
 		}
 		if (links != null) {
 			for (Link link : links) {
-				if (link.type.equals(linkType)) {
+				if (linkType == null || link.type.equals(linkType)) {
 					if (otherId == null || otherId.equals(direction == Direction.in ? link.fromId : link.toId)) {
 						return link;
 					}
@@ -427,12 +469,15 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return null;
 	}
 
-	public List<Shortcut> getShortcuts(ShortcutSettings settings) {
+	public List<Shortcut> getShortcuts(ShortcutSettings settings, Comparator<Link> linkSorter) {
 
 		List<Shortcut> shortcuts = new ArrayList<Shortcut>();
 		List<Link> links = settings.direction == Direction.in ? linksIn : linksOut;
 
 		if (links != null) {
+			if (linkSorter != null) {
+				Collections.sort(links, linkSorter);
+			}
 			for (Link link : links) {
 				if ((settings.linkType == null || link.type.equals(settings.linkType)) && link.shortcut != null) {
 					if (settings.linkSchema == null || (link.shortcut != null && link.shortcut.schema.equals(settings.linkSchema))) {
@@ -441,7 +486,9 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 							 * Must clone or the groups added below will cause circular references
 							 * that choke serializing to json.
 							 */
-							shortcuts.add(link.shortcut.clone());
+							Shortcut shortcut = link.shortcut.clone();
+							shortcut.inactive = link.inactive;
+							shortcuts.add(shortcut);
 						}
 					}
 				}
@@ -505,7 +552,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, 10
 					, false
 					, true);
-			Link link = getLinkByType(Constants.TYPE_LINK_PICTURE, null, Direction.in);
+			Link link = getLink(Constants.TYPE_LINK_PICTURE, null, Direction.in);
 			if (link != null) {
 				shortcut.photo = link.shortcut.getPhoto();
 				shortcut.appId = link.fromId;
@@ -514,6 +561,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				shortcut.photo.colorize = true;
 				shortcut.photo.color = Aircandi.getInstance().getResources().getColor(Pictures.ICON_COLOR);
 			}
+			shortcut.linkType = Constants.TYPE_LINK_PICTURE;
 			shortcuts.add(shortcut);
 
 			shortcut = Shortcut.builder(this
@@ -525,7 +573,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, 10
 					, false
 					, true);
-			link = getLinkByType(Constants.TYPE_LINK_CANDIGRAM, null, Direction.in);
+			link = getLink(Constants.TYPE_LINK_CANDIGRAM, null, Direction.in);
 			if (link != null) {
 				shortcut.photo = link.shortcut.getPhoto();
 				shortcut.appId = link.fromId;
@@ -547,7 +595,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, 10
 					, false
 					, true);
-			Link link = getLinkByType(Constants.TYPE_LINK_PICTURE, null, Direction.in);
+			Link link = getLink(Constants.TYPE_LINK_PICTURE, null, Direction.in);
 			if (link != null) {
 				shortcut.photo = link.shortcut.getPhoto();
 				shortcut.appId = link.fromId;
@@ -556,6 +604,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				shortcut.photo.colorize = true;
 				shortcut.photo.color = Aircandi.getInstance().getResources().getColor(Pictures.ICON_COLOR);
 			}
+			shortcut.linkType = Constants.TYPE_LINK_PICTURE;
 			shortcuts.add(shortcut);
 
 		}
@@ -571,6 +620,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				, true);
 		shortcut.photo.colorize = true;
 		shortcut.photo.color = Aircandi.getInstance().getResources().getColor(Comments.ICON_COLOR);
+		shortcut.linkType = Constants.TYPE_LINK_COMMENT;
 		shortcuts.add(shortcut);
 
 		shortcut = Shortcut.builder(this
@@ -613,6 +663,8 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			entity.shortcuts = (Boolean) (map.get("shortcuts") != null ? map.get("shortcuts") : false);
 			entity.stale = (Boolean) (map.get("stale") != null ? map.get("stale") : false);
 			entity.checked = (Boolean) (map.get("checked") != null ? map.get("checked") : false);
+			entity.placeId = (String) map.get("_place");
+			entity.linkModifiedDate = (Number) map.get("linkModifiedDate");
 
 			entity.toId = (String) (nameMapping ? map.get("_to") : map.get("toId"));
 			entity.fromId = (String) (nameMapping ? map.get("_from") : map.get("fromId"));
@@ -623,6 +675,10 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 			if (map.get("location") != null) {
 				entity.location = AirLocation.setPropertiesFromMap(new AirLocation(), (HashMap<String, Object>) map.get("location"), nameMapping);
+			}
+
+			if (map.get("place") != null) {
+				entity.place = Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("place"), nameMapping);
 			}
 
 			if (map.get("linksIn") != null) {
@@ -710,6 +766,9 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		if (photo != null) {
 			entity.photo = photo.clone();
 		}
+		if (place != null) {
+			entity.place = place.clone();
+		}
 		return entity;
 	}
 
@@ -751,6 +810,21 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				return 1;
 			}
 			else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
+				return 0;
+			}
+			return -1;
+		}
+	}
+
+	public static class SortByLinkModifiedDate implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity object1, Entity object2) {
+
+			if (object1.linkModifiedDate.longValue() < object2.linkModifiedDate.longValue()) {
+				return 1;
+			}
+			else if (object1.linkModifiedDate.longValue() == object2.linkModifiedDate.longValue()) {
 				return 0;
 			}
 			return -1;

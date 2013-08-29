@@ -79,6 +79,7 @@ import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.HttpServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.AirLocation;
+import com.aircandi.service.objects.AirMarker;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Beacon;
@@ -738,16 +739,24 @@ public class HttpService {
 
 		if (exception instanceof HttpServiceException) {
 			final HttpServiceException proxibaseException = (HttpServiceException) exception;
+			/*
+			 * It is possible that a retry might succeed after a 500 internal service error but I think
+			 * it is more conservative to just fail and let the user retry if they want to.
+			 */
+			if (proxibaseException.getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+				return false;
+			}
 
 			/*
-			 * For 500 internal server errors and 503 service unavailable errors, we want to retry, but we need to use
+			 * For 503 service unavailable errors, we want to retry, but we need to use
 			 * an exponential back-off strategy so that we don't overload a server with a flood of retries. If we've
 			 * surpassed our retry limit we handle the error response as a non-retryable error and go ahead and throw it
-			 * back to the user as an exception. We also retry 504 gateway timeout errors because this could have been
+			 * back to the user as an exception.
+			 * 
+			 * We also retry 504 gateway timeout errors because this could have been
 			 * caused by service crash during the request and the service will be restarted.
 			 */
-			if (proxibaseException.getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR
-					|| proxibaseException.getStatusCode() == HttpStatus.SC_SERVICE_UNAVAILABLE
+			if (proxibaseException.getStatusCode() == HttpStatus.SC_SERVICE_UNAVAILABLE
 					|| proxibaseException.getStatusCode() == HttpStatus.SC_GATEWAY_TIMEOUT) {
 				return true;
 			}
@@ -1053,6 +1062,9 @@ public class HttpService {
 				else if (objectType == ObjectType.User) {
 					list.add(User.setPropertiesFromMap(new User(), (HashMap) map, nameMapping));
 				}
+				else if (objectType == ObjectType.AirMarker) {
+					list.add(AirMarker.setPropertiesFromMap(new AirMarker(), (HashMap) map, nameMapping));
+				}
 				else if (objectType == ObjectType.Session) {
 					list.add(Session.setPropertiesFromMap(new Session(), (HashMap) map, nameMapping));
 				}
@@ -1256,11 +1268,11 @@ public class HttpService {
 	public static class RequestListener {
 
 		public void onStart() {}
-		
+
 		public void onError(Object response) {}
-		
+
 		public void onError() {}
-		
+
 		public void onComplete() {}
 
 		public void onComplete(Object response) {}
@@ -1290,7 +1302,7 @@ public class HttpService {
 		AirNotification,
 		Place,
 		Post,
-		Comment
+		Comment, AirMarker
 	}
 
 	public static enum RequestType {

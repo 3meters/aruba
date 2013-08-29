@@ -100,7 +100,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 			/* Shortcuts for place entities created by user */
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 			settings.appClass = Places.class;
-			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 			if (shortcuts.size() > 0) {
 				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 				drawShortcuts(shortcuts
@@ -115,7 +115,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 			/* Shortcuts for post entities created by user */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PICTURE, Direction.out, false, false);
 			settings.appClass = Pictures.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 			if (shortcuts.size() > 0) {
 				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 				drawShortcuts(shortcuts
@@ -133,7 +133,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 			/* Watching places */
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 			settings.appClass = Places.class;
-			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 			if (shortcuts.size() > 0) {
 				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 				drawShortcuts(shortcuts
@@ -148,7 +148,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 			/* Watching posts */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, Direction.out, false, false);
 			settings.appClass = Pictures.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 			if (shortcuts.size() > 0) {
 				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 				drawShortcuts(shortcuts
@@ -163,7 +163,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 			/* Watching users */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, Direction.out, false, false);
 			settings.appClass = Users.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 			if (shortcuts.size() > 0) {
 				Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 				drawShortcuts(shortcuts

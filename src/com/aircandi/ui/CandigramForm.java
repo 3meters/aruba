@@ -3,10 +3,16 @@ package com.aircandi.ui;
 import java.util.Collections;
 import java.util.List;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -28,6 +34,7 @@ import com.aircandi.events.MessageEvent;
 import com.aircandi.service.objects.Candigram;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.DefaultType;
@@ -35,11 +42,15 @@ import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutSettings;
+import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.UserView;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
@@ -48,15 +59,20 @@ import com.squareup.otto.Subscribe;
 
 public class CandigramForm extends BaseEntityForm {
 
-	Handler		mHandler	= new Handler();
-	Runnable	mTimer;
-	TextView	mActionInfo;
+	private Handler		mHandler	= new Handler();
+	private Runnable	mTimer;
+	private TextView	mActionInfo;
+	private SoundPool	mSoundPool;
+	private int			mCandigramExitSoundId;
 
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mActionInfo = (TextView) findViewById(R.id.action_info);
+		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
+		mCandigramExitSoundId = mSoundPool.load(this, R.raw.candigram_exit, 1);
+		
 
 		mTimer = new Runnable() {
 
@@ -93,9 +109,9 @@ public class CandigramForm extends BaseEntityForm {
 					refresh = true;
 				}
 
-				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId
-						, refresh
-						, LinkOptions.getDefault(DefaultType.LinksForCandigram));
+				LinkOptions linkOptions = LinkOptions.getDefault(DefaultType.LinksForCandigram);
+				linkOptions.setIgnoreInactive(true);
+				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, linkOptions);
 				return result;
 			}
 
@@ -111,7 +127,10 @@ public class CandigramForm extends BaseEntityForm {
 						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
-							mMenuItemEdit.setVisible(canUserEdit());
+							mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
+						}
+						if (mMenuItemAdd != null) {
+							mMenuItemAdd.setVisible(EntityManager.canUserAdd(mEntity));
 						}
 						draw();
 					}
@@ -149,6 +168,21 @@ public class CandigramForm extends BaseEntityForm {
 				}
 			});
 		}
+		/*
+		 * Candigram has moved/changed and we want to show something. We
+		 * don't get this message if current user triggered the move.
+		 */
+		else if (mEntityId.equals(event.notification.entity.id)) {
+			if (event.notification.action.equals("move")) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						EntityManager.getInstance().deleteEntity(event.notification.entity.id, true);
+						kickWrapup(event.notification.toEntity, event.notification.user);
+					}
+				});
+			}
+		}
 	}
 
 	@SuppressWarnings("ucd")
@@ -166,14 +200,21 @@ public class CandigramForm extends BaseEntityForm {
 				/*
 				 * Call service routine to trigger a nudge
 				 */
-				return new ModelResult();
+				final ModelResult result = EntityManager.getInstance().moveCandigram(mEntity);
+				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
 				setSupportProgressBarIndeterminateVisibility(false);
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {}
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					if (result.data != null) {
+						List<Entity> entities = (List<Entity>) result.data;
+						Entity place = entities.get(0);
+						kickWrapup(place, Aircandi.getInstance().getUser());
+					}
+				}
 				else {
 					Routing.serviceError(CandigramForm.this, result.serviceResponse);
 				}
@@ -182,10 +223,95 @@ public class CandigramForm extends BaseEntityForm {
 
 	}
 
+	public void kickWrapup(Entity entity, User user) {
+
+		Place place = (Place) entity;
+
+		final LayoutInflater inflater = LayoutInflater.from(this);
+		final ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.temp_kicked_candigram, null);
+		final TextView message = (TextView) customView.findViewById(R.id.message);
+		final TextView name = (TextView) customView.findViewById(R.id.name);
+		final TextView address = (TextView) customView.findViewById(R.id.address);
+		final AirImageView photoView = (AirImageView) customView.findViewById(R.id.photo);
+
+		UI.setVisibility(name, View.GONE);
+		UI.setVisibility(address, View.GONE);
+		if (place.name != null) {
+			name.setText(place.name);
+			UI.setVisibility(name, View.VISIBLE);
+		}
+
+		String addressBlock = "";
+		if (place.city != null && place.region != null && !place.city.equals("") && !place.region.equals("")) {
+			addressBlock += place.city + ", " + place.region;
+		}
+		else if (place.city != null && !place.city.equals("")) {
+			addressBlock += place.city;
+		}
+		else if (place.region != null && !place.region.equals("")) {
+			addressBlock += place.region;
+		}
+		if (!addressBlock.equals("")) {
+			address.setText(addressBlock);
+			UI.setVisibility(address, View.VISIBLE);
+		}
+
+		photoView.setTag(entity);
+		UI.drawPhoto(photoView, entity.getPhoto());
+
+		if (user.id.equals(Aircandi.getInstance().getUser().id)) {
+			message.setText("You kicked this candigram to: ");
+		}
+		else {
+			message.setText(user.name + " kicked this candigram to: ");
+		}
+
+		String dialogTitle = getResources().getString(R.string.alert_kicked_candigram);
+		if (mEntity.name != null && !mEntity.name.equals("")) {
+			dialogTitle = mEntity.name;
+		}
+
+		final AlertDialog dialog = Dialogs.alertDialog(null
+				, dialogTitle
+				, null
+				, customView
+				, this
+				, android.R.string.ok
+				, null
+				, null
+				, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							mSoundPool.play(mCandigramExitSoundId, 1.0f, 1.0f, 0, 0, 1f);							
+							finish();
+							Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CandigramOut);
+						}
+					}
+				}
+				, null);
+		dialog.setCanceledOnTouchOutside(false);
+	}
+
 	@SuppressWarnings("ucd")
 	public void onCaptureButtonClick(View view) {
 		StringBuilder preamble = new StringBuilder(getString(R.string.alert_candigram_capture));
 		Dialogs.alertDialogSimple(this, null, preamble.toString());
+	}
+
+	@Override
+	public void onAdd() {
+		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
+			Routing.route(this, Route.NewFor, mEntity);
+		}
+		else {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.alert_entity_locked)
+					, null
+					, this, android.R.string.ok, null, null, null, null);
+		}
 	}
 
 	@Override
@@ -301,12 +427,14 @@ public class CandigramForm extends BaseEntityForm {
 		/* Synthetic applink shortcuts */
 		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
 		settings.appClass = Applinks.class;
-		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByPosition());
+			Boolean canAdd = EntityManager.canUserAdd(mEntity);
+
 			drawShortcuts(shortcuts
 					, settings
-					, R.string.section_candigram_shortcuts_applinks
+					, canAdd ? R.string.section_candigram_shortcuts_applinks_can_add : R.string.section_candigram_shortcuts_applinks
 					, R.string.section_links_more
 					, mResources.getInteger(R.integer.shortcuts_flow_limit)
 					, R.id.shortcut_holder
@@ -316,7 +444,7 @@ public class CandigramForm extends BaseEntityForm {
 		/* Service applink shortcuts */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 		settings.appClass = Applinks.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByPosition());
 			drawShortcuts(shortcuts
@@ -331,13 +459,12 @@ public class CandigramForm extends BaseEntityForm {
 		/* Shortcuts for places linked to this candigram */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_CANDIGRAM, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 		settings.appClass = Places.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings);
+		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
 		if (shortcuts.size() > 0) {
-			Collections.sort(shortcuts, new Shortcut.SortByModifiedDate());
 			drawShortcuts(shortcuts
 					, settings
 					, R.string.section_candigram_shortcuts_places
-					, R.string.section_pictures_more
+					, R.string.section_places_more
 					, mResources.getInteger(R.integer.shortcuts_flow_limit)
 					, R.id.shortcut_holder
 					, R.layout.temp_place_switchboard_item);
@@ -406,12 +533,10 @@ public class CandigramForm extends BaseEntityForm {
 		UI.setVisibility(findViewById(R.id.button_nudge), View.GONE);
 		UI.setVisibility(findViewById(R.id.button_capture), View.GONE);
 
-		if (candigram.capture == null || !candigram.capture) {
-			UI.setVisibility(findViewById(R.id.button_capture), View.VISIBLE);
-		}
-
-		if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {
-			UI.setVisibility(findViewById(R.id.button_nudge), View.VISIBLE);
+		if (EntityManager.canUserAdd(mEntity)) {
+			if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {
+				UI.setVisibility(findViewById(R.id.button_nudge), View.VISIBLE);
+			}
 		}
 	}
 
@@ -422,7 +547,7 @@ public class CandigramForm extends BaseEntityForm {
 		if (candigram.hopNextDate != null) {
 			Long now = DateTime.nowDate().getTime();
 			Long next = candigram.hopNextDate.longValue();
-			String timeTill = DateTime.timeTill(now, next);
+			String timeTill = DateTime.interval(now, next, IntervalContext.future);
 			if (!timeTill.equals("now")) {
 				mActionInfo.setText("leaving in" + "\n" + timeTill);
 			}
@@ -430,7 +555,7 @@ public class CandigramForm extends BaseEntityForm {
 		else if (candigram.hopLastDate != null) {
 			Long now = DateTime.nowDate().getTime();
 			Long next = candigram.hopLastDate.longValue() + candigram.duration.longValue();
-			String timeTill = DateTime.timeTill(now, next);
+			String timeTill = DateTime.interval(now, next, IntervalContext.future);
 			if (!timeTill.equals("now")) {
 				mActionInfo.setText("leaving in" + "\n" + timeTill);
 			}

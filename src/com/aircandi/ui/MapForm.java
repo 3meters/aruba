@@ -1,5 +1,8 @@
 package com.aircandi.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.FeatureInfo;
@@ -14,7 +17,10 @@ import com.aircandi.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirLocation;
+import com.aircandi.service.objects.AirMarker;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.DefaultType;
@@ -25,7 +31,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -34,6 +42,8 @@ public class MapForm extends BaseActivity {
 	SupportMapFragment			mMapFragment;
 	Entity						mEntity;
 	String						mEntityId;
+	List<AirMarker>				mMarkers							= new ArrayList<AirMarker>();
+	LatLngBounds				mBounds;
 	private static final int	REQUEST_CODE_RECOVER_PLAY_SERVICES	= 1001;
 
 	@Override
@@ -51,13 +61,19 @@ public class MapForm extends BaseActivity {
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
+			final List<String> jsonMarkers = extras.getStringArrayList(Constants.EXTRA_MARKERS);
+			if (jsonMarkers != null) {
+				for (String jsonMarker : jsonMarkers) {
+					AirMarker marker = (AirMarker) HttpService.jsonToObject(jsonMarker, ObjectType.AirMarker);
+					mMarkers.add(marker);
+				}
+			}
 		}
 	}
-	
+
 	protected void initialize(Bundle savedInstanceState) {
-		
-        mMapFragment = new MapFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.fragment_holder, mMapFragment).commit();		
+		mMapFragment = new MapFragment();
+		getSupportFragmentManager().beginTransaction().add(R.id.fragment_holder, mMapFragment).commit();
 	}
 
 	@Override
@@ -147,15 +163,49 @@ public class MapForm extends BaseActivity {
 	 * This should only be called once and when we are sure that {@link #mMap} is not null.
 	 */
 	private void setUpMap() {
-		AirLocation location = mEntity.getLocation();
-		if (location != null) {
-			MarkerOptions options = new MarkerOptions().position(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()));
-			if (mEntity.name != null) {
-				options.title(mEntity.name);
+		if (mMarkers.size() == 0) {
+			AirLocation location = mEntity.getLocation();
+			if (location != null) {
+				MarkerOptions options = new MarkerOptions().position(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()));
+				if (mEntity.name != null) {
+					options.title(mEntity.name);
+				}
+				Marker marker = mMapFragment.getMap().addMarker(options);
+				marker.showInfoWindow();
+				mMapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()), 16));
 			}
-			Marker marker = mMapFragment.getMap().addMarker(options);
-			marker.showInfoWindow();
-			mMapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()), 16));
+		}
+		else {
+
+			LatLngBounds.Builder bc = new LatLngBounds.Builder();
+			for (AirMarker airMarker : mMarkers) {
+				LatLng latLng = new LatLng(airMarker.lat.doubleValue(), airMarker.lng.doubleValue());
+				MarkerOptions options = new MarkerOptions().position(latLng);
+				bc.include(latLng);
+
+				if (airMarker.title != null) {
+					options.title(airMarker.title);
+				}
+				if (airMarker.snippet != null) {
+					options.snippet(airMarker.snippet);
+				}
+				if (airMarker.iconResId != null) {
+					options.icon(BitmapDescriptorFactory.fromResource(airMarker.iconResId));
+				}
+				Marker marker = mMapFragment.getMap().addMarker(options);
+				if (airMarker.current != null && airMarker.current) {
+					marker.showInfoWindow();
+				}
+			}
+			mBounds = bc.build();
+			mMapFragment.getView().post(new Runnable() {
+
+				@Override
+				public void run() {
+					mMapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngBounds(mBounds, 75));
+
+				}
+			});			
 		}
 	}
 
@@ -198,7 +248,7 @@ public class MapForm extends BaseActivity {
 	// --------------------------------------------------------------------------------------------
 	// Misc
 	// --------------------------------------------------------------------------------------------
-	
+
 	@Override
 	protected int getLayoutId() {
 		return R.layout.map_form;

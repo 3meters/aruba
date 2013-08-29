@@ -63,10 +63,21 @@ public class ApplicationPicker extends BaseBrowse implements OnItemClickListener
 		if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_logo_holo_light : R.drawable.ic_logo_holo_dark
 					, getString(R.string.dialog_application_candigram_new), null, Constants.SCHEMA_ENTITY_CANDIGRAM));
-			
+
 			listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
 					, getString(R.string.dialog_application_picture_new), null, Constants.SCHEMA_ENTITY_PICTURE));
 
+			listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_monolog_light : R.drawable.ic_action_monolog_dark
+					, getString(R.string.dialog_application_comment_new), null, Constants.SCHEMA_ENTITY_COMMENT));
+		}
+		else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
+					, getString(R.string.dialog_application_picture_new), null, Constants.SCHEMA_ENTITY_PICTURE));
+
+			listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_monolog_light : R.drawable.ic_action_monolog_dark
+					, getString(R.string.dialog_application_comment_new), null, Constants.SCHEMA_ENTITY_COMMENT));
+		}
+		else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 			listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_monolog_light : R.drawable.ic_action_monolog_dark
 					, getString(R.string.dialog_application_comment_new), null, Constants.SCHEMA_ENTITY_COMMENT));
 		}

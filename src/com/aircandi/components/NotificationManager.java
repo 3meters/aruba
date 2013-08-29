@@ -141,48 +141,63 @@ public class NotificationManager {
 	public void decorateNotification(AirNotification notification) {
 		/*
 		 * Title and subtitle properties are added base on the context
-		 * of the notification.
+		 * of the notification and the type of entity.
 		 */
-		if (notification.type.equals("watch")) {
-			if (notification.action.equals("insert")) {
-				notification.title = notification.user.name;
-				String category = null;
-				if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-					Place place = (Place) notification.entity;
-					if (place.category != null && place.category.name != null) {
-						category = place.category.name;
-					}
-				}
-				if (category == null) {
-					category = notification.entity.schema;
-				}
-				notification.subtitle = "Added a " + category;
-				if (notification.entity.name != null) {
-					notification.subtitle += " called \"" + notification.entity.name + "\"";
-				}								
-				if (notification.toEntity != null && notification.toEntity.name != null) {
-					notification.subtitle += " to \"" + notification.toEntity.name + "\"";
-				}
+		if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
+				&& notification.entity.type.equals(Constants.TYPE_APP_TOUR)
+				&& notification.action.equals("move")) {
+			notification.title = "A " + Constants.SCHEMA_ENTITY_CANDIGRAM.toString();
+			if (notification.entity.name != null) {
+				notification.title += "called " + notification.entity.name;
+			}
+			if (notification.type.equals("nearby")) {
+				notification.subtitle = "Has dropped in near you";
+			}
+			else if (notification.type.equals("watch")) {
+				notification.subtitle = "Has dropped in";
+			}
+			
+			if (notification.toEntity != null && notification.toEntity.name != null) {
+				notification.subtitle += " at \"" + notification.toEntity.name + "\"";
+			}
+			return;
+		}
+		
+		notification.title = notification.user.name;
+
+		String category = null;
+		if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			Place place = (Place) notification.entity;
+			if (place.category != null && place.category.name != null) {
+				category = place.category.name;
 			}
 		}
-		else if (notification.type.equals("nearby")) {
+		if (category == null) {
+			category = notification.entity.schema;
+		}
+
+		if (notification.type.equals("nearby")) {
 			if (notification.action.equals("insert")) {
-				notification.title = notification.user.name;
-				String category = null;
-				if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-					Place place = (Place) notification.entity;
-					if (place.category != null && place.category.name != null) {
-						category = place.category.name;
-					}
-				}
-				if (category == null) {
-					category = notification.entity.schema;
-				}
 				notification.subtitle = "Added a new " + category + " near you";
-				if (notification.entity.name != null) {
-					notification.subtitle += " called \"" + notification.entity.name + "\"";
-				}
 			}
+			else if (notification.action.equals("move")) {
+				notification.subtitle = "Kicked a " + category + " near you";
+			}
+		}
+		else if (notification.type.equals("watch")) {
+			if (notification.action.equals("insert")) {
+				notification.subtitle = "Added a new " + category;
+			}
+			else if (notification.action.equals("move")) {
+				notification.subtitle = "Kicked a " + category;
+			}
+		}
+
+		if (notification.entity.name != null) {
+			notification.subtitle += " called \"" + notification.entity.name + "\"";
+		}
+		if (notification.toEntity != null && notification.toEntity.name != null) {
+			notification.subtitle += " to \"" + notification.toEntity.name + "\"";
 		}
 	}
 
@@ -234,11 +249,20 @@ public class NotificationManager {
 				, 0
 				, airNotification.intent
 				, PendingIntent.FLAG_CANCEL_CURRENT);
+		
+		String imageUri = null;
+		if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
+				&& airNotification.entity.type.equals(Constants.TYPE_APP_TOUR)
+				&& airNotification.action.equals("move")) {
+			imageUri = airNotification.entity.getPhotoUri();
+		}
+		else if (airNotification.user != null) {
+			imageUri = airNotification.user.getPhotoUri();
+		}
 
-		if (airNotification.user != null) {
-
+		if (imageUri != null) {
 			final BitmapRequest bitmapRequest = new BitmapRequest();
-			bitmapRequest.setImageUri(airNotification.user.getPhotoUri());
+			bitmapRequest.setImageUri(imageUri);
 			bitmapRequest.setImageRequestor(airNotification);
 			bitmapRequest.setImageSize((int) Aircandi.applicationContext.getResources().getDimensionPixelSize(R.dimen.notification_large_icon_width));
 			bitmapRequest.setRequestListener(new RequestListener() {
@@ -266,7 +290,7 @@ public class NotificationManager {
 		}
 
 	}
-	
+
 	public void cancelNotification(NotificationType type) {
 		mNotificationManager.cancel(type.name(), 0);
 	}

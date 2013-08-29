@@ -40,10 +40,10 @@
 
                     <com.aircandi.ui.widgets.AirTitle
                         android:layout_width="match_parent"
-                        android:textColor="@color/accent_blue"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
                         android:layout_height="wrap_content"
-                        android:text="@string/form_title_picture" />
+                        android:text="@string/form_title_picture"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:textColor="@color/accent_blue" />
 
                     <View
                         android:id="@+id/rule"
@@ -51,25 +51,100 @@
                         android:layout_height="1px"
                         android:background="?attr/ruleColorStrong" />
                 </LinearLayout>
-                
-                <com.aircandi.ui.widgets.AirImageView
-                    android:id="@+id/photo"
-                    android:layout_width="@dimen/image_extra_large"
-                    android:layout_height="@dimen/image_extra_large"
-                    android:layout_marginBottom="15dp"
-                    aircandi:layout="@layout/widget_webimageview_zoom"
-                    aircandi:sizeHint="@dimen/image_extra_large"
-                    android:background="@drawable/selector_image"
-                    android:clickable="true"
-                    android:onClick="onImageClick"
-                    android:scaleType="centerCrop" />
 
-                <include
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:orientation="horizontal" >
+
+                    <com.aircandi.ui.widgets.AirImageView
+                        android:id="@+id/photo"
+                        android:layout_width="@dimen/image_extra_large"
+                        android:layout_height="@dimen/image_extra_large"
+                        aircandi:layout="@layout/widget_webimageview_zoom"
+                        aircandi:sizeHint="@dimen/image_extra_large"
+                        android:background="@drawable/selector_image"
+                        android:clickable="true"
+                        android:onClick="onImageClick"
+                        android:scaleType="centerCrop" />
+
+                    <include
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="3dp"
+                        layout="@layout/widget_candi_header" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/place_holder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="3dp"
-                    android:layout_marginLeft="3dp"
-                    layout="@layout/widget_candi_header_post" />
+                    android:layout_marginBottom="15dp"
+                    android:layout_alignLeft="@+id/holder_author"
+                    android:layout_below="@+id/actions_holder"
+                    android:orientation="horizontal"
+                    android:visibility="visible" >
+
+                    <com.aircandi.ui.widgets.AirImageView
+                        android:id="@+id/place_photo"
+                        android:layout_width="@dimen/image_small"
+                        android:layout_height="@dimen/image_small"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginLeft="3dp"
+                        aircandi:showBusy="true"
+                        aircandi:sizeHint="@dimen/image_medium"
+                        android:background="@drawable/selector_image"
+                        android:scaleType="centerCrop" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical" >
+
+                        <com.aircandi.ui.widgets.AirTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="bottom"
+                            android:text="@string/comment_label_place"
+                            android:textAppearance="@style/textAppearanceSmall"
+                            android:textColor="?attr/textColorSecondary" />
+
+                        <com.aircandi.ui.widgets.AirTextView
+                            android:id="@+id/place_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:gravity="top"
+                            android:maxLines="2"
+                            android:text="@string/dummy_title"
+                            android:textAppearance="@style/textAppearanceSmall" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="vertical" >
+
+                    <com.aircandi.ui.widgets.AirTitle
+                        android:id="@+id/name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/dummy_name"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:textStyle="bold" />
+
+                    <com.aircandi.ui.widgets.AirTextView
+                        android:id="@+id/subtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="3dp"
+                        android:text="@string/dummy_tags"
+                        android:textStyle="italic" />
+                </LinearLayout>
 
                 <com.aircandi.ui.widgets.SectionLayout
                     android:id="@+id/section_description"

@@ -8,6 +8,8 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.TabManager;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Post;
 import com.aircandi.ui.base.BaseEntityEdit;
 
 public class PictureEdit extends BaseEntityEdit {
@@ -41,6 +43,13 @@ public class PictureEdit extends BaseEntityEdit {
 	protected String getLinkType() {
 		return Constants.TYPE_LINK_PICTURE;
 	};
+
+	@Override
+	protected void beforeInsert(Entity entity) {
+		if (Aircandi.currentPlace != null) {
+			((Post) entity).placeId = Aircandi.currentPlace.id;
+		}
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc

@@ -25,11 +25,15 @@ import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.applications.Candigrams;
 import com.aircandi.applications.Candigrams.PropertyType;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
+import com.aircandi.components.LocationManager;
 import com.aircandi.components.SpinnerData;
 import com.aircandi.components.TabManager;
+import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Candigram;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
@@ -420,6 +424,25 @@ public class CandigramEdit extends BaseEntityEdit {
 			if (!mEditing && candigram.duration != null) {
 				candigram.hopLastDate = DateTime.nowDate().getTime();
 				candigram.hopNextDate = candigram.hopLastDate.longValue() + candigram.duration.longValue();
+			}
+		}
+
+		/* Set location */
+		if (mParentId != null) {
+			Entity place = EntityManager.getEntity(mParentId);
+			if (place != null && place.location != null) {
+				candigram.location = new AirLocation();
+				candigram.location.lat = place.location.lat;
+				candigram.location.lng = place.location.lng;
+			}
+		}
+
+		if (candigram.location == null) {
+			AirLocation location = LocationManager.getInstance().getAirLocationLocked();
+			if (location != null) {
+				candigram.location = new AirLocation();
+				candigram.location.lat = location.lat;
+				candigram.location.lng = location.lng;
 			}
 		}
 	}

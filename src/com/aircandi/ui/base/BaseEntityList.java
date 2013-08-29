@@ -1,9 +1,7 @@
 package com.aircandi.ui.base;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -50,6 +48,7 @@ import com.aircandi.service.objects.User;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -77,7 +76,8 @@ public abstract class BaseEntityList extends BaseBrowse {
 	private EntityAdapter		mAdapter;
 
 	/* Inputs */
-	public String				mEntityId;
+	public String				mForEntityId;
+	public Entity				mForEntity;
 	protected String			mListLinkSchema;
 	protected String			mListLinkType;
 	protected String			mListLinkDirection;
@@ -90,7 +90,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
+			mForEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
 			/*
 			 * Could be any link type: place, post, comment, applink, create, like, watch
 			 */
@@ -112,6 +112,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
+		mForEntity = EntityManager.getEntity(mForEntityId);
 		mListView = (ListView) findViewById(R.id.list);
 		mGridView = (GridView) findViewById(R.id.grid);
 		mButtonNewEntity = (Button) findViewById(R.id.button_new_entity);
@@ -149,8 +150,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		final Entity entity = EntityManager.getEntity(mEntityId);
-		if (entity != null) {
+		if (mForEntity != null) {
 			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 				Drawable icon = getResources().getDrawable(R.drawable.img_picture_temp);
 				icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Pictures.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
@@ -203,8 +203,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 	private ModelResult loadEntities(Boolean refresh) {
 
-		Map map = new HashMap<String, Object>();
-		map.put("modifiedDate", -1);
 		mCursorSettings = new Cursor()
 				.setLimit(PAGE_SIZE)
 				.setSort(Maps.asMap("modifiedDate", -1))
@@ -226,7 +224,13 @@ public abstract class BaseEntityList extends BaseBrowse {
 			mCursorSettings.setDirection(mListLinkDirection);
 		}
 
-		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mEntityId, getLinkOptions(mListLinkSchema), mCursorSettings);
+		LinkOptions linkOptions = getLinkOptions(mListLinkSchema);
+		if (mForEntity != null && mForEntity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				linkOptions.setIgnoreInactive(true);
+			}
+		}
+		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mForEntityId, linkOptions, mCursorSettings);
 
 		return result;
 	}
@@ -247,7 +251,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 		 * entity is locked.
 		 */
 		Bundle extras = new Bundle();
-		extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mEntityId);
+		extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mForEntityId);
 		Routing.route(this, Route.New, null, mListLinkSchema, extras);
 	}
 
@@ -277,6 +281,9 @@ public abstract class BaseEntityList extends BaseBrowse {
 			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 				return LinkOptions.getDefault(DefaultType.LinksForPost);
 			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+				return LinkOptions.getDefault(DefaultType.LinksForCandigram);
+			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 				return LinkOptions.getDefault(DefaultType.LinksForPlace);
 			}
@@ -301,19 +308,9 @@ public abstract class BaseEntityList extends BaseBrowse {
 		/*
 		 * Setup menu items that are common to entity list browsing.
 		 */
-		MenuItem add = menu.findItem(R.id.add);
-		if (add != null) {
-			add.setVisible(false);
-			if (mListNewEnabled) {
-				add.setTitle(R.string.menu_add_entity_item);
-				if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-					add.setTitle(R.string.menu_add_comment_item);
-				}
-				else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-					add.setTitle(R.string.menu_add_picture_item);
-				}
-				add.setVisible(true);
-			}
+		mMenuItemAdd = menu.findItem(R.id.add);
+		if (mMenuItemAdd != null) {
+			mMenuItemAdd.setVisible(canUserAdd());
 		}
 
 		MenuItem refresh = menu.findItem(R.id.refresh);
@@ -332,6 +329,26 @@ public abstract class BaseEntityList extends BaseBrowse {
 		}
 
 		return true;
+	}
+
+	protected Boolean canUserAdd() {
+		if (mListNewEnabled) {
+			if (Aircandi.currentPlace != null && !Aircandi.currentPlace.hasActiveProximity()) {
+				if (mForEntity != null ? !mForEntity.isOwnedByCurrentUser() : true) {
+					return false;
+				}
+			}
+			mMenuItemAdd.setTitle(R.string.menu_add_entity_item);
+			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+				mMenuItemAdd.setTitle(R.string.menu_add_comment_item);
+			}
+			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+				mMenuItemAdd.setTitle(R.string.menu_add_picture_item);
+			}
+			mMenuItemAdd.setVisible(true);
+			return true;
+		}
+		return false;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -450,7 +467,14 @@ public abstract class BaseEntityList extends BaseBrowse {
 			for (Entity entity : mMoreEntities) {
 				list.add(entity);
 			}
-			list.sort(new Entity.SortByModifiedDate());
+			if (mListLinkType.equals(Constants.TYPE_LINK_CANDIGRAM)
+					|| mListLinkType.equals(Constants.TYPE_LINK_WATCH)
+					|| mListLinkType.equals(Constants.TYPE_LINK_CREATE)) {
+				list.sort(new Entity.SortByLinkModifiedDate());
+			}
+			else {
+				list.sort(new Entity.SortByModifiedDate());
+			}
 			notifyDataSetChanged();
 		}
 	}
@@ -473,6 +497,8 @@ public abstract class BaseEntityList extends BaseBrowse {
 			if (view == null) {
 				view = LayoutInflater.from(BaseEntityList.this).inflate(mListItemResId, null);
 				holder = new ViewHolder();
+
+				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
 				holder.name = (TextView) view.findViewById(R.id.name);
 				holder.subtitle = (TextView) view.findViewById(R.id.subtitle);
 				holder.type = (TextView) view.findViewById(R.id.type);
@@ -480,7 +506,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 				holder.creator = (UserView) view.findViewById(R.id.creator);
 				holder.area = (TextView) view.findViewById(R.id.area);
 				holder.createdDate = (TextView) view.findViewById(R.id.created_date);
-
 				holder.buttonComments = (Button) view.findViewById(R.id.button_comments);
 				holder.checked = (CheckBox) view.findViewById(R.id.checked);
 
@@ -496,7 +521,9 @@ public abstract class BaseEntityList extends BaseBrowse {
 					});
 				}
 
-				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
+				holder.placePhotoView = (AirImageView) view.findViewById(R.id.place_photo);
+				holder.placeName = (TextView) view.findViewById(R.id.place_name);
+
 				if (mGridView != null) {
 					Integer nudge = mResources.getDimensionPixelSize(R.dimen.grid_item_height_nudge);
 					final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mPhotoWidthPixels, mPhotoWidthPixels - nudge);
@@ -592,9 +619,30 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 				UI.setVisibility(holder.createdDate, View.GONE);
 				if (holder.createdDate != null && entity.createdDate != null) {
-					holder.createdDate.setText(DateTime.timeSince(entity.createdDate.longValue(), DateTime.nowDate().getTime()));
+					holder.createdDate.setText(DateTime.interval(entity.createdDate.longValue(), DateTime.nowDate().getTime(), IntervalContext.past));
 					UI.setVisibility(holder.createdDate, View.VISIBLE);
 				}
+
+				/* Place context */
+				UI.setVisibility(view.findViewById(R.id.place_holder), View.GONE);
+				if (entity.place != null) {
+					if (holder.placePhotoView != null) {
+						Photo photo = entity.place.getPhoto();
+						UI.drawPhoto(holder.placePhotoView, photo);
+						if (photo.usingDefault == null || !photo.usingDefault) {
+							holder.placePhotoView.setClickable(true);
+						}
+						UI.setVisibility(holder.placePhotoView, View.VISIBLE);
+					}
+					UI.setVisibility(holder.placeName, View.GONE);
+					if (holder.placeName != null && entity.place.name != null && !entity.place.name.equals("")) {
+						holder.placeName.setText(Html.fromHtml(entity.place.name));
+						UI.setVisibility(holder.placeName, View.VISIBLE);
+					}
+					UI.setVisibility(view.findViewById(R.id.place_holder), View.VISIBLE);
+				}
+
+				/* Photo */
 
 				if (holder.photoView != null) {
 					holder.photoView.setTag(entity);
@@ -653,6 +701,8 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 		public TextView		name;
 		public AirImageView	photoView;
+		public AirImageView	placePhotoView;
+		public TextView		placeName;
 		public TextView		subtitle;
 		public TextView		description;
 		public TextView		type;

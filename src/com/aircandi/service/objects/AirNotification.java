@@ -28,6 +28,8 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	@Expose
 	public Entity				toEntity;
 	@Expose
+	public Entity				fromEntity;
+	@Expose
 	public Number				sentDate;
 
 	/* Client only */
@@ -93,6 +95,29 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
 				notification.toEntity = User.setPropertiesFromMap(new User(), entityMap, nameMapping);
+			}
+		}
+		
+		if (map.get("fromEntity") != null) {
+			Map<String, Object> entityMap = (HashMap<String, Object>) map.get("fromEntity");
+			String schema = (String) entityMap.get("schema");
+			if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				notification.fromEntity = Place.setPropertiesFromMap(new Place(), entityMap, nameMapping);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_BEACON)) {
+				notification.fromEntity = Beacon.setPropertiesFromMap(new Beacon(), entityMap, nameMapping);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+				notification.fromEntity = Post.setPropertiesFromMap(new Post(), entityMap, nameMapping);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+				notification.fromEntity = Applink.setPropertiesFromMap(new Applink(), entityMap, nameMapping);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+				notification.fromEntity = Comment.setPropertiesFromMap(new Comment(), entityMap, nameMapping);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+				notification.fromEntity = User.setPropertiesFromMap(new User(), entityMap, nameMapping);
 			}
 		}
 		

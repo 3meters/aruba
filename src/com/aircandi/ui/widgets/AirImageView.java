@@ -1,5 +1,7 @@
 package com.aircandi.ui.widgets;
 
+import org.apache.http.HttpStatus;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -12,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.aircandi.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -147,6 +150,27 @@ public class AirImageView extends RelativeLayout {
 		bitmapRequest.setRequestListener(new RequestListener() {
 
 			@Override
+			public void onError(Object response) {
+				final ServiceResponse serviceResponse = (ServiceResponse) response;
+				
+				if (serviceResponse.exception.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+					UI.showToastNotification("Photo not found", Toast.LENGTH_SHORT);
+				}
+				showBroken();
+				mThreadHandler.post(new Runnable() {
+
+					@Override
+					public void run() {
+						mProgressBar.setVisibility(View.GONE);
+					}
+				});
+
+				if (originalImageReadyListener != null) {
+					originalImageReadyListener.onComplete(serviceResponse);
+				}
+			}
+
+			@Override
 			public void onProgressChanged(int progress) {
 				if (originalImageReadyListener != null) {
 					originalImageReadyListener.onProgressChanged(progress);
@@ -220,7 +244,7 @@ public class AirImageView extends RelativeLayout {
 			}
 		});
 	}
-	
+
 	public void showLoading() {
 		mThreadHandler.post(new Runnable() {
 

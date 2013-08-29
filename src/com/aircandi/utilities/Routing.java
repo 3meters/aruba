@@ -99,6 +99,7 @@ public final class Routing {
 	public static boolean route(final Activity activity, Route route, Entity entity, Shortcut shortcut, ShortcutSettings settings, Bundle extras) {
 
 		if (route == Route.Shortcut) {
+
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
 			}
@@ -249,13 +250,13 @@ public final class Routing {
 		}
 
 		else if (route == Route.Invite) {
-			
+
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, InviteEdit.class);
 			activity.startActivity(intentBuilder.create());
 			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
 			return true;
 		}
-		
+
 		else if (route == Route.Browse) {
 
 			if (entity == null) {
@@ -600,7 +601,7 @@ public final class Routing {
 
 		if (shortcut.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 
-			if (shortcut.app.equals(Constants.TYPE_APP_PICTURE) 
+			if (shortcut.app.equals(Constants.TYPE_APP_PICTURE)
 					|| shortcut.app.equals(Constants.TYPE_APP_POST)) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
 					Pictures.view(activity, shortcut.appId, entity.id);
@@ -667,14 +668,8 @@ public final class Routing {
 				AndroidManager.getInstance().callFacebookActivity(activity, (shortcut.appId != null) ? shortcut.appId : shortcut.appUrl);
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_MAP) && entity != null) {
-				//				Tracker.sendEvent("ui_action", "map_place", null, 0, Aircandi.getInstance().getUser());
-				//				final AirLocation location = entity.getLocation();
-				//				AndroidManager.getInstance().callMapActivity(activity
-				//						, String.valueOf(location.lat.doubleValue())
-				//						, String.valueOf(location.lng.doubleValue())
-				//						, entity.name);
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					Maps.view(activity, entity.id);
+					Maps.view(activity, entity);
 				}
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_YELP)) {
@@ -706,7 +701,7 @@ public final class Routing {
 		else {
 			if (shortcut.isContent()) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					if (shortcut.app.equals(Constants.TYPE_APP_PICTURE) 
+					if (shortcut.app.equals(Constants.TYPE_APP_PICTURE)
 							|| shortcut.app.equals(Constants.TYPE_APP_POST)) {
 						Pictures.view(activity, shortcut.getId(), entity.id);
 					}
@@ -786,13 +781,13 @@ public final class Routing {
 					/*
 					 * We don't have a network connection.
 					 */
-//					final Intent intent = new Intent(activity, activity.getClass());
-//					AirNotification airNotification = new AirNotification();
-//					airNotification.title = activity.getString(R.string.error_connection_none_notification_title);
-//					airNotification.subtitle = activity.getString(R.string.error_connection_none_notification_message);
-//					airNotification.intent = intent;
-//					airNotification.type = "network";
-//					NotificationManager.getInstance().showNotification(airNotification, activity);
+					//					final Intent intent = new Intent(activity, activity.getClass());
+					//					AirNotification airNotification = new AirNotification();
+					//					airNotification.title = activity.getString(R.string.error_connection_none_notification_title);
+					//					airNotification.subtitle = activity.getString(R.string.error_connection_none_notification_message);
+					//					airNotification.intent = intent;
+					//					airNotification.type = "network";
+					//					NotificationManager.getInstance().showNotification(airNotification, activity);
 
 					Dialogs.alertDialogSimple(activity, null, activity.getString(R.string.error_connection_none));
 				}

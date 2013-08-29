@@ -24,29 +24,8 @@ public class DateTime {
 		return cal.getTime();
 	}
 
-	public static String timeTill(Long dateOldMs, Long dateNewMs) {
-		String since = interval(dateOldMs, dateNewMs);
-		return since;
-	}
-
-	public static String intervalSince(Date dateOld, Date dateNew) {
-		String since = interval(dateOld.getTime(), dateNew.getTime());
-		if (!since.equals("now")) {
-			since += " ago";
-		}
-		return since;
-	}
-
-	public static String timeSince(Long dateOldMs, Long dateNewMs) {
-		String since = interval(dateOldMs, dateNewMs);
-		if (!since.equals("now")) {
-			since += " ago";
-		}
-		return since;
-	}
-
 	@SuppressWarnings("deprecation")
-	public static String interval(Long oldDateMs, Long newDateMs) {
+	public static String interval(Long oldDateMs, Long newDateMs, IntervalContext context ) {
 
 		final Date dateOld = new Date(oldDateMs);
 
@@ -99,6 +78,14 @@ public class DateTime {
 		{
 			interval = String.valueOf(seconds) + " seconds";
 		}
+		if (context == IntervalContext.past) {
+			interval += " ago";
+		}
 		return interval;
+	}
+	
+	public static enum IntervalContext {
+		past,
+		future
 	}
 }

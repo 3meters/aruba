@@ -14,7 +14,7 @@ import com.aircandi.components.SpinnerData;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.ui.CandigramForm;
-import com.aircandi.ui.EntityGrid;
+import com.aircandi.ui.EntityList;
 import com.aircandi.ui.edit.CandigramEdit;
 import com.aircandi.ui.edit.CandigramWizard;
 import com.aircandi.utilities.Animate;
@@ -40,12 +40,12 @@ public class Candigrams {
 		if (direction == null) {
 			direction = Direction.in;
 		}
-		IntentBuilder intentBuilder = new IntentBuilder(context, EntityGrid.class)
+		IntentBuilder intentBuilder = new IntentBuilder(context, EntityList.class)
 				.setEntityId(entityId)
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_CANDIGRAM)
-				.setListItemResId(R.layout.temp_griditem_entity)
+				.setListItemResId(R.layout.temp_listitem_candigram)
 				.setListNewEnabled(true);
 
 		context.startActivity(intentBuilder.create());
@@ -56,12 +56,12 @@ public class Candigrams {
 		if (direction == null) {
 			direction = Direction.in;
 		}
-		IntentBuilder intentBuilder = new IntentBuilder(context, EntityGrid.class)
+		IntentBuilder intentBuilder = new IntentBuilder(context, EntityList.class)
 				.setEntityId(entityId)
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_CANDIGRAM)
-				.setListItemResId(R.layout.temp_griditem_entity)
+				.setListItemResId(R.layout.temp_listitem_candigram)
 				.setListNewEnabled(true);
 
 		return intentBuilder.create();

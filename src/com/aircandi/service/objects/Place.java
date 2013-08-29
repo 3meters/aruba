@@ -348,10 +348,10 @@ public class Place extends Entity implements Cloneable, Serializable {
 		@Override
 		public int compare(Entity object1, Entity object2) {
 
-			if (object1.hasActiveProximityLink() && !object2.hasActiveProximityLink()) {
+			if (object1.hasActiveProximity() && !object2.hasActiveProximity()) {
 				return -1;
 			}
-			else if (object2.hasActiveProximityLink() && !object1.hasActiveProximityLink()) {
+			else if (object2.hasActiveProximity() && !object1.hasActiveProximity()) {
 				return 1;
 			}
 			else {

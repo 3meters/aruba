@@ -292,7 +292,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else {
 				shortcuts = (List<Shortcut>) entity.getShortcuts(new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK,
-						Direction.in, false, true));
+						Direction.in, false, true), null);
 			}
 
 			Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());
@@ -504,7 +504,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					final String imageDescription = extras.getString(Constants.EXTRA_URI_DESCRIPTION);
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
 					final Photo photo = (Photo) HttpService.jsonToObject(jsonPhoto, ObjectType.Photo);
-
+					
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
 							.setFromUri(photo.getUri())
 							.setRequestListener(new RequestListener() {
@@ -839,7 +839,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				if (mEntity.photo != null && mEntity.photo.hasBitmap() && !mEntity.photo.isBitmapLocalOnly()) {
 					bitmap = mEntity.photo.getBitmap();
 				}
-
+				
 				/* In case a derived class needs to augment the entity before insert */
 				beforeInsert(mEntity);
 
@@ -997,9 +997,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-
-		/* Cache edit and delete menus because we need to toggle it later */
-		mMenuItemDelete = menu.findItem(R.id.delete);
 
 		if (mEntity != null) {
 

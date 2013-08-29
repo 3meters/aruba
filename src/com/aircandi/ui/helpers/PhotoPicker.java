@@ -288,6 +288,8 @@ public class PhotoPicker extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 
 	private void startSearch(View view) {
+		
+		mSearch.dismissDropDown();
 
 		mQuery = mSearch.getText().toString().trim();
 

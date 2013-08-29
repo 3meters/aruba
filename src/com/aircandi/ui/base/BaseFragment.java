@@ -13,6 +13,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.aircandi.Aircandi;
 import com.aircandi.R;
 import com.aircandi.components.BusProvider;
 import com.aircandi.components.BusyManager;
@@ -42,6 +43,7 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 		setHasOptionsMenu(true);
 		mExtras = getSherlockActivity().getIntent().getExtras();
 		mResources = getResources();
+		Aircandi.currentPlace = null;
 	}
 
 	@Override
@@ -100,16 +102,20 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 	// --------------------------------------------------------------------------------------------
 
 	private void startBodyBusyIndicator() {
-		final View progress = getView().findViewById(R.id.progress);
-		if (progress != null) {
-			progress.setVisibility(View.VISIBLE);
+		if (getView() != null) {
+			final View progress = getView().findViewById(R.id.progress);
+			if (progress != null) {
+				progress.setVisibility(View.VISIBLE);
+			}
 		}
 	}
 
 	private void stopBodyBusyIndicator() {
-		final View progress = getView().findViewById(R.id.progress);
-		if (progress != null) {
-			progress.setVisibility(View.GONE);
+		if (getView() != null) {
+			final View progress = getView().findViewById(R.id.progress);
+			if (progress != null) {
+				progress.setVisibility(View.GONE);
+			}
 		}
 	}
 

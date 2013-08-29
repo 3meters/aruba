@@ -1,5 +1,9 @@
 package com.aircandi.ui.edit;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,6 +18,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
+import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
@@ -46,6 +51,14 @@ public class InviteEdit extends BaseEntityEdit {
 		 */
 		mDescription = (AirEditText) findViewById(R.id.description);
 		mEmail = (AirEditText) findViewById(R.id.email);
+
+		String lastMessage = Aircandi.settings.getString(Constants.SETTING_INVITE_MESSAGE_LAST, null);
+		if (lastMessage != null && !lastMessage.equals("")) {
+			mDescription.setText(lastMessage);
+		}
+		else {
+			mDescription.setText(getString(R.string.invite_message_default));
+		}
 
 		if (mDescription != null) {
 			mDescription.addTextChangedListener(new SimpleTextWatcher() {
@@ -186,21 +199,26 @@ public class InviteEdit extends BaseEntityEdit {
 	@Override
 	protected void insert() {
 		Logger.i(this, "Send invite");
+		final String email = mEmail.getEditableText().toString();
+		final String invitor = Aircandi.getInstance().getUser().name;
+		final String message = mDescription.getEditableText().toString();
+		final List<String> emails = new ArrayList(Arrays.asList(email.split("\\s*,\\s*")));
+
+		/* Stash message so we can restore it in the future */
+		Aircandi.settingsEditor.putString(Constants.SETTING_INVITE_MESSAGE_LAST, message);
+		Aircandi.settingsEditor.commit();
 
 		new AsyncTask() {
 
 			@Override
 			protected void onPreExecute() {
-				mBusyManager.showBusy(R.string.progress_sending);
+				mBusyManager.showBusy(emails.size() > 1 ? R.string.progress_sending_invite_plural : R.string.progress_sending_invite);
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("SendInvite");
-				String email = mEmail.getEditableText().toString();
-				String fullname = Aircandi.getInstance().getUser().name;
-				String message = mDescription.getEditableText().toString();
-				final ModelResult result = EntityManager.getInstance().sendInvite(email, fullname, message);
+				final ModelResult result = EntityManager.getInstance().sendInvite(emails, invitor, message);
 				return result;
 			}
 
@@ -211,7 +229,7 @@ public class InviteEdit extends BaseEntityEdit {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					Tracker.sendEvent("ui_action", "send_invite", null, 0, Aircandi.getInstance().getUser());
 					mBusyManager.hideBusy();
-					UI.showToastNotification(getString(R.string.alert_invite_sent), Toast.LENGTH_SHORT);
+					UI.showToastNotification(getString(emails.size() > 1 ? R.string.alert_invite_sent_plural : R.string.alert_invite_sent), Toast.LENGTH_SHORT);
 					finish();
 				}
 				else {

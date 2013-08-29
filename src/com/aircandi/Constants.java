@@ -40,6 +40,7 @@ public final class Constants {
 	public static final String	EXTRA_REFRESH_FORCE							= "com.aircandi.EXTRA_REFRESH_FORCE";														//$NON-NLS-1$
 	public static final String	EXTRA_HELP_ID								= "com.aircandi.EXTRA_HELP_ID";															//$NON-NLS-1$
 	public static final String	EXTRA_SHORTCUTS								= "com.aircandi.EXTRA_SHORTCUTS";															//$NON-NLS-1$
+	public static final String	EXTRA_MARKERS								= "com.aircandi.EXTRA_MARKERS";															//$NON-NLS-1$
 	public static final String	EXTRA_SKIP_SAVE								= "com.aircandi.EXTRA_EDIT_ONLY";															//$NON-NLS-1$
 	public static final String	EXTRA_TAB_POSITION							= "com.aircandi.EXTRA_TAB_POSITION";														//$NON-NLS-1$
 	public static final String	EXTRA_SHORTCUT_TYPE							= "com.aircandi.EXTRA_SHORTCUT_TYPE";														//$NON-NLS-1$
@@ -241,6 +242,7 @@ public final class Constants {
 	public static final String	SETTING_USER								= "Setting_User";
 	public static final String	SETTING_USER_SESSION						= "Setting_User_Session";
 	public static final String	SETTING_PICTURE_SEARCH_LAST					= "Setting_Picture_Search_Last";
+	public static final String	SETTING_INVITE_MESSAGE_LAST					= "Setting_Invite_Message_Last";
 	public static final String	SETTING_PICTURE_SEARCHES					= "Setting_Picture_Searches";
 	public static final String	SETTING_LAST_EMAIL							= "Setting_Last_Email";
 	public static final String	SETTING_RUN_ONCE_HELP_RADAR					= "Setting_Run_Once_Help_Radar";

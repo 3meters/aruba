@@ -115,6 +115,10 @@ public class EntityCache implements Map<String, Entity> {
 		if (linkOptions != null) {
 			parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
 		}
+		
+		if (linkOptions != null && linkOptions.ignoreInactive != null) {
+			parameters.putBoolean("ignoreInactive", linkOptions.ignoreInactive);
+		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
@@ -154,6 +158,10 @@ public class EntityCache implements Map<String, Entity> {
 
 		if (cursor != null) {
 			parameters.putString("cursor", "object:" + HttpService.objectToJson(cursor));
+		}
+		
+		if (linkOptions != null && linkOptions.ignoreInactive != null) {
+			parameters.putBoolean("ignoreInactive", linkOptions.ignoreInactive);
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
@@ -412,15 +420,17 @@ public class EntityCache implements Map<String, Entity> {
 		mLastActivityDate = DateTime.nowDate().getTime();
 	}
 
-	public void addLinkTo(String toId, String type, String fromId, Shortcut shortcut) {
+	public void addLink(String toId, String type, String fromId, Shortcut toShortcut, Shortcut fromShortcut) {
 
+		Long time = DateTime.nowDate().getTime();
+		
 		Entity entity = get(toId);
-
 		if (entity != null) {
-			Long time = DateTime.nowDate().getTime();
+			
 			if (entity.linksIn == null) {
 				entity.linksIn = new ArrayList<Link>();
 			}
+			
 			if (entity.linksInCounts == null) {
 				entity.linksInCounts = new ArrayList<Count>();
 				entity.linksInCounts.add(new Count(type, 1));
@@ -433,14 +443,47 @@ public class EntityCache implements Map<String, Entity> {
 			}
 
 			Link link = new Link(toId, type, true, fromId);
+			link.modifiedDate = time;
 
-			if (shortcut != null) {
-				link.shortcut = shortcut;
+			if (fromShortcut != null) {
+				link.shortcut = fromShortcut;
 			}
 
 			entity.linksIn.add(link);
 			entity.activityDate = time;
-			mLastActivityDate = DateTime.nowDate().getTime();
+			mLastActivityDate = time;
+		}
+		/*
+		 * Fixup out links too.
+		 */
+		entity = get(fromId);
+		if (entity != null) {
+			
+			if (entity.linksOut == null) {
+				entity.linksOut = new ArrayList<Link>();
+			}
+			
+			if (entity.linksOutCounts == null) {
+				entity.linksOutCounts = new ArrayList<Count>();
+				entity.linksOutCounts.add(new Count(type, 1));
+			}
+			else if (entity.getCount(type, Direction.out) == null) {
+				entity.linksOutCounts.add(new Count(type, 1));
+			}
+			else {
+				entity.getCount(type, Direction.out).count = entity.getCount(type, Direction.out).count.intValue() + 1;
+			}
+
+			Link link = new Link(toId, type, true, fromId);
+			link.modifiedDate = time;
+
+			if (toShortcut != null) {
+				link.shortcut = toShortcut;
+			}
+
+			entity.linksOut.add(link);
+			entity.activityDate = time;
+			mLastActivityDate = time;
 		}
 	}
 
@@ -485,8 +528,10 @@ public class EntityCache implements Map<String, Entity> {
 		mLastActivityDate = DateTime.nowDate().getTime();
 	}
 
-	public void removeLinkTo(String toId, String type, String fromId) {
+	public void removeLink(String toId, String type, String fromId) {
 
+		Long time = DateTime.nowDate().getTime();
+		
 		Entity entity = get(toId);
 		if (entity != null) {
 
@@ -505,10 +550,36 @@ public class EntityCache implements Map<String, Entity> {
 					}
 				}
 			}
+			
+			entity.activityDate = time;
+			mLastActivityDate = time;
 		}
-		Long time = DateTime.nowDate().getTime();
-		entity.activityDate = time;
-		mLastActivityDate = DateTime.nowDate().getTime();
+		
+		/*
+		 * Fixup out links too
+		 */
+		entity = get(fromId);
+		if (entity != null) {
+
+			if (entity.linksOutCounts != null) {
+				Count count = entity.getCount(type, Direction.out);
+				if (count != null) {
+					count.count = count.count.intValue() - 1;
+				}
+			}
+
+			if (entity.linksOut != null) {
+				for (Link link : entity.linksOut) {
+					if (link.toId != null && link.toId.equals(toId) && link.type.equals(type)) {
+						entity.linksOut.remove(link);
+						break;
+					}
+				}
+			}
+			
+			entity.activityDate = time;
+			mLastActivityDate = time;
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

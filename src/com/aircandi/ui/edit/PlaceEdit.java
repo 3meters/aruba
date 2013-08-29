@@ -154,11 +154,11 @@ public class PlaceEdit extends BaseEntityEdit {
 			 */
 			final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
 			if (location != null) {
-				if (((Place) mEntity).location == null) {
-					((Place) mEntity).location = new AirLocation();
+				if (mEntity.location == null) {
+					mEntity.location = new AirLocation();
 				}
-				((Place) mEntity).location.lat = location.lat;
-				((Place) mEntity).location.lng = location.lng;
+				mEntity.location.lat = location.lat;
+				mEntity.location.lng = location.lng;
 			}
 		}
 	}

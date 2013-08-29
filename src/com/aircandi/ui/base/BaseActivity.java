@@ -64,9 +64,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	/* Menus */
 	protected MenuItem	mMenuItemEdit;
-	@SuppressWarnings("ucd")
-	protected MenuItem	mMenuItemDelete;
-	@SuppressWarnings("ucd")
 	protected MenuItem	mMenuItemAdd;
 	protected MenuItem	mMenuItemSignout;
 

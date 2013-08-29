@@ -42,6 +42,8 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public Photo									photo;
 	@Expose
+	public AirLocation								location;
+	@Expose
 	public Boolean									content;
 	@Expose
 	public String									action;
@@ -53,6 +55,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	public Integer									count;
 	public List<Shortcut>							group;
 	public Boolean									synthetic			= false;
+	public Boolean									inactive			= false;
 	public String									linkType;
 	public Intent									intent;
 
@@ -80,6 +83,10 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 
 		if (map.get("photo") != null) {
 			shortcut.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"), nameMapping);
+		}
+
+		if (map.get("location") != null) {
+			shortcut.location = AirLocation.setPropertiesFromMap(new AirLocation(), (HashMap<String, Object>) map.get("location"), nameMapping);
 		}
 
 		return shortcut;
@@ -277,7 +284,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public Boolean isContent() {
-		return content;
+		return (content == null ? true : content);
 	}
 
 	public Shortcut setContent(Boolean content) {
@@ -311,7 +318,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 
 		@Override
 		public int compare(Shortcut object1, Shortcut object2) {
-			
+
 			if (object1.getPosition().intValue() < object2.getPosition().intValue()) {
 				return -1;
 			}
@@ -332,7 +339,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 			return 1;
 		}
 	}
-	
+
 	public static class SortByPosition implements Comparator<Shortcut> {
 
 		@Override
