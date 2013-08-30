@@ -34,7 +34,6 @@ import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Cursor;
@@ -44,7 +43,6 @@ import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.DefaultType;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
-import com.aircandi.service.objects.User;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.DateTime;
@@ -70,9 +68,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 	private static final long	LIST_MAX	= 300L;
 	private static final long	PAGE_SIZE	= 30L;
 
-	private Number				mEntityModelRefreshDate;
-	private Number				mEntityModelActivityDate;
-	private User				mEntityModelUser;
 	private EntityAdapter		mAdapter;
 
 	/* Inputs */
@@ -184,9 +179,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 			mBusyManager.startBodyBusyIndicator();
 			mEntities.clear();
 
-			mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-			mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
-			mEntityModelUser = Aircandi.getInstance().getUser();
+			synchronize();
 
 			mAdapter = new EntityAdapter(mEntities);
 			if (mListView != null) {
@@ -370,10 +363,8 @@ public abstract class BaseEntityList extends BaseBrowse {
 		 * - User signed out.
 		 * - User profile could have been updated and we don't catch that.
 		 */
-		if (!isFinishing() && mEntityModelUser != null) {
-			if (!Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)
-					|| ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()
-					|| EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+		if (!isFinishing()) {
+			if (unsynchronized()) {
 				invalidateOptionsMenu();
 				onDatabind(true);
 			}

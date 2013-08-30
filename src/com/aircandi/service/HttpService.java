@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLException;
 
 import net.minidev.json.JSONValue;
 import net.minidev.json.parser.ContainerFactory;
@@ -400,9 +401,14 @@ public class HttpService {
 				 * - SocketTimeoutException: timeout expired on a socket waiting for data
 				 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
 				 * 
+				 * - SSLException: Special note here. We can get this when a ssl connection has been
+				 * established with the service and then the device switches networks. That causes the
+				 * service to reset the connection and we get a read error.
+				 * 
 				 * Secondaries
 				 * - Zillions
 				 */
+
 				if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, e, retryCount)) {
 
 					final HttpServiceException proxibaseException = makeHttpServiceException(null, null, e);
@@ -735,6 +741,20 @@ public class HttpService {
 			 */
 			Logger.d(this, "Retrying on " + exception.getClass().getName() + ": " + exception.getMessage());
 			return true;
+		}
+
+		if (exception instanceof SSLException) {
+			/*
+			 * This can be caused as a result of the server resetting the connection.
+			 * 
+			 * Special note here. We can get this when a ssl connection has been
+			 * established with the service and then the device switches networks. That causes the service to reset the
+			 * connection and we get a read error.
+			 */
+			if (exception.getMessage().toLowerCase().contains("connection reset")) {
+				Logger.d(this, "Retrying on " + exception.getClass().getName() + ": " + exception.getMessage());
+				return true;
+			}
 		}
 
 		if (exception instanceof HttpServiceException) {

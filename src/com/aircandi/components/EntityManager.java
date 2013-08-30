@@ -993,7 +993,7 @@ public class EntityManager {
 
 		/* Construct entity, link, and observation */
 		final Bundle parameters = new Bundle();
-		parameters.putString("method", "proximity");
+		parameters.putString("method", "range");
 		parameters.putStringArrayList("entityIds", new ArrayList(Arrays.asList(entity.id)));
 
 		final ServiceRequest serviceRequest = new ServiceRequest()

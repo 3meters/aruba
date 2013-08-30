@@ -12,7 +12,6 @@ import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Entity;
@@ -72,8 +71,7 @@ public class UserForm extends BaseEntityForm {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
-						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
+						synchronize();
 						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
 							mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));

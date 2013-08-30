@@ -63,10 +63,10 @@
 
                     <com.aircandi.ui.widgets.AirImageView
                         android:id="@+id/photo"
-                        android:layout_width="@dimen/image_extra_large"
-                        android:layout_height="@dimen/image_extra_large"
+                        android:layout_width="@dimen/image_candigram_form"
+                        android:layout_height="@dimen/image_candigram_form"
                         aircandi:layout="@layout/widget_webimageview_zoom"
-                        aircandi:sizeHint="@dimen/image_extra_large"
+                        aircandi:sizeHint="@dimen/image_candigram_form"
                         android:background="@drawable/selector_image"
                         android:clickable="true"
                         android:onClick="onImageClick"

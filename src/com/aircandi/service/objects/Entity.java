@@ -213,6 +213,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public Float getDistance(Boolean refresh) {
 
 		if (refresh || distance == null) {
+			distance = null;
 			final Beacon beacon = getActiveBeacon(Constants.TYPE_LINK_PROXIMITY, true);
 			if (beacon != null) {
 				distance = beacon.getDistance(refresh);

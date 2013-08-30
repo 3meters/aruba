@@ -951,7 +951,7 @@ public final class Routing {
 			}
 		}
 
-		Logger.w(activity, "Service error: " + errorMessage);
+		Logger.w(activity, "Service error: (code: " + String.valueOf(statusCode) + ") " + errorMessage);
 		return statusCode;
 	}
 

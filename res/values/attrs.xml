@@ -104,6 +104,7 @@
         <attr name="brokenDrawable" format="integer" />
         <attr name="showBusy" format="boolean" />
         <attr name="sizeHint" format="dimension" />
+        <attr name="fixedAlong" format="string" />
     </declare-styleable>
     <declare-styleable name="TextViewEllipsizing">
         <attr name="maxLines" format="integer" />

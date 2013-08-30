@@ -27,7 +27,6 @@ import com.aircandi.applications.Places;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.events.MessageEvent;
@@ -123,8 +122,7 @@ public class CandigramForm extends BaseEntityForm {
 
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
-						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
+						synchronize();
 						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
 							mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
@@ -186,7 +184,7 @@ public class CandigramForm extends BaseEntityForm {
 	}
 
 	@SuppressWarnings("ucd")
-	public void onNudgeButtonClick(View view) {
+	public void onKickButtonClick(View view) {
 
 		new AsyncTask() {
 

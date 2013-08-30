@@ -23,7 +23,6 @@ import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
@@ -104,8 +103,7 @@ public class PlaceForm extends BaseEntityForm {
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
 						Aircandi.currentPlace = mEntity;
-						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
+						synchronize();
 						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
 							mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));

@@ -23,6 +23,7 @@ import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.HttpService.ServiceDataWrapper;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.AirLocation;
+import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Entity;
@@ -602,8 +603,14 @@ public class EntityCache implements Map<String, Entity> {
 								}
 								else {
 									Float distance = entity.getDistance(true);
-									if (distance == null || distance <= radius) {
+									if (distance != null && distance <= radius) {
 										entities.add(entity);
+									}
+									else if (distance == null) {
+										Beacon beacon = entity.getActiveBeacon(Constants.TYPE_LINK_PROXIMITY, false);
+										if (beacon != null) {
+											entities.add(entity);
+										}
 									}
 								}
 							}
@@ -637,8 +644,14 @@ public class EntityCache implements Map<String, Entity> {
 									}
 									else {
 										Float distance = entity.getDistance(true);
-										if (distance == null || distance <= radius) {
+										if (distance != null && distance <= radius) {
 											entities.add(entity);
+										}
+										else if (distance == null) {
+											Beacon beacon = entity.getActiveBeacon(Constants.TYPE_LINK_PROXIMITY, false);
+											if (beacon != null) {
+												entities.add(entity);
+											}
 										}
 									}
 								}

@@ -14,7 +14,6 @@ import com.aircandi.applications.Places;
 import com.aircandi.applications.Users;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
@@ -65,8 +64,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
-						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
+						synchronize();
 						setActivityTitle(mEntity.name);
 						draw();
 					}

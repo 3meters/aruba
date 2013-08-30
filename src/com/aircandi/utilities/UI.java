@@ -2,6 +2,7 @@ package com.aircandi.utilities;
 
 import android.app.Service;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PorterDuff;
@@ -119,76 +120,6 @@ public class UI {
 		BitmapManager.getInstance().masterFetch(bitmapRequest);
 	}
 
-	//	public static void picasso(final AirImageView photoView, Photo photo) {
-	//
-	//		String photoUri = photo.getUri();
-	//
-	//		if (photoUri.toLowerCase(Locale.US).startsWith("resource:")) {
-	//			final String rawResourceName = photoUri.substring(photoUri.indexOf("resource:") + 9);
-	//			final String resolvedResourceName = BitmapManager.getInstance().resolveResourceName(rawResourceName);
-	//			final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable",
-	//					Aircandi.getInstance().getPackageName());
-	//
-	//			Picasso.with(Aircandi.applicationContext)
-	//					.load(resourceId)
-	//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
-	//					.centerCrop()
-	//					.into(photoView.getImageView());
-	//		}
-	//		else {
-	//			Picasso.with(Aircandi.applicationContext)
-	//					.load(photoUri)
-	//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
-	//					.centerCrop()
-	//					.into(photoView.getImageView());
-	//		}
-	//	}
-	//
-	//	public static void picassoFancy(final AirImageView photoView, Photo photo) {
-	//
-	//		String photoUri = photo.getUri();
-	//
-	//		if (photoUri.toLowerCase(Locale.US).startsWith("resource:")) {
-	//			final String rawResourceName = photoUri.substring(photoUri.indexOf("resource:") + 9);
-	//			final String resolvedResourceName = BitmapManager.getInstance().resolveResourceName(rawResourceName);
-	//			final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable",
-	//					Aircandi.getInstance().getPackageName());
-	//
-	//			Picasso.with(Aircandi.applicationContext)
-	//					.load(resourceId)
-	//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
-	//					.centerCrop()
-	//					.into(new Target() {
-	//
-	//						@Override
-	//						public void onError() {}
-	//
-	//						@Override
-	//						public void onSuccess(Bitmap bitmap) {
-	//							final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
-	//							UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
-	//						}
-	//					});
-	//		}
-	//		else {
-	//			Picasso.with(Aircandi.applicationContext)
-	//					.load(photoUri)
-	//					.resize(photoView.getSizeHint(), photoView.getSizeHint())
-	//					.centerCrop()
-	//					.into(new Target() {
-	//
-	//						@Override
-	//						public void onError() {}
-	//
-	//						@Override
-	//						public void onSuccess(Bitmap bitmap) {
-	//							final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
-	//							UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
-	//						}
-	//					});
-	//		}
-	//	}
-
 	public static void showToastNotification(final String message, final int duration) {
 		Aircandi.mainThreadHandler.post(new Runnable() {
 
@@ -286,5 +217,28 @@ public class UI {
 	public static void hideSoftInput(Context context) {
 		InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);
 		inputManager.hideSoftInputFromWindow(new View(context).getWindowToken(), 0);
+	}
+
+	public static int showScreenSize() {
+		int screenSize = Aircandi.applicationContext.getResources().getConfiguration().screenLayout &
+				Configuration.SCREENLAYOUT_SIZE_MASK;
+
+		switch (screenSize) {
+			case Configuration.SCREENLAYOUT_SIZE_XLARGE:
+				showToastNotification("Extra large screen", Toast.LENGTH_LONG);
+				break;
+			case Configuration.SCREENLAYOUT_SIZE_LARGE:
+				showToastNotification("Large screen", Toast.LENGTH_LONG);
+				break;
+			case Configuration.SCREENLAYOUT_SIZE_NORMAL:
+				showToastNotification("Normal screen", Toast.LENGTH_LONG);
+				break;
+			case Configuration.SCREENLAYOUT_SIZE_SMALL:
+				showToastNotification("Small screen", Toast.LENGTH_LONG);
+				break;
+			default:
+				showToastNotification("Screen size is neither xlarge, large, normal or small", Toast.LENGTH_LONG);
+		}
+		return screenSize;
 	}
 }

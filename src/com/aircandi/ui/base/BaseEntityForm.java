@@ -37,7 +37,6 @@ import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.Applink;
@@ -66,8 +65,6 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	protected ScrollView			mScrollView;
 	protected ViewGroup				mFooterHolder;
 	protected Entity				mEntity;
-	protected Number				mEntityModelRefreshDate;
-	protected Number				mEntityModelActivityDate;
 
 	/* Inputs */
 	@SuppressWarnings("ucd")
@@ -633,15 +630,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			}
 
 			Animate.doOverridePendingTransition(this, TransitionType.PageBack);
-			if (mEntityModelRefreshDate != null
-					&& ProximityManager.getInstance().getLastBeaconLoadDate() != null
-					&& ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()) {
-				invalidateOptionsMenu();
-				onDatabind(true);
-			}
-			else if (mEntityModelActivityDate != null
-					&& EntityManager.getEntityCache().getLastActivityDate() != null
-					&& EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+			if (unsynchronized()) {
 				invalidateOptionsMenu();
 				onDatabind(true);
 			}

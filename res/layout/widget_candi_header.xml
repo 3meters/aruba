@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/form_button_height"
         android:layout_marginBottom="3dp"
-        android:onClick="onNudgeButtonClick"
+        android:onClick="onKickButtonClick"
         android:text="@string/button_nudge"
         android:visibility="gone" />
 

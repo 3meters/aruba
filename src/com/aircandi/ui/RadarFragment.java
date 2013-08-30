@@ -81,8 +81,6 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 
 	private final Handler			mHandler				= new Handler();
 
-	private Number					mEntityModelRefreshDate;
-	private Number					mEntityModelActivityDate;
 	private Number					mEntityModelBeaconDate;
 	private Integer					mEntityModelWifiState	= WifiManager.WIFI_STATE_UNKNOWN;
 
@@ -243,10 +241,7 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 			mList.setAdapter(mRadarAdapter);
 			mRadarAdapter.notifyDataSetChanged();
 		}
-		else if ((ProximityManager.getInstance().getLastBeaconLoadDate() != null && mEntityModelRefreshDate != null
-				&& ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue())
-				|| (EntityManager.getEntityCache().getLastActivityDate() != null && mEntityModelActivityDate != null
-				&& EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue())) {
+		else if (unsynchronized()) {
 			/*
 			 * Everytime we show details for a place, we fetch place details from the service
 			 * when in turn get pushed into the cache and activityDate gets tickled.
@@ -467,9 +462,8 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 				Logger.d(getSherlockActivity(), "Entities changed event: updating radar");
 				Aircandi.stopwatch1.segmentTime("Entities changed: start radar display");
 				Aircandi.stopwatch3.stop("Aircandi initialization finished and got first entities");
-
-				mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-				mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
+				
+				synchronize();
 
 				/* Point radar adapter at the updated entities */
 				final int previousCount = mRadarAdapter.getCount();
@@ -575,13 +569,12 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 
 	@Override
 	public void showBusy() {
-		super.hideBusy();
+		super.showBusy();
 	}
 
 	@Override
 	public void hideBusy() {
 		super.hideBusy();
-		mBusyManager.hideBusy();
 		mPullToRefreshAttacher.setRefreshing(false);
 	}
 
@@ -601,7 +594,7 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 				@Override
 				protected void onPreExecute() {
 					mPullToRefreshAttacher.setRefreshing(true);
-					mBusyManager.showBusy();
+					showBusy();
 				}
 
 				@Override
@@ -930,7 +923,6 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 
 		/* Kill busy */
 		mPullToRefreshAttacher.setRefreshComplete();
-		mBusyManager.hideBusy();
 		hideBusy();
 		super.onStop();
 	}

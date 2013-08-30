@@ -17,14 +17,20 @@ import com.aircandi.Aircandi;
 import com.aircandi.R;
 import com.aircandi.components.BusProvider;
 import com.aircandi.components.BusyManager;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.MenuManager;
+import com.aircandi.components.ProximityManager;
+import com.aircandi.service.objects.User;
 
 public abstract class BaseFragment extends SherlockFragment implements IDatabind {
 
 	protected Bundle		mExtras;
 	protected Resources		mResources;
 	protected BusyManager	mBusyManager;
+	protected Number		mEntityModelRefreshDate;
+	protected Number		mEntityModelActivityDate;
+	protected User			mEntityModelUser;
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -117,6 +123,37 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 				progress.setVisibility(View.GONE);
 			}
 		}
+	}
+
+	protected void synchronize() {
+		mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
+		mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
+		mEntityModelUser = Aircandi.getInstance().getUser();
+	}
+
+	protected Boolean unsynchronized() {
+		Number lastBeaconLoadDate = ProximityManager.getInstance().getLastBeaconLoadDate();
+		Number lastActivityDate = EntityManager.getEntityCache().getLastActivityDate();
+
+		if (Aircandi.getInstance().getUser() != null
+				&& mEntityModelUser != null
+				&& !mEntityModelUser.id.equals(Aircandi.getInstance().getUser().id)) {
+			return true;
+		}
+
+		if (lastBeaconLoadDate != null
+				&& mEntityModelRefreshDate != null
+				&& lastBeaconLoadDate.longValue() != mEntityModelRefreshDate.longValue()) {
+			return true;
+		}
+
+		if (lastActivityDate != null
+				&& mEntityModelActivityDate != null
+				&& lastActivityDate.longValue() != mEntityModelActivityDate.longValue()) {
+			return true;
+		}
+
+		return false;
 	}
 
 	// --------------------------------------------------------------------------------------------

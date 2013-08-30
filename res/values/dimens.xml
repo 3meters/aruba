@@ -17,6 +17,8 @@
     <dimen name="image_combo_button">30dp</dimen>
     <dimen name="image_badge_bug">20dp</dimen>
     <dimen name="notification_large_icon_width">64dp</dimen>
+    <dimen name="image_candigram_form">250dp</dimen>
+    <dimen name="image_picture_form">250dp</dimen>
     
     <!-- Forms -->
 

@@ -27,7 +27,6 @@ import com.aircandi.applications.Places;
 import com.aircandi.applications.Users;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link;
@@ -53,8 +52,6 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 
 	protected String		mEntityId;
 	protected Entity		mEntity;
-	protected Number		mEntityModelRefreshDate;
-	protected Number		mEntityModelActivityDate;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -87,8 +84,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, LinkOptions.getDefault(mLinkOptions));
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-					mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
+					synchronize();
 				}
 
 				return result;
@@ -453,22 +449,13 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			onDatabind(false);
 		}
 		else {
-
-			if (mEntityModelRefreshDate != null
-					&& ProximityManager.getInstance().getLastBeaconLoadDate() != null
-					&& ProximityManager.getInstance().getLastBeaconLoadDate().longValue() > mEntityModelRefreshDate.longValue()) {
-				onDatabind(false);
-			}
-			else if (mEntityModelActivityDate != null
-					&& EntityManager.getEntityCache().getLastActivityDate() != null
-					&& EntityManager.getEntityCache().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+			if (unsynchronized()) {
 				onDatabind(false);
 			}
 			else {
 				draw();
 				hideBusy();
 			}
-
 		}
 	}
 

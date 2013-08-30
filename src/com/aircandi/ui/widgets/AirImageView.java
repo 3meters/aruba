@@ -45,6 +45,8 @@ public class AirImageView extends RelativeLayout {
 	private Integer						mBrokenDrawable;
 	private Photo						mBrokenPhoto;
 	private ScaleType					mScaleType			= ScaleType.CENTER_CROP;
+	private FixedAlong					mFixedAlong			= FixedAlong.none;
+	private int							squareDimen			= 1;
 
 	private static final String			androidNamespace	= "http://schemas.android.com/apk/res/android";
 	private static final ScaleType[]	sScaleTypeArray		= {
@@ -75,6 +77,13 @@ public class AirImageView extends RelativeLayout {
 		mShowBusy = ta.getBoolean(R.styleable.AirImageView_showBusy, true);
 		mLayoutId = ta.getResourceId(R.styleable.AirImageView_layout, R.layout.widget_webimageview);
 		mBrokenDrawable = ta.getResourceId(R.styleable.AirImageView_brokenDrawable, R.drawable.img_broken);
+		String fixedAlong = ta.getString(R.styleable.AirImageView_fixedAlong);
+		if (fixedAlong != null) {
+			mFixedAlong = FixedAlong.valueOf(fixedAlong);
+			if (mFixedAlong == null) {
+				mFixedAlong = FixedAlong.none;
+			}
+		}
 
 		ta.recycle();
 
@@ -116,12 +125,29 @@ public class AirImageView extends RelativeLayout {
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Events
+	// --------------------------------------------------------------------------------------------
+
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		if (mImageMain != null) {
 			mImageMain.layout(l, t, r, b);
 		}
 		super.onLayout(changed, l, t, r, b);
+	}
+
+	@Override
+	public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+		if (mFixedAlong != FixedAlong.none) {
+			int square = (mFixedAlong == FixedAlong.width) ? getMeasuredWidth() : getMeasuredHeight();
+			if (square > squareDimen) {
+				squareDimen = square;
+			}
+			setMeasuredDimension(squareDimen, squareDimen);
+		}
 	}
 
 	private void doImageRequest(final BitmapRequest bitmapRequest, final boolean okToRecycle) {
@@ -152,7 +178,7 @@ public class AirImageView extends RelativeLayout {
 			@Override
 			public void onError(Object response) {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
-				
+
 				if (serviceResponse.exception.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
 					UI.showToastNotification("Photo not found", Toast.LENGTH_SHORT);
 				}
@@ -221,7 +247,7 @@ public class AirImageView extends RelativeLayout {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc
+	// Methods
 	// --------------------------------------------------------------------------------------------
 
 	public void clearImage(final boolean animate, final Integer animationId) {
@@ -266,7 +292,7 @@ public class AirImageView extends RelativeLayout {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Setters/Getters routines
+	// Properties
 	// --------------------------------------------------------------------------------------------
 
 	private void setImage(final Bitmap bitmap, String photoUri) {
@@ -328,5 +354,15 @@ public class AirImageView extends RelativeLayout {
 
 	public void setBrokenPhoto(Photo brokenPhoto) {
 		mBrokenPhoto = brokenPhoto;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Classes
+	// --------------------------------------------------------------------------------------------
+
+	public static enum FixedAlong {
+		none,
+		width,
+		height
 	}
 }

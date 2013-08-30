@@ -18,7 +18,6 @@ import com.aircandi.applications.Applinks;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.events.MessageEvent;
 import com.aircandi.service.objects.Count;
@@ -82,8 +81,7 @@ public class PictureForm extends BaseEntityForm {
 
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
-						mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-						mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
+						synchronize();
 						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
 							mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
