@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
@@ -751,7 +752,7 @@ public class HttpService {
 			 * established with the service and then the device switches networks. That causes the service to reset the
 			 * connection and we get a read error.
 			 */
-			if (exception.getMessage().toLowerCase().contains("connection reset")) {
+			if (exception.getMessage().toLowerCase(Locale.US).contains("connection reset")) {
 				Logger.d(this, "Retrying on " + exception.getClass().getName() + ": " + exception.getMessage());
 				return true;
 			}

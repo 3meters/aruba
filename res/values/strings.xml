@@ -99,6 +99,7 @@
     <string name="dummy_address">"2200 N 56th (at Keystone Pl N)\nSeattle, WA 98103\n(206) 545&#8211;4277"</string>
     <string name="dummy_comments">21 comments</string>
     <string name="dummy_distance">0.15mi</string>
+    <string name="dummy_candigram_action">leaving in 18 minutes</string>
     <string name="dummy_number">10</string>
     <string name="dummy_like_stat">12 likes</string>
     <string name="dummy_watch_stat">8 watching</string>
@@ -340,7 +341,7 @@
     <string name="button_map">map</string>
     <string name="button_more">more</string>
     <string name="button_tune">tune</string>
-    <string name="button_nudge">kick</string>
+    <string name="button_kick">kick</string>
     <string name="button_capture">capture</string>
     <string name="button_call">call</string>
     <string name="button_like">like</string>
@@ -491,7 +492,7 @@
     <!-- Invite -->
     
     <string name="invite_heading">invite your friends to Aircandi</string>
-    <string name="invite_message_default">I enjoy Aircandi. I thought you might like it too.</string>
+    <string name="invite_message_default">I enjoy Aircandi and I thought you might like it too!</string>
     
     <!-- Picture -->
     

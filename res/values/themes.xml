@@ -21,7 +21,7 @@
 
     <style name="aircandi_theme_dark" parent="Theme.Sherlock">
         <item name="themeTone">dark</item>
-        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:windowBackground">@color/background_dark</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowNoTitle">false</item>
 
@@ -125,7 +125,7 @@
 
     <style name="aircandi_theme_light" parent="Theme.Sherlock.Light">
         <item name="themeTone">light</item>
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowBackground">@color/background_light</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowNoTitle">false</item>
 

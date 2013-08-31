@@ -40,10 +40,10 @@ public class Maps {
 				for (Shortcut shortcut : shortcuts) {
 					if (shortcut.location != null) {
 						AirMarker marker = new AirMarker(shortcut.name, null, shortcut.location.lat, shortcut.location.lng, false,
-								R.drawable.ic_marker_candigram_inactive);
+								R.drawable.img_marker_candigram_inactive);
 						if (!shortcut.inactive) {
 							marker.current = true;
-							marker.iconResId = R.drawable.ic_marker_candigram;
+							marker.iconResId = R.drawable.img_marker_candigram;
 						}
 						markerStrings.add(HttpService.objectToJson(marker, UseAnnotations.False, ExcludeNulls.True));
 					}

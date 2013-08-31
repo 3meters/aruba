@@ -9,7 +9,8 @@
     android:clickable="true"
     android:clipToPadding="false"
     android:gravity="center"
-    android:minWidth="@dimen/action_button_min_width" >
+    android:minWidth="@dimen/action_button_min_width"
+    tools:ignore="Overdraw" >
 
     <!-- textview is a hack to force the action bar button to the height we want -->
     <com.aircandi.ui.widgets.AirTextView
@@ -29,7 +30,6 @@
         android:background="@drawable/bg_accuracy_indicator" />
 
     <View
-        android:id="@+id/accuracy_center"
         android:layout_width="7dp"
         android:layout_height="7dp"
         android:layout_gravity="center"

@@ -14,7 +14,6 @@
         android:id="@+id/stub_picture_detail"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:inflatedId="@+id/picture_detail"
         android:layout="@layout/temp_photo_detail" />
 
 </RelativeLayout>

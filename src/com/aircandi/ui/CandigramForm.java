@@ -528,12 +528,12 @@ public class CandigramForm extends BaseEntityForm {
 
 		Candigram candigram = (Candigram) mEntity;
 
-		UI.setVisibility(findViewById(R.id.button_nudge), View.GONE);
+		UI.setVisibility(findViewById(R.id.button_kick), View.GONE);
 		UI.setVisibility(findViewById(R.id.button_capture), View.GONE);
 
 		if (EntityManager.canUserAdd(mEntity)) {
 			if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {
-				UI.setVisibility(findViewById(R.id.button_nudge), View.VISIBLE);
+				UI.setVisibility(findViewById(R.id.button_kick), View.VISIBLE);
 			}
 		}
 	}

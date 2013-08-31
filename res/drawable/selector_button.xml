@@ -1,5 +1,4 @@
 <selector
-	android:id="@+id/mymenuselector"
 	xmlns:android="http://schemas.android.com/apk/res/android"
 >
 	<!-- Non focused states -->

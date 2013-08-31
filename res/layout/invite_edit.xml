@@ -2,8 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/backgroundForm" >
+    android:layout_height="match_parent" >
 
     <com.aircandi.ui.widgets.BounceScrollView
         android:layout_width="match_parent"
@@ -54,7 +53,7 @@
 
                 <com.aircandi.ui.widgets.AirEditText
                     android:id="@+id/email"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:drawableRight="?attr/iconClear"
@@ -66,7 +65,6 @@
                     android:textAppearance="?android:attr/textAppearance" />
 
                 <com.aircandi.ui.widgets.ComboButton
-                    android:id="@+id/button_search"
                     style="@style/form_button"
                     android:layout_width="@dimen/action_button_height"
                     android:layout_height="@dimen/action_button_height"
@@ -84,7 +82,7 @@
                 android:layout_weight="1"
                 android:gravity="top"
                 android:hint="@string/form_invite_message_hint"
-                android:inputType="textCapSentences|textAutoCorrect|textLongMessage"
+                android:inputType="textCapSentences|textAutoCorrect|textLongMessage|textMultiLine"
                 android:lines="5"
                 android:minLines="5" />
 

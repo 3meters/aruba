@@ -9,7 +9,8 @@
     android:clickable="true"
     android:clipToPadding="false"
     android:gravity="center"
-    android:minWidth="@dimen/action_button_min_width" >
+    android:minWidth="@dimen/action_button_min_width"
+    tools:ignore="Overdraw" >
 
     <!-- textview is a hack to force the action bar button to the height we want -->
 

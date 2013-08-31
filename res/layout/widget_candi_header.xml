@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Used by candigrams and pictures -->
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="wrap_content"
@@ -7,13 +9,13 @@
     android:paddingTop="3dp" >
 
     <com.aircandi.ui.widgets.AirButton
-        android:id="@+id/button_nudge"
+        android:id="@+id/button_kick"
         style="@style/form_button_floating"
         android:layout_width="match_parent"
         android:layout_height="@dimen/form_button_height"
         android:layout_marginBottom="3dp"
         android:onClick="onKickButtonClick"
-        android:text="@string/button_nudge"
+        android:text="@string/button_kick"
         android:visibility="gone" />
 
     <com.aircandi.ui.widgets.AirButton
@@ -58,7 +60,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/form_button_height"
+        android:layout_height="0dp"
         android:layout_marginLeft="5dp"
         android:layout_weight="1"
         android:orientation="vertical" >
@@ -83,8 +85,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dp"
-        android:text="leaving in 18 minutes"
+        android:text="@string/dummy_candigram_action"
         android:textColor="?attr/textColorButtonLink"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
 </LinearLayout>

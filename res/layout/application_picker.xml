@@ -44,7 +44,6 @@
         android:gravity="center_horizontal" >
 
         <com.aircandi.ui.widgets.AirButton
-            android:id="@+id/button_cancel"
             style="@style/form_button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -68,7 +68,6 @@
             android:src="?attr/iconDelete" />
 
         <ImageButton
-            android:id="@+id/button_suggest_links"
             style="@style/form_button_borderless"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -77,7 +76,6 @@
             android:src="?attr/iconSuggest" />
 
         <ImageButton
-            android:id="@+id/button_move_up"
             style="@style/form_button_borderless"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -86,7 +84,6 @@
             android:src="?attr/iconMoveUp" />
 
         <ImageButton
-            android:id="@+id/button_move_down"
             style="@style/form_button_borderless"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -95,7 +92,6 @@
             android:src="?attr/iconMoveDown" />
 
         <ImageButton
-            android:id="@+id/button_add"
             style="@style/form_button_borderless"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

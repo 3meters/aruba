@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/backgroundForm"
     tools:context="com.aircandi.ui.edit.CandigramEdit" >
 
     <com.aircandi.ui.widgets.BounceScrollView
@@ -23,7 +22,6 @@
             <!-- Wizard Start -->
 
             <FrameLayout
-                android:id="@+id/wizard_type"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" >
 

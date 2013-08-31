@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     android:background="?attr/backgroundHelp"
     android:clickable="true"
-    android:onClick="onHelpClick" >
+    android:onClick="onHelpClick"
+    tools:ignore="Overdraw" >
 
     <com.aircandi.ui.widgets.AirTextView
         style="@style/balloon"

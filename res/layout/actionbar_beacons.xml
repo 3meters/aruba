@@ -9,7 +9,8 @@
     android:clickable="true"
     android:clipToPadding="false"
     android:gravity="center"
-    android:minWidth="@dimen/action_button_min_width" >
+    android:minWidth="@dimen/action_button_min_width"
+    tools:ignore="Overdraw" >
 
     <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/beacon_indicator"
