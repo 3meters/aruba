@@ -48,6 +48,7 @@
         <attr name="iconMoveDown" format="reference" />
         <attr name="iconAdd" format="reference" />
         <attr name="iconAndroid" format="reference" />
+        <attr name="iconGooglePlay" format="reference" />
         <attr name="iconTune" format="reference" />
         <attr name="iconMap" format="reference" />
         <attr name="iconCall" format="reference" />

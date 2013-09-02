@@ -78,7 +78,7 @@
     </string-array>
     <string-array name="candigram_type_descriptions">
         <item>Candigram travels to a new place when time runs out</item>
-        <item>Candigram travels to a new place when nudged</item>
+        <item>Candigram travels to a new place when kicked</item>
     </string-array>
 
     <!-- Candigram range -->
@@ -101,6 +101,32 @@
         <item>The candigram travels anywhere in the world</item>
     </string-array>
 
+    <!-- Candigram hops -->
+
+    <string-array name="candigram_hops_entries">
+        <item>10 visits</item>
+        <item>50 visits</item>
+        <item>100 visits</item>
+        <item>500 visits</item>
+        <item>Unlimited</item>
+    </string-array>
+
+    <string-array name="candigram_hops_values">
+        <item>10</item>
+        <item>50</item>
+        <item>100</item>
+        <item>500</item>
+        <item>-1</item>
+    </string-array>
+
+    <string-array name="candigram_hops_descriptions">
+        <item>The candigram will travel to a maximum of 10 places</item>
+        <item>The candigram will travel to a maximum of 50 places</item>
+        <item>The candigram will travel to a maximum of 100 places</item>
+        <item>The candigram will travel to a maximum of 500 places</item>
+        <item>The candigram never stops visiting places</item>
+    </string-array>
+    
     <!-- Candigram duration -->
 
     <string-array name="candigram_duration_entries">
@@ -112,11 +138,11 @@
     </string-array>
 
     <string-array name="candigram_duration_values">
-        <item>30000</item>
-        <item>60000</item>
-        <item>480000</item>
-        <item>1440000</item>
-        <item>10080000</item>
+        <item>1800000</item>
+        <item>3600000</item>
+        <item>28800000</item>
+        <item>86400000</item>
+        <item>604800000</item>
     </string-array>
 
     <string-array name="candigram_duration_descriptions">

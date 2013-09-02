@@ -63,7 +63,6 @@ import com.aircandi.utilities.UI;
 public abstract class BaseEntityForm extends BaseBrowse {
 
 	protected ScrollView			mScrollView;
-	protected ViewGroup				mFooterHolder;
 	protected Entity				mEntity;
 
 	/* Inputs */
@@ -90,8 +89,6 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-
-		mFooterHolder = (ViewGroup) findViewById(R.id.footer_holder);
 		mScrollView = (ScrollView) findViewById(R.id.scroll_view);
 	}
 
@@ -141,7 +138,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				ModelResult result = (ModelResult) response;
 				setSupportProgressBarIndeterminateVisibility(false);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					onDatabind(false);
+					databind(false);
 				}
 				else {
 					if (result.serviceResponse.exception.getStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
@@ -307,9 +304,6 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 	// UI
 	// --------------------------------------------------------------------------------------------
-
-	@Override
-	protected abstract void draw();
 
 	protected void drawButtons() {
 
@@ -632,7 +626,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			Animate.doOverridePendingTransition(this, TransitionType.PageBack);
 			if (unsynchronized()) {
 				invalidateOptionsMenu();
-				onDatabind(true);
+				databind(false);
 			}
 
 			/* Package receiver */
@@ -670,7 +664,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 						@Override
 						public void run() {
-							onDatabind(false);
+							databind(false);
 						}
 					}, 1500);
 				}

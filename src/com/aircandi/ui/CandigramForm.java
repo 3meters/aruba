@@ -71,7 +71,6 @@ public class CandigramForm extends BaseEntityForm {
 		mActionInfo = (TextView) findViewById(R.id.action_info);
 		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
 		mCandigramExitSoundId = mSoundPool.load(this, R.raw.candigram_exit, 1);
-		
 
 		mTimer = new Runnable() {
 
@@ -84,7 +83,7 @@ public class CandigramForm extends BaseEntityForm {
 	}
 
 	@Override
-	public void onDatabind(final Boolean refreshProposed) {
+	public void databind(final Boolean refreshProposed) {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
@@ -111,6 +110,7 @@ public class CandigramForm extends BaseEntityForm {
 				LinkOptions linkOptions = LinkOptions.getDefault(DefaultType.LinksForCandigram);
 				linkOptions.setIgnoreInactive(true);
 				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, linkOptions);
+
 				return result;
 			}
 
@@ -189,14 +189,16 @@ public class CandigramForm extends BaseEntityForm {
 		new AsyncTask() {
 
 			@Override
-			protected void onPreExecute() {}
+			protected void onPreExecute() {
+				showBusy();
+			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("NudgeEntity");
-				Tracker.sendEvent("ui_action", "nudge_entity", null, 0, Aircandi.getInstance().getUser());
+				Thread.currentThread().setName("KickEntity");
+				Tracker.sendEvent("ui_action", "kick_entity", null, 0, Aircandi.getInstance().getUser());
 				/*
-				 * Call service routine to trigger a nudge
+				 * Call service routine to trigger a move
 				 */
 				final ModelResult result = EntityManager.getInstance().moveCandigram(mEntity);
 				return result;
@@ -206,6 +208,7 @@ public class CandigramForm extends BaseEntityForm {
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
 				setSupportProgressBarIndeterminateVisibility(false);
+				hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					if (result.data != null) {
 						List<Entity> entities = (List<Entity>) result.data;
@@ -223,7 +226,7 @@ public class CandigramForm extends BaseEntityForm {
 
 	public void kickWrapup(Entity entity, User user) {
 
-		Place place = (Place) entity;
+		final Place place = (Place) entity;
 
 		final LayoutInflater inflater = LayoutInflater.from(this);
 		final ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.temp_kicked_candigram, null);
@@ -275,14 +278,20 @@ public class CandigramForm extends BaseEntityForm {
 				, customView
 				, this
 				, android.R.string.ok
-				, null
+				, R.string.alert_kicked_follow
 				, null
 				, new DialogInterface.OnClickListener() {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
-							mSoundPool.play(mCandigramExitSoundId, 1.0f, 1.0f, 0, 0, 1f);							
+							mSoundPool.play(mCandigramExitSoundId, 1.0f, 1.0f, 0, 0, 1f);
+							finish();
+							Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CandigramOut);
+						}
+						else if (which == Dialog.BUTTON_NEGATIVE) {
+							Places.view(CandigramForm.this, place.id);
+							mSoundPool.play(mCandigramExitSoundId, 1.0f, 1.0f, 0, 0, 1f);
 							finish();
 							Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CandigramOut);
 						}
@@ -331,7 +340,7 @@ public class CandigramForm extends BaseEntityForm {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected void draw() {
+	public void draw() {
 		/*
 		 * For now, we assume that the candi form isn't recycled.
 		 * 
@@ -389,6 +398,7 @@ public class CandigramForm extends BaseEntityForm {
 			/* Start updating the countdown in action info */
 			mHandler.post(mTimer);
 			((TextView) findViewById(R.id.header)).setText("touring " + getString(R.string.form_title_candigram));
+			UI.setVisibility(mActionInfo, View.VISIBLE);
 		}
 		else if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {
 			((TextView) findViewById(R.id.header)).setText("bouncing " + getString(R.string.form_title_candigram));
@@ -513,10 +523,6 @@ public class CandigramForm extends BaseEntityForm {
 		drawButtons();
 
 		/* Visibility */
-		if (mFooterHolder != null) {
-			mFooterHolder.setVisibility(View.VISIBLE);
-		}
-
 		if (mScrollView != null) {
 			mScrollView.setVisibility(View.VISIBLE);
 		}
@@ -547,15 +553,7 @@ public class CandigramForm extends BaseEntityForm {
 			Long next = candigram.hopNextDate.longValue();
 			String timeTill = DateTime.interval(now, next, IntervalContext.future);
 			if (!timeTill.equals("now")) {
-				mActionInfo.setText("leaving in" + "\n" + timeTill);
-			}
-		}
-		else if (candigram.hopLastDate != null) {
-			Long now = DateTime.nowDate().getTime();
-			Long next = candigram.hopLastDate.longValue() + candigram.duration.longValue();
-			String timeTill = DateTime.interval(now, next, IntervalContext.future);
-			if (!timeTill.equals("now")) {
-				mActionInfo.setText("leaving in" + "\n" + timeTill);
+				action = "leaving in" + "\n" + timeTill;
 			}
 		}
 		mActionInfo.setText(action);

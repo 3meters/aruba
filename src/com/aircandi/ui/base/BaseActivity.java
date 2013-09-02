@@ -172,12 +172,17 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	@Override
 	public void showBusy() {
+		showBusy(null);
+	}
+
+	@Override
+	public void showBusy(final Object message) {
 		runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
 				if (mBusyManager != null) {
-					mBusyManager.showBusy();
+					mBusyManager.showBusy(message);
 					mBusyManager.startBodyBusyIndicator();
 				}
 			}
@@ -199,7 +204,10 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	};
 
 	@Override
-	public void onDatabind(Boolean refresh) {}
+	public void databind(Boolean refresh) {}
+
+	@Override
+	public void draw() {}
 
 	@Override
 	public void onError() {}

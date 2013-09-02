@@ -12,6 +12,7 @@ public class DateTime {
 	private static final String	DATE_FORMAT_TIME_SINCE_WITH_YEAR	= "MMM d, yyyy";
 	private static final String	TIME_FORMAT_TIME_SINCE				= "h:mm";
 	private static final String	AMPM_FORMAT_TIME_SINCE				= "a";
+	public static final String	DATE_FORMAT_DETAILED				= "MMM d, yyyy h:mm:ss.SSS";
 
 	public static String nowString(String pattern) {
 		final Calendar cal = Calendar.getInstance();
@@ -19,13 +20,18 @@ public class DateTime {
 		return sdf.format(cal.getTime());
 	}
 
+	public static String dateString(Long time, String pattern) {
+		final SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.US);
+		return sdf.format(time);
+	}
+	
 	public static Date nowDate() {
 		final Calendar cal = Calendar.getInstance();
 		return cal.getTime();
 	}
 
 	@SuppressWarnings("deprecation")
-	public static String interval(Long oldDateMs, Long newDateMs, IntervalContext context ) {
+	public static String interval(Long oldDateMs, Long newDateMs, IntervalContext context) {
 
 		final Date dateOld = new Date(oldDateMs);
 
@@ -83,7 +89,7 @@ public class DateTime {
 		}
 		return interval;
 	}
-	
+
 	public static enum IntervalContext {
 		past,
 		future

@@ -45,6 +45,7 @@ public class MapForm extends BaseActivity {
 	List<AirMarker>				mMarkers							= new ArrayList<AirMarker>();
 	LatLngBounds				mBounds;
 	private static final int	REQUEST_CODE_RECOVER_PLAY_SERVICES	= 1001;
+	private static final int	DEFAULT_ZOOM						= 16;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -77,7 +78,7 @@ public class MapForm extends BaseActivity {
 	}
 
 	@Override
-	public void onDatabind(final Boolean refreshProposed) {
+	public void databind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
 
@@ -97,9 +98,8 @@ public class MapForm extends BaseActivity {
 					refresh = true;
 				}
 
-				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId
-						, refresh
-						, LinkOptions.getDefault(DefaultType.LinksForPlace));
+				LinkOptions options = LinkOptions.getDefault(DefaultType.LinksForPlace);
+				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
 
 				return result;
 			}
@@ -125,7 +125,8 @@ public class MapForm extends BaseActivity {
 		}.execute();
 	}
 
-	protected void draw() {
+	@Override
+	public void draw() {
 		if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
 			UI.showToastNotification("Google Play Services not available", Toast.LENGTH_SHORT);
 			return;
@@ -172,7 +173,7 @@ public class MapForm extends BaseActivity {
 				}
 				Marker marker = mMapFragment.getMap().addMarker(options);
 				marker.showInfoWindow();
-				mMapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()), 16));
+				mMapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()), DEFAULT_ZOOM));
 			}
 		}
 		else {
@@ -203,9 +204,12 @@ public class MapForm extends BaseActivity {
 				@Override
 				public void run() {
 					mMapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngBounds(mBounds, 75));
-
+					float zoom = mMapFragment.getMap().getCameraPosition().zoom;
+					if (zoom > DEFAULT_ZOOM) {
+						mMapFragment.getMap().animateCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM), 1000, null);
+					}
 				}
-			});			
+			});
 		}
 	}
 
@@ -241,7 +245,7 @@ public class MapForm extends BaseActivity {
 		super.onResume();
 		if (checkPlayServices()) {
 			findViewById(R.id.fragment_holder).setVisibility(View.VISIBLE);
-			onDatabind(false);
+			databind(false);
 		}
 	}
 

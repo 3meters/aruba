@@ -13,7 +13,6 @@ import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.service.Expose;
-import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Photo.PhotoSource;
 
 /**
@@ -190,13 +189,6 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	public Boolean isActive(Entity entity) {
 		if (this.app.equals(Constants.TYPE_APP_MAP)) {
 			if (entity.getLocation() == null) {
-				return false;
-			}
-		}
-		else if (this.app.equals(Constants.TYPE_APP_LIKE)
-				|| this.app.equals(Constants.TYPE_APP_WATCH)) {
-			Count count = entity.getCount(app, Direction.in);
-			if (count == null || count.count.intValue() < 1) {
 				return false;
 			}
 		}

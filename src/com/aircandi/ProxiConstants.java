@@ -4,9 +4,9 @@ package com.aircandi;
 @SuppressWarnings("ucd")
 public final class ProxiConstants {
 
-	public static final int		TIMEOUT_SOCKET_QUERIES							= 2000;
+	public static final int		TIMEOUT_SOCKET_QUERIES							= 5000;
 	public static final int		TIMEOUT_SOCKET_UPDATES							= 30000;
-	public static final int		TIMEOUT_CONNECTION								= 2000;
+	public static final int		TIMEOUT_CONNECTION								= 5000;
 
 	public static String		WALLED_GARDEN_URI								= "http://clients3.google.com/generate_204";
 	public static final int		WALLED_GARDEN_SOCKET_TIMEOUT_MS					= 5000;

@@ -75,6 +75,32 @@
                 android:visibility="invisible" />
         </LinearLayout>
 
+        <!-- Hops -->
+
+        <LinearLayout
+            android:id="@+id/hops_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="vertical" >
+
+            <Spinner
+                android:id="@+id/spinner_hops"
+                android:layout_width="200dp"
+                android:layout_height="@dimen/form_field_height"
+                android:spinnerMode="dialog" />
+
+            <com.aircandi.ui.widgets.AirTextView
+                android:id="@+id/hint_hops"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/hint_indent_spinner"
+                android:text="@string/candigram_hops_help"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?attr/textColorSecondary"
+                android:visibility="invisible" />
+        </LinearLayout>
+        
         <!-- Visit duration -->
 
         <LinearLayout

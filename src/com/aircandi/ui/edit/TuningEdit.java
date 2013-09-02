@@ -40,13 +40,13 @@ public class TuningEdit extends BaseEntityEdit {
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-
 		mButtonTune = (Button) findViewById(R.id.button_tune);
 		mButtonUntune = (Button) findViewById(R.id.button_untune);
-	}
+		draw();
+}
 
 	@Override
-	protected void draw() {
+	public void draw() {
 
 		if (mEntity != null) {
 

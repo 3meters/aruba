@@ -25,6 +25,7 @@ public class Candigrams {
 	public static int TYPE_DEFAULT_POSITION = 0;
 	public static int RANGE_DEFAULT_POSITION = 2;
 	public static int DURATION_DEFAULT_POSITION = 1;
+	public static int HOPS_DEFAULT_POSITION = 1;
 	public static int ICON_COLOR = R.color.brand_pink_lighter;
 	
 
@@ -103,6 +104,11 @@ public class Candigrams {
 			valuesResId = R.array.candigram_duration_values;
 			descriptionsResId = R.array.candigram_duration_descriptions;
 		}
+		else if (propertyType == PropertyType.hops) {
+			entriesResId = R.array.candigram_hops_entries;
+			valuesResId = R.array.candigram_hops_values;
+			descriptionsResId = R.array.candigram_hops_descriptions;
+		}
 		
 		SpinnerData data = new SpinnerData(context);
 		data.setEntries(entriesResId);
@@ -160,8 +166,7 @@ public class Candigrams {
 		type,
 		range,
 		duration,
-		capture,
-		locked
+		locked, 
+		hops
 	}
-
 }

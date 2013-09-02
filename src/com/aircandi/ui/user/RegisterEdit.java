@@ -57,12 +57,14 @@ public class RegisterEdit extends BaseEntityEdit {
 				return false;
 			}
 		});
+		databind(null);
+		draw();
 	}
 
 	@Override
-	protected void databind() {
+	public void databind(Boolean refresh) {
 		mEntitySchema = Constants.SCHEMA_ENTITY_USER;
-		super.databind();
+		super.databind(refresh);
 	}
 
 	// --------------------------------------------------------------------------------------------

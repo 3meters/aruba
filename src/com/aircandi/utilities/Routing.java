@@ -63,6 +63,7 @@ import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.ui.base.BaseEdit;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.ui.base.BaseEntityForm;
+import com.aircandi.ui.edit.ApplinkEdit;
 import com.aircandi.ui.edit.ApplinkListEdit;
 import com.aircandi.ui.edit.CommentEdit;
 import com.aircandi.ui.edit.FeedbackEdit;
@@ -427,6 +428,11 @@ public final class Routing {
 			return true;
 		}
 
+		else if (route == Route.Test) {
+			((ApplinkEdit)activity).onTestButtonClick();
+			return true;
+		}
+		
 		else if (route == Route.Signin) {
 
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, SignInEdit.class);
@@ -980,6 +986,9 @@ public final class Routing {
 		else if (itemId == R.id.signout) {
 			return Route.Signout;
 		}
+		else if (itemId == R.id.test) {
+			return Route.Test;
+		}
 		else if (itemId == R.id.invite) {
 			return Route.Invite;
 		}
@@ -1042,6 +1051,6 @@ public final class Routing {
 		NewFor,
 		DeleteNotifications,
 		Notifications,
-		Created, Invite
+		Created, Invite, Test
 	}
 }

@@ -85,10 +85,12 @@ public class InviteEdit extends BaseEntityEdit {
 				}
 			});
 		}
+		databind(null);
+		draw();
 	}
 
 	@Override
-	protected void draw() {
+	public void draw() {
 		((UserView) findViewById(R.id.created_by)).databind(Aircandi.getInstance().getUser(), null);
 	}
 

@@ -12,9 +12,6 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -37,7 +34,6 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
-import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Dialogs;
 
 public class CandigramEdit extends BaseEntityEdit {
@@ -49,17 +45,17 @@ public class CandigramEdit extends BaseEntityEdit {
 	private Spinner		mSpinnerType;
 	private Spinner		mSpinnerRange;
 	private Spinner		mSpinnerDuration;
-
-	private CheckBox	mCheckBoxCapture;
+	private Spinner		mSpinnerHops;
 
 	private TextView	mHintType;
 	private TextView	mHintRange;
 	private TextView	mHintDuration;
-	private TextView	mHintCapture;
+	private TextView	mHintHops;
 
 	private SpinnerData	mSpinnerTypeData;
 	private SpinnerData	mSpinnerRangeData;
 	private SpinnerData	mSpinnerDurationData;
+	private SpinnerData	mSpinnerHopsData;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -71,22 +67,23 @@ public class CandigramEdit extends BaseEntityEdit {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
-		mCheckBoxCapture = (CheckBox) findViewById(R.id.chk_capture);
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
 		mSpinnerItem = getThemeTone().equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
 		mSpinnerTypeData = Candigrams.getSpinnerData(this, PropertyType.type);
 		mSpinnerRangeData = Candigrams.getSpinnerData(this, PropertyType.range);
 		mSpinnerDurationData = Candigrams.getSpinnerData(this, PropertyType.duration);
+		mSpinnerHopsData = Candigrams.getSpinnerData(this, PropertyType.hops);
 
 		mHintType = (TextView) findViewById(R.id.hint_type);
 		mHintRange = (TextView) findViewById(R.id.hint_range);
 		mHintDuration = (TextView) findViewById(R.id.hint_duration);
-		mHintCapture = (TextView) findViewById(R.id.hint_capture);
+		mHintHops = (TextView) findViewById(R.id.hint_hops);
 
 		mSpinnerType = (Spinner) findViewById(mEditing ? R.id.spinner_type : R.id.wizard_spinner_type);
 		mSpinnerRange = (Spinner) findViewById(R.id.spinner_range);
 		mSpinnerDuration = (Spinner) findViewById(R.id.spinner_duration);
+		mSpinnerHops = (Spinner) findViewById(R.id.spinner_hops);
 
 		mSpinnerType.setAdapter(new SpinnerAdapter(this, mSpinnerItem, mSpinnerTypeData.getEntries(), R.string.candigram_type_hint));
 		mSpinnerType.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -175,19 +172,27 @@ public class CandigramEdit extends BaseEntityEdit {
 			public void onNothingSelected(AdapterView<?> parent) {}
 		});
 
-		mCheckBoxCapture.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		mSpinnerHops.setAdapter(new SpinnerAdapter(this, mSpinnerItem, mSpinnerHopsData.getEntries(), R.string.candigram_hops_hint));
+		mSpinnerHops.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				Candigram candigram = (Candigram) mEntity;
-				mHintCapture.setText(getString(isChecked ? R.string.candigram_capture_true_hint : R.string.candigram_capture_false_hint));
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-				if (candigram.capture == null || ((Candigram) mEntity).capture != isChecked) {
-					if (!mFirstDraw) {
-						mDirty = true;
+				if (position < mSpinnerHops.getAdapter().getCount()) {
+					Candigram candigram = (Candigram) mEntity;
+					mHintHops.setText(mSpinnerHopsData.getDescriptions().get(position));
+					mHintHops.setVisibility(View.VISIBLE);
+					if (candigram.hopsMax == null
+							|| candigram.hopsMax.intValue() != Integer.parseInt(mSpinnerHopsData.getEntryValues().get(position))) {
+						if (!mFirstDraw) {
+							mDirty = true;
+						}
 					}
 				}
 			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {}
 		});
 
 		if (mEditing) {
@@ -213,6 +218,8 @@ public class CandigramEdit extends BaseEntityEdit {
 			findViewById(R.id.settings_button_finish).setVisibility(View.VISIBLE);
 			findViewById(R.id.settings_image_previous).setVisibility(View.VISIBLE);
 		}
+		databind(null);
+		draw();
 	}
 
 	@Override
@@ -227,7 +234,7 @@ public class CandigramEdit extends BaseEntityEdit {
 	}
 
 	@Override
-	protected void draw() {
+	public void draw() {
 		super.draw();
 
 		/* Place content */
@@ -277,10 +284,19 @@ public class CandigramEdit extends BaseEntityEdit {
 				mSpinnerDuration.setSelection(Candigrams.DURATION_DEFAULT_POSITION);
 			}
 		}
-
-		if (mCheckBoxCapture != null) {
-			mCheckBoxCapture.setChecked(candigram.capture != null ? candigram.capture : false);
-			mHintCapture.setText(getString(mCheckBoxCapture.isChecked() ? R.string.candigram_capture_true_hint : R.string.candigram_capture_false_hint));
+		if (mSpinnerHops != null) {
+			if (candigram.hopsMax != null) {
+				int i = 0;
+				for (String hops : mSpinnerHopsData.getEntryValues()) {
+					if (Integer.parseInt(hops) == candigram.hopsMax.intValue()) {
+						mSpinnerHops.setSelection(i);
+					}
+					i++;
+				}
+			}
+			else {
+				mSpinnerHops.setSelection(Candigrams.DURATION_DEFAULT_POSITION);
+			}
 		}
 	}
 
@@ -381,6 +397,17 @@ public class CandigramEdit extends BaseEntityEdit {
 			return false;
 		}
 
+		if (candigram.hopsMax == null) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_candigram_hops)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			return false;
+		}
+
 		if (candigram.type != null && candigram.type.equals(Constants.TYPE_APP_TOUR)) {
 			if (candigram.duration == null) {
 				Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
@@ -411,23 +438,20 @@ public class CandigramEdit extends BaseEntityEdit {
 			candigram.range = Integer.parseInt(mSpinnerRangeData.getEntryValues().get(mSpinnerRange.getSelectedItemPosition()));
 		}
 
+		if (mSpinnerHops != null && mSpinnerHops.getSelectedItemPosition() < mSpinnerHopsData.getEntryValues().size()) {
+			candigram.hopsMax = Integer.parseInt(mSpinnerHopsData.getEntryValues().get(mSpinnerHops.getSelectedItemPosition()));
+		}
+		
 		if (mSpinnerDuration != null && mSpinnerDuration.getSelectedItemPosition() < mSpinnerDurationData.getEntryValues().size()) {
-			candigram.duration = Integer.parseInt(mSpinnerDurationData.getEntryValues().get(mSpinnerDuration.getSelectedItemPosition()));
-		}
-
-		if (findViewById(R.id.chk_capture) != null) {
-			candigram.capture = ((CheckBox) findViewById(R.id.chk_capture)).isChecked();
-		}
-
-		if (candigram.type.equals(Constants.TYPE_APP_TOUR)) {
-			/* Updates do not change the current hop settings */
-			if (!mEditing && candigram.duration != null) {
-				candigram.hopLastDate = DateTime.nowDate().getTime();
-				candigram.hopNextDate = candigram.hopLastDate.longValue() + candigram.duration.longValue();
+			candigram.duration = null;
+			if (candigram.type.equals("tour")) {
+				candigram.duration = Integer.parseInt(mSpinnerDurationData.getEntryValues().get(mSpinnerDuration.getSelectedItemPosition()));
 			}
 		}
 
-		/* Set location */
+		/* 
+		 * Set origin location so service can determine eligible area for hops 
+		 */
 		if (mParentId != null) {
 			Entity place = EntityManager.getEntity(mParentId);
 			if (place != null && place.location != null) {

@@ -75,10 +75,11 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 
 		mMessage = (TextView) findViewById(R.id.message);
 		mList = (BounceListView) findViewById(R.id.list);
+		databind(null);
 	}
 
 	@Override
-	protected void databind() {
+	public void databind(Boolean refresh) {
 		/*
 		 * Before entities are customized, they have no position and are
 		 * sorted by the modified date on the link. Once entity customization
@@ -103,9 +104,6 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 		mBusyManager.hideBusy(); // visible by default
 		mBusyManager.stopBodyBusyIndicator();
 	}
-
-	@Override
-	protected void draw() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Events

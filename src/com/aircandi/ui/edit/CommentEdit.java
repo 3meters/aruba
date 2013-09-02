@@ -19,6 +19,7 @@ public class CommentEdit extends BaseEntityEdit {
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
+		
 		mDescription.setImeOptions(EditorInfo.IME_ACTION_SEND);
 		mDescription.setOnEditorActionListener(new OnEditorActionListener() {
 
@@ -34,11 +35,13 @@ public class CommentEdit extends BaseEntityEdit {
 				return false;
 			}
 		});
+		databind(null);
+		draw();
 	}
 
 	@Override
-	protected void databind() {
-		super.databind();
+	public void databind(Boolean refresh) {
+		super.databind(refresh);
 		/*
 		 * We are always creating a new comment.
 		 */

@@ -251,14 +251,19 @@ public class HttpService {
 		HttpRequestBase httpRequest = buildHttpRequest(serviceRequest, stopwatch);
 		HttpResponse httpResponse = null;
 
-		int retryCount = 0;
+		int tryCount = 0;
 		while (true) {
 
+			tryCount++;
 			try {
 
 				/* Always pre-flight our connection */
 				ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
 
+				if (stopwatch != null) {
+					stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": connected state check completed");
+				}
+				
 				if (connectedState == ConnectedState.None) {
 					final HttpServiceException proxibaseException = makeHttpServiceException(null, null, new SocketException());
 					throw proxibaseException;
@@ -269,7 +274,7 @@ public class HttpService {
 				}
 
 				/* If we get to here, we have a network connection so give it a try. */
-				if (retryCount > 0) {
+				if (tryCount > 1) {
 					/*
 					 * We do not retry if this is an update/insert/delete.
 					 * 
@@ -279,22 +284,25 @@ public class HttpService {
 					 * 
 					 * We put longer and longer pauses between retries and increase the socket timeout.
 					 */
-					pauseExponentially(retryCount);
+					pauseExponentially(tryCount);
 					final int newSocketTimeout = HttpConnectionParams.getSoTimeout(mHttpParams) + 2000;
 					HttpConnectionParams.setSoTimeout(mHttpParams, newSocketTimeout);
+					
+					if (stopwatch != null) {
+						stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": resetting socket timeout to " + String.valueOf(newSocketTimeout));
+					}
 				}
 
-				retryCount++;
 				long startTime = System.nanoTime();
 
 				if (stopwatch != null) {
-					stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": connection validation completed");
+					stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": connection validation completed");
 				}
 
 				httpResponse = mHttpClient.execute(httpRequest);
 
 				if (stopwatch != null) {
-					stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": request execute completed");
+					stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": request execute completed");
 				}
 
 				if (isRequestSuccessful(httpResponse)) {
@@ -304,6 +312,10 @@ public class HttpService {
 					long bytesDownloaded = (httpResponse.getEntity() != null) ? httpResponse.getEntity().getContentLength() : 0;
 					logDownload(startTime, System.nanoTime() - startTime, bytesDownloaded, httpRequest.getURI().toString());
 					Object response = handleResponse(httpRequest, httpResponse, serviceRequest.getResponseFormat(), serviceRequest.getRequestListener());
+					
+					if (stopwatch != null) {
+						stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": response content captured");
+					}
 
 					/* Check for valid client version even if the call was successful */
 					if (serviceRequest.getResponseFormat() == ResponseFormat.Json && !serviceRequest.getIgnoreResponseData()) {
@@ -311,6 +323,11 @@ public class HttpService {
 						 * We think anything json is coming from the Aircandi service (except Bing)
 						 */
 						ServiceData serviceData = (ServiceData) HttpService.jsonToObject((String) response, ObjectType.None, ServiceDataWrapper.True);
+						
+						if (stopwatch != null) {
+							stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": response content json (" + String.valueOf(((String)response).length()) + " bytes) decoded to object");
+						}
+						
 						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
 						if (serviceData != null && serviceData.androidMinimumVersion != null) {
 							if (serviceData.androidMinimumVersion.intValue() > clientVersionCode) {
@@ -322,7 +339,7 @@ public class HttpService {
 					}
 
 					if (stopwatch != null) {
-						stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": successful response processing completed");
+						stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": successful response processing completed");
 					}
 
 					return response;
@@ -339,7 +356,7 @@ public class HttpService {
 					httpRequest.setURI(redirectedUri);
 
 					if (stopwatch != null) {
-						stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": starting temp redirect");
+						stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": starting temp redirect");
 					}
 
 				}
@@ -374,20 +391,20 @@ public class HttpService {
 
 					HttpServiceException proxibaseException = makeHttpServiceException(httpStatusCode, httpStatusCodeService, null);
 
-					if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, proxibaseException, retryCount)) {
+					if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, proxibaseException, tryCount)) {
 						/*
 						 * If we got a duplicate error code back from the service, it could be because we tried
 						 * to double insert after a retry. In that case we want to eat the error and return success
 						 * to the caller. That means we also need to return the inserted entity.
 						 */
 						if (stopwatch != null) {
-							stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": throwing exception");
+							stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": throwing exception");
 						}
 						throw proxibaseException;
 					}
 
 					if (stopwatch != null) {
-						stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount) + ": failure, retrying");
+						stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": failure, retrying");
 					}
 				}
 			}
@@ -410,11 +427,11 @@ public class HttpService {
 				 * - Zillions
 				 */
 
-				if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, e, retryCount)) {
+				if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, e, tryCount)) {
 
 					final HttpServiceException proxibaseException = makeHttpServiceException(null, null, e);
 					if (stopwatch != null) {
-						stopwatch.segmentTime("Http service: try " + String.valueOf(retryCount + 1) + ": throwing IO exception");
+						stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount + 1) + ": throwing IO exception");
 					}
 					throw proxibaseException;
 
@@ -439,10 +456,6 @@ public class HttpService {
 	}
 
 	private HttpRequestBase buildHttpRequest(final ServiceRequest serviceRequest, final Stopwatch stopwatch) {
-
-		if (stopwatch != null) {
-			stopwatch.segmentTime("Http service: request construction started");
-		}
 
 		HttpRequestBase httpRequest = null;
 		StringBuilder jsonBody = new StringBuilder(5000);
@@ -881,7 +894,7 @@ public class HttpService {
 	}
 
 	private static String convertStreamToString(InputStream inputStream) throws IOException {
-
+		
 		final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 		final StringBuilder stringBuilder = new StringBuilder(); // $codepro.audit.disable defineInitialCapacity
 

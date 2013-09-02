@@ -15,12 +15,14 @@ import com.aircandi.ui.edit.PlaceEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 
-public class Places  {
+public class Places {
+
+	public static int	ICON_COLOR	= R.color.accent_red;
 
 	public static void view(Context context, String entityId) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceForm.class).setEntityId(entityId);
 		context.startActivity(intentBuilder.create());
-		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 
 	public static void viewFor(Context context, String entityId, String linkType, Direction direction) {
@@ -36,7 +38,7 @@ public class Places  {
 				.setListNewEnabled(true);
 
 		context.startActivity(intentBuilder.create());
-		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 
 	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction) {
@@ -58,13 +60,13 @@ public class Places  {
 	public static void edit(Context context, Entity entity) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceEdit.class).setEntity(entity);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
-		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 
 	@SuppressWarnings("ucd")
 	public static void insert(Context context) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_PLACE);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
-		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 }

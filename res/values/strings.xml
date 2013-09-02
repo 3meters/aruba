@@ -26,6 +26,7 @@
     <string name="menu_feedback_item">Feedback</string>
     <string name="menu_update_item">Update</string>
     <string name="menu_signout_item">Sign out</string>
+    <string name="menu_test_item">Test</string>
     <string name="menu_about_item">About</string>
     <string name="menu_suggest_links_item">Suggest links</string>
     <string name="menu_send_item">Send</string>
@@ -175,7 +176,13 @@
 
     <string name="alert_candigram_countdown">Touring candigrams travel place to place gathering pictures and comments as they go.</string>
     <string name="alert_candigram_capture">Capture lets you carry a candigram to another place and release it. If the candigram isn\'t released in 12 hours, it will return to where you captured it.</string>
-    <string name="alert_candigram_nudge">Discard</string>
+    <string name="alert_candigram_kick">Discard</string>
+    
+    <!-- Alerts: kicked candigram -->
+    
+    <string name="alert_kicked_candigram">Bouncing candigram</string>
+    <string name="alert_kicked_follow">Follow</string>
+        
     
     <!-- Errors: network -->
 
@@ -209,6 +216,7 @@
     <string name="error_missing_source_id_twitter">Enter a Twitter user id and then select picture again.</string>
     <string name="error_missing_candigram_type">Select a candigram type.</string>
     <string name="error_missing_candigram_range">Select the travel range.</string>
+    <string name="error_missing_candigram_hops">Select the maximum number of visits.</string>
     <string name="error_missing_candigram_duration">Select the length of visit.</string>
     <string name="error_missing_candigram_photo">Select a photo.</string>
     <string name="error_missing_invite_email">Enter at least one email address.</string>
@@ -258,6 +266,7 @@
     <string name="progress_deleting">Deleting&#8230;</string>
     <string name="progress_changing_password">Changing&#8230;</string>
     <string name="progress_searching">Searching&#8230;</string>
+    <string name="progress_loading_applinks">Loading links&#8230;</string>
     <string name="progress_signing_in">Signing in&#8230;</string>
     <string name="progress_signing_up">Creating&#8230;</string>
     <string name="progress_sending_invite">Sending invitation&#8230;</string>
@@ -438,9 +447,9 @@
 
     <!-- Forms.labels -->
 
-    <string name="form_label_applink_edit_name">LABEL</string>
-    <string name="form_label_applink_edit_app_id">USERNAME OR ID</string>
-    <string name="form_label_applink_edit_app_url">WEB ADDRESS (OPTIONAL)</string>
+    <string name="form_label_applink_edit_name">Label</string>
+    <string name="form_label_applink_edit_app_id">Username or id (optional)</string>
+    <string name="form_label_applink_edit_app_url">Web address (optional)</string>
     
     <string name="form_label_fullname">full name</string>
     <string name="form_label_bio">bio</string>
@@ -469,15 +478,14 @@
     <string name="candigram_type_hint">select candigram type</string>
     <string name="candigram_range_hint">travel range</string>
     <string name="candigram_duration_hint">length of visit</string>
+    <string name="candigram_hops_hint">number of visits</string>
     
     <string name="candigram_type_help">What type of candigram this is</string>
     <string name="candigram_range_help">How far this candigram can go when it travels</string>
     <string name="candigram_duration_help">How long a touring candigram stays before traveling to a new place</string>
-    <string name="candigram_capture_help">Allow users to capture and release this candigram</string>
+    <string name="candigram_hops_help">How many places a candigram can travel to</string>
     
     <string name="candigram_action_hint">Use kick to send this candigram traveling to a new place</string>
-    <string name="candigram_capture_true_hint">Allow users to capture and release this candigram</string>
-    <string name="candigram_capture_false_hint">Do not allow users to capture this candigram</string>
     
     <string name="section_candigram_shortcuts_places">places visited so far</string>
     <string name="section_candigram_shortcuts_applinks">pictures and comments</string>
@@ -487,7 +495,6 @@
     <string name="candigram_wizard_settings">Choose how your candigram travels and what other aircandi users can do with it.</string>
     
     <string name="candigram_button_finish">send</string>
-    <string name="alert_kicked_candigram">Bouncing candigram</string>
     
     <!-- Invite -->
     
@@ -529,8 +536,8 @@
     <string name="form_do_not_track_on_hint">All browsing activity is anonymous but editing, creating and commenting are public.</string>
     <string name="form_do_not_track_off_hint">All browsing, editing, creating and commenting activities are public.</string>
     
-    <string name="form_locked_true_help">Users can\'t add pictures or comments</string>
-    <string name="form_locked_false_help">Users can add pictures and comments</string>
+    <string name="form_locked_true_help">Aircandi users can\'t add pictures or comments</string>
+    <string name="form_locked_false_help">Aircandi users can add pictures and comments</string>
     
     <string name="form_invite_email_hint">email address</string>
     <string name="form_invite_message_hint">add a personal note (optional)</string>

@@ -12,7 +12,6 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -34,7 +33,6 @@ public class ApplinkEdit extends BaseEntityEdit {
 	private Spinner			mTypePicker;
 	private TextView		mAppId;
 	private TextView		mAppUrl;
-	private Button			mButtonTest;
 
 	private Integer			mSpinnerItemResId;
 	private Integer			mMissingResId;
@@ -50,11 +48,10 @@ public class ApplinkEdit extends BaseEntityEdit {
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-
+		
 		mTypePicker = (Spinner) findViewById(R.id.type_picker);
 		mAppId = (EditText) findViewById(R.id.app_id);
 		mAppUrl = (EditText) findViewById(R.id.app_url);
-		mButtonTest = (Button) findViewById(R.id.button_test);
 
 		mSpinnerItemResId = getThemeTone().equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
@@ -70,12 +67,6 @@ public class ApplinkEdit extends BaseEntityEdit {
 							mDirty = true;
 						}
 					}
-					if (s.toString() != "") {
-						mButtonTest.setVisibility(View.VISIBLE);
-					}
-					else {
-						mButtonTest.setVisibility(View.INVISIBLE);
-					}
 				}
 			});
 		}
@@ -90,19 +81,15 @@ public class ApplinkEdit extends BaseEntityEdit {
 							mDirty = true;
 						}
 					}
-					if (s.toString() != "") {
-						mButtonTest.setVisibility(View.VISIBLE);
-					}
-					else {
-						mButtonTest.setVisibility(View.INVISIBLE);
-					}
 				}
 			});
 		}
+		databind(null);
+		draw();
 	}
 
 	@Override
-	protected void draw() {
+	public void draw() {
 		super.draw();
 
 		final Applink applink = (Applink) mEntity;
@@ -264,7 +251,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
-	public void onTestButtonClick(View view) {
+	public void onTestButtonClick() {
 		if (validate()) {
 			gather();
 			Routing.shortcut(this, mEntity.getShortcut(), null, null);

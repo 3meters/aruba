@@ -47,10 +47,12 @@ public class FeedbackEdit extends BaseEntityEdit {
 				}
 			});
 		}
+		databind(null);
+		draw();
 	}
 
 	@Override
-	protected void databind() {
+	public void databind(Boolean refresh) {
 		/*
 		 * We are always creating a new comment.
 		 */
@@ -61,7 +63,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 	}
 
 	@Override
-	protected void draw() {
+	public void draw() {
 		((UserView) findViewById(R.id.created_by)).databind(Aircandi.getInstance().getUser(), null);
 	}
 

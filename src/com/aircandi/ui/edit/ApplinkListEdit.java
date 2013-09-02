@@ -28,8 +28,8 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 	private Entity	mParent;
 
 	@Override
-	protected void databind() {
-		super.databind();
+	public void databind(Boolean refresh) {
+		super.databind(refresh);
 
 		if (mEntityId != null) {
 			mParent = EntityManager.getEntity(mEntityId);
@@ -98,7 +98,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 					}
 				}
-				databind();
+				databind(null);
 				mBusyManager.hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
 			}
@@ -148,7 +148,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 						UI.showToastNotification(getResources().getString(R.string.toast_applinks_refreshed), Toast.LENGTH_SHORT);
 					}
 				}
-				databind();
+				databind(null);
 				mBusyManager.hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
 			}

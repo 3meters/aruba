@@ -82,7 +82,7 @@ public class BusyManager {
 		showBusy(null);
 	}
 
-	public void showBusy(Integer messageResId) {
+	public void showBusy(Object message) {
 
 		try {
 
@@ -90,9 +90,14 @@ public class BusyManager {
 				startActionbarBusyIndicator();
 			}
 
-			if (messageResId != null) {
+			if (message != null) {
 				final ProgressDialog progressDialog = getProgressDialog();
-				progressDialog.setMessage(mActivity.getString(messageResId));
+				if (message instanceof Integer) {
+					progressDialog.setMessage(mActivity.getString((Integer) message));
+				}
+				else {
+					progressDialog.setMessage((String) message);
+				}
 				if (!progressDialog.isShowing()) {
 					progressDialog.setCancelable(false);
 					progressDialog.show();

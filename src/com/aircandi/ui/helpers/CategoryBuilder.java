@@ -71,15 +71,16 @@ public class CategoryBuilder extends BaseEdit {
 		mSpinnerCategory = (Spinner) findViewById(R.id.category);
 		mSpinnerSubCategory = (Spinner) findViewById(R.id.sub_category);
 		mSpinnerSubSubCategory = (Spinner) findViewById(R.id.sub_sub_category);
-
 		mSpinnerItem = getThemeTone().equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
 		setActivityTitle(getString(R.string.dialog_category_builder_title));
-
+		
+		databind(null);
+		draw();		
 	}
 
 	@Override
-	protected void databind() {
+	public void databind(Boolean refresh) {
 		if (EntityManager.getInstance().getCategories().size() == 0) {
 			loadCategories();
 		}

@@ -64,14 +64,13 @@ public class PlaceForm extends BaseEntityForm {
 	}
 
 	@Override
-	public void onDatabind(final Boolean refreshProposed) {
+	public void databind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
 
 			@Override
 			protected void onPreExecute() {
-				mBusyManager.showBusy();
-				mBusyManager.startBodyBusyIndicator();
+				showBusy();
 			}
 
 			@Override
@@ -87,9 +86,8 @@ public class PlaceForm extends BaseEntityForm {
 					refresh = true;
 				}
 
-				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId
-						, refresh
-						, LinkOptions.getDefault(DefaultType.LinksForPlace));
+				LinkOptions options =LinkOptions.getDefault(DefaultType.LinksForPlace); 
+				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
 
 				return result;
 			}
@@ -103,10 +101,12 @@ public class PlaceForm extends BaseEntityForm {
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
 						Aircandi.currentPlace = mEntity;
-						synchronize();
 						setActivityTitle(mEntity.name);
 						if (mMenuItemEdit != null) {
 							mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
+						}
+						if (mMenuItemAdd != null) {
+							mMenuItemAdd.setVisible(EntityManager.canUserAdd(mEntity));
 						}
 
 						/* Action bar icon */
@@ -142,6 +142,7 @@ public class PlaceForm extends BaseEntityForm {
 							BitmapManager.getInstance().masterFetch(bitmapRequest);
 						}
 
+						synchronize();
 						draw();
 						if (mUpsize) {
 							mUpsize = false;
@@ -187,7 +188,7 @@ public class PlaceForm extends BaseEntityForm {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					final Entity upsizedEntity = (Entity) result.data;
 					mEntityId = upsizedEntity.id;
-					onDatabind(false);
+					databind(false);
 				}
 				else {
 					Routing.serviceError(PlaceForm.this, result.serviceResponse);
@@ -260,11 +261,11 @@ public class PlaceForm extends BaseEntityForm {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// UI routines
+	// Methods
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected void draw() {
+	public void draw() {
 		/*
 		 * For now, we assume that the candi form isn't recycled.
 		 * 
@@ -438,10 +439,6 @@ public class PlaceForm extends BaseEntityForm {
 		drawButtons();
 
 		/* Visibility */
-		if (mFooterHolder != null) {
-			mFooterHolder.setVisibility(View.VISIBLE);
-		}
-
 		if (mScrollView != null) {
 			mScrollView.setVisibility(View.VISIBLE);
 		}

@@ -87,6 +87,6 @@
         android:layout_marginLeft="5dp"
         android:text="@string/dummy_candigram_action"
         android:textColor="?attr/textColorButtonLink"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
 </LinearLayout>

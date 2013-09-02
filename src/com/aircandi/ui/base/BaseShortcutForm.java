@@ -30,7 +30,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 	protected DefaultType	mLinkOptions;
 
 	@Override
-	public void onDatabind(final Boolean refreshProposed) {
+	public void databind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
 
@@ -50,9 +50,8 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 					refresh = true;
 				}
 
-				ModelResult result = EntityManager.getInstance().getEntity(mEntityId
-						, refresh
-						, LinkOptions.getDefault(mLinkOptions));
+				LinkOptions options =LinkOptions.getDefault(mLinkOptions); 
+				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
 
 				return result;
 			}
@@ -88,7 +87,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected void draw() {
+	public void draw() {
 
 		/* Clear shortcut holder */
 		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();

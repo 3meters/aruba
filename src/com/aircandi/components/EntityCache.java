@@ -148,7 +148,7 @@ public class EntityCache implements Map<String, Entity> {
 		return serviceResponse;
 	}
 
-	public ServiceResponse loadEntitiesForEntity(String entityId, LinkOptions linkOptions, Cursor cursor) {
+	public ServiceResponse loadEntitiesForEntity(String entityId, LinkOptions linkOptions, Cursor cursor, Stopwatch stopwatch) {
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("entityId", entityId);
@@ -175,7 +175,7 @@ public class EntityCache implements Map<String, Entity> {
 			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
 		}
 
-		ServiceResponse serviceResponse = dispatch(serviceRequest);
+		ServiceResponse serviceResponse = dispatch(serviceRequest, stopwatch);
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) serviceResponse.data;

@@ -29,6 +29,7 @@ import com.aircandi.R;
 import com.aircandi.applications.Candigrams;
 import com.aircandi.applications.Comments;
 import com.aircandi.applications.Pictures;
+import com.aircandi.applications.Places;
 import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
@@ -78,6 +79,13 @@ public abstract class BaseEntityList extends BaseBrowse {
 	protected String			mListLinkDirection;
 	protected Integer			mListItemResId;
 	protected Boolean			mListNewEnabled;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		Aircandi.stopwatch3.start(this.getClass().getSimpleName() + " create");
+		super.onCreate(savedInstanceState);
+	}
+	
 
 	@Override
 	protected void unpackIntent() {
@@ -137,6 +145,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 				}
 			}
 		};
+		Aircandi.stopwatch3.segmentTime(this.getClass().getSimpleName() + " initialized");
 	}
 
 	@Override
@@ -164,22 +173,26 @@ public abstract class BaseEntityList extends BaseBrowse {
 				mActionBar.setIcon(icon);
 				setActivityTitle("candigrams");
 			}
+			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				Drawable icon = getResources().getDrawable(R.drawable.img_place_temp);
+				icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Places.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
+				mActionBar.setIcon(icon);
+				setActivityTitle("places");
+			}
 		}
+		Aircandi.stopwatch3.segmentTime(this.getClass().getSimpleName() + " action bar configured");
 	}
 
 	@Override
-	public void onDatabind(final Boolean refresh) {
+	public void databind(final Boolean refresh) {
 
 		if (refresh || mAdapter == null) {
 			mOffset = 0;
 
 			/* Prep the UI */
 			mButtonNewEntity.setVisibility(View.GONE);
-			mBusyManager.showBusy();
-			mBusyManager.startBodyBusyIndicator();
+			showBusy("Loading " + getActivityTitle() + "...");
 			mEntities.clear();
-
-			synchronize();
 
 			mAdapter = new EntityAdapter(mEntities);
 			if (mListView != null) {
@@ -223,7 +236,11 @@ public abstract class BaseEntityList extends BaseBrowse {
 				linkOptions.setIgnoreInactive(true);
 			}
 		}
-		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mForEntityId, linkOptions, mCursorSettings);
+		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mForEntityId, linkOptions, mCursorSettings, Aircandi.stopwatch3);
+		
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			synchronize();
+		}
 
 		return result;
 	}
@@ -272,7 +289,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 				return LinkOptions.getDefault(DefaultType.NoLinks);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-				return LinkOptions.getDefault(DefaultType.LinksForPost);
+				return LinkOptions.getDefault(DefaultType.LinksForPicture);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 				return LinkOptions.getDefault(DefaultType.LinksForCandigram);
@@ -366,7 +383,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 		if (!isFinishing()) {
 			if (unsynchronized()) {
 				invalidateOptionsMenu();
-				onDatabind(true);
+				databind(true); // Setting this here because it doesn't mean a service call
 			}
 		}
 	}
@@ -411,6 +428,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 			if (result.serviceResponse.responseCode != ResponseCode.Success) {
 				hideBusy();
 				Routing.serviceError(BaseEntityList.this, result.serviceResponse);
+				Aircandi.stopwatch3.stop(this.getClass().getSimpleName() + " databind failed");
 				return false;
 			}
 			else {
@@ -434,6 +452,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 						if (mMoreEntities.size() >= PAGE_SIZE) {
 							mOffset += PAGE_SIZE;
 							hideBusy();
+							Aircandi.stopwatch3.stop(this.getClass().getSimpleName() + " databind - more data available");
 							return (getWrappedAdapter().getCount() + mMoreEntities.size()) < LIST_MAX;
 						}
 					}
@@ -441,6 +460,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 			}
 
 			hideBusy();
+			Aircandi.stopwatch3.stop(this.getClass().getSimpleName() + " databind complete");
 			return false;
 		}
 
@@ -497,7 +517,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 				holder.creator = (UserView) view.findViewById(R.id.creator);
 				holder.area = (TextView) view.findViewById(R.id.area);
 				holder.createdDate = (TextView) view.findViewById(R.id.created_date);
-				holder.buttonComments = (Button) view.findViewById(R.id.button_comments);
+				holder.comments = (TextView) view.findViewById(R.id.comments);
 				holder.checked = (CheckBox) view.findViewById(R.id.checked);
 
 				if (holder.checked != null) {
@@ -516,7 +536,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 				holder.placeName = (TextView) view.findViewById(R.id.place_name);
 
 				if (mGridView != null) {
-					Integer nudge = mResources.getDimensionPixelSize(R.dimen.grid_item_height_nudge);
+					Integer nudge = mResources.getDimensionPixelSize(R.dimen.grid_item_height_kick);
 					final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mPhotoWidthPixels, mPhotoWidthPixels - nudge);
 					holder.photoView.getImageView().setLayoutParams(params);
 				}
@@ -583,14 +603,14 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 				/* Comments */
 
-				UI.setVisibility(holder.buttonComments, View.GONE);
-				if (holder.buttonComments != null) {
+				UI.setVisibility(holder.comments, View.GONE);
+				if (holder.comments != null) {
 					Count count = entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.in);
 					Integer commentCount = count != null ? count.count.intValue() : 0;
 					if (commentCount != null && commentCount > 0) {
-						holder.buttonComments.setText(String.valueOf(commentCount) + ((commentCount == 1) ? " Comment" : " Comments"));
-						holder.buttonComments.setTag(entity);
-						UI.setVisibility(holder.buttonComments, View.VISIBLE);
+						holder.comments.setText(String.valueOf(commentCount) + ((commentCount == 1) ? " Comment" : " Comments"));
+						holder.comments.setTag(entity);
+						UI.setVisibility(holder.comments, View.VISIBLE);
 					}
 				}
 
@@ -707,7 +727,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 		@SuppressWarnings("ucd")
 		public String		photoUri;		// Used for verification after fetching image
 		public Object		data;			// Object binding to
-		public Button		buttonComments;
+		public TextView		comments;
 	}
 
 }

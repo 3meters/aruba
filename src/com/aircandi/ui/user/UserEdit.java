@@ -51,11 +51,14 @@ public class UserEdit extends BaseEntityEdit {
 		mArea = (EditText) findViewById(R.id.area);
 		mEmail = (EditText) findViewById(R.id.email);
 		mDoNotTrack = (CheckBox) findViewById(R.id.chk_do_not_track);
+		
+		databind(null);
+		draw();
 	}
 
 	@Override
-	protected void databind() {
-		super.databind();
+	public void databind(Boolean refresh) {
+		super.databind(refresh);
 		
 		if (mEntity == null) {
 			throw new IllegalStateException("User entity required by UserEdit");
@@ -136,7 +139,7 @@ public class UserEdit extends BaseEntityEdit {
 	}
 
 	@Override
-	protected void draw() {
+	public void draw() {
 		super.draw();
 
 		User user = (User) mEntity;

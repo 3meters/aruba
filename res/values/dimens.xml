@@ -44,7 +44,7 @@
     <dimen name="grid_spacing_horizontal">0dp</dimen>
     <dimen name="grid_spacing_vertical">0dp</dimen>
     <dimen name="grid_padding">0dp</dimen>
-    <dimen name="grid_item_height_nudge">10dp</dimen>
+    <dimen name="grid_item_height_kick">10dp</dimen>
     <dimen name="grid_column_width_requested_large">150dp</dimen>
     <dimen name="grid_column_width_requested_medium">100dp</dimen>
     <dimen name="grid_column_width_requested_medium_small">75dp</dimen>

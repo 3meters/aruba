@@ -127,13 +127,12 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
 			mMessage = extras.getString(Constants.EXTRA_MESSAGE);
 		}
+		mEditing = (mEntity == null ? false : true);
 	}
 
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-
-		mEditing = (mEntity == null ? false : true);
 
 		mName = (AirEditText) findViewById(R.id.name);
 		mDescription = (AirEditText) findViewById(R.id.description);
@@ -185,7 +184,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	}
 
 	@Override
-	protected void databind() {
+	public void databind(Boolean refresh) {
 		if (mEditing) {
 			setActivityTitle(mEntity.name);
 		}
@@ -198,7 +197,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	}
 
 	@Override
-	protected void draw() {
+	public void draw() {
 
 		if (mEntity != null) {
 
@@ -264,6 +263,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 							&& Aircandi.getInstance().getUser().developer))) {
 				UI.setVisibility(findViewById(R.id.button_delete), View.VISIBLE);
 			}
+			mFirstDraw = false;
 		}
 	}
 
@@ -274,6 +274,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	}
 
 	protected void drawShortcuts(Entity entity) {
+		
 		if (findViewById(R.id.applinks) != null) {
 			/*
 			 * We are expecting a builder button with a viewgroup to
@@ -291,8 +292,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				}
 			}
 			else {
-				shortcuts = (List<Shortcut>) entity.getShortcuts(new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK,
-						Direction.in, false, true), null);
+				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
+				shortcuts = (List<Shortcut>) entity.getShortcuts(settings, null);
 			}
 
 			Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());
@@ -678,7 +679,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		return null;
 	}
 
-	private void loadApplinks() {
+	private void loadApplinks() {		
+		/*
+		 * First, we need the real applinks to send them to the applinks editor
+		 */		
 		if (mApplinks != null) {
 			doApplinksBuilder();
 		}
@@ -687,8 +691,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				@Override
 				protected void onPreExecute() {
-					mBusyManager.showBusy();
-					mBusyManager.startBodyBusyIndicator();
+					showBusy(R.string.progress_loading_applinks);
 				}
 
 				@Override
@@ -706,7 +709,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					linkTypes.add(Constants.TYPE_LINK_APPLINK);
 					cursor.setLinkTypes(linkTypes);
 
-					ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mEntity.id, null, cursor);
+					ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mEntity.id, null, cursor, null);
 
 					return result;
 				}
@@ -721,8 +724,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					else {
 						Routing.serviceError(BaseEntityEdit.this, result.serviceResponse);
 					}
-					mBusyManager.hideBusy();
-					mBusyManager.stopBodyBusyIndicator();
+					hideBusy();
 				}
 
 			}.execute();
@@ -989,6 +991,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 		}.execute();
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle
+	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
 	// Menus

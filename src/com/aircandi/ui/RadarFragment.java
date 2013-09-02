@@ -142,7 +142,7 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 	}
 
 	@Override
-	public void onDatabind(Boolean refresh) {
+	public void databind(Boolean refresh) {
 		/*
 		 * Cases that trigger a search
 		 * 
@@ -898,7 +898,7 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 			startScanService(Constants.INTERVAL_SCAN_WIFI);
 		}
 
-		onDatabind(false);
+		databind(false);
 	}
 
 	@Override

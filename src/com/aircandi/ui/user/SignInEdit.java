@@ -74,7 +74,7 @@ public class SignInEdit extends BaseEdit {
 	}
 
 	@Override
-	protected void draw() {
+	public void draw() {
 		if (mMessage != null) {
 			mMessage.setText(mFormMessage);
 		}

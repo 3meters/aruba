@@ -31,7 +31,7 @@ import com.aircandi.utilities.UI;
 public class UserForm extends BaseEntityForm {
 
 	@Override
-	public void onDatabind(final Boolean refreshProposed) {
+	public void databind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
 
@@ -51,9 +51,8 @@ public class UserForm extends BaseEntityForm {
 					refresh = true;
 				}
 
-				ModelResult result = EntityManager.getInstance().getEntity(mEntityId
-						, refresh
-						, LinkOptions.getDefault(DefaultType.LinksForUser));
+				LinkOptions options = LinkOptions.getDefault(DefaultType.LinksForUser);
+				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					if (result.data != null) {
@@ -142,7 +141,7 @@ public class UserForm extends BaseEntityForm {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected void draw() {
+	public void draw() {
 
 		User user = (User) mEntity;
 

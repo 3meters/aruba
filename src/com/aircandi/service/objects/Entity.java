@@ -150,8 +150,10 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				.setName(name != null ? name : null)
 				.setPhoto(getPhoto())
 				.setSchema(schema != null ? schema : null)
-				.setApp(schema != null ? schema : null);
-		shortcut.modifiedDate = DateTime.nowDate().getTime();
+				.setApp(schema != null ? schema : null)
+				.setPosition(position);
+
+		shortcut.modifiedDate = modifiedDate;
 		shortcut.content = true;
 		shortcut.action = Constants.ACTION_VIEW;
 		return shortcut;
@@ -263,14 +265,14 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public AirLocation getLocation() {
 		AirLocation loc = null;
 		Entity parent = null;
-		
+
 		if (this.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 			parent = getParent(Constants.TYPE_LINK_CANDIGRAM);
 		}
 		else {
 			parent = getParent(null);
 		}
-		
+
 		if (parent != null) {
 			loc = parent.location;
 		}
@@ -304,7 +306,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			Integer strongestLevel = -200;
 			for (Link link : linksOut) {
 				if (link.type.equals(linkType)) {
-					if (link.proximity != null && link.proximity.primary) {
+					if (link.proximity != null && link.proximity.primary != null && link.proximity.primary) {
 						Beacon beacon = (Beacon) EntityManager.getEntityCache().get(link.toId);
 						if (beacon != null && beacon.signal.intValue() > strongestLevel) {
 							strongestLink = link;
@@ -540,10 +542,16 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	}
 
 	public List<Shortcut> getClientShortcuts() {
-
+		/*
+		 * Shortcuts are in Shortcut.isActive() at draw time to determine if it gets shown
+		 */
 		List<Shortcut> shortcuts = new ArrayList<Shortcut>();
-
+		/*
+		 * For place only
+		 */
 		if (this.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+
+			/* Picture */
 			Shortcut shortcut = Shortcut.builder(this
 					, Constants.SCHEMA_ENTITY_APPLINK
 					, Constants.TYPE_APP_POST
@@ -565,6 +573,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			shortcut.linkType = Constants.TYPE_LINK_PICTURE;
 			shortcuts.add(shortcut);
 
+			/* Candigrams */
 			shortcut = Shortcut.builder(this
 					, Constants.SCHEMA_ENTITY_APPLINK
 					, Constants.TYPE_APP_CANDIGRAM
@@ -585,8 +594,26 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			}
 			shortcuts.add(shortcut);
 
+			/* Maps: Map is evaluated in Shortcut.isActive() at draw time to determine if it gets shown */
+			shortcut = Shortcut.builder(this
+					, Constants.SCHEMA_ENTITY_APPLINK
+					, Constants.TYPE_APP_MAP
+					, Constants.ACTION_VIEW
+					, "map"
+					, "resource:img_map_temp"
+					, 30
+					, false
+					, true);
+			shortcut.photo.colorize = true;
+			shortcut.photo.color = Aircandi.getInstance().getResources().getColor(Maps.ICON_COLOR);
+			shortcuts.add(shortcut);
 		}
+		/*
+		 * For candigram only
+		 */
 		else if (this.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+
+			/* Pictures */
 			Shortcut shortcut = Shortcut.builder(this
 					, Constants.SCHEMA_ENTITY_APPLINK
 					, Constants.TYPE_APP_POST
@@ -608,8 +635,24 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			shortcut.linkType = Constants.TYPE_LINK_PICTURE;
 			shortcuts.add(shortcut);
 
+			/*
+			 * Maps: Map is evaluated in Shortcut.isActive() at draw time to determine if it gets shown
+			 */
+			shortcut = Shortcut.builder(this
+					, Constants.SCHEMA_ENTITY_APPLINK
+					, Constants.TYPE_APP_MAP
+					, Constants.ACTION_VIEW
+					, "map"
+					, "resource:img_map_temp"
+					, 30
+					, false
+					, true);
+			shortcut.photo.colorize = true;
+			shortcut.photo.color = Aircandi.getInstance().getResources().getColor(Maps.ICON_COLOR);
+			shortcuts.add(shortcut);
 		}
 
+		/* Comments */
 		Shortcut shortcut = Shortcut.builder(this
 				, Constants.SCHEMA_ENTITY_APPLINK
 				, Constants.TYPE_APP_COMMENT
@@ -622,19 +665,6 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		shortcut.photo.colorize = true;
 		shortcut.photo.color = Aircandi.getInstance().getResources().getColor(Comments.ICON_COLOR);
 		shortcut.linkType = Constants.TYPE_LINK_COMMENT;
-		shortcuts.add(shortcut);
-
-		shortcut = Shortcut.builder(this
-				, Constants.SCHEMA_ENTITY_APPLINK
-				, Constants.TYPE_APP_MAP
-				, Constants.ACTION_VIEW
-				, "map"
-				, "resource:img_map_temp"
-				, 30
-				, false
-				, true);
-		shortcut.photo.colorize = true;
-		shortcut.photo.color = Aircandi.getInstance().getResources().getColor(Maps.ICON_COLOR);
 		shortcuts.add(shortcut);
 
 		return shortcuts;

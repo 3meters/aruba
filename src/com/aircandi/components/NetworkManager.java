@@ -154,8 +154,10 @@ public class NetworkManager {
 		}
 
 		/* We have a network connection so now check for a walled garden */
-		if (isWalledGardenConnection()) {
-			connectedState = ConnectedState.WalledGarden;
+		if (!isMobileNetwork()) {
+			if (isWalledGardenConnection()) {
+				connectedState = ConnectedState.WalledGarden;
+			}
 		}
 
 		synchronized (mConnectedState) {

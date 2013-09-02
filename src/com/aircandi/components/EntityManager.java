@@ -144,10 +144,10 @@ public class EntityManager {
 		return result;
 	}
 
-	public synchronized ModelResult loadEntitiesForEntity(String entityId, LinkOptions linkOptions, Cursor cursor) {
+	public synchronized ModelResult loadEntitiesForEntity(String entityId, LinkOptions linkOptions, Cursor cursor, Stopwatch stopwatch) {
 		final ModelResult result = new ModelResult();
 
-		result.serviceResponse = mEntityCache.loadEntitiesForEntity(entityId, linkOptions, cursor);
+		result.serviceResponse = mEntityCache.loadEntitiesForEntity(entityId, linkOptions, cursor, stopwatch);
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			ServiceData serviceData = (ServiceData) result.serviceResponse.data;

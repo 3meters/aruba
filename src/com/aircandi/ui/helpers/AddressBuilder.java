@@ -53,17 +53,20 @@ public class AddressBuilder extends BaseEdit {
 				return false;
 			}
 		});
+		
+		databind(null);
+		draw();		
 	}
 
 	@Override
-	protected void databind() {
+	public void databind(Boolean refresh) {
 		if (mEntity == null) {
 			mEntity = new Place();
 		}
 	}
 
 	@Override
-	protected void draw() {
+	public void draw() {
 
 		Place place = (Place) mEntity;
 		if (place.address != null) {

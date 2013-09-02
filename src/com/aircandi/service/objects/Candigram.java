@@ -23,19 +23,16 @@ public class Candigram extends Entity implements Cloneable, Serializable {
 	@Expose
 	public Number				duration;
 	@Expose
-	public Boolean				nudge = false;
-	@Expose
-	public Boolean				capture = false;
-	@Expose
 	public Number				hopsMax;
-	@Expose
+
+	@Expose(serialize = false, deserialize = true)
+	public Boolean				hopEnabled;
+	@Expose(serialize = false, deserialize = true)
 	public Number				hopLastDate;
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public Number				hopNextDate;
-	@Expose
-	public Boolean				moveOnRead;
-	@Expose
-	public Boolean				cloneOnLike;
+	@Expose(serialize = false, deserialize = true)
+	public Number				hopCount;
 
 	// --------------------------------------------------------------------------------------------
 	// Client fields (none are transferred)
@@ -52,13 +49,11 @@ public class Candigram extends Entity implements Cloneable, Serializable {
 
 			entity.range = (Number) map.get("range");
 			entity.duration = (Number) map.get("duration");
-			entity.nudge = (Boolean) map.get("nudge");
-			entity.capture = (Boolean) map.get("capture");
 			entity.hopsMax = (Number) map.get("hopsMax");
+			entity.hopCount = (Number) map.get("hopCount");
+			entity.hopEnabled = (Boolean) map.get("hopEnabled");
 			entity.hopLastDate = (Number) map.get("hopLastDate");
 			entity.hopNextDate = (Number) map.get("hopNextDate");
-			entity.moveOnRead = (Boolean) map.get("moveOnRead");
-			entity.cloneOnLike = (Boolean) map.get("cloneOnLike");
 		}
 		return entity;
 	}

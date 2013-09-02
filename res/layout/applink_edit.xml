@@ -9,8 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:fillViewport="true"
-        android:paddingBottom="@dimen/form_field_height" >
+        android:fillViewport="true" >
 
         <!-- Content -->
 
@@ -25,12 +24,13 @@
             <com.aircandi.ui.widgets.AirTextView
                 android:id="@+id/type"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/form_field_height"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:layout_marginLeft="4dp"
                 android:layout_marginTop="5dp"
                 android:text="@string/dummy_name"
                 android:textColor="@color/accent_blue"
+                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:visibility="visible" />
 
             <Spinner
@@ -47,7 +47,7 @@
                 android:id="@+id/photo_holder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="15dp"
                 android:layout_weight="0"
                 android:visibility="visible"
                 tools:ignore="InefficientWeight" >
@@ -84,26 +84,21 @@
                 android:id="@+id/name_holder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
                 android:orientation="vertical" >
 
                 <com.aircandi.ui.widgets.AirLabel
-                    style="@style/form_label_fancy"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="6dp"
-                    android:text="@string/form_label_applink_edit_name" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1px"
-                    android:layout_marginLeft="4dp"
-                    android:background="@color/accent_blue" />
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/form_label_applink_edit_name"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="?attr/textColorSecondary" />
 
                 <com.aircandi.ui.widgets.AirEditText
                     android:id="@+id/name"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/form_field_height"
-                    android:layout_marginBottom="8dp"
+                    android:layout_height="40dp"
                     android:layout_marginRight="15dp"
                     android:drawableRight="?attr/iconClear"
                     android:inputType="textCapWords|textNoSuggestions" />
@@ -113,27 +108,22 @@
                 android:id="@+id/app_id_holder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
                 android:orientation="vertical"
-                android:visibility="gone" >
+                android:visibility="visible" >
 
                 <com.aircandi.ui.widgets.AirLabel
-                    style="@style/form_label_fancy"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="6dp"
-                    android:text="@string/form_label_applink_edit_app_id" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1px"
-                    android:layout_marginLeft="4dp"
-                    android:background="@color/accent_blue" />
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/form_label_applink_edit_app_id"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="?attr/textColorSecondary" />
 
                 <com.aircandi.ui.widgets.AirEditText
                     android:id="@+id/app_id"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/form_field_height"
-                    android:layout_marginBottom="8dp"
+                    android:layout_height="40dp"
                     android:layout_marginRight="15dp"
                     android:drawableRight="?attr/iconClear"
                     android:inputType="textNoSuggestions" />
@@ -143,33 +133,27 @@
                 android:id="@+id/app_url_holder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
                 android:orientation="vertical"
-                android:visibility="gone" >
+                android:visibility="visible" >
 
                 <com.aircandi.ui.widgets.AirLabel
-                    style="@style/form_label_fancy"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="6dp"
-                    android:text="@string/form_label_applink_edit_app_url" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1px"
-                    android:layout_marginLeft="4dp"
-                    android:background="@color/accent_blue" />
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/form_label_applink_edit_app_url"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="?attr/textColorSecondary" />
 
                 <com.aircandi.ui.widgets.AirEditText
                     android:id="@+id/app_url"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
                     android:layout_marginRight="15dp"
                     android:drawableRight="?attr/iconClear"
                     android:inputType="textMultiLine|textNoSuggestions|textUri"
-                    android:maxLines="5"
-                    android:minHeight="@dimen/form_field_height"
-                    android:minLines="1" />
+                    android:lines="2"
+                    android:maxLines="5" />
             </LinearLayout>
 
             <LinearLayout
@@ -179,7 +163,7 @@
                 android:baselineAligned="false"
                 android:gravity="bottom"
                 android:orientation="horizontal"
-                android:visibility="gone" >
+                android:visibility="visible" >
 
                 <FrameLayout
                     android:layout_width="match_parent"
@@ -215,29 +199,5 @@
             </LinearLayout>
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
-
-    <LinearLayout
-        android:id="@+id/footer_holder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="?attr/backgroundActionBar"
-        android:orientation="vertical" >
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="?attr/ruleColor" />
-
-        <com.aircandi.ui.widgets.AirButton
-            android:id="@+id/button_test"
-            style="@style/form_button_borderless"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/form_field_height"
-            android:onClick="onTestButtonClick"
-            android:text="@string/form_button_test"
-            android:textColor="?attr/textColorButtonLink"
-            android:visibility="visible" />
-    </LinearLayout>
 
 </RelativeLayout>

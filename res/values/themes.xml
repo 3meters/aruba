@@ -108,6 +108,7 @@
         <item name="iconLike">@drawable/ic_action_heart_dark</item>
         <item name="iconWatch">@drawable/ic_action_show_dark</item>
         <item name="iconClear">@drawable/ic_action_cancel_dark</item>
+        <item name="iconGooglePlay">@drawable/ic_action_google_play_dark</item>
         
         <!-- Actionbar Sherlock -->
 
@@ -221,6 +222,7 @@
         <item name="iconLike">@drawable/ic_action_heart_light</item>
         <item name="iconWatch">@drawable/ic_action_show_light</item>
         <item name="iconClear">@drawable/ic_action_cancel_light</item>
+        <item name="iconGooglePlay">@drawable/ic_action_google_play_light</item>
         
         <!-- Actionbar Sherlock -->
 

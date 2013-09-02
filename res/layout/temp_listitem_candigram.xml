@@ -35,8 +35,8 @@
         android:layout_below="@+id/name"
         android:layout_toLeftOf="@+id/image_forward"
         android:layout_toRightOf="@id/photo"
-        android:textStyle="italic"
-        android:text="@string/dummy_subtitle" />
+        android:text="@string/dummy_subtitle"
+        android:textStyle="italic" />
 
     <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/description"
@@ -61,16 +61,13 @@
         android:layout_toRightOf="@+id/photo"
         android:orientation="vertical" >
 
-        <com.aircandi.ui.widgets.AirButton
-            android:id="@+id/button_comments"
-            style="@style/form_button"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:clickable="true"
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/comments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:gravity="left"
-            android:onClick="onCommentsClick"
-            android:paddingTop="5dp"
-            android:text="@string/dummy_comments" />
+            android:text="@string/dummy_comments"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <com.aircandi.ui.widgets.UserView
             android:id="@+id/creator"

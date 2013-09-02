@@ -139,7 +139,7 @@ public class PhotoPicker extends BaseBrowse {
 			mEntity = EntityManager.getEntity(mEntityId);
 			mProvider = ((Place) mEntity).getProvider();
 			mSearch.setVisibility(View.GONE);
-			mBusyManager.startBodyBusyIndicator();
+			showBusy(R.string.progress_searching);
 		}
 		else {
 
@@ -236,13 +236,18 @@ public class PhotoPicker extends BaseBrowse {
 			}
 		});
 
-		/* Autocomplete */
-		initAutoComplete();
-		bindAutoCompleteAdapter();
+		if (mPlacePhotoMode) {
+			databind(null);
+		}
+		else {
+			/* Autocomplete */
+			initAutoComplete();
+			bindAutoCompleteAdapter();
+		}
 	}
 
 	@Override
-	public void onDatabind(Boolean refresh) {
+	public void databind(Boolean refresh) {
 		/*
 		 * First check to see if there are any candi picture children.
 		 */
@@ -288,7 +293,7 @@ public class PhotoPicker extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 
 	private void startSearch(View view) {
-		
+
 		mSearch.dismissDropDown();
 
 		mQuery = mSearch.getText().toString().trim();
@@ -296,8 +301,7 @@ public class PhotoPicker extends BaseBrowse {
 		/* Prep the UI */
 		mMessage.setVisibility(View.GONE);
 		mImages.clear();
-		mBusyManager.showBusy();
-		mBusyManager.startBodyBusyIndicator();
+		showBusy();
 
 		/* Hide soft keyboard */
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -612,7 +616,7 @@ public class PhotoPicker extends BaseBrowse {
 				view = LayoutInflater.from(PhotoPicker.this).inflate(R.layout.temp_picture_search_item, null);
 				holder = new ViewHolder();
 				holder.photoView = (ImageView) view.findViewById(R.id.photo);
-				Integer nudge = mResources.getDimensionPixelSize(R.dimen.grid_item_height_nudge);
+				Integer nudge = mResources.getDimensionPixelSize(R.dimen.grid_item_height_kick);
 				final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mPhotoWidthPixels, mPhotoWidthPixels - nudge);
 				holder.photoView.setLayoutParams(params);
 				view.setTag(holder);

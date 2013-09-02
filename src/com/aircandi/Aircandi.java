@@ -136,7 +136,6 @@ public class Aircandi extends Application {
 		stopwatch1 = new Stopwatch("Stopwatch1"); // $codepro.audit.disable stringLiterals
 		stopwatch2 = new Stopwatch("Stopwatch2"); // $codepro.audit.disable stringLiterals
 		stopwatch3 = new Stopwatch("Stopwatch3"); // $codepro.audit.disable stringLiterals
-		stopwatch3 = new Stopwatch("Stopwatch4"); // $codepro.audit.disable stringLiterals
 
 		/* The following line triggers the initialization of ACRA */
 		ACRA.init(this);

@@ -119,7 +119,7 @@ public class LinkOptions extends ServiceObject {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit));
 				}
 			}
-			else if (defaultType == DefaultType.LinksForPost) {
+			else if (defaultType == DefaultType.LinksForPicture) {
 				linkOptions.shortcuts = true;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
@@ -155,7 +155,7 @@ public class LinkOptions extends ServiceObject {
 		LinksForProximity,
 		LinksForPlace,
 		LinksForCandigram,
-		LinksForPost,
+		LinksForPicture,
 		LinksForUser,
 		NoLinks,
 	}

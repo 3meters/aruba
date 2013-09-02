@@ -65,10 +65,11 @@ public class ShortcutPicker extends BaseBrowse {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		mList = (BounceListView) findViewById(R.id.list);
+		databind(null);
 	}
 
 	@Override
-	public void onDatabind(Boolean refresh) {
+	public void databind(Boolean refresh) {
 
 		/* We use this to access the source suggestions */
 

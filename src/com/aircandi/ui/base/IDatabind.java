@@ -10,9 +10,13 @@ public interface IDatabind {
 
 	public void onHelp();
 
-	public void onDatabind(Boolean refresh);
-	
+	public void databind(Boolean refresh);
+
+	public void draw();
+
 	public void showBusy();
+
+	public void showBusy(Object message);
 	
 	public void hideBusy();
 }

@@ -63,8 +63,9 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	public void onDatabind(Boolean refresh) {}
+	public void databind(Boolean refresh) {}
 
+	@Override
 	public void draw() {}
 
 	@Override
@@ -81,9 +82,14 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 
 	@Override
 	public void showBusy() {
+		showBusy(null);
+	}
+
+	@Override
+	public void showBusy(final Object message) {
 		startBodyBusyIndicator();
 		if (mBusyManager != null) {
-			mBusyManager.showBusy();
+			mBusyManager.showBusy(message);
 		}
 	}
 

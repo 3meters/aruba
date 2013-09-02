@@ -46,10 +46,12 @@ public class PlaceEdit extends BaseEntityEdit {
 				mTabManager.doRestoreInstanceState(savedInstanceState);
 			}
 		}
+		databind(null);
+		draw();
 	}
 
 	@Override
-	protected void draw() {
+	public void draw() {
 		super.draw();
 
 		/* Place content */
@@ -66,7 +68,6 @@ public class PlaceEdit extends BaseEntityEdit {
 				((BuilderButton) findViewById(R.id.category)).setText(place.category.name);
 			}
 		}
-
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -167,6 +168,10 @@ public class PlaceEdit extends BaseEntityEdit {
 	protected String getLinkType() {
 		return Constants.TYPE_LINK_PROXIMITY;
 	};
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle
+	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
 	// Misc

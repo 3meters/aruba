@@ -92,10 +92,12 @@ public class UriPicker extends BaseBrowse {
 				mTestButton.setEnabled(mTextUri.getText().length() > 0);
 			}
 		});
+
+		databind(null);
 	}
 
 	@Override
-	public void onDatabind(Boolean refresh) {
+	public void databind(Boolean refresh) {
 
 		new AsyncTask() {
 

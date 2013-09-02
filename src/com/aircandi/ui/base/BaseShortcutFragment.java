@@ -61,7 +61,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	}
 
 	@Override
-	public void onDatabind(final Boolean refreshProposed) {
+	public void databind(final Boolean refreshProposed) {
 
 		new AsyncTask() {
 
@@ -79,9 +79,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 					refresh = true;
 				}
 
-				ModelResult result = EntityManager.getInstance().getEntity(mEntityId
-						, refresh
-						, LinkOptions.getDefault(mLinkOptions));
+				LinkOptions options =LinkOptions.getDefault(mLinkOptions); 
+				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					synchronize();
@@ -118,7 +117,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	@Override
 	public void onRefresh() {
 		showBusy();
-		onDatabind(true);
+		databind(true);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -446,11 +445,11 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	public void onResume() {
 		super.onResume();
 		if (mEntity == null) {
-			onDatabind(false);
+			databind(false);
 		}
 		else {
 			if (unsynchronized()) {
-				onDatabind(false);
+				databind(false);
 			}
 			else {
 				draw();

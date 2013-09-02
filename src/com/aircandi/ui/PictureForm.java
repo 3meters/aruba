@@ -42,7 +42,7 @@ import com.squareup.otto.Subscribe;
 public class PictureForm extends BaseEntityForm {
 	
 	@Override
-	public void onDatabind(final Boolean refreshProposed) {
+	public void databind(final Boolean refreshProposed) {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
@@ -65,10 +65,9 @@ public class PictureForm extends BaseEntityForm {
 				if (entity == null || !entity.shortcuts) {
 					refresh = true;
 				}
-
-				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId
-						, refresh
-						, LinkOptions.getDefault(DefaultType.LinksForPost));
+				
+				LinkOptions options =LinkOptions.getDefault(DefaultType.LinksForPicture); 
+				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
 				
 				return result;
 			}
@@ -143,7 +142,7 @@ public class PictureForm extends BaseEntityForm {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected void draw() {
+	public void draw() {
 		/*
 		 * For now, we assume that the candi form isn't recycled.
 		 * 
@@ -315,10 +314,6 @@ public class PictureForm extends BaseEntityForm {
 		drawButtons();
 
 		/* Visibility */
-		if (mFooterHolder != null) {
-			mFooterHolder.setVisibility(View.VISIBLE);
-		}
-
 		if (mScrollView != null) {
 			mScrollView.setVisibility(View.VISIBLE);
 		}

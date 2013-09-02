@@ -50,7 +50,7 @@
         android:layout_alignRight="@+id/photo"
         android:layout_alignTop="@+id/photo"
         android:layout_margin="6dp"
-        android:src="@drawable/img_play_store_arrow"
+        android:src="?attr/iconGooglePlay"
         android:visibility="visible" />
 
     <com.aircandi.ui.widgets.AirTextView

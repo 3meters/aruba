@@ -31,9 +31,6 @@ public abstract class BaseEdit extends BaseActivity {
 			unpackIntent();
 			initialize(savedInstanceState);
 			configureActionBar();
-			databind();
-			draw();
-			mFirstDraw = false;
 		}
 	}
 
@@ -54,10 +51,6 @@ public abstract class BaseEdit extends BaseActivity {
 			mActionBar.setDisplayHomeAsUpEnabled(true);
 		}
 	}
-
-	protected void databind() {}
-
-	protected void draw() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Events

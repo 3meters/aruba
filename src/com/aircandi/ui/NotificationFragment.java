@@ -92,7 +92,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	}
 
 	@Override
-	public void onDatabind(final Boolean refresh) {
+	public void databind(final Boolean refresh) {
 		Logger.d(this, "databinding...");
 
 		showBusy();
@@ -125,7 +125,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	public void onRefresh() {
 		showBusy();
 		saveListPosition();
-		onDatabind(true);
+		databind(true);
 	}
 
 	@Override
@@ -258,7 +258,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	public void onResume() {
 		super.onResume();
 		hideBusy();
-		onDatabind(false);
+		databind(false);
 	}
 
 	// --------------------------------------------------------------------------------------------

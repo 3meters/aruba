@@ -28,8 +28,10 @@ public class MenuManager {
 		else if (activityName.equals("ApplinkListEdit")) {
 			menuInflater.inflate(R.menu.menu_edit_list, menu);
 		}
-		else if (activityName.equals("ApplinkEdit")
-				|| activityName.equals("UserEdit")
+		else if (activityName.equals("ApplinkEdit")) {
+			menuInflater.inflate(R.menu.menu_edit_applink, menu);
+		}
+		else if (activityName.equals("UserEdit")
 				|| activityName.equals("PasswordEdit")
 				|| activityName.equals("TuningEdit")
 				|| activityName.contains("SignInEdit")) {

@@ -57,10 +57,11 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 
 		mName = (TextView) findViewById(R.id.name);
 		mListView = (ListView) findViewById(R.id.form_list);
+		databind(null);
 	}
 
 	@Override
-	public void onDatabind(Boolean refresh) {
+	public void databind(Boolean refresh) {
 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();
