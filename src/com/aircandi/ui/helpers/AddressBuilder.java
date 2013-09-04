@@ -54,12 +54,12 @@ public class AddressBuilder extends BaseEdit {
 			}
 		});
 		
-		databind(null);
+		databind();
 		draw();		
 	}
 
 	@Override
-	public void databind(Boolean refresh) {
+	public void databind() {
 		if (mEntity == null) {
 			mEntity = new Place();
 		}

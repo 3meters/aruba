@@ -137,7 +137,7 @@ public class TuningEdit extends BaseEntityEdit {
 						 * We fake that the tuning happened because it is simpler than enabling/disabling ui
 						 */
 						setSupportProgressBarIndeterminateVisibility(false);
-						mBusyManager.hideBusy();
+						hideBusy();
 						if (mUntuning) {
 							mButtonUntune.setText(R.string.form_button_tuning_tuned);
 							mUntuned = true;
@@ -211,7 +211,7 @@ public class TuningEdit extends BaseEntityEdit {
 			@Override
 			protected void onPostExecute(Object response) {
 				setSupportProgressBarIndeterminateVisibility(false);
-				mBusyManager.hideBusy();
+				hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
 				
 				if (mTuned || mUntuned) {

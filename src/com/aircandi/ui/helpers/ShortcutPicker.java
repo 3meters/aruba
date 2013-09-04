@@ -65,11 +65,11 @@ public class ShortcutPicker extends BaseBrowse {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		mList = (BounceListView) findViewById(R.id.list);
-		databind(null);
+		databind();
 	}
 
 	@Override
-	public void databind(Boolean refresh) {
+	public void databind() {
 
 		/* We use this to access the source suggestions */
 
@@ -104,7 +104,7 @@ public class ShortcutPicker extends BaseBrowse {
 
 		final ShortcutListAdapter adapter = new ShortcutListAdapter(this, mShortcuts, R.layout.temp_listitem_shortcut_picker);
 		mList.setAdapter(adapter);
-		mBusyManager.hideBusy(); // Visible by default
+		hideBusy(); // Visible by default
 	}
 
 	// --------------------------------------------------------------------------------------------

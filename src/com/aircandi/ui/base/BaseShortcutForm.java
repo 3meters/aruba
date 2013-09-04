@@ -30,7 +30,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 	protected DefaultType	mLinkOptions;
 
 	@Override
-	public void databind(final Boolean refreshProposed) {
+	public void databind() {
 
 		new AsyncTask() {
 
@@ -45,10 +45,11 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 				Thread.currentThread().setName("GetUser");
 
 				Entity entity = EntityManager.getEntity(mEntityId);
-				Boolean refresh = refreshProposed;
+				Boolean refresh = mRefreshFromService;
 				if (entity == null || !entity.shortcuts) {
 					refresh = true;
 				}
+				mRefreshFromService = false;
 
 				LinkOptions options =LinkOptions.getDefault(mLinkOptions); 
 				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
@@ -71,7 +72,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 				else {
 					Routing.serviceError(BaseShortcutForm.this, result.serviceResponse);
 				}
-				mBusyManager.hideBusy();
+				hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
 			}
 

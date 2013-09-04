@@ -85,7 +85,7 @@ public class InviteEdit extends BaseEntityEdit {
 				}
 			});
 		}
-		databind(null);
+		databind();
 		draw();
 	}
 
@@ -230,7 +230,7 @@ public class InviteEdit extends BaseEntityEdit {
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					Tracker.sendEvent("ui_action", "send_invite", null, 0, Aircandi.getInstance().getUser());
-					mBusyManager.hideBusy();
+					hideBusy();
 					UI.showToastNotification(getString(emails.size() > 1 ? R.string.alert_invite_sent_plural : R.string.alert_invite_sent), Toast.LENGTH_SHORT);
 					finish();
 				}

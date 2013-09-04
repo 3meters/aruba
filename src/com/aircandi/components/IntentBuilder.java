@@ -90,7 +90,7 @@ public class IntentBuilder {
 		}
 
 		if (mForceRefresh != null) {
-			intent.putExtra(Constants.EXTRA_REFRESH_FORCE, mForceRefresh);
+			intent.putExtra(Constants.EXTRA_REFRESH_FROM_SERVICE, mForceRefresh);
 		}
 
 		if (mMessage != null) {

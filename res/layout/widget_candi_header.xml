@@ -18,17 +18,6 @@
         android:text="@string/button_kick"
         android:visibility="gone" />
 
-    <com.aircandi.ui.widgets.AirButton
-        android:id="@+id/button_capture"
-        style="@style/form_button"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/form_button_height"
-        android:layout_marginBottom="3dp"
-        android:minWidth="@dimen/form_button_width_min"
-        android:onClick="onCaptureButtonClick"
-        android:text="@string/button_capture"
-        android:visibility="gone" />
-
     <LinearLayout
         android:id="@+id/button_holder"
         android:layout_width="wrap_content"

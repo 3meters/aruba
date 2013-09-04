@@ -64,7 +64,7 @@ public class PlaceForm extends BaseEntityForm {
 	}
 
 	@Override
-	public void databind(final Boolean refreshProposed) {
+	public void databind() {
 
 		new AsyncTask() {
 
@@ -78,13 +78,14 @@ public class PlaceForm extends BaseEntityForm {
 				Thread.currentThread().setName("GetEntity");
 
 				Entity entity = EntityManager.getEntity(mEntityId);
-				Boolean refresh = refreshProposed;
+				Boolean refresh = mRefreshFromService;
 				if (entity == null) {
 					refresh = true;
 				}
 				else if (!entity.shortcuts && !entity.synthetic) {
 					refresh = true;
 				}
+				mRefreshFromService = false;
 
 				LinkOptions options =LinkOptions.getDefault(DefaultType.LinksForPlace); 
 				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
@@ -147,14 +148,14 @@ public class PlaceForm extends BaseEntityForm {
 						if (mUpsize) {
 							mUpsize = false;
 							upsize();
+							return;
 						}
 					}
 				}
 				else {
 					Routing.serviceError(PlaceForm.this, result.serviceResponse);
 				}
-				mBusyManager.hideBusy();
-				mBusyManager.stopBodyBusyIndicator();
+				hideBusy();
 			}
 
 		}.execute();
@@ -169,8 +170,8 @@ public class PlaceForm extends BaseEntityForm {
 
 			@Override
 			protected void onPreExecute() {
-				mBusyManager.showBusy();
-				mBusyManager.startBodyBusyIndicator();
+				mBusyManager.stopBodyBusyIndicator();
+				showBusy(R.string.progress_upsizing);
 			}
 
 			@Override
@@ -183,12 +184,11 @@ public class PlaceForm extends BaseEntityForm {
 			@Override
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
-				mBusyManager.hideBusy();
-				mBusyManager.stopBodyBusyIndicator();
+				hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					final Entity upsizedEntity = (Entity) result.data;
 					mEntityId = upsizedEntity.id;
-					databind(false);
+					databind();
 				}
 				else {
 					Routing.serviceError(PlaceForm.this, result.serviceResponse);

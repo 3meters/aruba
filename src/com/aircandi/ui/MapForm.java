@@ -78,7 +78,7 @@ public class MapForm extends BaseActivity {
 	}
 
 	@Override
-	public void databind(final Boolean refreshProposed) {
+	public void databind() {
 
 		new AsyncTask() {
 
@@ -90,13 +90,14 @@ public class MapForm extends BaseActivity {
 				Thread.currentThread().setName("GetEntity");
 
 				Entity entity = EntityManager.getEntity(mEntityId);
-				Boolean refresh = refreshProposed;
+				Boolean refresh = mRefreshFromService;
 				if (entity == null) {
 					refresh = true;
 				}
 				else if (!entity.shortcuts && !entity.synthetic) {
 					refresh = true;
 				}
+				mRefreshFromService = false;
 
 				LinkOptions options = LinkOptions.getDefault(DefaultType.LinksForPlace);
 				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
@@ -245,7 +246,7 @@ public class MapForm extends BaseActivity {
 		super.onResume();
 		if (checkPlayServices()) {
 			findViewById(R.id.fragment_holder).setVisibility(View.VISIBLE);
-			databind(false);
+			databind();
 		}
 	}
 

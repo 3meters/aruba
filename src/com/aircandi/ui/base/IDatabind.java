@@ -10,7 +10,7 @@ public interface IDatabind {
 
 	public void onHelp();
 
-	public void databind(Boolean refresh);
+	public void databind();
 
 	public void draw();
 

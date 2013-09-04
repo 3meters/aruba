@@ -129,7 +129,7 @@ public class SignInEdit extends BaseEdit {
 			protected void onPostExecute(Object response) {
 
 				final ModelResult result = (ModelResult) response;
-				mBusyManager.hideBusy();
+				hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					final String jsonResponse = (String) result.serviceResponse.data;

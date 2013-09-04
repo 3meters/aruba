@@ -12,7 +12,6 @@ ic_action_camera_dark.png
 ic_action_cancel_dark.png
 ic_action_dialer_dark.png
 ic_action_dialog_dark.png
-ic_action_dontlike_dark.png
 ic_action_edit_dark.png
 ic_action_facebook_dark.png
 ic_action_foursquare_dark.png
@@ -22,7 +21,6 @@ ic_action_heart_dark.png
 ic_action_info_dark.png
 ic_action_key_dark.png
 ic_action_like_dark.png
-ic_action_list_dark.png
 ic_action_location_dark.png
 ic_action_lock_closed_dark.png
 ic_action_map_dark.png
@@ -30,7 +28,6 @@ ic_action_monolog_dark.png
 ic_action_more_dark.png
 ic_action_picture_dark.png
 ic_action_reload_dark.png
-ic_action_save_dark.png
 ic_action_search_dark.png
 ic_action_send_dark.png
 ic_action_settings_dark.png

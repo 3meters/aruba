@@ -17,9 +17,6 @@ public abstract class BaseBrowse extends BaseActivity {
 	protected Number	mEntityModelActivityDate;
 	protected User		mEntityModelUser;
 
-	/* Inputs */
-	protected Boolean	mForceRefresh	= false;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -35,7 +32,7 @@ public abstract class BaseBrowse extends BaseActivity {
 	protected void unpackIntent() {
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			mForceRefresh = extras.getBoolean(Constants.EXTRA_REFRESH_FORCE);
+			mRefreshFromService = extras.getBoolean(Constants.EXTRA_REFRESH_FROM_SERVICE);
 		}
 	}
 
@@ -57,7 +54,8 @@ public abstract class BaseBrowse extends BaseActivity {
 
 	@Override
 	public void onRefresh() {
-		databind(true); // Called from Routing
+		mRefreshFromService	= true;
+		databind(); // Called from Routing
 	}
 
 	// --------------------------------------------------------------------------------------------

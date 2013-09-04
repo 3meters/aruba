@@ -84,7 +84,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 				}
 			});
 		}
-		databind(null);
+		databind();
 		draw();
 	}
 

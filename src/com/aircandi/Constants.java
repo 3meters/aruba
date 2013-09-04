@@ -37,7 +37,7 @@ public final class Constants {
 	public static final String	EXTRA_UPSIZE_SYNTHETIC						= "com.aircandi.EXTRA_UPSIZE_SYNTHETIC";													//$NON-NLS-1$
 	public static final String	EXTRA_PAGING_ENABLED						= "com.aircandi.EXTRA_PAGING_ENABLED";														//$NON-NLS-1$
 	public static final String	EXTRA_PHOTO									= "com.aircandi.EXTRA_PHOTO";																//$NON-NLS-1$
-	public static final String	EXTRA_REFRESH_FORCE							= "com.aircandi.EXTRA_REFRESH_FORCE";														//$NON-NLS-1$
+	public static final String	EXTRA_REFRESH_FROM_SERVICE					= "com.aircandi.EXTRA_REFRESH_FORCE";														//$NON-NLS-1$
 	public static final String	EXTRA_HELP_ID								= "com.aircandi.EXTRA_HELP_ID";															//$NON-NLS-1$
 	public static final String	EXTRA_SHORTCUTS								= "com.aircandi.EXTRA_SHORTCUTS";															//$NON-NLS-1$
 	public static final String	EXTRA_MARKERS								= "com.aircandi.EXTRA_MARKERS";															//$NON-NLS-1$
@@ -209,6 +209,7 @@ public final class Constants {
 
 	public static final int		RESULT_ENTITY_INSERTED						= 100;
 	public static final int		RESULT_ENTITY_UPDATED						= 110;
+	public static final int		RESULT_ENTITY_UPDATED_REFRESH				= 115;
 	public static final int		RESULT_ENTITY_DELETED						= 120;
 	public static final int		RESULT_ENTITY_EDITED						= 130;
 	public static final int		RESULT_COMMENT_INSERTED						= 200;

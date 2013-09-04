@@ -12,6 +12,6 @@
         android:icon="?attr/iconSend"
         android:orderInCategory="1"
         android:showAsAction="always"
-        android:title="@string/menu_picture_item"/>
+        android:title="@string/menu_send_item"/>
 
 </menu>

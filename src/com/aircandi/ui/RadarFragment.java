@@ -142,7 +142,7 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 	}
 
 	@Override
-	public void databind(Boolean refresh) {
+	public void databind() {
 		/*
 		 * Cases that trigger a search
 		 * 
@@ -251,7 +251,7 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 			mRadarAdapter.getItems().clear();
 			mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
 			mRadarAdapter.notifyDataSetChanged();
-			mBusyManager.hideBusy();
+			hideBusy();
 		}
 	}
 
@@ -349,7 +349,7 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 					/* We only show toast if we timeout without getting any location fix */
 					UI.showToastNotification(getString(R.string.error_location_poor), Toast.LENGTH_SHORT);
 				}
-				mBusyManager.hideBusy();
+				hideBusy();
 				mPullToRefreshAttacher.setRefreshComplete();
 			}
 		});
@@ -425,7 +425,7 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 						}.execute();
 					}
 					else {
-						mBusyManager.hideBusy();
+						hideBusy();
 					}
 				}
 			}
@@ -442,7 +442,7 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 			@Override
 			public void run() {
 				Logger.d(getSherlockActivity(), "Places near location finished event: ** done **");
-				mBusyManager.hideBusy();
+				hideBusy();
 			}
 		});
 	}
@@ -563,7 +563,7 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 
 		/* Kill busy */
 		mPullToRefreshAttacher.setRefreshComplete();
-		mBusyManager.hideBusy();
+		hideBusy();
 		hideBusy();
 	}
 
@@ -898,7 +898,7 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 			startScanService(Constants.INTERVAL_SCAN_WIFI);
 		}
 
-		databind(false);
+		databind();
 	}
 
 	@Override

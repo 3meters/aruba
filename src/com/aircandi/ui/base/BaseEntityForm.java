@@ -138,7 +138,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				ModelResult result = (ModelResult) response;
 				setSupportProgressBarIndeterminateVisibility(false);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					databind(false);
+					databind();
 				}
 				else {
 					if (result.serviceResponse.exception.getStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
@@ -255,10 +255,17 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		 * - Template picker returns type of candi to add as a child
 		 */
 		if (resultCode != Activity.RESULT_CANCELED) {
-			if (requestCode == Constants.ACTIVITY_ENTITY_EDIT) {
+			if (requestCode == Constants.ACTIVITY_ENTITY_INSERT) {
+				mRefreshFromService = true;
+			}
+			else if (requestCode == Constants.ACTIVITY_ENTITY_EDIT) {
 				if (resultCode == Constants.RESULT_ENTITY_DELETED) {
 					finish();
 					Animate.doOverridePendingTransition(this, TransitionType.PageToRadarAfterDelete);
+				}
+				else if (resultCode == Constants.RESULT_ENTITY_UPDATED_REFRESH
+						|| resultCode == Constants.RESULT_ENTITY_INSERTED) {
+					mRefreshFromService = true;
 				}
 			}
 			else if (requestCode == Constants.ACTIVITY_APPLICATION_PICK) {
@@ -320,12 +327,10 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			if (watched != null) {
 				if (mEntity.byAppUser(Constants.TYPE_LINK_WATCH)) {
 					final int color = Aircandi.getInstance().getResources().getColor(R.color.brand_pink_lighter);
-					watched.setLabel(getString(R.string.button_unwatch));
 					watched.setDrawableId(R.drawable.ic_action_show_dark);
 					watched.getImageIcon().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
 				}
 				else {
-					watched.setLabel(getString(R.string.button_watch));
 					watched.getImageIcon().setColorFilter(null);
 					if (getThemeTone().equals("dark")) {
 						watched.setDrawableId(R.drawable.ic_action_show_dark);
@@ -340,12 +345,10 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			if (liked != null) {
 				if (mEntity.byAppUser(Constants.TYPE_LINK_LIKE)) {
 					final int color = Aircandi.getInstance().getResources().getColor(R.color.accent_red);
-					liked.setLabel(getString(R.string.button_unlike));
 					liked.setDrawableId(R.drawable.ic_action_heart_dark);
 					liked.getImageIcon().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
 				}
 				else {
-					liked.setLabel(getString(R.string.button_like));
 					liked.getImageIcon().setColorFilter(null);
 					if (getThemeTone().equals("dark")) {
 						liked.setDrawableId(R.drawable.ic_action_heart_dark);
@@ -626,7 +629,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			Animate.doOverridePendingTransition(this, TransitionType.PageBack);
 			if (unsynchronized()) {
 				invalidateOptionsMenu();
-				databind(false);
+				databind();
 			}
 
 			/* Package receiver */
@@ -664,7 +667,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 						@Override
 						public void run() {
-							databind(false);
+							databind();
 						}
 					}, 1500);
 				}

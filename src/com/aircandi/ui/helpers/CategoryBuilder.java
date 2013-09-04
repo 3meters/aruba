@@ -75,12 +75,12 @@ public class CategoryBuilder extends BaseEdit {
 
 		setActivityTitle(getString(R.string.dialog_category_builder_title));
 		
-		databind(null);
+		databind();
 		draw();		
 	}
 
 	@Override
-	public void databind(Boolean refresh) {
+	public void databind() {
 		if (EntityManager.getInstance().getCategories().size() == 0) {
 			loadCategories();
 		}
@@ -123,7 +123,7 @@ public class CategoryBuilder extends BaseEdit {
 						initCategorySpinner();
 					}
 				}
-				mBusyManager.hideBusy();
+				hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
 			}
 

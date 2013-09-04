@@ -54,6 +54,8 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	protected Boolean	mPrefChangeNewSearchNeeded	= false;
 	protected Boolean	mPrefChangeRefreshUiNeeded	= false;
 	protected Boolean	mPrefChangeReloadNeeded		= false;
+	protected Boolean	mRefreshFromService			= false;	// Can be set by input or by other means
+
 	public Resources	mResources;
 	public BusyManager	mBusyManager;
 
@@ -204,7 +206,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	};
 
 	@Override
-	public void databind(Boolean refresh) {}
+	public void databind() {}
 
 	@Override
 	public void draw() {}
@@ -417,7 +419,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 							/* Notify interested parties */
 							UI.showToastNotification(Aircandi.applicationContext.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
-							((BaseActivity) activity).mBusyManager.hideBusy();
+							((BaseActivity) activity).hideBusy();
 							Routing.route(activity, Route.Splash);
 						}
 

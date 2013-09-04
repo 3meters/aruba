@@ -57,14 +57,14 @@ public class RegisterEdit extends BaseEntityEdit {
 				return false;
 			}
 		});
-		databind(null);
+		databind();
 		draw();
 	}
 
 	@Override
-	public void databind(Boolean refresh) {
+	public void databind() {
 		mEntitySchema = Constants.SCHEMA_ENTITY_USER;
-		super.databind(refresh);
+		super.databind();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -214,7 +214,7 @@ public class RegisterEdit extends BaseEntityEdit {
 					final User insertedUser = (User) result.data;
 					Aircandi.getInstance().setUser(insertedUser);
 
-					mBusyManager.hideBusy();
+					hideBusy();
 					Logger.i(RegisterEdit.this, "Inserted new user: " + mEntity.name + " (" + mEntity.id + ")");
 
 					UI.showToastNotification(getResources().getString(R.string.alert_signed_in)

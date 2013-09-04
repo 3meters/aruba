@@ -31,6 +31,7 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 	protected Number		mEntityModelRefreshDate;
 	protected Number		mEntityModelActivityDate;
 	protected User			mEntityModelUser;
+	protected Boolean		mRefreshFromService	= false;	// Can be set by input or by other means
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -63,7 +64,7 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	public void databind(Boolean refresh) {}
+	public void databind() {}
 
 	@Override
 	public void draw() {}

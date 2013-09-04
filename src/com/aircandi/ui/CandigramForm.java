@@ -83,7 +83,7 @@ public class CandigramForm extends BaseEntityForm {
 	}
 
 	@Override
-	public void databind(final Boolean refreshProposed) {
+	public void databind() {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
@@ -102,10 +102,11 @@ public class CandigramForm extends BaseEntityForm {
 				Thread.currentThread().setName("GetEntity");
 
 				Entity entity = EntityManager.getEntity(mEntityId);
-				Boolean refresh = refreshProposed;
+				Boolean refresh = mRefreshFromService;
 				if (entity == null || !entity.shortcuts) {
 					refresh = true;
 				}
+				mRefreshFromService = false;
 
 				LinkOptions linkOptions = LinkOptions.getDefault(DefaultType.LinksForCandigram);
 				linkOptions.setIgnoreInactive(true);
@@ -140,7 +141,7 @@ public class CandigramForm extends BaseEntityForm {
 				else {
 					Routing.serviceError(CandigramForm.this, result.serviceResponse);
 				}
-				mBusyManager.hideBusy();
+				hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
 			}
 
@@ -285,13 +286,13 @@ public class CandigramForm extends BaseEntityForm {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
-							mSoundPool.play(mCandigramExitSoundId, 1.0f, 1.0f, 0, 0, 1f);
+							mSoundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
 							finish();
 							Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CandigramOut);
 						}
 						else if (which == Dialog.BUTTON_NEGATIVE) {
 							Places.view(CandigramForm.this, place.id);
-							mSoundPool.play(mCandigramExitSoundId, 1.0f, 1.0f, 0, 0, 1f);
+							mSoundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
 							finish();
 							Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CandigramOut);
 						}
@@ -299,12 +300,6 @@ public class CandigramForm extends BaseEntityForm {
 				}
 				, null);
 		dialog.setCanceledOnTouchOutside(false);
-	}
-
-	@SuppressWarnings("ucd")
-	public void onCaptureButtonClick(View view) {
-		StringBuilder preamble = new StringBuilder(getString(R.string.alert_candigram_capture));
-		Dialogs.alertDialogSimple(this, null, preamble.toString());
 	}
 
 	@Override
@@ -535,7 +530,6 @@ public class CandigramForm extends BaseEntityForm {
 		Candigram candigram = (Candigram) mEntity;
 
 		UI.setVisibility(findViewById(R.id.button_kick), View.GONE);
-		UI.setVisibility(findViewById(R.id.button_capture), View.GONE);
 
 		if (EntityManager.canUserAdd(mEntity)) {
 			if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {

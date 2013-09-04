@@ -35,13 +35,13 @@ public class CommentEdit extends BaseEntityEdit {
 				return false;
 			}
 		});
-		databind(null);
+		databind();
 		draw();
 	}
 
 	@Override
-	public void databind(Boolean refresh) {
-		super.databind(refresh);
+	public void databind() {
+		super.databind();
 		/*
 		 * We are always creating a new comment.
 		 */

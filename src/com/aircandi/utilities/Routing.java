@@ -429,10 +429,10 @@ public final class Routing {
 		}
 
 		else if (route == Route.Test) {
-			((ApplinkEdit)activity).onTestButtonClick();
+			((ApplinkEdit) activity).onTestButtonClick();
 			return true;
 		}
-		
+
 		else if (route == Route.Signin) {
 
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, SignInEdit.class);
@@ -751,13 +751,38 @@ public final class Routing {
 		final String errorMessage = serviceResponse.exception.getMessage();
 		final Float statusCode = serviceResponse.exception.getStatusCode();
 
+		/*
+		 * There have been cases where the failure was so catastrophic, even the activity object
+		 * is dead so we check for it. Better to just to give a super generic message.
+		 */
+		if (activity == null) {
+			Aircandi.mainThreadHandler.post(new Runnable() {
+
+				@Override
+				public void run() {
+					Dialogs.alertDialog(R.drawable.ic_launcher
+							, null
+							, Aircandi.applicationContext.getString(R.string.error_connection_poor)
+							, null
+							, activity
+							, android.R.string.ok
+							, null
+							, null
+							, null
+							, null);
+				}
+			});
+			Logger.w(activity, "Service error: (code: " + String.valueOf(statusCode) + ") " + errorMessage);
+			return statusCode;
+		}
+
 		/* We always make sure the progress indicator has been stopped */
 		if (activity instanceof BaseActivity) {
 			activity.runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
-					((BaseActivity) activity).mBusyManager.hideBusy();
+					((BaseActivity) activity).hideBusy();
 				}
 			});
 		}
@@ -787,14 +812,6 @@ public final class Routing {
 					/*
 					 * We don't have a network connection.
 					 */
-					//					final Intent intent = new Intent(activity, activity.getClass());
-					//					AirNotification airNotification = new AirNotification();
-					//					airNotification.title = activity.getString(R.string.error_connection_none_notification_title);
-					//					airNotification.subtitle = activity.getString(R.string.error_connection_none_notification_message);
-					//					airNotification.intent = intent;
-					//					airNotification.type = "network";
-					//					NotificationManager.getInstance().showNotification(airNotification, activity);
-
 					Dialogs.alertDialogSimple(activity, null, activity.getString(R.string.error_connection_none));
 				}
 				else if (serviceResponse.exception.getInnerException() instanceof WalledGardenException) {

@@ -13,6 +13,7 @@ import java.util.Map;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
+import com.aircandi.R;
 import com.aircandi.applications.Candigrams;
 import com.aircandi.applications.Comments;
 import com.aircandi.applications.Maps;
@@ -556,7 +557,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, Constants.SCHEMA_ENTITY_APPLINK
 					, Constants.TYPE_APP_POST
 					, Constants.ACTION_VIEW_AUTO
-					, "pictures"
+					, Aircandi.getInstance().getResources().getString(R.string.applink_name_pictures)
 					, "resource:img_picture_temp"
 					, 10
 					, false
@@ -578,7 +579,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, Constants.SCHEMA_ENTITY_APPLINK
 					, Constants.TYPE_APP_CANDIGRAM
 					, Constants.ACTION_VIEW_AUTO
-					, "candigrams"
+					, Aircandi.getInstance().getResources().getString(R.string.applink_name_candigrams)
 					, "resource:img_candigram_temp"
 					, 10
 					, false
@@ -599,7 +600,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, Constants.SCHEMA_ENTITY_APPLINK
 					, Constants.TYPE_APP_MAP
 					, Constants.ACTION_VIEW
-					, "map"
+					, Aircandi.getInstance().getResources().getString(R.string.applink_name_map)
 					, "resource:img_map_temp"
 					, 30
 					, false
@@ -618,7 +619,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, Constants.SCHEMA_ENTITY_APPLINK
 					, Constants.TYPE_APP_POST
 					, Constants.ACTION_VIEW_AUTO
-					, "pictures"
+					, Aircandi.getInstance().getResources().getString(R.string.applink_name_pictures)
 					, "resource:img_picture_temp"
 					, 10
 					, false
@@ -642,7 +643,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, Constants.SCHEMA_ENTITY_APPLINK
 					, Constants.TYPE_APP_MAP
 					, Constants.ACTION_VIEW
-					, "map"
+					, Aircandi.getInstance().getResources().getString(R.string.applink_name_map)
 					, "resource:img_map_temp"
 					, 30
 					, false
@@ -657,7 +658,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				, Constants.SCHEMA_ENTITY_APPLINK
 				, Constants.TYPE_APP_COMMENT
 				, Constants.ACTION_VIEW_FOR
-				, "comments"
+				, Aircandi.getInstance().getResources().getString(R.string.applink_name_comments)
 				, "resource:img_comment_temp"
 				, 20
 				, false

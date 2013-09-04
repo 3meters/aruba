@@ -33,7 +33,7 @@ public class PictureEdit extends BaseEntityEdit {
 				mTabManager.doRestoreInstanceState(savedInstanceState);
 			}
 		}
-		databind(null);
+		databind();
 		draw();
 	}
 
@@ -59,6 +59,6 @@ public class PictureEdit extends BaseEntityEdit {
 
 	@Override
 	protected int getLayoutId() {
-		return R.layout.post_edit;
+		return R.layout.picture_edit;
 	}
 }

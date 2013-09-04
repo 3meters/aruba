@@ -46,7 +46,7 @@ public class PlaceEdit extends BaseEntityEdit {
 				mTabManager.doRestoreInstanceState(savedInstanceState);
 			}
 		}
-		databind(null);
+		databind();
 		draw();
 	}
 
@@ -130,6 +130,7 @@ public class PlaceEdit extends BaseEntityEdit {
 						mApplinks.add(applink);
 					}
 					mDirty = true;
+					mRefreshFromService = true;
 					drawShortcuts(mEntity);
 				}
 			}

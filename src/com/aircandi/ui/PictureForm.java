@@ -42,7 +42,7 @@ import com.squareup.otto.Subscribe;
 public class PictureForm extends BaseEntityForm {
 	
 	@Override
-	public void databind(final Boolean refreshProposed) {
+	public void databind() {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
@@ -61,10 +61,11 @@ public class PictureForm extends BaseEntityForm {
 				Thread.currentThread().setName("GetEntity");
 
 				Entity entity = EntityManager.getEntity(mEntityId);
-				Boolean refresh = refreshProposed;
+				Boolean refresh = mRefreshFromService;
 				if (entity == null || !entity.shortcuts) {
 					refresh = true;
 				}
+				mRefreshFromService = false;
 				
 				LinkOptions options =LinkOptions.getDefault(DefaultType.LinksForPicture); 
 				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
@@ -95,7 +96,7 @@ public class PictureForm extends BaseEntityForm {
 				else {
 					Routing.serviceError(PictureForm.this, result.serviceResponse);
 				}
-				mBusyManager.hideBusy();
+				hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
 			}
 
@@ -334,7 +335,7 @@ public class PictureForm extends BaseEntityForm {
 
 	@Override
 	protected int getLayoutId() {
-		return R.layout.post_form;
+		return R.layout.picture_form;
 	}
 
 }

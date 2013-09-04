@@ -12,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -28,8 +29,8 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 	private Entity	mParent;
 
 	@Override
-	public void databind(Boolean refresh) {
-		super.databind(refresh);
+	public void databind() {
+		super.databind();
 
 		if (mEntityId != null) {
 			mParent = EntityManager.getEntity(mEntityId);
@@ -78,6 +79,14 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 				final ModelResult result = (ModelResult) response;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					final List<Entity> applinks = (List<Entity>) result.data;
+					/*
+					 * Make sure they have the schema property set
+					 */
+					for (Entity applink: applinks) {
+						if (applink.schema == null) {
+							applink.schema = Constants.SCHEMA_ENTITY_APPLINK;
+						}
+					}
 
 					if (autoInsert) {
 						if (applinks.size() > 0) {
@@ -98,8 +107,8 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 					}
 				}
-				databind(null);
-				mBusyManager.hideBusy();
+				databind();
+				hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
 			}
 		}.execute();
@@ -148,8 +157,8 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 						UI.showToastNotification(getResources().getString(R.string.toast_applinks_refreshed), Toast.LENGTH_SHORT);
 					}
 				}
-				databind(null);
-				mBusyManager.hideBusy();
+				databind();
+				hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
 			}
 		}.execute();

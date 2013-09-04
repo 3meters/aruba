@@ -47,12 +47,12 @@ public class FeedbackEdit extends BaseEntityEdit {
 				}
 			});
 		}
-		databind(null);
+		databind();
 		draw();
 	}
 
 	@Override
-	public void databind(Boolean refresh) {
+	public void databind() {
 		/*
 		 * We are always creating a new comment.
 		 */
@@ -128,7 +128,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					Tracker.sendEvent("ui_action", "send_feedback", null, 0, Aircandi.getInstance().getUser());
-					mBusyManager.hideBusy();
+					hideBusy();
 					UI.showToastNotification(getString(R.string.alert_feedback_sent), Toast.LENGTH_SHORT);
 					finish();
 				}

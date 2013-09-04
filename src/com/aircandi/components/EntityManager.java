@@ -160,6 +160,31 @@ public class EntityManager {
 	// Service queries
 	// --------------------------------------------------------------------------------------------
 
+	public synchronized Boolean isActivityStale(String entityId, Number activityDate) {
+
+		final ModelResult result = new ModelResult();
+
+		final Bundle parameters = new Bundle();
+		parameters.putString("entityId", entityId);
+		parameters.putLong("activityDate", activityDate.longValue());
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "checkActivity")
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
+				.setResponseFormat(ResponseFormat.Json);
+
+		result.serviceResponse = dispatch(serviceRequest);
+
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			final String jsonResponse = (String) result.serviceResponse.data;
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.None, ServiceDataWrapper.True);
+			Boolean stale = (serviceData.info.contains("stale"));
+			return stale;
+		}
+		return false;
+	}
+	
 	public synchronized ModelResult loadCategories() {
 
 		final ModelResult result = new ModelResult();

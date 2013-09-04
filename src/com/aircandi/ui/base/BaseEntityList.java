@@ -184,10 +184,11 @@ public abstract class BaseEntityList extends BaseBrowse {
 	}
 
 	@Override
-	public void databind(final Boolean refresh) {
+	public void databind() {
 
-		if (refresh || mAdapter == null) {
+		if (mRefreshFromService || mAdapter == null) {
 			mOffset = 0;
+			mRefreshFromService = false;
 
 			/* Prep the UI */
 			mButtonNewEntity.setVisibility(View.GONE);
@@ -383,7 +384,8 @@ public abstract class BaseEntityList extends BaseBrowse {
 		if (!isFinishing()) {
 			if (unsynchronized()) {
 				invalidateOptionsMenu();
-				databind(true); // Setting this here because it doesn't mean a service call
+				mRefreshFromService = true;
+				databind(); // Setting this here because it doesn't mean a service call
 			}
 		}
 	}

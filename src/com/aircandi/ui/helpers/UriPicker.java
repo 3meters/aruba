@@ -93,11 +93,11 @@ public class UriPicker extends BaseBrowse {
 			}
 		});
 
-		databind(null);
+		databind();
 	}
 
 	@Override
-	public void databind(Boolean refresh) {
+	public void databind() {
 
 		new AsyncTask() {
 
@@ -120,7 +120,7 @@ public class UriPicker extends BaseBrowse {
 			protected void onPostExecute(Object response) {
 				mSearchAdapter = new SearchAdapter(UriPicker.this, mSearchItems, null);
 				mListView.setAdapter(mSearchAdapter);
-				mBusyManager.hideBusy();
+				hideBusy();
 			}
 
 		}.execute();
@@ -249,7 +249,7 @@ public class UriPicker extends BaseBrowse {
 							if (description != null) {
 								mUriDescription = description;
 							}
-							mBusyManager.hideBusy();
+							hideBusy();
 
 							final Intent intent = new Intent();
 							intent.putExtra(Constants.EXTRA_URI, mUri);

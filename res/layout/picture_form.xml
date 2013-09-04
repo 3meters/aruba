@@ -106,7 +106,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="bottom"
-                            android:text="@string/comment_label_place"
+                            android:text="@string/picture_label_place"
                             android:textAppearance="@style/textAppearanceSmall"
                             android:textColor="?attr/textColorSecondary" />
 

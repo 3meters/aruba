@@ -218,7 +218,7 @@ public class CandigramEdit extends BaseEntityEdit {
 			findViewById(R.id.settings_button_finish).setVisibility(View.VISIBLE);
 			findViewById(R.id.settings_image_previous).setVisibility(View.VISIBLE);
 		}
-		databind(null);
+		databind();
 		draw();
 	}
 

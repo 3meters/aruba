@@ -84,7 +84,7 @@ public class PasswordEdit extends BaseEdit {
 			@Override
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
-				mBusyManager.hideBusy();
+				hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					Logger.i(this, "User changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");

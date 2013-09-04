@@ -237,7 +237,7 @@ public class PhotoPicker extends BaseBrowse {
 		});
 
 		if (mPlacePhotoMode) {
-			databind(null);
+			databind();
 		}
 		else {
 			/* Autocomplete */
@@ -247,7 +247,7 @@ public class PhotoPicker extends BaseBrowse {
 	}
 
 	@Override
-	public void databind(Boolean refresh) {
+	public void databind() {
 		/*
 		 * First check to see if there are any candi picture children.
 		 */

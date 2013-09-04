@@ -96,6 +96,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	protected AirImageView		mImageRequestWebImageView;
 	protected Uri				mMediaFileUri;
 	protected File				mMediaFile;
+	
 
 	/* Inputs */
 	protected Entity			mEntity;
@@ -184,7 +185,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	}
 
 	@Override
-	public void databind(Boolean refresh) {
+	public void databind() {
 		if (mEditing) {
 			setActivityTitle(mEntity.name);
 		}
@@ -852,6 +853,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 					if (mApplinks != null) {
 						result = EntityManager.getInstance().replaceEntitiesForEntity(insertedEntity.id, mApplinks, Constants.TYPE_LINK_APPLINK);
+						/*
+						 * Need to update the linkIn for the entity or these won't show
+						 * without a service refresh.
+						 */
 					}
 
 					UI.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
@@ -864,8 +869,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			@Override
 			protected void onPostExecute(Object response) {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
-				mBusyManager.hideBusy();
+				hideBusy();
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					setResult(Constants.RESULT_ENTITY_INSERTED);
 					finish();
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.CandigramOut);
 				}
@@ -931,10 +937,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			@Override
 			protected void onPostExecute(Object response) {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
-				mBusyManager.hideBusy();
+				hideBusy();
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					UI.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-					setResult(Constants.RESULT_ENTITY_UPDATED);
+					setResult(mRefreshFromService ? Constants.RESULT_ENTITY_UPDATED_REFRESH : Constants.RESULT_ENTITY_UPDATED);
 					finish();
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
 				}
@@ -978,7 +984,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					/*
 					 * We either go back to a list or to radar.
 					 */
-					mBusyManager.hideBusy();
+					hideBusy();
 					UI.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
 					setResult(Constants.RESULT_ENTITY_DELETED);
 					finish();

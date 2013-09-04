@@ -51,11 +51,11 @@ public class ApplicationPicker extends BaseBrowse implements OnItemClickListener
 
 		mName = (TextView) findViewById(R.id.name);
 		mListView = (ListView) findViewById(R.id.form_list);
-		databind(null);
+		databind();
 	}
 
 	@Override
-	public void databind(Boolean refresh) {
+	public void databind() {
 		mName.setText(R.string.dialog_template_picker_title);
 
 		/* Shown as a dialog so doesn't have an action bar */
