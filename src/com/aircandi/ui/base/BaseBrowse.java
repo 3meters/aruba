@@ -4,8 +4,6 @@ import android.os.Bundle;
 import android.view.WindowManager;
 
 import com.aircandi.Aircandi;
-import com.aircandi.Constants;
-import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.service.objects.User;
@@ -14,7 +12,6 @@ import com.aircandi.utilities.DateTime;
 public abstract class BaseBrowse extends BaseActivity {
 
 	protected Number	mEntityModelRefreshDate;
-	protected Number	mEntityModelActivityDate;
 	protected User		mEntityModelUser;
 
 	@Override
@@ -28,17 +25,12 @@ public abstract class BaseBrowse extends BaseActivity {
 		}
 	}
 
-	@Override
-	protected void unpackIntent() {
-		final Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			mRefreshFromService = extras.getBoolean(Constants.EXTRA_REFRESH_FROM_SERVICE);
-		}
-	}
-
 	protected void initialize(Bundle savedInstanceState) {
 		mEntityModelUser = Aircandi.getInstance().getUser();
 	}
+
+	@Override
+	public void afterDatabind() {}
 
 	@Override
 	protected void configureActionBar() {
@@ -54,7 +46,6 @@ public abstract class BaseBrowse extends BaseActivity {
 
 	@Override
 	public void onRefresh() {
-		mRefreshFromService	= true;
 		databind(); // Called from Routing
 	}
 
@@ -68,24 +59,17 @@ public abstract class BaseBrowse extends BaseActivity {
 
 	protected void synchronize() {
 		mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-		mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 		mEntityModelUser = Aircandi.getInstance().getUser();
 	}
 
 	protected Boolean unsynchronized() {
-		
-		if (mEntityModelActivityDate == null) {
-			Logger.v(this, "Unsynchronized: no local activity date");
-			return true;
-		}
 
 		if (mEntityModelRefreshDate == null) {
 			Logger.v(this, "Unsynchronized: no local beacon date");
 			return true;
 		}
-		
+
 		Number lastBeaconLoadDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-		Number lastActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 
 		if (Aircandi.getInstance().getUser() != null
 				&& mEntityModelUser != null
@@ -100,15 +84,6 @@ public abstract class BaseBrowse extends BaseActivity {
 			Logger.v(this, "Unsynchronized: beacon load date has changed");
 			Logger.v(this, "Unsynchronized: beacon date old: " + DateTime.dateString(mEntityModelRefreshDate.longValue(), DateTime.DATE_FORMAT_DETAILED));
 			Logger.v(this, "Unsynchronized: beacon date new: " + DateTime.dateString(lastBeaconLoadDate.longValue(), DateTime.DATE_FORMAT_DETAILED));
-			return true;
-		}
-
-		if (lastActivityDate != null
-				&& mEntityModelActivityDate != null
-				&& lastActivityDate.longValue() != mEntityModelActivityDate.longValue()) {
-			Logger.v(this, "Unsynchronized: model activity date has changed");
-			Logger.v(this, "Unsynchronized: activity date old: " + DateTime.dateString(mEntityModelActivityDate.longValue(), DateTime.DATE_FORMAT_DETAILED));
-			Logger.v(this, "Unsynchronized: activity date new: " + DateTime.dateString(lastActivityDate.longValue(), DateTime.DATE_FORMAT_DETAILED));
 			return true;
 		}
 

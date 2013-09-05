@@ -5,7 +5,7 @@ import android.os.Bundle;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.ui.base.BaseShortcutFragment;
 
 @SuppressWarnings("ucd")
@@ -14,7 +14,7 @@ public class CreatedFragment extends BaseShortcutFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mLinkOptions = DefaultType.LinksForUser;
+		mLinkProfiles = LinkProfile.LinksForUser;
 		mShortcutType = Constants.TYPE_LINK_CREATE;
 	}
 

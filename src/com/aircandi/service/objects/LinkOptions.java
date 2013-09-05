@@ -75,9 +75,9 @@ public class LinkOptions extends ServiceObject {
 		return this;
 	}
 
-	public static LinkOptions getDefault(DefaultType defaultType) {
+	public static LinkOptions getDefault(LinkProfile linkProfile) {
 
-		if (defaultType == DefaultType.NoLinks) {
+		if (linkProfile == LinkProfile.NoLinks) {
 			return null;
 		}
 		else {
@@ -85,7 +85,7 @@ public class LinkOptions extends ServiceObject {
 			Number limit = ProxiConstants.LIMIT_USER_OWNED_ENTITIES;
 			LinkOptions linkOptions = new LinkOptions().setActive(new ArrayList<LinkSettings>());
 
-			if (defaultType == DefaultType.LinksForPlace) {
+			if (linkProfile == LinkProfile.LinksForPlace) {
 				linkOptions.shortcuts = true;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, true, false, true, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
@@ -101,10 +101,10 @@ public class LinkOptions extends ServiceObject {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit));
 				}
 			}
-			else if (defaultType == DefaultType.LinksForProximity) {
-				linkOptions = getDefault(DefaultType.LinksForPlace);
+			else if (linkProfile == LinkProfile.LinksForProximity) {
+				linkOptions = getDefault(LinkProfile.LinksForPlace);
 			}
-			else if (defaultType == DefaultType.LinksForCandigram) {
+			else if (linkProfile == LinkProfile.LinksForCandigram) {
 				linkOptions.shortcuts = true;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
@@ -119,7 +119,7 @@ public class LinkOptions extends ServiceObject {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit));
 				}
 			}
-			else if (defaultType == DefaultType.LinksForPicture) {
+			else if (linkProfile == LinkProfile.LinksForPicture) {
 				linkOptions.shortcuts = true;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
@@ -132,7 +132,7 @@ public class LinkOptions extends ServiceObject {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit));
 				}
 			}
-			else if (defaultType == DefaultType.LinksForUser) {
+			else if (linkProfile == LinkProfile.LinksForUser) {
 				linkOptions.shortcuts = true;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, limit).setDirection(Direction.out));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit).setDirection(Direction.both));
@@ -151,7 +151,7 @@ public class LinkOptions extends ServiceObject {
 		return this;
 	}
 
-	public enum DefaultType {
+	public enum LinkProfile {
 		LinksForProximity,
 		LinksForPlace,
 		LinksForCandigram,

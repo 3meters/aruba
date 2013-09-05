@@ -940,7 +940,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				hideBusy();
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					UI.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-					setResult(mRefreshFromService ? Constants.RESULT_ENTITY_UPDATED_REFRESH : Constants.RESULT_ENTITY_UPDATED);
+					setResult(Constants.RESULT_ENTITY_UPDATED);
 					finish();
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
 				}

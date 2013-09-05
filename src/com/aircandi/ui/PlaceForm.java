@@ -33,8 +33,7 @@ import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
-import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
@@ -64,101 +63,18 @@ public class PlaceForm extends BaseEntityForm {
 	}
 
 	@Override
-	public void databind() {
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+		mLinkProfile = LinkProfile.LinksForPlace;
+	}
 
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				showBusy();
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("GetEntity");
-
-				Entity entity = EntityManager.getEntity(mEntityId);
-				Boolean refresh = mRefreshFromService;
-				if (entity == null) {
-					refresh = true;
-				}
-				else if (!entity.shortcuts && !entity.synthetic) {
-					refresh = true;
-				}
-				mRefreshFromService = false;
-
-				LinkOptions options =LinkOptions.getDefault(DefaultType.LinksForPlace); 
-				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
-
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object modelResult) {
-				final ModelResult result = (ModelResult) modelResult;
-
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-					if (result.data != null) {
-						mEntity = (Entity) result.data;
-						Aircandi.currentPlace = mEntity;
-						setActivityTitle(mEntity.name);
-						if (mMenuItemEdit != null) {
-							mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
-						}
-						if (mMenuItemAdd != null) {
-							mMenuItemAdd.setVisible(EntityManager.canUserAdd(mEntity));
-						}
-
-						/* Action bar icon */
-						if (((Place) mEntity).category != null) {
-							final BitmapRequest bitmapRequest = new BitmapRequest();
-							bitmapRequest.setImageUri(((Place) mEntity).category.photo.getUri());
-							bitmapRequest.setImageRequestor(this);
-							bitmapRequest.setRequestListener(new RequestListener() {
-
-								@Override
-								public void onComplete(Object response) {
-
-									final ServiceResponse serviceResponse = (ServiceResponse) response;
-									if (serviceResponse.responseCode == ResponseCode.Success) {
-										runOnUiThread(new Runnable() {
-
-											@Override
-											public void run() {
-												final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-												final int color = mResources.getColor(getThemeTone().equals("dark") ? R.color.gray_00_pcnt
-														: R.color.gray_90_pcnt);
-												ColorFilter colorFilter = new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY);
-												BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(),
-														imageResponse.bitmap);
-												bitmapDrawable.setColorFilter(colorFilter);
-												bitmapDrawable.setAlpha(getThemeTone().equals("dark") ? 204 : 153);
-												mActionBar.setIcon(bitmapDrawable);
-											}
-										});
-									}
-								}
-							});
-							BitmapManager.getInstance().masterFetch(bitmapRequest);
-						}
-
-						synchronize();
-						draw();
-						if (mUpsize) {
-							mUpsize = false;
-							upsize();
-							return;
-						}
-					}
-				}
-				else {
-					Routing.serviceError(PlaceForm.this, result.serviceResponse);
-				}
-				hideBusy();
-			}
-
-		}.execute();
+	@Override
+	public void afterDatabind() {
+		Aircandi.currentPlace = mEntity;
+		if (mUpsize) {
+			mUpsize = false;
+			upsize();
+		}
 	}
 
 	private void upsize() {
@@ -275,6 +191,47 @@ public class PlaceForm extends BaseEntityForm {
 		 * - WebImageView child views are gone by default
 		 * - Header views are visible by default
 		 */
+		setActivityTitle(mEntity.name);
+		if (mMenuItemEdit != null) {
+			mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
+		}
+		if (mMenuItemAdd != null) {
+			mMenuItemAdd.setVisible(EntityManager.canUserAdd(mEntity));
+		}
+
+		/* Action bar icon */
+		if (((Place) mEntity).category != null) {
+			final BitmapRequest bitmapRequest = new BitmapRequest();
+			bitmapRequest.setImageUri(((Place) mEntity).category.photo.getUri());
+			bitmapRequest.setImageRequestor(this);
+			bitmapRequest.setRequestListener(new RequestListener() {
+
+				@Override
+				public void onComplete(Object response) {
+
+					final ServiceResponse serviceResponse = (ServiceResponse) response;
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+								final int color = mResources.getColor(getThemeTone().equals("dark") ? R.color.gray_00_pcnt
+										: R.color.gray_90_pcnt);
+								ColorFilter colorFilter = new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY);
+								BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(),
+										imageResponse.bitmap);
+								bitmapDrawable.setColorFilter(colorFilter);
+								bitmapDrawable.setAlpha(getThemeTone().equals("dark") ? 204 : 153);
+								mActionBar.setIcon(bitmapDrawable);
+							}
+						});
+					}
+				}
+			});
+			BitmapManager.getInstance().masterFetch(bitmapRequest);
+		}
+
 		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);
 		final AirImageView photoView = (AirImageView) findViewById(R.id.photo);
 		final TextView name = (TextView) findViewById(R.id.name);
@@ -456,6 +413,10 @@ public class PlaceForm extends BaseEntityForm {
 			UI.setVisibility(findViewById(R.id.button_tune), View.VISIBLE);
 		}
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle
+	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
 	// Menus

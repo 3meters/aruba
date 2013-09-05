@@ -41,6 +41,8 @@ import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.LinkOptions;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutMeta;
@@ -64,6 +66,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 	protected ScrollView			mScrollView;
 	protected Entity				mEntity;
+	protected LinkProfile			mLinkProfile;
 
 	/* Inputs */
 	@SuppressWarnings("ucd")
@@ -91,6 +94,64 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		super.initialize(savedInstanceState);
 		mScrollView = (ScrollView) findViewById(R.id.scroll_view);
 	}
+
+	@Override
+	public void databind() {
+
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				showBusy();
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("GetEntity");
+
+				ModelResult result = new ModelResult();
+				Entity entity = EntityManager.getEntity(mEntityId);
+				Boolean refresh = (entity == null || (!entity.shortcuts && !entity.synthetic));
+				if (!refresh) {
+					refresh = EntityManager.getInstance().isActivityStale(entity.id, entity.activityDate);
+				}
+
+				if (refresh) {
+					LinkOptions options = LinkOptions.getDefault(mLinkProfile);
+					result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
+				}
+
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object modelResult) {
+				final ModelResult result = (ModelResult) modelResult;
+
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+
+					if (result.data != null) {
+						mEntity = (Entity) result.data;
+						synchronize();
+						draw();
+						afterDatabind();
+					}
+					else  {
+						UI.showToastNotification("This item has been deleted", Toast.LENGTH_SHORT);
+						finish();
+					}					
+				}
+				else {
+					Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
+				}
+				hideBusy();
+			}
+
+		}.execute();
+	}
+	
+	@Override
+	public void afterDatabind() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Events
@@ -255,17 +316,10 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		 * - Template picker returns type of candi to add as a child
 		 */
 		if (resultCode != Activity.RESULT_CANCELED) {
-			if (requestCode == Constants.ACTIVITY_ENTITY_INSERT) {
-				mRefreshFromService = true;
-			}
-			else if (requestCode == Constants.ACTIVITY_ENTITY_EDIT) {
+			if (requestCode == Constants.ACTIVITY_ENTITY_EDIT) {
 				if (resultCode == Constants.RESULT_ENTITY_DELETED) {
 					finish();
 					Animate.doOverridePendingTransition(this, TransitionType.PageToRadarAfterDelete);
-				}
-				else if (resultCode == Constants.RESULT_ENTITY_UPDATED_REFRESH
-						|| resultCode == Constants.RESULT_ENTITY_INSERTED) {
-					mRefreshFromService = true;
 				}
 			}
 			else if (requestCode == Constants.ACTIVITY_APPLICATION_PICK) {
@@ -630,6 +684,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			if (unsynchronized()) {
 				invalidateOptionsMenu();
 				databind();
+				
 			}
 
 			/* Package receiver */

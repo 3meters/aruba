@@ -18,7 +18,7 @@ import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.utilities.Routing;
@@ -27,7 +27,7 @@ import com.aircandi.utilities.Routing;
 public abstract class BaseShortcutForm extends BaseEntityForm {
 
 	protected String		mShortcutType;
-	protected DefaultType	mLinkOptions;
+	protected LinkProfile	mLinkProfiles;
 
 	@Override
 	public void databind() {
@@ -51,7 +51,7 @@ public abstract class BaseShortcutForm extends BaseEntityForm {
 				}
 				mRefreshFromService = false;
 
-				LinkOptions options =LinkOptions.getDefault(mLinkOptions); 
+				LinkOptions options =LinkOptions.getDefault(mLinkProfiles); 
 				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
 
 				return result;

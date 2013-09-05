@@ -17,7 +17,6 @@ import com.aircandi.Aircandi;
 import com.aircandi.R;
 import com.aircandi.components.BusProvider;
 import com.aircandi.components.BusyManager;
-import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.MenuManager;
 import com.aircandi.components.ProximityManager;
@@ -29,9 +28,7 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 	protected Resources		mResources;
 	protected BusyManager	mBusyManager;
 	protected Number		mEntityModelRefreshDate;
-	protected Number		mEntityModelActivityDate;
 	protected User			mEntityModelUser;
-	protected Boolean		mRefreshFromService	= false;	// Can be set by input or by other means
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -134,13 +131,11 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 
 	protected void synchronize() {
 		mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-		mEntityModelActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 		mEntityModelUser = Aircandi.getInstance().getUser();
 	}
 
 	protected Boolean unsynchronized() {
 		Number lastBeaconLoadDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-		Number lastActivityDate = EntityManager.getEntityCache().getLastActivityDate();
 
 		if (Aircandi.getInstance().getUser() != null
 				&& mEntityModelUser != null
@@ -151,12 +146,6 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 		if (lastBeaconLoadDate != null
 				&& mEntityModelRefreshDate != null
 				&& lastBeaconLoadDate.longValue() != mEntityModelRefreshDate.longValue()) {
-			return true;
-		}
-
-		if (lastActivityDate != null
-				&& mEntityModelActivityDate != null
-				&& lastActivityDate.longValue() != mEntityModelActivityDate.longValue()) {
 			return true;
 		}
 

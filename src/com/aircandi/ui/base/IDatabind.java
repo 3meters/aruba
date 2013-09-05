@@ -12,6 +12,8 @@ public interface IDatabind {
 
 	public void databind();
 
+	public void afterDatabind();
+	
 	public void draw();
 
 	public void showBusy();

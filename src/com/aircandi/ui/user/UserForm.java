@@ -3,6 +3,7 @@ package com.aircandi.ui.user;
 import java.util.List;
 
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
@@ -14,10 +15,8 @@ import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.Count;
-import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
-import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
@@ -31,68 +30,23 @@ import com.aircandi.utilities.UI;
 public class UserForm extends BaseEntityForm {
 
 	@Override
-	public void databind() {
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mBusyManager.showBusy();
-				mBusyManager.startBodyBusyIndicator();
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("GetUser");
-
-				Entity entity = EntityManager.getEntity(mEntityId);
-				Boolean refresh = mRefreshFromService;
-				if (entity == null || !entity.shortcuts) {
-					refresh = true;
-				}
-				mRefreshFromService = false;
-
-				LinkOptions options = LinkOptions.getDefault(DefaultType.LinksForUser);
-				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
-
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					if (result.data != null) {
-						mEntity = (Entity) result.data;
-					}
-				}
-
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object modelResult) {
-				final ModelResult result = (ModelResult) modelResult;
-
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					if (result.data != null) {
-						mEntity = (Entity) result.data;
-						synchronize();
-						setActivityTitle(mEntity.name);
-						if (mMenuItemEdit != null) {
-							mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
-						}
-						if (mMenuItemSignout != null) {
-							mMenuItemSignout.setVisible(EntityManager.canUserEdit(mEntity));
-						}
-						draw();
-					}
-					loadStats();
-					mBusyManager.stopBodyBusyIndicator();
-				}
-				else {
-					Routing.serviceError(UserForm.this, result.serviceResponse);
-					hideBusy();
-					mBusyManager.stopBodyBusyIndicator();
-				}
-			}
-
-		}.execute();
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+		mLinkProfile = LinkProfile.LinksForUser;
 	}
+
+	@Override
+	public void afterDatabind() {
+		loadStats();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Events
+	// --------------------------------------------------------------------------------------------
+
+	// --------------------------------------------------------------------------------------------
+	// Methods
+	// --------------------------------------------------------------------------------------------
 
 	protected void loadStats() {
 
@@ -134,15 +88,19 @@ public class UserForm extends BaseEntityForm {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Events
-	// --------------------------------------------------------------------------------------------
-
-	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
 	@Override
 	public void draw() {
+
+		setActivityTitle(mEntity.name);
+		if (mMenuItemEdit != null) {
+			mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
+		}
+		if (mMenuItemSignout != null) {
+			mMenuItemSignout.setVisible(EntityManager.canUserEdit(mEntity));
+		}
 
 		User user = (User) mEntity;
 

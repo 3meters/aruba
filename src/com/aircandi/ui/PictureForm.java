@@ -3,12 +3,11 @@ package com.aircandi.ui;
 import java.util.Collections;
 import java.util.List;
 
-import android.os.AsyncTask;
+import android.os.Bundle;
 import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
@@ -16,15 +15,10 @@ import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.applications.Applinks;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.events.MessageEvent;
 import com.aircandi.service.objects.Count;
-import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
-import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
@@ -42,65 +36,9 @@ import com.squareup.otto.Subscribe;
 public class PictureForm extends BaseEntityForm {
 	
 	@Override
-	public void databind() {
-		/*
-		 * Navigation setup for action bar icon and title
-		 */
-		Logger.d(this, "Binding candi form");
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mBusyManager.showBusy();
-				mBusyManager.startBodyBusyIndicator();
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("GetEntity");
-
-				Entity entity = EntityManager.getEntity(mEntityId);
-				Boolean refresh = mRefreshFromService;
-				if (entity == null || !entity.shortcuts) {
-					refresh = true;
-				}
-				mRefreshFromService = false;
-				
-				LinkOptions options =LinkOptions.getDefault(DefaultType.LinksForPicture); 
-				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
-				
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object modelResult) {
-				final ModelResult result = (ModelResult) modelResult;
-
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-					if (result.data != null) {
-						mEntity = (Entity) result.data;
-						synchronize();
-						setActivityTitle(mEntity.name);
-						if (mMenuItemEdit != null) {
-							mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
-						}
-						draw();
-					}
-					else {
-						UI.showToastNotification("This item has been deleted", Toast.LENGTH_SHORT);
-						finish();
-					}
-				}
-				else {
-					Routing.serviceError(PictureForm.this, result.serviceResponse);
-				}
-				hideBusy();
-				mBusyManager.stopBodyBusyIndicator();
-			}
-
-		}.execute();
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+		mLinkProfile = LinkProfile.LinksForPicture;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -153,6 +91,11 @@ public class PictureForm extends BaseEntityForm {
 		 * - WebImageView child views are gone by default
 		 * - Header views are visible by default
 		 */
+		setActivityTitle(mEntity.name);
+		if (mMenuItemEdit != null) {
+			mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
+		}		
+		
 		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);
 		final AirImageView photoView = (AirImageView) findViewById(R.id.photo);
 		final AirImageView placePhotoView = (AirImageView) findViewById(R.id.place_photo);

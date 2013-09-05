@@ -39,8 +39,7 @@ import com.aircandi.utilities.DateTime;
 @SuppressWarnings("ucd")
 public class EntityCache implements Map<String, Entity> {
 
-	private Number						mLastActivityDate	= DateTime.nowDate().getTime();
-	private final Map<String, Entity>	mMap				= Collections.synchronizedMap(new HashMap<String, Entity>());
+	private final Map<String, Entity>	mCacheMap	= Collections.synchronizedMap(new HashMap<String, Entity>());
 
 	// --------------------------------------------------------------------------------------------
 	// Cache loading
@@ -116,7 +115,7 @@ public class EntityCache implements Map<String, Entity> {
 		if (linkOptions != null) {
 			parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
 		}
-		
+
 		if (linkOptions != null && linkOptions.ignoreInactive != null) {
 			parameters.putBoolean("ignoreInactive", linkOptions.ignoreInactive);
 		}
@@ -160,7 +159,7 @@ public class EntityCache implements Map<String, Entity> {
 		if (cursor != null) {
 			parameters.putString("cursor", "object:" + HttpService.objectToJson(cursor));
 		}
-		
+
 		if (linkOptions != null && linkOptions.ignoreInactive != null) {
 			parameters.putBoolean("ignoreInactive", linkOptions.ignoreInactive);
 		}
@@ -364,11 +363,8 @@ public class EntityCache implements Map<String, Entity> {
 	}
 
 	public synchronized Entity upsertEntity(Entity entity) {
-
-		@SuppressWarnings("unused")
-		Entity removedEntity = removeEntityTree(entity.id);
+		removeEntityTree(entity.id);
 		put(entity.id, entity);
-		mLastActivityDate = DateTime.nowDate().getTime();
 		return get(entity.id);
 	}
 
@@ -418,20 +414,19 @@ public class EntityCache implements Map<String, Entity> {
 				}
 			}
 		}
-		mLastActivityDate = DateTime.nowDate().getTime();
 	}
 
 	public void addLink(String toId, String type, String fromId, Shortcut toShortcut, Shortcut fromShortcut) {
 
 		Long time = DateTime.nowDate().getTime();
-		
+
 		Entity entity = get(toId);
 		if (entity != null) {
-			
+
 			if (entity.linksIn == null) {
 				entity.linksIn = new ArrayList<Link>();
 			}
-			
+
 			if (entity.linksInCounts == null) {
 				entity.linksInCounts = new ArrayList<Count>();
 				entity.linksInCounts.add(new Count(type, 1));
@@ -452,18 +447,17 @@ public class EntityCache implements Map<String, Entity> {
 
 			entity.linksIn.add(link);
 			entity.activityDate = time;
-			mLastActivityDate = time;
 		}
 		/*
 		 * Fixup out links too.
 		 */
 		entity = get(fromId);
 		if (entity != null) {
-			
+
 			if (entity.linksOut == null) {
 				entity.linksOut = new ArrayList<Link>();
 			}
-			
+
 			if (entity.linksOutCounts == null) {
 				entity.linksOutCounts = new ArrayList<Count>();
 				entity.linksOutCounts.add(new Count(type, 1));
@@ -484,7 +478,6 @@ public class EntityCache implements Map<String, Entity> {
 
 			entity.linksOut.add(link);
 			entity.activityDate = time;
-			mLastActivityDate = time;
 		}
 	}
 
@@ -507,8 +500,6 @@ public class EntityCache implements Map<String, Entity> {
 					staleEntity.stale = true;
 				}
 			}
-
-			mLastActivityDate = DateTime.nowDate().getTime();
 		}
 		return staleEntity;
 	}
@@ -526,13 +517,12 @@ public class EntityCache implements Map<String, Entity> {
 				}
 			}
 		}
-		mLastActivityDate = DateTime.nowDate().getTime();
 	}
 
 	public void removeLink(String toId, String type, String fromId) {
 
 		Long time = DateTime.nowDate().getTime();
-		
+
 		Entity entity = get(toId);
 		if (entity != null) {
 
@@ -551,11 +541,10 @@ public class EntityCache implements Map<String, Entity> {
 					}
 				}
 			}
-			
+
 			entity.activityDate = time;
-			mLastActivityDate = time;
 		}
-		
+
 		/*
 		 * Fixup out links too
 		 */
@@ -577,9 +566,8 @@ public class EntityCache implements Map<String, Entity> {
 					}
 				}
 			}
-			
+
 			entity.activityDate = time;
-			mLastActivityDate = time;
 		}
 	}
 
@@ -665,79 +653,67 @@ public class EntityCache implements Map<String, Entity> {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Set/get
-	// --------------------------------------------------------------------------------------------
-
-	public Number getLastActivityDate() {
-		return mLastActivityDate;
-	}
-
-	public void setLastActivityDate(Number lastActivityDate) {
-		mLastActivityDate = lastActivityDate;
-	}
-
-	// --------------------------------------------------------------------------------------------
 	// Map methods
 	// --------------------------------------------------------------------------------------------
 
 	@Override
 	public void clear() {
-		mMap.clear();
+		mCacheMap.clear();
 	}
 
 	@Override
 	public boolean containsKey(Object key) {
-		return mMap.containsKey(key);
+		return mCacheMap.containsKey(key);
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		return mMap.containsValue(value);
+		return mCacheMap.containsValue(value);
 	}
 
 	@Override
 	public Set<java.util.Map.Entry<String, Entity>> entrySet() {
-		return mMap.entrySet();
+		return mCacheMap.entrySet();
 	}
 
 	@Override
 	public Entity get(Object key) {
-		return mMap.get(key);
+		return mCacheMap.get(key);
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return mMap.isEmpty();
+		return mCacheMap.isEmpty();
 	}
 
 	@Override
 	public Set<String> keySet() {
-		return mMap.keySet();
+		return mCacheMap.keySet();
 	}
 
 	@Override
 	public Entity put(String key, Entity value) {
-		return mMap.put(key, value);
+		return mCacheMap.put(key, value);
 	}
 
 	@Override
 	public void putAll(Map<? extends String, ? extends Entity> map) {
-		mMap.putAll(map);
+		mCacheMap.putAll(map);
 	}
 
 	@Override
 	public Entity remove(Object key) {
-		return mMap.remove(key);
+		return mCacheMap.remove(key);
 	}
 
 	@Override
 	public int size() {
-		return mMap.size();
+		return mCacheMap.size();
 	}
 
 	@Override
 	public Collection<Entity> values() {
-		return mMap.values();
+		return mCacheMap.values();
 	}
 
 }

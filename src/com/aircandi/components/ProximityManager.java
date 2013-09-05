@@ -28,7 +28,7 @@ import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.utilities.DateTime;
@@ -221,7 +221,7 @@ public class ProximityManager {
 		String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
 
 		serviceResponse = mEntityCache.loadEntitiesByProximity(beaconIds
-				, LinkOptions.getDefault(DefaultType.LinksForProximity)
+				, LinkOptions.getDefault(LinkProfile.LinksForProximity)
 				, null
 				, registrationId
 				, Aircandi.stopwatch1);
@@ -258,7 +258,7 @@ public class ProximityManager {
 		}
 
 		ServiceResponse serviceResponse = mEntityCache.loadEntitiesNearLocation(location
-				, LinkOptions.getDefault(DefaultType.LinksForPlace)
+				, LinkOptions.getDefault(LinkProfile.LinksForPlace)
 				, excludePlaceIds);
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {

@@ -89,12 +89,16 @@ public class EntityManager {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Combo service/cache queries
+	// Cache queries
 	// --------------------------------------------------------------------------------------------
 
 	public static Entity getEntity(String entityId) {
 		return mEntityCache.get(entityId);
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Combo service/cache queries
+	// --------------------------------------------------------------------------------------------
 
 	public synchronized ModelResult getEntity(String entityId, Boolean refresh, LinkOptions linkOptions) {
 		/*
@@ -184,7 +188,7 @@ public class EntityManager {
 		}
 		return false;
 	}
-	
+
 	public synchronized ModelResult loadCategories() {
 
 		final ModelResult result = new ModelResult();
@@ -753,15 +757,14 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			mEntityCache.removeEntityTree(entityId);
-			/* 
+			/*
 			 * Remove 'create' link
 			 * 
 			 * FIXME: This needs to be generalized to hunt down all links that have
 			 * this entity at either end and clean them up including any counts.
-			 * 
 			 */
 			mEntityCache.removeLink(entityId, Constants.TYPE_LINK_CREATE, Aircandi.getInstance().getUser().id);
-			
+
 		}
 		return result;
 	}
@@ -1006,7 +1009,6 @@ public class EntityManager {
 			Entity entity = EntityManager.getEntity(entityId);
 			if (entity != null) {
 				entity.activityDate = DateTime.nowDate().getTime();
-				mEntityCache.setLastActivityDate(DateTime.nowDate().getTime());
 			}
 		}
 		return result;

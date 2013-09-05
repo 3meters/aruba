@@ -32,7 +32,7 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutMeta;
 import com.aircandi.service.objects.ShortcutSettings;
@@ -47,7 +47,7 @@ import com.aircandi.utilities.UI;
 public abstract class BaseShortcutFragment extends BaseFragment {
 
 	protected String		mShortcutType;
-	protected DefaultType	mLinkOptions;
+	protected LinkProfile	mLinkProfiles;
 	protected ScrollView	mScrollView;
 
 	protected String		mEntityId;
@@ -80,7 +80,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 				}
 				mRefreshFromService = false;
 
-				LinkOptions options =LinkOptions.getDefault(mLinkOptions); 
+				LinkOptions options =LinkOptions.getDefault(mLinkProfiles); 
 				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {

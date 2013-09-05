@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
@@ -25,7 +24,6 @@ import com.aircandi.R;
 import com.aircandi.applications.Applinks;
 import com.aircandi.applications.Places;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
@@ -35,8 +33,7 @@ import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Link.Direction;
-import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
@@ -68,10 +65,14 @@ public class CandigramForm extends BaseEntityForm {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
+		mLinkProfile = LinkProfile.LinksForCandigram;
 		mActionInfo = (TextView) findViewById(R.id.action_info);
 		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
 		mCandigramExitSoundId = mSoundPool.load(this, R.raw.candigram_exit, 1);
+	}
 
+	@Override
+	public void afterDatabind() {
 		mTimer = new Runnable() {
 
 			@Override
@@ -80,72 +81,6 @@ public class CandigramForm extends BaseEntityForm {
 				mHandler.postDelayed(mTimer, 1000);
 			}
 		};
-	}
-
-	@Override
-	public void databind() {
-		/*
-		 * Navigation setup for action bar icon and title
-		 */
-		Logger.d(this, "Binding candi form");
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mBusyManager.showBusy();
-				mBusyManager.startBodyBusyIndicator();
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("GetEntity");
-
-				Entity entity = EntityManager.getEntity(mEntityId);
-				Boolean refresh = mRefreshFromService;
-				if (entity == null || !entity.shortcuts) {
-					refresh = true;
-				}
-				mRefreshFromService = false;
-
-				LinkOptions linkOptions = LinkOptions.getDefault(DefaultType.LinksForCandigram);
-				linkOptions.setIgnoreInactive(true);
-				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, linkOptions);
-
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object modelResult) {
-				final ModelResult result = (ModelResult) modelResult;
-
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-					if (result.data != null) {
-						mEntity = (Entity) result.data;
-						synchronize();
-						setActivityTitle(mEntity.name);
-						if (mMenuItemEdit != null) {
-							mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
-						}
-						if (mMenuItemAdd != null) {
-							mMenuItemAdd.setVisible(EntityManager.canUserAdd(mEntity));
-						}
-						draw();
-					}
-					else {
-						UI.showToastNotification("This item has been deleted", Toast.LENGTH_SHORT);
-						finish();
-					}
-				}
-				else {
-					Routing.serviceError(CandigramForm.this, result.serviceResponse);
-				}
-				hideBusy();
-				mBusyManager.stopBodyBusyIndicator();
-			}
-
-		}.execute();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -345,6 +280,15 @@ public class CandigramForm extends BaseEntityForm {
 		 * - WebImageView child views are gone by default
 		 * - Header views are visible by default
 		 */
+
+		setActivityTitle(mEntity.name);
+		if (mMenuItemEdit != null) {
+			mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
+		}
+		if (mMenuItemAdd != null) {
+			mMenuItemAdd.setVisible(EntityManager.canUserAdd(mEntity));
+		}
+
 		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);
 		final AirImageView photoView = (AirImageView) findViewById(R.id.photo);
 		final TextView name = (TextView) findViewById(R.id.name);

@@ -41,7 +41,7 @@ import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.widgets.AirImageView;
@@ -186,9 +186,8 @@ public abstract class BaseEntityList extends BaseBrowse {
 	@Override
 	public void databind() {
 
-		if (mRefreshFromService || mAdapter == null) {
+		if (mAdapter == null) {
 			mOffset = 0;
-			mRefreshFromService = false;
 
 			/* Prep the UI */
 			mButtonNewEntity.setVisibility(View.GONE);
@@ -287,25 +286,25 @@ public abstract class BaseEntityList extends BaseBrowse {
 	private LinkOptions getLinkOptions(String schema) {
 		if (schema != null) {
 			if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-				return LinkOptions.getDefault(DefaultType.NoLinks);
+				return LinkOptions.getDefault(LinkProfile.NoLinks);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-				return LinkOptions.getDefault(DefaultType.LinksForPicture);
+				return LinkOptions.getDefault(LinkProfile.LinksForPicture);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
-				return LinkOptions.getDefault(DefaultType.LinksForCandigram);
+				return LinkOptions.getDefault(LinkProfile.LinksForCandigram);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-				return LinkOptions.getDefault(DefaultType.LinksForPlace);
+				return LinkOptions.getDefault(LinkProfile.LinksForPlace);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
-				return LinkOptions.getDefault(DefaultType.LinksForUser);
+				return LinkOptions.getDefault(LinkProfile.LinksForUser);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-				return LinkOptions.getDefault(DefaultType.NoLinks);
+				return LinkOptions.getDefault(LinkProfile.NoLinks);
 			}
 		}
-		return LinkOptions.getDefault(DefaultType.NoLinks);
+		return LinkOptions.getDefault(LinkProfile.NoLinks);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -384,7 +383,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 		if (!isFinishing()) {
 			if (unsynchronized()) {
 				invalidateOptionsMenu();
-				mRefreshFromService = true;
 				databind(); // Setting this here because it doesn't mean a service call
 			}
 		}

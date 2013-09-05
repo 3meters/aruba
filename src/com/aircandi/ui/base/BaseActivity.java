@@ -54,7 +54,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	protected Boolean	mPrefChangeNewSearchNeeded	= false;
 	protected Boolean	mPrefChangeRefreshUiNeeded	= false;
 	protected Boolean	mPrefChangeReloadNeeded		= false;
-	protected Boolean	mRefreshFromService			= false;	// Can be set by input or by other means
 
 	public Resources	mResources;
 	public BusyManager	mBusyManager;

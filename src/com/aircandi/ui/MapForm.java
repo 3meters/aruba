@@ -23,7 +23,7 @@ import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirMarker;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
@@ -99,7 +99,7 @@ public class MapForm extends BaseActivity {
 				}
 				mRefreshFromService = false;
 
-				LinkOptions options = LinkOptions.getDefault(DefaultType.LinksForPlace);
+				LinkOptions options = LinkOptions.getDefault(LinkProfile.LinksForPlace);
 				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
 
 				return result;

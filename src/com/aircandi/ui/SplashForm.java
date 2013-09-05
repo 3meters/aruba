@@ -27,7 +27,7 @@ import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.DefaultType;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.Animate;
@@ -220,7 +220,7 @@ public class SplashForm extends SherlockActivity {
 				ModelResult result = new ModelResult();
 
 				if (Aircandi.getInstance().getUser() != null) {
-					LinkOptions options = LinkOptions.getDefault(DefaultType.LinksForUser);
+					LinkOptions options = LinkOptions.getDefault(LinkProfile.LinksForUser);
 					result = EntityManager.getInstance().getEntity(Aircandi.getInstance().getUser().id, true, options);
 				}
 
