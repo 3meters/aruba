@@ -25,6 +25,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.components.EntityManager;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ExcludeNulls;
 import com.aircandi.service.HttpService.ObjectType;
@@ -43,7 +44,9 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 
 	protected BounceListView	mList;
 	protected TextView			mMessage;
+	protected Integer			mListItemResId;
 
+	protected Entity			mParent;
 	protected Entity			mEntityEditing;
 
 	/* Inputs */
@@ -75,11 +78,11 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 
 		mMessage = (TextView) findViewById(R.id.message);
 		mList = (BounceListView) findViewById(R.id.list);
-		databind();
+		databind(BindingMode.auto);
 	}
 
 	@Override
-	public void databind() {
+	public void databind(BindingMode mode) {
 		/*
 		 * Before entities are customized, they have no position and are
 		 * sorted by the modified date on the link. Once entity customization
@@ -101,8 +104,19 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 				position++;
 			}
 		}
+
+		if (mEntityId != null) {
+			mParent = EntityManager.getEntity(mEntityId);
+		}
+		final ArrayAdapter adapter = getAdapter();
+		mList.setAdapter(adapter);
+
 		hideBusy(); // visible by default
 		mBusyManager.stopBodyBusyIndicator();
+	}
+
+	protected ArrayAdapter getAdapter() {
+		return null;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -379,7 +393,7 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Inner classes
+	// Classes
 	// --------------------------------------------------------------------------------------------
 
 	protected abstract static class EntityListAdapter extends ArrayAdapter<Entity> implements Filterable {

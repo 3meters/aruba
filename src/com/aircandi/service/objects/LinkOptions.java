@@ -85,7 +85,7 @@ public class LinkOptions extends ServiceObject {
 			Number limit = ProxiConstants.LIMIT_USER_OWNED_ENTITIES;
 			LinkOptions linkOptions = new LinkOptions().setActive(new ArrayList<LinkSettings>());
 
-			if (linkProfile == LinkProfile.LinksForPlace) {
+			if (linkProfile == LinkProfile.LinksForPlace || linkProfile == LinkProfile.LinksForProximity) {
 				linkOptions.shortcuts = true;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, true, false, true, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
@@ -100,9 +100,6 @@ public class LinkOptions extends ServiceObject {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit));
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit));
 				}
-			}
-			else if (linkProfile == LinkProfile.LinksForProximity) {
-				linkOptions = getDefault(LinkProfile.LinksForPlace);
 			}
 			else if (linkProfile == LinkProfile.LinksForCandigram) {
 				linkOptions.shortcuts = true;

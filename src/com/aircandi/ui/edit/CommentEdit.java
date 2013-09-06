@@ -35,18 +35,6 @@ public class CommentEdit extends BaseEntityEdit {
 				return false;
 			}
 		});
-		databind();
-		draw();
-	}
-
-	@Override
-	public void databind() {
-		super.databind();
-		/*
-		 * We are always creating a new comment.
-		 */
-		mEntity.creator = Aircandi.getInstance().getUser();
-		mEntity.creatorId = Aircandi.getInstance().getUser().id;
 	}
 
 	// --------------------------------------------------------------------------------------------

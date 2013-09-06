@@ -340,7 +340,7 @@ public class Place extends Entity implements Cloneable, Serializable {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Inner classes
+	// Classes
 	// --------------------------------------------------------------------------------------------
 
 	public static class SortByProximityAndDistance implements Comparator<Entity> {

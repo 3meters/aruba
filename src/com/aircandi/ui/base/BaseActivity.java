@@ -205,7 +205,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	};
 
 	@Override
-	public void databind() {}
+	public void databind(BindingMode mode) {}
 
 	@Override
 	public void draw() {}

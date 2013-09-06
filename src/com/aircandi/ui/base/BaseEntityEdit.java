@@ -96,7 +96,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	protected AirImageView		mImageRequestWebImageView;
 	protected Uri				mMediaFileUri;
 	protected File				mMediaFile;
-	
 
 	/* Inputs */
 	protected Entity			mEntity;
@@ -185,15 +184,12 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	}
 
 	@Override
-	public void databind() {
-		if (mEditing) {
-			setActivityTitle(mEntity.name);
-		}
-		else {
-			if (mEntitySchema != null) {
-				mEntity = Entity.makeEntity(mEntitySchema);
-				setActivityTitle("new " + mEntity.schema);
-			}
+	public void databind(BindingMode mode) {
+		if (!mEditing && mEntitySchema != null) {
+			mEntity = Entity.makeEntity(mEntitySchema);
+			setActivityTitle("new " + mEntity.schema);
+			mEntity.creator = Aircandi.getInstance().getUser();
+			mEntity.creatorId = Aircandi.getInstance().getUser().id;
 		}
 	}
 
@@ -203,6 +199,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (mEntity != null) {
 
 			final Entity entity = mEntity;
+			if (mEditing) {
+				setActivityTitle(mEntity.name);
+			}
 
 			/* Content */
 
@@ -275,7 +274,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	}
 
 	protected void drawShortcuts(Entity entity) {
-		
+
 		if (findViewById(R.id.applinks) != null) {
 			/*
 			 * We are expecting a builder button with a viewgroup to
@@ -506,7 +505,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					final String imageDescription = extras.getString(Constants.EXTRA_URI_DESCRIPTION);
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
 					final Photo photo = (Photo) HttpService.jsonToObject(jsonPhoto, ObjectType.Photo);
-					
+
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
 							.setFromUri(photo.getUri())
 							.setRequestListener(new RequestListener() {
@@ -618,7 +617,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
-	protected abstract String getLinkType();
+	protected String getLinkType() {
+		return null;
+	};
 
 	protected void gather() {
 		if (findViewById(R.id.name) != null) {
@@ -680,10 +681,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		return null;
 	}
 
-	private void loadApplinks() {		
+	private void loadApplinks() {
 		/*
 		 * First, we need the real applinks to send them to the applinks editor
-		 */		
+		 */
 		if (mApplinks != null) {
 			doApplinksBuilder();
 		}
@@ -842,7 +843,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				if (mEntity.photo != null && mEntity.photo.hasBitmap() && !mEntity.photo.isBitmapLocalOnly()) {
 					bitmap = mEntity.photo.getBitmap();
 				}
-				
+
 				/* In case a derived class needs to augment the entity before insert */
 				beforeInsert(mEntity);
 
@@ -1001,6 +1002,13 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		databind(BindingMode.auto);
+		draw();
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Menus

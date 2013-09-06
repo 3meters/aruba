@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ViewFlipper;
 
 import com.aircandi.Aircandi;
@@ -30,12 +29,6 @@ public class PlaceEdit extends BaseEntityEdit {
 	private TabManager	mTabManager;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-		super.onCreate(savedInstanceState);
-	}
-
-	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		
@@ -46,8 +39,6 @@ public class PlaceEdit extends BaseEntityEdit {
 				mTabManager.doRestoreInstanceState(savedInstanceState);
 			}
 		}
-		databind();
-		draw();
 	}
 
 	@Override
@@ -130,7 +121,6 @@ public class PlaceEdit extends BaseEntityEdit {
 						mApplinks.add(applink);
 					}
 					mDirty = true;
-					mRefreshFromService = true;
 					drawShortcuts(mEntity);
 				}
 			}

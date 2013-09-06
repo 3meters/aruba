@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -79,13 +80,12 @@ public abstract class BaseEntityList extends BaseBrowse {
 	protected String			mListLinkDirection;
 	protected Integer			mListItemResId;
 	protected Boolean			mListNewEnabled;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Aircandi.stopwatch3.start(this.getClass().getSimpleName() + " create");
 		super.onCreate(savedInstanceState);
 	}
-	
 
 	@Override
 	protected void unpackIntent() {
@@ -115,7 +115,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
-		mForEntity = EntityManager.getEntity(mForEntityId);
 		mListView = (ListView) findViewById(R.id.list);
 		mGridView = (GridView) findViewById(R.id.grid);
 		mButtonNewEntity = (Button) findViewById(R.id.button_new_entity);
@@ -146,6 +145,57 @@ public abstract class BaseEntityList extends BaseBrowse {
 			}
 		};
 		Aircandi.stopwatch3.segmentTime(this.getClass().getSimpleName() + " initialized");
+	}
+
+	@Override
+	public void databind(final BindingMode mode) {
+		
+		if (mAdapter == null) {
+
+			/* Prep the UI */
+			mButtonNewEntity.setVisibility(View.GONE);
+			showBusy("Loading " + getActivityTitle() + "...");
+			
+			/* Manage list */
+			mOffset = 0;
+			mEntities.clear();
+			mForEntity = EntityManager.getEntity(mForEntityId);
+			
+			mAdapter = new EntityAdapter(mEntities);
+			if (mListView != null) {
+				mListView.setAdapter(mAdapter); // draw happens in the adapter
+			}
+			else if (mGridView != null) {
+				mGridView.setAdapter(mAdapter); // draw happens in the adapter
+			}
+		}
+		else {
+			
+			new AsyncTask() {
+
+				@Override
+				protected Object doInBackground(Object... params) {
+					Thread.currentThread().setName("ActivityStaleCheck");
+
+					Boolean refreshNeeded = (mode == BindingMode.service);
+					
+					/* Returns false if service call fails.*/
+					if (!refreshNeeded) {
+						refreshNeeded = EntityManager.getInstance().isActivityStale(mForEntity.id, mForEntity.activityDate);
+					}
+
+					return refreshNeeded;
+				}
+
+				@Override
+				protected void onPostExecute(Object result) {
+					if ((Boolean)result) {
+						mEntities.clear();
+						mAdapter.notifyDataSetChanged();  // triggers reload/redraw
+					}
+				}
+			}.execute();
+		}
 	}
 
 	@Override
@@ -183,31 +233,10 @@ public abstract class BaseEntityList extends BaseBrowse {
 		Aircandi.stopwatch3.segmentTime(this.getClass().getSimpleName() + " action bar configured");
 	}
 
-	@Override
-	public void databind() {
-
-		if (mAdapter == null) {
-			mOffset = 0;
-
-			/* Prep the UI */
-			mButtonNewEntity.setVisibility(View.GONE);
-			showBusy("Loading " + getActivityTitle() + "...");
-			mEntities.clear();
-
-			mAdapter = new EntityAdapter(mEntities);
-			if (mListView != null) {
-				mListView.setAdapter(mAdapter); // draw happens in the adapter
-			}
-			else if (mGridView != null) {
-				mGridView.setAdapter(mAdapter); // draw happens in the adapter
-			}
-		}
-		else {
-			mAdapter.notifyDataSetChanged();
-		}
-	}
-
 	private ModelResult loadEntities(Boolean refresh) {
+		/*
+		 * Called on a background thread.
+		 */
 
 		mCursorSettings = new Cursor()
 				.setLimit(PAGE_SIZE)
@@ -237,10 +266,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 			}
 		}
 		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mForEntityId, linkOptions, mCursorSettings, Aircandi.stopwatch3);
-		
-		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			synchronize();
-		}
 
 		return result;
 	}
@@ -368,23 +393,9 @@ public abstract class BaseEntityList extends BaseBrowse {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		/*
-		 * We have to be pretty aggressive about refreshing the UI because
-		 * there are lots of actions that could have happened while this activity
-		 * was stopped that change what the user would expect to see.
-		 * 
-		 * - Entity deleted or modified
-		 * - Entity children modified
-		 * - New comments
-		 * - Change in user which effects which candi and UI should be visible.
-		 * - User signed out.
-		 * - User profile could have been updated and we don't catch that.
-		 */
 		if (!isFinishing()) {
-			if (unsynchronized()) {
-				invalidateOptionsMenu();
-				databind(); // Setting this here because it doesn't mean a service call
-			}
+			invalidateOptionsMenu();
+			databind(BindingMode.auto); // Setting this here because it doesn't mean a service call
 		}
 	}
 
@@ -398,7 +409,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Inner classes/enums
+	// Classes/enums
 	// --------------------------------------------------------------------------------------------
 
 	private class EntityAdapter extends EndlessAdapter {

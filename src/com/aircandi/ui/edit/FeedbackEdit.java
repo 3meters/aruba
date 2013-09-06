@@ -47,14 +47,12 @@ public class FeedbackEdit extends BaseEntityEdit {
 				}
 			});
 		}
-		databind();
-		draw();
 	}
 
 	@Override
-	public void databind() {
+	public void databind(BindingMode mode) {
 		/*
-		 * We are always creating a new comment.
+		 * Not a real entity so we completely override databind.
 		 */
 		mDocument = new Document();
 		mDocument.type = "feedback";

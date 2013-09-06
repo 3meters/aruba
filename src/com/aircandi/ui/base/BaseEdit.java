@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.WindowManager;
 
 import com.aircandi.Constants;
 import com.aircandi.R;
@@ -17,16 +18,17 @@ import com.aircandi.utilities.Routing.Route;
 
 public abstract class BaseEdit extends BaseActivity {
 
-	protected Boolean	mEditing		= false;
-	protected Boolean	mDirty			= false;
-	protected Boolean	mFirstDraw		= true;
+	protected Boolean	mEditing	= false;
+	protected Boolean	mDirty		= false;
+	protected Boolean	mFirstDraw	= true;
 
 	/* Inputs */
-	protected Boolean	mSkipSave		= false;
+	protected Boolean	mSkipSave	= false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		if (!isFinishing()) {
 			unpackIntent();
 			initialize(savedInstanceState);
@@ -43,6 +45,9 @@ public abstract class BaseEdit extends BaseActivity {
 	}
 
 	protected void initialize(Bundle savedInstanceState) {}
+
+	@Override
+	public void afterDatabind() {}
 
 	@Override
 	protected void configureActionBar() {

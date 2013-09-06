@@ -25,21 +25,19 @@ import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Applink;
-import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Shortcut;
-import com.aircandi.ui.base.BaseBrowse;
+import com.aircandi.ui.base.BasePicker;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.BounceListView;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
 
-public class ShortcutPicker extends BaseBrowse {
+public class ShortcutPicker extends BasePicker {
 
 	private BounceListView			mList;
 	private final List<Shortcut>	mShortcuts	= new ArrayList<Shortcut>();
-	private Entity					mEntity;
 
 	@Override
 	protected void unpackIntent() {
@@ -53,11 +51,6 @@ public class ShortcutPicker extends BaseBrowse {
 					mShortcuts.add(shortcut);
 				}
 			}
-
-			final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
-			if (jsonEntity != null) {
-				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
-			}
 		}
 	}
 
@@ -65,11 +58,10 @@ public class ShortcutPicker extends BaseBrowse {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		mList = (BounceListView) findViewById(R.id.list);
-		databind();
 	}
 
 	@Override
-	public void databind() {
+	public void databind(BindingMode mode) {
 
 		/* We use this to access the source suggestions */
 

@@ -1,6 +1,7 @@
 package com.aircandi.ui.base;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -57,6 +58,7 @@ import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
@@ -96,29 +98,47 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	}
 
 	@Override
-	public void databind() {
+	public void databind(final BindingMode mode) {
+
+		/*
+		 * If cache entity is fresher than the one currently bound to or there is
+		 * a cache entity available, go ahead and draw before we check against the service.
+		 */
+		final Entity entity = EntityManager.getEntity(mEntityId);
+		if (entity != null && mEntity != null) {
+			if (mEntity.activityDate.longValue() != entity.activityDate.longValue()) {
+				mEntity = entity;
+				draw();
+			}
+		}
+		else if (entity != null) {
+			mEntity = entity;
+			draw();
+		}
+
+		final AtomicBoolean refreshNeeded = new AtomicBoolean(false);
 
 		new AsyncTask() {
 
 			@Override
-			protected void onPreExecute() {
-				showBusy();
-			}
-
-			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetEntity");
-
 				ModelResult result = new ModelResult();
-				Entity entity = EntityManager.getEntity(mEntityId);
-				Boolean refresh = (entity == null || (!entity.shortcuts && !entity.synthetic));
-				if (!refresh) {
-					refresh = EntityManager.getInstance().isActivityStale(entity.id, entity.activityDate);
+
+				refreshNeeded.set(mEntity == null
+						|| mode == BindingMode.service
+						|| (!entity.shortcuts && !entity.synthetic));
+				/*
+				 * Returns false if service call fails.
+				 */
+				if (!refreshNeeded.get()) {
+					refreshNeeded.set(EntityManager.getInstance().isActivityStale(mEntity.id, mEntity.activityDate));
 				}
 
-				if (refresh) {
+				if (refreshNeeded.get()) {
+					showBusy();
 					LinkOptions options = LinkOptions.getDefault(mLinkProfile);
-					result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
+					result = EntityManager.getInstance().getEntity(mEntityId, refreshNeeded.get(), options);
 				}
 
 				return result;
@@ -126,30 +146,30 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 			@Override
 			protected void onPostExecute(Object modelResult) {
-				final ModelResult result = (ModelResult) modelResult;
+				if (refreshNeeded.get()) {
+					final ModelResult result = (ModelResult) modelResult;
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-					if (result.data != null) {
-						mEntity = (Entity) result.data;
-						synchronize();
-						draw();
-						afterDatabind();
+						if (result.data != null) {
+							mEntity = (Entity) result.data;
+							draw();
+						}
+						else {
+							UI.showToastNotification("This item has been deleted", Toast.LENGTH_SHORT);
+							finish();
+						}
 					}
-					else  {
-						UI.showToastNotification("This item has been deleted", Toast.LENGTH_SHORT);
-						finish();
-					}					
+					else {
+						Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
+					}
+					hideBusy();
 				}
-				else {
-					Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
-				}
-				hideBusy();
+				afterDatabind();
 			}
 
 		}.execute();
 	}
-	
+
 	@Override
 	public void afterDatabind() {}
 
@@ -176,6 +196,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 					Tracker.sendEvent("ui_action", "like_entity", null, 0, Aircandi.getInstance().getUser());
 					Shortcut fromShortcut = Aircandi.getInstance().getUser().getShortcut();
 					Shortcut toShortcut = mEntity.getShortcut();
+					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
 					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_LIKE
@@ -186,6 +207,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				}
 				else {
 					Tracker.sendEvent("ui_action", "unlike_" + mEntity.schema, null, 0, Aircandi.getInstance().getUser());
+					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
 					result = EntityManager.getInstance().deleteLink(Aircandi.getInstance().getUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_LIKE
@@ -199,7 +221,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				ModelResult result = (ModelResult) response;
 				setSupportProgressBarIndeterminateVisibility(false);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					databind();
+					databind(BindingMode.auto);
 				}
 				else {
 					if (result.serviceResponse.exception.getStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
@@ -233,6 +255,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 					Tracker.sendEvent("ui_action", "watch_" + mEntity.schema, null, 0, Aircandi.getInstance().getUser());
 					Shortcut fromShortcut = Aircandi.getInstance().getUser().getShortcut();
 					Shortcut toShortcut = mEntity.getShortcut();
+					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
 					result = EntityManager.getInstance().insertLink(
 							Aircandi.getInstance().getUser().id
 							, mEntity.id
@@ -244,6 +267,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				}
 				else {
 					Tracker.sendEvent("ui_action", "unwatch_" + mEntity.schema, null, 0, Aircandi.getInstance().getUser());
+					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
 					result = EntityManager.getInstance().deleteLink(Aircandi.getInstance().getUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_WATCH
@@ -681,11 +705,8 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			}
 
 			Animate.doOverridePendingTransition(this, TransitionType.PageBack);
-			if (unsynchronized()) {
-				invalidateOptionsMenu();
-				databind();
-				
-			}
+			invalidateOptionsMenu();
+			databind(BindingMode.auto);
 
 			/* Package receiver */
 			final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
@@ -722,7 +743,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 						@Override
 						public void run() {
-							databind();
+							databind(BindingMode.auto);
 						}
 					}, 1500);
 				}

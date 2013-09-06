@@ -14,7 +14,6 @@ import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.Contacts;
 import android.text.Editable;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
@@ -36,12 +35,6 @@ public class InviteEdit extends BaseEntityEdit {
 
 	private AirEditText			mEmail;
 	private static final int	CONTACT_PICKER_RESULT	= 1001;
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-		super.onCreate(savedInstanceState);
-	}
 
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
@@ -85,8 +78,6 @@ public class InviteEdit extends BaseEntityEdit {
 				}
 			});
 		}
-		databind();
-		draw();
 	}
 
 	@Override

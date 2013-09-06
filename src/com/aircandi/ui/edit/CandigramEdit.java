@@ -8,7 +8,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -56,12 +55,6 @@ public class CandigramEdit extends BaseEntityEdit {
 	private SpinnerData	mSpinnerRangeData;
 	private SpinnerData	mSpinnerDurationData;
 	private SpinnerData	mSpinnerHopsData;
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-		super.onCreate(savedInstanceState);
-	}
 
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
@@ -218,8 +211,6 @@ public class CandigramEdit extends BaseEntityEdit {
 			findViewById(R.id.settings_button_finish).setVisibility(View.VISIBLE);
 			findViewById(R.id.settings_image_previous).setVisibility(View.VISIBLE);
 		}
-		databind();
-		draw();
 	}
 
 	@Override

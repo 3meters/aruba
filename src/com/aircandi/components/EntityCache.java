@@ -420,22 +420,22 @@ public class EntityCache implements Map<String, Entity> {
 
 		Long time = DateTime.nowDate().getTime();
 
-		Entity entity = get(toId);
-		if (entity != null) {
+		Entity toEntity = get(toId);
+		if (toEntity != null) {
 
-			if (entity.linksIn == null) {
-				entity.linksIn = new ArrayList<Link>();
+			if (toEntity.linksIn == null) {
+				toEntity.linksIn = new ArrayList<Link>();
 			}
 
-			if (entity.linksInCounts == null) {
-				entity.linksInCounts = new ArrayList<Count>();
-				entity.linksInCounts.add(new Count(type, 1));
+			if (toEntity.linksInCounts == null) {
+				toEntity.linksInCounts = new ArrayList<Count>();
+				toEntity.linksInCounts.add(new Count(type, 1));
 			}
-			else if (entity.getCount(type, Direction.in) == null) {
-				entity.linksInCounts.add(new Count(type, 1));
+			else if (toEntity.getCount(type, Direction.in) == null) {
+				toEntity.linksInCounts.add(new Count(type, 1));
 			}
 			else {
-				entity.getCount(type, Direction.in).count = entity.getCount(type, Direction.in).count.intValue() + 1;
+				toEntity.getCount(type, Direction.in).count = toEntity.getCount(type, Direction.in).count.intValue() + 1;
 			}
 
 			Link link = new Link(toId, type, true, fromId);
@@ -445,28 +445,27 @@ public class EntityCache implements Map<String, Entity> {
 				link.shortcut = fromShortcut;
 			}
 
-			entity.linksIn.add(link);
-			entity.activityDate = time;
+			toEntity.linksIn.add(link);
 		}
 		/*
 		 * Fixup out links too.
 		 */
-		entity = get(fromId);
-		if (entity != null) {
+		Entity fromEntity = get(fromId);
+		if (fromEntity != null) {
 
-			if (entity.linksOut == null) {
-				entity.linksOut = new ArrayList<Link>();
+			if (fromEntity.linksOut == null) {
+				fromEntity.linksOut = new ArrayList<Link>();
 			}
 
-			if (entity.linksOutCounts == null) {
-				entity.linksOutCounts = new ArrayList<Count>();
-				entity.linksOutCounts.add(new Count(type, 1));
+			if (fromEntity.linksOutCounts == null) {
+				fromEntity.linksOutCounts = new ArrayList<Count>();
+				fromEntity.linksOutCounts.add(new Count(type, 1));
 			}
-			else if (entity.getCount(type, Direction.out) == null) {
-				entity.linksOutCounts.add(new Count(type, 1));
+			else if (fromEntity.getCount(type, Direction.out) == null) {
+				fromEntity.linksOutCounts.add(new Count(type, 1));
 			}
 			else {
-				entity.getCount(type, Direction.out).count = entity.getCount(type, Direction.out).count.intValue() + 1;
+				fromEntity.getCount(type, Direction.out).count = fromEntity.getCount(type, Direction.out).count.intValue() + 1;
 			}
 
 			Link link = new Link(toId, type, true, fromId);
@@ -476,8 +475,7 @@ public class EntityCache implements Map<String, Entity> {
 				link.shortcut = toShortcut;
 			}
 
-			entity.linksOut.add(link);
-			entity.activityDate = time;
+			fromEntity.linksOut.add(link);
 		}
 	}
 
@@ -521,53 +519,47 @@ public class EntityCache implements Map<String, Entity> {
 
 	public void removeLink(String toId, String type, String fromId) {
 
-		Long time = DateTime.nowDate().getTime();
+		Entity toEntity = get(toId);
+		if (toEntity != null) {
 
-		Entity entity = get(toId);
-		if (entity != null) {
-
-			if (entity.linksInCounts != null) {
-				Count count = entity.getCount(type, Direction.in);
+			if (toEntity.linksInCounts != null) {
+				Count count = toEntity.getCount(type, Direction.in);
 				if (count != null) {
 					count.count = count.count.intValue() - 1;
 				}
 			}
 
-			if (entity.linksIn != null) {
-				for (Link link : entity.linksIn) {
+			if (toEntity.linksIn != null) {
+				for (Link link : toEntity.linksIn) {
 					if (link.fromId != null && link.fromId.equals(fromId) && link.type.equals(type)) {
-						entity.linksIn.remove(link);
+						toEntity.linksIn.remove(link);
 						break;
 					}
 				}
 			}
-
-			entity.activityDate = time;
 		}
 
 		/*
 		 * Fixup out links too
 		 */
-		entity = get(fromId);
-		if (entity != null) {
+		Entity fromEntity = get(fromId);
+		if (fromEntity != null) {
 
-			if (entity.linksOutCounts != null) {
-				Count count = entity.getCount(type, Direction.out);
+			if (fromEntity.linksOutCounts != null) {
+				Count count = fromEntity.getCount(type, Direction.out);
 				if (count != null) {
 					count.count = count.count.intValue() - 1;
 				}
 			}
 
-			if (entity.linksOut != null) {
-				for (Link link : entity.linksOut) {
+			if (fromEntity.linksOut != null) {
+				for (Link link : fromEntity.linksOut) {
 					if (link.toId != null && link.toId.equals(toId) && link.type.equals(type)) {
-						entity.linksOut.remove(link);
+						fromEntity.linksOut.remove(link);
 						break;
 					}
 				}
 			}
-
-			entity.activityDate = time;
 		}
 	}
 

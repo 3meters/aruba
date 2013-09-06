@@ -1,42 +1,32 @@
 package com.aircandi.ui.base;
 
 import android.os.Bundle;
-import android.view.WindowManager;
 
-public abstract class BaseBrowse extends BaseActivity {
+import com.aircandi.Constants;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.ObjectType;
+import com.aircandi.service.objects.Entity;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-		if (!isFinishing()) {
-			unpackIntent();
-			initialize(savedInstanceState);
-			configureActionBar();
-		}
-	}
+public abstract class BasePicker extends BaseBrowse {
 
-	protected void initialize(Bundle savedInstanceState) {}
+	protected Entity	mEntity;
 
 	@Override
-	public void afterDatabind() {}
+	protected void unpackIntent() {
+		super.unpackIntent();
 
-	@Override
-	protected void configureActionBar() {
-		super.configureActionBar();
-		if (mActionBar != null) {
-			mActionBar.setDisplayHomeAsUpEnabled(true);
+		final Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
+			if (jsonEntity != null) {
+				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
+			}
 		}
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public void onRefresh() {
-		databind(BindingMode.service); // Called from Routing
-	}
 
 	// --------------------------------------------------------------------------------------------
 	// UI
@@ -53,6 +43,14 @@ public abstract class BaseBrowse extends BaseActivity {
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (!isFinishing()) {
+			databind(BindingMode.auto);
+		}
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc

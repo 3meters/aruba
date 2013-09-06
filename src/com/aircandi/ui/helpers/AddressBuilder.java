@@ -12,34 +12,18 @@ import android.widget.TextView.OnEditorActionListener;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
-import com.aircandi.ui.base.BaseEdit;
+import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Utilities;
 
-public class AddressBuilder extends BaseEdit {
+public class AddressBuilder extends BaseEntityEdit {
 
 	private Entity	mEntity;
-
-	@Override
-	protected void unpackIntent() {
-		super.unpackIntent();
-		
-		final Bundle extras = this.getIntent().getExtras();
-		if (extras != null) {
-			final String jsonAddress = extras.getString(Constants.EXTRA_ENTITY);
-			if (jsonAddress != null) {
-				mEntity = (Place) HttpService.jsonToObject(jsonAddress, ObjectType.Place);
-			}
-		}
-	}
 	
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-
-		setActivityTitle(getString(R.string.dialog_address_builder_title));
 
 		((EditText) findViewById(R.id.phone)).setImeOptions(EditorInfo.IME_ACTION_DONE);
 		((EditText) findViewById(R.id.phone)).setOnEditorActionListener(new OnEditorActionListener() {
@@ -53,22 +37,15 @@ public class AddressBuilder extends BaseEdit {
 				return false;
 			}
 		});
-		
-		databind();
-		draw();		
-	}
-
-	@Override
-	public void databind() {
-		if (mEntity == null) {
-			mEntity = new Place();
-		}
 	}
 
 	@Override
 	public void draw() {
 
+		setActivityTitle(getString(R.string.dialog_address_builder_title));
+		
 		Place place = (Place) mEntity;
+
 		if (place.address != null) {
 			((EditText) findViewById(R.id.address)).setText(place.address);
 		}
@@ -90,7 +67,8 @@ public class AddressBuilder extends BaseEdit {
 	// Events
 	// --------------------------------------------------------------------------------------------
 
-	private void gather() {
+	@Override
+	protected void gather() {
 		Place place = (Place) mEntity;
 		place.phone = Utilities.emptyAsNull(((EditText) findViewById(R.id.phone)).getEditableText().toString());
 		place.address = Utilities.emptyAsNull(((EditText) findViewById(R.id.address)).getEditableText().toString());
@@ -112,8 +90,8 @@ public class AddressBuilder extends BaseEdit {
 	private void save() {
 		final Intent intent = new Intent();
 		if (mEntity != null) {
-			final String jsonAddress = HttpService.objectToJson(mEntity);
-			intent.putExtra(Constants.EXTRA_PLACE, jsonAddress);
+			final String jsonEntity = HttpService.objectToJson(mEntity);
+			intent.putExtra(Constants.EXTRA_PLACE, jsonEntity);
 		}
 		setResult(Activity.RESULT_OK, intent);
 		finish();
@@ -127,4 +105,5 @@ public class AddressBuilder extends BaseEdit {
 	protected int getLayoutId() {
 		return R.layout.address_builder;
 	}
+
 }

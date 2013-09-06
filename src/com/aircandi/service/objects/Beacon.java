@@ -125,7 +125,7 @@ public class Beacon extends Entity implements Cloneable, Serializable {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Inner classes
+	// Classes
 	// --------------------------------------------------------------------------------------------
 
 	public static class SortBySignalLevel implements Comparator<Beacon> {

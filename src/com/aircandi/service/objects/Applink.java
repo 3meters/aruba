@@ -90,7 +90,7 @@ public class Applink extends Entity implements Cloneable, Serializable {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Inner classes
+	// Classes
 	// --------------------------------------------------------------------------------------------	
 
 	public static Applink builder(Entity entity, String type, String name, String image, Boolean synthetic) {

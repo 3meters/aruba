@@ -7,25 +7,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
 import com.aircandi.Constants;
 import com.aircandi.R;
-import com.aircandi.components.EntityManager;
-import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirMarker;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
-import com.aircandi.ui.base.BaseActivity;
-import com.aircandi.utilities.Routing;
+import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.utilities.UI;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -37,7 +31,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapForm extends BaseActivity {
+public class MapForm extends BaseEntityForm {
 
 	SupportMapFragment			mMapFragment;
 	Entity						mEntity;
@@ -48,20 +42,11 @@ public class MapForm extends BaseActivity {
 	private static final int	DEFAULT_ZOOM						= 16;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		if (!isFinishing()) {
-			unpackIntent();
-			initialize(savedInstanceState);
-			configureActionBar();
-		}
-	}
-
-	@Override
 	protected void unpackIntent() {
+		super.unpackIntent();
+
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
 			final List<String> jsonMarkers = extras.getStringArrayList(Constants.EXTRA_MARKERS);
 			if (jsonMarkers != null) {
 				for (String jsonMarker : jsonMarkers) {
@@ -72,62 +57,27 @@ public class MapForm extends BaseActivity {
 		}
 	}
 
+	@Override
 	protected void initialize(Bundle savedInstanceState) {
+		mLinkProfile = LinkProfile.LinksForPlace;
 		mMapFragment = new MapFragment();
 		getSupportFragmentManager().beginTransaction().add(R.id.fragment_holder, mMapFragment).commit();
 	}
 
 	@Override
-	public void databind() {
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("GetEntity");
-
-				Entity entity = EntityManager.getEntity(mEntityId);
-				Boolean refresh = mRefreshFromService;
-				if (entity == null) {
-					refresh = true;
-				}
-				else if (!entity.shortcuts && !entity.synthetic) {
-					refresh = true;
-				}
-				mRefreshFromService = false;
-
-				LinkOptions options = LinkOptions.getDefault(LinkProfile.LinksForPlace);
-				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
-
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object modelResult) {
-				final ModelResult result = (ModelResult) modelResult;
-
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-					if (result.data != null) {
-						mEntity = (Entity) result.data;
-						setActivityTitle(mEntity.name);
-						draw();
-					}
-				}
-				else {
-					Routing.serviceError(MapForm.this, result.serviceResponse);
-				}
-				setSupportProgressBarIndeterminateVisibility(Boolean.FALSE);
-			}
-
-		}.execute();
+	public void databind(BindingMode mode) {
+		/*
+		 * Just here for a pre-databinding check.
+		 */
+		if (checkPlayServices()) {
+			findViewById(R.id.fragment_holder).setVisibility(View.VISIBLE);
+			super.databind(mode);
+		}
 	}
 
 	@Override
 	public void draw() {
+		setActivityTitle(mEntity.name);
 		if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
 			UI.showToastNotification("Google Play Services not available", Toast.LENGTH_SHORT);
 			return;
@@ -142,7 +92,7 @@ public class MapForm extends BaseActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
 			case REQUEST_CODE_RECOVER_PLAY_SERVICES:
 				if (resultCode == RESULT_CANCELED) {
@@ -174,7 +124,8 @@ public class MapForm extends BaseActivity {
 				}
 				Marker marker = mMapFragment.getMap().addMarker(options);
 				marker.showInfoWindow();
-				mMapFragment.getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()), DEFAULT_ZOOM));
+				mMapFragment.getMap().moveCamera(
+						CameraUpdateFactory.newLatLngZoom(new LatLng(location.lat.doubleValue(), location.lng.doubleValue()), DEFAULT_ZOOM));
 			}
 		}
 		else {
@@ -241,15 +192,6 @@ public class MapForm extends BaseActivity {
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		if (checkPlayServices()) {
-			findViewById(R.id.fragment_holder).setVisibility(View.VISIBLE);
-			databind();
-		}
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Misc
 	// --------------------------------------------------------------------------------------------
@@ -282,4 +224,5 @@ public class MapForm extends BaseActivity {
 	private static int getMajorVersion(int glEsVersion) {
 		return ((glEsVersion & 0xffff0000) >> 16);
 	}
+
 }

@@ -60,7 +60,7 @@ public class PhotoForm extends BaseBrowse {
 		}
 
 		setSupportProgressBarIndeterminateVisibility(true);
-		databind();
+		databind(BindingMode.auto);
 	}
 
 	@Override
@@ -73,7 +73,11 @@ public class PhotoForm extends BaseBrowse {
 	}
 
 	@Override
-	public void databind() {
+	public void databind(BindingMode mode) {
+		/*
+		 * Photo form is a special case that doesn't share enough
+		 * functionality to move this databind to a base class.
+		 */
 		List<Photo> photos = EntityManager.getInstance().getPhotos();
 		final Photo photo = EntityManager.getInstance().getPhoto(mImageUri);
 		if (!mPagingEnabled) {

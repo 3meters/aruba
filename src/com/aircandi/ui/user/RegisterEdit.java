@@ -41,6 +41,7 @@ public class RegisterEdit extends BaseEntityEdit {
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
+		mEntitySchema = Constants.SCHEMA_ENTITY_USER;
 		mEmail = (EditText) findViewById(R.id.email);
 		mPassword = (EditText) findViewById(R.id.password);
 		mPasswordConfirm = (EditText) findViewById(R.id.password_confirm);
@@ -57,14 +58,6 @@ public class RegisterEdit extends BaseEntityEdit {
 				return false;
 			}
 		});
-		databind();
-		draw();
-	}
-
-	@Override
-	public void databind() {
-		mEntitySchema = Constants.SCHEMA_ENTITY_USER;
-		super.databind();
 	}
 
 	// --------------------------------------------------------------------------------------------

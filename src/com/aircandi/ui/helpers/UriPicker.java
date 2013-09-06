@@ -36,7 +36,7 @@ import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService.RequestType;
 import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
-import com.aircandi.ui.base.BaseBrowse;
+import com.aircandi.ui.base.BasePicker;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
@@ -46,7 +46,7 @@ import com.aircandi.utilities.UI;
 import com.aircandi.utilities.Utilities;
 
 @SuppressWarnings("ucd")
-public class UriPicker extends BaseBrowse {
+public class UriPicker extends BasePicker {
 
 	private TextView				mName;
 	private ListView				mListView;
@@ -62,6 +62,8 @@ public class UriPicker extends BaseBrowse {
 
 	@Override
 	protected void unpackIntent() {
+		super.unpackIntent();
+		
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mVerifyUri = extras.getBoolean(Constants.EXTRA_VERIFY_URI, false);
@@ -92,12 +94,10 @@ public class UriPicker extends BaseBrowse {
 				mTestButton.setEnabled(mTextUri.getText().length() > 0);
 			}
 		});
-
-		databind();
 	}
 
 	@Override
-	public void databind() {
+	public void databind(BindingMode mode) {
 
 		new AsyncTask() {
 

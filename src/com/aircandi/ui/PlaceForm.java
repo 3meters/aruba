@@ -19,12 +19,10 @@ import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.applications.Applinks;
-import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
@@ -71,7 +69,7 @@ public class PlaceForm extends BaseEntityForm {
 	@Override
 	public void afterDatabind() {
 		Aircandi.currentPlace = mEntity;
-		if (mUpsize) {
+		if (mUpsize && mEntity != null) {
 			mUpsize = false;
 			upsize();
 		}
@@ -104,7 +102,7 @@ public class PlaceForm extends BaseEntityForm {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					final Entity upsizedEntity = (Entity) result.data;
 					mEntityId = upsizedEntity.id;
-					databind();
+					databind(BindingMode.auto);
 				}
 				else {
 					Routing.serviceError(PlaceForm.this, result.serviceResponse);
@@ -116,12 +114,6 @@ public class PlaceForm extends BaseEntityForm {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
-
-	@SuppressWarnings("ucd")
-	public void onCallButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "call_place", null, 0, Aircandi.getInstance().getUser());
-		AndroidManager.getInstance().callDialerActivity(this, ((Place) mEntity).phone);
-	}
 
 	@Override
 	public void onAdd() {

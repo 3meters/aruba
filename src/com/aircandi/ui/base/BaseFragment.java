@@ -59,15 +59,20 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
+	
+	@Override
+	public void onRefresh() {
+		databind(BindingMode.service); // Called from Routing
+	}
 
 	@Override
-	public void databind() {}
+	public void databind(BindingMode mode) {}
+	
+	@Override
+	public void afterDatabind() {}
 
 	@Override
 	public void draw() {}
-
-	@Override
-	public void onRefresh() {}
 
 	@Override
 	public void onAdd() {}

@@ -92,7 +92,10 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	}
 
 	@Override
-	public void databind() {
+	public void databind(BindingMode mode) {
+		/*
+		 * This databinding is always against the local sqlite database.
+		 */
 		Logger.d(this, "databinding...");
 
 		showBusy();
@@ -123,9 +126,8 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 
 	@Override
 	public void onRefresh() {
-		showBusy();
 		saveListPosition();
-		databind();
+		super.onRefresh();
 	}
 
 	@Override
@@ -257,8 +259,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	@Override
 	public void onResume() {
 		super.onResume();
-		hideBusy();
-		databind();
+		databind(BindingMode.auto);
 	}
 
 	// --------------------------------------------------------------------------------------------

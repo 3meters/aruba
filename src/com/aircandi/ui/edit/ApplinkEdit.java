@@ -41,8 +41,8 @@ public class ApplinkEdit extends BaseEntityEdit {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 		super.onCreate(savedInstanceState);
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 				}
 			});
 		}
-		databind();
+		databind(BindingMode.auto);
 		draw();
 	}
 

@@ -23,15 +23,13 @@ import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.AirApplication;
 import com.aircandi.components.AndroidManager;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Place;
-import com.aircandi.ui.base.BaseBrowse;
+import com.aircandi.ui.base.BasePicker;
 
-public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener {
+public class PhotoSourcePicker extends BasePicker implements OnItemClickListener {
 
 	private TextView	mName;
 	private ListView	mListView;
@@ -39,29 +37,16 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 	private Entity		mEntity;
 	
 	@Override
-	protected void unpackIntent() {
-		super.unpackIntent();
-		
-		final Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
-			if (jsonEntity != null) {
-				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
-			}
-		}
-	}
-
-	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mName = (TextView) findViewById(R.id.name);
 		mListView = (ListView) findViewById(R.id.form_list);
-		databind();
+		mListView.setOnItemClickListener(this);
 	}
 
 	@Override
-	public void databind() {
+	public void databind(BindingMode mode) {
 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();
@@ -132,7 +117,6 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 
 		mListAdapter = new ListAdapter(this, listData);
 		mListView.setAdapter(mListAdapter);
-		mListView.setOnItemClickListener(this);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -149,7 +133,7 @@ public class PhotoSourcePicker extends BaseBrowse implements OnItemClickListener
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Inner classes
+	// Classes
 	// --------------------------------------------------------------------------------------------
 
 	private class ListAdapter extends ArrayAdapter<Object> {

@@ -42,7 +42,6 @@ public class TuningEdit extends BaseEntityEdit {
 		super.initialize(savedInstanceState);
 		mButtonTune = (Button) findViewById(R.id.button_tune);
 		mButtonUntune = (Button) findViewById(R.id.button_untune);
-		draw();
 }
 
 	@Override

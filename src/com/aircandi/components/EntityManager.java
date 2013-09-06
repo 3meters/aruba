@@ -521,14 +521,13 @@ public class EntityManager {
 		 * inserted entity is retrieved from the service and pushed into the local cache. The cached entity is returned
 		 * in the data property of the result object.
 		 * 
-		 * @return a ModelResult object. The data property includes the just inserted entity.
+		 * Updates activityDate in the database:
+		 * - on any upstream entities linked to in the process
+		 * - beacons links can be created
+		 * - custom link can be created
+		 * - create link is created from user but not followed
 		 */
-		/*
-		 * This is the only place we use the children property
-		 * set when deserializing from the service. After this
-		 * all references to the children are dynamically assembled
-		 * in the getChildren method on entities.
-		 */
+		
 		ModelResult result = new ModelResult();
 		String originalEntityId = entity.id;
 
@@ -648,6 +647,7 @@ public class EntityManager {
 				final String jsonResponse = (String) result.serviceResponse.data;
 				final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, serviceDataType, ServiceDataWrapper.True);
 
+				/* Has updated activityDate */
 				final Entity insertedEntity = (Entity) serviceData.data;
 
 				/* We want to retain the parent relationship */
@@ -661,13 +661,10 @@ public class EntityManager {
 					mEntityCache.removeEntityTree(originalEntityId);
 				}
 
-				if (link != null) {
-					mEntityCache.addLink(link.toId, link.type, insertedEntity.id, null, insertedEntity.getShortcut());
-				}
-
-				/*
-				 * Add 'create' link
+				/* 
+				 * Add soft 'create' link so user entity doesn't have to be refetched 
 				 */
+				Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
 				mEntityCache.addLink(insertedEntity.id
 						, Constants.TYPE_LINK_CREATE
 						, Aircandi.getInstance().getUser().id
@@ -682,6 +679,13 @@ public class EntityManager {
 	}
 
 	public ModelResult updateEntity(Entity entity, Bitmap bitmap) {
+		/*
+		 * Updates activityDate in the database:
+		 * - on the updated entity
+		 * - on any upstream entities the updated entity is linked to
+		 * - inactive links are excluded
+		 * - like/create/watch links are not followed
+		 */
 		final ModelResult result = new ModelResult();
 
 		/* Upload new images to S3 as needed. */
@@ -718,7 +722,6 @@ public class EntityManager {
 		}
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			entity.activityDate = DateTime.nowDate().getTime();
 			mEntityCache.upsertEntity(entity);
 			if (entity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
 				mEntityCache.updateEntityUser(entity);
@@ -729,6 +732,12 @@ public class EntityManager {
 	}
 
 	public ModelResult deleteEntity(String entityId, Boolean cacheOnly) {
+		/*
+		 * Updates activityDate in the database:
+		 * - on any upstream entities the deleted entity was linked to
+		 * - inactive links are excluded
+		 * - like/create/watch links are not followed
+		 */
 		final ModelResult result = new ModelResult();
 
 		if (!cacheOnly) {
@@ -763,6 +772,7 @@ public class EntityManager {
 			 * FIXME: This needs to be generalized to hunt down all links that have
 			 * this entity at either end and clean them up including any counts.
 			 */
+			Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();			
 			mEntityCache.removeLink(entityId, Constants.TYPE_LINK_CREATE, Aircandi.getInstance().getUser().id);
 
 		}
@@ -966,12 +976,18 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult replaceEntitiesForEntity(String entityId, List<Entity> entities, String linkType) {
-
+	public ModelResult replaceEntitiesForEntity(String entityId, List<Entity> entitiesForEntity, String linkType) {
+		/*
+		 * moveCandigrams updates activityDate in the database:
+		 * - on the parent entity
+		 * - on any other upstream entities
+		 * - inactive links are not followed
+		 * - like/create/watch links are not followed
+		 */
 		final ModelResult result = new ModelResult();
 
 		/* Upload new images to S3 as needed. */
-		for (Entity entity : entities) {
+		for (Entity entity : entitiesForEntity) {
 			if (entity.photo != null && entity.photo.hasBitmap()) {
 				result.serviceResponse = storeImageAtS3(entity, null, entity.photo.getBitmap());
 				if (result.serviceResponse.responseCode != ResponseCode.Success) {
@@ -984,7 +1000,7 @@ public class EntityManager {
 		parameters.putString("entityId", entityId);
 
 		final List<String> entityStrings = new ArrayList<String>();
-		for (Entity entity : entities) {
+		for (Entity entity : entitiesForEntity) {
 			if (entity.isTempId()) {
 				entity.id = null;
 			}
@@ -1005,16 +1021,19 @@ public class EntityManager {
 
 		result.serviceResponse = dispatch(serviceRequest);
 
-		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			Entity entity = EntityManager.getEntity(entityId);
-			if (entity != null) {
-				entity.activityDate = DateTime.nowDate().getTime();
-			}
-		}
 		return result;
 	}
 
 	public ModelResult moveCandigram(Entity entity) {
+		/*
+		 * moveCandigrams updates activityDate in the database:
+		 * - on the candigram
+		 * - on the old place candigram was linked to
+		 * - on the new place candigram is linked to
+		 * - on any other upstream entities with valid links
+		 * - inactive links are not followed
+		 * - like/create/watch links are not followed
+		 */
 
 		final ModelResult result = new ModelResult();
 
@@ -1034,22 +1053,11 @@ public class EntityManager {
 
 		result.serviceResponse = dispatch(serviceRequest);
 
-		/* Reproduce the service call effect locally */
+		/* Return the new place the candigram has moved to */
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) result.serviceResponse.data;
 			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Entity, ServiceDataWrapper.True);
 			result.data = serviceData.data;
-
-			/*
-			 * Remove candigram to force it to be refreshed from the service.
-			 * If in cache, make sure parent place know it needs to refresh.
-			 */
-			Long activityDate = DateTime.nowDate().getTime();
-			Entity parent = entity.getParent(Constants.TYPE_LINK_CANDIGRAM);
-			if (parent != null) {
-				parent.activityDate = activityDate;
-			}
-			mEntityCache.removeEntityTree(entity.id);
 		}
 
 		return result;

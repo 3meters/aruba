@@ -36,4 +36,5 @@ public class WatchingFragment extends BaseShortcutFragment {
 	protected int getLayoutId() {
 		return R.layout.shortcut_fragment;
 	}
+
 }

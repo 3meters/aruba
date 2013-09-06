@@ -4,10 +4,12 @@ import java.util.List;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,17 +28,15 @@ import com.aircandi.utilities.UI;
 
 public class ApplinkListEdit extends BaseEntityListEdit {
 
-	private Entity	mParent;
+	@Override
+	protected void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+		mListItemResId = R.layout.temp_listitem_applink_edit;
+	}
 
 	@Override
-	public void databind() {
-		super.databind();
-
-		if (mEntityId != null) {
-			mParent = EntityManager.getEntity(mEntityId);
-		}
-		final ListAdapter adapter = new ListAdapter(this, mEntities, R.layout.temp_listitem_applink_edit);
-		mList.setAdapter(adapter);
+	protected ArrayAdapter getAdapter() {
+		return new ListAdapter(this, mEntities, mListItemResId);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 					}
 				}
-				databind();
+				databind(BindingMode.auto);
 				hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
 			}
@@ -157,7 +157,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 						UI.showToastNotification(getResources().getString(R.string.toast_applinks_refreshed), Toast.LENGTH_SHORT);
 					}
 				}
-				databind();
+				databind(BindingMode.auto);
 				hideBusy();
 				mBusyManager.stopBodyBusyIndicator();
 			}
@@ -178,7 +178,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Inner classes
+	// Classes
 	// --------------------------------------------------------------------------------------------
 
 	private static class ListAdapter extends EntityListAdapter {

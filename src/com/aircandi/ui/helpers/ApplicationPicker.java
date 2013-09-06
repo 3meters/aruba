@@ -20,30 +20,13 @@ import android.widget.TextView;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.AirApplication;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
-import com.aircandi.service.objects.Entity;
-import com.aircandi.ui.base.BaseBrowse;
+import com.aircandi.ui.base.BasePicker;
 
-public class ApplicationPicker extends BaseBrowse implements OnItemClickListener {
+public class ApplicationPicker extends BasePicker implements OnItemClickListener {
 
 	private TextView	mName;
 	private ListView	mListView;
 	private ListAdapter	mListAdapter;
-	private Entity		mEntity;
-
-	@Override
-	protected void unpackIntent() {
-		super.unpackIntent();
-
-		final Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
-			if (jsonEntity != null) {
-				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
-			}
-		}
-	}
 
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
@@ -51,11 +34,11 @@ public class ApplicationPicker extends BaseBrowse implements OnItemClickListener
 
 		mName = (TextView) findViewById(R.id.name);
 		mListView = (ListView) findViewById(R.id.form_list);
-		databind();
+		mListView.setOnItemClickListener(this);
 	}
 
 	@Override
-	public void databind() {
+	public void databind(BindingMode mode) {
 		mName.setText(R.string.dialog_template_picker_title);
 
 		/* Shown as a dialog so doesn't have an action bar */
@@ -85,7 +68,6 @@ public class ApplicationPicker extends BaseBrowse implements OnItemClickListener
 
 		mListAdapter = new ListAdapter(this, listData);
 		mListView.setAdapter(mListAdapter);
-		mListView.setOnItemClickListener(this);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -102,7 +84,7 @@ public class ApplicationPicker extends BaseBrowse implements OnItemClickListener
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Inner classes
+	// Classes
 	// --------------------------------------------------------------------------------------------
 
 	private class ListAdapter extends ArrayAdapter<Object>

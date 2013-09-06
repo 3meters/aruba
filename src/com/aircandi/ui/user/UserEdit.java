@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -33,12 +32,6 @@ public class UserEdit extends BaseEntityEdit {
 	private TabManager	mTabManager;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-		super.onCreate(savedInstanceState);
-	}
-
-	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
@@ -52,17 +45,6 @@ public class UserEdit extends BaseEntityEdit {
 		mEmail = (EditText) findViewById(R.id.email);
 		mDoNotTrack = (CheckBox) findViewById(R.id.chk_do_not_track);
 		
-		databind();
-		draw();
-	}
-
-	@Override
-	public void databind() {
-		super.databind();
-		
-		if (mEntity == null) {
-			throw new IllegalStateException("User entity required by UserEdit");
-		}
 		if (mBio != null) {
 			mBio.addTextChangedListener(new SimpleTextWatcher() {
 
@@ -135,7 +117,6 @@ public class UserEdit extends BaseEntityEdit {
 				}
 			});
 		}
-
 	}
 
 	@Override
