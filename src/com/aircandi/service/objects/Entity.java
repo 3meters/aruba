@@ -23,6 +23,7 @@ import com.aircandi.components.LocationManager;
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
 import com.aircandi.service.objects.Link.Direction;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.utilities.DateTime;
 
@@ -186,6 +187,27 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	// --------------------------------------------------------------------------------------------
 	// Properties
 	// --------------------------------------------------------------------------------------------
+	
+	// --------------------------------------------------------------------------------------------
+	// Methods
+	// --------------------------------------------------------------------------------------------
+	
+	public LinkProfile getDefaultLinkProfile() {
+		LinkProfile linkProfile = LinkProfile.NoLinks;
+		if (this.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			linkProfile = LinkProfile.LinksForPlace;
+		}
+		else if (this.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			linkProfile = LinkProfile.LinksForCandigram;
+		}
+		else if (this.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+			linkProfile = LinkProfile.LinksForPicture;
+		}
+		else if (this.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+			linkProfile = LinkProfile.LinksForUser;
+		}
+		return linkProfile;
+	}
 
 	public Boolean isHidden() {
 		Boolean oldIsHidden = hidden;

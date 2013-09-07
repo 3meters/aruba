@@ -31,11 +31,11 @@ public final class ProxiConstants {
 	public static final String	INSERT_USER_SECRET								= "larissa";																																	//$NON-NLS-1$
 	public static final String	ADMIN_USER_ID									= "us.000000.00000.000.000000";																												//$NON-NLS-1$
 
-	public static final String	URL_PROXIBASE_SERVICE							= "http://ariseditions.com:8080";				// local																					// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
-	public static final String	_URL_PROXIBASE_SERVICE							= "https://api.aircandi.com";					// production																					//$NON-NLS-1$
-	public static final String	__URL_PROXIBASE_SERVICE							= "https://api.aircandi.com:444";				// staging																									//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE							= "http://ariseditions.com:8080";																												// local																					// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
+	public static final String	_URL_PROXIBASE_SERVICE							= "https://api.aircandi.com";																													// production																					//$NON-NLS-1$
+	public static final String	__URL_PROXIBASE_SERVICE							= "https://api.aircandi.com:444";																												// staging																									//$NON-NLS-1$
 
-	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS		= "/img/applinks/";																																//$NON-NLS-1$
+	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS		= "/img/applinks/";																															//$NON-NLS-1$
 	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES		= "/img/categories/foursquare/";																												//$NON-NLS-1$
 
 	public static final String	URL_PROXIBASE_SERVICE_REST						= URL_PROXIBASE_SERVICE + "/data/";																											//$NON-NLS-1$
@@ -43,7 +43,7 @@ public final class ProxiConstants {
 	public static final String	URL_PROXIBASE_SERVICE_ADMIN						= URL_PROXIBASE_SERVICE + "/admin/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_METHOD					= URL_PROXIBASE_SERVICE + "/do/";																												//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_PLACES					= URL_PROXIBASE_SERVICE + "/places/";																											//$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE_APPLINKS					= URL_PROXIBASE_SERVICE + "/applinks/";																											//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_APPLINKS					= URL_PROXIBASE_SERVICE + "/applinks/";																										//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_AUTH						= URL_PROXIBASE_SERVICE + "/auth/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS		= URL_PROXIBASE_SERVICE + PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS;																			//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_ASSETS_CATEGORIES			= URL_PROXIBASE_SERVICE + PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES;																			//$NON-NLS-1$
@@ -55,6 +55,7 @@ public final class ProxiConstants {
 	public static final String	USER_AGENT_DESKTOP								= "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16";					//$NON-NLS-1$
 	public static final String	USER_AGENT_NEXUS_S								= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";	//$NON-NLS-1$
 
+	public static final int		LIMIT_LINKS_DEFAULT								= 50;
 	public static final int		LIMIT_USER_WATCHING_ENTITIES					= 50;
 	public static final int		LIMIT_USER_WATCHING_USERS						= 50;
 	public static final int		LIMIT_USER_OWNED_ENTITIES						= 200;

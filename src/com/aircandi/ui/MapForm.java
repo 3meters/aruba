@@ -17,7 +17,6 @@ import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirMarker;
-import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.utilities.UI;
@@ -34,8 +33,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MapForm extends BaseEntityForm {
 
 	SupportMapFragment			mMapFragment;
-	Entity						mEntity;
-	String						mEntityId;
 	List<AirMarker>				mMarkers							= new ArrayList<AirMarker>();
 	LatLngBounds				mBounds;
 	private static final int	REQUEST_CODE_RECOVER_PLAY_SERVICES	= 1001;
@@ -77,7 +74,9 @@ public class MapForm extends BaseEntityForm {
 
 	@Override
 	public void draw() {
-		setActivityTitle(mEntity.name);
+		if (mEntity.name != null && !mEntity.name.equals("")) {
+			setActivityTitle(mEntity.name);
+		}
 		if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
 			UI.showToastNotification("Google Play Services not available", Toast.LENGTH_SHORT);
 			return;

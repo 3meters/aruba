@@ -82,58 +82,58 @@ public class LinkOptions extends ServiceObject {
 		}
 		else {
 			User user = Aircandi.getInstance().getUser();
-			Number limit = ProxiConstants.LIMIT_USER_OWNED_ENTITIES;
 			LinkOptions linkOptions = new LinkOptions().setActive(new ArrayList<LinkSettings>());
+			linkOptions.shortcuts = true;
 
 			if (linkProfile == LinkProfile.LinksForPlace || linkProfile == LinkProfile.LinksForProximity) {
-				linkOptions.shortcuts = true;
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, true, false, true, limit));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PICTURE, true, false, true, 1)); // just one so we can preview
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CANDIGRAM, true, false, true, 1)); // just one so we can preview
+				Number limit = ProxiConstants.LIMIT_LINKS_DEFAULT;
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, true, false, true, false, limit));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, false, limit));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true, false));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PICTURE, true, false, true, false, 1)); // just one so we can preview
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CANDIGRAM, true, false, true, false, 1)); // just one so we can preview
 				if (user != null) {
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, limit, Maps.asMap("_from", user.id)));
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, false, limit, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, false, limit, Maps.asMap("_from", user.id)));
 				}
 				else {
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit));
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, false, limit));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, false, limit));
 				}
 			}
 			else if (linkProfile == LinkProfile.LinksForCandigram) {
-				linkOptions.shortcuts = true;
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
+				Number limit = ProxiConstants.LIMIT_LINKS_DEFAULT;
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, false, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PICTURE, true, false, true, 1)); // just one so we can preview
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CANDIGRAM, true, false, true, limit).setDirection(Direction.out));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PICTURE, true, false, true, false, 1)); // just one so we can preview
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CANDIGRAM, true, false, true, true, limit).setDirection(Direction.out));
 				if (user != null) {
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, limit, Maps.asMap("_from", user.id)));
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, false, limit, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, false, limit, Maps.asMap("_from", user.id)));
 				}
 				else {
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit));
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, false, limit));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, false, limit));
 				}
 			}
 			else if (linkProfile == LinkProfile.LinksForPicture) {
-				linkOptions.shortcuts = true;
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, limit));
+				Number limit = ProxiConstants.LIMIT_LINKS_DEFAULT;
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, false, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
 				if (user != null) {
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, limit, Maps.asMap("_from", user.id)));
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, false, limit, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, false, limit, Maps.asMap("_from", user.id)));
 				}
 				else {
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit));
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, limit));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, false, limit));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, false, limit));
 				}
 			}
 			else if (linkProfile == LinkProfile.LinksForUser) {
-				linkOptions.shortcuts = true;
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, limit).setDirection(Direction.out));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, limit).setDirection(Direction.both));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, limit).setDirection(Direction.both));
+				Number limit = ProxiConstants.LIMIT_USER_OWNED_ENTITIES;
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, false, limit).setDirection(Direction.out));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, false, limit).setDirection(Direction.both));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, false, limit).setDirection(Direction.both));
 			}
 			return linkOptions;
 		}

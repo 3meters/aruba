@@ -5,6 +5,7 @@ import java.util.HashMap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
@@ -33,6 +34,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 		 * Feedback are not really an entity type so we handle
 		 * all the expected initialization.
 		 */
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 		mDescription = (AirEditText) findViewById(R.id.description);
 
 		if (mDescription != null) {

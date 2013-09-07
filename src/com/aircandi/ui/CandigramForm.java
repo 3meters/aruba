@@ -10,7 +10,6 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,7 +54,6 @@ import com.squareup.otto.Subscribe;
 
 public class CandigramForm extends BaseEntityForm {
 
-	private Handler		mHandler	= new Handler();
 	private Runnable	mTimer;
 	private TextView	mActionInfo;
 	private SoundPool	mSoundPool;
@@ -355,16 +353,8 @@ public class CandigramForm extends BaseEntityForm {
 		}
 
 		/* Stats */
-
-		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
-		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
-		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
-		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
-
-		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
-		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
-		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
-		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
+		
+		drawStats();
 
 		/* Shortcuts */
 
@@ -466,6 +456,21 @@ public class CandigramForm extends BaseEntityForm {
 			mScrollView.setVisibility(View.VISIBLE);
 		}
 	}
+	
+	@Override
+	protected void drawStats() {
+		
+		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
+		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
+		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
+		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
+
+		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
+		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
+		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
+		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
+	}
+
 
 	@Override
 	protected void drawButtons() {

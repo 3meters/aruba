@@ -277,9 +277,9 @@
     <!-- Applink names -->
     
     <string name="applink_name_map">map</string>
-    <string name="applink_name_pictures">map</string>
-    <string name="applink_name_comments">map</string>
-    <string name="applink_name_candigrams">map</string>
+    <string name="applink_name_pictures">pictures</string>
+    <string name="applink_name_comments">comments</string>
+    <string name="applink_name_candigrams">candigrams</string>
     
     <!-- EntityForm -->
 

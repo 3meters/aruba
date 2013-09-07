@@ -200,6 +200,7 @@ public class CandigramEdit extends BaseEntityEdit {
 		}
 		else {
 			findViewById(R.id.type_holder).setVisibility(View.GONE);
+			findViewById(R.id.authoring_holder).setVisibility(View.GONE);
 			mViewFlipper.setDisplayedChild(0);
 			Integer colorResId = R.color.accent_gray_dark;
 			((ImageView) findViewById(R.id.type_image_next)).setColorFilter(mResources.getColor(colorResId), PorterDuff.Mode.SRC_ATOP);

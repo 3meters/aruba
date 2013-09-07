@@ -693,7 +693,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				@Override
 				protected void onPreExecute() {
-					showBusy(R.string.progress_loading_applinks);
+					showBusy(R.string.progress_loading_applinks, false);
 				}
 
 				@Override

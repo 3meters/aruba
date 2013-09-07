@@ -85,7 +85,7 @@ public class PlaceForm extends BaseEntityForm {
 			@Override
 			protected void onPreExecute() {
 				mBusyManager.stopBodyBusyIndicator();
-				showBusy(R.string.progress_upsizing);
+				showBusy(R.string.progress_upsizing, false);
 			}
 
 			@Override
@@ -279,15 +279,7 @@ public class PlaceForm extends BaseEntityForm {
 
 		/* Stats */
 
-		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
-		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
-		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
-		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
-
-		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
-		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
-		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
-		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
+		drawStats();
 
 		/* Shortcuts */
 
@@ -391,6 +383,20 @@ public class PlaceForm extends BaseEntityForm {
 		if (mScrollView != null) {
 			mScrollView.setVisibility(View.VISIBLE);
 		}
+	}
+
+	@Override
+	protected void drawStats() {
+		
+		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
+		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
+		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
+		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
+
+		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
+		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
+		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
+		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
 	}
 
 	@Override

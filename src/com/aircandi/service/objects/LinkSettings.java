@@ -2,6 +2,7 @@ package com.aircandi.service.objects;
 
 import java.util.Map;
 
+import com.aircandi.ProxiConstants;
 import com.aircandi.service.Expose;
 import com.aircandi.service.objects.Link.Direction;
 
@@ -22,6 +23,8 @@ public class LinkSettings extends ServiceObject {
 	@Expose
 	public Boolean				count				= true;
 	@Expose
+	public Boolean				inactive			= false;
+	@Expose
 	public Map					where;
 	@Expose
 	public Number				limit;
@@ -31,25 +34,23 @@ public class LinkSettings extends ServiceObject {
 	public LinkSettings() {}
 
 	public LinkSettings(String type, Boolean links, Boolean load, Boolean count) {
-		this.type = type;
-		this.links = links;
-		this.load = load;
-		this.count = count;
+		this(type, links, load, count, false); 
+	}
+	
+	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Boolean inactive) {
+		this(type, links, load, count, inactive, ProxiConstants.LIMIT_LINKS_DEFAULT); 
 	}
 
-	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Number limit) {
-		this.type = type;
-		this.links = links;
-		this.load = load;
-		this.count = count;
-		this.limit = limit;
+	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Boolean inactive, Number limit) {
+		this(type, links, load, count, inactive, limit, null); 
 	}
 
-	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Number limit, Map where) {
+	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Boolean inactive, Number limit, Map where) {
 		this.type = type;
 		this.links = links;
 		this.load = load;
 		this.count = count;
+		this.inactive = inactive;
 		this.where = where;
 		this.limit = limit;
 	}
@@ -113,6 +114,15 @@ public class LinkSettings extends ServiceObject {
 
 	public LinkSettings setDirection(Direction direction) {
 		this.direction = direction.name();
+		return this;
+	}
+
+	public Boolean getInactive() {
+		return inactive;
+	}
+
+	public LinkSettings setInactive(Boolean inactive) {
+		this.inactive = inactive;
 		return this;
 	}
 }

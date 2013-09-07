@@ -161,7 +161,8 @@ public class UserForm extends BaseEntityForm {
 		}
 	}
 
-	private void drawStats() {
+	@Override
+	public void drawStats() {
 
 		User user = (User) mEntity;
 		final TextView stats = (TextView) findViewById(R.id.stats);

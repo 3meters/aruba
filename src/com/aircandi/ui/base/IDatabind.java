@@ -19,8 +19,10 @@ public interface IDatabind {
 
 	public void showBusy();
 
-	public void showBusy(Object message);
+	public void showBusy(Object message, Boolean actionBarOnly);
 
+	public void showBusyTimed(Integer duration, Boolean actionBarOnly);
+	
 	public void hideBusy();
 
 	public enum BindingMode {

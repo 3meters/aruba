@@ -46,7 +46,6 @@ import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
-import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
@@ -74,6 +73,7 @@ import com.aircandi.ui.widgets.AirAutoCompleteTextView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
+import com.commonsware.cwac.endless.EndlessAdapter;
 
 /*
  * We often will get duplicates because the ordering of images isn't
@@ -139,7 +139,7 @@ public class PhotoPicker extends BaseBrowse {
 			mEntity = EntityManager.getEntity(mEntityId);
 			mProvider = ((Place) mEntity).getProvider();
 			mSearch.setVisibility(View.GONE);
-			showBusy(R.string.progress_searching);
+			showBusy(R.string.progress_searching, false);
 		}
 		else {
 

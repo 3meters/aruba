@@ -59,7 +59,7 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public void onRefresh() {
 		databind(BindingMode.service); // Called from Routing
@@ -67,7 +67,7 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 
 	@Override
 	public void databind(BindingMode mode) {}
-	
+
 	@Override
 	public void afterDatabind() {}
 
@@ -85,12 +85,14 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 
 	@Override
 	public void showBusy() {
-		showBusy(null);
+		showBusy(null, false);
 	}
 
 	@Override
-	public void showBusy(final Object message) {
-		startBodyBusyIndicator();
+	public void showBusy(final Object message, final Boolean actionBarOnly) {
+		if (actionBarOnly == null || !actionBarOnly) {
+			startBodyBusyIndicator();
+		}
 		if (mBusyManager != null) {
 			mBusyManager.showBusy(message);
 		}
@@ -103,6 +105,9 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 			mBusyManager.hideBusy();
 		}
 	}
+	
+	@Override
+	public void showBusyTimed(final Integer duration, final Boolean actionBarOnly) {}
 
 	// --------------------------------------------------------------------------------------------
 	// UI

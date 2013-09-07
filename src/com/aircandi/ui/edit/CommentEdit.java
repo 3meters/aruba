@@ -2,6 +2,7 @@ package com.aircandi.ui.edit;
 
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -19,7 +20,8 @@ public class CommentEdit extends BaseEntityEdit {
 	@Override
 	protected void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-		
+
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 		mDescription.setImeOptions(EditorInfo.IME_ACTION_SEND);
 		mDescription.setOnEditorActionListener(new OnEditorActionListener() {
 

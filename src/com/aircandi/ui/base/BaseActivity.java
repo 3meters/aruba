@@ -12,6 +12,7 @@ import android.graphics.PixelFormat;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
@@ -57,6 +58,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	public Resources	mResources;
 	public BusyManager	mBusyManager;
+	protected Handler	mHandler					= new Handler();
 
 	/* Theme */
 	private String		mPrefTheme;
@@ -173,18 +175,43 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	@Override
 	public void showBusy() {
-		showBusy(null);
+		showBusy(null, false);
 	}
 
 	@Override
-	public void showBusy(final Object message) {
+	public void showBusy(final Object message, final Boolean actionBarOnly) {
 		runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
 				if (mBusyManager != null) {
 					mBusyManager.showBusy(message);
-					mBusyManager.startBodyBusyIndicator();
+					if (actionBarOnly == null || !actionBarOnly) {
+						mBusyManager.startBodyBusyIndicator();
+					}
+				}
+			}
+		});
+	}
+
+	@Override
+	public void showBusyTimed(final Integer duration, final Boolean actionBarOnly) {
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (mBusyManager != null) {
+					mBusyManager.showBusy();
+					if (actionBarOnly == null || !actionBarOnly) {
+						mBusyManager.startBodyBusyIndicator();
+					}
+					mHandler.postDelayed(new Runnable() {
+
+						@Override
+						public void run() {
+							hideBusy();
+						}
+					}, duration);
 				}
 			}
 		});

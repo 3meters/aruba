@@ -25,7 +25,7 @@
         android:orientation="horizontal" >
 
         <com.aircandi.ui.widgets.AirTextView
-            android:id="@+id/name"
+            android:id="@+id/user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/name"
+            android:layout_toRightOf="@+id/user_name"
             android:paddingLeft="4dp"
             android:paddingRight="4dp"
             android:text="@string/symbol_bullet" />
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="14dp"
-            android:layout_toRightOf="@+id/name"
+            android:layout_toRightOf="@+id/user_name"
             android:text="@string/dummy_location"
             android:textColor="?attr/textColorSecondary" />
     </RelativeLayout>

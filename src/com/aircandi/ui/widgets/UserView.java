@@ -35,11 +35,11 @@ public class UserView extends RelativeLayout {
 	private TextView		mLikeCount;
 	private TextView		mWatchCount;
 	private TextView		mTimeSince;
-	
+
 	private Entity			mUser;
 	private String			mLabelString;
 	private Long			mDate;
-	private Boolean			mLocked = false;
+	private Boolean			mLocked	= false;
 
 	public UserView(Context context) {
 		this(context, null);
@@ -89,10 +89,10 @@ public class UserView extends RelativeLayout {
 		this.setTag(entity);
 		draw();
 	}
-	
+
 	private void draw() {
 		User user = (User) mUser;
-		
+
 		if (user != null) {
 			if (mLabel != null) {
 				if (mLabelString != null) {
@@ -123,7 +123,9 @@ public class UserView extends RelativeLayout {
 			}
 
 			if (mPhotoView != null) {
-				UI.drawPhoto(mPhotoView, user.getPhoto());
+				if (mPhotoView.getPhoto() == null || !mPhotoView.getPhoto().getUri().equals(user.getPhoto().getUri())) {
+					UI.drawPhoto(mPhotoView, user.getPhoto());
+				}
 			}
 
 			if (mImageLocked != null) {

@@ -34,7 +34,6 @@ public class PhotoSourcePicker extends BasePicker implements OnItemClickListener
 	private TextView	mName;
 	private ListView	mListView;
 	private ListAdapter	mListAdapter;
-	private Entity		mEntity;
 	
 	@Override
 	protected void initialize(Bundle savedInstanceState) {

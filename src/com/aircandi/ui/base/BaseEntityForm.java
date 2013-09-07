@@ -104,6 +104,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		 * If cache entity is fresher than the one currently bound to or there is
 		 * a cache entity available, go ahead and draw before we check against the service.
 		 */
+		showBusy(null, true);
 		final Entity entity = EntityManager.getEntity(mEntityId);
 		if (entity != null && mEntity != null) {
 			if (mEntity.activityDate.longValue() != entity.activityDate.longValue()) {
@@ -125,15 +126,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				Thread.currentThread().setName("GetEntity");
 				ModelResult result = new ModelResult();
 
-				refreshNeeded.set(mEntity == null
-						|| mode == BindingMode.service
-						|| (!entity.shortcuts && !entity.synthetic));
-				/*
-				 * Returns false if service call fails.
-				 */
-				if (!refreshNeeded.get()) {
-					refreshNeeded.set(EntityManager.getInstance().isActivityStale(mEntity.id, mEntity.activityDate));
-				}
+				refreshNeeded.set(mEntity == null || EntityManager.getInstance().isActivityStale(mEntity.id, mEntity.activityDate));
 
 				if (refreshNeeded.get()) {
 					showBusy();
@@ -163,6 +156,9 @@ public abstract class BaseEntityForm extends BaseBrowse {
 						Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
 					}
 					hideBusy();
+				}
+				else if (mode == BindingMode.service) {
+					showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
 				}
 				afterDatabind();
 			}
@@ -219,15 +215,13 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			@Override
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
-				setSupportProgressBarIndeterminateVisibility(false);
+				((ComboButton) findViewById(R.id.button_like)).getViewAnimator().setDisplayedChild(0);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					databind(BindingMode.auto);
+					drawButtons();
+					drawStats();
 				}
 				else {
-					if (result.serviceResponse.exception.getStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
-						UI.showToastNotification(getString(R.string.toast_like_duplicate), Toast.LENGTH_SHORT);
-					}
-					else {
+					if (result.serviceResponse.exception.getStatusCode() != ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
 						Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
 					}
 				}
@@ -256,8 +250,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 					Shortcut fromShortcut = Aircandi.getInstance().getUser().getShortcut();
 					Shortcut toShortcut = mEntity.getShortcut();
 					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
-					result = EntityManager.getInstance().insertLink(
-							Aircandi.getInstance().getUser().id
+					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_WATCH
 							, false
@@ -281,7 +274,8 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				ModelResult result = (ModelResult) response;
 				((ComboButton) findViewById(R.id.button_watch)).getViewAnimator().setDisplayedChild(0);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					draw();
+					drawButtons();
+					drawStats();
 				}
 				else {
 					if (result.serviceResponse.exception.getStatusCode() != ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
@@ -389,6 +383,8 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 	// UI
 	// --------------------------------------------------------------------------------------------
+	
+	protected void drawStats() {}
 
 	protected void drawButtons() {
 

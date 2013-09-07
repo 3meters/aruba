@@ -2,6 +2,7 @@ package com.aircandi.ui.base;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -31,7 +32,6 @@ import com.aircandi.applications.Candigrams;
 import com.aircandi.applications.Comments;
 import com.aircandi.applications.Pictures;
 import com.aircandi.applications.Places;
-import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.Maps;
@@ -52,6 +52,7 @@ import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
+import com.commonsware.cwac.endless.EndlessAdapter;
 
 public abstract class BaseEntityList extends BaseBrowse {
 
@@ -149,18 +150,18 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 	@Override
 	public void databind(final BindingMode mode) {
-		
+
 		if (mAdapter == null) {
 
 			/* Prep the UI */
 			mButtonNewEntity.setVisibility(View.GONE);
-			showBusy("Loading " + getActivityTitle() + "...");
-			
+			showBusy("Loading " + getActivityTitle() + "...", false);
+
 			/* Manage list */
 			mOffset = 0;
 			mEntities.clear();
 			mForEntity = EntityManager.getEntity(mForEntityId);
-			
+
 			mAdapter = new EntityAdapter(mEntities);
 			if (mListView != null) {
 				mListView.setAdapter(mAdapter); // draw happens in the adapter
@@ -170,28 +171,54 @@ public abstract class BaseEntityList extends BaseBrowse {
 			}
 		}
 		else {
-			
+
+			final AtomicBoolean refreshNeeded = new AtomicBoolean(false);
+
 			new AsyncTask() {
 
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("ActivityStaleCheck");
+					ModelResult result = new ModelResult();
 
-					Boolean refreshNeeded = (mode == BindingMode.service);
-					
-					/* Returns false if service call fails.*/
-					if (!refreshNeeded) {
-						refreshNeeded = EntityManager.getInstance().isActivityStale(mForEntity.id, mForEntity.activityDate);
+					refreshNeeded.set(EntityManager.getInstance().isActivityStale(mForEntity.id, mForEntity.activityDate));
+					if (refreshNeeded.get()) {
+						/*
+						 * Parent is stale so refetch it first. This might not be necessary because parent
+						 * can be flagged as stale because of changes to children but we refetch anyway rather
+						 * than make it more complicated trying to tell the difference.
+						 */
+						showBusy();
+						LinkOptions options = LinkOptions.getDefault(mForEntity.getDefaultLinkProfile());
+						result = EntityManager.getInstance().getEntity(mForEntity.id, refreshNeeded.get(), options);
+						if (result.serviceResponse.responseCode == ResponseCode.Success) {
+							if (result.data != null) {
+								mForEntity = (Entity) result.data;
+							}
+						}
 					}
-
-					return refreshNeeded;
+					return result;
 				}
 
 				@Override
-				protected void onPostExecute(Object result) {
-					if ((Boolean)result) {
-						mEntities.clear();
-						mAdapter.notifyDataSetChanged();  // triggers reload/redraw
+				protected void onPostExecute(Object response) {
+					if (refreshNeeded.get()) {
+						final ModelResult result = (ModelResult) response;
+						if (result.serviceResponse.responseCode == ResponseCode.Success) {
+							/*
+							 * This triggers pulling fresh data and rebuilding the dataset.
+							 */
+							mOffset = 0;
+							mEntities.clear();
+							mAdapter.restartAppending();
+						}
+						else {
+							Routing.serviceError(BaseEntityList.this, result.serviceResponse);
+						}
+						hideBusy();
+					}
+					else if (mode == BindingMode.service) {
+						showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
 					}
 				}
 			}.execute();
@@ -545,6 +572,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 				holder.placePhotoView = (AirImageView) view.findViewById(R.id.place_photo);
 				holder.placeName = (TextView) view.findViewById(R.id.place_name);
+				holder.userName = (TextView) view.findViewById(R.id.user_name);
 
 				if (mGridView != null) {
 					Integer nudge = mResources.getDimensionPixelSize(R.dimen.grid_item_height_kick);
@@ -631,6 +659,12 @@ public abstract class BaseEntityList extends BaseBrowse {
 				if (holder.creator != null && entity.creator != null && !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 					holder.creator.databind(entity.creator, entity.modifiedDate.longValue(), entity.locked);
 					UI.setVisibility(holder.creator, View.VISIBLE);
+				}
+
+				UI.setVisibility(holder.userName, View.GONE);
+				if (holder.userName != null && entity.creator != null && entity.creator.name != null && entity.creator.name.length() > 0) {
+					holder.userName.setText(entity.creator.name);
+					UI.setVisibility(holder.userName, View.VISIBLE);
 				}
 
 				UI.setVisibility(holder.area, View.GONE);
@@ -725,6 +759,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 		public AirImageView	photoView;
 		public AirImageView	placePhotoView;
 		public TextView		placeName;
+		public TextView		userName;
 		public TextView		subtitle;
 		public TextView		description;
 		public TextView		type;
