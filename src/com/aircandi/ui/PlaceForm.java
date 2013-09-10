@@ -68,6 +68,8 @@ public class PlaceForm extends BaseEntityForm {
 
 	@Override
 	public void afterDatabind() {
+		super.afterDatabind();
+
 		Aircandi.currentPlace = mEntity;
 		if (mUpsize && mEntity != null) {
 			mUpsize = false;
@@ -102,6 +104,8 @@ public class PlaceForm extends BaseEntityForm {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					final Entity upsizedEntity = (Entity) result.data;
 					mEntityId = upsizedEntity.id;
+					mEntity = null;
+					mCacheStamp = null;
 					databind(BindingMode.auto);
 				}
 				else {

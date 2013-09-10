@@ -39,7 +39,7 @@ public class Users {
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 
-	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction) {
+	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction, String title) {
 		if (direction == null) {
 			direction = Direction.in;
 		}
@@ -48,6 +48,7 @@ public class Users {
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_PLACE)
+				.setListTitle(title)
 				.setListItemResId(R.layout.temp_listitem_entity)
 				.setListNewEnabled(true);
 

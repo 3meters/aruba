@@ -42,7 +42,7 @@ public class Pictures {
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 
-	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction) {
+	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction, String title) {
 		if (direction == null) {
 			direction = Direction.in;
 		}
@@ -51,6 +51,7 @@ public class Pictures {
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_PICTURE)
+				.setListTitle(title)
 				.setListItemResId(R.layout.temp_griditem_entity)
 				.setListNewEnabled(true);
 

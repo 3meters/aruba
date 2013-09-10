@@ -55,7 +55,7 @@ import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.commonsware.cwac.endless.EndlessAdapter;
 
-public abstract class BaseEntityList extends BaseBrowse {
+public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 	protected ListView			mListView;
 	protected GridView			mGridView;
@@ -80,6 +80,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 	protected String			mListLinkDirection;
 	protected Integer			mListItemResId;
 	protected Boolean			mListNewEnabled;
+	protected String			mListTitle;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -108,6 +109,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 			}
 			mListNewEnabled = extras.getBoolean(Constants.EXTRA_LIST_NEW_ENABLED, false);
 			mListItemResId = extras.getInt(Constants.EXTRA_LIST_ITEM_RESID, getListItemResId(mListLinkSchema));
+			mListTitle = extras.getString(Constants.EXTRA_LIST_TITLE);
 		}
 	}
 
@@ -148,27 +150,14 @@ public abstract class BaseEntityList extends BaseBrowse {
 	}
 
 	@Override
-	public void databind(final BindingMode mode) {
+	public void bind(final BindingMode mode) {
 
 		if (mAdapter == null) {
-
-			/* Prep the UI */
 			mButtonNewEntity.setVisibility(View.GONE);
 			showBusy("Loading " + getActivityTitle() + "...", false);
-
-			/* Manage list */
-			mOffset = 0;
-			mEntities.clear();
 			mForEntity = EntityManager.getEntity(mForEntityId);
 			mCacheStamp = mForEntity.getCacheStamp();
-
-			mAdapter = new EntityAdapter(mEntities);
-			if (mListView != null) {
-				mListView.setAdapter(mAdapter); // draw happens in the adapter
-			}
-			else if (mGridView != null) {
-				mGridView.setAdapter(mAdapter); // draw happens in the adapter
-			}
+			setAdapter();
 		}
 		else {
 
@@ -200,11 +189,11 @@ public abstract class BaseEntityList extends BaseBrowse {
 				protected void onPostExecute(Object response) {
 					if (refreshNeeded.get()) {
 						/*
-						 * This triggers pulling fresh data and rebuilding the dataset.
+						 * Using brute force to rebuild the data because I've
+						 * beat my head against the wall trying to get other refresh
+						 * mechanisms to work.
 						 */
-						mOffset = 0;
-						mEntities.clear();
-						mAdapter.restartAppending();
+						setAdapter();
 					}
 					else if (mode == BindingMode.service) {
 						showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
@@ -216,6 +205,18 @@ public abstract class BaseEntityList extends BaseBrowse {
 			}.execute();
 		}
 	}
+	
+	protected void setAdapter() {
+		mOffset = 0;
+		mEntities.clear();
+		mAdapter = new EntityAdapter(mEntities);
+		if (mListView != null) {
+			mListView.setAdapter(mAdapter); // draw happens in the adapter
+		}
+		else if (mGridView != null) {
+			mGridView.setAdapter(mAdapter); // draw happens in the adapter
+		}
+	}
 
 	@Override
 	protected void configureActionBar() {
@@ -223,31 +224,29 @@ public abstract class BaseEntityList extends BaseBrowse {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		if (mForEntity != null) {
-			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-				Drawable icon = getResources().getDrawable(R.drawable.img_picture_temp);
-				icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Pictures.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
-				mActionBar.setIcon(icon);
-				setActivityTitle("pictures");
-			}
-			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-				Drawable icon = getResources().getDrawable(R.drawable.img_comment_temp);
-				icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Comments.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
-				mActionBar.setIcon(icon);
-				setActivityTitle("comments");
-			}
-			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
-				Drawable icon = getResources().getDrawable(R.drawable.img_candigram_temp);
-				icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Candigrams.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
-				mActionBar.setIcon(icon);
-				setActivityTitle("candigrams");
-			}
-			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-				Drawable icon = getResources().getDrawable(R.drawable.img_place_temp);
-				icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Places.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
-				mActionBar.setIcon(icon);
-				setActivityTitle("places");
-			}
+		if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+			Drawable icon = getResources().getDrawable(R.drawable.img_picture_temp);
+			icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Pictures.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
+			mActionBar.setIcon(icon);
+			setActivityTitle(mListTitle != null ? mListTitle : "pictures");
+		}
+		else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			Drawable icon = getResources().getDrawable(R.drawable.img_comment_temp);
+			icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Comments.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
+			mActionBar.setIcon(icon);
+			setActivityTitle(mListTitle != null ? mListTitle : "comments");
+		}
+		else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			Drawable icon = getResources().getDrawable(R.drawable.img_candigram_temp);
+			icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Candigrams.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
+			mActionBar.setIcon(icon);
+			setActivityTitle(mListTitle != null ? mListTitle : "candigrams");
+		}
+		else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			Drawable icon = getResources().getDrawable(R.drawable.img_place_temp);
+			icon.setColorFilter(Aircandi.getInstance().getResources().getColor(Places.ICON_COLOR), PorterDuff.Mode.SRC_ATOP);
+			mActionBar.setIcon(icon);
+			setActivityTitle(mListTitle != null ? mListTitle : "places");
 		}
 		Aircandi.stopwatch3.segmentTime(this.getClass().getSimpleName() + " action bar configured");
 	}
@@ -414,7 +413,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 		super.onResume();
 		if (!isFinishing()) {
 			invalidateOptionsMenu();
-			databind(BindingMode.auto); // Setting this here because it doesn't mean a service call
+			bind(BindingMode.auto); // Setting this here because it doesn't mean a service call
 		}
 	}
 

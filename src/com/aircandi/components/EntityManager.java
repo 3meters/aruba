@@ -1026,7 +1026,7 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult moveCandigram(Entity entity) {
+	public ModelResult moveCandigram(Entity entity, Boolean skipMove, String toId) {
 		/*
 		 * moveCandigrams updates activityDate in the database:
 		 * - on the candigram
@@ -1034,7 +1034,7 @@ public class EntityManager {
 		 * - on the new place candigram is linked to
 		 * - on any other upstream entities with valid links
 		 * - inactive links are not followed
-		 * - like/create/watch links are not followed
+		 * - like/create/watch/proximity links are not followed
 		 */
 
 		final ModelResult result = new ModelResult();
@@ -1042,6 +1042,12 @@ public class EntityManager {
 		/* Construct entity, link, and observation */
 		final Bundle parameters = new Bundle();
 		parameters.putString("method", "range");
+		if (toId != null) {
+			parameters.putString("toId", toId);
+		}
+		if (skipMove != null) {
+			parameters.putBoolean("skipMove", skipMove);
+		}
 		parameters.putStringArrayList("entityIds", new ArrayList(Arrays.asList(entity.id)));
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
@@ -1188,7 +1194,7 @@ public class EntityManager {
 	}
 
 	public ModelResult upsizeSynthetic(Place synthetic) {
-		
+
 		/* Decorate and clone */
 		final Entity entity = Place.upsizeFromSynthetic(synthetic);
 

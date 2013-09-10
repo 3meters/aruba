@@ -15,23 +15,13 @@ public abstract class BaseBrowse extends BaseActivity {
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		if (!isFinishing()) {
 			unpackIntent();
-			configureActionBar();
 			initialize(savedInstanceState);
-			afterInitialize();
+			configureActionBar();
 		}
 	}
 
 	@Override
 	public void initialize(Bundle savedInstanceState) {}
-
-	@Override
-	public void afterInitialize() {}
-
-	@Override
-	public void beforeDatabind() {}
-
-	@Override
-	public void afterDatabind() {}
 
 	@Override
 	protected void configureActionBar() {
@@ -44,11 +34,6 @@ public abstract class BaseBrowse extends BaseActivity {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public void onRefresh() {
-		databind(BindingMode.service); // Called from Routing
-	}
 
 	// --------------------------------------------------------------------------------------------
 	// UI

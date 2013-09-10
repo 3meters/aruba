@@ -61,7 +61,7 @@ public class ShortcutPicker extends BasePicker {
 	}
 
 	@Override
-	public void databind(BindingMode mode) {
+	public void bind(BindingMode mode) {
 
 		/* We use this to access the source suggestions */
 

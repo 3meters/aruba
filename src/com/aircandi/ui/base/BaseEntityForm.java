@@ -65,7 +65,7 @@ import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 
-public abstract class BaseEntityForm extends BaseBrowse {
+public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 
 	protected ScrollView			mScrollView;
 	protected Entity				mEntity;
@@ -98,14 +98,8 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		mScrollView = (ScrollView) findViewById(R.id.scroll_view);
 	}
 
-	@Override
-	public void afterInitialize() {
-		beforeDatabind();
-		databind(BindingMode.auto);
-		afterDatabind();
-	}
+	public void afterDatabind() {}
 
-	@Override
 	public void beforeDatabind() {
 		/*
 		 * If cache entity is fresher than the one currently bound to or there is
@@ -125,6 +119,11 @@ public abstract class BaseEntityForm extends BaseBrowse {
 		final AtomicBoolean refreshNeeded = new AtomicBoolean(false);
 
 		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				beforeDatabind();
+			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
@@ -160,6 +159,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 			@Override
 			protected void onPostExecute(Object modelResult) {
 
+				hideBusy();
 				if (refreshNeeded.get()) {
 					final ModelResult result = (ModelResult) modelResult;
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -176,13 +176,13 @@ public abstract class BaseEntityForm extends BaseBrowse {
 					}
 					else {
 						Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
+						return;
 					}
-					hideBusy();
-					afterDatabind();
 				}
 				else if (mode == BindingMode.service) {
 					showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
 				}
+				afterDatabind();
 			}
 
 		}.execute();
@@ -191,6 +191,11 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onRefresh() {
+		databind(BindingMode.service); // Called from Routing
+	}
 
 	@SuppressWarnings("ucd")
 	public void onLikeButtonClick(View view) {
@@ -477,19 +482,19 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 			Intent intent = null;
 			if (settings.appClass.equals(Applinks.class)) {
-				intent = Applinks.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
+				intent = Applinks.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, titleResId != null ? getString(titleResId) : null);
 			}
 			if (settings.appClass.equals(Comments.class)) {
-				intent = Comments.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
+				intent = Comments.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, titleResId != null ? getString(titleResId) : null);
 			}
 			if (settings.appClass.equals(Places.class)) {
-				intent = Places.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
+				intent = Places.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, titleResId != null ? getString(titleResId) : null);
 			}
 			if (settings.appClass.equals(Pictures.class)) {
-				intent = Pictures.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
+				intent = Pictures.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, titleResId != null ? getString(titleResId) : null);
 			}
 			if (settings.appClass.equals(Users.class)) {
-				intent = Users.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction);
+				intent = Users.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, titleResId != null ? getString(titleResId) : null);
 			}
 
 			/*

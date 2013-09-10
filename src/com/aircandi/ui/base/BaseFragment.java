@@ -19,7 +19,7 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.MenuManager;
 import com.aircandi.service.objects.User;
 
-public abstract class BaseFragment extends SherlockFragment implements IDatabind {
+public abstract class BaseFragment extends SherlockFragment implements IForm {
 
 	protected Resources		mResources;
 	protected BusyManager	mBusyManager;
@@ -61,16 +61,11 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 	@Override
 	public void initialize(Bundle savedInstanceState) {}
 
-	@Override
-	public void afterInitialize() {}
-
-	@Override
 	public void beforeDatabind() {}
 
 	@Override
 	public void databind(BindingMode mode) {}
 
-	@Override
 	public void afterDatabind() {}
 
 	@Override

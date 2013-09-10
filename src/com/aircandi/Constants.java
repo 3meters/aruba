@@ -49,6 +49,7 @@ public final class Constants {
 	public static final String	EXTRA_LIST_LINK_DIRECTION					= "com.aircandi.EXTRA_LIST_DIRECTION";														//$NON-NLS-1$
 	public static final String	EXTRA_LIST_NEW_ENABLED						= "com.aircandi.EXTRA_LIST_NEW_ENABLED";													//$NON-NLS-1$
 	public static final String	EXTRA_LIST_ITEM_RESID						= "com.aircandi.EXTRA_LIST_ITEM_RESID";													//$NON-NLS-1$
+	public static final String	EXTRA_LIST_TITLE							= "com.aircandi.EXTRA_LIST_TITLE";															//$NON-NLS-1$
 
 	/* Interval helpers */
 	public static final int		MILLS_PER_SECOND							= 1000;

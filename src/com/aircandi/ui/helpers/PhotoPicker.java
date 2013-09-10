@@ -69,6 +69,7 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.base.BaseBrowse;
+import com.aircandi.ui.base.IList;
 import com.aircandi.ui.widgets.AirAutoCompleteTextView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Routing;
@@ -79,7 +80,7 @@ import com.commonsware.cwac.endless.EndlessAdapter;
  * We often will get duplicates because the ordering of images isn't
  * guaranteed while paging.
  */
-public class PhotoPicker extends BaseBrowse {
+public class PhotoPicker extends BaseBrowse implements IList {
 
 	private DrawableManager			mDrawableManager;
 
@@ -237,7 +238,7 @@ public class PhotoPicker extends BaseBrowse {
 		});
 
 		if (mPlacePhotoMode) {
-			databind(BindingMode.auto);
+			bind(BindingMode.auto);
 		}
 		else {
 			/* Autocomplete */
@@ -247,7 +248,7 @@ public class PhotoPicker extends BaseBrowse {
 	}
 
 	@Override
-	public void databind(BindingMode mode) {
+	public void bind(BindingMode mode) {
 		/*
 		 * First check to see if there are any candi picture children.
 		 */
@@ -288,6 +289,9 @@ public class PhotoPicker extends BaseBrowse {
 		startSearch(view);
 	}
 
+	@Override
+	public void onAdd() {}
+
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
@@ -304,8 +308,8 @@ public class PhotoPicker extends BaseBrowse {
 		showBusy();
 
 		/* Hide soft keyboard */
-		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(mSearch.getWindowToken(), 0);		
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(mSearch.getWindowToken(), 0);
 
 		/* Stash query so we can restore it in the future */
 		Aircandi.settingsEditor.putString(Constants.SETTING_PICTURE_SEARCH_LAST, mQuery);

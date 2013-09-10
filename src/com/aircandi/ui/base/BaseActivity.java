@@ -47,7 +47,7 @@ import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.google.android.gcm.GCMRegistrar;
 
-public abstract class BaseActivity extends SherlockFragmentActivity implements IDatabind {
+public abstract class BaseActivity extends SherlockFragmentActivity implements IBase {
 
 	protected ActionBar	mActionBar;
 	protected String	mActivityTitle;
@@ -144,6 +144,9 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	public void onRefresh() {}
 
 	@Override
+	public void onAdd() {}
+
+	@Override
 	public void onBackPressed() {
 		Routing.route(this, Route.Cancel);
 	}
@@ -167,9 +170,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 		finish();
 		Animate.doOverridePendingTransition(this, TransitionType.PageBack);
 	}
-
-	@Override
-	public void onAdd() {}
 
 	@Override
 	public void onHelp() {}
@@ -231,12 +231,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 			}
 		});
 	};
-
-	@Override
-	public void databind(BindingMode mode) {}
-
-	@Override
-	public void draw() {}
 
 	@Override
 	public void onError() {}

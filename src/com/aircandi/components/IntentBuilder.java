@@ -24,6 +24,7 @@ public class IntentBuilder {
 	private String		mListLinkSchema;
 	private String		mListLinkType;
 	private String		mListLinkDirection;
+	private String		mListTitle;
 	private Boolean		mListNewEnabled;
 	private Integer		mListItemResId;
 
@@ -87,6 +88,10 @@ public class IntentBuilder {
 
 		if (mListNewEnabled != null) {
 			intent.putExtra(Constants.EXTRA_LIST_NEW_ENABLED, mListNewEnabled);
+		}
+		
+		if (mListTitle != null) {
+			intent.putExtra(Constants.EXTRA_LIST_TITLE, mListTitle);
 		}
 
 		if (mForceRefresh != null) {
@@ -173,6 +178,15 @@ public class IntentBuilder {
 
 	public IntentBuilder setListLinkDirection(String listLinkDirection) {
 		mListLinkDirection = listLinkDirection;
+		return this;
+	}
+
+	public String getListTitle() {
+		return mListTitle;
+	}
+
+	public IntentBuilder setListTitle(String listTitle) {
+		mListTitle = listTitle;
 		return this;
 	}
 

@@ -75,7 +75,7 @@
     <string name="dummy_location">Seattle, WA</string>
     <string name="dummy_address">"2200 N 56th (at Keystone Pl N)\nSeattle, WA 98103\n(206) 545&#8211;4277"</string>
     <string name="dummy_comments">21 comments</string>
-    <string name="dummy_candigram_action">leaving in 18 minutes</string>
+    <string name="dummy_candigram_action">checking schedule</string>
     <string name="dummy_number">10</string>
     <string name="dummy_like_stat">12 likes</string>
     <string name="dummy_watch_stat">8 watching</string>
@@ -132,6 +132,8 @@
     
     <string name="alert_kicked_candigram">Bouncing candigram</string>
     <string name="alert_kicked_follow">Follow</string>
+    <string name="alert_kicked_cancel">Cancel</string>
+    <string name="alert_kicked">Kick!</string>
     
     <!-- Errors: network -->
 

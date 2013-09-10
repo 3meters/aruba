@@ -32,10 +32,11 @@ import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.BaseBrowse;
+import com.aircandi.ui.base.IForm;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.UI;
 
-public class PhotoForm extends BaseBrowse {
+public class PhotoForm extends BaseBrowse implements IForm {
 
 	private List<Photo>	mPhotosForPaging	= new ArrayList<Photo>();
 	private String		mImageUri;
@@ -166,6 +167,9 @@ public class PhotoForm extends BaseBrowse {
 		BitmapManager.getInstance().masterFetch(bitmapRequest);
 		return layout;
 	}
+
+	@Override
+	public void draw() {}
 
 	private void updateViewPager(List<Photo> photos)
 	{

@@ -16,7 +16,7 @@ import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 
-public abstract class BaseEdit extends BaseActivity {
+public abstract class BaseEdit extends BaseActivity implements IEdit {
 
 	protected Boolean	mEditing	= false;
 	protected Boolean	mDirty		= false;
@@ -33,7 +33,8 @@ public abstract class BaseEdit extends BaseActivity {
 			unpackIntent();
 			configureActionBar();
 			initialize(savedInstanceState);
-			afterInitialize();
+			bind(BindingMode.auto);
+			draw();
 		}
 	}
 
@@ -49,13 +50,10 @@ public abstract class BaseEdit extends BaseActivity {
 	public void initialize(Bundle savedInstanceState) {}
 
 	@Override
-	public void afterInitialize() {}
+	public void bind(BindingMode mode) {}
 
 	@Override
-	public void beforeDatabind() {}
-
-	@Override
-	public void afterDatabind() {}
+	public void draw() {}
 
 	@Override
 	protected void configureActionBar() {

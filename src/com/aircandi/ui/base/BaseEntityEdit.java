@@ -174,21 +174,13 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	}
 
 	@Override
-	public void afterInitialize() {
-		beforeDatabind();
-		databind(BindingMode.auto);
-	}
-
-	@Override
-	public void databind(BindingMode mode) {
+	public void bind(BindingMode mode) {
 		if (!mEditing && mEntity == null && mEntitySchema != null) {
 			mEntity = Entity.makeEntity(mEntitySchema);
 			setActivityTitle("new " + mEntity.schema);
 			mEntity.creator = Aircandi.getInstance().getUser();
 			mEntity.creatorId = Aircandi.getInstance().getUser().id;
 		}
-		afterDatabind();
-		draw();
 	}
 
 	@Override
@@ -338,6 +330,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
+	
+	@Override
+	public void onAdd(){}
 
 	@Override
 	public void onAccept() {

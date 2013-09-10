@@ -14,13 +14,13 @@ import com.aircandi.ui.edit.CommentEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 
-public class Comments  {
-	
-	public static int ICON_COLOR = R.color.accent_orange_dark;
+public class Comments {
+
+	public static int	ICON_COLOR	= R.color.accent_orange_dark;
 
 	public static void view(Context context, String entityId) {}
 
-	public static void viewFor(Context context,String entityId, String linkType, Direction direction) {
+	public static void viewFor(Context context, String entityId, String linkType, Direction direction) {
 		if (direction == null) {
 			direction = Direction.in;
 		}
@@ -36,7 +36,7 @@ public class Comments  {
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 
-	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction) {
+	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction, String title) {
 		if (direction == null) {
 			direction = Direction.in;
 		}
@@ -44,6 +44,7 @@ public class Comments  {
 				.setEntityId(entityId)
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
+				.setListTitle(title)
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_COMMENT)
 				.setListItemResId(R.layout.temp_listitem_comment)
 				.setListNewEnabled(true);

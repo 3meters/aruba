@@ -14,7 +14,7 @@ import com.aircandi.ui.edit.PlaceEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 
-public class Applinks  {
+public class Applinks {
 
 	@SuppressWarnings("ucd")
 	public static void viewFor(Context context, String entityId, String linkType, Direction direction) {
@@ -30,10 +30,10 @@ public class Applinks  {
 				.setListNewEnabled(true);
 
 		context.startActivity(intentBuilder.create());
-		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 
-	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction) {
+	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction, String title) {
 		if (direction == null) {
 			direction = Direction.in;
 		}
@@ -41,6 +41,7 @@ public class Applinks  {
 				.setEntityId(entityId)
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
+				.setListTitle(title)
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_APPLINK)
 				.setListItemResId(R.layout.temp_listitem_applink)
 				.setListNewEnabled(true);
@@ -52,13 +53,13 @@ public class Applinks  {
 	public static void edit(Context context, Entity entity) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceEdit.class).setEntity(entity);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
-		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 
 	@SuppressWarnings("ucd")
 	public static void insert(Context context) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_PLACE);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
-		Animate.doOverridePendingTransition((Activity)context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 }

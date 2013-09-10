@@ -254,19 +254,24 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 
 			Intent intent = null;
 			if (settings.appClass.equals(Applinks.class)) {
-				intent = Applinks.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction);
+				intent = Applinks.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction,
+						titleResId != null ? getString(titleResId) : null);
 			}
 			if (settings.appClass.equals(Comments.class)) {
-				intent = Comments.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction);
+				intent = Comments.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction,
+						titleResId != null ? getString(titleResId) : null);
 			}
 			if (settings.appClass.equals(Places.class)) {
-				intent = Places.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction);
+				intent = Places.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction,
+						titleResId != null ? getString(titleResId) : null);
 			}
 			if (settings.appClass.equals(Pictures.class)) {
-				intent = Pictures.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction);
+				intent = Pictures.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction,
+						titleResId != null ? getString(titleResId) : null);
 			}
 			if (settings.appClass.equals(Users.class)) {
-				intent = Users.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction);
+				intent = Users.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction,
+						titleResId != null ? getString(titleResId) : null);
 			}
 
 			/*

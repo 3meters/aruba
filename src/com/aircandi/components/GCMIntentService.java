@@ -44,7 +44,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		/* Build intent that can be used in association with the notification */
 		if (notification.entity != null) {
 			if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-				notification.intent = Comments.viewForGetIntent(context, notification.entity.toId, Constants.TYPE_LINK_COMMENT, null);
+				notification.intent = Comments.viewForGetIntent(context, notification.entity.toId, Constants.TYPE_LINK_COMMENT, null, null);
 			}
 			else {
 				Class<?> clazz = BaseEntityForm.viewFormBySchema(notification.entity.schema);

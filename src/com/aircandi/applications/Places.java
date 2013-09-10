@@ -41,7 +41,7 @@ public class Places {
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
 	}
 
-	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction) {
+	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction, String title) {
 		if (direction == null) {
 			direction = Direction.in;
 		}
@@ -49,6 +49,7 @@ public class Places {
 				.setEntityId(entityId)
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
+				.setListTitle(title)
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_PLACE)
 				.setListItemResId(R.layout.temp_listitem_entity)
 				.setListNewEnabled(true);

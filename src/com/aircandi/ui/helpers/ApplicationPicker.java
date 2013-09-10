@@ -38,7 +38,7 @@ public class ApplicationPicker extends BasePicker implements OnItemClickListener
 	}
 
 	@Override
-	public void databind(BindingMode mode) {
+	public void bind(BindingMode mode) {
 		mName.setText(R.string.dialog_template_picker_title);
 
 		/* Shown as a dialog so doesn't have an action bar */

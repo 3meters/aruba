@@ -7,7 +7,7 @@ import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.Entity;
 
-public abstract class BasePicker extends BaseBrowse {
+public abstract class BasePicker extends BaseBrowse implements IList {
 
 	protected Entity	mEntity;
 
@@ -48,7 +48,7 @@ public abstract class BasePicker extends BaseBrowse {
 	protected void onResume() {
 		super.onResume();
 		if (!isFinishing()) {
-			databind(BindingMode.auto);
+			bind(BindingMode.auto);
 		}
 	}
 

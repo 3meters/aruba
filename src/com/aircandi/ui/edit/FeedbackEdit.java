@@ -52,7 +52,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 	}
 
 	@Override
-	public void databind(BindingMode mode) {
+	public void bind(BindingMode mode) {
 		/*
 		 * Not a real entity so we completely override databind.
 		 */

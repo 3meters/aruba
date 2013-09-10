@@ -40,7 +40,7 @@ import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 
-public abstract class BaseEntityListEdit extends BaseEdit {
+public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 
 	protected BounceListView	mList;
 	protected TextView			mMessage;
@@ -82,7 +82,7 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 	}
 
 	@Override
-	public void databind(BindingMode mode) {
+	public void bind(BindingMode mode) {
 		/*
 		 * Before entities are customized, they have no position and are
 		 * sorted by the modified date on the link. Once entity customization
@@ -366,7 +366,7 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		databind(BindingMode.auto);
+		bind(BindingMode.auto);
 	}
 
 	// --------------------------------------------------------------------------------------------

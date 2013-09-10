@@ -49,11 +49,11 @@ public class CategoryBuilder extends BaseEdit {
 	private Category		mSubSubCategory;
 
 	private List<Category>	mCategories;
-	
+
 	@Override
 	public void unpackIntent() {
 		super.unpackIntent();
-		
+
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
 			final String jsonCategory = extras.getString(Constants.EXTRA_CATEGORY);
@@ -74,13 +74,13 @@ public class CategoryBuilder extends BaseEdit {
 		mSpinnerItem = getThemeTone().equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
 		setActivityTitle(getString(R.string.dialog_category_builder_title));
-		
-		databind(BindingMode.auto);
-		draw();		
+
+		bind(BindingMode.auto);
+		draw();
 	}
 
 	@Override
-	public void databind(BindingMode mode) {
+	public void bind(BindingMode mode) {
 		if (EntityManager.getInstance().getCategories().size() == 0) {
 			loadCategories();
 		}
@@ -460,5 +460,4 @@ public class CategoryBuilder extends BaseEdit {
 	protected int getLayoutId() {
 		return R.layout.category_builder;
 	}
-
 }

@@ -45,7 +45,7 @@ public class PhotoSourcePicker extends BasePicker implements OnItemClickListener
 	}
 
 	@Override
-	public void databind(BindingMode mode) {
+	public void bind(BindingMode mode) {
 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();
