@@ -37,20 +37,20 @@ public class BitmapLoader {
 	private List<BitmapLoaderThread>	mThreads		= Collections.synchronizedList(new ArrayList<BitmapLoaderThread>());
 
 	public BitmapLoader() {
-		
+
 		/*
 		 * This is a very basic thread pool implementation. We are pre-starting three worker threads
 		 * to handle image downloads and processing. This could be much better using dynamic
 		 * thread allocation with ThreadPoolExecutor.
-		 *  
+		 * 
 		 * see-> http://http://developer.android.com/training/multiple-threads/index.html
 		 */
-		
+
 		mThreads.add(new BitmapLoaderThread(mBitmapQueue, Thread.MIN_PRIORITY));
 		mThreads.add(new BitmapLoaderThread(mBitmapQueue, Thread.MIN_PRIORITY));
 		mThreads.add(new BitmapLoaderThread(mBitmapQueue, Thread.MIN_PRIORITY));
-		
-		for (Thread thread : mThreads){
+
+		for (Thread thread : mThreads) {
 			thread.start();
 		}
 	}
@@ -76,9 +76,9 @@ public class BitmapLoader {
 	}
 
 	public void stopBitmapLoaderThread() {
-		for (Thread thread : mThreads){
+		for (Thread thread : mThreads) {
 			thread.interrupt();
-		}		
+		}
 		mBitmapQueue.mQueue.clear();
 	}
 
@@ -204,8 +204,9 @@ public class BitmapLoader {
 
 					/* Make sure this is still a valid request */
 					ServiceResponse serviceResponse = new ServiceResponse();
-					
-					if (bitmapRequest.getImageView() == null || bitmapRequest.getImageView().getTag().equals(bitmapRequest.getImageUri())) {
+
+					if (bitmapRequest.getImageView() == null || bitmapRequest.getImageView().getTag() == null
+							|| bitmapRequest.getImageView().getTag().equals(bitmapRequest.getImageUri())) {
 
 						Logger.v(BitmapLoader.this, bitmapRequest.getImageUri() + ": Download started...");
 						Bitmap bitmap = null;
@@ -233,7 +234,8 @@ public class BitmapLoader {
 
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 
-							if (bitmapRequest.getImageView() == null || bitmapRequest.getImageView().getTag().equals(bitmapRequest.getImageUri())) {
+							if (bitmapRequest.getImageView() == null || bitmapRequest.getImageView().getTag() == null
+									|| bitmapRequest.getImageView().getTag().equals(bitmapRequest.getImageUri())) {
 
 								Logger.v(BitmapLoader.this,
 										bitmapRequest.getImageUri() + ": Download finished: " + String.valueOf(estimatedTime / 1000000)
@@ -275,18 +277,10 @@ public class BitmapLoader {
 								}
 
 								if (bitmapRequest.getImageView() != null) {
-									if (bitmapRequest.getImageView().getTag().equals(bitmapRequest.getImageUri())) {
-
+									if (bitmapRequest.getImageView().getTag() == null
+											|| bitmapRequest.getImageView().getTag().equals(bitmapRequest.getImageUri())) {
 										final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
-										/* Put this on the main thread */
-										Aircandi.mainThreadHandler.post(new Runnable() {
-
-											@Override
-											public void run() {
-												UI.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true,
-														Animate.fadeInMedium());
-											}
-										});
+										UI.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, Animate.fadeInMedium());
 									}
 								}
 							}

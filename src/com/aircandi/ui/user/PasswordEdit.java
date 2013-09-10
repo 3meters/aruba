@@ -29,7 +29,7 @@ public class PasswordEdit extends BaseEdit {
 	protected String	mEntityId;
 
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		super.unpackIntent();
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -38,7 +38,7 @@ public class PasswordEdit extends BaseEdit {
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mPasswordOld = (EditText) findViewById(R.id.password_old);

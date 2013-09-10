@@ -31,20 +31,28 @@ public abstract class BaseEdit extends BaseActivity {
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		if (!isFinishing()) {
 			unpackIntent();
-			initialize(savedInstanceState);
 			configureActionBar();
+			initialize(savedInstanceState);
+			afterInitialize();
 		}
 	}
 
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mSkipSave = extras.getBoolean(Constants.EXTRA_SKIP_SAVE, false);
 		}
 	}
 
-	protected void initialize(Bundle savedInstanceState) {}
+	@Override
+	public void initialize(Bundle savedInstanceState) {}
+
+	@Override
+	public void afterInitialize() {}
+
+	@Override
+	public void beforeDatabind() {}
 
 	@Override
 	public void afterDatabind() {}

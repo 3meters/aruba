@@ -39,7 +39,7 @@ public class MapForm extends BaseEntityForm {
 	private static final int	DEFAULT_ZOOM						= 16;
 
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		super.unpackIntent();
 
 		final Bundle extras = getIntent().getExtras();
@@ -55,7 +55,7 @@ public class MapForm extends BaseEntityForm {
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		mLinkProfile = LinkProfile.LinksForPlace;
 		mMapFragment = new MapFragment();
 		getSupportFragmentManager().beginTransaction().add(R.id.fragment_holder, mMapFragment).commit();

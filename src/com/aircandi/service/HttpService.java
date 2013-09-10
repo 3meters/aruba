@@ -85,6 +85,7 @@ import com.aircandi.service.objects.AirMarker;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Beacon;
+import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Candigram;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Comment;
@@ -93,7 +94,6 @@ import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Post;
-import com.aircandi.service.objects.Result;
 import com.aircandi.service.objects.ServiceBase.UpdateScope;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
@@ -868,6 +868,11 @@ public class HttpService {
 		if (serviceRequest.getResponseFormat() == ResponseFormat.Json) {
 			httpAction.addHeader("Accept", "application/json");
 		}
+		if (serviceRequest.getResponseFormat() == ResponseFormat.Bytes) {
+			httpAction.addHeader("Accept", "image/jpeg");
+			httpAction.addHeader("Accept", "image/png");
+			httpAction.addHeader("Accept", "image/gif");
+		}
 		if (serviceRequest.getAuthType() == AuthType.Basic) {
 			httpAction.addHeader("Authorization", "Basic " + serviceRequest.getPasswordBase64());
 		}
@@ -1115,7 +1120,7 @@ public class HttpService {
 					list.add(Shortcut.setPropertiesFromMap(new Shortcut(), (HashMap) map, nameMapping));
 				}
 				else if (objectType == ObjectType.Result) {
-					list.add(Result.setPropertiesFromMap(new Result(), (HashMap) map, nameMapping));
+					list.add(CacheStamp.setPropertiesFromMap(new CacheStamp(), (HashMap) map, nameMapping));
 				}
 				else if (objectType == ObjectType.Post) {
 					list.add(Post.setPropertiesFromMap(new Post(), (HashMap) map, nameMapping));
@@ -1305,13 +1310,11 @@ public class HttpService {
 
 		public void onError(Object response) {}
 
-		public void onError() {}
-
 		public void onComplete() {}
 
 		public void onComplete(Object response) {}
 
-		public void onComplete(Object response, Photo photo, String photoUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {} // $codepro.audit.disable largeNumberOfParameters
+		public void onComplete(Object response, Photo photo, Bitmap bitmap) {} // $codepro.audit.disable largeNumberOfParameters
 
 		public void onProgressChanged(int progress) {}
 	}

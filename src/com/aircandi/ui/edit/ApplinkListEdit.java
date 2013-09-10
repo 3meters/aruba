@@ -29,7 +29,7 @@ import com.aircandi.utilities.UI;
 public class ApplinkListEdit extends BaseEntityListEdit {
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		mListItemResId = R.layout.temp_listitem_applink_edit;
 	}
@@ -63,8 +63,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 			@Override
 			protected void onPreExecute() {
-				mBusyManager.showBusy();
-				mBusyManager.startBodyBusyIndicator();
+				showBusy();
 			}
 
 			@Override
@@ -94,6 +93,17 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 							int activeCountOld = mEntities.size();
 							int activeCountNew = applinks.size();
 							mEntities = applinks;
+							
+							Integer position = 0;
+							for (Entity entity : mEntities) {
+								entity.checked = false;
+								entity.position = position;
+								position++;
+							}
+							
+							mAdapter.clear();
+							mAdapter.addAll(mEntities);
+							mAdapter.notifyDataSetChanged();
 							if (activeCountNew == activeCountOld) {
 								UI.showToastNotification(getResources().getString(R.string.toast_applinks_no_links), Toast.LENGTH_SHORT);
 							}
@@ -107,9 +117,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 					}
 				}
-				databind(BindingMode.auto);
 				hideBusy();
-				mBusyManager.stopBodyBusyIndicator();
 			}
 		}.execute();
 	}
@@ -120,8 +128,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 			@Override
 			protected void onPreExecute() {
-				mBusyManager.showBusy();
-				mBusyManager.startBodyBusyIndicator();
+				showBusy();
 			}
 
 			@Override
@@ -154,12 +161,13 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 							}
 						}
 						mEntities = applinks;
+						mAdapter.clear();
+						mAdapter.addAll(mEntities);
+						mAdapter.notifyDataSetChanged();
 						UI.showToastNotification(getResources().getString(R.string.toast_applinks_refreshed), Toast.LENGTH_SHORT);
 					}
 				}
-				databind(BindingMode.auto);
 				hideBusy();
-				mBusyManager.stopBodyBusyIndicator();
 			}
 		}.execute();
 	}

@@ -71,7 +71,7 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 	private PullToRefreshAttacher	mPullToRefreshAttacher;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 			Routing.route(this, Route.SettingsLocation);

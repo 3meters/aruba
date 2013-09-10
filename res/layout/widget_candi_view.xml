@@ -23,12 +23,14 @@
         android:paddingRight="15dp"
         android:paddingTop="25dp" >
 
-        <ImageView
+        <com.aircandi.ui.widgets.AirImageView
             android:id="@+id/subtitle_badge"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/image_small"
+            android:layout_height="@dimen/image_small"
             android:layout_gravity="center_vertical"
             android:layout_marginRight="10dp"
+            aircandi:layout="@layout/widget_webimageview"
+            aircandi:sizeHint="@dimen/image_small"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter" />
 

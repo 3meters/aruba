@@ -60,7 +60,7 @@ public class CandigramForm extends BaseEntityForm {
 	private int			mCandigramExitSoundId;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mLinkProfile = LinkProfile.LinksForCandigram;

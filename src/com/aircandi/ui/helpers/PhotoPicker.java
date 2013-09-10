@@ -106,7 +106,7 @@ public class PhotoPicker extends BaseBrowse {
 	private static final String		QUERY_DEFAULT		= "wallpaper unusual places";
 
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		super.unpackIntent();
 
 		final Bundle extras = getIntent().getExtras();
@@ -124,7 +124,7 @@ public class PhotoPicker extends BaseBrowse {
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mDrawableManager = new DrawableManager();
@@ -225,9 +225,9 @@ public class PhotoPicker extends BaseBrowse {
 					if (photo == null) {
 						photo = new Photo(imageResult.getMediaUrl(), null, null, null, PhotoSource.external);
 					}
+					photo.name = mTitleOptional;
 
 					final Intent intent = new Intent();
-					intent.putExtra(Constants.EXTRA_URI_TITLE, mTitleOptional);
 					final String jsonPhoto = HttpService.objectToJson(photo);
 					intent.putExtra(Constants.EXTRA_PHOTO, jsonPhoto);
 					setResult(Activity.RESULT_OK, intent);
@@ -304,8 +304,8 @@ public class PhotoPicker extends BaseBrowse {
 		showBusy();
 
 		/* Hide soft keyboard */
-		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(mSearch.getWindowToken(), 0);		
 
 		/* Stash query so we can restore it in the future */
 		Aircandi.settingsEditor.putString(Constants.SETTING_PICTURE_SEARCH_LAST, mQuery);

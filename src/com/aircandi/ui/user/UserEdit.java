@@ -32,7 +32,7 @@ public class UserEdit extends BaseEntityEdit {
 	private TabManager	mTabManager;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mTabManager = new TabManager(Constants.TABS_USER_EDIT_ID, mActionBar, (ViewFlipper) findViewById(R.id.flipper_form));
@@ -44,7 +44,7 @@ public class UserEdit extends BaseEntityEdit {
 		mArea = (EditText) findViewById(R.id.area);
 		mEmail = (EditText) findViewById(R.id.email);
 		mDoNotTrack = (CheckBox) findViewById(R.id.chk_do_not_track);
-		
+
 		if (mBio != null) {
 			mBio.addTextChangedListener(new SimpleTextWatcher() {
 
@@ -173,10 +173,10 @@ public class UserEdit extends BaseEntityEdit {
 		super.gather();
 
 		User user = (User) mEntity;
-		user.email = mEmail.getText().toString().trim();
-		user.bio = mBio.getText().toString().trim();
-		user.area = mArea.getText().toString().trim();
-		user.webUri = mWebUri.getText().toString().trim();
+		user.email = Utilities.emptyAsNull(mEmail.getText().toString().trim());;
+		user.bio = Utilities.emptyAsNull(mBio.getText().toString().trim());
+		user.area = Utilities.emptyAsNull(mArea.getText().toString().trim());
+		user.webUri = Utilities.emptyAsNull(mWebUri.getText().toString().trim());
 		user.doNotTrack = mDoNotTrack.isChecked();
 	}
 

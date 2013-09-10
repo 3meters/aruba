@@ -35,6 +35,7 @@ import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Beacon;
+import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Device;
@@ -164,13 +165,20 @@ public class EntityManager {
 	// Service queries
 	// --------------------------------------------------------------------------------------------
 
-	public synchronized Boolean isActivityStale(String entityId, Number activityDate) {
+	public synchronized CacheStamp loadCacheStamp(String entityId, CacheStamp cacheStamp) {
 
 		final ModelResult result = new ModelResult();
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("entityId", entityId);
-		parameters.putLong("activityDate", activityDate.longValue());
+
+		if (cacheStamp.activityDate != null) {
+			parameters.putLong("activityDate", cacheStamp.activityDate.longValue());
+		}
+
+		if (cacheStamp.modifiedDate != null) {
+			parameters.putLong("modifiedDate", cacheStamp.modifiedDate.longValue());
+		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "checkActivity")
@@ -180,13 +188,17 @@ public class EntityManager {
 
 		result.serviceResponse = dispatch(serviceRequest);
 
+		/* In case of a failure, we echo back the provided cache stamp */
+		CacheStamp cacheStampService = cacheStamp.clone();
+
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.None, ServiceDataWrapper.True);
-			Boolean stale = (serviceData.info.contains("stale"));
-			return stale;
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.Result, ServiceDataWrapper.True);
+			if (serviceData.data != null) {
+				cacheStampService = (CacheStamp) serviceData.data;
+			}
 		}
-		return false;
+		return cacheStampService;
 	}
 
 	public synchronized ModelResult loadCategories() {
@@ -527,9 +539,8 @@ public class EntityManager {
 		 * - custom link can be created
 		 * - create link is created from user but not followed
 		 */
-		
+
 		ModelResult result = new ModelResult();
-		String originalEntityId = entity.id;
 
 		Logger.i(this, "Inserting entity: " + entity.name);
 
@@ -646,23 +657,9 @@ public class EntityManager {
 
 				final String jsonResponse = (String) result.serviceResponse.data;
 				final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, serviceDataType, ServiceDataWrapper.True);
-
-				/* Has updated activityDate */
 				final Entity insertedEntity = (Entity) serviceData.data;
-
-				/* We want to retain the parent relationship */
-				if (entity.toId != null) {
-					insertedEntity.toId = entity.toId;
-				}
-
-				mEntityCache.upsertEntity(insertedEntity);
-
-				if (!insertedEntity.id.equals(originalEntityId)) {
-					mEntityCache.removeEntityTree(originalEntityId);
-				}
-
-				/* 
-				 * Add soft 'create' link so user entity doesn't have to be refetched 
+				/*
+				 * Optimization: Add soft 'create' link so user entity doesn't have to be refetched
 				 */
 				Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
 				mEntityCache.addLink(insertedEntity.id
@@ -671,7 +668,7 @@ public class EntityManager {
 						, insertedEntity.getShortcut()
 						, Aircandi.getInstance().getUser().getShortcut());
 
-				result.data = mEntityCache.get(insertedEntity.id);
+				result.data = insertedEntity;
 			}
 		}
 
@@ -706,6 +703,7 @@ public class EntityManager {
 			 */
 			final Bundle parameters = new Bundle();
 			parameters.putBoolean("skipActivityDate", false);
+			parameters.putBoolean("returnEntity", false);
 			entity.updateScope = UpdateScope.Object;
 			parameters.putString("entity", "object:" + HttpService.objectToJson(entity, UseAnnotations.True, ExcludeNulls.True));
 
@@ -722,7 +720,11 @@ public class EntityManager {
 		}
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			mEntityCache.upsertEntity(entity);
+			/*
+			 * Optimization: We crawl entities in the cache and update embedded
+			 * user objects so we don't have to refresh all the affected entities
+			 * from the service.
+			 */
 			if (entity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
 				mEntityCache.updateEntityUser(entity);
 			}
@@ -772,7 +774,7 @@ public class EntityManager {
 			 * FIXME: This needs to be generalized to hunt down all links that have
 			 * this entity at either end and clean them up including any counts.
 			 */
-			Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();			
+			Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
 			mEntityCache.removeLink(entityId, Constants.TYPE_LINK_CREATE, Aircandi.getInstance().getUser().id);
 
 		}
@@ -1186,8 +1188,23 @@ public class EntityManager {
 	}
 
 	public ModelResult upsizeSynthetic(Place synthetic) {
+		
+		/* Decorate and clone */
 		final Entity entity = Place.upsizeFromSynthetic(synthetic);
+
+		/* Insert in database */
 		ModelResult result = EntityManager.getInstance().insertEntity(entity);
+
+		/*
+		 * Remove synthetic from the cache and add database entity
+		 */
+		if (result.serviceResponse.responseCode == ResponseCode.Success) {
+			Entity upsized = (Entity) result.data;
+			mEntityCache.removeEntityTree(synthetic.id);
+			mEntityCache.decorate(upsized, null);
+			mEntityCache.upsertEntity(upsized);
+		}
+
 		return result;
 	}
 

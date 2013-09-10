@@ -38,7 +38,7 @@ public class TuningEdit extends BaseEntityEdit {
 	private Boolean	mFirstTune 			= true;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		mButtonTune = (Button) findViewById(R.id.button_tune);
 		mButtonUntune = (Button) findViewById(R.id.button_untune);

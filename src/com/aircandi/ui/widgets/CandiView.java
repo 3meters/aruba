@@ -9,7 +9,6 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -20,6 +19,7 @@ import com.aircandi.R;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
+import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Entity;
@@ -35,18 +35,18 @@ public class CandiView extends RelativeLayout {
 	public static final int	VERTICAL	= 1;
 
 	private Entity			mEntity;
-	private Number			mEntityActivityDate;
 	private Integer			mLayoutId;
 	private ViewGroup		mLayout;
 
 	private AirImageView	mPhotoView;
-	private ImageView		mCategoryPhoto;
+	private AirImageView	mCategoryPhoto;
 	private TextView		mName;
 	private TextView		mSubtitle;
 	private TextView		mDistance;
 	private View			mCandiViewGroup;
 	private LinearLayout	mShortcuts;
 	private LinearLayout	mInfoHolder;
+	private CacheStamp		mCacheStamp;
 
 	public CandiView(Context context) {
 		this(context, null);
@@ -76,7 +76,7 @@ public class CandiView extends RelativeLayout {
 		mName = (TextView) mLayout.findViewById(R.id.name);
 		mSubtitle = (TextView) mLayout.findViewById(R.id.subtitle);
 		mDistance = (TextView) mLayout.findViewById(R.id.distance);
-		mCategoryPhoto = (ImageView) mLayout.findViewById(R.id.subtitle_badge);
+		mCategoryPhoto = (AirImageView) mLayout.findViewById(R.id.subtitle_badge);
 		mShortcuts = (LinearLayout) mLayout.findViewById(R.id.shortcuts);
 		mInfoHolder = (LinearLayout) mLayout.findViewById(R.id.info_holder);
 	}
@@ -87,9 +87,7 @@ public class CandiView extends RelativeLayout {
 			 * If it is the same entity and it hasn't changed then nothing to do
 			 */
 			if (!entity.synthetic) {
-				if (mEntity != null
-						&& entity.id.equals(mEntity.id)
-						&& entity.activityDate.longValue() == mEntityActivityDate.longValue()) {
+				if (mEntity != null && entity.id.equals(mEntity.id) && mCacheStamp.equals(entity.getCacheStamp())) {
 					mEntity = entity;
 					showDistance(entity);
 					return;
@@ -106,11 +104,13 @@ public class CandiView extends RelativeLayout {
 			}
 
 			mEntity = entity;
-			mEntityActivityDate = entity.activityDate;
+			mCacheStamp = entity.getCacheStamp();
 
 			/* Primary candi image */
 
 			drawPhoto();
+			
+			/* Background color */
 
 			if (mCandiViewGroup != null) {
 				String colorizeKey = null;
@@ -120,12 +120,16 @@ public class CandiView extends RelativeLayout {
 				Integer colorResId = Place.getCategoryColorResId(colorizeKey, true, Aircandi.muteColor, false);
 				mCandiViewGroup.setBackgroundResource(colorResId);
 			}
+			
+			/* name */
 
 			setVisibility(mName, View.GONE);
 			if (mName != null && entity.name != null && !entity.name.equals("")) {
 				mName.setText(Html.fromHtml(entity.name));
 				setVisibility(mName, View.VISIBLE);
 			}
+			
+			/* Subtitle */
 
 			setVisibility(mSubtitle, View.GONE);
 			if (mSubtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
@@ -144,24 +148,21 @@ public class CandiView extends RelativeLayout {
 					setVisibility(mSubtitle, View.VISIBLE);
 				}
 			}
+			
+			/* Category photo */
 
 			setVisibility(mCategoryPhoto, View.GONE);
 			if (mCategoryPhoto != null) {
 				if (category != null) {
 					if (!UI.photosEqual((Photo) mCategoryPhoto.getTag(), category.photo)) {
 						mCategoryPhoto.setTag(category.photo);
-						final BitmapRequest bitmapRequest = new BitmapRequest(category.photo.getUri(), mCategoryPhoto);
+						final BitmapRequest bitmapRequest = new BitmapRequest(category.photo.getUri(), mCategoryPhoto.getImageView());
 						bitmapRequest.setImageRequestor(mCategoryPhoto);
 						bitmapRequest.setImageSize(UI.getRawPixelsForDisplayPixels(this.getContext(), 50));
 						BitmapManager.getInstance().masterFetch(bitmapRequest);
 					}
 					mCategoryPhoto.setVisibility(View.VISIBLE);
 				}
-			}
-
-			if (mSubtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
-				mSubtitle.setText(Html.fromHtml(entity.subtitle.toUpperCase(Locale.US)));
-				setVisibility(mSubtitle, View.VISIBLE);
 			}
 
 			/* Links */
@@ -183,7 +184,7 @@ public class CandiView extends RelativeLayout {
 				if (count != null && entity.getCount(Constants.TYPE_LINK_PICTURE, Direction.in).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_pictures_dark", null, sizePixels, marginPixels);
 				}
-				
+
 				count = entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.in);
 				if (count != null && entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.in).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_comments_dark", null, sizePixels, marginPixels);
@@ -334,14 +335,6 @@ public class CandiView extends RelativeLayout {
 
 	public void setCandiImage(AirImageView candiImage) {
 		mPhotoView = candiImage;
-	}
-
-	public ImageView getCategoryImage() {
-		return mCategoryPhoto;
-	}
-
-	public void setCategoryImage(ImageView categoryImage) {
-		mCategoryPhoto = categoryImage;
 	}
 
 	public LinearLayout getTextGroup() {

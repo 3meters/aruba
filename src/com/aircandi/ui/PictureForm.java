@@ -36,7 +36,7 @@ import com.squareup.otto.Subscribe;
 public class PictureForm extends BaseEntityForm {
 	
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		mLinkProfile = LinkProfile.LinksForPicture;
 	}

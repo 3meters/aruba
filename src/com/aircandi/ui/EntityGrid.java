@@ -11,7 +11,7 @@ import com.squareup.otto.Subscribe;
 public class EntityGrid extends BaseEntityList {
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		/* Set spacing */

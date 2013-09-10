@@ -40,7 +40,7 @@ public class ShortcutPicker extends BasePicker {
 	private final List<Shortcut>	mShortcuts	= new ArrayList<Shortcut>();
 
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		super.unpackIntent();
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
@@ -55,7 +55,7 @@ public class ShortcutPicker extends BasePicker {
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		mList = (BounceListView) findViewById(R.id.list);
 	}

@@ -1,3 +1,4 @@
+
 package com.aircandi.ui;
 
 import java.util.ArrayList;
@@ -66,7 +67,6 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.ui.base.BaseFragment;
-import com.aircandi.ui.base.IDatabind;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.DateTime.IntervalContext;
@@ -76,7 +76,7 @@ import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
-public class RadarFragment extends BaseFragment implements IDatabind,
+public class RadarFragment extends BaseFragment implements 
 		PullToRefreshAttacher.OnRefreshListener {
 
 	private final Handler			mHandler				= new Handler();
@@ -241,7 +241,7 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 			mList.setAdapter(mRadarAdapter);
 			mRadarAdapter.notifyDataSetChanged();
 		}
-		else if (unsynchronized()) {
+		else  {
 			/*
 			 * Everytime we show details for a place, we fetch place details from the service
 			 * when in turn get pushed into the cache and activityDate gets tickled.
@@ -463,8 +463,6 @@ public class RadarFragment extends BaseFragment implements IDatabind,
 				Aircandi.stopwatch1.segmentTime("Entities changed: start radar display");
 				Aircandi.stopwatch3.stop("Aircandi initialization finished and got first entities");
 				
-				synchronize();
-
 				/* Point radar adapter at the updated entities */
 				final int previousCount = mRadarAdapter.getCount();
 				final List<Entity> entities = event.entities;

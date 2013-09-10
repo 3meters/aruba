@@ -1,12 +1,17 @@
 package com.aircandi.utilities;
 
+import org.apache.http.HttpStatus;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -19,8 +24,11 @@ import android.widget.Toast;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
+import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
@@ -36,16 +44,21 @@ public class UI {
 	}
 
 	public static void drawPhoto(final AirImageView photoView, final Photo photo) {
+		drawPhoto(photoView, photo, null);
+	}
+
+	public static void drawPhoto(final AirImageView photoView, final Photo photo, final RequestListener listener) {
 
 		if (photo != null && photo.hasBitmap()) {
-			photoView.hideLoading();
+			photoView.showLoading(false);
 			UI.showImageInImageView(photo.getBitmap(), photoView.getImageView(), true, Animate.fadeInMedium());
 			photoView.setVisibility(View.VISIBLE);
 		}
 		else {
+			photoView.getImageView().setImageDrawable(null);
 			photoView.getImageView().setTag(photo.getUri());
 			photoView.setPhoto(photo);
-			aircandi(photoView, photo);
+			aircandi(photoView, photo, listener);
 		}
 		/*
 		 * Special color treatment if enabled.
@@ -86,35 +99,69 @@ public class UI {
 		}
 	}
 
-	public static void aircandi(final AirImageView photoView, final Photo photo) {
-		final BitmapRequest bitmapRequest = new BitmapRequest(photo.getUri(), photoView.getImageView())
+	public static void aircandi(final AirImageView photoView, final Photo photo, final RequestListener listener) {
+		/*
+		 * We don't pass photoView so we handle getting the bitmap displayed.
+		 */
+		final BitmapRequest bitmapRequest = new BitmapRequest()
+				.setImageUri(photo.getUri())
 				.setImageSize(photoView.getSizeHint())
 				.setImageRequestor(photoView)
 				.setRequestListener(new RequestListener() {
 
 					@Override
 					public void onStart() {
-						photoView.showLoading();
-					}
-
-					@Override
-					public void onError(Object response) {
-						if (photoView.getBrokenPhoto() != null) {
-							photoView.getImageView().setTag(photo.getUri());
-							photoView.setPhoto(photo);
-							aircandi(photoView, photoView.getBrokenPhoto());
-						}
-						else {
-							photoView.hideLoading();
-							photoView.showBroken();
-						}
+						photoView.showLoading(true);
 					}
 
 					@Override
 					public void onComplete(Object response) {
-						photoView.hideLoading();
+						final ServiceResponse serviceResponse = (ServiceResponse) response;
+						if (serviceResponse.responseCode == ResponseCode.Success) {
+
+							final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+							/*
+							 * Make sure we still need the bitmap we got
+							 */
+							if (imageResponse.bitmap != null && imageResponse.photoUri.equals(photo.getUri())) {
+								final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), imageResponse.bitmap);
+								UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
+								if (listener != null) {
+									listener.onComplete(response, photo, imageResponse.bitmap);
+								}
+							}
+						}
+						photoView.showLoading(false);
 					}
 
+					@Override
+					public void onError(Object response) {
+						final ServiceResponse serviceResponse = (ServiceResponse) response;
+
+						if (serviceResponse.exception != null && serviceResponse.exception.getStatusCode() != null) {
+							Float statusCode = serviceResponse.exception.getStatusCode();
+							String exception = serviceResponse.exception.getInnerException().getClass().getSimpleName();
+							if (statusCode == HttpStatus.SC_NOT_FOUND) {
+								UI.showToastNotification("Photo not found", Toast.LENGTH_SHORT);
+							}
+							else if (statusCode == HttpStatus.SC_NOT_ACCEPTABLE) {
+								UI.showToastNotification("Unknown photo format", Toast.LENGTH_SHORT);
+							}
+							else {
+								UI.showToastNotification("Unhandled status code: " + String.valueOf(statusCode), Toast.LENGTH_LONG);
+								UI.showToastNotification("Unhandled exception: " + exception, Toast.LENGTH_LONG);
+							}
+						}
+						if (photoView.getBrokenPhoto() != null) {
+							photoView.getImageView().setTag(photo.getUri());
+							photoView.setPhoto(photo);
+							aircandi(photoView, photoView.getBrokenPhoto(), listener);
+						}
+						else {
+							photoView.showLoading(false);
+							photoView.showBroken(true);
+						}
+					}
 				});
 
 		BitmapManager.getInstance().masterFetch(bitmapRequest);
@@ -161,51 +208,107 @@ public class UI {
 		return bitmapScaled;
 	}
 
-	public static void showImageInImageView(Bitmap bitmap, final ImageView imageView, boolean animate, Animation animation) {
-		imageView.setImageBitmap(bitmap);
-		if (animate) {
-			animation.setFillEnabled(true);
-			animation.setFillAfter(true);
-			animation.setAnimationListener(new AnimationListener() {
+	public static void showImageInImageView(final Bitmap bitmap, final ImageView imageView, final boolean animate, final Animation animation) {
+		/*
+		 * Make sure this on the main thread
+		 */
+		Aircandi.mainThreadHandler.post(new Runnable() {
 
-				@Override
-				public void onAnimationStart(Animation animation) {}
+			@Override
+			public void run() {
+				imageView.setImageBitmap(bitmap);
+				if (animate) {
+					animation.setFillEnabled(true);
+					animation.setFillAfter(true);
+					animation.setAnimationListener(new AnimationListener() {
 
-				@Override
-				public void onAnimationEnd(Animation animation) {
-					imageView.clearAnimation();
+						@Override
+						public void onAnimationStart(Animation animation) {}
+
+						@Override
+						public void onAnimationEnd(Animation animation) {
+							imageView.clearAnimation();
+						}
+
+						@Override
+						public void onAnimationRepeat(Animation animation) {}
+					});
+					imageView.startAnimation(animation);
 				}
-
-				@Override
-				public void onAnimationRepeat(Animation animation) {}
-			});
-			imageView.startAnimation(animation);
-		}
-		imageView.postInvalidate();
-	}
-
-	public static void clearImageInImageView(ImageView imageView, boolean animate, Animation animation) {
-		if (animate) {
-			animation.setFillEnabled(true);
-			animation.setFillAfter(true);
-			imageView.startAnimation(animation);
-		}
-		else {
-			imageView.setAnimation(null);
-			imageView.setImageBitmap(null);
-		}
-	}
-
-	public static void showDrawableInImageView(Drawable drawable, ImageView imageView, boolean animate, Animation animation) {
-		if (imageView != null) {
-			imageView.setImageDrawable(drawable);
-			if (animate) {
-				animation.setFillEnabled(true);
-				animation.setFillAfter(true);
-				imageView.startAnimation(animation);
+				imageView.postInvalidate();
 			}
-			imageView.postInvalidate();
-		}
+		});
+
+	}
+
+	public static void clearImageInImageView(final ImageView imageView, final boolean animate, final Animation animation) {
+		Aircandi.mainThreadHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				if (animate) {
+					animation.setFillEnabled(true);
+					animation.setFillAfter(true);
+					imageView.startAnimation(animation);
+				}
+				else {
+					imageView.setAnimation(null);
+					imageView.setImageBitmap(null);
+				}
+			}
+		});
+	}
+
+	public static void showDrawableInImageView(final Drawable drawable, final ImageView imageView, final boolean animate, final Animation animation) {
+		/*
+		 * Make sure this on the main thread
+		 */
+		Aircandi.mainThreadHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				if (imageView != null) {
+					imageView.setImageDrawable(drawable);
+					if (animate) {
+						animation.setFillEnabled(true);
+						animation.setFillAfter(true);
+						imageView.startAnimation(animation);
+					}
+					imageView.postInvalidate();
+				}
+			}
+		});
+	}
+
+	public static void setImageBitmapWithFade(final ImageView imageView, final Bitmap bitmap) {
+		Resources resources = imageView.getResources();
+		BitmapDrawable bitmapDrawable = new BitmapDrawable(resources, bitmap);
+		setImageDrawableWithFade(imageView, bitmapDrawable);
+	}
+
+	public static void setImageDrawableWithFade(final ImageView imageView, final Drawable drawable) {
+		/*
+		 * Make sure this on the main thread
+		 */
+		Aircandi.mainThreadHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				Drawable currentDrawable = imageView.getDrawable();
+				if (currentDrawable != null) {
+					Drawable[] arrayDrawable = new Drawable[2];
+					arrayDrawable[0] = currentDrawable;
+					arrayDrawable[1] = drawable;
+					TransitionDrawable transitionDrawable = new TransitionDrawable(arrayDrawable);
+					transitionDrawable.setCrossFadeEnabled(true);
+					imageView.setImageDrawable(transitionDrawable);
+					transitionDrawable.startTransition(2000);
+				}
+				else {
+					imageView.setImageDrawable(drawable);
+				}
+			}
+		});
 	}
 
 	public static void setVisibility(View view, Integer visibility) {
@@ -214,11 +317,19 @@ public class UI {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public static void hideSoftInput(Context context) {
 		InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);
 		inputManager.hideSoftInputFromWindow(new View(context).getWindowToken(), 0);
 	}
+	
+	@SuppressWarnings("ucd")
+	public static void showSoftInput(Context context) {
+		InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);
+		inputManager.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+	}
 
+	@SuppressWarnings("ucd")
 	public static int showScreenSize() {
 		int screenSize = Aircandi.applicationContext.getResources().getConfiguration().screenLayout &
 				Configuration.SCREENLAYOUT_SIZE_MASK;

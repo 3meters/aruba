@@ -1,5 +1,7 @@
 package com.aircandi.ui.base;
 
+import android.os.Bundle;
+
 
 public interface IDatabind {
 
@@ -11,6 +13,14 @@ public interface IDatabind {
 
 	public void onHelp();
 
+	public void unpackIntent();
+	
+	public void initialize(Bundle savedInstanceState);
+	
+	public void afterInitialize();
+	
+	public void beforeDatabind();
+	
 	public void databind(BindingMode mode);
 
 	public void afterDatabind();
@@ -27,7 +37,6 @@ public interface IDatabind {
 
 	public enum BindingMode {
 		auto,
-		cache,
 		service,
 	}
 }

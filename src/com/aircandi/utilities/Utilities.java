@@ -141,6 +141,7 @@ public class Utilities {
 		return stringValue;
 	}
 
+	@SuppressWarnings("ucd")
 	public static String loadStringFromRaw(Integer resId) {
 		InputStream inputStream = null;
 		BufferedReader reader = null;

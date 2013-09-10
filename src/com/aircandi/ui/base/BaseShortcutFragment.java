@@ -79,12 +79,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 					refresh = true;
 				}
 
-				LinkOptions options =LinkOptions.getDefault(mLinkProfiles); 
+				LinkOptions options = LinkOptions.getDefault(mLinkProfiles);
 				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
-
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					synchronize();
-				}
 
 				return result;
 			}
@@ -438,17 +434,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (mEntity == null) {
-			databind(BindingMode.auto);
-		}
-		else {
-			if (unsynchronized()) {
-				databind(BindingMode.auto);
-			}
-			else {
-				draw();
-			}
-		}
+		databind(BindingMode.auto);
 	}
 
 	// --------------------------------------------------------------------------------------------

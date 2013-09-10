@@ -42,7 +42,7 @@ public class SignInEdit extends BaseEdit {
 	private String		mFormMessage;
 
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		super.unpackIntent();
 
 		final Bundle extras = getIntent().getExtras();
@@ -52,7 +52,7 @@ public class SignInEdit extends BaseEdit {
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		
 		mEmail = (EditText) findViewById(R.id.email);

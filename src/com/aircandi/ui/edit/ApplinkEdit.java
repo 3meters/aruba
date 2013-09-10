@@ -46,7 +46,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		
 		mTypePicker = (Spinner) findViewById(R.id.type_picker);
@@ -85,7 +85,6 @@ public class ApplinkEdit extends BaseEntityEdit {
 			});
 		}
 		databind(BindingMode.auto);
-		draw();
 	}
 
 	@Override

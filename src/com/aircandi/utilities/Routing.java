@@ -1039,7 +1039,6 @@ public final class Routing {
 		Shortcut,
 		EntityList,
 		Home,
-		Radar,
 		Settings,
 		Feedback,
 		Cancel,

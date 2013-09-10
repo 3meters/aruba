@@ -36,7 +36,7 @@ public class PhotoSourcePicker extends BasePicker implements OnItemClickListener
 	private ListAdapter	mListAdapter;
 	
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mName = (TextView) findViewById(R.id.name);

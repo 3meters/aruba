@@ -160,6 +160,11 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		shortcut.action = Constants.ACTION_VIEW;
 		return shortcut;
 	}
+	
+	public CacheStamp getCacheStamp() {
+		CacheStamp cacheStamp = new CacheStamp(this.activityDate, this.modifiedDate);
+		return cacheStamp;
+	}
 
 	public Integer getPosition() {
 		return position != null ? position.intValue() : 0;

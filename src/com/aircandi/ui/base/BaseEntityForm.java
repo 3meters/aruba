@@ -41,6 +41,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.Applink;
+import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
@@ -80,7 +81,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	protected final PackageReceiver	mPackageReceiver	= new PackageReceiver();
 
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		super.unpackIntent();
 
 		final Bundle extras = getIntent().getExtras();
@@ -92,30 +93,34 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		mScrollView = (ScrollView) findViewById(R.id.scroll_view);
 	}
 
 	@Override
-	public void databind(final BindingMode mode) {
+	public void afterInitialize() {
+		beforeDatabind();
+		databind(BindingMode.auto);
+		afterDatabind();
+	}
 
+	@Override
+	public void beforeDatabind() {
 		/*
 		 * If cache entity is fresher than the one currently bound to or there is
 		 * a cache entity available, go ahead and draw before we check against the service.
 		 */
-		showBusy(null, true);
-		final Entity entity = EntityManager.getEntity(mEntityId);
-		if (entity != null && mEntity != null) {
-			if (mEntity.activityDate.longValue() != entity.activityDate.longValue()) {
-				mEntity = entity;
-				draw();
-			}
-		}
-		else if (entity != null) {
-			mEntity = entity;
+		mCacheStamp = null;
+		mEntity = EntityManager.getEntity(mEntityId);
+		if (mEntity != null) {
+			mCacheStamp = mEntity.getCacheStamp();
 			draw();
 		}
+	}
+
+	@Override
+	public void databind(final BindingMode mode) {
 
 		final AtomicBoolean refreshNeeded = new AtomicBoolean(false);
 
@@ -126,12 +131,27 @@ public abstract class BaseEntityForm extends BaseBrowse {
 				Thread.currentThread().setName("GetEntity");
 				ModelResult result = new ModelResult();
 
-				refreshNeeded.set(mEntity == null || EntityManager.getInstance().isActivityStale(mEntity.id, mEntity.activityDate));
+				if (mEntity != null && mEntity.synthetic) {
+					return result;
+				}
+
+				refreshNeeded.set(mCacheStamp == null || mEntity == null);
+
+				if (!refreshNeeded.get()) {
+					CacheStamp cacheStamp = EntityManager.getInstance().loadCacheStamp(mEntity.id, mCacheStamp);
+					/*
+					 * We refresh for both modified and activity because both can change what we
+					 * show for an entity including links and link shortcuts.
+					 */
+					if (!cacheStamp.equals(mCacheStamp)) {
+						refreshNeeded.set(true);
+					}
+				}
 
 				if (refreshNeeded.get()) {
 					showBusy();
 					LinkOptions options = LinkOptions.getDefault(mLinkProfile);
-					result = EntityManager.getInstance().getEntity(mEntityId, refreshNeeded.get(), options);
+					result = EntityManager.getInstance().getEntity(mEntityId, true, options);
 				}
 
 				return result;
@@ -139,12 +159,14 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 			@Override
 			protected void onPostExecute(Object modelResult) {
+
 				if (refreshNeeded.get()) {
 					final ModelResult result = (ModelResult) modelResult;
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						if (result.data != null) {
 							mEntity = (Entity) result.data;
+							mCacheStamp = mEntity.getCacheStamp();
 							draw();
 						}
 						else {
@@ -156,18 +178,15 @@ public abstract class BaseEntityForm extends BaseBrowse {
 						Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
 					}
 					hideBusy();
+					afterDatabind();
 				}
 				else if (mode == BindingMode.service) {
 					showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
 				}
-				afterDatabind();
 			}
 
 		}.execute();
 	}
-
-	@Override
-	public void afterDatabind() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Events
@@ -383,7 +402,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 	// --------------------------------------------------------------------------------------------
 	// UI
 	// --------------------------------------------------------------------------------------------
-	
+
 	protected void drawStats() {}
 
 	protected void drawButtons() {
@@ -702,7 +721,7 @@ public abstract class BaseEntityForm extends BaseBrowse {
 
 			Animate.doOverridePendingTransition(this, TransitionType.PageBack);
 			invalidateOptionsMenu();
-			databind(BindingMode.auto);
+			databind(BindingMode.auto);	// check to see if the cache stamp is stale
 
 			/* Package receiver */
 			final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);

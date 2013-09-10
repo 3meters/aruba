@@ -346,7 +346,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 		}
 	}
 
-	public static class SortByModifiedDate implements Comparator<Shortcut> {
+	public static class SortByModifiedDate implements Comparator<Shortcut> { // NO_UCD (unused code)
 
 		@Override
 		public int compare(Shortcut object1, Shortcut object2) {

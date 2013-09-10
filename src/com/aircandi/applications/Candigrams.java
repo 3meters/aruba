@@ -22,8 +22,7 @@ import com.aircandi.utilities.Animate.TransitionType;
 
 public class Candigrams {
 	
-	public static int TYPE_DEFAULT_POSITION = 0;
-	public static int RANGE_DEFAULT_POSITION = 2;
+	public static int RANGE_DEFAULT_POSITION = 1;
 	public static int DURATION_DEFAULT_POSITION = 1;
 	public static int HOPS_DEFAULT_POSITION = 1;
 	public static int ICON_COLOR = R.color.brand_pink_lighter;

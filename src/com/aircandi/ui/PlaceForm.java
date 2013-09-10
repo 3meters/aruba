@@ -51,7 +51,7 @@ public class PlaceForm extends BaseEntityForm {
 	private Boolean	mUpsize;
 
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		super.unpackIntent();
 
 		final Bundle extras = getIntent().getExtras();
@@ -61,7 +61,7 @@ public class PlaceForm extends BaseEntityForm {
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		mLinkProfile = LinkProfile.LinksForPlace;
 	}

@@ -29,7 +29,7 @@ public class PlaceEdit extends BaseEntityEdit {
 	private TabManager	mTabManager;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		
 		if (mEntity != null) {

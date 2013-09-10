@@ -12,7 +12,7 @@ public abstract class BasePicker extends BaseBrowse {
 	protected Entity	mEntity;
 
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		super.unpackIntent();
 
 		final Bundle extras = getIntent().getExtras();

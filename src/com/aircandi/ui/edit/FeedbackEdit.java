@@ -29,7 +29,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 	private Document	mDocument;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		/*
 		 * Feedback are not really an entity type so we handle
 		 * all the expected initialization.

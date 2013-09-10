@@ -1,10 +1,7 @@
 package com.aircandi.ui.widgets;
 
-import org.apache.http.HttpStatus;
-
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -14,15 +11,8 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.aircandi.R;
-import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.bitmaps.BitmapManager;
-import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
-import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.UI;
@@ -35,7 +25,6 @@ public class AirImageView extends RelativeLayout {
 	private ProgressBar					mProgressBar;
 
 	private Photo						mPhoto;
-	private String						mImageUri;
 	private final Handler				mThreadHandler		= new Handler();
 
 	private Integer						mSizeHint;
@@ -150,143 +139,29 @@ public class AirImageView extends RelativeLayout {
 		}
 	}
 
-	private void doImageRequest(final BitmapRequest bitmapRequest, final boolean okToRecycle) {
-		/*
-		 * Handles the image request to set the internal ImageView. Creates a separate
-		 * scaled bitmap based on maxWidth and maxHeight or defaults if not set. The original
-		 * bitmap supplied to satisfy the image request may be recycled unless !okToRecycle. If an image
-		 * is not supplied by the image request, the standard broken image is used.
-		 */
-		mImageUri = bitmapRequest.getImageUri();
-
-		final RequestListener originalImageReadyListener = bitmapRequest.getRequestListener();
-
-		/* Start the busy indicator */
-
-		if (mShowBusy) {
-			showLoading();
-		}
-
-		/* Clear the current bitmap */
-		mImageMain.setImageBitmap(null);
-
-		bitmapRequest.setImageRequestor(mImageMain);
-		bitmapRequest.setImageSize(mSizeHint);
-
-		bitmapRequest.setRequestListener(new RequestListener() {
-
-			@Override
-			public void onError(Object response) {
-				final ServiceResponse serviceResponse = (ServiceResponse) response;
-
-				if (serviceResponse.exception.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-					UI.showToastNotification("Photo not found", Toast.LENGTH_SHORT);
-				}
-				showBroken();
-				mThreadHandler.post(new Runnable() {
-
-					@Override
-					public void run() {
-						mProgressBar.setVisibility(View.GONE);
-					}
-				});
-
-				if (originalImageReadyListener != null) {
-					originalImageReadyListener.onComplete(serviceResponse);
-				}
-			}
-
-			@Override
-			public void onProgressChanged(int progress) {
-				if (originalImageReadyListener != null) {
-					originalImageReadyListener.onProgressChanged(progress);
-				}
-			}
-
-			@Override
-			public void onComplete(Object response) {
-				final ServiceResponse serviceResponse = (ServiceResponse) response;
-
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-
-					/* Make sure this is the right target for the image */
-					if (imageResponse.photoUri.equals(mImageUri)) {
-						if (imageResponse.bitmap != null) {
-							/*
-							 * Give the original listener a chance to modify the
-							 * bitmap before we display it.
-							 */
-							setImage(imageResponse.bitmap, imageResponse.photoUri);
-						}
-					}
-				}
-				else {
-					/*
-					 * Show broken image
-					 */
-					showBroken();
-				}
-
-				mThreadHandler.post(new Runnable() {
-
-					@Override
-					public void run() {
-						mProgressBar.setVisibility(View.GONE);
-					}
-				});
-
-				if (originalImageReadyListener != null) {
-					originalImageReadyListener.onComplete(serviceResponse);
-				}
-			}
-		});
-
-		BitmapManager.getInstance().masterFetch(bitmapRequest);
-
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
-	public void clearImage(final boolean animate, final Integer animationId) {
+	public void showBroken(final Boolean visible) {
 		mThreadHandler.post(new Runnable() {
 
 			@Override
 			public void run() {
-				UI.clearImageInImageView(mImageMain, animate, Animate.fadeOutMedium());
+				if (visible) {
+					final Drawable drawable = AirImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
+					UI.showDrawableInImageView(drawable, mImageMain, true, Animate.fadeInMedium());
+				}
 			}
 		});
 	}
 
-	public void showBroken() {
+	public void showLoading(final Boolean visible) {
 		mThreadHandler.post(new Runnable() {
 
 			@Override
 			public void run() {
-				final Drawable drawable = AirImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
-				UI.showDrawableInImageView(drawable, mImageMain, true, Animate.fadeInMedium());
-			}
-		});
-	}
-
-	public void showLoading() {
-		mThreadHandler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				mProgressBar.setVisibility(View.VISIBLE);
-			}
-		});
-	}
-
-	public void hideLoading() {
-		mThreadHandler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				mProgressBar.setVisibility(View.GONE);
+				mProgressBar.setVisibility(visible ? View.VISIBLE : View.GONE);
 			}
 		});
 	}
@@ -294,31 +169,6 @@ public class AirImageView extends RelativeLayout {
 	// --------------------------------------------------------------------------------------------
 	// Properties
 	// --------------------------------------------------------------------------------------------
-
-	private void setImage(final Bitmap bitmap, String photoUri) {
-
-		mImageUri = photoUri;
-		mThreadHandler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				mImageMain.setImageBitmap(null);
-				UI.showImageInImageView(bitmap, mImageMain, true, Animate.fadeInMedium());
-			}
-		});
-	}
-
-	public void setBitmapRequest(final BitmapRequest bitmapRequest) {
-		setBitmapRequest(bitmapRequest, true);
-	}
-
-	public void setBitmapRequest(final BitmapRequest bitmapRequest, final boolean okToRecycle) {
-		doImageRequest(bitmapRequest, okToRecycle);
-	}
-
-	public void setImageDrawable(Drawable drawable) {
-		UI.showDrawableInImageView(drawable, mImageMain, true, Animate.fadeInMedium());
-	}
 
 	public ImageView getImageView() {
 		return mImageMain;

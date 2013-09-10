@@ -53,9 +53,10 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 	protected String			mEntityId;
 	protected List<Entity>		mEntities	= new ArrayList<Entity>();
 	protected String			mListSchema;
+	protected ArrayAdapter		mAdapter;
 
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		super.unpackIntent();
 
 		final Bundle extras = this.getIntent().getExtras();
@@ -73,12 +74,11 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mMessage = (TextView) findViewById(R.id.message);
 		mList = (BounceListView) findViewById(R.id.list);
-		databind(BindingMode.auto);
 	}
 
 	@Override
@@ -89,30 +89,32 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 		 * is saved to the service, the position field has been set on the set of
 		 * entities.
 		 */
-		Collections.sort(mEntities, new Entity.SortByPositionModifiedDate());
+		if (mAdapter == null) {
+			Collections.sort(mEntities, new Entity.SortByPositionModifiedDate());
 
-		if (mEntities.size() == 0) {
-			mMessage.setText(R.string.sources_builder_empty);
-			mMessage.setVisibility(View.VISIBLE);
-		}
-		else {
-			mMessage.setVisibility(View.GONE);
-			Integer position = 0;
-			for (Entity entity : mEntities) {
-				entity.checked = false;
-				entity.position = position;
-				position++;
+			if (mEntities.size() == 0) {
+				mMessage.setText(R.string.sources_builder_empty);
+				mMessage.setVisibility(View.VISIBLE);
 			}
-		}
+			else {
+				mMessage.setVisibility(View.GONE);
+				Integer position = 0;
+				for (Entity entity : mEntities) {
+					entity.checked = false;
+					entity.position = position;
+					position++;
+				}
+			}
 
-		if (mEntityId != null) {
-			mParent = EntityManager.getEntity(mEntityId);
-		}
-		final ArrayAdapter adapter = getAdapter();
-		mList.setAdapter(adapter);
+			if (mEntityId != null) {
+				mParent = EntityManager.getEntity(mEntityId);
+			}
+			mAdapter = getAdapter();
+			mList.setAdapter(mAdapter);  // triggers draw
 
-		hideBusy(); // visible by default
-		mBusyManager.stopBodyBusyIndicator();
+			hideBusy(); // visible by default
+			mBusyManager.stopBodyBusyIndicator();
+		}
 	}
 
 	protected ArrayAdapter getAdapter() {
@@ -356,6 +358,16 @@ public abstract class BaseEntityListEdit extends BaseEdit {
 
 	@Override
 	protected void delete() {}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		databind(BindingMode.auto);
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Menus

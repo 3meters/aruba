@@ -324,6 +324,7 @@ public class NotificationManager {
 	// Classes
 	// --------------------------------------------------------------------------------------------	
 
+	@SuppressWarnings("ucd")
 	public enum NotificationType {
 		network,
 		nearby,

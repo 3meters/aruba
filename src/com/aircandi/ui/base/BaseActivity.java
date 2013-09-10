@@ -119,7 +119,8 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 		}
 	}
 
-	protected void unpackIntent() {}
+	@Override
+	public void unpackIntent() {}
 
 	protected void configureActionBar() {
 		try {

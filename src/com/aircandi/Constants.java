@@ -26,8 +26,6 @@ public final class Constants {
 	public static final String	EXTRA_PLACE									= "com.aircandi.EXTRA_PLACE";																//$NON-NLS-1$
 
 	public static final String	EXTRA_URI									= "com.aircandi.EXTRA_URI";																//$NON-NLS-1$
-	public static final String	EXTRA_URI_TITLE								= "com.aircandi.EXTRA_URI_TITLE";															//$NON-NLS-1$
-	public static final String	EXTRA_URI_DESCRIPTION						= "com.aircandi.EXTRA_URI_DESCRIPTION";													//$NON-NLS-1$
 
 	public static final String	EXTRA_MESSAGE								= "com.aircandi.EXTRA_MESSAGE";															//$NON-NLS-1$
 	public static final String	EXTRA_CATEGORY								= "com.aircandi.EXTRA_CATEGORY";															//$NON-NLS-1$
@@ -75,7 +73,7 @@ public final class Constants {
 	/* Ui */
 	public static final int		MAX_Y_OVERSCROLL_DISTANCE					= 50;
 	public static final float	DIALOGS_DIM_AMOUNT							= 0.5f;
-	public static final int		INTERVAL_FAKE_BUSY							= 2000;
+	public static final int		INTERVAL_FAKE_BUSY							= 1000;
 
 	public static final int		TABS_PRIMARY_ID								= 1;
 	public static final int		TABS_USER_FORM_ID							= 2;

@@ -90,7 +90,7 @@ public class FontManager {
 		return fontRobotoLight;
 	}
 
-	public static Typeface getFontRobotoRegular() {
+	public static Typeface getFontRobotoRegular() { // NO_UCD (unused code)
 		return fontRobotoRegular;
 	}
 

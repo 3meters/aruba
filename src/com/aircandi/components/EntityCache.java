@@ -57,13 +57,13 @@ public class EntityCache implements Map<String, Entity> {
 		return serviceResponse;
 	}
 
-	private void decorate(List<Entity> entities, LinkOptions linkOptions) {
+	public void decorate(List<Entity> entities, LinkOptions linkOptions) {
 		for (Entity entity : entities) {
 			decorate(entity, linkOptions);
 		}
 	}
 
-	private void decorate(Entity entity, LinkOptions linkOptions) {
+	public void decorate(Entity entity, LinkOptions linkOptions) {
 		/*
 		 * Adds client applinks before entity is pushed to the cache.
 		 */
@@ -485,7 +485,7 @@ public class EntityCache implements Map<String, Entity> {
 
 	public synchronized Entity removeEntityTree(String entityId) {
 		/*
-		 * Clean out every entity related to entityId
+		 * Clean out entity and every entity related to entity
 		 */
 		Entity staleEntity = remove(entityId);
 		if (staleEntity != null) {

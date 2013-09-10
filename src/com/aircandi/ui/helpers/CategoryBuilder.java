@@ -51,7 +51,7 @@ public class CategoryBuilder extends BaseEdit {
 	private List<Category>	mCategories;
 	
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		super.unpackIntent();
 		
 		final Bundle extras = this.getIntent().getExtras();
@@ -64,7 +64,7 @@ public class CategoryBuilder extends BaseEdit {
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mPhotoView = (AirImageView) findViewById(R.id.photo);

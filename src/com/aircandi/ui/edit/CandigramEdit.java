@@ -57,7 +57,7 @@ public class CandigramEdit extends BaseEntityEdit {
 	private SpinnerData	mSpinnerHopsData;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
@@ -189,6 +189,9 @@ public class CandigramEdit extends BaseEntityEdit {
 		});
 
 		if (mEditing) {
+			/*
+			 * If editing, mEntity is already initialized from intent extras.
+			 */
 			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
 				mTabManager = new TabManager(Constants.TABS_ENTITY_FORM_ID, mActionBar, mViewFlipper);
 				mTabManager.initialize();
@@ -212,6 +215,7 @@ public class CandigramEdit extends BaseEntityEdit {
 			findViewById(R.id.settings_button_finish).setVisibility(View.VISIBLE);
 			findViewById(R.id.settings_image_previous).setVisibility(View.VISIBLE);
 		}
+
 	}
 
 	@Override
@@ -287,7 +291,7 @@ public class CandigramEdit extends BaseEntityEdit {
 				}
 			}
 			else {
-				mSpinnerHops.setSelection(Candigrams.DURATION_DEFAULT_POSITION);
+				mSpinnerHops.setSelection(Candigrams.HOPS_DEFAULT_POSITION);
 			}
 		}
 	}
@@ -433,7 +437,7 @@ public class CandigramEdit extends BaseEntityEdit {
 		if (mSpinnerHops != null && mSpinnerHops.getSelectedItemPosition() < mSpinnerHopsData.getEntryValues().size()) {
 			candigram.hopsMax = Integer.parseInt(mSpinnerHopsData.getEntryValues().get(mSpinnerHops.getSelectedItemPosition()));
 		}
-		
+
 		if (mSpinnerDuration != null && mSpinnerDuration.getSelectedItemPosition() < mSpinnerDurationData.getEntryValues().size()) {
 			candigram.duration = null;
 			if (candigram.type.equals("tour")) {
@@ -441,8 +445,8 @@ public class CandigramEdit extends BaseEntityEdit {
 			}
 		}
 
-		/* 
-		 * Set origin location so service can determine eligible area for hops 
+		/*
+		 * Set origin location so service can determine eligible area for hops
 		 */
 		if (mParentId != null) {
 			Entity place = EntityManager.getEntity(mParentId);

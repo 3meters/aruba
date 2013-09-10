@@ -37,6 +37,7 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
+import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Entity;
@@ -60,8 +61,6 @@ public abstract class BaseEntityList extends BaseBrowse {
 	protected GridView			mGridView;
 	protected OnClickListener	mClickListener;
 	protected Integer			mPhotoWidthPixels;
-	protected Integer			mPhotoMarginPixels;
-	protected Integer			mNumColumns;
 
 	private List<Entity>		mEntities	= new ArrayList<Entity>();
 	private Cursor				mCursorSettings;
@@ -69,7 +68,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 
 	private long				mOffset		= 0;
 	private static final long	LIST_MAX	= 300L;
-	private static final long	PAGE_SIZE	= 30L;
+	private static final long	PAGE_SIZE	= 10L;
 
 	private EntityAdapter		mAdapter;
 
@@ -89,7 +88,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 	}
 
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		super.unpackIntent();
 
 		final Bundle extras = getIntent().getExtras();
@@ -113,7 +112,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mListView = (ListView) findViewById(R.id.list);
@@ -161,6 +160,7 @@ public abstract class BaseEntityList extends BaseBrowse {
 			mOffset = 0;
 			mEntities.clear();
 			mForEntity = EntityManager.getEntity(mForEntityId);
+			mCacheStamp = mForEntity.getCacheStamp();
 
 			mAdapter = new EntityAdapter(mEntities);
 			if (mListView != null) {
@@ -181,21 +181,17 @@ public abstract class BaseEntityList extends BaseBrowse {
 					Thread.currentThread().setName("ActivityStaleCheck");
 					ModelResult result = new ModelResult();
 
-					refreshNeeded.set(EntityManager.getInstance().isActivityStale(mForEntity.id, mForEntity.activityDate));
-					if (refreshNeeded.get()) {
-						/*
-						 * Parent is stale so refetch it first. This might not be necessary because parent
-						 * can be flagged as stale because of changes to children but we refetch anyway rather
-						 * than make it more complicated trying to tell the difference.
-						 */
-						showBusy();
-						LinkOptions options = LinkOptions.getDefault(mForEntity.getDefaultLinkProfile());
-						result = EntityManager.getInstance().getEntity(mForEntity.id, refreshNeeded.get(), options);
-						if (result.serviceResponse.responseCode == ResponseCode.Success) {
-							if (result.data != null) {
-								mForEntity = (Entity) result.data;
-							}
-						}
+					showBusy();
+					CacheStamp cacheStamp = EntityManager.getInstance().loadCacheStamp(mForEntity.id, mCacheStamp);
+					/*
+					 * For now, we refresh for both modified and activity to keep it simple. We do
+					 * not update the ForEntity because that should be handled by code that is dealing with
+					 * it directly. The cache stamp should keep us from doing extra refreshes even though
+					 * the ForEntity hasn't changed.
+					 */
+					if (!cacheStamp.equals(mCacheStamp)) {
+						refreshNeeded.set(true);
+						mCacheStamp = cacheStamp;
 					}
 					return result;
 				}
@@ -203,22 +199,18 @@ public abstract class BaseEntityList extends BaseBrowse {
 				@Override
 				protected void onPostExecute(Object response) {
 					if (refreshNeeded.get()) {
-						final ModelResult result = (ModelResult) response;
-						if (result.serviceResponse.responseCode == ResponseCode.Success) {
-							/*
-							 * This triggers pulling fresh data and rebuilding the dataset.
-							 */
-							mOffset = 0;
-							mEntities.clear();
-							mAdapter.restartAppending();
-						}
-						else {
-							Routing.serviceError(BaseEntityList.this, result.serviceResponse);
-						}
-						hideBusy();
+						/*
+						 * This triggers pulling fresh data and rebuilding the dataset.
+						 */
+						mOffset = 0;
+						mEntities.clear();
+						mAdapter.restartAppending();
 					}
 					else if (mode == BindingMode.service) {
 						showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
+					}
+					else {
+						hideBusy();
 					}
 				}
 			}.execute();
@@ -493,6 +485,15 @@ public abstract class BaseEntityList extends BaseBrowse {
 							Aircandi.stopwatch3.stop(this.getClass().getSimpleName() + " databind - more data available");
 							return (getWrappedAdapter().getCount() + mMoreEntities.size()) < LIST_MAX;
 						}
+						if (mListNewEnabled) {
+							runOnUiThread(new Runnable() {
+
+								@Override
+								public void run() {
+									mButtonNewEntity.setVisibility(View.GONE);
+								}
+							});
+						}
 					}
 				}
 			}
@@ -518,11 +519,12 @@ public abstract class BaseEntityList extends BaseBrowse {
 			}
 			if (mListLinkType.equals(Constants.TYPE_LINK_CANDIGRAM)
 					|| mListLinkType.equals(Constants.TYPE_LINK_WATCH)
-					|| mListLinkType.equals(Constants.TYPE_LINK_CREATE)) {
+					|| mListLinkType.equals(Constants.TYPE_LINK_CREATE)
+					|| mListLinkType.equals(Constants.TYPE_LINK_COMMENT)) {
 				list.sort(new Entity.SortByLinkModifiedDate());
 			}
 			else {
-				list.sort(new Entity.SortByModifiedDate());
+				list.sort(new Entity.SortByLinkModifiedDate());
 			}
 			notifyDataSetChanged();
 		}
@@ -684,7 +686,9 @@ public abstract class BaseEntityList extends BaseBrowse {
 				if (entity.place != null) {
 					if (holder.placePhotoView != null) {
 						Photo photo = entity.place.getPhoto();
-						UI.drawPhoto(holder.placePhotoView, photo);
+						if (holder.placePhotoView.getPhoto() == null || !holder.placePhotoView.getPhoto().getUri().equals(photo.getUri())) {
+							UI.drawPhoto(holder.placePhotoView, photo);
+						}
 						if (photo.usingDefault == null || !photo.usingDefault) {
 							holder.placePhotoView.setClickable(true);
 						}
@@ -706,9 +710,10 @@ public abstract class BaseEntityList extends BaseBrowse {
 					if (entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 						photo = entity.creator.getPhoto();
 					}
-
-					holder.photoView.getImageView().setImageDrawable(null);
-					UI.drawPhoto(holder.photoView, photo);
+					if (holder.photoView.getPhoto() == null || !holder.photoView.getPhoto().getUri().equals(photo.getUri())) {
+						holder.photoView.getImageView().setImageDrawable(null);
+						UI.drawPhoto(holder.photoView, photo);
+					}
 				}
 
 				view.setClickable(true);

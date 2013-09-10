@@ -38,7 +38,7 @@ public class RegisterEdit extends BaseEntityEdit {
 	private EditText	mPasswordConfirm;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mEntitySchema = Constants.SCHEMA_ENTITY_USER;

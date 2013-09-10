@@ -50,7 +50,7 @@ public class PhotoForm extends BaseBrowse {
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		final Bundle extras = this.getIntent().getExtras();

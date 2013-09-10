@@ -18,7 +18,7 @@ import com.aircandi.utilities.Dialogs;
 public class CommentEdit extends BaseEntityEdit {
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);

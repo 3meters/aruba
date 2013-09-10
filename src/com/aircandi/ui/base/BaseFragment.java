@@ -3,8 +3,6 @@ package com.aircandi.ui.base;
 import android.app.Activity;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,12 +17,10 @@ import com.aircandi.components.BusProvider;
 import com.aircandi.components.BusyManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.MenuManager;
-import com.aircandi.components.ProximityManager;
 import com.aircandi.service.objects.User;
 
 public abstract class BaseFragment extends SherlockFragment implements IDatabind {
 
-	protected Bundle		mExtras;
 	protected Resources		mResources;
 	protected BusyManager	mBusyManager;
 	protected Number		mEntityModelRefreshDate;
@@ -45,7 +41,6 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 		 * so mBusyManager must have already been created.
 		 */
 		setHasOptionsMenu(true);
-		mExtras = getSherlockActivity().getIntent().getExtras();
 		mResources = getResources();
 		Aircandi.currentPlace = null;
 	}
@@ -61,9 +56,16 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	public void onRefresh() {
-		databind(BindingMode.service); // Called from Routing
-	}
+	public void unpackIntent() {}
+
+	@Override
+	public void initialize(Bundle savedInstanceState) {}
+
+	@Override
+	public void afterInitialize() {}
+
+	@Override
+	public void beforeDatabind() {}
 
 	@Override
 	public void databind(BindingMode mode) {}
@@ -73,6 +75,11 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 
 	@Override
 	public void draw() {}
+
+	@Override
+	public void onRefresh() {
+		databind(BindingMode.service); // Called from Routing
+	}
 
 	@Override
 	public void onAdd() {}
@@ -105,7 +112,7 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 			mBusyManager.hideBusy();
 		}
 	}
-	
+
 	@Override
 	public void showBusyTimed(final Integer duration, final Boolean actionBarOnly) {}
 
@@ -137,29 +144,6 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 				progress.setVisibility(View.GONE);
 			}
 		}
-	}
-
-	protected void synchronize() {
-		mEntityModelRefreshDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-		mEntityModelUser = Aircandi.getInstance().getUser();
-	}
-
-	protected Boolean unsynchronized() {
-		Number lastBeaconLoadDate = ProximityManager.getInstance().getLastBeaconLoadDate();
-
-		if (Aircandi.getInstance().getUser() != null
-				&& mEntityModelUser != null
-				&& !mEntityModelUser.id.equals(Aircandi.getInstance().getUser().id)) {
-			return true;
-		}
-
-		if (lastBeaconLoadDate != null
-				&& mEntityModelRefreshDate != null
-				&& lastBeaconLoadDate.longValue() != mEntityModelRefreshDate.longValue()) {
-			return true;
-		}
-
-		return false;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -246,26 +230,5 @@ public abstract class BaseFragment extends SherlockFragment implements IDatabind
 	public void onDestroy() {
 		Logger.d(this, "Fragment destroy");
 		super.onDestroy();
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Classes
-	// --------------------------------------------------------------------------------------------
-
-	public enum ServiceOperation {
-		Signin,
-		PasswordChange,
-	}
-
-	public static class SimpleTextWatcher implements TextWatcher {
-
-		@Override
-		public void afterTextChanged(Editable s) {}
-
-		@Override
-		public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-		@Override
-		public void onTextChanged(CharSequence s, int start, int before, int count) {}
 	}
 }

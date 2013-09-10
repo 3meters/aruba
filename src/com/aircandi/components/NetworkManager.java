@@ -18,7 +18,6 @@ import android.widget.Toast;
 
 import com.aircandi.BuildConfig;
 import com.aircandi.ProxiConstants;
-import com.aircandi.components.NotificationManager.NotificationType;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.ServiceRequest;
@@ -105,10 +104,6 @@ public class NetworkManager {
 		 * Don't assume this is being called from the UI thread.
 		 */
 		ServiceResponse serviceResponse = new ServiceResponse();
-		if (NotificationManager.mNotificationManager != null) {
-			NotificationManager.getInstance().cancelNotification(NotificationType.network);
-		}
-
 		try {
 			/* Could be string, input stream, or array of bytes */
 			final Object response = HttpService.getInstance().request(serviceRequest, stopwatch);

@@ -22,7 +22,6 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,9 +43,6 @@ import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
-import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
-import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ExcludeNulls;
 import com.aircandi.service.HttpService.ObjectType;
@@ -100,14 +96,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	/* Inputs */
 	protected Entity			mEntity;
 	public String				mParentId;
-	@SuppressWarnings("ucd")
-	public String				mEntityId;
 	public String				mEntitySchema;
-	@SuppressWarnings("ucd")
-	public String				mMessage;
 
 	@Override
-	protected void unpackIntent() {
+	public void unpackIntent() {
 		super.unpackIntent();
 		/*
 		 * Intent inputs:
@@ -124,14 +116,12 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 			mParentId = extras.getString(Constants.EXTRA_ENTITY_PARENT_ID);
 			mEntitySchema = extras.getString(Constants.EXTRA_ENTITY_SCHEMA);
-			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
-			mMessage = extras.getString(Constants.EXTRA_MESSAGE);
 		}
 		mEditing = (mEntity == null ? false : true);
 	}
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		mName = (AirEditText) findViewById(R.id.name);
@@ -184,13 +174,21 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	}
 
 	@Override
+	public void afterInitialize() {
+		beforeDatabind();
+		databind(BindingMode.auto);
+	}
+
+	@Override
 	public void databind(BindingMode mode) {
-		if (!mEditing && mEntitySchema != null) {
+		if (!mEditing && mEntity == null && mEntitySchema != null) {
 			mEntity = Entity.makeEntity(mEntitySchema);
 			setActivityTitle("new " + mEntity.schema);
 			mEntity.creator = Aircandi.getInstance().getUser();
 			mEntity.creatorId = Aircandi.getInstance().getUser().id;
 		}
+		afterDatabind();
+		draw();
 	}
 
 	@Override
@@ -269,7 +267,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 	protected void drawPhoto() {
 		if (mPhotoView != null) {
-			UI.drawPhoto(mPhotoView, mEntity.getPhoto());
+			if (mPhotoView.getPhoto() == null || !mPhotoView.getPhoto().getUri().equals(mEntity.getPhoto().getUri())) {
+				UI.drawPhoto(mPhotoView, mEntity.getPhoto());
+			}
 		}
 	}
 
@@ -378,7 +378,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		mImageRequestListener = new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, Photo photo, String photoUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
+			public void onComplete(Object response, Photo photo, Bitmap bitmap) {
 
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -387,18 +387,13 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					if (photo != null) {
 						mEntity.photo = photo;
 					}
-					else if (photoUri != null) {
-						mEntity.photo = new Photo(photoUri, null, null, null, PhotoSource.aircandi);
-					}
 
-					if (imageBitmap != null) {
+					if (bitmap != null) {
 						final String imageKey = mEntity.schema + "_" + mEntity.id + ".jpg";
-						mEntity.photo = new Photo(photoUri, null, null, null, PhotoSource.cache);
-						mEntity.photo.setBitmap(imageKey, imageBitmap); // Could get set to null if we are using the default 
-						mEntity.photo.setBitmapLocalOnly(bitmapLocalOnly);
+						mEntity.photo = new Photo(photo.getUri(), null, null, null, PhotoSource.cache);
+						mEntity.photo.setBitmap(imageKey, bitmap); // Could get set to null if we are using the default 
+						mEntity.photo.setBitmapLocalOnly(photo.bitmapLocalOnly);
 					}
-
-					drawPhoto();
 				}
 			}
 		};
@@ -467,18 +462,15 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				Tracker.sendEvent("ui_action", "select_picture_device", null, 0, Aircandi.getInstance().getUser());
 				final Uri photoUri = intent.getData();
-				Bitmap bitmap = null;
 
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
-				bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(photoUri);
+				Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(photoUri);
 				if (bitmap != null && mImageRequestListener != null) {
-					mImageRequestListener.onComplete(new ServiceResponse()
-							, null
-							, null
-							, bitmap
-							, null
-							, null
-							, false);
+
+					final String imageKey = mEntity.schema + "_" + mEntity.id + ".jpg";
+					Photo photo = new Photo(photoUri.toString(), null, null, null, PhotoSource.cache);
+					photo.setBitmap(imageKey, bitmap); // Could get set to null if we are using the default 
+					mImageRequestListener.onComplete(new ServiceResponse(), photo, null);
 				}
 			}
 			else if (requestCode == Constants.ACTIVITY_PICTURE_MAKE) {
@@ -486,14 +478,13 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0, Aircandi.getInstance().getUser());
 				final Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
-				if (mImageRequestListener != null) {
-					mImageRequestListener.onComplete(new ServiceResponse()
-							, null
-							, null
-							, bitmap
-							, null
-							, null
-							, false);
+
+				if (bitmap != null && mImageRequestListener != null) {
+
+					final String imageKey = mEntity.schema + "_" + mEntity.id + ".jpg";
+					Photo photo = new Photo(null, null, null, null, PhotoSource.cache);
+					photo.setBitmap(imageKey, bitmap); // Could get set to null if we are using the default 
+					mImageRequestListener.onComplete(new ServiceResponse(), photo, null);
 				}
 			}
 			else if (requestCode == Constants.ACTIVITY_PICTURE_SEARCH) {
@@ -501,61 +492,12 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				Tracker.sendEvent("ui_action", "select_picture_search", null, 0, Aircandi.getInstance().getUser());
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String imageTitle = extras.getString(Constants.EXTRA_URI_TITLE);
-					final String imageDescription = extras.getString(Constants.EXTRA_URI_DESCRIPTION);
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
 					final Photo photo = (Photo) HttpService.jsonToObject(jsonPhoto, ObjectType.Photo);
+					photo.setBitmapLocalOnly(true);
 
-					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
-							.setFromUri(photo.getUri())
-							.setRequestListener(new RequestListener() {
-
-								@Override
-								public void onComplete(Object response) {
-
-									final ServiceResponse serviceResponse = (ServiceResponse) response;
-									if (serviceResponse.responseCode == ResponseCode.Success) {
-										runOnUiThread(new Runnable() {
-
-											@Override
-											public void run() {
-												if (mImageRequestListener != null) {
-													final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-													/*
-													 * We cache search pictures to aircandi storage because it give us
-													 * a chance to pre-process them to be a more standardized blob size
-													 * and dimensions. We also can serve them up with more predictable
-													 * performance.
-													 */
-													mImageRequestListener.onComplete(serviceResponse
-															, photo
-															, null
-															, imageResponse.bitmap
-															, imageTitle
-															, imageDescription
-															, false);
-												}
-											}
-										});
-									}
-								}
-							});
-
-					final BitmapRequest imageRequest = builder.create();
-					mImageRequestWebImageView.setBitmapRequest(imageRequest, false);
-
-					if (imageTitle != null && !imageTitle.equals("")) {
-						final EditText title = (EditText) findViewById(R.id.name);
-						if (title != null && title.getText().toString().equals("")) {
-							title.setText(imageTitle);
-						}
-					}
-
-					if (imageDescription != null && !imageDescription.equals("")) {
-						final EditText description = (EditText) findViewById(R.id.description);
-						if (description != null && description.getText().toString().equals("")) {
-							description.setText(imageDescription);
-						}
+					if (mImageRequestWebImageView.getPhoto() == null || !mImageRequestWebImageView.getPhoto().getUri().equals(photo.getUri())) {
+						UI.drawPhoto(mImageRequestWebImageView, photo, mImageRequestListener);
 					}
 				}
 			}
@@ -567,44 +509,11 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					final Bundle extras = intent.getExtras();
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
 					final Photo photo = (Photo) HttpService.jsonToObject(jsonPhoto, ObjectType.Photo);
+					photo.setBitmapLocalOnly(true);
 
-					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
-							.setFromUri(photo.getUri())
-							.setRequestListener(new RequestListener() {
-
-								@Override
-								public void onComplete(Object response) {
-
-									final ServiceResponse serviceResponse = (ServiceResponse) response;
-									if (serviceResponse.responseCode == ResponseCode.Success) {
-										runOnUiThread(new Runnable() {
-
-											@Override
-											public void run() {
-												if (mImageRequestListener != null) {
-													final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-													/*
-													 * We don't cache place pictures from foursquare because they
-													 * wouldn't like that. Plus they serve them up in a more consistent
-													 * way than
-													 * something like search pictures (which we do cache).
-													 */
-													mImageRequestListener.onComplete(serviceResponse
-															, photo
-															, imageResponse.photoUri
-															, imageResponse.bitmap
-															, null
-															, null
-															, true);
-												}
-											}
-										});
-									}
-								}
-							});
-
-					final BitmapRequest imageRequest = builder.create();
-					mImageRequestWebImageView.setBitmapRequest(imageRequest, false);
+					if (mImageRequestWebImageView.getPhoto() == null || !mImageRequestWebImageView.getPhoto().getUri().equals(photo.getUri())) {
+						UI.drawPhoto(mImageRequestWebImageView, photo, mImageRequestListener);
+					}
 				}
 			}
 			else {
@@ -1002,13 +911,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		databind(BindingMode.auto);
-		draw();
-	}
 
 	// --------------------------------------------------------------------------------------------
 	// Menus

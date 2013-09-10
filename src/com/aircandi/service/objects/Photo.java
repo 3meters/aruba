@@ -47,11 +47,12 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 
 	/* client only */
 	public String				name;
-	public Boolean				usingDefault = false;
+	public String				description;
+	public Boolean				usingDefault		= false;
 
 	/* Used to stash temp bitmaps. Always access using set/getBitmap() */
-	protected String			bitmapKey;
-	protected Boolean			bitmapLocalOnly		= false;
+	public String				bitmapKey;
+	public Boolean				bitmapLocalOnly		= false;
 
 	public Photo() {}
 
@@ -88,6 +89,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		photo.source = (String) map.get("source");
 		photo.createdDate = (Number) map.get("createdDate");
 		photo.name = (String) map.get("name");
+		photo.description = (String) map.get("description");
 		photo.color = (Integer) map.get("color");
 		photo.colorize = (Boolean) map.get("colorize");
 		photo.colorizeKey = (String) map.get("colorizeKey");
@@ -244,6 +246,14 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 
 	public void setBitmapLocalOnly(Boolean bitmapLocalOnly) {
 		this.bitmapLocalOnly = bitmapLocalOnly;
+	}
+
+	public String getBitmapKey() {
+		return bitmapKey;
+	}
+
+	public void setBitmapKey(String bitmapKey) {
+		this.bitmapKey = bitmapKey;
 	}
 
 	public static class PhotoSource {

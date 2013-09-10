@@ -22,7 +22,7 @@ public class AddressBuilder extends BaseEntityEdit {
 	private Entity	mEntity;
 	
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
 		((EditText) findViewById(R.id.phone)).setImeOptions(EditorInfo.IME_ACTION_DONE);

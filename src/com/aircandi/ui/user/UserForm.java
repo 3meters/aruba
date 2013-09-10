@@ -30,7 +30,7 @@ import com.aircandi.utilities.UI;
 public class UserForm extends BaseEntityForm {
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		mLinkProfile = LinkProfile.LinksForUser;
 	}

@@ -37,7 +37,7 @@ public class InviteEdit extends BaseEntityEdit {
 	private static final int	CONTACT_PICKER_RESULT	= 1001;
 
 	@Override
-	protected void initialize(Bundle savedInstanceState) {
+	public void initialize(Bundle savedInstanceState) {
 		/*
 		 * Feedback are not really an entity type so we have to handle
 		 * all the expected initialization.
