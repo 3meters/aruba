@@ -66,6 +66,5 @@
     <string name="com.aircandi.ui.helpers.PhotoPicker">PhotoPicker</string>
     <string name="com.aircandi.ui.helpers.PhotoSourcePicker">PhotoSourcePicker</string>
     <string name="com.aircandi.ui.helpers.ShortcutPicker">ShortcutPicker</string>
-    <string name="com.aircandi.ui.helpers.UriPicker">UriPicker</string>
 
 </resources>

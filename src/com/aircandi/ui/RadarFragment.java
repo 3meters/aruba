@@ -1,4 +1,3 @@
-
 package com.aircandi.ui;
 
 import java.util.ArrayList;
@@ -24,7 +23,11 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -63,11 +66,13 @@ import com.aircandi.events.MonitoringWifiScanReceivedEvent;
 import com.aircandi.events.PlacesNearLocationFinishedEvent;
 import com.aircandi.events.QueryWifiScanReceivedEvent;
 import com.aircandi.service.objects.AirLocation;
+import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.ui.widgets.CandiView;
+import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Dialogs;
@@ -76,15 +81,20 @@ import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
-public class RadarFragment extends BaseFragment implements 
+public class RadarFragment extends BaseFragment implements
 		PullToRefreshAttacher.OnRefreshListener {
 
 	private final Handler			mHandler				= new Handler();
 
 	private Number					mEntityModelBeaconDate;
+	private String					mEntityModelProvider;
 	private Integer					mEntityModelWifiState	= WifiManager.WIFI_STATE_UNKNOWN;
 
 	private ListView				mList;
+	private View					mAttributionGoogle;
+	private View					mAttributionFoursquare;
+	private View					mAttributionHolder;
+	private Boolean					mAttributionHidden		= false;
 	private MenuItem				mMenuItemBeacons;
 	private TextView				mBeaconIndicator;
 	private String					mDebugWifi;
@@ -109,6 +119,18 @@ public class RadarFragment extends BaseFragment implements
 
 		View view = super.onCreateView(inflater, container, savedInstanceState);
 		mList = (ListView) view.findViewById(R.id.radar_list);
+		mAttributionGoogle = view.findViewById(R.id.image_google);
+		mAttributionFoursquare = view.findViewById(R.id.image_foursquare);
+		mAttributionHolder = view.findViewById(R.id.attribution_holder);
+		View dismiss = mAttributionHolder.findViewById(R.id.image_dismiss);
+		dismiss.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				showAttribution(false);
+				mAttributionHidden = true;
+			}
+		});
 
 		// Now get the PullToRefresh attacher from the Activity. An exercise to the reader
 		// is to create an implicit interface instead of casting to the concrete Activity
@@ -138,6 +160,21 @@ public class RadarFragment extends BaseFragment implements
 			}
 		});
 
+		mList.setOnScrollListener(new OnScrollListener() {
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {}
+
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
+					if (!mAttributionHidden) {
+						showAttribution(false);
+						mAttributionHidden = true;
+					}
+				}
+			}
+		});
+
 		return view;
 	}
 
@@ -158,10 +195,20 @@ public class RadarFragment extends BaseFragment implements
 		 * - Preference change
 		 * - EntityModel has changed since last search
 		 */
+		String provider = Aircandi.settings.getString(
+				Constants.PREF_PLACE_PROVIDER,
+				Constants.PREF_PLACE_PROVIDER_DEFAULT);
+
+		Boolean providerChange = false;
+		if (mEntityModelProvider != null && !provider.equals(mEntityModelProvider)) {
+			providerChange = true;
+		}
+		mEntityModelProvider = provider;
+		showAttribution(provider, providerChange);
 
 		/* Adapter snapshots the items in mEntities */
 		if (mRadarAdapter == null) {
-			Logger.d(getSherlockActivity(), "Start first place search");
+			Logger.d(getSherlockActivity(), "Databind: adapter null - start first place search");
 
 			mRadarAdapter = new RadarListAdapter(getSherlockActivity(), mEntities);
 			mList.setAdapter(mRadarAdapter);
@@ -179,21 +226,33 @@ public class RadarFragment extends BaseFragment implements
 			 * Gets set everytime we accept a location change in onLocationChange. Means
 			 * we didn't get an acceptable fix yet from either the network or gps providers.
 			 */
-			Logger.d(getSherlockActivity(), "Start place search because didn't complete location fix");
+			Logger.d(getSherlockActivity(), "Databind: no location fix - retry");
 			LocationManager.getInstance().lockLocationBurst();
 		}
 		else if (ProximityManager.getInstance().beaconRefreshNeeded(LocationManager.getInstance().getLocationLocked())) {
 			/*
 			 * We check to see if it's been awhile since the last search.
 			 */
-			Logger.d(getSherlockActivity(), "Start place search because of staleness");
+			Logger.d(getSherlockActivity(), "Databind: Start full place search because of staleness");
 			searchForPlaces();
+		}
+		else if (providerChange) {
+			Logger.d(getSherlockActivity(), "Databind: Start location search - provider change");
+			EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_PLACE, null, true);
+			showBusy();
+			mRadarAdapter.getItems().clear();
+			mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
+			mRadarAdapter.notifyDataSetChanged();
+			hideBusy();
+			LocationManager.getInstance().setLocationLocked(null);
+			LocationManager.getInstance().lockLocationBurst();
 		}
 		else if (NetworkManager.getInstance().getWifiState() == WifiManager.WIFI_STATE_DISABLED
 				&& mEntityModelWifiState == WifiManager.WIFI_STATE_ENABLED) {
 			/*
 			 * Wifi has been disabled since our last search
 			 */
+			Logger.d(getSherlockActivity(), "Databind: wifi switched off");
 			Integer wifiApState = NetworkManager.getInstance().getWifiApState();
 			if (wifiApState != null && (wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED
 					|| wifiApState == NetworkManager.WIFI_AP_STATE_ENABLED + 10)) {
@@ -212,6 +271,7 @@ public class RadarFragment extends BaseFragment implements
 			/*
 			 * Wifi has been enabled since our last search
 			 */
+			Logger.d(getSherlockActivity(), "Databind: start full place search because wifi switched on");
 			UI.showToastNotification("Wifi enabled", Toast.LENGTH_SHORT);
 			searchForPlaces();
 		}
@@ -221,7 +281,7 @@ public class RadarFragment extends BaseFragment implements
 			 * The beacons we are locked to have changed while we were away so we need to
 			 * search for new places linked to beacons.
 			 */
-			Logger.d(getSherlockActivity(), "Refresh places for beacons because beacon date has changed");
+			Logger.d(getSherlockActivity(), "Databind: reload places because beacon date has changed");
 			mEntityModelBeaconDate = ProximityManager.getInstance().getLastBeaconLockedDate();
 			new AsyncTask() {
 
@@ -238,20 +298,75 @@ public class RadarFragment extends BaseFragment implements
 			/*
 			 * View is being recreated but we already have data.
 			 */
+			Logger.d(getSherlockActivity(), "Databind: list adapter null - reset and repaint");
 			mList.setAdapter(mRadarAdapter);
 			mRadarAdapter.notifyDataSetChanged();
 		}
-		else  {
-			/*
-			 * Everytime we show details for a place, we fetch place details from the service
-			 * when in turn get pushed into the cache and activityDate gets tickled.
-			 */
-			Logger.d(getSherlockActivity(), "Update radar ui because of detected entity model change");
-			mBusyManager.showBusy();
-			mRadarAdapter.getItems().clear();
-			mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
-			mRadarAdapter.notifyDataSetChanged();
-			hideBusy();
+		else {
+
+			CacheStamp stamp = EntityManager.getInstance().getCacheStamp();
+			if (mCacheStamp != null && !mCacheStamp.equals(stamp)) {
+				/*
+				 * EntityManager stamp gets updated when places are inserted/updated/deleted
+				 */
+				Logger.d(getSherlockActivity(), "Databind: reload places because cache stamp is dirty");
+				new AsyncTask() {
+
+					@Override
+					protected Object doInBackground(Object... params) {
+						Thread.currentThread().setName("GetEntitiesForBeacons");
+						final ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesByProximity();
+						return serviceResponse;
+					}
+
+				}.execute();
+
+			}
+			else {
+				Logger.d(getSherlockActivity(), "Databind: repaint to catch changes to places while paused");
+				mBusyManager.showBusy();
+				mRadarAdapter.getItems().clear();
+				mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
+				mRadarAdapter.notifyDataSetChanged();
+				hideBusy();
+			}
+		}
+	}
+
+	private String showAttribution(String provider, Boolean change) {
+		UI.setVisibility(mAttributionFoursquare, View.INVISIBLE);
+		UI.setVisibility(mAttributionGoogle, View.INVISIBLE);
+
+		if (provider.equals(Constants.TYPE_PROVIDER_FOURSQUARE)) {
+			UI.setVisibility(mAttributionFoursquare, View.VISIBLE);
+			if (mAttributionHidden) {
+				showAttribution(true);
+			}
+			mAttributionHidden = false;
+		}
+		else if (provider.equals(Constants.TYPE_PROVIDER_GOOGLE)) {
+			UI.setVisibility(mAttributionGoogle, View.VISIBLE);
+			if (mAttributionHidden) {
+				showAttribution(true);
+			}
+			mAttributionHidden = false;
+		}
+		else {
+			mAttributionHolder.setVisibility(View.INVISIBLE);
+			mAttributionHidden = true;
+		}
+		return provider;
+	}
+
+	private void showAttribution(Boolean visible) {
+		Animation animation = null;
+		if (visible) {
+			animation = Animate.loadAnimation(R.anim.slide_in_bottom_long);
+			mAttributionHolder.startAnimation(animation);
+		}
+		else {
+			animation = Animate.loadAnimation(R.anim.slide_out_bottom_long);
+			mAttributionHolder.startAnimation(animation);
 		}
 	}
 
@@ -327,6 +442,7 @@ public class RadarFragment extends BaseFragment implements
 				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "entities_for_beacons", null, Aircandi.getInstance().getUser());
 				Logger.d(getSherlockActivity(), "Entities for beacons finished event: ** done **");
 				mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
+				mCacheStamp = EntityManager.getInstance().getCacheStamp();
 				mPullToRefreshAttacher.setRefreshComplete();
 			}
 		});
@@ -462,7 +578,7 @@ public class RadarFragment extends BaseFragment implements
 				Logger.d(getSherlockActivity(), "Entities changed event: updating radar");
 				Aircandi.stopwatch1.segmentTime("Entities changed: start radar display");
 				Aircandi.stopwatch3.stop("Aircandi initialization finished and got first entities");
-				
+
 				/* Point radar adapter at the updated entities */
 				final int previousCount = mRadarAdapter.getCount();
 				final List<Entity> entities = event.entities;
@@ -601,7 +717,6 @@ public class RadarFragment extends BaseFragment implements
 					 * We have special handling for connected state because search triggers a wifi scan which
 					 * which in turn seems to have its own need to access the network. Their logic works for quite
 					 * awhile before giving up.
-					 * 
 					 */
 					ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
 					if (connectedState == ConnectedState.Normal) {
@@ -622,7 +737,7 @@ public class RadarFragment extends BaseFragment implements
 				@Override
 				protected void onPostExecute(Object result) {
 					ConnectedState connectedState = (ConnectedState) result;
-					
+
 					if (connectedState != ConnectedState.Normal) {
 						if (Aircandi.stopwatch3.isStarted()) {
 							Aircandi.stopwatch3.stop("Aircandi initialization finished: network problem");
@@ -706,13 +821,16 @@ public class RadarFragment extends BaseFragment implements
 							}
 						}
 						beaconMessage.append(System.getProperty("line.separator"));
-						beaconMessage.append("Wifi fix: " + DateTime.interval(ProximityManager.getInstance().mLastWifiUpdate.getTime(), DateTime.nowDate().getTime(), IntervalContext.past));
+						beaconMessage.append("Wifi fix: "
+								+ DateTime.interval(ProximityManager.getInstance().mLastWifiUpdate.getTime(), DateTime.nowDate().getTime(),
+										IntervalContext.past));
 					}
 
 					final Location location = LocationManager.getInstance().getLocationLocked();
 					if (location != null) {
 						final Date fixDate = new Date(location.getTime());
-						beaconMessage.append(System.getProperty("line.separator") + "Location fix: " + DateTime.interval(fixDate.getTime(), DateTime.nowDate().getTime(), IntervalContext.past));
+						beaconMessage.append(System.getProperty("line.separator") + "Location fix: "
+								+ DateTime.interval(fixDate.getTime(), DateTime.nowDate().getTime(), IntervalContext.past));
 						beaconMessage.append(System.getProperty("line.separator") + "Location accuracy: " + String.valueOf(location.getAccuracy()));
 						beaconMessage.append(System.getProperty("line.separator") + "Location provider: " + location.getProvider());
 					}

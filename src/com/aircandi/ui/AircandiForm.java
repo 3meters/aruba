@@ -64,7 +64,6 @@ import com.aircandi.utilities.Routing.Route;
 public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 
 	private Number					mPauseDate;
-	private Boolean					mFreshWindow	= false;
 	private Fragment				mCurrentFragment;
 	private Fragment				mRadarFragment;
 
@@ -93,10 +92,10 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 	protected void configureActionBar() {
 		super.configureActionBar();
 		if (mActionBar != null) {
-			
+
 			mActionBar.setDisplayShowTitleEnabled(true);
 			mActionBar.setDisplayShowHomeEnabled(true);
-			
+
 			mActionBar.setHomeButtonEnabled(false);
 			mActionBar.setDisplayHomeAsUpEnabled(false);
 
@@ -113,7 +112,7 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
-
+	
 	@Override
 	public void onAdd() {
 		BaseFragment fragment = getCurrentFragment();
@@ -233,7 +232,12 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 		 * OnResume gets called after OnCreate (always) and whenever the activity is being brought back to the
 		 * foreground. Not guaranteed but is usually called just before the activity receives focus.
 		 */
-		mFreshWindow = true;
+		if (mPauseDate != null) {
+			final Long interval = DateTime.nowDate().getTime() - mPauseDate.longValue();
+			if (interval > Constants.INTERVAL_TETHER_ALERT) {
+				tetherAlert();
+			}
+		}
 		super.onResume();
 	}
 
@@ -246,34 +250,6 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 		 */
 		mPauseDate = DateTime.nowDate().getTime();
 		super.onPause();
-	}
-
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-		super.onWindowFocusChanged(hasFocus);
-		Logger.d(this, "onWindowFocusChanged called");
-
-		if (isFinishing()) return;
-
-		if (hasFocus && mFreshWindow) {
-
-			if (mPauseDate != null) {
-				final Long interval = DateTime.nowDate().getTime() - mPauseDate.longValue();
-				if (interval > Constants.INTERVAL_TETHER_ALERT) {
-					tetherAlert();
-				}
-			}
-
-			/*
-			 * Give the current fragment the chance to refresh in case
-			 * the data has changed while this activity did not have focus.
-			 */
-			BaseFragment fragment = getCurrentFragment();
-			if (fragment != null && fragment instanceof RadarFragment) {
-				((RadarFragment) fragment).databind(BindingMode.auto);
-			}
-			mFreshWindow = false;
-		}
 	}
 
 	@Override

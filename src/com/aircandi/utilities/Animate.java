@@ -190,7 +190,7 @@ public class Animate {
 		}
 	}
 
-	private static Animation loadAnimation(int animationResId) throws NotFoundException {
+	public static Animation loadAnimation(int animationResId) throws NotFoundException {
 		/*
 		 * Loads an animation object from a resource
 		 * 

@@ -127,7 +127,7 @@ public class UI {
 								final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), imageResponse.bitmap);
 								UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
 								if (listener != null) {
-									listener.onComplete(response, photo, imageResponse.bitmap);
+									listener.onComplete(response, photo, imageResponse.bitmap, false);
 								}
 							}
 						}

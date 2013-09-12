@@ -61,6 +61,7 @@ import com.aircandi.utilities.UI;
 public class EntityManager {
 
 	private static final EntityCache	mEntityCache	= new EntityCache();
+	private Number						mActivityDate;
 
 	/*
 	 * The photo collection enables swiping between photos while staying at the same level of the hierarchy.
@@ -669,6 +670,10 @@ public class EntityManager {
 						, Aircandi.getInstance().getUser().getShortcut());
 
 				result.data = insertedEntity;
+				
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)){
+					mActivityDate = DateTime.nowDate().getTime(); 
+				}
 			}
 		}
 
@@ -728,6 +733,10 @@ public class EntityManager {
 			if (entity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
 				mEntityCache.updateEntityUser(entity);
 			}
+			
+			if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)){
+				mActivityDate = DateTime.nowDate().getTime(); 
+			}			
 		}
 
 		return result;
@@ -741,9 +750,10 @@ public class EntityManager {
 		 * - like/create/watch links are not followed
 		 */
 		final ModelResult result = new ModelResult();
+		Entity entity = null;
 
 		if (!cacheOnly) {
-			final Entity entity = mEntityCache.get(entityId);
+			entity = mEntityCache.get(entityId);
 			/*
 			 * Delete the entity and all links and observations it is associated with. We attempt to continue even
 			 * if the call to delete the image failed.
@@ -776,7 +786,10 @@ public class EntityManager {
 			 */
 			Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
 			mEntityCache.removeLink(entityId, Constants.TYPE_LINK_CREATE, Aircandi.getInstance().getUser().id);
-
+			
+			if (entity != null && entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)){
+				mActivityDate = DateTime.nowDate().getTime(); 
+			}
 		}
 		return result;
 	}
@@ -980,11 +993,11 @@ public class EntityManager {
 
 	public ModelResult replaceEntitiesForEntity(String entityId, List<Entity> entitiesForEntity, String linkType) {
 		/*
-		 * moveCandigrams updates activityDate in the database:
+		 * Updates activityDate in the database:
 		 * - on the parent entity
 		 * - on any other upstream entities
 		 * - inactive links are not followed
-		 * - like/create/watch links are not followed
+		 * - like/create/watch/proximity links are not followed
 		 */
 		final ModelResult result = new ModelResult();
 
@@ -1074,6 +1087,11 @@ public class EntityManager {
 	// --------------------------------------------------------------------------------------------
 	// Other service tasks
 	// --------------------------------------------------------------------------------------------
+
+	public CacheStamp getCacheStamp() {
+		CacheStamp cacheStamp = new CacheStamp(mActivityDate, null);
+		return cacheStamp;
+	}
 
 	public ModelResult registerDevice(Device device) {
 		ModelResult result = new ModelResult();

@@ -46,6 +46,7 @@ import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
+import com.aircandi.applications.Pictures;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
@@ -68,6 +69,8 @@ import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.ServiceData;
+import com.aircandi.service.objects.Shortcut;
+import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.ui.base.IList;
 import com.aircandi.ui.widgets.AirAutoCompleteTextView;
@@ -223,6 +226,10 @@ public class PhotoPicker extends BaseBrowse implements IList {
 
 					ImageResult imageResult = mImages.get(position);
 					Photo photo = imageResult.getPhoto();
+					/*
+					 * Photo gets set for images that are already being used like pictures linked to places so
+					 * an empty photo means the image is coming from external service like bing.
+					 */
 					if (photo == null) {
 						photo = new Photo(imageResult.getMediaUrl(), null, null, null, PhotoSource.external);
 					}
@@ -254,21 +261,14 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		 */
 		if (mPlacePhotoMode && mEntity != null) {
 
-			List<String> schemas = new ArrayList<String>();
-			schemas.add(Constants.SCHEMA_ENTITY_PICTURE);
-			List<String> linkTypes = new ArrayList<String>();
-			linkTypes.add(Constants.TYPE_LINK_PICTURE);
-
-			List<Entity> entities = (List<Entity>) mEntity.getLinkedEntitiesByLinkTypes(linkTypes
-					, schemas
-					, Direction.in
-					, false);
-
-			for (Entity entity : entities) {
-				if (entity.photo != null) {
-					if (!entity.photo.getSourceName().equals(PhotoSource.foursquare)) {
-						ImageResult imageResult = entity.photo.getAsImageResult();
-						imageResult.setPhoto(entity.photo);
+			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_PICTURE, Constants.SCHEMA_ENTITY_PICTURE, Direction.in, false, false);
+			settings.appClass = Pictures.class;
+			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
+			if (shortcuts.size() > 0) {
+				for (Shortcut shortcut : shortcuts) {
+					if (shortcut.photo != null) {
+						ImageResult imageResult = shortcut.photo.getAsImageResult();
+						imageResult.setPhoto(shortcut.photo);
 						mImages.add(imageResult);
 					}
 				}

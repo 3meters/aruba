@@ -132,7 +132,6 @@
     
     <string name="alert_kicked_candigram">Bouncing candigram</string>
     <string name="alert_kicked_follow">Follow</string>
-    <string name="alert_kicked_cancel">Cancel</string>
     <string name="alert_kicked">Kick!</string>
     
     <!-- Errors: network -->
@@ -194,14 +193,12 @@
     <string name="toast_signed_out">Signed out.</string>
     <string name="toast_applinks_no_links">No new links found.</string>
     <string name="toast_applinks_linked">Found additional link.</string>
-    <string name="toast_like_duplicate">You have already liked this.</string>
 
     <!-- UI General -->
 
     <string name="progress_signing_out">Signing out&#8230;</string>
     <string name="progress_saving">Saving&#8230;</string>
     <string name="progress_sending">Sending&#8230;</string>
-    <string name="progress_verifying">Verifying&#8230;</string>
     <string name="progress_tuning">Tuning&#8230;</string>
     <string name="progress_deleting">Deleting&#8230;</string>
     <string name="progress_changing_password">Changing&#8230;</string>
@@ -239,11 +236,11 @@
 
     <!-- Dialogs -->
 
-    <string name="dialog_about_copyright">copyright 3meters LLC 2010&#8211;2013</string>
+    <string name="dialog_about_copyright">copyright &#169; 3meters LLC</string>
+    <string name="dialog_about_factual">place listings data copyright &#169; Factual</string>
     <string name="dialog_template_picker_title">add a candigram</string>
     <string name="dialog_address_builder_title">address</string>
     <string name="dialog_category_builder_title">category</string>
-    <string name="dialog_link_picker_title">website</string>
     <string name="dialog_photo_picker_search_title">photo search</string>
     <string name="dialog_photo_source_title">select photo</string>
     <string name="dialog_photo_source_search">Search for photos</string>
@@ -347,11 +344,9 @@
     <!-- Forms.buttons -->
 
     <string name="form_button_change_picture">select</string>
-    <string name="form_button_test_link">test</string>
     <string name="form_button_change_password">change password</string>
     <string name="form_button_sign_in">sign in</string>
     <string name="form_button_register">register</string>
-    <string name="form_button_ok" tools:ignore="ButtonCase,Typos">ok</string>
     <string name="form_button_cancel" tools:ignore="ButtonCase">cancel</string>
     <string name="form_button_terms">terms</string>
     <string name="form_button_send_password">forgot password?</string>

@@ -32,7 +32,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <!-- To support GCM -->
@@ -54,6 +54,7 @@
     <application
         android:name="com.aircandi.Aircandi"
         android:allowBackup="false"
+        android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/name_app"
         android:theme="@style/aircandi_theme_midnight" >
@@ -252,12 +253,6 @@
             android:theme="@style/aircandi_theme_dialog_dark"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.ui.helpers.UriPicker"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:enabled="false"
-            android:theme="@style/aircandi_theme_dialog_dark"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
             android:name="com.aircandi.ui.helpers.AddressBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/aircandi_theme_dialog_dark"
@@ -297,11 +292,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
     <uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS" />
-    <uses-permission android:name="android.permission.READ_LOGS" />
-
-
-
-
+    <uses-permission android:name="android.permission.READ_LOGS" />
     -->
 
 </manifest>

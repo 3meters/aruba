@@ -373,7 +373,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		mImageRequestListener = new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, Photo photo, Bitmap bitmap) {
+			public void onComplete(Object response, Photo photo, Bitmap bitmap, Boolean bitmapLocalOnly) {
 
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -385,9 +385,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 					if (bitmap != null) {
 						final String imageKey = mEntity.schema + "_" + mEntity.id + ".jpg";
-						mEntity.photo = new Photo(photo.getUri(), null, null, null, PhotoSource.cache);
+						mEntity.photo = new Photo(null, null, null, null, PhotoSource.cache);
 						mEntity.photo.setBitmap(imageKey, bitmap); // Could get set to null if we are using the default 
-						mEntity.photo.setBitmapLocalOnly(photo.bitmapLocalOnly);
+						mEntity.photo.setBitmapLocalOnly(bitmapLocalOnly);
+						UI.drawPhoto(mPhotoView, mEntity.photo, null);						
 					}
 				}
 			}
@@ -461,25 +462,18 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
 				Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(photoUri);
 				if (bitmap != null && mImageRequestListener != null) {
-
-					final String imageKey = mEntity.schema + "_" + mEntity.id + ".jpg";
-					Photo photo = new Photo(photoUri.toString(), null, null, null, PhotoSource.cache);
-					photo.setBitmap(imageKey, bitmap); // Could get set to null if we are using the default 
-					mImageRequestListener.onComplete(new ServiceResponse(), photo, null);
+					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, false);
 				}
 			}
 			else if (requestCode == Constants.ACTIVITY_PICTURE_MAKE) {
 
 				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0, Aircandi.getInstance().getUser());
-				final Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
-
+				
+				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
+				final Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
 				if (bitmap != null && mImageRequestListener != null) {
-
-					final String imageKey = mEntity.schema + "_" + mEntity.id + ".jpg";
-					Photo photo = new Photo(null, null, null, null, PhotoSource.cache);
-					photo.setBitmap(imageKey, bitmap); // Could get set to null if we are using the default 
-					mImageRequestListener.onComplete(new ServiceResponse(), photo, null);
+					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, false);
 				}
 			}
 			else if (requestCode == Constants.ACTIVITY_PICTURE_SEARCH) {

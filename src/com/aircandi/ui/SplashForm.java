@@ -35,6 +35,7 @@ import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
+import com.aircandi.utilities.UI;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.GoogleAnalytics;
@@ -57,6 +58,7 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	private void initialize() {
+		attribution();
 		if (!Aircandi.applicationUpdateRequired) {
 			if (Aircandi.firstStartApp) {
 				warmup();
@@ -73,6 +75,20 @@ public class SplashForm extends SherlockActivity {
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
+
+	private void attribution() {
+		UI.setVisibility(findViewById(R.id.image_foursquare), View.GONE);
+		UI.setVisibility(findViewById(R.id.image_google), View.GONE);
+		String provider = Aircandi.settings.getString(
+				Constants.PREF_PLACE_PROVIDER,
+				Constants.PREF_PLACE_PROVIDER_DEFAULT);
+		if (provider.equals(Constants.TYPE_PROVIDER_FOURSQUARE)) {
+			UI.setVisibility(findViewById(R.id.image_foursquare), View.VISIBLE);
+		}
+		else if (provider.equals(Constants.TYPE_PROVIDER_GOOGLE)) {
+			UI.setVisibility(findViewById(R.id.image_google), View.VISIBLE);
+		}
+	}
 
 	private void warmup() {
 		new AsyncTask() {

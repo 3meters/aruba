@@ -17,14 +17,13 @@ import com.aircandi.components.BusProvider;
 import com.aircandi.components.BusyManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.MenuManager;
-import com.aircandi.service.objects.User;
+import com.aircandi.service.objects.CacheStamp;
 
 public abstract class BaseFragment extends SherlockFragment implements IForm {
 
 	protected Resources		mResources;
 	protected BusyManager	mBusyManager;
-	protected Number		mEntityModelRefreshDate;
-	protected User			mEntityModelUser;
+	protected CacheStamp	mCacheStamp;
 
 	@Override
 	public void onAttach(Activity activity) {

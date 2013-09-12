@@ -102,7 +102,9 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 							}
 							
 							mAdapter.clear();
-							mAdapter.addAll(mEntities);
+							for (Entity entity: mEntities) {
+								mAdapter.add(entity);
+							}
 							mAdapter.notifyDataSetChanged();
 							if (activeCountNew == activeCountOld) {
 								UI.showToastNotification(getResources().getString(R.string.toast_applinks_no_links), Toast.LENGTH_SHORT);
@@ -162,7 +164,9 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 						}
 						mEntities = applinks;
 						mAdapter.clear();
-						mAdapter.addAll(mEntities);
+						for (Entity entity: mEntities) {
+							mAdapter.add(entity);
+						}
 						mAdapter.notifyDataSetChanged();
 						UI.showToastNotification(getResources().getString(R.string.toast_applinks_refreshed), Toast.LENGTH_SHORT);
 					}

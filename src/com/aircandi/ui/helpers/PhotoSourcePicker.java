@@ -21,12 +21,14 @@ import android.widget.TextView;
 
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.applications.Pictures;
 import com.aircandi.components.AirApplication;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.service.objects.Applink;
-import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Place;
+import com.aircandi.service.objects.Shortcut;
+import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.base.BasePicker;
 
 public class PhotoSourcePicker extends BasePicker implements OnItemClickListener {
@@ -74,22 +76,17 @@ public class PhotoSourcePicker extends BasePicker implements OnItemClickListener
 			}
 			else {
 				
-				List<String> schemas = new ArrayList<String>();
-				schemas.add(Constants.SCHEMA_ENTITY_PICTURE);
-				List<String> linkTypes = new ArrayList<String>();
-				linkTypes.add(Constants.TYPE_LINK_PICTURE);
-				
-				List<Entity> entities = (List<Entity>) mEntity.getLinkedEntitiesByLinkTypes(linkTypes
-						, schemas
-						, Direction.in
-						, false);
-				
-				for (Entity post : entities) {
-					if (post.photo != null) {
-						listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_location_light
-								: R.drawable.ic_action_location_dark
-								, getString(R.string.dialog_photo_source_place), null, Constants.PHOTO_SOURCE_PLACE));
-						break;
+				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_PICTURE, Constants.SCHEMA_ENTITY_PICTURE, Direction.in, false, false);
+				settings.appClass = Pictures.class;
+				List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
+				if (shortcuts.size() > 0) {
+					for (Shortcut shortcut : shortcuts) {
+						if (shortcut.photo != null) {
+							listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_location_light
+									: R.drawable.ic_action_location_dark
+									, getString(R.string.dialog_photo_source_place), null, Constants.PHOTO_SOURCE_PLACE));
+							break;
+						}
 					}
 				}
 			}

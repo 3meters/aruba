@@ -1,5 +1,7 @@
 package com.aircandi.ui;
 
+import java.util.Calendar;
+
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -201,12 +203,20 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 	}
 
 	private void doInfoClick() {
+		
+		Calendar calendar = Calendar.getInstance();
+		String year = String.valueOf(calendar.get(Calendar.YEAR));
+		
 		final String title = getString(R.string.alert_about_title);
+		
 		final String message = getString(R.string.alert_about_label_version) + " "
 				+ Aircandi.getVersionName(this, AircandiForm.class) + System.getProperty("line.separator")
 				+ getString(R.string.alert_about_label_code) + " "
 				+ String.valueOf(Aircandi.getVersionCode(this, AircandiForm.class)) + System.getProperty("line.separator")
-				+ getString(R.string.dialog_about_copyright);
+				+ System.getProperty("line.separator")
+				+ getString(R.string.dialog_about_copyright) + " " + year + System.getProperty("line.separator")
+				+ getString(R.string.dialog_about_factual) + " " + year + System.getProperty("line.separator");
+		
 		Dialogs.alertDialog(R.drawable.ic_launcher
 				, title
 				, message

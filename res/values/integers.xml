@@ -3,5 +3,6 @@
 
     <integer name="shortcuts_flow_limit">8</integer>
     <integer name="place_shortcuts_flow_limit">8</integer>
-
+    <integer name="anim_extra_long">300</integer>
+    
 </resources>

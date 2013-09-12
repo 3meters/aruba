@@ -1314,7 +1314,7 @@ public class HttpService {
 
 		public void onComplete(Object response) {}
 
-		public void onComplete(Object response, Photo photo, Bitmap bitmap) {} // $codepro.audit.disable largeNumberOfParameters
+		public void onComplete(Object response, Photo photo, Bitmap bitmap, Boolean bitmapLocalOnly) {} // $codepro.audit.disable largeNumberOfParameters
 
 		public void onProgressChanged(int progress) {}
 	}

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
     <ListView
         android:id="@+id/radar_list"
@@ -16,4 +15,47 @@
         android:paddingRight="1dp"
         android:paddingTop="3dp" />
 
-</LinearLayout>
+    <RelativeLayout
+        android:id="@+id/attribution_holder"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/overlay_picture"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" >
+
+        <ImageView
+            android:id="@+id/image_google"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:maxWidth="100dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/img_google_powered_dark" />
+
+        <ImageView
+            android:id="@+id/image_foursquare"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:maxWidth="100dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/img_foursquare_powered_dark" />
+
+        <ImageView
+            android:id="@+id/image_dismiss"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/selector_button"
+            android:clickable="true"
+            android:paddingBottom="15dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingTop="15dp"
+            android:src="@drawable/ic_action_cancel_dark" />
+    </RelativeLayout>
+
+</RelativeLayout>

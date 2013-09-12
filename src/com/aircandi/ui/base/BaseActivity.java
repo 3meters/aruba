@@ -491,7 +491,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	@Override
 	protected void onRestart() {
-		Logger.d(this, "CandiActivity restarting");
+		Logger.d(this, "Activity restarting");
 		super.onRestart();
 		checkForPreferenceChanges();
 	}
@@ -499,6 +499,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	@Override
 	protected void onStart() {
 		if (!isFinishing()) {
+			Logger.d(this, "Activity starting");
 			Tracker.activityStart(this, Aircandi.getInstance().getUser());
 			if (mPrefChangeReloadNeeded) {
 				final Intent intent = getIntent();
@@ -511,18 +512,21 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	@Override
 	protected void onResume() {
+		Logger.d(this, "Activity resuming");
 		BusProvider.getInstance().register(this);
 		super.onResume();
 	}
 
 	@Override
 	protected void onPause() {
+		Logger.d(this, "Activity pausing");
 		BusProvider.getInstance().unregister(this);
 		super.onPause();
 	}
 
 	@Override
 	protected void onStop() {
+		Logger.d(this, "Activity stopping");
 		Tracker.activityStop(this, Aircandi.getInstance().getUser());
 		super.onStop();
 	}
@@ -530,7 +534,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	@Override
 	protected void onDestroy() {
 		/* This activity gets destroyed everytime we leave using back or finish(). */
-		Logger.d(this, "onDestroy called");
+		Logger.d(this, "Activity destroying");
 		super.onDestroy();
 	}
 
