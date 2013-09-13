@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.Maps;
 import com.aircandi.service.Expose;
 import com.aircandi.service.objects.Link.Direction;
@@ -86,7 +86,7 @@ public class LinkOptions extends ServiceObject {
 			linkOptions.shortcuts = true;
 
 			if (linkProfile == LinkProfile.LinksForPlace || linkProfile == LinkProfile.LinksForProximity) {
-				Number limit = ProxiConstants.LIMIT_LINKS_DEFAULT;
+				Number limit = ServiceConstants.LIMIT_LINKS_DEFAULT;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, true, false, true, false, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, false, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true, false));
@@ -102,7 +102,7 @@ public class LinkOptions extends ServiceObject {
 				}
 			}
 			else if (linkProfile == LinkProfile.LinksForCandigram) {
-				Number limit = ProxiConstants.LIMIT_LINKS_DEFAULT;
+				Number limit = ServiceConstants.LIMIT_LINKS_DEFAULT;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, false, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PICTURE, true, false, true, false, 1)); // just one so we can preview
@@ -117,7 +117,7 @@ public class LinkOptions extends ServiceObject {
 				}
 			}
 			else if (linkProfile == LinkProfile.LinksForPicture) {
-				Number limit = ProxiConstants.LIMIT_LINKS_DEFAULT;
+				Number limit = ServiceConstants.LIMIT_LINKS_DEFAULT;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, false, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
 				if (user != null) {
@@ -130,7 +130,7 @@ public class LinkOptions extends ServiceObject {
 				}
 			}
 			else if (linkProfile == LinkProfile.LinksForUser) {
-				Number limit = ProxiConstants.LIMIT_USER_OWNED_ENTITIES;
+				Number limit = ServiceConstants.LIMIT_USER_OWNED_ENTITIES;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, false, limit).setDirection(Direction.out));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, false, limit).setDirection(Direction.both));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, false, limit).setDirection(Direction.both));

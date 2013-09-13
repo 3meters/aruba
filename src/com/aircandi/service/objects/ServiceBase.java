@@ -3,7 +3,7 @@ package com.aircandi.service.objects;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.aircandi.ProxiConstants;
+import com.aircandi.ServiceConstants;
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
 
@@ -97,7 +97,7 @@ public abstract class ServiceBase extends ServiceObject {
 	// --------------------------------------------------------------------------------------------	
 
 	public String getEntryUri() {
-		final String root = ProxiConstants.URL_PROXIBASE_SERVICE_REST;
+		final String root = ServiceConstants.URL_PROXIBASE_SERVICE_REST;
 		final String entity = this.getCollection();
 		final String uri = root + entity + "/" + id;
 		return uri;

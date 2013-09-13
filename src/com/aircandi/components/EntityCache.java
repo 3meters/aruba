@@ -13,7 +13,7 @@ import android.os.Bundle;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.service.HttpService;
@@ -121,7 +121,7 @@ public class EntityCache implements Map<String, Entity> {
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
@@ -165,7 +165,7 @@ public class EntityCache implements Map<String, Entity> {
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForEntity")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForEntity")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
@@ -217,7 +217,7 @@ public class EntityCache implements Map<String, Entity> {
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesByProximity")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesByProximity")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
@@ -282,7 +282,7 @@ public class EntityCache implements Map<String, Entity> {
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_PLACES + "getNearLocation")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_PLACES + "getNearLocation")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);

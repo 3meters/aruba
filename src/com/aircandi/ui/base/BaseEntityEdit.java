@@ -30,8 +30,8 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
@@ -226,7 +226,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			UI.setVisibility(creator, View.GONE);
 			if (creator != null
 					&& entity.creator != null
-					&& !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+					&& !entity.creator.id.equals(ServiceConstants.ADMIN_USER_ID)) {
 
 				creator.setLabel(getString(R.string.candi_label_user_added_by));
 				creator.databind(entity.creator, entity.createdDate != null ? entity.createdDate.longValue() : null, entity.locked);
@@ -236,7 +236,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			/* Editor block */
 
 			UI.setVisibility(editor, View.GONE);
-			if (editor != null && entity.modifier != null && !entity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+			if (editor != null && entity.modifier != null && !entity.modifier.id.equals(ServiceConstants.ADMIN_USER_ID)) {
 				if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
 					editor.setLabel(getString(R.string.candi_label_user_edited_by));
 					editor.databind(entity.modifier, entity.modifiedDate.longValue(), null);
@@ -601,7 +601,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					Map map = new HashMap<String, Object>();
 					map.put("modifiedDate", -1);
 					Cursor cursor = new Cursor()
-							.setLimit(ProxiConstants.LIMIT_CHILD_ENTITIES)
+							.setLimit(ServiceConstants.LIMIT_CHILD_ENTITIES)
 							.setSort(Maps.asMap("modifiedDate", -1))
 							.setSkip(0);
 
@@ -732,7 +732,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				}
 
 				/* We always send beacons to support nearby notifications */
-				beacons = ProximityManager.getInstance().getStrongestBeacons(ProxiConstants.PROXIMITY_BEACON_COVERAGE);
+				beacons = ProximityManager.getInstance().getStrongestBeacons(ServiceConstants.PROXIMITY_BEACON_COVERAGE);
 				primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
 
 				Tracker.sendEvent("ui_action", "entity_insert", mEntity.type, 0, Aircandi.getInstance().getUser());

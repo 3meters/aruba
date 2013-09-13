@@ -26,8 +26,8 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.applications.Candigrams;
 import com.aircandi.applications.Comments;
 import com.aircandi.applications.Pictures;
@@ -205,7 +205,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			}.execute();
 		}
 	}
-	
+
 	protected void setAdapter() {
 		mOffset = 0;
 		mEntities.clear();
@@ -631,6 +631,16 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 				UI.setVisibility(holder.type, View.GONE);
 				if (holder.type != null && entity.type != null && entity.type.length() > 0) {
 					holder.type.setText(entity.type);
+					if (entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+						String typeVerbose = entity.type;
+						if (entity.type.equals(Constants.TYPE_APP_TOUR)) {
+							typeVerbose = mResources.getString(R.string.candigram_type_tour_verbose);
+						}
+						if (entity.type.equals(Constants.TYPE_APP_BOUNCE)) {
+							typeVerbose = mResources.getString(R.string.candigram_type_bounce_verbose);
+						}
+						holder.type.setText(typeVerbose);
+					}
 					UI.setVisibility(holder.type, View.VISIBLE);
 				}
 
@@ -657,7 +667,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 				/* Creator */
 
 				UI.setVisibility(holder.creator, View.GONE);
-				if (holder.creator != null && entity.creator != null && !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+				if (holder.creator != null && entity.creator != null && !entity.creator.id.equals(ServiceConstants.ADMIN_USER_ID)) {
 					holder.creator.databind(entity.creator, entity.modifiedDate.longValue(), entity.locked);
 					UI.setVisibility(holder.creator, View.VISIBLE);
 				}

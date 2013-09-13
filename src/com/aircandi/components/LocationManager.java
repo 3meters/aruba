@@ -10,7 +10,6 @@ import android.location.Location;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.PlacesConstants;
 import com.aircandi.events.LocationChangedEvent;
 import com.aircandi.events.LocationTimeoutEvent;
 import com.aircandi.service.objects.AirLocation;
@@ -96,7 +95,7 @@ public class LocationManager {
 			mLocationModeBurstGps = true;
 		}
 
-		Aircandi.mainThreadHandler.postDelayed(mBurstTimeout, PlacesConstants.BURST_TIMEOUT);
+		Aircandi.mainThreadHandler.postDelayed(mBurstTimeout, Constants.BURST_TIMEOUT);
 	}
 
 	public void stopLocationBurst() {
@@ -220,7 +219,7 @@ public class LocationManager {
 					}
 
 					if (location.getProvider().equals("network") && mLocationModeBurstNetwork) {
-						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_NETWORK) {
+						if (location.getAccuracy() <= Constants.DESIRED_ACCURACY_NETWORK) {
 							Logger.d(this, "Network burst mode stopped: desired accuracy reached");
 							if (mLocationModeBurstGps) {
 								mLocationManager.removeUpdates(mLocationListenerPendingIntent);
@@ -232,7 +231,7 @@ public class LocationManager {
 						}
 					}
 					else if (location.getProvider().equals("gps") && mLocationModeBurstGps) {
-						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_GPS) {
+						if (location.getAccuracy() <= Constants.DESIRED_ACCURACY_GPS) {
 							Logger.d(this, "Gps burst mode stopped: desired accuracy reached");
 							stopLocationBurst();
 						}
@@ -265,7 +264,7 @@ public class LocationManager {
 
 		final long fixAge = System.currentTimeMillis() - location.getTime();
 		final float fixAccuracy = location.getAccuracy();
-		if ((fixAge <= PlacesConstants.MAXIMUM_AGE_PREFERRED && fixAccuracy <= PlacesConstants.MINIMUM_ACCURACY)) {
+		if ((fixAge <= Constants.MAXIMUM_AGE_PREFERRED && fixAccuracy <= Constants.MINIMUM_ACCURACY)) {
 			return true;
 		}
 		return false;
@@ -330,7 +329,7 @@ public class LocationManager {
 
 		/* Check distance moved and adjust for accuracy */
 		final float distance = currentBestLocation.distanceTo(locationToEvaluate);
-		if (distance - locationToEvaluate.getAccuracy() > PlacesConstants.MIN_DISTANCE_UPDATES) {
+		if (distance - locationToEvaluate.getAccuracy() > Constants.MIN_DISTANCE_UPDATES) {
 			return LocationBetterReason.Distance;
 		}
 
@@ -346,7 +345,7 @@ public class LocationManager {
 		if (distance >= minDistance) {
 			return true;
 		}
-		//		if (distance - locationToEvaluate.getAccuracy() > PlacesConstants.MIN_DISTANCE_UPDATES) {
+		//		if (distance - locationToEvaluate.getAccuracy() > Constants.MIN_DISTANCE_UPDATES) {
 		//			return true;
 		//		}
 		return false;

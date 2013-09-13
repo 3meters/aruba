@@ -2,7 +2,7 @@
 package com.aircandi;
 
 @SuppressWarnings("ucd")
-public final class ProxiConstants {
+public final class ServiceConstants {
 
 	public static final int		TIMEOUT_SOCKET_QUERIES							= 3000;
 	public static final int		TIMEOUT_SOCKET_UPDATES							= 30000;
@@ -73,5 +73,5 @@ public final class ProxiConstants {
 	public static final float	HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE			= 403.1f;																																		// $codepro.audit.disable questionableName
 	public static final float	HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK	= 403.21f;																																		// $codepro.audit.disable questionableName
 
-	private ProxiConstants() {}; // $codepro.audit.disable emptyMethod
+	private ServiceConstants() {}; // $codepro.audit.disable emptyMethod
 }

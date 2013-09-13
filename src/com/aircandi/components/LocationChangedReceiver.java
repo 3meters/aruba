@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 
-import com.aircandi.PlacesConstants;
+import com.aircandi.Constants;
 import com.aircandi.events.LocationReceivedEvent;
 
 
@@ -34,7 +34,7 @@ public class LocationChangedReceiver extends BroadcastReceiver {
 
 		if (intent.hasExtra(providerEnabledKey)) {
 			if (!intent.getBooleanExtra(providerEnabledKey, true)) {
-				final Intent providerDisabledIntent = new Intent(PlacesConstants.ACTIVE_LOCATION_UPDATE_PROVIDER_DISABLED);
+				final Intent providerDisabledIntent = new Intent(Constants.ACTIVE_LOCATION_UPDATE_PROVIDER_DISABLED);
 				context.sendBroadcast(providerDisabledIntent);
 			}
 		}

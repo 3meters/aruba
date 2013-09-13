@@ -284,7 +284,7 @@ public class ProximityManager {
 
 		//		final Location lastKnownLocation = LocationManager.getInstance().getLastKnownLocation();
 		//		if (lastKnownLocation != null) {
-		//			final Boolean hasMoved = LocationManager.hasMoved(lastKnownLocation, activeLocation, PlacesConstants.DIST_ONE_HUNDRED_METERS);
+		//			final Boolean hasMoved = LocationManager.hasMoved(lastKnownLocation, activeLocation, Constants.DIST_ONE_HUNDRED_METERS);
 		//			if (hasMoved) {
 		//				Logger.v(this, "Refresh needed: moved location");
 		//				return true;

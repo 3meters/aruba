@@ -72,7 +72,7 @@ import android.graphics.Bitmap;
 import com.aircandi.Aircandi;
 import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ConnectedState;
@@ -181,7 +181,7 @@ public class HttpService {
 
 			@Override
 			public int getMaxForRoute(HttpRoute route) {
-				return ProxiConstants.DEFAULT_CONNECTIONS_PER_ROUTE;
+				return ServiceConstants.DEFAULT_CONNECTIONS_PER_ROUTE;
 			}
 		};
 
@@ -195,12 +195,12 @@ public class HttpService {
 		 * - setConnectionTimeout: Used trying to establish a connection to the server.
 		 * - setSoTimeout: How long a socket will wait for data before throwing up.
 		 */
-		ConnManagerParams.setMaxTotalConnections(params, ProxiConstants.DEFAULT_MAX_CONNECTIONS);
+		ConnManagerParams.setMaxTotalConnections(params, ServiceConstants.DEFAULT_MAX_CONNECTIONS);
 		ConnManagerParams.setMaxConnectionsPerRoute(params, connPerRoute);
 		ConnManagerParams.setTimeout(params, 1000);
 		HttpConnectionParams.setStaleCheckingEnabled(params, false);
-		HttpConnectionParams.setConnectionTimeout(params, ProxiConstants.TIMEOUT_CONNECTION);
-		HttpConnectionParams.setSoTimeout(params, ProxiConstants.TIMEOUT_SOCKET_QUERIES);
+		HttpConnectionParams.setConnectionTimeout(params, ServiceConstants.TIMEOUT_CONNECTION);
+		HttpConnectionParams.setSoTimeout(params, ServiceConstants.TIMEOUT_SOCKET_QUERIES);
 		HttpConnectionParams.setTcpNoDelay(params, true);
 		HttpConnectionParams.setSocketBufferSize(params, 8192);
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
@@ -462,7 +462,7 @@ public class HttpService {
 		Query query = null;
 		HttpConnectionParams.setSoTimeout(mHttpParams,
 				(serviceRequest.getSocketTimeout() == null)
-						? ProxiConstants.TIMEOUT_SOCKET_QUERIES
+						? ServiceConstants.TIMEOUT_SOCKET_QUERIES
 						: serviceRequest.getSocketTimeout());
 
 		/* Construct the request */
@@ -474,7 +474,7 @@ public class HttpService {
 			if (serviceRequest.getRequestBody() != null) {
 				if (serviceRequest.getUseSecret()) {
 					addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + ", \"secret\":\""
-							+ ProxiConstants.INSERT_USER_SECRET + "\"}");
+							+ ServiceConstants.INSERT_USER_SECRET + "\"}");
 				}
 				else {
 					addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + "}");
@@ -635,8 +635,8 @@ public class HttpService {
 			}
 			else if (exception instanceof SocketException) {
 				httpException = new HttpServiceException("Device is not connected to a network: "
-						+ String.valueOf(ProxiConstants.CONNECT_TRIES) + " tries over "
-						+ String.valueOf(ProxiConstants.CONNECT_WAIT * ProxiConstants.CONNECT_TRIES / 1000) + " second window"
+						+ String.valueOf(ServiceConstants.CONNECT_TRIES) + " tries over "
+						+ String.valueOf(ServiceConstants.CONNECT_WAIT * ServiceConstants.CONNECT_TRIES / 1000) + " second window"
 						, ErrorType.Client
 						, exception
 						, statusCode);
@@ -657,26 +657,26 @@ public class HttpService {
 				/* missing, expired or invalid session */
 				httpException = new HttpServiceException("Unauthorized", ErrorType.Service, new HttpServiceException.UnauthorizedException());
 			}
-			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
+			else if (statusCode == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
 				httpException = new HttpServiceException("Unauthorized credentials", ErrorType.Service, new HttpServiceException.SessionException());
 			}
-			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
+			else if (statusCode == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
 				httpException = new HttpServiceException("Expired session", ErrorType.Service, new HttpServiceException.SessionException());
 			}
-			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
+			else if (statusCode == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
 				httpException = new HttpServiceException("Unauthorized whitelist", ErrorType.Service, new HttpServiceException.UnauthorizedException());
 			}
-			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED) {
+			else if (statusCode == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED) {
 				httpException = new HttpServiceException("Unauthorized unverified", ErrorType.Service, new HttpServiceException.UnauthorizedException());
 			}
 			else if (statusCode == HttpStatus.SC_FORBIDDEN) {
 				/* weak password, duplicate email */
 				httpException = new HttpServiceException("Forbidden", ErrorType.Service, new HttpServiceException.ForbiddenException());
 			}
-			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
+			else if (statusCode == ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
 				httpException = new HttpServiceException("Duplicate", ErrorType.Service, new HttpServiceException.DuplicateException());
 			}
-			else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
+			else if (statusCode == ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
 				httpException = new HttpServiceException("Weak password", ErrorType.Service, new HttpServiceException.PasswordException());
 			}
 			else if (statusCode == HttpStatus.SC_GATEWAY_TIMEOUT) {
@@ -716,7 +716,7 @@ public class HttpService {
 
 	private boolean shouldRetry(HttpRequestBase httpAction, Exception exception, int retries) {
 
-		if (retries > ProxiConstants.MAX_BACKOFF_RETRIES) {
+		if (retries > ServiceConstants.MAX_BACKOFF_RETRIES) {
 			return false;
 		}
 
@@ -805,7 +805,7 @@ public class HttpService {
 		long delay = 0;
 		final long scaleFactor = 100;
 		delay = (long) (Math.pow(2, retries) * scaleFactor);
-		delay = Math.min(delay, ProxiConstants.MAX_BACKOFF_IN_MILLISECONDS);
+		delay = Math.min(delay, ServiceConstants.MAX_BACKOFF_IN_MILLISECONDS);
 		Logger.d(this, "Retryable error detected, will retry in " + delay + "ms, attempt number: " + retries);
 
 		try {

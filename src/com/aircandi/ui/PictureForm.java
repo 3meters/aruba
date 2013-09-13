@@ -11,8 +11,8 @@ import android.widget.TextView;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.applications.Applinks;
 import com.aircandi.components.EntityManager;
 import com.aircandi.events.MessageEvent;
@@ -213,7 +213,7 @@ public class PictureForm extends BaseEntityForm {
 
 		if (user != null
 				&& mEntity.creator != null
-				&& !mEntity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+				&& !mEntity.creator.id.equals(ServiceConstants.ADMIN_USER_ID)) {
 
 			if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 				if (((Place) mEntity).getProvider().type.equals("aircandi")) {
@@ -238,7 +238,7 @@ public class PictureForm extends BaseEntityForm {
 
 		/* Editor block */
 
-		if (user != null && mEntity.modifier != null && !mEntity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+		if (user != null && mEntity.modifier != null && !mEntity.modifier.id.equals(ServiceConstants.ADMIN_USER_ID)) {
 			if (mEntity.createdDate.longValue() != mEntity.modifiedDate.longValue()) {
 				user.setLabel(getString(R.string.candi_label_user_edited_by));
 				user.databind(mEntity.modifier, mEntity.modifiedDate.longValue(), null);

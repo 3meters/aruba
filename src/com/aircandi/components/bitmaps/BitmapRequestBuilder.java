@@ -1,6 +1,6 @@
 package com.aircandi.components.bitmaps;
 
-import com.aircandi.ProxiConstants;
+import com.aircandi.ServiceConstants;
 import com.aircandi.service.HttpService.RequestListener;
 
 public class BitmapRequestBuilder {
@@ -37,7 +37,7 @@ public class BitmapRequestBuilder {
 		if (photoUri != null && !photoUri.equals("")) {
 			String photoUriFixed = photoUri;
 			if (!photoUri.startsWith("http:") && !photoUri.startsWith("https:") && !photoUri.startsWith("resource:")) {
-				photoUriFixed = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
+				photoUriFixed = ServiceConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 			}
 			mImageUri = photoUriFixed;
 		}

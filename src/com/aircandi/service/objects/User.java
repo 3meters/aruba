@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.aircandi.ProxiConstants;
+import com.aircandi.ServiceConstants;
 import com.aircandi.service.Expose;
 
 /**
@@ -105,7 +105,7 @@ public class User extends Entity {
 			if (!photoUri.startsWith("http:")
 					&& !photoUri.startsWith("https:")
 					&& !photoUri.startsWith("resource:")) {
-				photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
+				photoUri = ServiceConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 			}
 		}
 

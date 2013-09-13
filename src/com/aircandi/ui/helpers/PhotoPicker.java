@@ -44,8 +44,8 @@ import android.widget.TextView;
 import com.aircandi.Aircandi;
 import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.applications.Pictures;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
@@ -392,7 +392,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 			}
 		}
 
-		final String bingUrl = ProxiConstants.URL_PROXIBASE_SEARCH_IMAGES
+		final String bingUrl = ServiceConstants.URL_PROXIBASE_SEARCH_IMAGES
 				+ "?Query=" + query
 				+ "&Market=%27en-US%27&Adult=%27Strict%27&ImageFilters=%27size%3alarge%27"
 				+ "&$top=" + String.valueOf(count)

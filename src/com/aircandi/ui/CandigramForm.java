@@ -18,8 +18,8 @@ import android.widget.TextView;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.applications.Applinks;
 import com.aircandi.applications.Places;
 import com.aircandi.components.EntityManager;
@@ -108,6 +108,12 @@ public class CandigramForm extends BaseEntityForm {
 	@SuppressWarnings("ucd")
 	public void onKickButtonClick(View view) {
 
+//		if (!EntityManager.canUserKick((Candigram) mEntity)) {
+//			Link link = mEntity.getParentLink(Constants.TYPE_LINK_CANDIGRAM);
+//			kickUnavailable(link.shortcut.name, link.shortcut.photo, Aircandi.getInstance().getUser());
+//			return;
+//		}
+
 		new AsyncTask() {
 
 			@Override
@@ -146,9 +152,40 @@ public class CandigramForm extends BaseEntityForm {
 
 	}
 
+	public void kickUnavailable(String placeName, Photo placePhoto, final User user) {
+
+		ViewGroup customView = customPlaceView(null, placeName, placePhoto);
+		final TextView message = (TextView) customView.findViewById(R.id.message);
+
+		message.setText("To kick this candigram, you need to be at: ");
+
+		String dialogTitle = getResources().getString(R.string.alert_kicked_candigram);
+		if (mEntity.name != null && !mEntity.name.equals("")) {
+			dialogTitle = mEntity.name;
+		}
+
+		final AlertDialog dialog = Dialogs.alertDialog(null
+				, dialogTitle
+				, null
+				, customView
+				, this
+				, android.R.string.ok
+				, null
+				, null
+				, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				}
+				, null);
+		dialog.setCanceledOnTouchOutside(false);
+	}
+
 	public void kickCandidate(final Entity place, final User user) {
 
-		ViewGroup customView = customPlaceView((Place) place);
+		ViewGroup customView = customPlaceView((Place) place, place.name, place.getPhoto());
 		final TextView message = (TextView) customView.findViewById(R.id.message);
 
 		message.setText("This candigram will be kicked to: ");
@@ -230,7 +267,7 @@ public class CandigramForm extends BaseEntityForm {
 	public void kickAlert(Entity entity, User user) {
 
 		final Place place = (Place) entity;
-		ViewGroup customView = customPlaceView((Place) place);
+		ViewGroup customView = customPlaceView((Place) place, place.name, place.getPhoto());
 		final TextView message = (TextView) customView.findViewById(R.id.message);
 
 		if (user.id.equals(Aircandi.getInstance().getUser().id)) {
@@ -274,7 +311,7 @@ public class CandigramForm extends BaseEntityForm {
 		dialog.setCanceledOnTouchOutside(false);
 	}
 
-	public ViewGroup customPlaceView(Place place) {
+	public ViewGroup customPlaceView(Place place, String placeName, Photo placePhoto) {
 
 		final LayoutInflater inflater = LayoutInflater.from(this);
 		final ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.temp_kicked_candigram, null);
@@ -284,28 +321,30 @@ public class CandigramForm extends BaseEntityForm {
 
 		UI.setVisibility(name, View.GONE);
 		UI.setVisibility(address, View.GONE);
-		if (place.name != null) {
-			name.setText(place.name);
+		if (placeName != null) {
+			name.setText(placeName);
 			UI.setVisibility(name, View.VISIBLE);
 		}
 
-		String addressBlock = "";
-		if (place.city != null && place.region != null && !place.city.equals("") && !place.region.equals("")) {
-			addressBlock += place.city + ", " + place.region;
-		}
-		else if (place.city != null && !place.city.equals("")) {
-			addressBlock += place.city;
-		}
-		else if (place.region != null && !place.region.equals("")) {
-			addressBlock += place.region;
-		}
-		if (!addressBlock.equals("")) {
-			address.setText(addressBlock);
-			UI.setVisibility(address, View.VISIBLE);
+		if (place != null) {
+			String addressBlock = "";
+			if (place.city != null && place.region != null && !place.city.equals("") && !place.region.equals("")) {
+				addressBlock += place.city + ", " + place.region;
+			}
+			else if (place.city != null && !place.city.equals("")) {
+				addressBlock += place.city;
+			}
+			else if (place.region != null && !place.region.equals("")) {
+				addressBlock += place.region;
+			}
+			if (!addressBlock.equals("")) {
+				address.setText(addressBlock);
+				UI.setVisibility(address, View.VISIBLE);
+			}
 		}
 
 		photoView.setTag(place);
-		UI.drawPhoto(photoView, place.getPhoto());
+		UI.drawPhoto(photoView, placePhoto);
 		return customView;
 	}
 
@@ -500,7 +539,7 @@ public class CandigramForm extends BaseEntityForm {
 
 		if (user != null
 				&& mEntity.creator != null
-				&& !mEntity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+				&& !mEntity.creator.id.equals(ServiceConstants.ADMIN_USER_ID)) {
 
 			if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 				if (((Place) mEntity).getProvider().type.equals("aircandi")) {
@@ -525,7 +564,7 @@ public class CandigramForm extends BaseEntityForm {
 
 		/* Editor block */
 
-		if (user != null && mEntity.modifier != null && !mEntity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+		if (user != null && mEntity.modifier != null && !mEntity.modifier.id.equals(ServiceConstants.ADMIN_USER_ID)) {
 			if (mEntity.createdDate.longValue() != mEntity.modifiedDate.longValue()) {
 				user.setLabel(getString(R.string.candi_label_user_edited_by));
 				user.databind(mEntity.modifier, mEntity.modifiedDate.longValue(), null);
@@ -563,12 +602,11 @@ public class CandigramForm extends BaseEntityForm {
 		Candigram candigram = (Candigram) mEntity;
 
 		UI.setVisibility(findViewById(R.id.button_kick), View.GONE);
-
-		if (EntityManager.canUserAdd(mEntity)) {
-			if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {
-				UI.setVisibility(findViewById(R.id.button_kick), View.VISIBLE);
-			}
+		//		if (EntityManager.canUserAdd(mEntity)) {
+		if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)) {
+			UI.setVisibility(findViewById(R.id.button_kick), View.VISIBLE);
 		}
+		//		}
 	}
 
 	private void setActionText() {

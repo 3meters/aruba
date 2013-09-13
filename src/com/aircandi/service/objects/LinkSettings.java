@@ -2,7 +2,7 @@ package com.aircandi.service.objects;
 
 import java.util.Map;
 
-import com.aircandi.ProxiConstants;
+import com.aircandi.ServiceConstants;
 import com.aircandi.service.Expose;
 import com.aircandi.service.objects.Link.Direction;
 
@@ -38,7 +38,7 @@ public class LinkSettings extends ServiceObject {
 	}
 	
 	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Boolean inactive) {
-		this(type, links, load, count, inactive, ProxiConstants.LIMIT_LINKS_DEFAULT); 
+		this(type, links, load, count, inactive, ServiceConstants.LIMIT_LINKS_DEFAULT); 
 	}
 
 	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Boolean inactive, Number limit) {

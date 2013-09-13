@@ -269,6 +269,10 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 				intent = Pictures.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction,
 						titleResId != null ? getString(titleResId) : null);
 			}
+			if (settings.appClass.equals(Candigrams.class)) {
+				intent = Candigrams.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction,
+						titleResId != null ? getString(titleResId) : null);
+			}
 			if (settings.appClass.equals(Users.class)) {
 				intent = Users.viewForGetIntent(getSherlockActivity(), mEntityId, settings.linkType, settings.direction,
 						titleResId != null ? getString(titleResId) : null);

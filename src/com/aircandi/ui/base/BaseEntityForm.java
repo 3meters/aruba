@@ -27,8 +27,8 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.applications.Applinks;
 import com.aircandi.applications.Comments;
 import com.aircandi.applications.Pictures;
@@ -142,7 +142,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 					 * We refresh for both modified and activity because both can change what we
 					 * show for an entity including links and link shortcuts.
 					 */
-					if (!cacheStamp.equals(mCacheStamp)) {
+					if (cacheStamp != null && !cacheStamp.equals(mCacheStamp)) {
 						refreshNeeded.set(true);
 					}
 				}
@@ -245,7 +245,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 					drawStats();
 				}
 				else {
-					if (result.serviceResponse.exception.getStatusCode() != ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
+					if (result.serviceResponse.exception.getStatusCode() != ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
 						Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
 					}
 				}
@@ -302,7 +302,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 					drawStats();
 				}
 				else {
-					if (result.serviceResponse.exception.getStatusCode() != ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
+					if (result.serviceResponse.exception.getStatusCode() != ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
 						Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
 					}
 				}

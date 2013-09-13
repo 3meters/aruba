@@ -20,8 +20,8 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Window;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -120,7 +120,7 @@ public class PhotoForm extends BaseBrowse implements IForm {
 		/* Image */
 		String photoUri = photo.getUri();
 		if (!photoUri.startsWith("http:") && !photoUri.startsWith("https:") && !photoUri.startsWith("resource:")) {
-			photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
+			photoUri = ServiceConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 		}
 		final ViewHolder holder = new ViewHolder();
 		holder.photoView = image;

@@ -17,7 +17,7 @@ import android.net.wifi.WifiManager;
 import android.widget.Toast;
 
 import com.aircandi.BuildConfig;
-import com.aircandi.ProxiConstants;
+import com.aircandi.ServiceConstants;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpServiceException;
 import com.aircandi.service.ServiceRequest;
@@ -135,12 +135,12 @@ public class NetworkManager {
 			attempts++;
 			Logger.v(this, "No network connection: attempt: " + String.valueOf(attempts));
 
-			if (attempts >= ProxiConstants.CONNECT_TRIES) {
+			if (attempts >= ServiceConstants.CONNECT_TRIES) {
 				connectedState = ConnectedState.None;
 				break;
 			}
 			try {
-				Thread.sleep(ProxiConstants.CONNECT_WAIT);
+				Thread.sleep(ServiceConstants.CONNECT_WAIT);
 			}
 			catch (InterruptedException exception) {
 				connectedState = ConnectedState.None;
@@ -224,11 +224,11 @@ public class NetworkManager {
 	public boolean isWalledGardenConnection() {
 		HttpURLConnection urlConnection = null;
 		try {
-			URL url = new URL(ProxiConstants.WALLED_GARDEN_URI);
+			URL url = new URL(ServiceConstants.WALLED_GARDEN_URI);
 			urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.setInstanceFollowRedirects(false);
-			urlConnection.setConnectTimeout(ProxiConstants.WALLED_GARDEN_SOCKET_TIMEOUT_MS);
-			urlConnection.setReadTimeout(ProxiConstants.WALLED_GARDEN_SOCKET_TIMEOUT_MS);
+			urlConnection.setConnectTimeout(ServiceConstants.WALLED_GARDEN_SOCKET_TIMEOUT_MS);
+			urlConnection.setReadTimeout(ServiceConstants.WALLED_GARDEN_SOCKET_TIMEOUT_MS);
 			urlConnection.setUseCaches(false);
 			urlConnection.getInputStream();
 			// We got a valid response, but not from the real google

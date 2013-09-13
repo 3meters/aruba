@@ -12,15 +12,12 @@ import android.widget.TextView.OnEditorActionListener;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.service.HttpService;
-import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Utilities;
 
 public class AddressBuilder extends BaseEntityEdit {
 
-	private Entity	mEntity;
-	
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
@@ -43,7 +40,7 @@ public class AddressBuilder extends BaseEntityEdit {
 	public void draw() {
 
 		setActivityTitle(getString(R.string.dialog_address_builder_title));
-		
+
 		Place place = (Place) mEntity;
 
 		if (place.address != null) {

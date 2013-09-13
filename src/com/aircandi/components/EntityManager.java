@@ -20,7 +20,7 @@ import android.os.Bundle;
 import com.aircandi.Aircandi;
 import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;
@@ -36,6 +36,7 @@ import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.CacheStamp;
+import com.aircandi.service.objects.Candigram;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Device;
@@ -182,7 +183,7 @@ public class EntityManager {
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "checkActivity")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "checkActivity")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
@@ -210,7 +211,7 @@ public class EntityManager {
 		parameters.putString("source", "foursquare");
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_PLACES + "getCategories")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_PLACES + "getCategories")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
@@ -238,7 +239,7 @@ public class EntityManager {
 		parameters.putStringArrayList("applinks", (ArrayList<String>) entityStrings);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_APPLINKS + "refresh")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_APPLINKS + "refresh")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
@@ -265,10 +266,10 @@ public class EntityManager {
 			entityStrings.add("object:" + HttpService.objectToJson(applink, UseAnnotations.True, ExcludeNulls.True));
 		}
 		parameters.putStringArrayList("applinks", (ArrayList<String>) entityStrings);
-		parameters.putInt("timeout", ProxiConstants.SOURCE_SUGGESTIONS_TIMEOUT);
+		parameters.putInt("timeout", ServiceConstants.SOURCE_SUGGESTIONS_TIMEOUT);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_APPLINKS + "suggest")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_APPLINKS + "suggest")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
@@ -293,7 +294,7 @@ public class EntityManager {
 		parameters.putLong("skip", offset);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getPlacePhotos")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "getPlacePhotos")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
@@ -315,7 +316,7 @@ public class EntityManager {
 		final ModelResult result = new ModelResult();
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + collection + "/genId")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST + collection + "/genId")
 				.setRequestType(RequestType.Get)
 				.setSuppressUI(true)
 				.setResponseFormat(ResponseFormat.Json);
@@ -344,10 +345,10 @@ public class EntityManager {
 				+ "}");
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signin")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_AUTH + "signin")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 				.setRetry(false)
 				.setResponseFormat(ResponseFormat.Json);
 
@@ -367,10 +368,10 @@ public class EntityManager {
 			 * really hurt anything.
 			 */
 			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signout")
+					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_AUTH + "signout")
 					.setRequestType(RequestType.Get)
 					.setSession(user.session)
-					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_QUERIES)
+					.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_QUERIES)
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
@@ -391,10 +392,10 @@ public class EntityManager {
 				+ "}");
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "changepw")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_USER + "changepw")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 				.setRetry(false)
 				.setSession(Aircandi.getInstance().getUser().session)
 				.setResponseFormat(ResponseFormat.Json);
@@ -414,10 +415,10 @@ public class EntityManager {
 			user.id = (String) result.serviceResponse.data;
 
 			ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "create")
+					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_USER + "create")
 					.setRequestType(RequestType.Insert)
 					.setRequestBody(HttpService.objectToJson(user, UseAnnotations.True, ExcludeNulls.True))
-					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+					.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 					.setRetry(false)
 					.setUseSecret(true)
 					.setResponseFormat(ResponseFormat.Json);
@@ -447,7 +448,7 @@ public class EntityManager {
 							.setUri(user.getEntryUri())
 							.setRequestType(RequestType.Update)
 							.setRequestBody(HttpService.objectToJson(user, UseAnnotations.True, ExcludeNulls.True))
-							.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+							.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 							.setRetry(false)
 							.setSession(user.session)
 							.setResponseFormat(ResponseFormat.Json);
@@ -475,7 +476,7 @@ public class EntityManager {
 		Logger.i(this, "Calling checkSession");
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "checkSession")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "checkSession")
 				.setRequestType(RequestType.Get)
 				.setResponseFormat(ResponseFormat.Json);
 
@@ -493,7 +494,7 @@ public class EntityManager {
 		// http://ariseditions.com:8080/data/actions?countBy=_user,type&find={"_user":"us.000000.00000.000.000001"}
 		try {
 			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST
+					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST
 							+ "actions?countBy="
 							+ URLEncoder.encode("_user,type", "utf-8")
 							+ "&find="
@@ -635,11 +636,11 @@ public class EntityManager {
 				}
 
 				final ServiceRequest serviceRequest = new ServiceRequest()
-						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity")
+						.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity")
 						.setRequestType(RequestType.Method)
 						.setParameters(parameters)
 						.setSession(Aircandi.getInstance().getUser().session)
-						.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+						.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 						.setRetry(false)
 						.setResponseFormat(ResponseFormat.Json);
 
@@ -662,17 +663,19 @@ public class EntityManager {
 				/*
 				 * Optimization: Add soft 'create' link so user entity doesn't have to be refetched
 				 */
-				Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
-				mEntityCache.addLink(insertedEntity.id
-						, Constants.TYPE_LINK_CREATE
-						, Aircandi.getInstance().getUser().id
-						, insertedEntity.getShortcut()
-						, Aircandi.getInstance().getUser().getShortcut());
+				if (!entity.synthetic) {
+					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
+					mEntityCache.addLink(insertedEntity.id
+							, Constants.TYPE_LINK_CREATE
+							, Aircandi.getInstance().getUser().id
+							, insertedEntity.getShortcut()
+							, Aircandi.getInstance().getUser().getShortcut());
+				}
 
 				result.data = insertedEntity;
-				
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)){
-					mActivityDate = DateTime.nowDate().getTime(); 
+
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					mActivityDate = DateTime.nowDate().getTime();
 				}
 			}
 		}
@@ -713,11 +716,11 @@ public class EntityManager {
 			parameters.putString("entity", "object:" + HttpService.objectToJson(entity, UseAnnotations.True, ExcludeNulls.True));
 
 			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity")
+					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity")
 					.setRequestType(RequestType.Method)
 					.setParameters(parameters)
 					.setSession(Aircandi.getInstance().getUser().session)
-					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+					.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
@@ -733,10 +736,10 @@ public class EntityManager {
 			if (entity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
 				mEntityCache.updateEntityUser(entity);
 			}
-			
-			if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)){
-				mActivityDate = DateTime.nowDate().getTime(); 
-			}			
+
+			if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				mActivityDate = DateTime.nowDate().getTime();
+			}
 		}
 
 		return result;
@@ -765,11 +768,11 @@ public class EntityManager {
 			parameters.putBoolean("deleteChildren", true);
 
 			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteEntity")
+					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteEntity")
 					.setRequestType(RequestType.Method)
 					.setParameters(parameters)
 					.setSession(Aircandi.getInstance().getUser().session)
-					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+					.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
@@ -786,9 +789,9 @@ public class EntityManager {
 			 */
 			Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
 			mEntityCache.removeLink(entityId, Constants.TYPE_LINK_CREATE, Aircandi.getInstance().getUser().id);
-			
-			if (entity != null && entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)){
-				mActivityDate = DateTime.nowDate().getTime(); 
+
+			if (entity != null && entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				mActivityDate = DateTime.nowDate().getTime();
 			}
 		}
 		return result;
@@ -860,11 +863,11 @@ public class EntityManager {
 		String methodName = untuning ? "untrackEntity" : "trackEntity";
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + methodName)
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + methodName)
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setSession(Aircandi.getInstance().getUser().session)
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 				.setRetry(false)
 				.setResponseFormat(ResponseFormat.Json);
 
@@ -935,11 +938,11 @@ public class EntityManager {
 		parameters.putString("actionType", actionType);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertLink")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "insertLink")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setSession(Aircandi.getInstance().getUser().session)
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 				.setRetry(false)
 				.setResponseFormat(ResponseFormat.Json);
 
@@ -949,7 +952,7 @@ public class EntityManager {
 		 */
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			/*
-			 * Fail could be because of ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
+			 * Fail could be because of ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
 			 * prevents any user from liking the same entity more than once.
 			 */
 			mEntityCache.addLink(toId, type, fromId, toShortcut, fromShortcut);
@@ -968,11 +971,11 @@ public class EntityManager {
 		parameters.putString("actionType", actionType);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteLink")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteLink")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setSession(Aircandi.getInstance().getUser().session)
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 				.setRetry(false)
 				.setResponseFormat(ResponseFormat.Json);
 
@@ -982,7 +985,7 @@ public class EntityManager {
 		 */
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			/*
-			 * Fail could be because of ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
+			 * Fail could be because of ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
 			 * prevents any user from liking the same entity more than once.
 			 */
 			mEntityCache.removeLink(toId, type, fromId);
@@ -1025,7 +1028,7 @@ public class EntityManager {
 		parameters.putString("linkType", linkType);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "replaceEntitiesForEntity")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "replaceEntitiesForEntity")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
@@ -1064,11 +1067,11 @@ public class EntityManager {
 		parameters.putStringArrayList("entityIds", new ArrayList(Arrays.asList(entity.id)));
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "moveCandigrams")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "moveCandigrams")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setSession(Aircandi.getInstance().getUser().session)
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 				.setRetry(false)
 				.setResponseFormat(ResponseFormat.Json);
 
@@ -1097,11 +1100,11 @@ public class EntityManager {
 		ModelResult result = new ModelResult();
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + Device.collectionId)
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST + Device.collectionId)
 				.setRequestType(RequestType.Insert)
 				.setRequestBody(HttpService.objectToJson(device, UseAnnotations.True, ExcludeNulls.True))
 				.setIgnoreResponseData(true)
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 				.setRetry(false)
 				.setSession(Aircandi.getInstance().getUser().session)
 				.setResponseFormat(ResponseFormat.Json);
@@ -1116,10 +1119,10 @@ public class EntityManager {
 		parameters.putString("registrationId", registrationId);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "unregisterDevice")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "unregisterDevice")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 				.setRetry(false)
 				.setResponseFormat(ResponseFormat.Json);
 
@@ -1135,10 +1138,10 @@ public class EntityManager {
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			document.id = (String) result.serviceResponse.data;
 			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + document.getCollection())
+					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST + document.getCollection())
 					.setRequestType(RequestType.Insert)
 					.setRequestBody(HttpService.objectToJson(document, UseAnnotations.True, ExcludeNulls.True))
-					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+					.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 					.setRetry(false)
 					.setSession(Aircandi.getInstance().getUser().session)
 					.setResponseFormat(ResponseFormat.Json);
@@ -1165,11 +1168,11 @@ public class EntityManager {
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "invite")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_USER + "invite")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setSession(Aircandi.getInstance().getUser().session)
-				.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
 				.setRetry(false)
 				.setResponseFormat(ResponseFormat.Json);
 
@@ -1269,6 +1272,24 @@ public class EntityManager {
 		return false;
 	}
 
+	public static Boolean canUserKick(Candigram entity) {
+		if (entity == null) return false;
+
+		/* Current user is owner */
+		if (entity.isOwnedByCurrentUser() || entity.isOwnedBySystem()) {
+			return true;
+		}
+
+		/* Nearby */
+		Entity parent = entity.getParent(Constants.TYPE_LINK_CANDIGRAM);
+		if (parent != null && parent.hasActiveProximity()) {
+			return true;
+		}
+
+		/* Not owner and nearby */
+		return false;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Cache queries
 	// --------------------------------------------------------------------------------------------
@@ -1286,7 +1307,7 @@ public class EntityManager {
 				proximity);
 
 		Collections.sort(places, new Place.SortByProximityAndDistance());
-		return places.size() > ProxiConstants.LIMIT_RADAR_PLACES ? places.subList(0, ProxiConstants.LIMIT_RADAR_PLACES) : places;
+		return places.size() > ServiceConstants.LIMIT_RADAR_PLACES ? places.subList(0, ServiceConstants.LIMIT_RADAR_PLACES) : places;
 	}
 
 	// --------------------------------------------------------------------------------------------

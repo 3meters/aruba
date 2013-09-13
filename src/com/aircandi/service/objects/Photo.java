@@ -6,7 +6,7 @@ import java.util.Map;
 
 import android.graphics.Bitmap;
 
-import com.aircandi.ProxiConstants;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.components.bitmaps.ImageResult.Thumbnail;
@@ -170,13 +170,13 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		if (photoUri != null && !photoUri.startsWith("resource:")) {
 			if (source != null) {
 				if (source.equals(PhotoSource.aircandi)) {
-					photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
+					photoUri = ServiceConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 				}
 				else if (source.equals(PhotoSource.assets)) {
-					photoUri = ProxiConstants.URL_PROXIBASE_SERVICE + photoUri;
+					photoUri = ServiceConstants.URL_PROXIBASE_SERVICE + photoUri;
 				}
 				else if (source.equals(PhotoSource.assets_categories)) {
-					photoUri = ProxiConstants.URL_PROXIBASE_SERVICE + photoUri;
+					photoUri = ServiceConstants.URL_PROXIBASE_SERVICE + photoUri;
 				}
 			}
 		}
@@ -190,7 +190,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		}
 		if (photoUri != null && !photoUri.startsWith("resource:") && source != null) {
 			if (source.equals(PhotoSource.aircandi)) {
-				photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
+				photoUri = ServiceConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 			}
 		}
 		return photoUri;

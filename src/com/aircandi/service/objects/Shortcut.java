@@ -10,7 +10,7 @@ import java.util.Map;
 import android.content.Intent;
 
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.service.Expose;
 import com.aircandi.service.objects.Photo.PhotoSource;
@@ -137,7 +137,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 		}
 
 		if (!photoUri.startsWith("http:") && !photoUri.startsWith("https:") && !photoUri.startsWith("resource:")) {
-			photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
+			photoUri = ServiceConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 		}
 
 		return photoUri;

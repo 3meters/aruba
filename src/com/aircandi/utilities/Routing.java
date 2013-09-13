@@ -24,8 +24,8 @@ import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.applications.Candigrams;
 import com.aircandi.applications.Comments;
 import com.aircandi.applications.Maps;
@@ -928,7 +928,7 @@ public final class Routing {
 					 * - 401.2: expired session
 					 * - 401.1: invalid or missing session
 					 */
-					if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
+					if (statusCode == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
 						title = activity.getString(R.string.error_session_expired_title);
 						message = activity.getString(R.string.error_session_expired);
 						/*
@@ -937,7 +937,7 @@ public final class Routing {
 						BaseActivity.signout(null, true);
 
 					}
-					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
+					else if (statusCode == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
 						message = activity.getString(R.string.error_session_invalid);
 						if (serviceOperation != null) {
 							if (serviceOperation == ServiceOperation.PasswordChange) {
@@ -951,16 +951,16 @@ public final class Routing {
 							BaseActivity.signout(null, true);
 						}
 					}
-					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
+					else if (statusCode == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
 						message = activity.getString(R.string.error_whitelist_unauthorized);
 					}
-					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED) {
+					else if (statusCode == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED) {
 						message = activity.getString(R.string.error_unverified_unauthorized);
 					}
-					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
+					else if (statusCode == ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
 						message = activity.getString(R.string.error_signup_password_weak);
 					}
-					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
+					else if (statusCode == ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
 						message = activity.getString(R.string.error_signup_email_taken);
 					}
 					else {

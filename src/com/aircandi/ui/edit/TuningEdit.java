@@ -8,8 +8,8 @@ import android.view.View;
 import android.widget.Button;
 
 import com.aircandi.Aircandi;
-import com.aircandi.ProxiConstants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
@@ -184,7 +184,7 @@ public class TuningEdit extends BaseEntityEdit {
 		 * - no links are created.
 		 * - entity_proximity action logged.
 		 */
-		final List<Beacon> beacons = ProximityManager.getInstance().getStrongestBeacons(ProxiConstants.PROXIMITY_BEACON_COVERAGE);
+		final List<Beacon> beacons = ProximityManager.getInstance().getStrongestBeacons(ServiceConstants.PROXIMITY_BEACON_COVERAGE);
 		final Beacon primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
 
 		new AsyncTask() {

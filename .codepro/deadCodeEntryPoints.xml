@@ -140,7 +140,7 @@
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.components{java[AircandiCommon~onLocationReceived~QLocationReceivedEvent;"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi{PlacesConstants.java[PlacesConstants"/>
+				handle="=Aircandi/src&lt;com.aircandi{Constants.java[PlacesConstants"/>
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.components{LocationChangedReceiver.java[LocationChangedReceiver"/>
 		<explicit-entry-point

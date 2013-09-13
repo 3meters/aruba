@@ -23,10 +23,10 @@ public class TestUtils {
 	 *            <li>HttpStatus.SC_GATEWAY_TIMEOUT
 	 *            <li>HttpStatus.SC_CONFLICT
 	 *            <li>HttpStatus.SC_REQUEST_TOO_LONG
-	 *            <li>ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS
-	 *            <li>ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED
-	 *            <li>ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE
-	 *            <li>ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK
+	 *            <li>ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS
+	 *            <li>ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED
+	 *            <li>ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE
+	 *            <li>ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK
 	 *            </ul>
 	 * @param type
 	 *            Exception class

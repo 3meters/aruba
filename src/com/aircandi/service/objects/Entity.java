@@ -12,8 +12,8 @@ import java.util.Map;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.ProxiConstants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.applications.Candigrams;
 import com.aircandi.applications.Comments;
 import com.aircandi.applications.Maps;
@@ -138,7 +138,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			place.provider.aircandi = Aircandi.getInstance().getUser().id;
 			place.category = new Category();
 			place.category.id = "generic";
-			place.category.photo = new Photo(ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES + "generic_88.png", null, null, null,
+			place.category.photo = new Photo(ServiceConstants.PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES + "generic_88.png", null, null, null,
 					PhotoSource.assets_categories);
 			place.category.photo.colorize = true;
 		}
@@ -160,7 +160,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		shortcut.action = Constants.ACTION_VIEW;
 		return shortcut;
 	}
-	
+
 	public CacheStamp getCacheStamp() {
 		CacheStamp cacheStamp = new CacheStamp(this.activityDate, this.modifiedDate);
 		return cacheStamp;
@@ -185,18 +185,18 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	}
 
 	public Boolean isOwnedBySystem() {
-		Boolean owned = (ownerId != null && ownerId.equals(ProxiConstants.ADMIN_USER_ID));
+		Boolean owned = (ownerId != null && ownerId.equals(ServiceConstants.ADMIN_USER_ID));
 		return owned;
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Properties
 	// --------------------------------------------------------------------------------------------
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
-	
+
 	public LinkProfile getDefaultLinkProfile() {
 		LinkProfile linkProfile = LinkProfile.NoLinks;
 		if (this.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
@@ -269,7 +269,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		}
 
 		if (!photoUri.startsWith("http:") && !photoUri.startsWith("https:") && !photoUri.startsWith("resource:")) {
-			photoUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
+			photoUri = ServiceConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 		}
 
 		return photoUri;
@@ -416,6 +416,17 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		else {
 			return EntityManager.getEntity(toId);
 		}
+	}
+
+	public Link getParentLink(String linkType) {
+		if (linksOut != null) {
+			for (Link link : linksOut) {
+				if (!link.inactive && (linkType == null || link.type.equals(linkType))) {
+					return link;
+				}
+			}
+		}
+		return null;
 	}
 
 	public Boolean hasActiveProximity() {
