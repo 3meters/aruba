@@ -12,14 +12,14 @@ public final class ServiceConstants {
 	public static final int		WALLED_GARDEN_SOCKET_TIMEOUT_MS					= 5000;
 
 	/*
-	 * Used when trying to verify that a network connection is available. The retries
+	 * Used when trying to verify that a NETWORK connection is available. The retries
 	 * are used to allow for the case where the connecting process is underway.
 	 */
 	public static int			CONNECT_TRIES									= 10;
 	public static int			CONNECT_WAIT									= 500;
 
 	/*
-	 * When spotty connectivity causes timeouts, we retry using softer constraints.
+	 * When spotty connectivity causes timeouts, we RETRY using softer constraints.
 	 * We do not attempt retries if the call involved an update/insert/delete.
 	 */
 	public static final int		MAX_BACKOFF_IN_MILLISECONDS						= 5 * 1000;
@@ -31,9 +31,9 @@ public final class ServiceConstants {
 	public static final String	INSERT_USER_SECRET								= "larissa";																																	//$NON-NLS-1$
 	public static final String	ADMIN_USER_ID									= "us.000000.00000.000.000000";																												//$NON-NLS-1$
 
-	public static final String	URL_PROXIBASE_SERVICE							= "http://ariseditions.com:8080";																												// local																					// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
+	public static final String	__URL_PROXIBASE_SERVICE							= "http://ariseditions.com:8080";																												// local																					// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
 	public static final String	_URL_PROXIBASE_SERVICE							= "https://api.aircandi.com";																													// production																					//$NON-NLS-1$
-	public static final String	__URL_PROXIBASE_SERVICE							= "https://api.aircandi.com:444";																												// staging																									//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE							= "https://api.aircandi.com:444";																												// staging																									//$NON-NLS-1$
 
 	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS		= "/img/applinks/";																															//$NON-NLS-1$
 	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES		= "/img/categories/foursquare/";																												//$NON-NLS-1$

@@ -188,8 +188,8 @@ public class Link extends ServiceBase {
 	}
 
 	public enum Direction {
-		in,
-		out,
-		both
+		IN,
+		OUT,
+		BOTH
 	}
 }

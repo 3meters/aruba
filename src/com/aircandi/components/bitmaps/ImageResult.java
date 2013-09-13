@@ -6,7 +6,7 @@ import java.util.Map;
 import com.aircandi.service.objects.Photo;
 
 /**
- * The Class ImageResult.
+ * The Class IMAGE_RESULT.
  * Used for bing image searches.
  */
 public class ImageResult
@@ -21,7 +21,7 @@ public class ImageResult
 	private String		contentType;
 	private Thumbnail	thumbnail;
 	
-	/* Client only */
+	/* CLIENT only */
 	private Photo		photo;
 
 	public static ImageResult setPropertiesFromMap(ImageResult imageResult, Map map, Boolean nameMapping) {
@@ -120,38 +120,38 @@ public class ImageResult
 	}
 
 	/**
-	 * Gets the width.
+	 * Gets the WIDTH.
 	 * 
-	 * @return the width
+	 * @return the WIDTH
 	 */
 	public Long getWidth() {
 		return width;
 	}
 
 	/**
-	 * Sets the width.
+	 * Sets the WIDTH.
 	 * 
 	 * @param value
-	 *            the new width
+	 *            the new WIDTH
 	 */
 	public void setWidth(Long value) {
 		width = value;
 	}
 
 	/**
-	 * Gets the height.
+	 * Gets the HEIGHT.
 	 * 
-	 * @return the height
+	 * @return the HEIGHT
 	 */
 	public Long getHeight() {
 		return height;
 	}
 
 	/**
-	 * Sets the height.
+	 * Sets the HEIGHT.
 	 * 
 	 * @param value
-	 *            the new height
+	 *            the new HEIGHT
 	 */
 	public void setHeight(Long value) {
 		height = value;
@@ -177,19 +177,19 @@ public class ImageResult
 	}
 
 	/**
-	 * Gets the content type.
+	 * Gets the content TYPE.
 	 * 
-	 * @return the content type
+	 * @return the content TYPE
 	 */
 	public String getContentType() {
 		return contentType;
 	}
 
 	/**
-	 * Sets the content type.
+	 * Sets the content TYPE.
 	 * 
 	 * @param value
-	 *            the new content type
+	 *            the new content TYPE
 	 */
 	public void setContentType(String value) {
 		contentType = value;
@@ -272,57 +272,57 @@ public class ImageResult
 		}
 
 		/**
-		 * Gets the content type.
+		 * Gets the content TYPE.
 		 * 
-		 * @return the content type
+		 * @return the content TYPE
 		 */
 		public String getContentType() {
 			return contentType;
 		}
 
 		/**
-		 * Sets the content type.
+		 * Sets the content TYPE.
 		 * 
 		 * @param value
-		 *            the new content type
+		 *            the new content TYPE
 		 */
 		public void setContentType(String value) {
 			contentType = value;
 		}
 
 		/**
-		 * Gets the width.
+		 * Gets the WIDTH.
 		 * 
-		 * @return the width
+		 * @return the WIDTH
 		 */
 		public Long getWidth() {
 			return width;
 		}
 
 		/**
-		 * Sets the width.
+		 * Sets the WIDTH.
 		 * 
 		 * @param value
-		 *            the new width
+		 *            the new WIDTH
 		 */
 		public void setWidth(Long value) {
 			width = value;
 		}
 
 		/**
-		 * Gets the height.
+		 * Gets the HEIGHT.
 		 * 
-		 * @return the height
+		 * @return the HEIGHT
 		 */
 		public Long getHeight() {
 			return height;
 		}
 
 		/**
-		 * Sets the height.
+		 * Sets the HEIGHT.
 		 * 
 		 * @param value
-		 *            the new height
+		 *            the new HEIGHT
 		 */
 		public void setHeight(Long value) {
 			height = value;

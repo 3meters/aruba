@@ -86,7 +86,7 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 				@Override
 				public boolean onPreferenceChange(Preference preference, Object newValue) {
 					/*
-					 * Update user property and push update to service
+					 * UPDATE user property and push update to SERVICE
 					 */
 					return true; // we handled it
 				}
@@ -128,7 +128,7 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 
 				@Override
 				public boolean onPreferenceClick(Preference preference) {
-					Routing.route(Preferences.this, Route.Feedback);
+					Routing.route(Preferences.this, Route.FEEDBACK);
 					return true;
 				}
 			});
@@ -171,7 +171,7 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 
 	private void setSummaries(PreferenceGroup prefGroup) {
 		/*
-		 * Walk and set the current pref values in the UI
+		 * Walk and set the current pref values IN the UI
 		 */
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		for (int i = 0; i < prefGroup.getPreferenceCount(); i++) {
@@ -252,7 +252,7 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 			 */
 			setResult(Activity.RESULT_CANCELED);
 			finish();
-			Animate.doOverridePendingTransition(this, TransitionType.PageToPage);
+			Animate.doOverridePendingTransition(this, TransitionType.PAGE_TO_PAGE);
 		}
 		return true;
 	}

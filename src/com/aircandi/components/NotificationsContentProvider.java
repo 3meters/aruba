@@ -43,7 +43,7 @@ public class NotificationsContentProvider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
-		/* Using SQLiteQueryBuilder instead of query() method */
+		/* Using SQLiteQueryBuilder instead of QUERY() method */
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 
 		/* Check if the caller has requested a column which does not exists */
@@ -57,11 +57,11 @@ public class NotificationsContentProvider extends ContentProvider {
 			case NOTIFICATIONS:
 				break;
 			case NOTIFICATION_ID:
-				/* Adding the ID to the original query */
+				/* Adding the ID to the original QUERY */
 				queryBuilder.appendWhere(NotificationTable.COLUMN_ID + "=" + uri.getLastPathSegment());
 				break;
 			default:
-				throw new IllegalArgumentException("Unknown URI: " + uri);
+				throw new IllegalArgumentException("UNKNOWN URI: " + uri);
 		}
 
 		SQLiteDatabase database = DatabaseHelper.getInstance().getWritableDatabase();
@@ -90,7 +90,7 @@ public class NotificationsContentProvider extends ContentProvider {
 				id = database.insert(NotificationTable.TABLE_NOTIFICATIONS, null, values);
 				break;
 			default:
-				throw new IllegalArgumentException("Unknown URI: " + uri);
+				throw new IllegalArgumentException("UNKNOWN URI: " + uri);
 		}
 
 		getContext().getContentResolver().notifyChange(uri, null);
@@ -123,7 +123,7 @@ public class NotificationsContentProvider extends ContentProvider {
 				}
 				break;
 			default:
-				throw new IllegalArgumentException("Unknown URI: " + uri);
+				throw new IllegalArgumentException("UNKNOWN URI: " + uri);
 		}
 		getContext().getContentResolver().notifyChange(uri, null);
 
@@ -157,7 +157,7 @@ public class NotificationsContentProvider extends ContentProvider {
 				}
 				break;
 			default:
-				throw new IllegalArgumentException("Unknown URI: " + uri);
+				throw new IllegalArgumentException("UNKNOWN URI: " + uri);
 		}
 
 		getContext().getContentResolver().notifyChange(uri, null);
@@ -176,7 +176,7 @@ public class NotificationsContentProvider extends ContentProvider {
 			HashSet<String> availableColumns = new HashSet<String>(Arrays.asList(available));
 			/* Check if all columns which are requested are available */
 			if (!availableColumns.containsAll(requestedColumns)) {
-				throw new IllegalArgumentException("Unknown columns in projection");
+				throw new IllegalArgumentException("UNKNOWN columns IN projection");
 			}
 		}
 	}

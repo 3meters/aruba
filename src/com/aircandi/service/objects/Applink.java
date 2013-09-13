@@ -21,7 +21,7 @@ public class Applink extends Entity implements Cloneable, Serializable {
 	public static final String	collectionId		= "applinks";
 
 	// --------------------------------------------------------------------------------------------
-	// Service fields
+	// SERVICE fields
 	// --------------------------------------------------------------------------------------------
 
 	@Expose
@@ -95,7 +95,7 @@ public class Applink extends Entity implements Cloneable, Serializable {
 
 	public static Applink builder(Entity entity, String type, String name, String image, Boolean synthetic) {
 
-		final Applink applink = (Applink) EntityManager.getInstance().loadEntityFromResources(R.raw.applink_entity, ObjectType.Applink);
+		final Applink applink = (Applink) EntityManager.getInstance().loadEntityFromResources(R.raw.applink_entity, ObjectType.APPLINK);
 		applink.id = entity.id + "." + type;
 		applink.schema = Constants.SCHEMA_ENTITY_APPLINK;
 		applink.type = type;

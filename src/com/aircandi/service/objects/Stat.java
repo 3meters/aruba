@@ -32,7 +32,7 @@ public class Stat extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public static Stat setPropertiesFromMap(Stat stat, Map map, Boolean nameMapping) {
-		stat.type = (String) map.get("type");
+		stat.type = (String) map.get("TYPE");
 		stat.countBy = (Number) map.get("countBy");
 		return stat;
 	}

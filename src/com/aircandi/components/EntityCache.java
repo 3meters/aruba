@@ -51,7 +51,7 @@ public class EntityCache implements Map<String, Entity> {
 
 	private ServiceResponse dispatch(ServiceRequest serviceRequest, Stopwatch stopwatch) {
 		/*
-		 * We use this as a choke point for all calls to the aircandi service.
+		 * We use this as a choke point for all calls to the aircandi SERVICE.
 		 */
 		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest, stopwatch);
 		return serviceResponse;
@@ -79,11 +79,11 @@ public class EntityCache implements Map<String, Entity> {
 			if (entity.linksInCounts == null) {
 				entity.linksInCounts = new ArrayList<Count>();
 			}
-			else if (entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.in) == null) {
+			else if (entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.IN) == null) {
 				entity.linksInCounts.add(new Count(Constants.TYPE_LINK_APPLINK, shortcuts.size()));
 			}
 			else {
-				entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.in).count = entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.in).count.intValue()
+				entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.IN).count = entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.IN).count.intValue()
 						+ shortcuts.size();
 			}
 			for (Shortcut shortcut : shortcuts) {
@@ -99,8 +99,8 @@ public class EntityCache implements Map<String, Entity> {
 
 	public ServiceResponse loadEntity(String entityId, LinkOptions linkOptions) {
 		/*
-		 * Retrieves entity from cache if available otherwise downloads the entity from the service. If refresh is true
-		 * then bypasses the cache and downloads from the service.
+		 * Retrieves entity from cache if available otherwise downloads the entity from the SERVICE. If refresh is true
+		 * then bypasses the cache and downloads from the SERVICE.
 		 */
 		final List<String> entityIds = new ArrayList<String>();
 		entityIds.add(entityId);
@@ -122,9 +122,9 @@ public class EntityCache implements Map<String, Entity> {
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
-				.setRequestType(RequestType.Method)
+				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setResponseFormat(ResponseFormat.Json);
+				.setResponseFormat(ResponseFormat.JSON);
 
 		if (Aircandi.getInstance().getUser() != null) {
 			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
@@ -132,9 +132,9 @@ public class EntityCache implements Map<String, Entity> {
 
 		ServiceResponse serviceResponse = dispatch(serviceRequest);
 
-		if (serviceResponse.responseCode == ResponseCode.Success) {
+		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Entity, ServiceDataWrapper.True);
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.ENTITY, ServiceDataWrapper.TRUE);
 			final List<Entity> loadedEntities = (List<Entity>) serviceData.data;
 			serviceResponse.data = serviceData;
 
@@ -166,9 +166,9 @@ public class EntityCache implements Map<String, Entity> {
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForEntity")
-				.setRequestType(RequestType.Method)
+				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setResponseFormat(ResponseFormat.Json);
+				.setResponseFormat(ResponseFormat.JSON);
 
 		if (Aircandi.getInstance().getUser() != null) {
 			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
@@ -176,15 +176,15 @@ public class EntityCache implements Map<String, Entity> {
 
 		ServiceResponse serviceResponse = dispatch(serviceRequest, stopwatch);
 
-		if (serviceResponse.responseCode == ResponseCode.Success) {
+		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Entity, ServiceDataWrapper.True);
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.ENTITY, ServiceDataWrapper.TRUE);
 			final List<Entity> loadedEntities = (List<Entity>) serviceData.data;
 			serviceResponse.data = serviceData;
 
 			if (loadedEntities != null && loadedEntities.size() > 0) {
 				for (Entity entity : loadedEntities) {
-					if (cursor != null && cursor.direction != null && cursor.direction.equals("out")) {
+					if (cursor != null && cursor.direction != null && cursor.direction.equals("OUT")) {
 						entity.fromId = entityId;
 					}
 					else {
@@ -218,27 +218,27 @@ public class EntityCache implements Map<String, Entity> {
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesByProximity")
-				.setRequestType(RequestType.Method)
+				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setResponseFormat(ResponseFormat.Json);
+				.setResponseFormat(ResponseFormat.JSON);
 
 		if (Aircandi.getInstance().getUser() != null) {
 			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
 		}
 
 		if (stopwatch != null) {
-			stopwatch.segmentTime("Load entities: service call started");
+			stopwatch.segmentTime("Load entities: SERVICE call started");
 		}
 
 		ServiceResponse serviceResponse = dispatch(serviceRequest, stopwatch);
 
 		if (stopwatch != null) {
-			stopwatch.segmentTime("Load entities: service call complete");
+			stopwatch.segmentTime("Load entities: SERVICE call complete");
 		}
 
-		if (serviceResponse.responseCode == ResponseCode.Success) {
+		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Entity, ServiceDataWrapper.True);
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.ENTITY, ServiceDataWrapper.TRUE);
 			final List<Entity> loadedEntities = (List<Entity>) serviceData.data;
 			serviceResponse.data = serviceData;
 
@@ -283,9 +283,9 @@ public class EntityCache implements Map<String, Entity> {
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_PLACES + "getNearLocation")
-				.setRequestType(RequestType.Method)
+				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setResponseFormat(ResponseFormat.Json);
+				.setResponseFormat(ResponseFormat.JSON);
 
 		if (Aircandi.getInstance().getUser() != null) {
 			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
@@ -293,10 +293,10 @@ public class EntityCache implements Map<String, Entity> {
 
 		ServiceResponse serviceResponse = EntityManager.getInstance().dispatch(serviceRequest);
 
-		if (serviceResponse.responseCode == ResponseCode.Success) {
+		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.Place, ServiceDataWrapper.True);
+			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.PLACE, ServiceDataWrapper.TRUE);
 
 			/* Do a bit of fixup */
 			final List<Entity> entities = (List<Entity>) serviceData.data;
@@ -319,7 +319,7 @@ public class EntityCache implements Map<String, Entity> {
 				}
 			}
 
-			/* Places locked in by proximity trump places locked in by location */
+			/* Places LOCKED IN by proximity trump places LOCKED IN by location */
 			final List<Place> proximityPlaces = (List<Place>) EntityManager.getInstance().getPlaces(null, true);
 
 			Iterator<Place> iterProximityPlaces = proximityPlaces.iterator();
@@ -370,7 +370,7 @@ public class EntityCache implements Map<String, Entity> {
 
 	public synchronized void updateEntityUser(Entity entity) {
 		/*
-		 * Updates user objects that are embedded in entities.
+		 * Updates user objects that are embedded IN entities.
 		 */
 		User user = (User) entity;
 		for (Entry<String, Entity> entry : entrySet()) {
@@ -431,11 +431,11 @@ public class EntityCache implements Map<String, Entity> {
 				toEntity.linksInCounts = new ArrayList<Count>();
 				toEntity.linksInCounts.add(new Count(type, 1));
 			}
-			else if (toEntity.getCount(type, Direction.in) == null) {
+			else if (toEntity.getCount(type, Direction.IN) == null) {
 				toEntity.linksInCounts.add(new Count(type, 1));
 			}
 			else {
-				toEntity.getCount(type, Direction.in).count = toEntity.getCount(type, Direction.in).count.intValue() + 1;
+				toEntity.getCount(type, Direction.IN).count = toEntity.getCount(type, Direction.IN).count.intValue() + 1;
 			}
 
 			Link link = new Link(toId, type, true, fromId);
@@ -448,7 +448,7 @@ public class EntityCache implements Map<String, Entity> {
 			toEntity.linksIn.add(link);
 		}
 		/*
-		 * Fixup out links too.
+		 * Fixup OUT links too.
 		 */
 		Entity fromEntity = get(fromId);
 		if (fromEntity != null) {
@@ -461,11 +461,11 @@ public class EntityCache implements Map<String, Entity> {
 				fromEntity.linksOutCounts = new ArrayList<Count>();
 				fromEntity.linksOutCounts.add(new Count(type, 1));
 			}
-			else if (fromEntity.getCount(type, Direction.out) == null) {
+			else if (fromEntity.getCount(type, Direction.OUT) == null) {
 				fromEntity.linksOutCounts.add(new Count(type, 1));
 			}
 			else {
-				fromEntity.getCount(type, Direction.out).count = fromEntity.getCount(type, Direction.out).count.intValue() + 1;
+				fromEntity.getCount(type, Direction.OUT).count = fromEntity.getCount(type, Direction.OUT).count.intValue() + 1;
 			}
 
 			Link link = new Link(toId, type, true, fromId);
@@ -485,13 +485,13 @@ public class EntityCache implements Map<String, Entity> {
 
 	public synchronized Entity removeEntityTree(String entityId) {
 		/*
-		 * Clean out entity and every entity related to entity
+		 * Clean OUT entity and every entity related to entity
 		 */
 		Entity staleEntity = remove(entityId);
 		if (staleEntity != null) {
 			staleEntity.stale = true;
 
-			List<Entity> entities = (List<Entity>) staleEntity.getLinkedEntitiesByLinkTypes(null, null, Direction.in, true);
+			List<Entity> entities = (List<Entity>) staleEntity.getLinkedEntitiesByLinkTypes(null, null, Direction.IN, true);
 			for (Entity childEntity : entities) {
 				staleEntity = remove(childEntity.id);
 				if (staleEntity != null) {
@@ -523,7 +523,7 @@ public class EntityCache implements Map<String, Entity> {
 		if (toEntity != null) {
 
 			if (toEntity.linksInCounts != null) {
-				Count count = toEntity.getCount(type, Direction.in);
+				Count count = toEntity.getCount(type, Direction.IN);
 				if (count != null) {
 					count.count = count.count.intValue() - 1;
 				}
@@ -540,13 +540,13 @@ public class EntityCache implements Map<String, Entity> {
 		}
 
 		/*
-		 * Fixup out links too
+		 * Fixup OUT links too
 		 */
 		Entity fromEntity = get(fromId);
 		if (fromEntity != null) {
 
 			if (fromEntity.linksOutCounts != null) {
-				Count count = fromEntity.getCount(type, Direction.out);
+				Count count = fromEntity.getCount(type, Direction.OUT);
 				if (count != null) {
 					count.count = count.count.intValue() - 1;
 				}

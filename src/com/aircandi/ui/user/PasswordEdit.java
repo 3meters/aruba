@@ -85,9 +85,9 @@ public class PasswordEdit extends BaseEdit {
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
 				hideBusy();
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
-					Logger.i(this, "User changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
+					Logger.i(this, "USER changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
 					Tracker.sendEvent("ui_action", "change_password", null, 0, Aircandi.getInstance().getUser());
 					UI.showToastNotification(getResources().getString(R.string.alert_password_changed)
 							+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);

@@ -97,7 +97,7 @@ public class AirEditText extends EditText {
 			this.setCompoundDrawables(null, null, null, null);
 		}
 		else {
-			/* Add clear button */
+			/* ADD clear button */
 			this.setCompoundDrawablesWithIntrinsicBounds(null, null, mClearDrawable, null);
 		}
 	}

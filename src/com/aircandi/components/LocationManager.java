@@ -61,7 +61,7 @@ public class LocationManager {
 
 			@Override
 			public void run() {
-				Logger.d(LocationManager.this, "Burst mode stopped: timed out");
+				Logger.d(LocationManager.this, "Burst mode stopped: timed OUT");
 				Aircandi.mainThreadHandler.removeCallbacks(mBurstTimeout);
 				mLocationManager.removeUpdates(mLocationListenerPendingIntent);
 				mLocationModeBurstNetwork = false;
@@ -109,13 +109,13 @@ public class LocationManager {
 	public Location getLastKnownLocation() {
 
 		Location location = null;
-		LocationBetterReason reason = LocationBetterReason.None;
+		LocationBetterReason reason = LocationBetterReason.NONE;
 		List<String> providers = mLocationManager.getAllProviders();
 		for (String provider : providers) {
 			Location locationCandidate = mLocationManager.getLastKnownLocation(provider);
 			if (locationCandidate != null) {
 				reason = isBetterLocation(locationCandidate, location);
-				if (reason != LocationBetterReason.None) {
+				if (reason != LocationBetterReason.NONE) {
 					location = locationCandidate;
 				}
 			}
@@ -164,11 +164,11 @@ public class LocationManager {
 						location.accuracy = mLocationLocked.getAccuracy();
 					}
 					if (mLocationLocked.hasBearing()) {
-						/* Direction of travel in degrees East of true North. */
+						/* Direction of travel IN degrees East of true North. */
 						location.bearing = mLocationLocked.getBearing();
 					}
 					if (mLocationLocked.hasSpeed()) {
-						/* Speed of the device over ground in meters/second. */
+						/* Speed of the device over ground IN meters/second. */
 						location.speed = mLocationLocked.getSpeed();
 					}
 					location.provider = mLocationLocked.getProvider();
@@ -202,23 +202,23 @@ public class LocationManager {
 		else {
 			if (isGoodLocation(location)) {
 				final LocationBetterReason reason = isBetterLocation(location, mLocationLatest);
-				if (reason != LocationBetterReason.None) {
+				if (reason != LocationBetterReason.NONE) {
 					String message = "Location changed:";
 					message += " provider: " + location.getProvider();
 					message += " accuracy: " + String.valueOf(location.getAccuracy());
 					message += " reason: ** " + reason.name().toLowerCase(Locale.US) + " **";
 					Logger.d(this, message);
 
-					if (reason == LocationBetterReason.NotNull
-							|| reason == LocationBetterReason.Provider
-							|| reason == LocationBetterReason.Accuracy
-							|| reason == LocationBetterReason.Recency) {
+					if (reason == LocationBetterReason.NOT_NULL
+							|| reason == LocationBetterReason.PROVIDER
+							|| reason == LocationBetterReason.ACCURACY
+							|| reason == LocationBetterReason.RECENCY) {
 
 						mLocationLatest = location;
 						BusProvider.getInstance().post(new LocationChangedEvent(mLocationLatest));
 					}
 
-					if (location.getProvider().equals("network") && mLocationModeBurstNetwork) {
+					if (location.getProvider().equals("NETWORK") && mLocationModeBurstNetwork) {
 						if (location.getAccuracy() <= Constants.DESIRED_ACCURACY_NETWORK) {
 							Logger.d(this, "Network burst mode stopped: desired accuracy reached");
 							if (mLocationModeBurstGps) {
@@ -277,17 +277,17 @@ public class LocationManager {
 
 		/* A new location is always better than no location */
 		if (currentBestLocation == null) {
-			return LocationBetterReason.NotNull;
+			return LocationBetterReason.NOT_NULL;
 		}
 
-		/* A good gps location is always better than an excellent network location */
-		if (currentBestLocation.getProvider().equals("network") && locationToEvaluate.getProvider().equals("gps")) {
-			return LocationBetterReason.Provider;
+		/* A good gps location is always better than an excellent NETWORK location */
+		if (currentBestLocation.getProvider().equals("NETWORK") && locationToEvaluate.getProvider().equals("gps")) {
+			return LocationBetterReason.PROVIDER;
 		}
 
-		/* Do not replace a good gps location with a network location */
-		if (currentBestLocation.getProvider().equals("gps") && locationToEvaluate.getProvider().equals("network")) {
-			return LocationBetterReason.None;
+		/* Do not replace a good gps location with a NETWORK location */
+		if (currentBestLocation.getProvider().equals("gps") && locationToEvaluate.getProvider().equals("NETWORK")) {
+			return LocationBetterReason.NONE;
 		}
 
 		/* Check whether the new location fix is more or less accurate */
@@ -307,13 +307,13 @@ public class LocationManager {
 
 		/* Determine location quality using a combination of timeliness and accuracy */
 		if (isMoreAccurate) {
-			return LocationBetterReason.Accuracy;
+			return LocationBetterReason.ACCURACY;
 		}
 		else if (isNewer && !isLessAccurate) {
-			return LocationBetterReason.Recency;
+			return LocationBetterReason.RECENCY;
 		}
 		else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
-			return LocationBetterReason.Recency;
+			return LocationBetterReason.RECENCY;
 		}
 		/*
 		 * If it's been more than two minutes since the current location, use
@@ -321,19 +321,19 @@ public class LocationManager {
 		 */
 		if (isSignificantlyNewer) {
 			/* If the new location is more than two minutes older, it must be worse */
-			return LocationBetterReason.Recency;
+			return LocationBetterReason.RECENCY;
 		}
 		else if (isSignificantlyOlder) {
-			return LocationBetterReason.None;
+			return LocationBetterReason.NONE;
 		}
 
 		/* Check distance moved and adjust for accuracy */
 		final float distance = currentBestLocation.distanceTo(locationToEvaluate);
 		if (distance - locationToEvaluate.getAccuracy() > Constants.MIN_DISTANCE_UPDATES) {
-			return LocationBetterReason.Distance;
+			return LocationBetterReason.DISTANCE;
 		}
 
-		return LocationBetterReason.None;
+		return LocationBetterReason.NONE;
 	}
 
 	public static Boolean hasMoved(Location locationToEvaluate, Location currentBestLocation, Integer minDistance) {
@@ -385,11 +385,11 @@ public class LocationManager {
 	}
 
 	private enum LocationBetterReason {
-		Distance,
-		Recency,
-		Accuracy,
-		Provider,
-		NotNull,
-		None
+		DISTANCE,
+		RECENCY,
+		ACCURACY,
+		PROVIDER,
+		NOT_NULL,
+		NONE
 	}
 }

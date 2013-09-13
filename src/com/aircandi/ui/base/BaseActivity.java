@@ -76,7 +76,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 			/*
 			 * We restarting after a crash or after being killed by Android
 			 */
-			super.onCreate(null); // null prevents fragment auto creation
+			super.onCreate(null); // null prevents fragment AUTO creation
 			Logger.d(this, "Aircandi not launched normally, routing to splash activity");
 			Intent intent = new Intent(this, SplashForm.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -148,7 +148,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	@Override
 	public void onBackPressed() {
-		Routing.route(this, Route.Cancel);
+		Routing.route(this, Route.CANCEL);
 	}
 
 	@Override
@@ -162,13 +162,13 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	@SuppressWarnings("ucd")
 	public void onCancelButtonClick(View view) {
-		Routing.route(this, Route.Cancel);
+		Routing.route(this, Route.CANCEL);
 	}
 
 	public void onCancel(Boolean force) {
 		setResult(Activity.RESULT_CANCELED);
 		finish();
-		Animate.doOverridePendingTransition(this, TransitionType.PageBack);
+		Animate.doOverridePendingTransition(this, TransitionType.PAGE_BACK);
 	}
 
 	@Override
@@ -339,10 +339,10 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB_MR2) {
 			//			final android.view.WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
-			//			final int height = Math.min(newConfig.screenHeightDp, 450);
-			//			final int width = Math.min(newConfig.screenWidthDp, 350);
-			//			params.height = ImageUtils.getRawPixels(mActivity, height);
-			//			params.width = ImageUtils.getRawPixels(mActivity, width);
+			//			final int HEIGHT = Math.min(newConfig.screenHeightDp, 450);
+			//			final int WIDTH = Math.min(newConfig.screenWidthDp, 350);
+			//			params.height = ImageUtils.getRawPixels(mActivity, HEIGHT);
+			//			params.width = ImageUtils.getRawPixels(mActivity, WIDTH);
 			//			mActivity.getWindow().setAttributes(params);
 		}
 	}
@@ -366,7 +366,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 				actionBarTitleId = Class.forName("com.actionbarsherlock.R$id").getField("abs__action_bar_title").getInt(null);
 			}
 			else {
-				// Use reflection to get the actionbar title TextView and set the custom font. May break in updates.
+				// Use reflection to get the actionbar title TextView and set the custom font. May break IN updates.
 				actionBarTitleId = Class.forName("com.android.internal.R$id").getField("action_bar_title").getInt(null);
 			}
 		}
@@ -416,18 +416,18 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 					@Override
 					protected void onPostExecute(Object response) {
 						final ModelResult result = (ModelResult) response;
-						/* We continue on even if the service call failed. */
-						if (result.serviceResponse.responseCode == ResponseCode.Success) {
-							Logger.i(this, "User signed out: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
+						/* We continue on even if the SERVICE call failed. */
+						if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+							Logger.i(this, "USER signed OUT: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
 						}
 						else {
-							Logger.w(this, "User signed out, service call failed: " + Aircandi.getInstance().getUser().id);
+							Logger.w(this, "USER signed OUT, SERVICE call failed: " + Aircandi.getInstance().getUser().id);
 						}
 
-						/* Stop the current tracking session. Starts again when a user logs in. */
+						/* Stop the current tracking session. Starts again when a user logs IN. */
 						Tracker.stopSession(Aircandi.getInstance().getUser());
 
-						/* Clear the user and session that is tied into auto-signin */
+						/* Clear the user and session that is tied into AUTO-signin */
 						com.aircandi.components.NotificationManager.getInstance().unregisterDeviceWithAircandi(
 								GCMRegistrar.getRegistrationId(Aircandi.applicationContext));
 						Aircandi.getInstance().setUser(null);
@@ -441,7 +441,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 							/* Notify interested parties */
 							UI.showToastNotification(Aircandi.applicationContext.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
 							((BaseActivity) activity).hideBusy();
-							Routing.route(activity, Route.Splash);
+							Routing.route(activity, Route.SPLASH);
 						}
 
 					}
@@ -558,8 +558,8 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	}
 
 	public enum ServiceOperation {
-		Signin,
-		PasswordChange,
+		SIGNIN,
+		PASSWORD_CHANGE,
 	}
 
 	public static class SimpleTextWatcher implements TextWatcher {

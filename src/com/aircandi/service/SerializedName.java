@@ -2,12 +2,12 @@
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may not use this file except IN compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+ * Unless required by applicable law or agreed to IN writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -56,7 +56,7 @@ import java.lang.annotation.Target;
  * {"name":"a","someOtherField":"b"}
  * </pre>
  *
- * <p>NOTE: The value you specify in this annotation must be a valid JSON field name.</p>
+ * <p>NOTE: The value you specify IN this annotation must be a valid JSON field name.</p>
  *
  * @see com.google.gson.FieldNamingPolicy
  *
@@ -68,7 +68,7 @@ import java.lang.annotation.Target;
 public @interface SerializedName {
 	
   /**
-   * If {@code true}, the field marked with this annotation is written out in the JSON while
+   * If {@code true}, the field marked with this annotation is written OUT IN the JSON while
    * serializing. If {@code false}, the field marked with this annotation is skipped from the
    * serialized output. Defaults to {@code true}.
    * @since 1.4

@@ -96,7 +96,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		if (extras != null) {
 			mForEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
 			/*
-			 * Could be any link type: place, post, comment, applink, create, like, watch
+			 * Could be any link TYPE: place, post, comment, applink, create, like, WATCH
 			 */
 			mListLinkSchema = extras.getString(Constants.EXTRA_LIST_LINK_SCHEMA);
 			mListLinkType = extras.getString(Constants.EXTRA_LIST_LINK_TYPE);
@@ -105,7 +105,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			}
 			mListLinkDirection = extras.getString(Constants.EXTRA_LIST_LINK_DIRECTION);
 			if (mListLinkDirection == null) {
-				mListLinkDirection = "in";
+				mListLinkDirection = "IN";
 			}
 			mListNewEnabled = extras.getBoolean(Constants.EXTRA_LIST_NEW_ENABLED, false);
 			mListItemResId = extras.getInt(Constants.EXTRA_LIST_ITEM_RESID, getListItemResId(mListLinkSchema));
@@ -142,7 +142,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 					Routing.shortcut(BaseEntityList.this, entity.getShortcut(), null, null);
 				}
 				else {
-					Routing.route(BaseEntityList.this, Route.Browse, entity, null, null);
+					Routing.route(BaseEntityList.this, Route.BROWSE, entity, null, null);
 				}
 			}
 		};
@@ -173,7 +173,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 					showBusy();
 					CacheStamp cacheStamp = EntityManager.getInstance().loadCacheStamp(mForEntity.id, mCacheStamp);
 					/*
-					 * For now, we refresh for both modified and activity to keep it simple. We do
+					 * For now, we refresh for BOTH modified and activity to keep it simple. We do
 					 * not update the ForEntity because that should be handled by code that is dealing with
 					 * it directly. The cache stamp should keep us from doing extra refreshes even though
 					 * the ForEntity hasn't changed.
@@ -195,7 +195,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 						 */
 						setAdapter();
 					}
-					else if (mode == BindingMode.service) {
+					else if (mode == BindingMode.SERVICE) {
 						showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
 					}
 					else {
@@ -211,10 +211,10 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		mEntities.clear();
 		mAdapter = new EntityAdapter(mEntities);
 		if (mListView != null) {
-			mListView.setAdapter(mAdapter); // draw happens in the adapter
+			mListView.setAdapter(mAdapter); // draw happens IN the adapter
 		}
 		else if (mGridView != null) {
-			mGridView.setAdapter(mAdapter); // draw happens in the adapter
+			mGridView.setAdapter(mAdapter); // draw happens IN the adapter
 		}
 	}
 
@@ -301,11 +301,11 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	public void onAdd() {
 		/*
 		 * We assume the new entity button wouldn't be visible if the
-		 * entity is locked.
+		 * entity is LOCKED.
 		 */
 		Bundle extras = new Bundle();
 		extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mForEntityId);
-		Routing.route(this, Route.New, null, mListLinkSchema, extras);
+		Routing.route(this, Route.NEW, null, mListLinkSchema, extras);
 	}
 
 	@SuppressWarnings("ucd")
@@ -329,25 +329,25 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	private LinkOptions getLinkOptions(String schema) {
 		if (schema != null) {
 			if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-				return LinkOptions.getDefault(LinkProfile.NoLinks);
+				return LinkOptions.getDefault(LinkProfile.NO_LINKS);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-				return LinkOptions.getDefault(LinkProfile.LinksForPicture);
+				return LinkOptions.getDefault(LinkProfile.LINKS_FOR_PICTURE);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
-				return LinkOptions.getDefault(LinkProfile.LinksForCandigram);
+				return LinkOptions.getDefault(LinkProfile.LINKS_FOR_CANDIGRAM);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-				return LinkOptions.getDefault(LinkProfile.LinksForPlace);
+				return LinkOptions.getDefault(LinkProfile.LINKS_FOR_PLACE);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
-				return LinkOptions.getDefault(LinkProfile.LinksForUser);
+				return LinkOptions.getDefault(LinkProfile.LINKS_FOR_USER);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-				return LinkOptions.getDefault(LinkProfile.NoLinks);
+				return LinkOptions.getDefault(LinkProfile.NO_LINKS);
 			}
 		}
-		return LinkOptions.getDefault(LinkProfile.NoLinks);
+		return LinkOptions.getDefault(LinkProfile.NO_LINKS);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -413,7 +413,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		super.onResume();
 		if (!isFinishing()) {
 			invalidateOptionsMenu();
-			bind(BindingMode.auto); // Setting this here because it doesn't mean a service call
+			bind(BindingMode.AUTO); // Setting this here because it doesn't mean a SERVICE call
 		}
 	}
 
@@ -447,14 +447,14 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			 * - when this function reported more available and the special pending view
 			 * is being rendered by getView.
 			 * 
-			 * Returning true means we think there are more items available to query for.
+			 * Returning true means we think there are more items available to QUERY for.
 			 * 
 			 * This is called on background thread from an AsyncTask started by EndlessAdapter.
 			 */
 			mMoreEntities.clear();
 			final ModelResult result = loadEntities(false);
 
-			if (result.serviceResponse.responseCode != ResponseCode.Success) {
+			if (result.serviceResponse.responseCode != ResponseCode.SUCCESS) {
 				hideBusy();
 				Routing.serviceError(BaseEntityList.this, result.serviceResponse);
 				Aircandi.stopwatch3.stop(this.getClass().getSimpleName() + " databind failed");
@@ -655,10 +655,10 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 				UI.setVisibility(holder.comments, View.GONE);
 				if (holder.comments != null) {
-					Count count = entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.in);
+					Count count = entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.IN);
 					Integer commentCount = count != null ? count.count.intValue() : 0;
 					if (commentCount != null && commentCount > 0) {
-						holder.comments.setText(String.valueOf(commentCount) + ((commentCount == 1) ? " Comment" : " Comments"));
+						holder.comments.setText(String.valueOf(commentCount) + ((commentCount == 1) ? " COMMENT" : " Comments"));
 						holder.comments.setTag(entity);
 						UI.setVisibility(holder.comments, View.VISIBLE);
 					}
@@ -686,11 +686,11 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 				UI.setVisibility(holder.createdDate, View.GONE);
 				if (holder.createdDate != null && entity.createdDate != null) {
-					holder.createdDate.setText(DateTime.interval(entity.createdDate.longValue(), DateTime.nowDate().getTime(), IntervalContext.past));
+					holder.createdDate.setText(DateTime.interval(entity.createdDate.longValue(), DateTime.nowDate().getTime(), IntervalContext.PAST));
 					UI.setVisibility(holder.createdDate, View.VISIBLE);
 				}
 
-				/* Place context */
+				/* PLACE context */
 				UI.setVisibility(view.findViewById(R.id.place_holder), View.GONE);
 				if (entity.place != null) {
 					if (holder.placePhotoView != null) {
@@ -711,7 +711,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 					UI.setVisibility(view.findViewById(R.id.place_holder), View.VISIBLE);
 				}
 
-				/* Photo */
+				/* PHOTO */
 
 				if (holder.photoView != null) {
 					holder.photoView.setTag(entity);
@@ -786,7 +786,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 		@SuppressWarnings("ucd")
 		public String		photoUri;		// Used for verification after fetching image
-		public Object		data;			// Object binding to
+		public Object		data;			// OBJECT binding to
 		public TextView		comments;
 	}
 

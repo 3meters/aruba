@@ -40,7 +40,7 @@ public class NetworkManager {
 	private Integer							mWifiApState;
 	private WifiManager						mWifiManager;
 	private ConnectivityManager				mConnectivityManager;
-	private ConnectedState					mConnectedState					= ConnectedState.Normal;
+	private ConnectedState					mConnectedState					= ConnectedState.NORMAL;
 
 	public static final String				EXTRA_WIFI_AP_STATE				= "wifi_state";
 	public static final String				WIFI_AP_STATE_CHANGED_ACTION	= "android.net.wifi.WIFI_AP_STATE_CHANGED";
@@ -70,7 +70,7 @@ public class NetworkManager {
 		intentFilter.addAction(WIFI_AP_STATE_CHANGED_ACTION);
 		mApplicationContext.registerReceiver(mWifiStateChangedReceiver, intentFilter);
 		/*
-		 * Enables registration for changes in network status from http stack
+		 * Enables registration for changes IN NETWORK status from http stack
 		 */
 		mNetworkStateChangedFilter = new IntentFilter();
 		mNetworkStateChangedFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -85,13 +85,13 @@ public class NetworkManager {
 					boolean noConnection = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
 
 					if (noConnection) {
-						UI.showToastNotification("Lost network connection", Toast.LENGTH_SHORT);
+						UI.showToastNotification("Lost NETWORK connection", Toast.LENGTH_SHORT);
 					}
 					if (wifi.isAvailable()) {
-						UI.showToastNotification("Wifi network is available", Toast.LENGTH_SHORT);
+						UI.showToastNotification("Wifi NETWORK is available", Toast.LENGTH_SHORT);
 					}
 					if (mobile.isAvailable()) {
-						UI.showToastNotification("Mobile network is available", Toast.LENGTH_SHORT);
+						UI.showToastNotification("Mobile NETWORK is available", Toast.LENGTH_SHORT);
 					}
 				}
 			}
@@ -107,14 +107,14 @@ public class NetworkManager {
 		try {
 			/* Could be string, input stream, or array of bytes */
 			final Object response = HttpService.getInstance().request(serviceRequest, stopwatch);
-			serviceResponse = new ServiceResponse(ResponseCode.Success, response, null);
+			serviceResponse = new ServiceResponse(ResponseCode.SUCCESS, response, null);
 		}
 		catch (HttpServiceException exception) {
 			/*
-			 * We got a service side error that either stopped us in our tracks or
+			 * We got a SERVICE side error that either stopped us IN our tracks or
 			 * we gave up after performing a series of retries.
 			 */
-			serviceResponse = new ServiceResponse(ResponseCode.Failed, null, exception);
+			serviceResponse = new ServiceResponse(ResponseCode.FAILED, null, exception);
 		}
 		return serviceResponse;
 	}
@@ -130,28 +130,28 @@ public class NetworkManager {
 		 * We create a little time for a connection process to complete
 		 * Max attempt time = CONNECT_TRIES * CONNECT_WAIT
 		 */
-		ConnectedState connectedState = ConnectedState.Normal;
+		ConnectedState connectedState = ConnectedState.NORMAL;
 		while (!NetworkManager.getInstance().isConnected()) {
 			attempts++;
-			Logger.v(this, "No network connection: attempt: " + String.valueOf(attempts));
+			Logger.v(this, "No NETWORK connection: attempt: " + String.valueOf(attempts));
 
 			if (attempts >= ServiceConstants.CONNECT_TRIES) {
-				connectedState = ConnectedState.None;
+				connectedState = ConnectedState.NONE;
 				break;
 			}
 			try {
 				Thread.sleep(ServiceConstants.CONNECT_WAIT);
 			}
 			catch (InterruptedException exception) {
-				connectedState = ConnectedState.None;
+				connectedState = ConnectedState.NONE;
 				break;
 			}
 		}
 
-		/* We have a network connection so now check for a walled garden */
+		/* We have a NETWORK connection so now check for a walled garden */
 		if (!isMobileNetwork()) {
 			if (isWalledGardenConnection()) {
-				connectedState = ConnectedState.WalledGarden;
+				connectedState = ConnectedState.WALLED_GARDEN;
 			}
 		}
 
@@ -195,7 +195,7 @@ public class NetworkManager {
 
 	@SuppressWarnings("ucd")
 	protected Boolean isMobileNetwork() {
-		/* Check if we're connected to a data network, and if so - if it's a mobile network. */
+		/* Check if we're connected to a data NETWORK, and if so - if it's a mobile NETWORK. */
 		Boolean isMobileNetwork = null;
 		if (mConnectivityManager != null) {
 			final NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
@@ -210,7 +210,7 @@ public class NetworkManager {
 	 */
 	@SuppressWarnings("ucd")
 	protected Integer getNetworkTypeId() {
-		/* Check if we're connected to a data network, and if so - if it's a mobile network. */
+		/* Check if we're connected to a data NETWORK, and if so - if it's a mobile NETWORK. */
 		Integer networkTypeId = null;
 		if (mConnectivityManager != null) {
 			final NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
@@ -328,7 +328,7 @@ public class NetworkManager {
 	public static class ServiceResponse {
 
 		public Object				data;
-		public ResponseCode			responseCode	= ResponseCode.Success;
+		public ResponseCode			responseCode	= ResponseCode.SUCCESS;
 
 		public HttpServiceException	exception;
 
@@ -342,10 +342,13 @@ public class NetworkManager {
 	}
 
 	public static enum ResponseCode {
-		Success, Failed
+		SUCCESS, 
+		FAILED
 	}
 
 	public static enum ConnectedState {
-		None, Normal, WalledGarden,
+		NONE, 
+		NORMAL, 
+		WALLED_GARDEN,
 	}
 }

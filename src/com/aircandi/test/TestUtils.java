@@ -28,7 +28,7 @@ public class TestUtils {
 	 *            <li>ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE
 	 *            <li>ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK
 	 *            </ul>
-	 * @param type
+	 * @param TYPE
 	 *            Exception class
 	 *            <ul>
 	 *            <li>ClientProtocolException.class
@@ -51,7 +51,7 @@ public class TestUtils {
 		}
 
 		final HttpServiceException proxibaseException = HttpService.makeHttpServiceException(httpStatusCode, null, exception);
-		final ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Failed, null, proxibaseException);
+		final ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.FAILED, null, proxibaseException);
 		return serviceResponse;
 	}
 }

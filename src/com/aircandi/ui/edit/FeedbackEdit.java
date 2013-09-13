@@ -31,7 +31,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		/*
-		 * Feedback are not really an entity type so we handle
+		 * FEEDBACK are not really an entity TYPE so we handle
 		 * all the expected initialization.
 		 */
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -105,7 +105,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 
 	@Override
 	protected void insert() {
-		Logger.i(this, "Insert feedback");
+		Logger.i(this, "INSERT feedback");
 
 		new AsyncTask() {
 
@@ -126,7 +126,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
 
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					Tracker.sendEvent("ui_action", "send_feedback", null, 0, Aircandi.getInstance().getUser());
 					hideBusy();
 					UI.showToastNotification(getString(R.string.alert_feedback_sent), Toast.LENGTH_SHORT);

@@ -33,12 +33,12 @@ public class Candigrams {
 				.setEntityId(entityId)
 				.setEntityParentId(parentId);
 		context.startActivity(intentBuilder.create());
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 	}
 
 	public static void viewFor(Context context, String entityId, String linkType, Direction direction) {
 		if (direction == null) {
-			direction = Direction.in;
+			direction = Direction.IN;
 		}
 		IntentBuilder intentBuilder = new IntentBuilder(context, EntityList.class)
 				.setEntityId(entityId)
@@ -49,12 +49,12 @@ public class Candigrams {
 				.setListNewEnabled(true);
 
 		context.startActivity(intentBuilder.create());
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 	}
 
 	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction, String title) {
 		if (direction == null) {
-			direction = Direction.in;
+			direction = Direction.IN;
 		}
 		IntentBuilder intentBuilder = new IntentBuilder(context, EntityList.class)
 				.setEntityId(entityId)
@@ -72,14 +72,14 @@ public class Candigrams {
 	public static void edit(Context context, Entity entity) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, CandigramEdit.class).setEntity(entity);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 	}
 
 	@SuppressWarnings("ucd")
 	public static void insert(Context context) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, CandigramWizard.class).setEntitySchema(Constants.SCHEMA_ENTITY_CANDIGRAM);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 	}
 	
 	public static SpinnerData getSpinnerData(Context context, PropertyType propertyType) {
@@ -89,22 +89,22 @@ public class Candigrams {
 		Integer valuesResId = null;
 		Integer descriptionsResId = null;
 		
-		if (propertyType == PropertyType.type) {
+		if (propertyType == PropertyType.TYPE) {
 			entriesResId = R.array.candigram_type_entries;
 			valuesResId = R.array.candigram_type_values;
 			descriptionsResId = R.array.candigram_type_descriptions;
 		}
-		else if (propertyType == PropertyType.range) {
+		else if (propertyType == PropertyType.RANGE) {
 			entriesResId = R.array.candigram_range_entries;
 			valuesResId = R.array.candigram_range_values;
 			descriptionsResId = R.array.candigram_range_descriptions;
 		}
-		else if (propertyType == PropertyType.duration) {
+		else if (propertyType == PropertyType.DURATION) {
 			entriesResId = R.array.candigram_duration_entries;
 			valuesResId = R.array.candigram_duration_values;
 			descriptionsResId = R.array.candigram_duration_descriptions;
 		}
-		else if (propertyType == PropertyType.hops) {
+		else if (propertyType == PropertyType.HOPS) {
 			entriesResId = R.array.candigram_hops_entries;
 			valuesResId = R.array.candigram_hops_values;
 			descriptionsResId = R.array.candigram_hops_descriptions;
@@ -127,7 +127,7 @@ public class Candigrams {
 		Integer valuesResId = null;
 		Integer descriptionsResId = null;
 		
-		if (propertyType == PropertyType.type) {
+		if (propertyType == PropertyType.TYPE) {
 			entriesResId = R.array.candigram_type_entries;
 			valuesResId = R.array.candigram_type_values;
 			descriptionsResId = R.array.candigram_type_descriptions;
@@ -163,10 +163,10 @@ public class Candigrams {
 	}
 
 	public enum PropertyType {
-		type,
-		range,
-		duration,
-		locked, 
-		hops
+		TYPE,
+		RANGE,
+		DURATION,
+		LOCKED, 
+		HOPS
 	}
 }

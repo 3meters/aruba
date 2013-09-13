@@ -42,7 +42,7 @@ public class HorizontalScrollLayout extends HorizontalScrollView {
 		final FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		this.addView(mLayout, layoutParams);
 
-		/* Show something in design mode */
+		/* Show something IN design mode */
 		if (isInEditMode()) {
 			int itemCount = 0;
 			while (itemCount < 3) {

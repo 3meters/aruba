@@ -14,7 +14,7 @@ public class CreatedFragment extends BaseShortcutFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mLinkProfiles = LinkProfile.LinksForUser;
+		mLinkProfiles = LinkProfile.LINKS_FOR_USER;
 		mShortcutType = Constants.TYPE_LINK_CREATE;
 	}
 

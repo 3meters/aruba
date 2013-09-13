@@ -18,7 +18,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 	}
 
 	/*
-	 * Note: The methods below run in the intent service's thread and hence are free to make network calls without the
+	 * Note: The methods below run IN the intent SERVICE's thread and hence are free to make NETWORK calls without the
 	 * risk of blocking the UI thread.
 	 */
 
@@ -29,19 +29,19 @@ public class GCMIntentService extends GCMBaseIntentService {
 		 * device/application pair as parameter. Typically, you should send the regid to your server so it can use it to
 		 * send messages to this device.
 		 */
-		Logger.i(this, "GCM: Device registration id is: " + registrationId);
+		Logger.i(this, "GCM: DEVICE registration id is: " + registrationId);
 	}
 
 	@Override
 	protected void onMessage(Context context, Intent messageIntent) {
 		/*
 		 * Called when our server sends a message to GCM, and GCM delivers it to the device. If the message has a
-		 * payload, its contents are available as extras in the intent.
+		 * payload, its contents are available as extras IN the intent.
 		 */
 		String jsonNotification = messageIntent.getStringExtra("notification");
-		AirNotification notification = (AirNotification) HttpService.jsonToObject(jsonNotification, ObjectType.AirNotification);
+		AirNotification notification = (AirNotification) HttpService.jsonToObject(jsonNotification, ObjectType.AIR_NOTIFICATION);
 
-		/* Build intent that can be used in association with the notification */
+		/* Build intent that can be used IN association with the notification */
 		if (notification.entity != null) {
 			if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 				notification.intent = Comments.viewForGetIntent(context, notification.entity.toId, Constants.TYPE_LINK_COMMENT, null, null);
@@ -59,7 +59,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		/* Customize title and subtitle before storing and broadcasting */
 		NotificationManager.getInstance().decorateNotification(notification);
 
-		/* Stash in our local database */
+		/* Stash IN our local database */
 		NotificationManager.getInstance().storeNotification(notification, jsonNotification);
 
 		/* Trigger event so subscribers can decide if they should refresh */
@@ -85,6 +85,6 @@ public class GCMIntentService extends GCMBaseIntentService {
 		 * Called when the device tries to register or unregister, but GCM returned an error. Typically, there is
 		 * nothing to be done other than evaluating the error (returned by errorId) and trying to fix the problem.
 		 */
-		Logger.i(this, "GCM: Error: " + errorId);
+		Logger.i(this, "GCM: ERROR: " + errorId);
 	}
 }

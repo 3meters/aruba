@@ -61,7 +61,7 @@ public class PhotoForm extends BaseBrowse implements IForm {
 		}
 
 		setSupportProgressBarIndeterminateVisibility(true);
-		databind(BindingMode.auto);
+		databind(BindingMode.AUTO);
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class PhotoForm extends BaseBrowse implements IForm {
 	@Override
 	public void databind(BindingMode mode) {
 		/*
-		 * Photo form is a special case that doesn't share enough
+		 * PHOTO form is a special case that doesn't share enough
 		 * functionality to move this databind to a base class.
 		 */
 		List<Photo> photos = EntityManager.getInstance().getPhotos();
@@ -140,7 +140,7 @@ public class PhotoForm extends BaseBrowse implements IForm {
 
 					@Override
 					public void run() {
-						if (serviceResponse.responseCode != ResponseCode.Success) {
+						if (serviceResponse.responseCode != ResponseCode.SUCCESS) {
 							image.setScaleType(ScaleType.CENTER);
 							image.setImageResource(R.drawable.img_broken);
 						}

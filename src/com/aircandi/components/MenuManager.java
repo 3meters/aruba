@@ -40,7 +40,7 @@ public class MenuManager {
 		else if (activityName.contains("CandigramWizard")) {
 			menuInflater.inflate(R.menu.menu_cancel, menu);
 		}
-		else if (activityName.contains("Edit")) {
+		else if (activityName.contains("EDIT")) {
 			menuInflater.inflate(R.menu.menu_edit_entity, menu);
 		}
 		else if (activityName.contains("Builder")) {
@@ -51,7 +51,7 @@ public class MenuManager {
 		}
 		else {
 
-			/* Browse */
+			/* BROWSE */
 
 			if (activityName.equals("HelpForm")) {
 				menuInflater.inflate(R.menu.menu_cancel, menu);
@@ -77,7 +77,7 @@ public class MenuManager {
 				else if (activityName.equals("UserForm")) {
 					menuInflater.inflate(R.menu.menu_browse_user, menu);
 				}
-				else if (activityName.equals("EntityList")
+				else if (activityName.equals("ENTITY_LIST")
 						|| activityName.equals("EntityGrid")) {
 					menuInflater.inflate(R.menu.menu_browse_entity_list, menu);
 				}

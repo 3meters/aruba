@@ -109,7 +109,7 @@ public class BusyManager {
 		}
 		catch (BadTokenException e) {
 			/*
-			 * Sometimes the activity has been destroyed out from under us
+			 * Sometimes the activity has been destroyed OUT from under us
 			 * so we trap this and continue.
 			 */
 			e.printStackTrace();

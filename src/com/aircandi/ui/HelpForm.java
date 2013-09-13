@@ -29,7 +29,7 @@ public class HelpForm extends BaseBrowse {
 		updateRunOnce();
 		setResult(Activity.RESULT_CANCELED);
 		finish();
-		Animate.doOverridePendingTransition(this, TransitionType.HelpToPage);
+		Animate.doOverridePendingTransition(this, TransitionType.HELP_TO_PAGE);
 	}
 
 	// --------------------------------------------------------------------------------------------

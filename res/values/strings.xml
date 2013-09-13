@@ -80,6 +80,7 @@
     <string name="dummy_like_stat">12 likes</string>
     <string name="dummy_watch_stat">8 watching</string>
     <string name="dummy_timesince">10 minutes ago</string>
+    <string name="dummy_type_candigram">bouncing</string>
     <string name="dummy_datetime">December 23 at 10:12am</string>
     <string name="dummy_tags">Coffee Shop, Cafe, Tea Room</string>
     <string name="dummy_button_label">Watch</string>
@@ -439,7 +440,6 @@
     <string name="form_zipcode_hint">zipcode</string>
     <string name="form_comment_hint">comment</string>
     <string name="form_feedback_hint">feedback</string>
-    <string name="form_uri_hint">web address</string>
     <string name="picture_search_query_hint">search</string>
     <string name="form_do_not_track_on_hint">All browsing activity is anonymous but editing, creating and commenting are public.</string>
     <string name="form_do_not_track_off_hint">All browsing, editing, creating and commenting activities are public.</string>

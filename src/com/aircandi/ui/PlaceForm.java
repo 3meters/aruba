@@ -63,7 +63,7 @@ public class PlaceForm extends BaseEntityForm {
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-		mLinkProfile = LinkProfile.LinksForPlace;
+		mLinkProfile = LinkProfile.LINKS_FOR_PLACE;
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class PlaceForm extends BaseEntityForm {
 
 	private void upsize() {
 		/*
-		 * Upsized places do not automatically link to nearby beacons because
+		 * Upsized places do not automatically link to NEARBY beacons because
 		 * the browsing action isn't enough of an indicator of proximity.
 		 */
 		new AsyncTask() {
@@ -101,12 +101,12 @@ public class PlaceForm extends BaseEntityForm {
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
 				hideBusy();
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					final Entity upsizedEntity = (Entity) result.data;
 					mEntityId = upsizedEntity.id;
 					mEntity = null;
 					mCacheStamp = null;
-					databind(BindingMode.auto);
+					databind(BindingMode.AUTO);
 				}
 				else {
 					Routing.serviceError(PlaceForm.this, result.serviceResponse);
@@ -122,7 +122,7 @@ public class PlaceForm extends BaseEntityForm {
 	@Override
 	public void onAdd() {
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
-			Routing.route(this, Route.NewFor, mEntity);
+			Routing.route(this, Route.NEW_FOR, mEntity);
 		}
 		else {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
@@ -137,13 +137,13 @@ public class PlaceForm extends BaseEntityForm {
 	public void onHelp() {
 		Bundle extras = new Bundle();
 		extras.putInt(Constants.EXTRA_HELP_ID, R.layout.place_help);
-		Routing.route(this, Route.Help, null, null, extras);
+		Routing.route(this, Route.HELP, null, null, extras);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onTuneButtonClick(View view) {
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
-			Routing.route(this, Route.Tune, mEntity);
+			Routing.route(this, Route.TUNE, mEntity);
 		}
 		else {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
@@ -158,7 +158,7 @@ public class PlaceForm extends BaseEntityForm {
 	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
 		/*
-		 * Refresh the form because something new has been added to it
+		 * REFRESH the form because something new has been added to it
 		 * like a comment or post. Or something has moved like a candigram.
 		 */
 		if (mEntityId.equals(event.notification.entity.toId)
@@ -181,7 +181,7 @@ public class PlaceForm extends BaseEntityForm {
 		/*
 		 * For now, we assume that the candi form isn't recycled.
 		 * 
-		 * We leave most of the views visible by default so they are visible in the layout editor.
+		 * We leave most of the views visible by default so they are visible IN the layout editor.
 		 * 
 		 * - WebImageView primary image is visible by default
 		 * - WebImageView child views are gone by default
@@ -206,7 +206,7 @@ public class PlaceForm extends BaseEntityForm {
 				public void onComplete(Object response) {
 
 					final ServiceResponse serviceResponse = (ServiceResponse) response;
-					if (serviceResponse.responseCode == ResponseCode.Success) {
+					if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 						runOnUiThread(new Runnable() {
 
 							@Override
@@ -291,7 +291,7 @@ public class PlaceForm extends BaseEntityForm {
 		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();
 
 		/* Synthetic applink shortcuts */
-		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
+		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.IN, true, true);
 		settings.appClass = Applinks.class;
 		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 		if (shortcuts.size() > 0) {
@@ -305,8 +305,8 @@ public class PlaceForm extends BaseEntityForm {
 					, R.layout.temp_place_switchboard_item);
 		}
 
-		/* Service applink shortcuts */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
+		/* SERVICE applink shortcuts */
+		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.IN, false, true);
 		settings.appClass = Applinks.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 		if (shortcuts.size() > 0) {
@@ -320,7 +320,7 @@ public class PlaceForm extends BaseEntityForm {
 					, R.layout.temp_place_switchboard_item);
 		}
 
-		/* Place specific info */
+		/* PLACE specific info */
 		if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			final Place place = (Place) mEntity;
 
@@ -392,12 +392,12 @@ public class PlaceForm extends BaseEntityForm {
 	@Override
 	protected void drawStats() {
 		
-		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
+		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.IN);
 		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
 		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
 		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
 
-		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
+		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.IN);
 		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
 		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
 		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
@@ -409,7 +409,7 @@ public class PlaceForm extends BaseEntityForm {
 
 		Place place = (Place) mEntity;
 
-		/* Tune */
+		/* TUNE */
 		UI.setVisibility(findViewById(R.id.button_tune), View.GONE);
 		if (!place.synthetic) {
 			UI.setVisibility(findViewById(R.id.button_tune), View.VISIBLE);

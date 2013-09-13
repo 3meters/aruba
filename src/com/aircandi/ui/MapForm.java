@@ -47,7 +47,7 @@ public class MapForm extends BaseEntityForm {
 			final List<String> jsonMarkers = extras.getStringArrayList(Constants.EXTRA_MARKERS);
 			if (jsonMarkers != null) {
 				for (String jsonMarker : jsonMarkers) {
-					AirMarker marker = (AirMarker) HttpService.jsonToObject(jsonMarker, ObjectType.AirMarker);
+					AirMarker marker = (AirMarker) HttpService.jsonToObject(jsonMarker, ObjectType.AIR_MARKER);
 					mMarkers.add(marker);
 				}
 			}
@@ -56,7 +56,7 @@ public class MapForm extends BaseEntityForm {
 
 	@Override
 	public void initialize(Bundle savedInstanceState) {
-		mLinkProfile = LinkProfile.LinksForPlace;
+		mLinkProfile = LinkProfile.LINKS_FOR_PLACE;
 		mMapFragment = new MapFragment();
 		getSupportFragmentManager().beginTransaction().add(R.id.fragment_holder, mMapFragment).commit();
 	}

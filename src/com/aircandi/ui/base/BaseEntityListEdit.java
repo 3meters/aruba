@@ -64,7 +64,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 			final List<String> jsonEntities = extras.getStringArrayList(Constants.EXTRA_ENTITIES);
 			if (jsonEntities != null) {
 				for (String jsonEntity : jsonEntities) {
-					Entity entity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
+					Entity entity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.ENTITY);
 					mEntities.add(entity);
 				}
 			}
@@ -86,7 +86,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 		/*
 		 * Before entities are customized, they have no position and are
 		 * sorted by the modified date on the link. Once entity customization
-		 * is saved to the service, the position field has been set on the set of
+		 * is saved to the SERVICE, the position field has been set on the set of
 		 * entities.
 		 */
 		if (mAdapter == null) {
@@ -135,18 +135,18 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 				final List<String> jsonEntities = new ArrayList<String>();
 
 				for (Entity entity : mEntities) {
-					jsonEntities.add(HttpService.objectToJson(entity, UseAnnotations.False, ExcludeNulls.True));
+					jsonEntities.add(HttpService.objectToJson(entity, UseAnnotations.FALSE, ExcludeNulls.TRUE));
 				}
 
 				intent.putStringArrayListExtra(Constants.EXTRA_ENTITIES, (ArrayList<String>) jsonEntities);
 				setResult(Activity.RESULT_OK, intent);
 				finish();
-				Animate.doOverridePendingTransition(this, TransitionType.FormToPage);
+				Animate.doOverridePendingTransition(this, TransitionType.FORM_TO_PAGE);
 			}
 		}
 		else {
 			finish();
-			Animate.doOverridePendingTransition(BaseEntityListEdit.this, TransitionType.FormToPage);
+			Animate.doOverridePendingTransition(BaseEntityListEdit.this, TransitionType.FORM_TO_PAGE);
 		}
 	}
 
@@ -178,7 +178,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 		Bundle extras = new Bundle();
 		extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mEntityId);
 		extras.putBoolean(Constants.EXTRA_SKIP_SAVE, true);
-		Routing.route(this, Route.New, null, mListSchema, extras);
+		Routing.route(this, Route.NEW, null, mListSchema, extras);
 	}
 
 	@SuppressWarnings("ucd")
@@ -221,7 +221,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 		mEntityEditing = (Entity) check.getTag();
 		Bundle extras = new Bundle();
 		extras.putBoolean(Constants.EXTRA_SKIP_SAVE, true);
-		Routing.route(this, Route.Edit, mEntityEditing, null, null, extras);
+		Routing.route(this, Route.EDIT, mEntityEditing, null, null, extras);
 	}
 
 	@Override
@@ -233,7 +233,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 					final Bundle extras = intent.getExtras();
 					final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
 					if (jsonEntity != null) {
-						final Entity entityUpdated = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
+						final Entity entityUpdated = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.ENTITY);
 						if (entityUpdated != null) {
 							for (Entity entity : mEntities) {
 								if (entity.id.equals(entityUpdated.id)) {
@@ -252,7 +252,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 					final Bundle extras = intent.getExtras();
 					final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
 					if (jsonEntity != null) {
-						final Entity entityNew = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
+						final Entity entityNew = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.ENTITY);
 						if (entityNew != null) {
 							entityNew.checked = false;
 							mEntities.add(entityNew);
@@ -366,7 +366,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		bind(BindingMode.auto);
+		bind(BindingMode.AUTO);
 	}
 
 	// --------------------------------------------------------------------------------------------

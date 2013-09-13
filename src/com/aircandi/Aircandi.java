@@ -153,7 +153,7 @@ public class Aircandi extends Application {
 		/* Color hinting */
 		muteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others
 
-		/* Set prefs so we can tell when a change happens that we need to respond to. Theme is set in setTheme(). */
+		/* Set prefs so we can tell when a change happens that we need to respond to. Theme is set IN setTheme(). */
 		snapshotPreferences();
 	}
 

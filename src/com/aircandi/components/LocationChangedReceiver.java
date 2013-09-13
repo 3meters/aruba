@@ -12,7 +12,7 @@ import com.aircandi.events.LocationReceivedEvent;
 /**
  * This Receiver class is used to listen for Broadcast Intents that announce
  * that a location change has occurred. This is used instead of a LocationListener
- * within an Activity is our only action is to start a service.
+ * within an Activity is our only action is to start a SERVICE.
  */
 @SuppressWarnings("ucd")
 public class LocationChangedReceiver extends BroadcastReceiver {
@@ -21,7 +21,7 @@ public class LocationChangedReceiver extends BroadcastReceiver {
 
 	/**
 	 * When a new location is received, extract it from the Intent and use
-	 * it to start the Service used to update the list of nearby places.
+	 * it to start the SERVICE used to update the list of NEARBY places.
 	 * 
 	 * This is the Active receiver, used to receive Location updates when
 	 * the Activity is visible.

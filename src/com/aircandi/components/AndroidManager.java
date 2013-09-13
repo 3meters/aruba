@@ -74,7 +74,7 @@ public class AndroidManager {
 	@SuppressWarnings("ucd")
 	protected boolean getIsLowBattery() {
 		/*
-		 * Returns battery status. True if less than 15% remaining.
+		 * Returns battery status. TRUE if less than 15% remaining.
 		 */
 		final IntentFilter batIntentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 		final Intent battery = Aircandi.applicationContext.registerReceiver(null, batIntentFilter);
@@ -97,7 +97,7 @@ public class AndroidManager {
 
 		final Intent searchAddress = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
 		context.startActivity(searchAddress);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_SOURCE);
 	}
 
 	public void callMapNavigationActivity(Context context, String latitude, String longitude, String label) {
@@ -107,7 +107,7 @@ public class AndroidManager {
 				+ "(" + label + ")";
 		final Intent searchAddress = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
 		context.startActivity(searchAddress);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_SOURCE);
 	}
 
 	public void callMapLocalActivity(Context context, String latitude, String longitude, String label) {
@@ -117,14 +117,14 @@ public class AndroidManager {
 				+ "(" + label + ")";
 		final Intent searchAddress = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
 		context.startActivity(searchAddress);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_SOURCE);
 	}
 
 	public void callDialerActivity(Context context, String phoneNumber) {
 		final String number = "tel:" + phoneNumber.trim();
 		final Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(number));
 		context.startActivity(callIntent);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_SOURCE);
 	}
 
 	public void callBrowserActivity(Context context, String uri) {
@@ -138,7 +138,7 @@ public class AndroidManager {
 			intent.setData(Uri.parse(uri));
 			context.startActivity(intent);
 		}
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_SOURCE);
 	}
 
 	public void callSendToActivity(Context context, String placeName, String emailAddress, String subject, String body) {
@@ -157,13 +157,13 @@ public class AndroidManager {
 		/*
 		 * Activity Action: Deliver some data to someone else. Who the data is being delivered to is not specified; it
 		 * is up to the receiver of this action to ask the user where the data should be sent.
-		 * When launching a SEND intent, you should usually wrap it in a chooser (through createChooser), which will
+		 * When launching a SEND intent, you should usually wrap it IN a chooser (through createChooser), which will
 		 * give the proper interface for the user to pick how to send your data and allow you to specify a prompt
 		 * indicating what they are doing.
 		 * 
-		 * Input: getType is the MIME type of the data being sent. get*Extra can have either a EXTRA_TEXT or
-		 * EXTRA_STREAM field, containing the data to be sent. If using EXTRA_TEXT, the MIME type should be
-		 * "text/plain"; otherwise it should be the MIME type of the data in EXTRA_STREAM. If using EXTRA_TEXT, you can
+		 * Input: getType is the MIME TYPE of the data being sent. get*Extra can have either a EXTRA_TEXT or
+		 * EXTRA_STREAM field, containing the data to be sent. If using EXTRA_TEXT, the MIME TYPE should be
+		 * "text/plain"; otherwise it should be the MIME TYPE of the data IN EXTRA_STREAM. If using EXTRA_TEXT, you can
 		 * also optionally supply EXTRA_HTML_TEXT for clients to retrieve your text with HTML formatting.
 		 * 
 		 * As of android.os.Build.VERSION_CODES.JELLY_BEAN, the data being sent can be supplied through
@@ -189,7 +189,7 @@ public class AndroidManager {
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse("https://www.twitter.com/" + twitterHandle));
 		context.startActivity(intent);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_SOURCE);
 	}
 
 	public void callFoursquareActivity(Context context, String venueId) {
@@ -197,14 +197,14 @@ public class AndroidManager {
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse("http://m.foursquare.com/venue/" + venueId));
 		context.startActivity(intent);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_SOURCE);
 	}
 
 	public void callOpentableActivity(Context context, String sourceId, String sourceUri) {
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(sourceUri));
 		context.startActivity(intent);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_SOURCE);
 	}
 
 	public void callFacebookActivity(Context context, String facebookId) {
@@ -217,21 +217,21 @@ public class AndroidManager {
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse("http://m.facebook.com/" + facebookId));
 		context.startActivity(intent);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_SOURCE);
 	}
 
 	public void callYelpActivity(Context context, String sourceId, String sourceUri) {
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(sourceUri));
 		context.startActivity(intent);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_SOURCE);
 	}
 
 	public void callGenericActivity(Context context, String sourceId) {
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(sourceId));
 		context.startActivity(intent);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_SOURCE);
 	}
 
 	private Intent findBrowserApp(Context context, String uri) {
@@ -292,7 +292,7 @@ public class AndroidManager {
 		/* Create the storage directory if it does not exist */
 		if (!mediaStorageDir.exists()) {
 			if (!mediaStorageDir.mkdirs()) {
-				Logger.d(Aircandi.applicationContext, "Failed to create directory for pictures");
+				Logger.d(Aircandi.applicationContext, "FAILED to create directory for pictures");
 				return null;
 			}
 		}

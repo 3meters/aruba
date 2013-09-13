@@ -39,7 +39,7 @@ public class InviteEdit extends BaseEntityEdit {
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		/*
-		 * Feedback are not really an entity type so we have to handle
+		 * FEEDBACK are not really an entity TYPE so we have to handle
 		 * all the expected initialization.
 		 */
 		mDescription = (AirEditText) findViewById(R.id.description);
@@ -109,7 +109,7 @@ public class InviteEdit extends BaseEntityEdit {
 						// get the contact id from the Uri
 						String id = result.getLastPathSegment();
 
-						// query for everything email
+						// QUERY for everything email
 						cursor = getContentResolver().query(Email.CONTENT_URI
 								, null
 								, Email.CONTACT_ID + "=?"
@@ -128,7 +128,7 @@ public class InviteEdit extends BaseEntityEdit {
 						}
 					}
 					catch (Exception e) {
-						Logger.e(this, "Failed to get email data", e);
+						Logger.e(this, "FAILED to get email data", e);
 					}
 					finally {
 						if (cursor != null) {
@@ -197,7 +197,7 @@ public class InviteEdit extends BaseEntityEdit {
 		final String message = mDescription.getEditableText().toString();
 		final List<String> emails = new ArrayList(Arrays.asList(email.split("\\s*,\\s*")));
 
-		/* Stash message so we can restore it in the future */
+		/* Stash message so we can restore it IN the FUTURE */
 		Aircandi.settingsEditor.putString(Constants.SETTING_INVITE_MESSAGE_LAST, message);
 		Aircandi.settingsEditor.commit();
 
@@ -219,7 +219,7 @@ public class InviteEdit extends BaseEntityEdit {
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
 
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					Tracker.sendEvent("ui_action", "send_invite", null, 0, Aircandi.getInstance().getUser());
 					hideBusy();
 					UI.showToastNotification(getString(emails.size() > 1 ? R.string.alert_invite_sent_plural : R.string.alert_invite_sent), Toast.LENGTH_SHORT);

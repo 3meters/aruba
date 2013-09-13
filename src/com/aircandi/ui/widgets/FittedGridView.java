@@ -27,7 +27,7 @@ public class FittedGridView extends GridView {
 
 		// HACK! TAKE THAT ANDROID!
 		if (mExpanded) {
-			// Calculate entire height by providing a very large height hint.
+			// Calculate entire HEIGHT by providing a very large HEIGHT hint.
 			// But do not use the highest 2 bits of this integer; those are
 			// reserved for the MeasureSpec mode.
 			final int expandSpec = MeasureSpec.makeMeasureSpec(Integer.MAX_VALUE >> 2, MeasureSpec.AT_MOST);
@@ -44,13 +44,13 @@ public class FittedGridView extends GridView {
 		//		if (getLayoutParams().height == LayoutParams.WRAP_CONTENT) {
 		//			/*
 		//			 * The great Android "hackatlon", the love, the magic.
-		//			 * The two leftmost bits in the height measure spec have
-		//			 * a special meaning, hence we can't use them to describe height.
+		//			 * The two leftmost bits IN the HEIGHT measure spec have
+		//			 * a special meaning, hence we can't use them to describe HEIGHT.
 		//			 */
 		//			heightSpec = MeasureSpec.makeMeasureSpec(Integer.MAX_VALUE >> 2, MeasureSpec.AT_MOST);
 		//		}
 		//		else {
-		//			/* Any other height should be respected as is. */
+		//			/* Any other HEIGHT should be respected as is. */
 		//			heightSpec = heightMeasureSpec;
 		//		}
 		//

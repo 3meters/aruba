@@ -67,7 +67,7 @@ public class PhotoSourcePicker extends BasePicker implements OnItemClickListener
 			}
 		}
 
-		/* Add place photo option if this is a place entity */
+		/* ADD place photo option if this is a place entity */
 		if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			Place place = (Place) mEntity;
 			if (place.getProvider().type != null && place.getProvider().type.equals(Constants.TYPE_PROVIDER_FOURSQUARE)) {
@@ -76,7 +76,7 @@ public class PhotoSourcePicker extends BasePicker implements OnItemClickListener
 			}
 			else {
 				
-				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_PICTURE, Constants.SCHEMA_ENTITY_PICTURE, Direction.in, false, false);
+				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_PICTURE, Constants.SCHEMA_ENTITY_PICTURE, Direction.IN, false, false);
 				settings.appClass = Pictures.class;
 				List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 				if (shortcuts.size() > 0) {

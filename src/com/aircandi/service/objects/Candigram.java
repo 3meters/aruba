@@ -15,7 +15,7 @@ public class Candigram extends Entity implements Cloneable, Serializable {
 	public static final String	collectionId		= "candigrams";
 
 	// --------------------------------------------------------------------------------------------
-	// Service fields
+	// SERVICE fields
 	// --------------------------------------------------------------------------------------------
 
 	@Expose
@@ -35,7 +35,7 @@ public class Candigram extends Entity implements Cloneable, Serializable {
 	public Number				hopCount;
 
 	// --------------------------------------------------------------------------------------------
-	// Client fields (none are transferred)
+	// CLIENT fields (NONE are transferred)
 	// --------------------------------------------------------------------------------------------
 
 	public Candigram() {}
@@ -47,8 +47,8 @@ public class Candigram extends Entity implements Cloneable, Serializable {
 		synchronized (entity) {
 			entity = (Candigram) Entity.setPropertiesFromMap(entity, map, nameMapping);
 
-			entity.range = (Number) map.get("range");
-			entity.duration = (Number) map.get("duration");
+			entity.range = (Number) map.get("RANGE");
+			entity.duration = (Number) map.get("DURATION");
 			entity.hopsMax = (Number) map.get("hopsMax");
 			entity.hopCount = (Number) map.get("hopCount");
 			entity.hopEnabled = (Boolean) map.get("hopEnabled");

@@ -137,7 +137,7 @@ public class CandiView extends RelativeLayout {
 				setVisibility(mSubtitle, View.VISIBLE);
 			}
 
-			/* Place specific info */
+			/* PLACE specific info */
 
 			/* We take over the subtitle field and use it for categories */
 			Category category = ((Place) entity).category;
@@ -149,7 +149,7 @@ public class CandiView extends RelativeLayout {
 				}
 			}
 			
-			/* Category photo */
+			/* CATEGORY photo */
 
 			setVisibility(mCategoryPhoto, View.GONE);
 			if (mCategoryPhoto != null) {
@@ -174,35 +174,35 @@ public class CandiView extends RelativeLayout {
 				final int sizePixels = UI.getRawPixelsForDisplayPixels(this.getContext(), 20);
 				final int marginPixels = UI.getRawPixelsForDisplayPixels(this.getContext(), 3);
 
-				/* Post indicator always goes first */
-				Count count = entity.getCount(Constants.TYPE_LINK_CANDIGRAM, Direction.in);
-				if (count != null && entity.getCount(Constants.TYPE_LINK_CANDIGRAM, Direction.in).count.intValue() > 0) {
+				/* POST indicator always goes first */
+				Count count = entity.getCount(Constants.TYPE_LINK_CANDIGRAM, Direction.IN);
+				if (count != null && entity.getCount(Constants.TYPE_LINK_CANDIGRAM, Direction.IN).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_candigrams_dark", null, sizePixels, marginPixels);
 				}
 
-				count = entity.getCount(Constants.TYPE_LINK_PICTURE, Direction.in);
-				if (count != null && entity.getCount(Constants.TYPE_LINK_PICTURE, Direction.in).count.intValue() > 0) {
+				count = entity.getCount(Constants.TYPE_LINK_PICTURE, Direction.IN);
+				if (count != null && entity.getCount(Constants.TYPE_LINK_PICTURE, Direction.IN).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_pictures_dark", null, sizePixels, marginPixels);
 				}
 
-				count = entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.in);
-				if (count != null && entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.in).count.intValue() > 0) {
+				count = entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.IN);
+				if (count != null && entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.IN).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_comments_dark", null, sizePixels, marginPixels);
 				}
 
-				count = entity.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
-				if (count != null && entity.getCount(Constants.TYPE_LINK_LIKE, Direction.in).count.intValue() > 0) {
+				count = entity.getCount(Constants.TYPE_LINK_LIKE, Direction.IN);
+				if (count != null && entity.getCount(Constants.TYPE_LINK_LIKE, Direction.IN).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_like_holo_dark", String.valueOf(count.count.intValue()), sizePixels, marginPixels);
 				}
 
-				count = entity.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
-				if (count != null && entity.getCount(Constants.TYPE_LINK_WATCH, Direction.in).count.intValue() > 0) {
+				count = entity.getCount(Constants.TYPE_LINK_WATCH, Direction.IN);
+				if (count != null && entity.getCount(Constants.TYPE_LINK_WATCH, Direction.IN).count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_watched_holo_dark", String.valueOf(count.count.intValue()), sizePixels, marginPixels);
 				}
 				setVisibility(mShortcuts, View.VISIBLE);
 			}
 
-			/* Distance */
+			/* DISTANCE */
 			showDistance(entity);
 		}
 	}

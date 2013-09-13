@@ -77,7 +77,7 @@ public class LinkOptions extends ServiceObject {
 
 	public static LinkOptions getDefault(LinkProfile linkProfile) {
 
-		if (linkProfile == LinkProfile.NoLinks) {
+		if (linkProfile == LinkProfile.NO_LINKS) {
 			return null;
 		}
 		else {
@@ -85,7 +85,7 @@ public class LinkOptions extends ServiceObject {
 			LinkOptions linkOptions = new LinkOptions().setActive(new ArrayList<LinkSettings>());
 			linkOptions.shortcuts = true;
 
-			if (linkProfile == LinkProfile.LinksForPlace || linkProfile == LinkProfile.LinksForProximity) {
+			if (linkProfile == LinkProfile.LINKS_FOR_PLACE || linkProfile == LinkProfile.LINKS_FOR_PROXIMITY) {
 				Number limit = ServiceConstants.LIMIT_LINKS_DEFAULT;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, true, false, true, false, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, false, limit));
@@ -101,12 +101,12 @@ public class LinkOptions extends ServiceObject {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, false, limit));
 				}
 			}
-			else if (linkProfile == LinkProfile.LinksForCandigram) {
+			else if (linkProfile == LinkProfile.LINKS_FOR_CANDIGRAM) {
 				Number limit = ServiceConstants.LIMIT_LINKS_DEFAULT;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, false, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PICTURE, true, false, true, false, 1)); // just one so we can preview
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CANDIGRAM, true, false, true, true, limit).setDirection(Direction.out));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CANDIGRAM, true, false, true, true, limit).setDirection(Direction.OUT));
 				if (user != null) {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, false, limit, Maps.asMap("_from", user.id)));
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, false, limit, Maps.asMap("_from", user.id)));
@@ -116,7 +116,7 @@ public class LinkOptions extends ServiceObject {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, false, limit));
 				}
 			}
-			else if (linkProfile == LinkProfile.LinksForPicture) {
+			else if (linkProfile == LinkProfile.LINKS_FOR_PICTURE) {
 				Number limit = ServiceConstants.LIMIT_LINKS_DEFAULT;
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, false, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
@@ -129,11 +129,11 @@ public class LinkOptions extends ServiceObject {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, false, false, true, false, limit));
 				}
 			}
-			else if (linkProfile == LinkProfile.LinksForUser) {
+			else if (linkProfile == LinkProfile.LINKS_FOR_USER) {
 				Number limit = ServiceConstants.LIMIT_USER_OWNED_ENTITIES;
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, false, limit).setDirection(Direction.out));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, false, limit).setDirection(Direction.both));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, false, limit).setDirection(Direction.both));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, false, limit).setDirection(Direction.OUT));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, false, limit).setDirection(Direction.BOTH));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, false, limit).setDirection(Direction.BOTH));
 			}
 			return linkOptions;
 		}
@@ -149,11 +149,11 @@ public class LinkOptions extends ServiceObject {
 	}
 
 	public enum LinkProfile {
-		LinksForProximity,
-		LinksForPlace,
-		LinksForCandigram,
-		LinksForPicture,
-		LinksForUser,
-		NoLinks,
+		LINKS_FOR_PROXIMITY,
+		LINKS_FOR_PLACE,
+		LINKS_FOR_CANDIGRAM,
+		LINKS_FOR_PICTURE,
+		LINKS_FOR_USER,
+		NO_LINKS,
 	}
 }

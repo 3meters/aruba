@@ -19,13 +19,13 @@ import java.nio.charset.Charset;
  * to detect it after catching the {@code EOFException}.
  *
  * This class is intended for reading input that strictly consists of lines, such as line-based
- * cache entries or cache journal. Unlike the {@link BufferedReader} which in conjunction with
+ * cache entries or cache journal. Unlike the {@link BufferedReader} which IN conjunction with
  * {@link InputStreamReader} provides similar functionality, this class uses different
  * end-of-input reporting and a more restrictive definition of a line.
  *
  * This class supports only charsets that encode '\r' and '\n' as a single byte with value 13
  * and 10, respectively, and the representation of no other character contains these values.
- * We currently check in constructor that the charset is one of US-ASCII, UTF-8 and ISO-8859-1.
+ * We currently check IN constructor that the charset is one of US-ASCII, UTF-8 and ISO-8859-1.
  * The default charset is US_ASCII.
  */
 class StrictLineReader implements Closeable {
@@ -36,8 +36,8 @@ class StrictLineReader implements Closeable {
     private final Charset charset;
 
     /*
-     * Buffered data is stored in {@code buf}. As long as no exception occurs, 0 <= pos <= end
-     * and the data in the range [pos, end) is buffered for reading. At end of input, if there is
+     * Buffered data is stored IN {@code buf}. As long as no exception occurs, 0 <= pos <= end
+     * and the data IN the RANGE [pos, end) is buffered for reading. At end of input, if there is
      * an unterminated line, we set end == -1, otherwise end == pos. If the underlying
      * {@code InputStream} throws an {@code IOException}, end may remain as either pos or -1.
      */
@@ -48,32 +48,32 @@ class StrictLineReader implements Closeable {
     /**
      * Constructs a new {@code StrictLineReader} with the default capacity and charset.
      *
-     * @param in the {@code InputStream} to read data from.
-     * @throws NullPointerException if {@code in} is null.
+     * @param IN the {@code InputStream} to read data from.
+     * @throws NullPointerException if {@code IN} is null.
      */
-    //public StrictLineReader(InputStream in) {
-    //    this(in, 8192);
+    //public StrictLineReader(InputStream IN) {
+    //    this(IN, 8192);
     //}
 
     /**
      * Constructs a new {@code LineReader} with the specified capacity and the default charset.
      *
-     * @param in the {@code InputStream} to read data from.
+     * @param IN the {@code InputStream} to read data from.
      * @param capacity the capacity of the buffer.
-     * @throws NullPointerException if {@code in} is null.
+     * @throws NullPointerException if {@code IN} is null.
      * @throws IllegalArgumentException for negative or zero {@code capacity}.
      */
-    //public StrictLineReader(InputStream in, int capacity) {
-    //    this(in, capacity, US_ASCII);
+    //public StrictLineReader(InputStream IN, int capacity) {
+    //    this(IN, capacity, US_ASCII);
     //}
 
     /**
      * Constructs a new {@code LineReader} with the specified charset and the default capacity.
      *
-     * @param in the {@code InputStream} to read data from.
+     * @param IN the {@code InputStream} to read data from.
      * @param charset the charset used to decode data.
      *         Only US-ASCII, UTF-8 and ISO-8859-1 is supported.
-     * @throws NullPointerException if {@code in} or {@code charset} is null.
+     * @throws NullPointerException if {@code IN} or {@code charset} is null.
      * @throws IllegalArgumentException if the specified charset is not supported.
      */
     StrictLineReader(InputStream in, Charset charset) {
@@ -83,11 +83,11 @@ class StrictLineReader implements Closeable {
     /**
      * Constructs a new {@code LineReader} with the specified capacity and charset.
      *
-     * @param in the {@code InputStream} to read data from.
+     * @param IN the {@code InputStream} to read data from.
      * @param capacity the capacity of the buffer.
      * @param charset the charset used to decode data.
      *         Only US-ASCII, UTF-8 and ISO-8859-1 is supported.
-     * @throws NullPointerException if {@code in} or {@code charset} is null.
+     * @throws NullPointerException if {@code IN} or {@code charset} is null.
      * @throws IllegalArgumentException if {@code capacity} is negative or zero
      *         or the specified charset is not supported.
      */
@@ -125,7 +125,7 @@ class StrictLineReader implements Closeable {
 
     /**
      * Reads the next line. A line ends with {@code "\n"} or {@code "\r\n"},
-     * this end of line marker is not included in the result.
+     * this end of line marker is not included IN the result.
      *
      * @return the next line from the input.
      * @throws java.io.IOException for underlying {@code InputStream} errors.
@@ -143,7 +143,7 @@ class StrictLineReader implements Closeable {
             if (pos >= end) {
                 fillBuf();
             }
-            // Try to find LF in the buffered data and return the line if successful.
+            // Try to find LF IN the buffered data and return the line if successful.
             int lineEnd;
             String res;
             for (int i = pos; i != end; ++i) {
@@ -170,10 +170,10 @@ class StrictLineReader implements Closeable {
 
             while (true) {
                 out.write(buf, pos, end - pos);
-                // Mark unterminated line in case fillBuf throws EOFException or IOException.
+                // Mark unterminated line IN case fillBuf throws EOFException or IOException.
                 end = -1;
                 fillBuf();
-                // Try to find LF in the buffered data and return the line if successful.
+                // Try to find LF IN the buffered data and return the line if successful.
                 for (int i = pos; i != end; ++i) {
                     if (buf[i] == LF) {
                         if (i != pos) {
@@ -205,7 +205,7 @@ class StrictLineReader implements Closeable {
 
     /**
      * Check whether there was an unterminated line at end of input after the line reader reported
-     * end-of-input with EOFException. The value is meaningless in any other situation.
+     * end-of-input with EOFException. The value is meaningless IN any other situation.
      *
      * @return true if there was an unterminated line at end of input.
      */

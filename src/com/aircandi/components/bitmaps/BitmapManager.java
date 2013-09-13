@@ -55,11 +55,11 @@ public class BitmapManager {
 	private BitmapManager() {
 		mBitmapLoader = new BitmapLoader();
 		/*
-		 * Get memory class of this device, exceeding this amount will throw an
+		 * GET memory class of this device, exceeding this amount will throw an
 		 * OutOfMemory exception.
 		 */
 		final int memClass = ((ActivityManager) Aircandi.applicationContext.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
-		Logger.i(this, "Device memory class: " + String.valueOf(memClass));
+		Logger.i(this, "DEVICE memory class: " + String.valueOf(memClass));
 
 		/* Use 1/4th of the available memory for this memory cache. */
 		final int cacheSize = (memClass << 10 << 10) >> 2;
@@ -68,7 +68,7 @@ public class BitmapManager {
 		mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
 			@Override
 			protected int sizeOf(String key, Bitmap bitmap) {
-				/* The cache size will be measured in bytes rather than number of items. */
+				/* The cache size will be measured IN bytes rather than number of items. */
 				return UI.getImageMemorySize(bitmap.getHeight(), bitmap.getWidth(), bitmap.hasAlpha());
 			}
 		};
@@ -99,7 +99,7 @@ public class BitmapManager {
 		}
 		else {
 			final ServiceResponse serviceResponse = BitmapManager.getInstance().fetchBitmap(bitmapRequest);
-			if (serviceResponse.responseCode != ResponseCode.Success) {
+			if (serviceResponse.responseCode != ResponseCode.SUCCESS) {
 				if (bitmapRequest.getRequestListener() != null) {
 					bitmapRequest.getRequestListener().onStart();
 				}
@@ -122,7 +122,7 @@ public class BitmapManager {
 		final String rawResourceName = bitmapRequest.getImageUri().substring(bitmapRequest.getImageUri().indexOf("resource:") + 9);
 		final String resolvedResourceName = resolveResourceName(rawResourceName);
 		if (resolvedResourceName == null) {
-			serviceResponse.responseCode = ResponseCode.Failed;
+			serviceResponse.responseCode = ResponseCode.FAILED;
 			if (bitmapRequest.getRequestListener() != null) {
 				bitmapRequest.getRequestListener().onComplete(serviceResponse);
 			}
@@ -196,7 +196,7 @@ public class BitmapManager {
 			}
 		}
 		else {
-			serviceResponse.responseCode = ResponseCode.Failed;
+			serviceResponse.responseCode = ResponseCode.FAILED;
 		}
 
 		return serviceResponse;
@@ -310,7 +310,7 @@ public class BitmapManager {
 
 		if (cursor != null) {
 
-			/* Means the image is in the media store */
+			/* Means the image is IN the media store */
 			String imageData = "";
 			if (cursor.moveToFirst()) {
 				final int dataColumn = cursor.getColumnIndex(Images.Media.DATA);
@@ -324,7 +324,7 @@ public class BitmapManager {
 		}
 		else {
 
-			/* The image is in the local file system */
+			/* The image is IN the local file system */
 			imageFile = new File(photoUri.toString().replace("file://", ""));
 
 			final ExifInterface exif;

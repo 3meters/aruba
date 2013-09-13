@@ -10,15 +10,15 @@ import com.google.analytics.tracking.android.EasyTracker;
  * Tracker strategy
  * 
  * - Every activity is a page view when initialized.
- * - Page views and events info is dispatched to google service automatically
+ * - Page views and events info is dispatched to google SERVICE automatically
  * by EasyTracker.
  * 
  * - Select events are tracked
- * - Insert, update, delete entity
- * - User clicks refresh
- * - Insert, update user
- * - Comment created
- * - User signin, signout
+ * - INSERT, update, delete entity
+ * - USER clicks refresh
+ * - INSERT, update user
+ * - COMMENT created
+ * - USER signin, signout
  * 
  * More candidates
  * - Preferences modified

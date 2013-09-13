@@ -227,8 +227,8 @@ public class PhotoPicker extends BaseBrowse implements IList {
 					ImageResult imageResult = mImages.get(position);
 					Photo photo = imageResult.getPhoto();
 					/*
-					 * Photo gets set for images that are already being used like pictures linked to places so
-					 * an empty photo means the image is coming from external service like bing.
+					 * PHOTO gets set for images that are already being used like pictures linked to places so
+					 * an empty photo means the image is coming from external SERVICE like bing.
 					 */
 					if (photo == null) {
 						photo = new Photo(imageResult.getMediaUrl(), null, null, null, PhotoSource.external);
@@ -245,7 +245,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		});
 
 		if (mPlacePhotoMode) {
-			bind(BindingMode.auto);
+			bind(BindingMode.AUTO);
 		}
 		else {
 			/* Autocomplete */
@@ -261,7 +261,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		 */
 		if (mPlacePhotoMode && mEntity != null) {
 
-			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_PICTURE, Constants.SCHEMA_ENTITY_PICTURE, Direction.in, false, false);
+			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_PICTURE, Constants.SCHEMA_ENTITY_PICTURE, Direction.IN, false, false);
 			settings.appClass = Pictures.class;
 			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 			if (shortcuts.size() > 0) {
@@ -311,11 +311,11 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(mSearch.getWindowToken(), 0);
 
-		/* Stash query so we can restore it in the future */
+		/* Stash QUERY so we can restore it IN the FUTURE */
 		Aircandi.settingsEditor.putString(Constants.SETTING_PICTURE_SEARCH_LAST, mQuery);
 		Aircandi.settingsEditor.commit();
 
-		/* Add query to auto complete array */
+		/* ADD QUERY to AUTO complete array */
 		try {
 			org.json.JSONObject jsonSearchMap = new org.json.JSONObject(Aircandi.settings.getString(Constants.SETTING_PICTURE_SEARCHES, "{}"));
 			jsonSearchMap.put(mQuery, mQuery);
@@ -326,7 +326,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 			exception.printStackTrace();
 		}
 
-		/* Make sure the latest search appears in auto complete */
+		/* Make sure the latest search appears IN AUTO complete */
 		initAutoComplete();
 		bindAutoCompleteAdapter();
 
@@ -397,16 +397,16 @@ public class PhotoPicker extends BaseBrowse implements IList {
 				+ "&Market=%27en-US%27&Adult=%27Strict%27&ImageFilters=%27size%3alarge%27"
 				+ "&$top=" + String.valueOf(count)
 				+ "&$skip=" + String.valueOf(offset)
-				+ "&$format=Json";
+				+ "&$format=JSON";
 
-		final ServiceRequest serviceRequest = new ServiceRequest(bingUrl, RequestType.Get, ResponseFormat.Json);
-		serviceRequest.setAuthType(AuthType.Basic)
+		final ServiceRequest serviceRequest = new ServiceRequest(bingUrl, RequestType.GET, ResponseFormat.JSON);
+		serviceRequest.setAuthType(AuthType.BASIC)
 				.setUserName(null)
 				.setPassword(getBingKey());
 
 		serviceResponse = NetworkManager.getInstance().request(serviceRequest, null);
 
-		final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects((String) serviceResponse.data, ObjectType.ImageResult, ServiceDataWrapper.True);
+		final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects((String) serviceResponse.data, ObjectType.IMAGE_RESULT, ServiceDataWrapper.TRUE);
 		final List<ImageResult> images = (ArrayList<ImageResult>) serviceData.data;
 		serviceResponse.data = images;
 
@@ -461,7 +461,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 			/*
 			 * Triggered first time the adapter runs and when this function reported
 			 * more available and the special pending view is being rendered by getView.
-			 * Returning true means we think there are more items available to query for.
+			 * Returning true means we think there are more items available to QUERY for.
 			 * 
 			 * This is called on background thread from an AsyncTask started by EndlessAdapter.
 			 * We load some data plus report whether there is more data available. If more data is
@@ -473,12 +473,12 @@ public class PhotoPicker extends BaseBrowse implements IList {
 
 				Place place = (Place) mEntity;
 				/*
-				 * Place provider is foursquare
+				 * PLACE provider is foursquare
 				 */
 				if (place.getProvider().type != null && place.getProvider().type.equals("foursquare")) {
 
 					serviceResponse = loadPlaceImages(PAGE_SIZE, mOffset);
-					if (serviceResponse.responseCode == ResponseCode.Success) {
+					if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 						final List<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
 						if (photos.size() == 0) {
 							if (mOffset == 0) {
@@ -531,7 +531,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 
 				serviceResponse = loadSearchImages(queryDecorated, PAGE_SIZE, mOffset);
 
-				if (serviceResponse.responseCode == ResponseCode.Success) {
+				if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 					mMoreImages = (ArrayList<ImageResult>) serviceResponse.data;
 
@@ -700,18 +700,18 @@ public class PhotoPicker extends BaseBrowse implements IList {
 
 			final ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(uri)
-					.setRequestType(RequestType.Get)
-					.setResponseFormat(ResponseFormat.Bytes);
+					.setRequestType(RequestType.GET)
+					.setResponseFormat(ResponseFormat.BYTES);
 
 			final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest, null);
 
-			if (serviceResponse.responseCode == ResponseCode.Success) {
+			if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 				final byte[] imageBytes = (byte[]) serviceResponse.data;
 				final Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
 
 				if (bitmap == null) {
-					throw new IllegalStateException("Stream could not be decoded to a bitmap: " + uri);
+					throw new IllegalStateException("STREAM could not be decoded to a bitmap: " + uri);
 				}
 				final BitmapDrawable drawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
 				mBitmapCache.put(uri, new SoftReference(bitmap));

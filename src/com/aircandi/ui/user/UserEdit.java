@@ -150,7 +150,7 @@ public class UserEdit extends BaseEntityEdit {
 
 	@SuppressWarnings("ucd")
 	public void onChangePasswordButtonClick(View view) {
-		Routing.route(this, Route.PasswordChange);
+		Routing.route(this, Route.PASSWORD_CHANGE);
 	}
 
 	@Override

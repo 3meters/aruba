@@ -47,7 +47,7 @@ public class SplashForm extends SherlockActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		/*
-		 * Used by other activities to determine if they were launched normally or auto launched after a crash
+		 * Used by other activities to determine if they were launched normally or AUTO launched after a crash
 		 */
 		Aircandi.LAUNCHED_NORMALLY = true;
 
@@ -112,18 +112,18 @@ public class SplashForm extends SherlockActivity {
 				GoogleAnalytics.getInstance(SplashForm.this).setDebug(false);
 				EasyTracker.getInstance().setContext(getApplicationContext());
 
-				/* Connectivity monitoring */
+				/* Connectivity MONITORING */
 				NetworkManager.getInstance().setContext(getApplicationContext());
 				NetworkManager.getInstance().initialize();
 
 				/*
 				 * Fire off a check to make sure the session is valid. This will also
-				 * be the first opportunity to check our network connection. Also, the
+				 * be the first opportunity to check our NETWORK connection. Also, the
 				 * users session window will be extended assuming the session is valid.
 				 */
 				result = EntityManager.getInstance().checkSession();
 
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 					/* Cache categories - we delay until after the initial rush for data */
 					if (EntityManager.getInstance().getCategories().size() == 0) {
@@ -131,9 +131,9 @@ public class SplashForm extends SherlockActivity {
 					}
 				}
 
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
-					/* Service notifications */
+					/* SERVICE notifications */
 					GCMRegistrar.checkDevice(SplashForm.this); 	// Does device support GCM
 					GCMRegistrar.checkManifest(SplashForm.this); 	// Is manifest setup correctly for GCM
 					String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
@@ -148,7 +148,7 @@ public class SplashForm extends SherlockActivity {
 					Aircandi.getInstance().setUsingEmulator(Aircandi.usingEmulator);
 
 					/*
-					 * Get setup for location snapshots. Initialize will populate location
+					 * GET setup for location snapshots. Initialize will populate location
 					 * with the best of any cached location fixes. A single update will
 					 * be launched if the best cached location fix doesn't meet our freshness
 					 * and accuracy requirements.
@@ -162,18 +162,18 @@ public class SplashForm extends SherlockActivity {
 			protected void onPostExecute(Object modelResult) {
 				ModelResult result = (ModelResult) modelResult;
 
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					Aircandi.firstStartApp = false;
 					signinAuto();
 				}
 				else {
 					if (Routing.isNetworkError(result.serviceResponse)) {
 						Routing.serviceError(SplashForm.this, result.serviceResponse);
-						showButtons(Buttons.retry);
+						showButtons(Buttons.RETRY);
 					}
 					else {
 						Routing.serviceError(SplashForm.this, result.serviceResponse);
-						showButtons(Buttons.account);
+						showButtons(Buttons.ACCOUNT);
 					}
 				}
 			}
@@ -187,10 +187,10 @@ public class SplashForm extends SherlockActivity {
 		final String jsonSession = Aircandi.settings.getString(Constants.SETTING_USER_SESSION, null);
 
 		if (jsonUser != null && jsonSession != null) {
-			Logger.i(this, "Auto sign in...");
-			final User user = (User) HttpService.jsonToObject(jsonUser, ObjectType.User);
+			Logger.i(this, "Auto sign IN...");
+			final User user = (User) HttpService.jsonToObject(jsonUser, ObjectType.USER);
 			if (user != null) {
-				user.session = (Session) HttpService.jsonToObject(jsonSession, ObjectType.Session);
+				user.session = (Session) HttpService.jsonToObject(jsonSession, ObjectType.SESSION);
 				if (user.session != null) {
 					Aircandi.getInstance().setUser(user);
 					Tracker.startNewSession(Aircandi.getInstance().getUser());
@@ -206,19 +206,19 @@ public class SplashForm extends SherlockActivity {
 				}
 			}
 		}
-		showButtons(Buttons.account);
+		showButtons(Buttons.ACCOUNT);
 	}
 
 	private void showButtons(Buttons buttons) {
-		if (buttons == Buttons.none) {
+		if (buttons == Buttons.NONE) {
 			findViewById(R.id.button_retry_holder).setVisibility(View.GONE);
 			findViewById(R.id.button_holder).setVisibility(View.GONE);
 		}
-		else if (buttons == Buttons.retry) {
+		else if (buttons == Buttons.RETRY) {
 			findViewById(R.id.button_retry_holder).setVisibility(View.VISIBLE);
 			findViewById(R.id.button_holder).setVisibility(View.GONE);
 		}
-		else if (buttons == Buttons.account) {
+		else if (buttons == Buttons.ACCOUNT) {
 			findViewById(R.id.button_retry_holder).setVisibility(View.GONE);
 			findViewById(R.id.button_holder).setVisibility(View.VISIBLE);
 		}
@@ -236,7 +236,7 @@ public class SplashForm extends SherlockActivity {
 				ModelResult result = new ModelResult();
 
 				if (Aircandi.getInstance().getUser() != null) {
-					LinkOptions options = LinkOptions.getDefault(LinkProfile.LinksForUser);
+					LinkOptions options = LinkOptions.getDefault(LinkProfile.LINKS_FOR_USER);
 					result = EntityManager.getInstance().getEntity(Aircandi.getInstance().getUser().id, true, options);
 				}
 
@@ -247,20 +247,20 @@ public class SplashForm extends SherlockActivity {
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
 
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					final Intent intent = new Intent(SplashForm.this, AircandiForm.class);
 					startActivity(intent);
 					finish();
-					Animate.doOverridePendingTransition(SplashForm.this, TransitionType.PageToHelp);
+					Animate.doOverridePendingTransition(SplashForm.this, TransitionType.PAGE_TO_HELP);
 				}
 				else {
 					if (Routing.isNetworkError(result.serviceResponse)) {
 						Routing.serviceError(SplashForm.this, result.serviceResponse);
-						showButtons(Buttons.retry);
+						showButtons(Buttons.RETRY);
 					}
 					else {
 						Routing.serviceError(SplashForm.this, result.serviceResponse);
-						showButtons(Buttons.account);
+						showButtons(Buttons.ACCOUNT);
 					}
 				}
 			}
@@ -320,7 +320,7 @@ public class SplashForm extends SherlockActivity {
 			updateRequired();
 			return;
 		}
-		Routing.route(this, Route.Signin);
+		Routing.route(this, Route.SIGNIN);
 	}
 
 	@SuppressWarnings("ucd")
@@ -329,12 +329,12 @@ public class SplashForm extends SherlockActivity {
 			updateRequired();
 			return;
 		}
-		Routing.route(this, Route.Register);
+		Routing.route(this, Route.REGISTER);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onRetryButtonClick(View view) {
-		showButtons(Buttons.none);
+		showButtons(Buttons.NONE);
 		if (Aircandi.applicationUpdateRequired) {
 			updateRequired();
 			return;
@@ -367,8 +367,8 @@ public class SplashForm extends SherlockActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private enum Buttons {
-		account,
-		retry,
-		none
+		ACCOUNT,
+		RETRY,
+		NONE
 	}
 }

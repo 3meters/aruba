@@ -117,7 +117,7 @@ public class UI {
 					@Override
 					public void onComplete(Object response) {
 						final ServiceResponse serviceResponse = (ServiceResponse) response;
-						if (serviceResponse.responseCode == ResponseCode.Success) {
+						if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 							final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
 							/*
@@ -142,10 +142,10 @@ public class UI {
 							Float statusCode = serviceResponse.exception.getStatusCode();
 							String exception = serviceResponse.exception.getInnerException().getClass().getSimpleName();
 							if (statusCode == HttpStatus.SC_NOT_FOUND) {
-								UI.showToastNotification("Photo not found", Toast.LENGTH_SHORT);
+								UI.showToastNotification("PHOTO not found", Toast.LENGTH_SHORT);
 							}
 							else if (statusCode == HttpStatus.SC_NOT_ACCEPTABLE) {
-								UI.showToastNotification("Unknown photo format", Toast.LENGTH_SHORT);
+								UI.showToastNotification("UNKNOWN photo format", Toast.LENGTH_SHORT);
 							}
 							else {
 								UI.showToastNotification("Unhandled status code: " + String.valueOf(statusCode), Toast.LENGTH_LONG);
@@ -201,7 +201,7 @@ public class UI {
 			/*
 			 * Create a new bitmap from the original using the matrix to transform the result.
 			 * Potential for OM condition because if the garbage collector is behind, we could
-			 * have several large bitmaps in memory at the same time.
+			 * have several large bitmaps IN memory at the same time.
 			 */
 			bitmapScaled = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 		}
@@ -342,7 +342,7 @@ public class UI {
 				showToastNotification("Large screen", Toast.LENGTH_LONG);
 				break;
 			case Configuration.SCREENLAYOUT_SIZE_NORMAL:
-				showToastNotification("Normal screen", Toast.LENGTH_LONG);
+				showToastNotification("NORMAL screen", Toast.LENGTH_LONG);
 				break;
 			case Configuration.SCREENLAYOUT_SIZE_SMALL:
 				showToastNotification("Small screen", Toast.LENGTH_LONG);

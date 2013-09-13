@@ -93,7 +93,7 @@ public class TabManager implements ActionBar.TabListener {
 	@Override
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 		Logger.v(this, "onTabSelected: " + tab.getTag());
-		/* Currently handles tab switching in all forms with view flippers */
+		/* Currently handles tab switching IN all forms with view flippers */
 		if (mViewFlipper != null) {
 			mViewFlipper.setDisplayedChild(tab.getPosition());
 		}

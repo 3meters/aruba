@@ -45,7 +45,7 @@ public class PlaceEdit extends BaseEntityEdit {
 	public void draw() {
 		super.draw();
 
-		/* Place content */
+		/* PLACE content */
 		Place place = (Place) mEntity;
 
 		if (findViewById(R.id.address) != null) {
@@ -67,12 +67,12 @@ public class PlaceEdit extends BaseEntityEdit {
 
 	@SuppressWarnings("ucd")
 	public void onAddressBuilderClick(View view) {
-		Routing.route(this, Route.AddressEdit, mEntity);
+		Routing.route(this, Route.ADDRESS_EDIT, mEntity);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onCategoryBuilderClick(View view) {
-		Routing.route(this, Route.CategoryEdit, mEntity);
+		Routing.route(this, Route.CATEGORY_EDIT, mEntity);
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class PlaceEdit extends BaseEntityEdit {
 
 					final String jsonPlace = extras.getString(Constants.EXTRA_PLACE);
 					if (jsonPlace != null) {
-						final Place placeUpdated = (Place) HttpService.jsonToObject(jsonPlace, ObjectType.Place);
+						final Place placeUpdated = (Place) HttpService.jsonToObject(jsonPlace, ObjectType.PLACE);
 						if (placeUpdated.phone != null) {
 							placeUpdated.phone = placeUpdated.phone.replaceAll("[^\\d.]", "");
 						}
@@ -100,7 +100,7 @@ public class PlaceEdit extends BaseEntityEdit {
 					final Bundle extras = intent.getExtras();
 					final String jsonCategory = extras.getString(Constants.EXTRA_CATEGORY);
 					if (jsonCategory != null) {
-						final Category categoryUpdated = (Category) HttpService.jsonToObject(jsonCategory, ObjectType.Category);
+						final Category categoryUpdated = (Category) HttpService.jsonToObject(jsonCategory, ObjectType.CATEGORY);
 						if (categoryUpdated != null) {
 							mDirty = true;
 							((Place) mEntity).category = categoryUpdated;
@@ -117,7 +117,7 @@ public class PlaceEdit extends BaseEntityEdit {
 					final List<String> jsonApplinks = extras.getStringArrayList(Constants.EXTRA_ENTITIES);
 					mApplinks.clear();
 					for (String jsonApplink : jsonApplinks) {
-						Applink applink = (Applink) HttpService.jsonToObject(jsonApplink, ObjectType.Applink);
+						Applink applink = (Applink) HttpService.jsonToObject(jsonApplink, ObjectType.APPLINK);
 						mApplinks.add(applink);
 					}
 					mDirty = true;

@@ -63,10 +63,10 @@ public class CandigramEdit extends BaseEntityEdit {
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
 		mSpinnerItem = getThemeTone().equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
-		mSpinnerTypeData = Candigrams.getSpinnerData(this, PropertyType.type);
-		mSpinnerRangeData = Candigrams.getSpinnerData(this, PropertyType.range);
-		mSpinnerDurationData = Candigrams.getSpinnerData(this, PropertyType.duration);
-		mSpinnerHopsData = Candigrams.getSpinnerData(this, PropertyType.hops);
+		mSpinnerTypeData = Candigrams.getSpinnerData(this, PropertyType.TYPE);
+		mSpinnerRangeData = Candigrams.getSpinnerData(this, PropertyType.RANGE);
+		mSpinnerDurationData = Candigrams.getSpinnerData(this, PropertyType.DURATION);
+		mSpinnerHopsData = Candigrams.getSpinnerData(this, PropertyType.HOPS);
 
 		mHintType = (TextView) findViewById(R.id.hint_type);
 		mHintRange = (TextView) findViewById(R.id.hint_range);
@@ -233,7 +233,7 @@ public class CandigramEdit extends BaseEntityEdit {
 	public void draw() {
 		super.draw();
 
-		/* Place content */
+		/* PLACE content */
 		Candigram candigram = (Candigram) mEntity;
 
 		if (mSpinnerType != null) {
@@ -344,7 +344,7 @@ public class CandigramEdit extends BaseEntityEdit {
 					final IntentBuilder intentBuilder = new IntentBuilder().setEntity(mEntity);
 					setResult(Constants.RESULT_ENTITY_EDITED, intentBuilder.create());
 					finish();
-					Animate.doOverridePendingTransition(this, TransitionType.CandigramOut);
+					Animate.doOverridePendingTransition(this, TransitionType.CANDIGRAM_OUT);
 				}
 				else {
 					if (mEditing) {
@@ -446,7 +446,7 @@ public class CandigramEdit extends BaseEntityEdit {
 		}
 
 		/*
-		 * Set origin location so service can determine eligible area for hops
+		 * Set origin location so SERVICE can determine eligible area for HOPS
 		 */
 		if (mParentId != null) {
 			Entity place = EntityManager.getEntity(mParentId);

@@ -34,7 +34,7 @@ public class AirImageView extends RelativeLayout {
 	private Integer						mBrokenDrawable;
 	private Photo						mBrokenPhoto;
 	private ScaleType					mScaleType			= ScaleType.CENTER_CROP;
-	private FixedAlong					mFixedAlong			= FixedAlong.none;
+	private FixedAlong					mFixedAlong			= FixedAlong.NONE;
 	private int							squareDimen			= 1;
 
 	private static final String			androidNamespace	= "http://schemas.android.com/apk/res/android";
@@ -70,7 +70,7 @@ public class AirImageView extends RelativeLayout {
 		if (fixedAlong != null) {
 			mFixedAlong = FixedAlong.valueOf(fixedAlong);
 			if (mFixedAlong == null) {
-				mFixedAlong = FixedAlong.none;
+				mFixedAlong = FixedAlong.NONE;
 			}
 		}
 
@@ -130,8 +130,8 @@ public class AirImageView extends RelativeLayout {
 	public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-		if (mFixedAlong != FixedAlong.none) {
-			int square = (mFixedAlong == FixedAlong.width) ? getMeasuredWidth() : getMeasuredHeight();
+		if (mFixedAlong != FixedAlong.NONE) {
+			int square = (mFixedAlong == FixedAlong.WIDTH) ? getMeasuredWidth() : getMeasuredHeight();
 			if (square > squareDimen) {
 				squareDimen = square;
 			}
@@ -211,8 +211,8 @@ public class AirImageView extends RelativeLayout {
 	// --------------------------------------------------------------------------------------------
 
 	public static enum FixedAlong {
-		none,
-		width,
-		height
+		NONE,
+		WIDTH,
+		HEIGHT
 	}
 }

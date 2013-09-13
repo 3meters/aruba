@@ -58,7 +58,7 @@ public class CategoryBuilder extends BaseEdit {
 		if (extras != null) {
 			final String jsonCategory = extras.getString(Constants.EXTRA_CATEGORY);
 			if (jsonCategory != null) {
-				mOriginalCategory = (Category) HttpService.jsonToObject(jsonCategory, ObjectType.Category);
+				mOriginalCategory = (Category) HttpService.jsonToObject(jsonCategory, ObjectType.CATEGORY);
 			}
 		}
 	}
@@ -75,7 +75,7 @@ public class CategoryBuilder extends BaseEdit {
 
 		setActivityTitle(getString(R.string.dialog_category_builder_title));
 
-		bind(BindingMode.auto);
+		bind(BindingMode.AUTO);
 		draw();
 	}
 
@@ -114,7 +114,7 @@ public class CategoryBuilder extends BaseEdit {
 			@Override
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					mCategories = EntityManager.getInstance().getCategories();
 					if (mCategories != null) {
 						if (mOriginalCategory != null) {

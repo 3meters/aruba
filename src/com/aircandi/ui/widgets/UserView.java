@@ -115,7 +115,7 @@ public class UserView extends RelativeLayout {
 
 			if (mTimeSince != null) {
 				if (mDate != null) {
-					mTimeSince.setText(DateTime.interval(mDate, DateTime.nowDate().getTime(), IntervalContext.past));
+					mTimeSince.setText(DateTime.interval(mDate, DateTime.nowDate().getTime(), IntervalContext.PAST));
 				}
 				else {
 					mTimeSince.setVisibility(View.GONE);
@@ -139,11 +139,11 @@ public class UserView extends RelativeLayout {
 
 			if (mBoundView.findViewById(R.id.stats_group) != null) {
 				if (mImageWatched != null) {
-					Count count = user.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
+					Count count = user.getCount(Constants.TYPE_LINK_WATCH, Direction.IN);
 					mWatchCount.setText(String.valueOf(count != null ? count.count.intValue() : 0));
 				}
 				if (mImageLiked != null) {
-					Count count = user.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
+					Count count = user.getCount(Constants.TYPE_LINK_LIKE, Direction.IN);
 					mLikeCount.setText(String.valueOf(count != null ? count.count.intValue() : 0));
 				}
 			}
@@ -151,7 +151,7 @@ public class UserView extends RelativeLayout {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Set/Get
+	// Set/GET
 	// --------------------------------------------------------------------------------------------
 
 	public void setLabel(String label) {

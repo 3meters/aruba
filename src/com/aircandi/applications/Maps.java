@@ -32,7 +32,7 @@ public class Maps {
 		if (entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 
 			Bundle extras = new Bundle();
-			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CANDIGRAM, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
+			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CANDIGRAM, Constants.SCHEMA_ENTITY_PLACE, Direction.OUT, false, false);
 			settings.appClass = Places.class;
 			List<Shortcut> shortcuts = (List<Shortcut>) entity.getShortcuts(settings, new Link.SortByModifiedDate());
 			if (shortcuts.size() > 0) {
@@ -45,7 +45,7 @@ public class Maps {
 							marker.current = true;
 							marker.iconResId = R.drawable.img_marker_candigram;
 						}
-						markerStrings.add(HttpService.objectToJson(marker, UseAnnotations.False, ExcludeNulls.True));
+						markerStrings.add(HttpService.objectToJson(marker, UseAnnotations.FALSE, ExcludeNulls.TRUE));
 					}
 				}
 				if (markerStrings.size() > 0) {
@@ -57,12 +57,12 @@ public class Maps {
 					.setEntityId(entity.id)
 					.setExtras(extras);
 			context.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
+			Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 		}
 		else {
 			IntentBuilder intentBuilder = new IntentBuilder(context, MapForm.class).setEntityId(entity.id);
 			context.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
+			Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 		}
 	}
 }

@@ -103,7 +103,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 	public void beforeDatabind() {
 		/*
 		 * If cache entity is fresher than the one currently bound to or there is
-		 * a cache entity available, go ahead and draw before we check against the service.
+		 * a cache entity available, go ahead and draw before we check against the SERVICE.
 		 */
 		mCacheStamp = null;
 		mEntity = EntityManager.getEntity(mEntityId);
@@ -139,7 +139,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 				if (!refreshNeeded.get()) {
 					CacheStamp cacheStamp = EntityManager.getInstance().loadCacheStamp(mEntity.id, mCacheStamp);
 					/*
-					 * We refresh for both modified and activity because both can change what we
+					 * We refresh for BOTH modified and activity because BOTH can change what we
 					 * show for an entity including links and link shortcuts.
 					 */
 					if (cacheStamp != null && !cacheStamp.equals(mCacheStamp)) {
@@ -162,7 +162,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 				hideBusy();
 				if (refreshNeeded.get()) {
 					final ModelResult result = (ModelResult) modelResult;
-					if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 						if (result.data != null) {
 							mEntity = (Entity) result.data;
@@ -179,7 +179,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 						return;
 					}
 				}
-				else if (mode == BindingMode.service) {
+				else if (mode == BindingMode.SERVICE) {
 					showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
 				}
 				afterDatabind();
@@ -194,7 +194,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 
 	@Override
 	public void onRefresh() {
-		databind(BindingMode.service); // Called from Routing
+		databind(BindingMode.SERVICE); // Called from Routing
 	}
 
 	@SuppressWarnings("ucd")
@@ -240,7 +240,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
 				((ComboButton) findViewById(R.id.button_like)).getViewAnimator().setDisplayedChild(0);
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					drawButtons();
 					drawStats();
 				}
@@ -297,7 +297,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
 				((ComboButton) findViewById(R.id.button_watch)).getViewAnimator().setDisplayedChild(0);
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					drawButtons();
 					drawStats();
 				}
@@ -317,26 +317,26 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 		if (!shortcut.app.equals(Constants.TYPE_APP_MAP)) {
 			if (shortcut.count != null && shortcut.count == 0 && !EntityManager.canUserAdd(mEntity)) return;
 		}
-		Routing.route(this, Route.Shortcut, mEntity, shortcut, null, null);
+		Routing.route(this, Route.SHORTCUT, mEntity, shortcut, null, null);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onUserClick(View view) {
 		Entity entity = (Entity) view.getTag();
-		Routing.route(this, Route.Profile, entity);
+		Routing.route(this, Route.PROFILE, entity);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onImageClick(View view) {
 		if (mEntity.photo != null) {
-			Routing.route(this, Route.Photo, mEntity);
+			Routing.route(this, Route.PHOTO, mEntity);
 		}
 	}
 
 	@SuppressWarnings("ucd")
 	public void onNewCommentButtonClick(View view) {
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
-			Routing.route(this, Route.CommentNew, mEntity);
+			Routing.route(this, Route.COMMENT_NEW, mEntity);
 		}
 		else {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
@@ -355,13 +355,13 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 		 * Cases that use activity result
 		 * 
 		 * - Candi picker returns entity id for a move
-		 * - Template picker returns type of candi to add as a child
+		 * - Template picker returns TYPE of candi to add as a child
 		 */
 		if (resultCode != Activity.RESULT_CANCELED) {
 			if (requestCode == Constants.ACTIVITY_ENTITY_EDIT) {
 				if (resultCode == Constants.RESULT_ENTITY_DELETED) {
 					finish();
-					Animate.doOverridePendingTransition(this, TransitionType.PageToRadarAfterDelete);
+					Animate.doOverridePendingTransition(this, TransitionType.PAGE_TO_RADAR_AFTER_DELETE);
 				}
 			}
 			else if (requestCode == Constants.ACTIVITY_APPLICATION_PICK) {
@@ -377,7 +377,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 								.setEntityParentId(mEntityId);
 
 						startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
-						Animate.doOverridePendingTransition(this, TransitionType.PageToForm);
+						Animate.doOverridePendingTransition(this, TransitionType.PAGE_TO_FORM);
 					}
 				}
 			}
@@ -713,20 +713,20 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 		 * there are lots of actions that could have happened while this activity
 		 * was stopped that change what the user would expect to see.
 		 * 
-		 * - Entity deleted or modified
-		 * - Entity children modified
-		 * - New comments
-		 * - Change in user which effects which candi and UI should be visible.
-		 * - User profile could have been updated and we don't catch that.
+		 * - ENTITY deleted or modified
+		 * - ENTITY children modified
+		 * - NEW comments
+		 * - Change IN user which effects which candi and UI should be visible.
+		 * - USER profile could have been updated and we don't catch that.
 		 */
 		if (!isFinishing()) {
 			if (mEntity instanceof Place) {
 				Aircandi.currentPlace = mEntity;
 			}
 
-			Animate.doOverridePendingTransition(this, TransitionType.PageBack);
+			Animate.doOverridePendingTransition(this, TransitionType.PAGE_BACK);
 			invalidateOptionsMenu();
-			databind(BindingMode.auto);	// check to see if the cache stamp is stale
+			databind(BindingMode.AUTO);	// check to see if the cache stamp is stale
 
 			/* Package receiver */
 			final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
@@ -763,7 +763,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 
 						@Override
 						public void run() {
-							databind(BindingMode.auto);
+							databind(BindingMode.AUTO);
 						}
 					}, 1500);
 				}

@@ -49,7 +49,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public Number									modifiedDate;
 
-	/* Client only properties */
+	/* CLIENT only properties */
 
 	public Integer									count;
 	public List<Shortcut>							group;

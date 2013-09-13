@@ -22,12 +22,12 @@ public class Places {
 	public static void view(Context context, String entityId) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceForm.class).setEntityId(entityId);
 		context.startActivity(intentBuilder.create());
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 	}
 
 	public static void viewFor(Context context, String entityId, String linkType, Direction direction) {
 		if (direction == null) {
-			direction = Direction.in;
+			direction = Direction.IN;
 		}
 		IntentBuilder intentBuilder = new IntentBuilder(context, EntityList.class)
 				.setEntityId(entityId)
@@ -38,12 +38,12 @@ public class Places {
 				.setListNewEnabled(true);
 
 		context.startActivity(intentBuilder.create());
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 	}
 
 	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction, String title) {
 		if (direction == null) {
-			direction = Direction.in;
+			direction = Direction.IN;
 		}
 		IntentBuilder intentBuilder = new IntentBuilder(context, EntityList.class)
 				.setEntityId(entityId)
@@ -61,13 +61,13 @@ public class Places {
 	public static void edit(Context context, Entity entity) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceEdit.class).setEntity(entity);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 	}
 
 	@SuppressWarnings("ucd")
 	public static void insert(Context context) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceEdit.class).setEntitySchema(Constants.SCHEMA_ENTITY_PLACE);
 		((Activity) context).startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
-		Animate.doOverridePendingTransition((Activity) context, TransitionType.PageToPage);
+		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 	}
 }

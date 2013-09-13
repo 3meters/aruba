@@ -130,13 +130,13 @@ public class SignInEdit extends BaseEdit {
 
 				final ModelResult result = (ModelResult) response;
 				hideBusy();
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 					final String jsonResponse = (String) result.serviceResponse.data;
-					final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.None, ServiceDataWrapper.True);
+					final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.NONE, ServiceDataWrapper.TRUE);
 					final User user = serviceData.user;
 					user.session = serviceData.session;
-					Logger.i(this, "User signed in: " + user.name + " (" + user.id + ")");
+					Logger.i(this, "USER signed IN: " + user.name + " (" + user.id + ")");
 
 					Aircandi.getInstance().setUser(user);
 
@@ -156,7 +156,7 @@ public class SignInEdit extends BaseEdit {
 
 					setResult(Constants.RESULT_USER_SIGNED_IN);
 					finish();
-					Animate.doOverridePendingTransition(SignInEdit.this, TransitionType.FormToPage);
+					Animate.doOverridePendingTransition(SignInEdit.this, TransitionType.FORM_TO_PAGE);
 				}
 				else {
 					Routing.serviceError(SignInEdit.this, result.serviceResponse);

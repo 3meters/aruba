@@ -66,7 +66,7 @@ public class RegisterEdit extends BaseEntityEdit {
 
 	@SuppressWarnings("ucd")
 	public void onViewTermsButtonClick(View view) {
-		Routing.route(this, Route.Terms);
+		Routing.route(this, Route.TERMS);
 	}
 
 	@SuppressWarnings("ucd")
@@ -198,11 +198,11 @@ public class RegisterEdit extends BaseEntityEdit {
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
 
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					/*
 					 * mUser has been set to the user and session we got back from
-					 * the service when it was inserted. We now consider the user
-					 * signed in.
+					 * the SERVICE when it was inserted. We now consider the user
+					 * signed IN.
 					 */
 					final User insertedUser = (User) result.data;
 					Aircandi.getInstance().setUser(insertedUser);
@@ -223,7 +223,7 @@ public class RegisterEdit extends BaseEntityEdit {
 
 					setResult(Constants.RESULT_USER_SIGNED_IN);
 					finish();
-					Animate.doOverridePendingTransition(RegisterEdit.this, TransitionType.FormToPage);
+					Animate.doOverridePendingTransition(RegisterEdit.this, TransitionType.FORM_TO_PAGE);
 				}
 				else {
 					/*

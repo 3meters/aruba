@@ -85,7 +85,7 @@ public final class Routing {
 
 	public static boolean intent(Activity activity, Intent intent) {
 		activity.startActivity(intent);
-		Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+		Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 		return true;
 	}
 
@@ -99,7 +99,7 @@ public final class Routing {
 
 	public static boolean route(final Activity activity, Route route, Entity entity, Shortcut shortcut, ShortcutSettings settings, Bundle extras) {
 
-		if (route == Route.Shortcut) {
+		if (route == Route.SHORTCUT) {
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
@@ -123,11 +123,11 @@ public final class Routing {
 				for (Shortcut item : shortcut.group) {
 					Shortcut clone = item.clone();
 					clone.group = null;
-					shortcutStrings.add(HttpService.objectToJson(clone, UseAnnotations.False, ExcludeNulls.True));
+					shortcutStrings.add(HttpService.objectToJson(clone, UseAnnotations.FALSE, ExcludeNulls.TRUE));
 				}
 				intent.putStringArrayListExtra(Constants.EXTRA_SHORTCUTS, (ArrayList<String>) shortcutStrings);
 				activity.startActivity(intent);
-				Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+				Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			}
 			else {
 				Routing.shortcut(activity, shortcut, entity, null);
@@ -135,7 +135,7 @@ public final class Routing {
 
 			return true;
 		}
-		else if (route == Route.EntityList && settings != null) {
+		else if (route == Route.ENTITY_LIST && settings != null) {
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
@@ -148,7 +148,7 @@ public final class Routing {
 					.setExtras(extras);
 
 			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_PAGE);
 			return true;
 		}
 		else {
@@ -159,11 +159,11 @@ public final class Routing {
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public static boolean route(final Activity activity, Route route, Entity entity, String schema, Bundle extras) {
 
-		if (route == Route.Unknown) {
+		if (route == Route.UNKNOWN) {
 
 			return false;
 		}
-		else if (route == Route.Home) {
+		else if (route == Route.HOME) {
 
 			Intent intent = new Intent(activity, AircandiForm.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -171,11 +171,11 @@ public final class Routing {
 			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
 			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_PAGE);
 			return true;
 		}
 
-		else if (route == Route.Watching) {
+		else if (route == Route.WATCHING) {
 
 			entity = Aircandi.getInstance().getUser();
 
@@ -188,11 +188,11 @@ public final class Routing {
 			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
 			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_PAGE);
 			return true;
 		}
 
-		else if (route == Route.Created) {
+		else if (route == Route.CREATED) {
 
 			entity = Aircandi.getInstance().getUser();
 
@@ -205,11 +205,11 @@ public final class Routing {
 			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
 			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_PAGE);
 			return true;
 		}
 
-		else if (route == Route.Profile) {
+		else if (route == Route.PROFILE) {
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid user entity required for selected route");
@@ -222,43 +222,43 @@ public final class Routing {
 			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 
 			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_PAGE);
 			return true;
 		}
 
-		else if (route == Route.Notifications) {
+		else if (route == Route.NOTIFICATIONS) {
 
 			Intent intent = new Intent(activity, AircandiForm.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_PAGE);
 			return true;
 		}
 
-		else if (route == Route.Settings) {
+		else if (route == Route.SETTINGS) {
 
 			activity.startActivityForResult(new Intent(activity, Preferences.class), Constants.ACTIVITY_PREFERENCES);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.Feedback) {
+		else if (route == Route.FEEDBACK) {
 
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, FeedbackEdit.class);
 			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.Invite) {
+		else if (route == Route.INVITE) {
 
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, InviteEdit.class);
 			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.Browse) {
+		else if (route == Route.BROWSE) {
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
@@ -273,12 +273,12 @@ public final class Routing {
 					intentBuilder.setEntityParentId(entity.toId);
 				}
 				activity.startActivity(intentBuilder.create());
-				Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+				Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_PAGE);
 			}
 			return true;
 		}
 
-		else if (route == Route.Edit) {
+		else if (route == Route.EDIT) {
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
@@ -288,28 +288,28 @@ public final class Routing {
 					.setEntity(entity)
 					.setExtras(extras);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.Add) {
+		else if (route == Route.ADD) {
 
 			((BaseBrowse) activity).onAdd();
 			return true;
 		}
 
-		else if (route == Route.New) {
+		else if (route == Route.NEW) {
 
 			Tracker.sendEvent("ui_action", "new_" + schema, null, 0, Aircandi.getInstance().getUser());
 			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.insertFormBySchema(schema))
 					.setEntitySchema(schema)
 					.setExtras(extras);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.Help) {
+		else if (route == Route.HELP) {
 
 			if (extras == null) {
 				((BaseBrowse) activity).onHelp();
@@ -317,12 +317,12 @@ public final class Routing {
 			else {
 				IntentBuilder intentBuilder = new IntentBuilder(activity, HelpForm.class).setExtras(extras);
 				activity.startActivity(intentBuilder.create());
-				Animate.doOverridePendingTransition(activity, TransitionType.PageToHelp);
+				Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_HELP);
 			}
 			return true;
 		}
 
-		else if (route == Route.SigninProfile) {
+		else if (route == Route.SIGNIN_PROFILE) {
 
 			entity = Aircandi.getInstance().getUser();
 			if (entity == null) {
@@ -332,11 +332,11 @@ public final class Routing {
 					.setEntityId(entity.id);
 
 			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_PAGE);
 			return true;
 		}
 
-		else if (route == Route.Photo) {
+		else if (route == Route.PHOTO) {
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
@@ -354,22 +354,22 @@ public final class Routing {
 			intent.putExtra(Constants.EXTRA_PAGING_ENABLED, false);
 
 			activity.startActivity(intent);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_PAGE);
 			return true;
 		}
 
-		else if (route == Route.CommentNew) {
+		else if (route == Route.COMMENT_NEW) {
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
 			}
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, CommentEdit.class).setEntityParentId(entity.id);
 			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.EntityList) {
+		else if (route == Route.ENTITY_LIST) {
 
 			/* Extras must set list mode. */
 			if (entity == null) {
@@ -381,108 +381,108 @@ public final class Routing {
 					.setListLinkSchema(schema)
 					.setExtras(extras);
 			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToPage);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_PAGE);
 			return true;
 		}
 
-		else if (route == Route.Accept) {
+		else if (route == Route.ACCEPT) {
 
 			((BaseEdit) activity).onAccept();	// Give activity a chance for discard confirmation
 			return true;
 		}
 
-		else if (route == Route.Cancel) {
+		else if (route == Route.CANCEL) {
 
 			((BaseActivity) activity).onCancel(false);	// Give activity a chance for discard confirmation
 			return true;
 		}
 
-		else if (route == Route.CancelForce) {
+		else if (route == Route.CANCEL_FORCE) {
 
 			((BaseActivity) activity).onCancel(true);	// Give activity a chance for discard confirmation
 			return true;
 		}
 
-		else if (route == Route.Delete) {
+		else if (route == Route.DELETE) {
 
 			((BaseEdit) activity).confirmDelete();	// Give activity a chance for discard confirmation
 			return true;
 		}
 
-		else if (route == Route.DeleteNotifications) {
+		else if (route == Route.DELETE_NOTIFICATIONS) {
 
 			return false;
 		}
 
-		else if (route == Route.CancelHelp) {
+		else if (route == Route.CANCEL_HELP) {
 
 			activity.setResult(Activity.RESULT_CANCELED);
 			activity.finish();
-			Animate.doOverridePendingTransition(activity, TransitionType.HelpToPage);
+			Animate.doOverridePendingTransition(activity, TransitionType.HELP_TO_PAGE);
 			return true;
 		}
 
-		else if (route == Route.Signout) {
+		else if (route == Route.SIGNOUT) {
 
 			BaseActivity.signout(activity, false);
 			return true;
 		}
 
-		else if (route == Route.Test) {
+		else if (route == Route.TEST) {
 			((ApplinkEdit) activity).onTestButtonClick();
 			return true;
 		}
 
-		else if (route == Route.Signin) {
+		else if (route == Route.SIGNIN) {
 
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, SignInEdit.class);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_SIGNIN);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.Register) {
+		else if (route == Route.REGISTER) {
 
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, RegisterEdit.class);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_SIGNIN);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.Terms) {
+		else if (route == Route.TERMS) {
 
 			final IntentBuilder intentBuilder = new IntentBuilder(android.content.Intent.ACTION_VIEW);
 			intentBuilder.setData(Uri.parse(Constants.URL_AIRCANDI_TERMS));
 			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.SettingsLocation) {
+		else if (route == Route.SETTINGS_LOCATION) {
 
 			activity.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			activity.finish();
 			return true;
 		}
 
-		else if (route == Route.SettingsWifi) {
+		else if (route == Route.SETTINGS_WIFI) {
 
 			activity.startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			activity.finish();
 			return true;
 		}
 
-		else if (route == Route.AddressEdit) {
+		else if (route == Route.ADDRESS_EDIT) {
 
 			IntentBuilder intentBuilder = new IntentBuilder(activity, AddressBuilder.class).setEntity(entity);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ADDRESS_EDIT);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.CategoryEdit) {
+		else if (route == Route.CATEGORY_EDIT) {
 
 			final Intent intent = new Intent(activity, CategoryBuilder.class);
 			if (((Place) entity).category != null) {
@@ -490,19 +490,19 @@ public final class Routing {
 				intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
 			}
 			activity.startActivityForResult(intent, Constants.ACTIVITY_CATEGORY_EDIT);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.PasswordChange) {
+		else if (route == Route.PASSWORD_CHANGE) {
 
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, PasswordEdit.class);
 			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.Splash) {
+		else if (route == Route.SPLASH) {
 
 			final Intent intent = new Intent(activity, SplashForm.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -511,27 +511,27 @@ public final class Routing {
 			}
 			activity.startActivity(intent);
 			activity.finish();
-			Animate.doOverridePendingTransition(activity, TransitionType.FormToPage);
+			Animate.doOverridePendingTransition(activity, TransitionType.FORM_TO_PAGE);
 			return true;
 		}
 
-		else if (route == Route.PhotoSource) {
+		else if (route == Route.PHOTO_SOURCE) {
 
 			IntentBuilder intentBuilder = new IntentBuilder(activity, PhotoSourcePicker.class).setEntity(entity);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_SOURCE_PICK);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.NewFor) {
+		else if (route == Route.NEW_FOR) {
 
 			IntentBuilder intentBuilder = new IntentBuilder(activity, ApplicationPicker.class).setEntity(entity);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_APPLICATION_PICK);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.ApplinksEdit) {
+		else if (route == Route.APPLINKS_EDIT) {
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
@@ -540,17 +540,17 @@ public final class Routing {
 					.setEntityId(entity.id)
 					.setExtras(extras);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_APPLINKS_EDIT);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.PhotoFromGallery) {
+		else if (route == Route.PHOTO_FROM_GALLERY) {
 
 			final Intent intent = new Intent()
 					.setType("image/*")
 					.setAction(Intent.ACTION_GET_CONTENT);
 
-			/* We want to filter out remove images like the linked in from picasa. */
+			/* We want to filter OUT remove images like the linked IN from picasa. */
 			if (Constants.SUPPORTS_HONEYCOMB) {
 				intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
 			}
@@ -558,45 +558,45 @@ public final class Routing {
 			activity.startActivityForResult(Intent.createChooser(intent
 					, activity.getString(R.string.chooser_gallery_title))
 					, Constants.ACTIVITY_PICTURE_PICK_DEVICE);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.PhotoFromCamera) {
+		else if (route == Route.PHOTO_FROM_CAMERA) {
 
 			IntentBuilder intentBuilder = new IntentBuilder(MediaStore.ACTION_IMAGE_CAPTURE).setExtras(extras);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_MAKE);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.PhotoSearch) {
+		else if (route == Route.PHOTO_SEARCH) {
 
 			IntentBuilder intentBuilder = new IntentBuilder(activity, PhotoPicker.class).setExtras(extras);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_PICK_PLACE);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.PhotoPlaceSearch) {
+		else if (route == Route.PHOTO_PLACE_SEARCH) {
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
 			}
 			IntentBuilder intentBuilder = new IntentBuilder(activity, PhotoPicker.class).setEntityId(entity.id);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_PICK_PLACE);
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
-		else if (route == Route.Tune) {
+		else if (route == Route.TUNE) {
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
 			}
 			IntentBuilder intentBuilder = new IntentBuilder(activity, TuningEdit.class).setEntity(entity);
 			activity.startActivity(intentBuilder.create());
-			Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
@@ -733,7 +733,7 @@ public final class Routing {
 
 	public static Boolean isNetworkError(ServiceResponse serviceResponse) {
 		final ErrorType errorType = serviceResponse.exception.getErrorType();
-		if (errorType == ErrorType.Client) {
+		if (errorType == ErrorType.CLIENT) {
 			if (serviceResponse.exception.getInnerException() instanceof IOException) {
 				return true;
 			}
@@ -772,7 +772,7 @@ public final class Routing {
 							, null);
 				}
 			});
-			Logger.w(activity, "Service error: (code: " + String.valueOf(statusCode) + ") " + errorMessage);
+			Logger.w(activity, "SERVICE error: (code: " + String.valueOf(statusCode) + ") " + errorMessage);
 			return statusCode;
 		}
 
@@ -788,35 +788,35 @@ public final class Routing {
 		}
 
 		/*
-		 * Client errors occur when we are unable to get a response from a service, or when the client is
-		 * unable to understand a response from a service. This includes protocol, network and timeout errors.
+		 * CLIENT errors occur when we are unable to get a response from a SERVICE, or when the client is
+		 * unable to understand a response from a SERVICE. This includes protocol, NETWORK and timeout errors.
 		 */
-		if (errorType == ErrorType.Client) {
+		if (errorType == ErrorType.CLIENT) {
 
 			if (serviceResponse.exception.getInnerException() instanceof IOException) {
 				/*
-				 * We have a bad network connection.
+				 * We have a bad NETWORK connection.
 				 * 
 				 * This could be any of these:
 				 * 
 				 * Handled above
 				 * - SocketException: thrown during socket creation or setting options
-				 * - ConnectTimeoutException: timeout expired trying to connect to service
+				 * - ConnectTimeoutException: timeout expired trying to connect to SERVICE
 				 * - SocketTimeoutException: timeout expired on a socket
 				 * 
 				 * Still left
 				 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
-				 * - UnknownHostException: hostname didn't exist in the dns system
+				 * - UnknownHostException: hostname didn't exist IN the dns system
 				 */
 				if (serviceResponse.exception.getInnerException() instanceof SocketException) {
 					/*
-					 * We don't have a network connection.
+					 * We don't have a NETWORK connection.
 					 */
 					Dialogs.alertDialogSimple(activity, null, activity.getString(R.string.error_connection_none));
 				}
 				else if (serviceResponse.exception.getInnerException() instanceof WalledGardenException) {
 					/*
-					 * We have a connection but user is locked in a walled garden until they sign-in, pay, etc.
+					 * We have a connection but user is LOCKED IN a walled garden until they sign-IN, pay, etc.
 					 */
 					Dialogs.alertDialogSimple(activity, null, activity.getString(R.string.error_connection_walled_garden));
 				}
@@ -830,14 +830,14 @@ public final class Routing {
 				else if (serviceResponse.exception.getInnerException() instanceof SocketTimeoutException) {
 					/*
 					 * We have a connection but got tired of waiting for data. Could be a
-					 * poor connection or service is slow.
+					 * poor connection or SERVICE is slow.
 					 */
 					UI.showToastNotification(activity.getString(R.string.error_connection_poor), Toast.LENGTH_SHORT);
 				}
 				else if (serviceResponse.exception.getInnerException() instanceof UnknownHostException) {
 					/*
 					 * We have a connection but got tired of waiting for data. Could be a
-					 * poor connection or service is slow.
+					 * poor connection or SERVICE is slow.
 					 */
 					Dialogs.alertDialogSimple(activity, null, activity.getString(R.string.error_client_unknown_host));
 				}
@@ -866,62 +866,62 @@ public final class Routing {
 				}
 			}
 		}
-		else if (errorType == ErrorType.Service) {
+		else if (errorType == ErrorType.SERVICE) {
 
 			if (serviceResponse.exception.getInnerException() instanceof HttpServiceException.NotFoundException) {
 				/*
-				 * Reached the service but requested something that doesn't exist. This is a bug and
+				 * Reached the SERVICE but requested something that doesn't exist. This is a bug and
 				 * not something that a user should cause.
 				 */
 				UI.showToastNotification(activity.getString(R.string.error_client_request_not_found), Toast.LENGTH_SHORT);
 			}
 			else if (serviceResponse.exception.getInnerException() instanceof HttpServiceException.UnauthorizedException) {
 				/*
-				 * Reached the service but requested something that the user can't access.
+				 * Reached the SERVICE but requested something that the user can't access.
 				 */
 				UI.showToastNotification(activity.getString(R.string.error_service_unauthorized), Toast.LENGTH_SHORT);
 			}
 			else if (serviceResponse.exception.getInnerException() instanceof HttpServiceException.ForbiddenException) {
 				/*
-				 * Reached the service but request was invalid per service policy.
+				 * Reached the SERVICE but request was invalid per SERVICE policy.
 				 */
 				UI.showToastNotification(activity.getString(R.string.error_service_forbidden), Toast.LENGTH_SHORT);
 			}
 			else if (serviceResponse.exception.getInnerException() instanceof HttpServiceException.GatewayTimeoutException) {
 				/*
-				 * Reached the service but request was invalid per service policy.
+				 * Reached the SERVICE but request was invalid per SERVICE policy.
 				 */
 				UI.showToastNotification(activity.getString(R.string.error_service_gateway_timeout), Toast.LENGTH_SHORT);
 			}
 			else if (serviceResponse.exception.getInnerException() instanceof HttpServiceException.ClientVersionException) {
 				/*
-				 * Reached the service but a more current client version is required.
+				 * Reached the SERVICE but a more current client version is required.
 				 */
 				Aircandi.applicationUpdateRequired = true;
 				final Intent intent = new Intent(activity, SplashForm.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				activity.startActivity(intent);
 				activity.finish();
-				Animate.doOverridePendingTransition(activity, TransitionType.FormToPage);
+				Animate.doOverridePendingTransition(activity, TransitionType.FORM_TO_PAGE);
 			}
 			else {
 				String title = null;
 				String message = null;
 				if (statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
 					/*
-					 * Reached the service with a good call but the service failed for an unknown reason. Examples
-					 * are service bugs like missing indexes causing mongo queries to throw errors.
+					 * Reached the SERVICE with a good call but the SERVICE failed for an unknown reason. Examples
+					 * are SERVICE bugs like missing indexes causing mongo queries to throw errors.
 					 * 
-					 * - 500: Something bad and unknown has happened in the service.
+					 * - 500: Something bad and unknown has happened IN the SERVICE.
 					 */
 					UI.showToastNotification(activity.getString(R.string.error_service_unknown), Toast.LENGTH_SHORT);
 				}
 				else {
 					/*
-					 * Reached the service with a good call but failed for a well known reason.
+					 * Reached the SERVICE with a good call but failed for a well known reason.
 					 * 
 					 * This could have been caused by any problem while inserting/updating.
-					 * We look first for ones that are known responses from the service.
+					 * We look first for ones that are known responses from the SERVICE.
 					 * 
 					 * - 403.x: password not strong enough
 					 * - 403.x: email not unique
@@ -932,7 +932,7 @@ public final class Routing {
 						title = activity.getString(R.string.error_session_expired_title);
 						message = activity.getString(R.string.error_session_expired);
 						/*
-						 * Make sure the user is logged out
+						 * Make sure the user is logged OUT
 						 */
 						BaseActivity.signout(null, true);
 
@@ -940,10 +940,10 @@ public final class Routing {
 					else if (statusCode == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
 						message = activity.getString(R.string.error_session_invalid);
 						if (serviceOperation != null) {
-							if (serviceOperation == ServiceOperation.PasswordChange) {
+							if (serviceOperation == ServiceOperation.PASSWORD_CHANGE) {
 								message = activity.getString(R.string.error_change_password_unauthorized);
 							}
-							else if (serviceOperation == ServiceOperation.Signin) {
+							else if (serviceOperation == ServiceOperation.SIGNIN) {
 								message = activity.getString(R.string.error_signin_invalid_signin);
 							}
 						}
@@ -974,99 +974,101 @@ public final class Routing {
 			}
 		}
 
-		Logger.w(activity, "Service error: (code: " + String.valueOf(statusCode) + ") " + errorMessage);
+		Logger.w(activity, "SERVICE error: (code: " + String.valueOf(statusCode) + ") " + errorMessage);
 		return statusCode;
 	}
 
 	public static Route routeForMenuId(int itemId) {
 		if (itemId == R.id.edit) {
-			return Route.Edit;
+			return Route.EDIT;
 		}
 		else if (itemId == R.id.help) {
-			return Route.Help;
+			return Route.HELP;
 		}
 		else if (itemId == R.id.refresh) {
-			return Route.Refresh;
+			return Route.REFRESH;
 		}
 		else if (itemId == R.id.settings) {
-			return Route.Settings;
+			return Route.SETTINGS;
 		}
 		else if (itemId == R.id.profile) {
-			return Route.SigninProfile;
+			return Route.SIGNIN_PROFILE;
 		}
 		else if (itemId == android.R.id.home) {
-			return Route.Cancel;
+			return Route.CANCEL;
 		}
 		else if (itemId == R.id.home) {
-			return Route.Home;
+			return Route.HOME;
 		}
 		else if (itemId == R.id.signout) {
-			return Route.Signout;
+			return Route.SIGNOUT;
 		}
 		else if (itemId == R.id.test) {
-			return Route.Test;
+			return Route.TEST;
 		}
 		else if (itemId == R.id.invite) {
-			return Route.Invite;
+			return Route.INVITE;
 		}
 		else if (itemId == R.id.cancel) {
-			return Route.Cancel;
+			return Route.CANCEL;
 		}
 		else if (itemId == R.id.accept) {
-			return Route.Accept;
+			return Route.ACCEPT;
 		}
 		else if (itemId == R.id.add) {
-			return Route.Add;
+			return Route.ADD;
 		}
 		else if (itemId == R.id.delete) {
-			return Route.Delete;
+			return Route.DELETE;
 		}
-		return Route.Unknown;
+		return Route.UNKNOWN;
 	}
 
 	public static enum Route {
-		Unknown,
-		Add,
-		New,
-		Edit,
-		Browse,
-		Help,
-		Profile,
-		SigninProfile,
-		Watching,
-		Photo,
-		CommentNew,
-		Shortcut,
-		EntityList,
-		Home,
-		Settings,
-		Feedback,
-		Cancel,
-		CancelForce,
-		CancelHelp,
-		Delete,
-		Refresh,
-		Signout,
-		Signin,
-		Register,
-		Accept,
-		Terms,
-		SettingsLocation,
-		SettingsWifi,
-		AddressEdit,
-		CategoryEdit,
-		PasswordChange,
-		Splash,
-		PhotoSource,
-		ApplinksEdit,
-		PhotoFromGallery,
-		PhotoFromCamera,
-		PhotoSearch,
-		PhotoPlaceSearch,
-		Tune,
-		NewFor,
-		DeleteNotifications,
-		Notifications,
-		Created, Invite, Test
+		UNKNOWN,
+		ADD,
+		NEW,
+		EDIT,
+		BROWSE,
+		HELP,
+		PROFILE,
+		SIGNIN_PROFILE,
+		WATCHING,
+		PHOTO,
+		COMMENT_NEW,
+		SHORTCUT,
+		ENTITY_LIST,
+		HOME,
+		SETTINGS,
+		FEEDBACK,
+		CANCEL,
+		CANCEL_FORCE,
+		CANCEL_HELP,
+		DELETE,
+		REFRESH,
+		SIGNOUT,
+		SIGNIN,
+		REGISTER,
+		ACCEPT,
+		TERMS,
+		SETTINGS_LOCATION,
+		SETTINGS_WIFI,
+		ADDRESS_EDIT,
+		CATEGORY_EDIT,
+		PASSWORD_CHANGE,
+		SPLASH,
+		PHOTO_SOURCE,
+		APPLINKS_EDIT,
+		PHOTO_FROM_GALLERY,
+		PHOTO_FROM_CAMERA,
+		PHOTO_SEARCH,
+		PHOTO_PLACE_SEARCH,
+		TUNE,
+		NEW_FOR,
+		DELETE_NOTIFICATIONS,
+		NOTIFICATIONS,
+		CREATED,
+		INVITE,
+		TEST
 	}
 }

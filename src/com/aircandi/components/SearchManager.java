@@ -35,7 +35,7 @@ public class SearchManager {
 
 		List<SearchItem> searchItems = null;
 
-		/* Need to add the created date column to the query */
+		/* Need to add the created date column to the QUERY */
 		final String[] columns = new String[Browser.HISTORY_PROJECTION.length + 1];
 		System.arraycopy(Browser.HISTORY_PROJECTION, 0, columns, 0, Browser.HISTORY_PROJECTION.length);
 		final int createdColumnIndex = columns.length - 1;
@@ -74,7 +74,7 @@ public class SearchManager {
 		if (url == null || favicon == null) {
 			return;
 		}
-		/* Strip the query. */
+		/* Strip the QUERY. */
 		final int query = url.indexOf('?');
 		String noQuery = url;
 		if (query != -1) {

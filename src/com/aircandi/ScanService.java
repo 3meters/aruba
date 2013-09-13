@@ -15,7 +15,7 @@ public class ScanService extends Service {
 	private ScanTask	mScanTask;
 
 	/**
-	 * Simply return null, since our Service will not be communicating with
+	 * Simply return null, since our SERVICE will not be communicating with
 	 * any other components. It just does its work silently.
 	 */
 	@Override
@@ -25,7 +25,7 @@ public class ScanService extends Service {
 
 	/**
 	 * This is called on 2.0+ (API level 5 or higher). Returning
-	 * START_NOT_STICKY tells the system to not restart the service if it is
+	 * START_NOT_STICKY tells the system to not restart the SERVICE if it is
 	 * killed because of poor resource (memory/cpu) conditions.
 	 */
 	@Override
@@ -51,8 +51,8 @@ public class ScanService extends Service {
 			 * Kicks off the scan but we won't know if it was completed. Will exit
 			 * early if a scan is already active.
 			 */
-			Logger.v(ScanService.this, "Wifi scan service: requesting wifi scan"); //$NON-NLS-1$
-			ProximityManager.getInstance().scanForWifi(ScanReason.monitoring);
+			Logger.v(ScanService.this, "Wifi scan SERVICE: requesting wifi scan"); //$NON-NLS-1$
+			ProximityManager.getInstance().scanForWifi(ScanReason.MONITORING);
 			return null;
 		}
 

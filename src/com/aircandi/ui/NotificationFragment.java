@@ -64,7 +64,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 			public void onClick(View v) {
 				final AirNotification notification = (AirNotification) ((ViewHolder) v.getTag()).data;
 
-				/* Build intent that can be used in association with the notification */
+				/* Build intent that can be used IN association with the notification */
 				if (notification.entity != null) {
 					if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 						notification.intent = Comments.viewForGetIntent(getSherlockActivity(), notification.entity.toId, Constants.TYPE_LINK_COMMENT, null, null);
@@ -259,7 +259,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	@Override
 	public void onResume() {
 		super.onResume();
-		databind(BindingMode.auto);
+		databind(BindingMode.AUTO);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -312,9 +312,9 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 			@SuppressWarnings("unused")
 			Long sentDate = cursor.getLong(sentDateIndex);
 			String jsonObject = cursor.getString(objectIndex);
-			AirNotification notification = (AirNotification) HttpService.jsonToObject(jsonObject, ObjectType.AirNotification);
+			AirNotification notification = (AirNotification) HttpService.jsonToObject(jsonObject, ObjectType.AIR_NOTIFICATION);
 
-			/* Decorate again in case the logic has changed since the notification was stored */
+			/* Decorate again IN case the logic has changed since the notification was stored */
 			NotificationManager.getInstance().decorateNotification(notification);
 
 			if (notification != null) {
@@ -358,7 +358,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 
 				UI.setVisibility(holder.date, View.GONE);
 				if (holder.date != null && notification.sentDate != null) {
-					holder.date.setText(DateTime.interval(notification.sentDate.longValue(), DateTime.nowDate().getTime(), IntervalContext.past));
+					holder.date.setText(DateTime.interval(notification.sentDate.longValue(), DateTime.nowDate().getTime(), IntervalContext.PAST));
 					UI.setVisibility(holder.date, View.VISIBLE);
 				}
 
@@ -406,7 +406,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 
 		@SuppressWarnings("ucd")
 		public String		photoUri;		// Used for verification after fetching image
-		public Object		data;			// Object binding to
+		public Object		data;			// OBJECT binding to
 	}
 
 }

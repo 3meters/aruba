@@ -33,7 +33,7 @@ public abstract class BaseEdit extends BaseActivity implements IEdit {
 			unpackIntent();
 			configureActionBar();
 			initialize(savedInstanceState);
-			bind(BindingMode.auto);
+			bind(BindingMode.AUTO);
 			draw();
 		}
 	}
@@ -69,7 +69,7 @@ public abstract class BaseEdit extends BaseActivity implements IEdit {
 
 	@Override
 	public void onBackPressed() {
-		Routing.route(this, Route.Cancel);
+		Routing.route(this, Route.CANCEL);
 	}
 
 	public abstract void onAccept();
@@ -82,7 +82,7 @@ public abstract class BaseEdit extends BaseActivity implements IEdit {
 		else {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
-			Animate.doOverridePendingTransition(this, TransitionType.PageBack);
+			Animate.doOverridePendingTransition(this, TransitionType.PAGE_BACK);
 		}
 	}
 
@@ -122,7 +122,7 @@ public abstract class BaseEdit extends BaseActivity implements IEdit {
 								onAccept();
 							}
 							else if (which == Dialog.BUTTON_NEUTRAL) {
-								Routing.route(BaseEdit.this, Route.CancelForce);
+								Routing.route(BaseEdit.this, Route.CANCEL_FORCE);
 							}
 						}
 					}
@@ -143,7 +143,7 @@ public abstract class BaseEdit extends BaseActivity implements IEdit {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							if (which == Dialog.BUTTON_POSITIVE) {
-								Routing.route(BaseEdit.this, Route.CancelForce);
+								Routing.route(BaseEdit.this, Route.CANCEL_FORCE);
 							}
 						}
 					}

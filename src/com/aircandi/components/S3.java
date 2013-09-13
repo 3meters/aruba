@@ -126,10 +126,10 @@ public class S3 {
 	//			S3.getInstance().deleteObject(CandiConstants.S3_BUCKET_IMAGES, imageKey);
 	//		}
 	//		catch (final AmazonServiceException exception) {
-	//			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Service, ErrorCode.AmazonServiceException, exception);
+	//			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.SERVICE, ErrorCode.AmazonServiceException, exception);
 	//		}
 	//		catch (final AmazonClientException exception) {
-	//			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Client, ErrorCode.AmazonClientException, exception);
+	//			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.CLIENT, ErrorCode.AmazonClientException, exception);
 	//		}
 	//	}
 	//
@@ -144,10 +144,10 @@ public class S3 {
 	//			S3.getInstance().copyObject(req);
 	//		}
 	//		catch (final AmazonServiceException exception) {
-	//			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Service, ErrorCode.AmazonServiceException, exception);
+	//			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.SERVICE, ErrorCode.AmazonServiceException, exception);
 	//		}
 	//		catch (final AmazonClientException exception) {
-	//			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Client, ErrorCode.AmazonClientException, exception);
+	//			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.CLIENT, ErrorCode.AmazonClientException, exception);
 	//		}
 	//	}
 }

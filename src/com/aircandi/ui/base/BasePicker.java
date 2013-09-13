@@ -19,7 +19,7 @@ public abstract class BasePicker extends BaseBrowse implements IList {
 		if (extras != null) {
 			final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
 			if (jsonEntity != null) {
-				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
+				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.ENTITY);
 			}
 		}
 	}
@@ -48,7 +48,7 @@ public abstract class BasePicker extends BaseBrowse implements IList {
 	protected void onResume() {
 		super.onResume();
 		if (!isFinishing()) {
-			bind(BindingMode.auto);
+			bind(BindingMode.AUTO);
 		}
 	}
 

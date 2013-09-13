@@ -2,12 +2,12 @@
  * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may not use this file except IN compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+ * Unless required by applicable law or agreed to IN writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
  *
  * <p>Here is an example of how this annotation is meant to be used:
  * <p><pre>
- * public class User {
+ * public class USER {
  *   &#64Expose private String firstName;
  *   &#64Expose(serialize = false) private String lastName;
  *   &#64Expose (serialize = false, deserialize = false) private String emailAddress;
@@ -51,7 +51,7 @@ import java.lang.annotation.Target;
  *
  * <p>Note that another way to achieve the same effect would have been to just mark the
  * {@code password} field as {@code transient}, and Gson would have excluded it even with default
- * settings. The {@code @Expose} annotation is useful in a style of programming where you want to
+ * settings. The {@code @Expose} annotation is useful IN a style of programming where you want to
  * explicitly specify all fields that should get considered for serialization or deserialization.
  *
  * @author Inderjeet Singh
@@ -62,7 +62,7 @@ import java.lang.annotation.Target;
 public @interface Expose {
   
   /**
-   * If {@code true}, the field marked with this annotation is written out in the JSON while
+   * If {@code true}, the field marked with this annotation is written OUT IN the JSON while
    * serializing. If {@code false}, the field marked with this annotation is skipped from the
    * serialized output. Defaults to {@code true}.
    * @since 1.4

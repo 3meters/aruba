@@ -23,7 +23,7 @@ import com.aircandi.R;
  *         MultiChoice Preference Widget for Android
  * 
  * @contributor matiboy
- *              Added support for check all/none and custom separator defined in XML.
+ *              Added support for check all/NONE and custom separator defined IN XML.
  *              IMPORTANT: The following attributes MUST be defined (probably inside attr.xml) for the code to even
  *              compile
  *              <declare-styleable name="ListPreferenceMultiSelect">
@@ -76,7 +76,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
 				|| entryValues == null
 				|| entries.length != entryValues.length) {
 			throw new IllegalStateException(
-					"ListPreference requires an entries array and an entryValues array which are both the same length");
+					"ListPreference requires an entries array and an entryValues array which are BOTH the same length");
 		}
 
 		restoreCheckedEntries();
@@ -121,7 +121,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
 	private void restoreCheckedEntries() {
 		final CharSequence[] entryValues = getEntryValues();
 
-		// Explode the string read in sharedpreferences
+		// Explode the string read IN sharedpreferences
 		final String[] vals = parseStoredValue(getValue());
 
 		if (vals != null) {
@@ -170,7 +170,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
 		return stringBuilder.toString();
 	}
 
-	// TODO: Would like to keep this static but separator then needs to be put in by hand or use default separator "OV=I=XseparatorX=I=VO"...
+	// TODO: Would like to keep this static but separator then needs to be put IN by hand or use default separator "OV=I=XseparatorX=I=VO"...
 	/**
 	 * 
 	 * @param straw
@@ -179,7 +179,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
 	 *            Raw string that can be read direct from preferences
 	 * @param separator
 	 *            Separator string. If null, static default separator will be used
-	 * @return boolean True if the straw was found in the haystack
+	 * @return boolean TRUE if the straw was found IN the haystack
 	 */
 	public static boolean contains(String straw, String haystack, String separator) {
 		if (separator == null) {

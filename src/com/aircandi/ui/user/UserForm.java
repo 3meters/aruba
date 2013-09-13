@@ -32,7 +32,7 @@ public class UserForm extends BaseEntityForm {
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-		mLinkProfile = LinkProfile.LinksForUser;
+		mLinkProfile = LinkProfile.LINKS_FOR_USER;
 	}
 
 	@Override
@@ -61,9 +61,9 @@ public class UserForm extends BaseEntityForm {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetStats");
 
-				/* Get user stats using rest api */
+				/* GET user stats using rest api */
 				ModelResult result = EntityManager.getInstance().getUserStats(mEntityId);
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					((User) mEntity).stats = (List<Stat>) result.data;
 				}
 				return result;
@@ -73,7 +73,7 @@ public class UserForm extends BaseEntityForm {
 			protected void onPostExecute(Object modelResult) {
 				final ModelResult result = (ModelResult) modelResult;
 
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					if (result.data != null) {
 						drawStats();
 					}
@@ -170,13 +170,13 @@ public class UserForm extends BaseEntityForm {
 		UI.setVisibility(stats, View.GONE);
 		final StringBuilder statString = new StringBuilder(500);
 
-		/* Like and watch stats */
+		/* Like and WATCH stats */
 
-		Count count = user.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
+		Count count = user.getCount(Constants.TYPE_LINK_LIKE, Direction.IN);
 		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
 		statString.append("Liked by: " + String.valueOf(count.count.intValue()) + "<br/>");
 
-		count = user.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
+		count = user.getCount(Constants.TYPE_LINK_WATCH, Direction.IN);
 		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
 		statString.append("Watchers: " + String.valueOf(count.count.intValue()) + "<br/>");
 

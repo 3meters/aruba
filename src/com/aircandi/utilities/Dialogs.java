@@ -81,7 +81,7 @@ public class Dialogs {
 		final AlertDialog alert = builder.create();
 		alert.show();
 
-		/* Hardcoded size for body text in the alert */
+		/* Hardcoded size for body text IN the alert */
 		final TextView textView = (TextView) alert.findViewById(android.R.id.message);
 		if (textView != null) {
 			textView.setTextSize(14);
@@ -136,7 +136,7 @@ public class Dialogs {
 								public void onClick(DialogInterface dialog, int which) {
 									if (which == Dialog.BUTTON_POSITIVE) {
 										Logger.d(this, "Wifi check: navigating to wifi settings");
-										Routing.route(activity, Route.SettingsWifi);
+										Routing.route(activity, Route.SETTINGS_WIFI);
 									}
 									else if (which == Dialog.BUTTON_NEGATIVE) {
 										Logger.d(this, "Wifi check: user declined");
@@ -179,7 +179,7 @@ public class Dialogs {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
 								Tracker.sendEvent("ui_action", "update_aircandi", "com.aircandi", 0, Aircandi.getInstance().getUser());
-								Logger.d(this, "Update: navigating to market install/update page");
+								Logger.d(this, "UPDATE: navigating to market install/update page");
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(Constants.APP_MARKET_URI));
 								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 								intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
@@ -196,7 +196,7 @@ public class Dialogs {
 								activity.startActivityForResult(intent, Constants.ACTIVITY_MARKET);
 							}
 							dialog.dismiss();
-							Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+							Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 						}
 						else if (which == Dialog.BUTTON_NEGATIVE) {
 							dialog.dismiss();
@@ -243,12 +243,12 @@ public class Dialogs {
 								activity.startActivityForResult(intent, Constants.ACTIVITY_MARKET);
 							}
 							dialog.dismiss();
-							Animate.doOverridePendingTransition(activity, TransitionType.PageToForm);
+							Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 						}
 						else if (which == Dialog.BUTTON_NEGATIVE) {
 							final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
 							meta.installDeclined = true;
-							Routing.route(activity, Route.Shortcut, entity, shortcut, null, null);
+							Routing.route(activity, Route.SHORTCUT, entity, shortcut, null, null);
 							dialog.dismiss();
 						}
 					}

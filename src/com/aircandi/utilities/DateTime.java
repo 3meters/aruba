@@ -85,14 +85,14 @@ public class DateTime {
 		{
 			interval = String.valueOf(seconds) + " seconds";
 		}
-		if (context == IntervalContext.past) {
+		if (context == IntervalContext.PAST) {
 			interval += " ago";
 		}
 		return interval;
 	}
 
 	public static enum IntervalContext {
-		past,
-		future
+		PAST,
+		FUTURE
 	}
 }

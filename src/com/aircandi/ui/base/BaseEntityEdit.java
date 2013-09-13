@@ -104,14 +104,14 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		/*
 		 * Intent inputs:
 		 * - Both: Edit_Only
-		 * - New: Schema (required), Parent_Entity_Id
-		 * - Edit: Entity (required)
+		 * - NEW: Schema (required), Parent_Entity_Id
+		 * - EDIT: ENTITY (required)
 		 */
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
 			if (jsonEntity != null) {
-				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.Entity);
+				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.ENTITY);
 			}
 
 			mParentId = extras.getString(Constants.EXTRA_ENTITY_PARENT_ID);
@@ -284,7 +284,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				}
 			}
 			else {
-				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
+				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.IN, false, true);
 				shortcuts = (List<Shortcut>) entity.getShortcuts(settings, null);
 			}
 
@@ -346,7 +346,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					final IntentBuilder intentBuilder = new IntentBuilder().setEntity(mEntity);
 					setResult(Constants.RESULT_ENTITY_EDITED, intentBuilder.create());
 					finish();
-					Animate.doOverridePendingTransition(this, TransitionType.FormToPage);
+					Animate.doOverridePendingTransition(this, TransitionType.FORM_TO_PAGE);
 				}
 				else {
 					if (mEditing) {
@@ -367,7 +367,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	public void onChangePhotoButtonClick(View view) {
 
 		gather(); // So picture logic has the latest property values
-		Routing.route(this, Route.PhotoSource, mEntity);
+		Routing.route(this, Route.PHOTO_SOURCE, mEntity);
 
 		mImageRequestWebImageView = mPhotoView;
 		mImageRequestListener = new RequestListener() {
@@ -376,7 +376,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			public void onComplete(Object response, Photo photo, Bitmap bitmap, Boolean bitmapLocalOnly) {
 
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
+				if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 					mDirty = true;
 					if (photo != null) {
@@ -398,7 +398,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	@SuppressWarnings("ucd")
 	public void onUserClick(View view) {
 		Entity entity = (Entity) view.getTag();
-		Routing.route(this, Route.Profile, entity);
+		Routing.route(this, Route.PROFILE, entity);
 	}
 
 	@SuppressWarnings("ucd")
@@ -440,7 +440,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 							usePhotoDefault();
 						}
 						else if (pictureSource.equals(Constants.PHOTO_SOURCE_FACEBOOK)) {
-							mEntity.photo = new Photo("https://graph.facebook.com/" + ((Applink) mEntity).appId + "/picture?type=large", null, null, null,
+							mEntity.photo = new Photo("https://graph.facebook.com/" + ((Applink) mEntity).appId + "/picture?TYPE=large", null, null, null,
 									PhotoSource.facebook);
 							drawPhoto();
 						}
@@ -459,7 +459,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				Tracker.sendEvent("ui_action", "select_picture_device", null, 0, Aircandi.getInstance().getUser());
 				final Uri photoUri = intent.getData();
 
-				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
+				/* Bitmap size is trimmed if necessary to fit our max IN memory image size. */
 				Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(photoUri);
 				if (bitmap != null && mImageRequestListener != null) {
 					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, false);
@@ -470,7 +470,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0, Aircandi.getInstance().getUser());
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
 				
-				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
+				/* Bitmap size is trimmed if necessary to fit our max IN memory image size. */
 				final Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
 				if (bitmap != null && mImageRequestListener != null) {
 					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, false);
@@ -482,7 +482,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
-					final Photo photo = (Photo) HttpService.jsonToObject(jsonPhoto, ObjectType.Photo);
+					final Photo photo = (Photo) HttpService.jsonToObject(jsonPhoto, ObjectType.PHOTO);
 					photo.setBitmapLocalOnly(true);
 
 					if (mImageRequestWebImageView.getPhoto() == null || !mImageRequestWebImageView.getPhoto().getUri().equals(photo.getUri())) {
@@ -497,7 +497,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 					final Bundle extras = intent.getExtras();
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
-					final Photo photo = (Photo) HttpService.jsonToObject(jsonPhoto, ObjectType.Photo);
+					final Photo photo = (Photo) HttpService.jsonToObject(jsonPhoto, ObjectType.PHOTO);
 					photo.setBitmapLocalOnly(true);
 
 					if (mImageRequestWebImageView.getPhoto() == null || !mImageRequestWebImageView.getPhoto().getUri().equals(photo.getUri())) {
@@ -617,7 +617,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				@Override
 				protected void onPostExecute(Object modelResult) {
 					final ModelResult result = (ModelResult) modelResult;
-					if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 						mApplinks = (List<Entity>) result.data;
 						doApplinksBuilder();
 					}
@@ -638,13 +638,13 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (mApplinks.size() > 0) {
 			final List<String> applinkStrings = new ArrayList<String>();
 			for (Entity applink : mApplinks) {
-				applinkStrings.add(HttpService.objectToJson(applink, UseAnnotations.False, ExcludeNulls.True));
+				applinkStrings.add(HttpService.objectToJson(applink, UseAnnotations.FALSE, ExcludeNulls.TRUE));
 			}
 			extras.putStringArrayList(Constants.EXTRA_ENTITIES, (ArrayList<String>) applinkStrings);
 		}
 
 		extras.putString(Constants.EXTRA_LIST_LINK_SCHEMA, Constants.SCHEMA_ENTITY_APPLINK);
-		Routing.route(this, Route.ApplinksEdit, mEntity, null, null, extras);
+		Routing.route(this, Route.APPLINKS_EDIT, mEntity, null, null, extras);
 	}
 
 	protected void usePhotoDefault() {
@@ -666,7 +666,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 	@SuppressLint("InlinedApi")
 	protected void photoFromGallery() {
-		Routing.route(this, Route.PhotoFromGallery);
+		Routing.route(this, Route.PHOTO_FROM_GALLERY);
 	}
 
 	protected void photoFromCamera() {
@@ -675,18 +675,18 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (mMediaFile != null) {
 			mMediaFileUri = Uri.fromFile(mMediaFile);
 			extras.putParcelable(MediaStore.EXTRA_OUTPUT, mMediaFileUri);
-			Routing.route(this, Route.PhotoFromCamera, mEntity, null, null, extras);
+			Routing.route(this, Route.PHOTO_FROM_CAMERA, mEntity, null, null, extras);
 		}
 	}
 
 	protected void photoSearch(String defaultSearch) {
 		Bundle extras = new Bundle();
 		extras.putString(Constants.EXTRA_SEARCH_PHRASE, defaultSearch);
-		Routing.route(this, Route.PhotoSearch, null, null, null, extras);
+		Routing.route(this, Route.PHOTO_SEARCH, null, null, null, extras);
 	}
 
 	protected void photoFromPlace(Entity entity) {
-		Routing.route(this, Route.PhotoPlaceSearch, entity);
+		Routing.route(this, Route.PHOTO_PLACE_SEARCH, entity);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -731,7 +731,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					mEntity.toId = null;
 				}
 
-				/* We always send beacons to support nearby notifications */
+				/* We always send beacons to support NEARBY notifications */
 				beacons = ProximityManager.getInstance().getStrongestBeacons(ServiceConstants.PROXIMITY_BEACON_COVERAGE);
 				primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
 
@@ -747,14 +747,14 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				result = EntityManager.getInstance().insertEntity(mEntity, link, beacons, primaryBeacon, bitmap);
 
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					Entity insertedEntity = (Entity) result.data;
 
 					if (mApplinks != null) {
 						result = EntityManager.getInstance().replaceEntitiesForEntity(insertedEntity.id, mApplinks, Constants.TYPE_LINK_APPLINK);
 						/*
 						 * Need to update the linkIn for the entity or these won't show
-						 * without a service refresh.
+						 * without a SERVICE refresh.
 						 */
 					}
 
@@ -769,10 +769,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			protected void onPostExecute(Object response) {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				hideBusy();
-				if (serviceResponse.responseCode == ResponseCode.Success) {
+				if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					setResult(Constants.RESULT_ENTITY_INSERTED);
 					finish();
-					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.CandigramOut);
+					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.CANDIGRAM_OUT);
 				}
 				else {
 					Routing.serviceError(BaseEntityEdit.this, serviceResponse);
@@ -802,8 +802,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					result = EntityManager.getInstance().replaceEntitiesForEntity(mEntity.id, mApplinks, Constants.TYPE_LINK_APPLINK);
 				}
 
-				/* Update entity */
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				/* UPDATE entity */
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 					Tracker.sendEvent("ui_action", "entity_update", mEntity.schema, 0, Aircandi.getInstance().getUser());
 					Bitmap bitmap = null;
@@ -811,19 +811,19 @@ public abstract class BaseEntityEdit extends BaseEdit {
 						bitmap = mEntity.photo.getBitmap();
 					}
 
-					/* Something in the call caused us to lose the most recent picture. */
+					/* Something IN the call caused us to lose the most recent picture. */
 					result = EntityManager.getInstance().updateEntity(mEntity, bitmap);
 
-					if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 						if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
 							if (Aircandi.getInstance().getUser().id.equals(mEntity.id)) {
 
-								/* We also need to update the user that has been persisted for auto sign in. */
+								/* We also need to update the user that has been persisted for AUTO sign IN. */
 								final String jsonUser = HttpService.objectToJson(mEntity);
 								Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
 								Aircandi.settingsEditor.commit();
 
-								/* Update the global user but retain the session info */
+								/* UPDATE the global user but retain the session info */
 								((User) mEntity).session = Aircandi.getInstance().getUser().session;
 								Aircandi.getInstance().setUser((User) mEntity);
 							}
@@ -837,11 +837,11 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			protected void onPostExecute(Object response) {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				hideBusy();
-				if (serviceResponse.responseCode == ResponseCode.Success) {
+				if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					UI.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 					setResult(Constants.RESULT_ENTITY_UPDATED);
 					finish();
-					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPage);
+					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FORM_TO_PAGE);
 				}
 				else {
 					Routing.serviceError(BaseEntityEdit.this, serviceResponse);
@@ -854,7 +854,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	@Override
 	protected void delete() {
 		/*
-		 * TODO: We need to update the service so the recursive entity delete also deletes any associated resources
+		 * TODO: We need to update the SERVICE so the recursive entity delete also deletes any associated resources
 		 * stored with S3. As currently coded, we will be orphaning any images associated with child entities.
 		 */
 
@@ -877,7 +877,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
 
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					Logger.i(this, "Deleted entity: " + mEntity.name);
 
 					/*
@@ -887,7 +887,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					UI.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
 					setResult(Constants.RESULT_ENTITY_DELETED);
 					finish();
-					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FormToPageAfterDelete);
+					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FORM_TO_PAGE_AFTER_DELETE);
 				}
 				else {
 					Routing.serviceError(BaseEntityEdit.this, result.serviceResponse);

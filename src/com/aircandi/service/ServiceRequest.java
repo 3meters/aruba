@@ -10,7 +10,7 @@ import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.objects.Session;
 
 /**
- * Here is the typical code to construct a service request:
+ * Here is the typical code to construct a SERVICE request:
  * 
  * <pre>
  * 
@@ -19,9 +19,9 @@ import com.aircandi.service.objects.Session;
  * 	&#064;code
  * 	ServiceRequest serviceRequest = new ServiceRequest();
  * 	serviceRequest.setUri(mServiceUri + getCollection());
- * 	serviceRequest.setRequestType(RequestType.Insert);
+ * 	serviceRequest.setRequestType(RequestType.INSERT);
  * 	serviceRequest.setRequestBody(ProxibaseService.convertObjectToJsonSmart(this, true));
- * 	serviceRequest.setResponseFormat(ResponseFormat.Json);
+ * 	serviceRequest.setResponseFormat(ResponseFormat.JSON);
  * 	serviceRequest.setRequestListener(listener);
  * 	NetworkManager.getInstance().requestAsync(serviceRequest);
  * }
@@ -43,7 +43,7 @@ public class ServiceRequest {
 	private Session			mSession;
 	private String			mUserName;
 	private String			mPassword;
-	private AuthType		mAuthType	= AuthType.None;
+	private AuthType		mAuthType	= AuthType.NONE;
 	private Integer			mSocketTimeout;
 	private Boolean			mRetry		= true;
 	private Boolean			mUseSecret	= false;
@@ -52,9 +52,9 @@ public class ServiceRequest {
 
 	@SuppressWarnings("ucd")
 	public enum AuthType {
-		None,
-		Basic,
-		OAuth
+		NONE,
+		BASIC,
+		OAUTH
 	}
 
 	public ServiceRequest() {}

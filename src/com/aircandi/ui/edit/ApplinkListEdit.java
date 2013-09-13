@@ -76,7 +76,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 			@Override
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					final List<Entity> applinks = (List<Entity>) result.data;
 					/*
 					 * Make sure they have the schema property set
@@ -143,7 +143,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 			@Override
 			protected void onPostExecute(Object response) {
 				final ModelResult result = (ModelResult) response;
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					final List<Entity> applinks = (List<Entity>) result.data;
 
 					if (applinks.size() > 0) {

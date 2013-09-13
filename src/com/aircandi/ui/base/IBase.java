@@ -25,7 +25,7 @@ public interface IBase {
 	public void hideBusy();
 	
 	public enum BindingMode {
-		auto,
-		service,
+		AUTO,
+		SERVICE,
 	}	
 }

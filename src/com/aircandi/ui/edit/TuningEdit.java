@@ -70,7 +70,7 @@ public class TuningEdit extends BaseEntityEdit {
 
 	@SuppressWarnings("ucd")
 	public void onEditButtonClick(View view) {
-		Routing.route(this, Route.Edit, mEntity);
+		Routing.route(this, Route.EDIT, mEntity);
 	}
 
 	@SuppressWarnings("ucd")
@@ -81,7 +81,7 @@ public class TuningEdit extends BaseEntityEdit {
 			mBusyManager.showBusy(R.string.progress_tuning);
 			if (NetworkManager.getInstance().isWifiEnabled()) {
 				mTuningInProcess = true;
-				ProximityManager.getInstance().scanForWifi(ScanReason.query);
+				ProximityManager.getInstance().scanForWifi(ScanReason.QUERY);
 			}
 			else {
 				tuneProximity();
@@ -97,7 +97,7 @@ public class TuningEdit extends BaseEntityEdit {
 			mBusyManager.showBusy(R.string.progress_tuning);
 			if (NetworkManager.getInstance().isWifiEnabled()) {
 				mTuningInProcess = true;
-				ProximityManager.getInstance().scanForWifi(ScanReason.query);
+				ProximityManager.getInstance().scanForWifi(ScanReason.QUERY);
 			}
 			else {
 				tuneProximity();
@@ -161,7 +161,7 @@ public class TuningEdit extends BaseEntityEdit {
 
 				@Override
 				public void run() {
-					Logger.d(TuningEdit.this, "Beacons locked event: tune entity");
+					Logger.d(TuningEdit.this, "Beacons LOCKED event: tune entity");
 					tuneProximity();
 				}
 			});
