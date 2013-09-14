@@ -86,7 +86,7 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 				@Override
 				public boolean onPreferenceChange(Preference preference, Object newValue) {
 					/*
-					 * UPDATE user property and push update to SERVICE
+					 * Update user property and push update to service
 					 */
 					return true; // we handled it
 				}
@@ -171,7 +171,7 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 
 	private void setSummaries(PreferenceGroup prefGroup) {
 		/*
-		 * Walk and set the current pref values IN the UI
+		 * Walk and set the current pref values in the UI
 		 */
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		for (int i = 0; i < prefGroup.getPreferenceCount(); i++) {

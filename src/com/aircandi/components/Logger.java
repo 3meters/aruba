@@ -23,7 +23,7 @@ public class Logger {
 	 * Information that is needed to track down bugs either locally or via remote crash reports.
 	 * 
 	 * VERBOSE = 2
-	 * Chatty stuff that is helpful IN the logs while developing but will never used IN release.
+	 * Chatty stuff that is helpful in the logs while developing but will never used in release.
 	 */
 
 	private static final boolean	INCLUDE_MODULE	= true;
@@ -107,7 +107,7 @@ public class Logger {
 	 * Information
 	 * This level of logging should used be to note that something interesting to most people happened, i.e. when a
 	 * situation is detected that is likely to have widespread impact, though isn't necessarily an error. Such a
-	 * condition should only be logged by a module that reasonably believes that it is the most authoritative IN that
+	 * condition should only be logged by a module that reasonably believes that it is the most authoritative in that
 	 * domain (to avoid duplicate logging by non-authoritative components). This level is always logged.
 	 */
 	public static void i(Object taskContext, String msgFormat) {
@@ -123,7 +123,7 @@ public class Logger {
 	}
 
 	/**
-	 * DEBUG: Compiled IN but stripped at runtime.
+	 * DEBUG: Compiled in but stripped at runtime.
 	 * This level of logging should be used to further note what is happening on the device that could be relevant to
 	 * investigate and debug unexpected behaviors. You should log only what is needed to gather enough information about
 	 * what is going on about your component. If your debug logs are dominating the log then you probably should be

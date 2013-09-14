@@ -142,6 +142,8 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	@Override
 	public void onRefresh() {}
+	
+	public void onAccept() {}
 
 	@Override
 	public void onAdd() {}
@@ -366,7 +368,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 				actionBarTitleId = Class.forName("com.actionbarsherlock.R$id").getField("abs__action_bar_title").getInt(null);
 			}
 			else {
-				// Use reflection to get the actionbar title TextView and set the custom font. May break IN updates.
+				// Use reflection to get the actionbar title TextView and set the custom font. May break in updates.
 				actionBarTitleId = Class.forName("com.android.internal.R$id").getField("action_bar_title").getInt(null);
 			}
 		}
@@ -416,15 +418,15 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 					@Override
 					protected void onPostExecute(Object response) {
 						final ModelResult result = (ModelResult) response;
-						/* We continue on even if the SERVICE call failed. */
+						/* We continue on even if the service call failed. */
 						if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-							Logger.i(this, "USER signed OUT: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
+							Logger.i(this, "USER signed out: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
 						}
 						else {
-							Logger.w(this, "USER signed OUT, SERVICE call failed: " + Aircandi.getInstance().getUser().id);
+							Logger.w(this, "USER signed out, service call failed: " + Aircandi.getInstance().getUser().id);
 						}
 
-						/* Stop the current tracking session. Starts again when a user logs IN. */
+						/* Stop the current tracking session. Starts again when a user logs in. */
 						Tracker.stopSession(Aircandi.getInstance().getUser());
 
 						/* Clear the user and session that is tied into AUTO-signin */

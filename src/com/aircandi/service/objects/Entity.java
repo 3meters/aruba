@@ -28,7 +28,7 @@ import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.utilities.DateTime;
 
 /**
- * ENTITY as described by the proxi protocol standards.
+ * Entity as described by the service protocol standards.
  * 
  * @author Jayma
  */
@@ -38,7 +38,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	private static final long	serialVersionUID	= -3902834532692561618L;
 
 	// --------------------------------------------------------------------------------------------
-	// SERVICE fields
+	// service fields
 	// --------------------------------------------------------------------------------------------	
 
 	/* Database fields */
@@ -78,7 +78,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	@Expose(serialize = false, deserialize = true)
 	public List<Entity>			entities;
 
-	/* PLACE (synthesized for the client) */
+	/* Place (synthesized for the client) */
 
 	@Expose(serialize = false, deserialize = true)
 	public Place				place;
@@ -86,14 +86,14 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public Number				linkModifiedDate;
 
 	// --------------------------------------------------------------------------------------------
-	// CLIENT fields (NONE are transferred)
+	// client fields (NONE are transferred)
 	// --------------------------------------------------------------------------------------------	
 
 	public Boolean				hidden				= false;					// Flag entities not currently visible because of fencing.
 	public Float				distance;										// Used to cache most recent distance calculation.
-	public Boolean				checked				= false;					// Used to track selection IN lists.
+	public Boolean				checked				= false;					// Used to track selection in lists.
 	public Boolean				stale				= false;					// Used to determine that an entity ref is no longer current.
-	public Boolean				synthetic			= false;					// ENTITY is not persisted with SERVICE.
+	public Boolean				synthetic			= false;					// Entity is not persisted with service.
 	public Boolean				shortcuts			= false;					// Do links have shortcuts?
 
 	public Entity() {}
@@ -104,7 +104,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	public static Entity makeEntity(String schema) {
 		if (schema == null) {
-			throw new IllegalArgumentException("ENTITY.makeEntity(): schema parameter is null");
+			throw new IllegalArgumentException("Entity.makeEntity(): schema parameter is null");
 		}
 		Entity entity = null;
 
@@ -218,7 +218,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		Boolean oldIsHidden = hidden;
 		this.hidden = false;
 		/*
-		 * Make it harder to fade OUT than it is to fade IN. Entities are only NEW
+		 * Make it harder to fade out than it is to fade in. Entities are only NEW
 		 * for the first scan that discovers them.
 		 */
 		if (signalFence != null) {
@@ -368,13 +368,13 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public List<? extends Entity> getLinkedEntitiesByLinkTypes(List<String> linkTypes, List<String> schemas, Direction direction, Boolean traverse) {
 		final List<Entity> entities = new ArrayList<Entity>();
 		if (linksIn != null) {
-			if (direction == Direction.IN || direction == Direction.BOTH) {
+			if (direction == Direction.in || direction == Direction.both) {
 				for (Link link : linksIn) {
 					if ((linkTypes == null || linkTypes.contains(link.type)) && link.strong) {
 						Entity entity = EntityManager.getEntity(link.fromId);
 						if (entity != null) {
 							if (traverse) {
-								entities.addAll(entity.getLinkedEntitiesByLinkTypes(linkTypes, schemas, Direction.IN, traverse));
+								entities.addAll(entity.getLinkedEntitiesByLinkTypes(linkTypes, schemas, Direction.in, traverse));
 							}
 							if (schemas == null || schemas.contains(entity.schema)) {
 								entities.add(entity);
@@ -385,13 +385,13 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			}
 		}
 		if (linksOut != null) {
-			if (direction == Direction.OUT || direction == Direction.BOTH) {
+			if (direction == Direction.out || direction == Direction.both) {
 				for (Link link : linksOut) {
 					if ((linkTypes == null || linkTypes.contains(link.type)) && link.strong) {
 						Entity entity = EntityManager.getEntity(link.toId);
 						if (entity != null) {
 							if (traverse) {
-								entities.addAll(entity.getLinkedEntitiesByLinkTypes(linkTypes, schemas, Direction.OUT, traverse));
+								entities.addAll(entity.getLinkedEntitiesByLinkTypes(linkTypes, schemas, Direction.out, traverse));
 							}
 							if (schemas == null || schemas.contains(entity.schema)) {
 								entities.add(entity);
@@ -445,7 +445,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	public Count getCount(String countType, Direction direction) {
 		List<Count> linkCounts = linksInCounts;
-		if (direction == Direction.OUT) {
+		if (direction == Direction.out) {
 			linkCounts = linksOutCounts;
 		}
 
@@ -462,7 +462,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public Integer getCount(List<String> countTypes, Direction direction) {
 		Integer count = 0;
 		List<Count> linkCounts = linksInCounts;
-		if (direction == Direction.OUT) {
+		if (direction == Direction.out) {
 			linkCounts = linksOutCounts;
 		}
 		if (linkCounts != null) {
@@ -477,13 +477,13 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	public Link getLink(String linkType, String otherId, Direction direction) {
 		List<Link> links = linksIn;
-		if (direction == Direction.OUT) {
+		if (direction == Direction.out) {
 			links = linksOut;
 		}
 		if (links != null) {
 			for (Link link : links) {
 				if (linkType == null || link.type.equals(linkType)) {
-					if (otherId == null || otherId.equals(direction == Direction.IN ? link.fromId : link.toId)) {
+					if (otherId == null || otherId.equals(direction == Direction.in ? link.fromId : link.toId)) {
 						return link;
 					}
 				}
@@ -494,7 +494,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	public Link removeLinksByType(String linkType, String otherId, Direction direction) {
 		List<Link> links = linksIn;
-		if (direction == Direction.OUT) {
+		if (direction == Direction.out) {
 			links = linksOut;
 		}
 		if (links != null) {
@@ -502,7 +502,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			while (iterLinks.hasNext()) {
 				Link link = iterLinks.next();
 				if (link.type.equals(linkType)) {
-					if (otherId == null || otherId.equals(direction == Direction.IN ? link.fromId : link.toId)) {
+					if (otherId == null || otherId.equals(direction == Direction.in ? link.fromId : link.toId)) {
 						iterLinks.remove();
 					}
 				}
@@ -514,7 +514,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public List<Shortcut> getShortcuts(ShortcutSettings settings, Comparator<Link> linkSorter) {
 
 		List<Shortcut> shortcuts = new ArrayList<Shortcut>();
-		List<Link> links = settings.direction == Direction.IN ? linksIn : linksOut;
+		List<Link> links = settings.direction == Direction.in ? linksIn : linksOut;
 
 		if (links != null) {
 			if (linkSorter != null) {
@@ -582,7 +582,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	public List<Shortcut> getClientShortcuts() {
 		/*
-		 * Shortcuts are IN SHORTCUT.isActive() at draw time to determine if it gets shown
+		 * Shortcuts are in shortcut.isActive() at draw time to determine if it gets shown
 		 */
 		List<Shortcut> shortcuts = new ArrayList<Shortcut>();
 		/*
@@ -600,7 +600,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, 10
 					, false
 					, true);
-			Link link = getLink(Constants.TYPE_LINK_PICTURE, null, Direction.IN);
+			Link link = getLink(Constants.TYPE_LINK_PICTURE, null, Direction.in);
 			if (link != null) {
 				shortcut.photo = link.shortcut.getPhoto();
 				shortcut.appId = link.fromId;
@@ -622,7 +622,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, 10
 					, false
 					, true);
-			link = getLink(Constants.TYPE_LINK_CANDIGRAM, null, Direction.IN);
+			link = getLink(Constants.TYPE_LINK_CANDIGRAM, null, Direction.in);
 			if (link != null) {
 				shortcut.photo = link.shortcut.getPhoto();
 				shortcut.appId = link.fromId;
@@ -633,7 +633,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			}
 			shortcuts.add(shortcut);
 
-			/* Maps: Map is evaluated IN SHORTCUT.isActive() at draw time to determine if it gets shown */
+			/* Maps: Map is evaluated in shortcut.isActive() at draw time to determine if it gets shown */
 			shortcut = Shortcut.builder(this
 					, Constants.SCHEMA_ENTITY_APPLINK
 					, Constants.TYPE_APP_MAP
@@ -662,7 +662,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					, 10
 					, false
 					, true);
-			Link link = getLink(Constants.TYPE_LINK_PICTURE, null, Direction.IN);
+			Link link = getLink(Constants.TYPE_LINK_PICTURE, null, Direction.in);
 			if (link != null) {
 				shortcut.photo = link.shortcut.getPhoto();
 				shortcut.appId = link.fromId;
@@ -675,7 +675,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			shortcuts.add(shortcut);
 
 			/*
-			 * Maps: Map is evaluated IN SHORTCUT.isActive() at draw time to determine if it gets shown
+			 * Maps: Map is evaluated in shortcut.isActive() at draw time to determine if it gets shown
 			 */
 			shortcut = Shortcut.builder(this
 					, Constants.SCHEMA_ENTITY_APPLINK
@@ -733,7 +733,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			entity.shortcuts = (Boolean) (map.get("shortcuts") != null ? map.get("shortcuts") : false);
 			entity.stale = (Boolean) (map.get("stale") != null ? map.get("stale") : false);
 			entity.checked = (Boolean) (map.get("checked") != null ? map.get("checked") : false);
-			entity.placeId = (String) map.get("_place");
+			entity.placeId = (String) (nameMapping ? map.get("_place") : map.get("placeId"));
 			entity.linkModifiedDate = (Number) map.get("linkModifiedDate");
 
 			entity.toId = (String) (nameMapping ? map.get("_to") : map.get("toId"));

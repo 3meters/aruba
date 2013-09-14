@@ -33,7 +33,7 @@ public class ReportSenderBugsense extends HttpPostSender {
 			custom.append("Custom_Data_Network_Type=" + getNetworkTypeLabel(networkTypeId) + "\n");
 		}
 		
-		/* USER id and name */
+		/* user id and name */
 		User user = Aircandi.getInstance().getUser();
 		if (user != null) {
 			custom.append("Custom_User_Id=" + user.id + "\n");

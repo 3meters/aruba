@@ -29,7 +29,7 @@ public class LinkSettings extends ServiceObject {
 	@Expose
 	public Number				limit;
 	@Expose
-	public String				direction			= "BOTH";
+	public String				direction			= "both";
 
 	public LinkSettings() {}
 

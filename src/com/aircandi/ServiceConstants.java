@@ -19,7 +19,7 @@ public final class ServiceConstants {
 	public static int			CONNECT_WAIT									= 500;
 
 	/*
-	 * When spotty connectivity causes timeouts, we RETRY using softer constraints.
+	 * When spotty connectivity causes timeouts, we retry using softer constraints.
 	 * We do not attempt retries if the call involved an update/insert/delete.
 	 */
 	public static final int		MAX_BACKOFF_IN_MILLISECONDS						= 5 * 1000;

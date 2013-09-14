@@ -387,7 +387,7 @@ public final class Routing {
 
 		else if (route == Route.ACCEPT) {
 
-			((BaseEdit) activity).onAccept();	// Give activity a chance for discard confirmation
+			((BaseActivity) activity).onAccept();	// Give activity a chance for discard confirmation
 			return true;
 		}
 
@@ -550,7 +550,7 @@ public final class Routing {
 					.setType("image/*")
 					.setAction(Intent.ACTION_GET_CONTENT);
 
-			/* We want to filter OUT remove images like the linked IN from picasa. */
+			/* We want to filter out remove images like the linked in from picasa. */
 			if (Constants.SUPPORTS_HONEYCOMB) {
 				intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
 			}
@@ -772,7 +772,7 @@ public final class Routing {
 							, null);
 				}
 			});
-			Logger.w(activity, "SERVICE error: (code: " + String.valueOf(statusCode) + ") " + errorMessage);
+			Logger.w(activity, "Service error: (code: " + String.valueOf(statusCode) + ") " + errorMessage);
 			return statusCode;
 		}
 
@@ -788,8 +788,8 @@ public final class Routing {
 		}
 
 		/*
-		 * CLIENT errors occur when we are unable to get a response from a SERVICE, or when the client is
-		 * unable to understand a response from a SERVICE. This includes protocol, NETWORK and timeout errors.
+		 * client errors occur when we are unable to get a response from a service, or when the client is
+		 * unable to understand a response from a service. This includes protocol, NETWORK and timeout errors.
 		 */
 		if (errorType == ErrorType.CLIENT) {
 
@@ -801,12 +801,12 @@ public final class Routing {
 				 * 
 				 * Handled above
 				 * - SocketException: thrown during socket creation or setting options
-				 * - ConnectTimeoutException: timeout expired trying to connect to SERVICE
+				 * - ConnectTimeoutException: timeout expired trying to connect to service
 				 * - SocketTimeoutException: timeout expired on a socket
 				 * 
 				 * Still left
 				 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
-				 * - UnknownHostException: hostname didn't exist IN the dns system
+				 * - UnknownHostException: hostname didn't exist in the dns system
 				 */
 				if (serviceResponse.exception.getInnerException() instanceof SocketException) {
 					/*
@@ -816,7 +816,7 @@ public final class Routing {
 				}
 				else if (serviceResponse.exception.getInnerException() instanceof WalledGardenException) {
 					/*
-					 * We have a connection but user is LOCKED IN a walled garden until they sign-IN, pay, etc.
+					 * We have a connection but user is LOCKED in a walled garden until they sign-in, pay, etc.
 					 */
 					Dialogs.alertDialogSimple(activity, null, activity.getString(R.string.error_connection_walled_garden));
 				}
@@ -830,14 +830,14 @@ public final class Routing {
 				else if (serviceResponse.exception.getInnerException() instanceof SocketTimeoutException) {
 					/*
 					 * We have a connection but got tired of waiting for data. Could be a
-					 * poor connection or SERVICE is slow.
+					 * poor connection or service is slow.
 					 */
 					UI.showToastNotification(activity.getString(R.string.error_connection_poor), Toast.LENGTH_SHORT);
 				}
 				else if (serviceResponse.exception.getInnerException() instanceof UnknownHostException) {
 					/*
 					 * We have a connection but got tired of waiting for data. Could be a
-					 * poor connection or SERVICE is slow.
+					 * poor connection or service is slow.
 					 */
 					Dialogs.alertDialogSimple(activity, null, activity.getString(R.string.error_client_unknown_host));
 				}
@@ -870,32 +870,32 @@ public final class Routing {
 
 			if (serviceResponse.exception.getInnerException() instanceof HttpServiceException.NotFoundException) {
 				/*
-				 * Reached the SERVICE but requested something that doesn't exist. This is a bug and
+				 * Reached the service but requested something that doesn't exist. This is a bug and
 				 * not something that a user should cause.
 				 */
 				UI.showToastNotification(activity.getString(R.string.error_client_request_not_found), Toast.LENGTH_SHORT);
 			}
 			else if (serviceResponse.exception.getInnerException() instanceof HttpServiceException.UnauthorizedException) {
 				/*
-				 * Reached the SERVICE but requested something that the user can't access.
+				 * Reached the service but requested something that the user can't access.
 				 */
 				UI.showToastNotification(activity.getString(R.string.error_service_unauthorized), Toast.LENGTH_SHORT);
 			}
 			else if (serviceResponse.exception.getInnerException() instanceof HttpServiceException.ForbiddenException) {
 				/*
-				 * Reached the SERVICE but request was invalid per SERVICE policy.
+				 * Reached the service but request was invalid per service policy.
 				 */
 				UI.showToastNotification(activity.getString(R.string.error_service_forbidden), Toast.LENGTH_SHORT);
 			}
 			else if (serviceResponse.exception.getInnerException() instanceof HttpServiceException.GatewayTimeoutException) {
 				/*
-				 * Reached the SERVICE but request was invalid per SERVICE policy.
+				 * Reached the service but request was invalid per service policy.
 				 */
 				UI.showToastNotification(activity.getString(R.string.error_service_gateway_timeout), Toast.LENGTH_SHORT);
 			}
 			else if (serviceResponse.exception.getInnerException() instanceof HttpServiceException.ClientVersionException) {
 				/*
-				 * Reached the SERVICE but a more current client version is required.
+				 * Reached the service but a more current client version is required.
 				 */
 				Aircandi.applicationUpdateRequired = true;
 				final Intent intent = new Intent(activity, SplashForm.class);
@@ -909,19 +909,19 @@ public final class Routing {
 				String message = null;
 				if (statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
 					/*
-					 * Reached the SERVICE with a good call but the SERVICE failed for an unknown reason. Examples
-					 * are SERVICE bugs like missing indexes causing mongo queries to throw errors.
+					 * Reached the service with a good call but the service failed for an unknown reason. Examples
+					 * are service bugs like missing indexes causing mongo queries to throw errors.
 					 * 
-					 * - 500: Something bad and unknown has happened IN the SERVICE.
+					 * - 500: Something bad and unknown has happened in the service.
 					 */
 					UI.showToastNotification(activity.getString(R.string.error_service_unknown), Toast.LENGTH_SHORT);
 				}
 				else {
 					/*
-					 * Reached the SERVICE with a good call but failed for a well known reason.
+					 * Reached the service with a good call but failed for a well known reason.
 					 * 
 					 * This could have been caused by any problem while inserting/updating.
-					 * We look first for ones that are known responses from the SERVICE.
+					 * We look first for ones that are known responses from the service.
 					 * 
 					 * - 403.x: password not strong enough
 					 * - 403.x: email not unique
@@ -932,7 +932,7 @@ public final class Routing {
 						title = activity.getString(R.string.error_session_expired_title);
 						message = activity.getString(R.string.error_session_expired);
 						/*
-						 * Make sure the user is logged OUT
+						 * Make sure the user is logged out
 						 */
 						BaseActivity.signout(null, true);
 
@@ -974,7 +974,7 @@ public final class Routing {
 			}
 		}
 
-		Logger.w(activity, "SERVICE error: (code: " + String.valueOf(statusCode) + ") " + errorMessage);
+		Logger.w(activity, "Service error: (code: " + String.valueOf(statusCode) + ") " + errorMessage);
 		return statusCode;
 	}
 

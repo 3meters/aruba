@@ -19,7 +19,7 @@ public class Beacon extends Entity implements Cloneable, Serializable {
 	public static final String	collectionId		= "beacons";
 
 	// --------------------------------------------------------------------------------------------
-	// SERVICE fields
+	// service fields
 	// --------------------------------------------------------------------------------------------
 
 	@Expose
@@ -30,7 +30,7 @@ public class Beacon extends Entity implements Cloneable, Serializable {
 	public Number				signal;									// Used to evaluate location accuracy 
 
 	// --------------------------------------------------------------------------------------------
-	// CLIENT fields (NONE are transferred)
+	// client fields (NONE are transferred)
 	// --------------------------------------------------------------------------------------------
 
 	public Boolean				test				= false;

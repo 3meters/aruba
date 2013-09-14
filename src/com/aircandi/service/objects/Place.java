@@ -24,7 +24,7 @@ public class Place extends Entity implements Cloneable, Serializable {
 	public static final String	collectionId		= "places";
 
 	// --------------------------------------------------------------------------------------------
-	// SERVICE fields
+	// service fields
 	// --------------------------------------------------------------------------------------------
 
 	@Expose
@@ -45,7 +45,7 @@ public class Place extends Entity implements Cloneable, Serializable {
 	public Category				category;
 
 	// --------------------------------------------------------------------------------------------
-	// CLIENT fields (NONE are transferred)
+	// client fields (NONE are transferred)
 	// --------------------------------------------------------------------------------------------
 
 	public Place() {}
@@ -59,7 +59,7 @@ public class Place extends Entity implements Cloneable, Serializable {
 		 * Sythetic entity created from foursquare data
 		 * 
 		 * We make a copy so these changes don't effect the synthetic entity
-		 * IN the entity model IN case we keep it because of a failure.
+		 * in the entity model in case we keep it because of a failure.
 		 */
 		final Place entity = synthetic.clone();
 		entity.locked = false;

@@ -75,7 +75,7 @@ public class ProximityManager {
 
 	public void scanForWifi(final ScanReason reason) {
 		/*
-		 * If context is null then we probably crashed and the scan SERVICE is still calling.
+		 * If context is null then we probably crashed and the scan service is still calling.
 		 */
 		if (Aircandi.applicationContext == null) {
 			return;
@@ -94,7 +94,7 @@ public class ProximityManager {
 						Logger.v(ProximityManager.this, "Received wifi scan results for " + reason.name());
 						Aircandi.applicationContext.unregisterReceiver(this);
 
-						/* GET the latest scan results */
+						/* get the latest scan results */
 						mWifiList.clear();
 
 						for (ScanResult scanResult : mWifiManager.getScanResults()) {
@@ -162,7 +162,7 @@ public class ProximityManager {
 		 */
 		mEntityCache.removeEntities(Constants.SCHEMA_ENTITY_BEACON, Constants.TYPE_ANY, null);
 		/*
-		 * INSERT beacons for the latest scan results.
+		 * insert beacons for the latest scan results.
 		 */
 		synchronized (mWifiList) {
 			WifiScanResult scanResult = null;
@@ -190,21 +190,21 @@ public class ProximityManager {
 
 	public synchronized ServiceResponse getEntitiesByProximity() {
 		/*
-		 * All current beacons ids are sent to the SERVICE. Previously discovered beacons are included IN separate
+		 * All current beacons ids are sent to the service. Previously discovered beacons are included in separate
 		 * array along with a their freshness date.
 		 * 
 		 * To force a full rebuild of all entities for all beacons, clear the beacon collection.
 		 * 
-		 * The SERVICE returns all entities for new beacons and entities that have had activity since the freshness
-		 * date for old beacons. Unchanged entities from previous scans will still be updated for local changes IN
+		 * The service returns all entities for new beacons and entities that have had activity since the freshness
+		 * date for old beacons. Unchanged entities from previous scans will still be updated for local changes in
 		 * visibility.
 		 */
 		Logger.d(this, "Processing beacons from scan");
 		Aircandi.stopwatch1.segmentTime("Entities for beacons (synchronized): processing started");
 
 		/*
-		 * Call the proxi SERVICE to see if the new beacons have been tagged with any entities. If call comes back
-		 * null then there was a NETWORK or SERVICE problem. The user got a toast notification from the SERVICE. We
+		 * Call the proxi service to see if the new beacons have been tagged with any entities. If call comes back
+		 * null then there was a NETWORK or service problem. The user got a toast notification from the service. We
 		 * are making synchronous calls inside an asynchronous thread.
 		 */
 		ServiceResponse serviceResponse = new ServiceResponse();
@@ -243,7 +243,7 @@ public class ProximityManager {
 	public synchronized ServiceResponse getEntitiesNearLocation(AirLocation location) {
 
 		/*
-		 * We find all aircandi place entities IN the cache (via proximity or location) that are active based
+		 * We find all aircandi place entities in the cache (via proximity or location) that are active based
 		 * on the current search parameters (beacons and search radius) and could be supplied by the place provider. We
 		 * create an array of the provider place id's and pass them so they can be excluded from the places
 		 * that get returned.
@@ -277,7 +277,7 @@ public class ProximityManager {
 		if (mLastBeaconLoadDate != null) {
 			final Long interval = DateTime.nowDate().getTime() - mLastBeaconLoadDate;
 			if (interval > Constants.INTERVAL_REFRESH) {
-				Logger.v(this, "REFRESH needed: PAST interval");
+				Logger.v(this, "Refresh needed: past interval");
 				return true;
 			}
 		}
@@ -286,7 +286,7 @@ public class ProximityManager {
 		//		if (lastKnownLocation != null) {
 		//			final Boolean hasMoved = LocationManager.hasMoved(lastKnownLocation, activeLocation, Constants.DIST_ONE_HUNDRED_METERS);
 		//			if (hasMoved) {
-		//				Logger.v(this, "REFRESH needed: moved location");
+		//				Logger.v(this, "Refresh needed: moved location");
 		//				return true;
 		//			}
 		//		}

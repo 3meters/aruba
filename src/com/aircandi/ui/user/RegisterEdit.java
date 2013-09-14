@@ -201,8 +201,8 @@ public class RegisterEdit extends BaseEntityEdit {
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					/*
 					 * mUser has been set to the user and session we got back from
-					 * the SERVICE when it was inserted. We now consider the user
-					 * signed IN.
+					 * the service when it was inserted. We now consider the user
+					 * signed in.
 					 */
 					final User insertedUser = (User) result.data;
 					Aircandi.getInstance().setUser(insertedUser);

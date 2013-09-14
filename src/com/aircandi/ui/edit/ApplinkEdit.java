@@ -96,7 +96,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 		/* Spinners */
 
 		if (mEditing) {
-			((TextView) findViewById(R.id.type)).setText("LINK TYPE: " + applink.type);
+			((TextView) findViewById(R.id.type)).setText("LINK type: " + applink.type);
 			UI.setVisibility(findViewById(R.id.type), View.VISIBLE);
 			UI.setVisibility(findViewById(R.id.type_picker), View.GONE);
 			UI.setVisibility(mPhotoHolder, View.VISIBLE);

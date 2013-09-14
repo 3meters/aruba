@@ -96,7 +96,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		if (extras != null) {
 			mForEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
 			/*
-			 * Could be any link TYPE: place, post, comment, applink, create, like, WATCH
+			 * Could be any link type: place, post, comment, applink, create, like, watch
 			 */
 			mListLinkSchema = extras.getString(Constants.EXTRA_LIST_LINK_SCHEMA);
 			mListLinkType = extras.getString(Constants.EXTRA_LIST_LINK_TYPE);
@@ -105,7 +105,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			}
 			mListLinkDirection = extras.getString(Constants.EXTRA_LIST_LINK_DIRECTION);
 			if (mListLinkDirection == null) {
-				mListLinkDirection = "IN";
+				mListLinkDirection = "in";
 			}
 			mListNewEnabled = extras.getBoolean(Constants.EXTRA_LIST_NEW_ENABLED, false);
 			mListItemResId = extras.getInt(Constants.EXTRA_LIST_ITEM_RESID, getListItemResId(mListLinkSchema));
@@ -173,7 +173,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 					showBusy();
 					CacheStamp cacheStamp = EntityManager.getInstance().loadCacheStamp(mForEntity.id, mCacheStamp);
 					/*
-					 * For now, we refresh for BOTH modified and activity to keep it simple. We do
+					 * For now, we refresh for both modified and activity to keep it simple. We do
 					 * not update the ForEntity because that should be handled by code that is dealing with
 					 * it directly. The cache stamp should keep us from doing extra refreshes even though
 					 * the ForEntity hasn't changed.
@@ -211,10 +211,10 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		mEntities.clear();
 		mAdapter = new EntityAdapter(mEntities);
 		if (mListView != null) {
-			mListView.setAdapter(mAdapter); // draw happens IN the adapter
+			mListView.setAdapter(mAdapter); // draw happens in the adapter
 		}
 		else if (mGridView != null) {
-			mGridView.setAdapter(mAdapter); // draw happens IN the adapter
+			mGridView.setAdapter(mAdapter); // draw happens in the adapter
 		}
 	}
 
@@ -413,7 +413,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		super.onResume();
 		if (!isFinishing()) {
 			invalidateOptionsMenu();
-			bind(BindingMode.AUTO); // Setting this here because it doesn't mean a SERVICE call
+			bind(BindingMode.AUTO); // Setting this here because it doesn't mean a service call
 		}
 	}
 
@@ -655,10 +655,10 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 				UI.setVisibility(holder.comments, View.GONE);
 				if (holder.comments != null) {
-					Count count = entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.IN);
+					Count count = entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.in);
 					Integer commentCount = count != null ? count.count.intValue() : 0;
 					if (commentCount != null && commentCount > 0) {
-						holder.comments.setText(String.valueOf(commentCount) + ((commentCount == 1) ? " COMMENT" : " Comments"));
+						holder.comments.setText(String.valueOf(commentCount) + ((commentCount == 1) ? " Comment" : " Comments"));
 						holder.comments.setTag(entity);
 						UI.setVisibility(holder.comments, View.VISIBLE);
 					}
@@ -690,7 +690,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 					UI.setVisibility(holder.createdDate, View.VISIBLE);
 				}
 
-				/* PLACE context */
+				/* Place context */
 				UI.setVisibility(view.findViewById(R.id.place_holder), View.GONE);
 				if (entity.place != null) {
 					if (holder.placePhotoView != null) {
@@ -711,7 +711,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 					UI.setVisibility(view.findViewById(R.id.place_holder), View.VISIBLE);
 				}
 
-				/* PHOTO */
+				/* Photo */
 
 				if (holder.photoView != null) {
 					holder.photoView.setTag(entity);
@@ -786,7 +786,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 		@SuppressWarnings("ucd")
 		public String		photoUri;		// Used for verification after fetching image
-		public Object		data;			// OBJECT binding to
+		public Object		data;			// object binding to
 		public TextView		comments;
 	}
 

@@ -21,7 +21,7 @@ public class ImageResult
 	private String		contentType;
 	private Thumbnail	thumbnail;
 	
-	/* CLIENT only */
+	/* client only */
 	private Photo		photo;
 
 	public static ImageResult setPropertiesFromMap(ImageResult imageResult, Map map, Boolean nameMapping) {
@@ -177,19 +177,19 @@ public class ImageResult
 	}
 
 	/**
-	 * Gets the content TYPE.
+	 * Gets the content type.
 	 * 
-	 * @return the content TYPE
+	 * @return the content type
 	 */
 	public String getContentType() {
 		return contentType;
 	}
 
 	/**
-	 * Sets the content TYPE.
+	 * Sets the content type.
 	 * 
 	 * @param value
-	 *            the new content TYPE
+	 *            the new content type
 	 */
 	public void setContentType(String value) {
 		contentType = value;
@@ -272,19 +272,19 @@ public class ImageResult
 		}
 
 		/**
-		 * Gets the content TYPE.
+		 * Gets the content type.
 		 * 
-		 * @return the content TYPE
+		 * @return the content type
 		 */
 		public String getContentType() {
 			return contentType;
 		}
 
 		/**
-		 * Sets the content TYPE.
+		 * Sets the content type.
 		 * 
 		 * @param value
-		 *            the new content TYPE
+		 *            the new content type
 		 */
 		public void setContentType(String value) {
 			contentType = value;

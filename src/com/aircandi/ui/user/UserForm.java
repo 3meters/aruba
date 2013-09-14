@@ -61,7 +61,7 @@ public class UserForm extends BaseEntityForm {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetStats");
 
-				/* GET user stats using rest api */
+				/* get user stats using rest api */
 				ModelResult result = EntityManager.getInstance().getUserStats(mEntityId);
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					((User) mEntity).stats = (List<Stat>) result.data;
@@ -172,11 +172,11 @@ public class UserForm extends BaseEntityForm {
 
 		/* Like and WATCH stats */
 
-		Count count = user.getCount(Constants.TYPE_LINK_LIKE, Direction.IN);
+		Count count = user.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
 		statString.append("Liked by: " + String.valueOf(count.count.intValue()) + "<br/>");
 
-		count = user.getCount(Constants.TYPE_LINK_WATCH, Direction.IN);
+		count = user.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
 		statString.append("Watchers: " + String.valueOf(count.count.intValue()) + "<br/>");
 

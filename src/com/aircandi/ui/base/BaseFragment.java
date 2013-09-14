@@ -36,7 +36,7 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		/*
-		 * Triggers fragment menu construction IN some android versions
+		 * Triggers fragment menu construction in some android versions
 		 * so mBusyManager must have already been created.
 		 */
 		setHasOptionsMenu(true);
@@ -200,7 +200,7 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 	@Override
 	public void onPause() {
 		/*
-		 * USER might be leaving fragment so do any work needed
+		 * user might be leaving fragment so do any work needed
 		 * because they might not come back.
 		 */
 		Logger.d(this, "Fragment pause");

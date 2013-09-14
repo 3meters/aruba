@@ -82,7 +82,7 @@ public class DiskLruImageCache {
 	@SuppressWarnings("unused")
 	private File getDiskCacheDir(Context context, String uniqueName) {
 		/*
-		 * Check if media is mounted or storage is built-IN, if so, try and use external cache dir
+		 * Check if media is mounted or storage is built-in, if so, try and use external cache dir
 		 * otherwise use internal cache dir
 		 */
 		String cachePath = context.getCacheDir().getPath();
@@ -91,7 +91,7 @@ public class DiskLruImageCache {
 
 	private File getDiskCacheDirExternalPreferred(Context context, String uniqueName) {
 		/*
-		 * Check if media is mounted or storage is built-IN, if so, try and use external cache dir
+		 * Check if media is mounted or storage is built-in, if so, try and use external cache dir
 		 * otherwise use internal cache dir.
 		 */
 		String cachePath = "";

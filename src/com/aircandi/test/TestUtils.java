@@ -28,7 +28,7 @@ public class TestUtils {
 	 *            <li>ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE
 	 *            <li>ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK
 	 *            </ul>
-	 * @param TYPE
+	 * @param type
 	 *            Exception class
 	 *            <ul>
 	 *            <li>ClientProtocolException.class

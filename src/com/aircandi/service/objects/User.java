@@ -19,7 +19,7 @@ public class User extends Entity {
 	public static final String	collectionId		= "users";
 
 	// --------------------------------------------------------------------------------------------
-	// SERVICE fields
+	// service fields
 	// --------------------------------------------------------------------------------------------
 
 	@Expose
@@ -69,7 +69,7 @@ public class User extends Entity {
 	public List<Stat>			stats;
 
 	// --------------------------------------------------------------------------------------------
-	// CLIENT fields
+	// client fields
 	// --------------------------------------------------------------------------------------------
 
 	public Session				session;

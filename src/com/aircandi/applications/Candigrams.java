@@ -38,7 +38,7 @@ public class Candigrams {
 
 	public static void viewFor(Context context, String entityId, String linkType, Direction direction) {
 		if (direction == null) {
-			direction = Direction.IN;
+			direction = Direction.in;
 		}
 		IntentBuilder intentBuilder = new IntentBuilder(context, EntityList.class)
 				.setEntityId(entityId)
@@ -54,7 +54,7 @@ public class Candigrams {
 
 	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction, String title) {
 		if (direction == null) {
-			direction = Direction.IN;
+			direction = Direction.in;
 		}
 		IntentBuilder intentBuilder = new IntentBuilder(context, EntityList.class)
 				.setEntityId(entityId)
@@ -89,7 +89,7 @@ public class Candigrams {
 		Integer valuesResId = null;
 		Integer descriptionsResId = null;
 		
-		if (propertyType == PropertyType.TYPE) {
+		if (propertyType == PropertyType.type) {
 			entriesResId = R.array.candigram_type_entries;
 			valuesResId = R.array.candigram_type_values;
 			descriptionsResId = R.array.candigram_type_descriptions;
@@ -127,7 +127,7 @@ public class Candigrams {
 		Integer valuesResId = null;
 		Integer descriptionsResId = null;
 		
-		if (propertyType == PropertyType.TYPE) {
+		if (propertyType == PropertyType.type) {
 			entriesResId = R.array.candigram_type_entries;
 			valuesResId = R.array.candigram_type_values;
 			descriptionsResId = R.array.candigram_type_descriptions;
@@ -163,7 +163,7 @@ public class Candigrams {
 	}
 
 	public enum PropertyType {
-		TYPE,
+		type,
 		RANGE,
 		DURATION,
 		LOCKED, 

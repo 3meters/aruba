@@ -32,16 +32,16 @@ import com.aircandi.BuildConfig;
  * A cache that uses a bounded amount of space on a filesystem. Each cache
  * entry has a string key and a fixed number of values. Each key must match
  * the regex <strong>[a-z0-9_-]{1,64}</strong>. Values are byte sequences,
- * accessible as streams or files. Each value must be between {@code 0} and {@code Integer.MAX_VALUE} bytes IN length.
+ * accessible as streams or files. Each value must be between {@code 0} and {@code Integer.MAX_VALUE} bytes in length.
  * 
  * <p>
- * The cache stores its data IN a directory on the filesystem. This directory must be exclusive to the cache; the cache
+ * The cache stores its data in a directory on the filesystem. This directory must be exclusive to the cache; the cache
  * may delete or overwrite files from its directory. It is an error for multiple processes to use the same cache
  * directory at the same time.
  * 
  * <p>
  * This cache limits the number of bytes that it will store on the filesystem. When the number of stored bytes exceeds
- * the limit, the cache will remove entries IN the background until the limit is satisfied. The limit is not strict: the
+ * the limit, the cache will remove entries in the background until the limit is satisfied. The limit is not strict: the
  * cache may temporarily exceed it while waiting for files to be deleted. The limit does not include filesystem overhead
  * or the cache journal so space-sensitive applications should set a conservative limit.
  * 
@@ -100,7 +100,7 @@ public final class DiskLruCache implements Closeable {
 	 * constant string "libcore.io.DiskLruCache", the disk cache's version,
 	 * the application's version, the value count, and a blank line.
 	 * 
-	 * Each of the subsequent lines IN the file is a record of the state of a
+	 * Each of the subsequent lines in the file is a record of the state of a
 	 * cache entry. Each line contains space-separated values: a state, a key,
 	 * and optional state-specific values.
 	 * o DIRTY lines track that an entry is actively being created or updated.
@@ -167,7 +167,7 @@ public final class DiskLruCache implements Closeable {
 	}
 
 	/**
-	 * Opens the cache IN {@code directory}, creating a cache if NONE exists
+	 * Opens the cache in {@code directory}, creating a cache if none exists
 	 * there.
 	 * 
 	 * @param directory
@@ -398,7 +398,7 @@ public final class DiskLruCache implements Closeable {
 
 	/**
 	 * Returns an editor for the entry named {@code key}, or null if another
-	 * edit is IN progress.
+	 * edit is in progress.
 	 */
 	public Editor edit(String key) throws IOException {
 		return edit(key, ANY_SEQUENCE_NUMBER);
@@ -417,7 +417,7 @@ public final class DiskLruCache implements Closeable {
 			lruEntries.put(key, entry);
 		}
 		else if (entry.currentEditor != null) {
-			return null; // another edit is IN progress
+			return null; // another edit is in progress
 		}
 
 		final Editor editor = new Editor(entry);
@@ -454,7 +454,7 @@ public final class DiskLruCache implements Closeable {
 	}
 
 	/**
-	 * Returns the number of bytes currently being used to store the values IN
+	 * Returns the number of bytes currently being used to store the values in
 	 * this cache. This may be greater than the max size if a background
 	 * deletion is pending.
 	 */
@@ -617,7 +617,7 @@ public final class DiskLruCache implements Closeable {
 
 	/**
 	 * Closes the cache and deletes all of its stored values. This will delete
-	 * all files IN the cache directory including files that weren't created by
+	 * all files in the cache directory including files that weren't created by
 	 * the cache.
 	 */
 	public void delete() throws IOException {
@@ -657,7 +657,7 @@ public final class DiskLruCache implements Closeable {
 		/**
 		 * Returns an editor for this snapshot's entry, or null if either the
 		 * entry has changed since this snapshot was created or if another edit
-		 * is IN progress.
+		 * is in progress.
 		 */
 		public Editor edit() throws IOException {
 			return DiskLruCache.this.edit(key, sequenceNumber);

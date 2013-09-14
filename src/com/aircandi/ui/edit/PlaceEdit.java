@@ -45,7 +45,7 @@ public class PlaceEdit extends BaseEntityEdit {
 	public void draw() {
 		super.draw();
 
-		/* PLACE content */
+		/* Place content */
 		Place place = (Place) mEntity;
 
 		if (findViewById(R.id.address) != null) {

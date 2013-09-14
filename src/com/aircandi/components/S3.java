@@ -56,6 +56,7 @@ public class S3 {
 	/* Jayma: Added routines */
 
 	public static void putImage(String imageKey, Bitmap bitmap, Integer quality) throws HttpServiceException {
+		
 		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
 		final byte[] bitmapBytes = outputStream.toByteArray();

@@ -68,7 +68,7 @@ public class ShortcutPicker extends BasePicker {
 		if (mShortcuts != null && mShortcuts.size() > 0) {
 			setActivityTitle(mShortcuts.get(0).app);
 
-			/* Show default photo based on the TYPE of the shortcut set */
+			/* Show default photo based on the type of the shortcut set */
 			Photo photo = new Photo(Applink.getDefaultPhotoUri(mShortcuts.get(0).schema), null, null, null, PhotoSource.assets);
 			final BitmapRequest bitmapRequest = new BitmapRequest();
 			bitmapRequest.setImageUri(photo.getUri());

@@ -108,7 +108,7 @@ import com.aircandi.ui.AircandiForm;
  * Http 1.1 Status Codes (subset)
  * 
  * - 200: OK
- * - 201: CREATED
+ * - 201: Created
  * - 202: Accepted
  * - 203: Non-authoritative information
  * - 204: Request fulfilled but no content returned (message body empty).
@@ -117,11 +117,11 @@ import com.aircandi.ui.AircandiForm;
  * - 401: Unauthorized. Request requires user authentication.
  * - 403: Forbidden
  * - 404: Not found
- * - 405: METHOD not allowed
+ * - 405: Method not allowed
  * - 408: Request timeout
- * - 415: Unsupported media TYPE
+ * - 415: Unsupported media type
  * - 500: Internal server error
- * - 503: SERVICE unavailable. Caused by temporary overloading or maintenance.
+ * - 503: Service unavailable. Caused by temporary overloading or maintenance.
  * 
  * Notes:
  * 
@@ -133,7 +133,7 @@ import com.aircandi.ui.AircandiForm;
  * 
  * - Connection timeout is the max time allowed to make initial connection with the remote server.
  * - Sockettimeout is the max inactivity time allowed between two consecutive data packets.
- * - AndroidHttpClient sets BOTH to 60 seconds.
+ * - AndroidHttpClient sets both to 60 seconds.
  */
 
 /*
@@ -216,8 +216,8 @@ public class HttpService {
 		/*
 		 * Set to BrowserCompatHostnameVerifier
 		 * 
-		 * AllowAllHostnameVerifier doesn't verify host names contained IN SSL certificate. It should not be set IN
-		 * production environment. It may allow man IN middle attack. Other host name verifiers for specific needs
+		 * AllowAllHostnameVerifier doesn't verify host names contained in SSL certificate. It should not be set in
+		 * production environment. It may allow man in middle attack. Other host name verifiers for specific needs
 		 * are StrictHostnameVerifier and BrowserCompatHostnameVerifier.
 		 */
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
@@ -236,7 +236,7 @@ public class HttpService {
 		httpClient.addRequestInterceptor(new HttpRequestInterceptor() {
 			@Override
 			public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
-				request.addHeader("USER-Agent", "Mozilla/5.0");
+				request.addHeader("User-Agent", "Mozilla/5.0");
 			}
 		});
 		return httpClient;
@@ -261,7 +261,7 @@ public class HttpService {
 				ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
 
 				if (stopwatch != null) {
-					stopwatch.segmentTime("Http SERVICE: try " + String.valueOf(tryCount) + ": connected state check completed");
+					stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": connected state check completed");
 				}
 				
 				if (connectedState == ConnectedState.NONE) {
@@ -273,10 +273,10 @@ public class HttpService {
 					throw proxibaseException;
 				}
 
-				/* If we get to here, we have a NETWORK connection so give it a try. */
+				/* If we get to here, we have a network connection so give it a try. */
 				if (tryCount > 1) {
 					/*
-					 * We do not RETRY if this is an update/insert/delete.
+					 * We do not retry if this is an update/insert/delete.
 					 * 
 					 * We could be retrying because of a socket timeout exception. A socket timeout exception
 					 * could be caused by: 1) poor/slow connection, 2) connectivity changes like drops, or switching
@@ -289,20 +289,20 @@ public class HttpService {
 					HttpConnectionParams.setSoTimeout(mHttpParams, newSocketTimeout);
 					
 					if (stopwatch != null) {
-						stopwatch.segmentTime("Http SERVICE: try " + String.valueOf(tryCount) + ": resetting socket timeout to " + String.valueOf(newSocketTimeout));
+						stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": resetting socket timeout to " + String.valueOf(newSocketTimeout));
 					}
 				}
 
 				long startTime = System.nanoTime();
 
 				if (stopwatch != null) {
-					stopwatch.segmentTime("Http SERVICE: try " + String.valueOf(tryCount) + ": connection validation completed");
+					stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": connection validation completed");
 				}
 
 				httpResponse = mHttpClient.execute(httpRequest);
 
 				if (stopwatch != null) {
-					stopwatch.segmentTime("Http SERVICE: try " + String.valueOf(tryCount) + ": request execute completed");
+					stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": request execute completed");
 				}
 
 				if (isRequestSuccessful(httpResponse)) {
@@ -314,18 +314,18 @@ public class HttpService {
 					Object response = handleResponse(httpRequest, httpResponse, serviceRequest.getResponseFormat(), serviceRequest.getRequestListener());
 					
 					if (stopwatch != null) {
-						stopwatch.segmentTime("Http SERVICE: try " + String.valueOf(tryCount) + ": response content captured");
+						stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": response content captured");
 					}
 
 					/* Check for valid client version even if the call was successful */
 					if (serviceRequest.getResponseFormat() == ResponseFormat.JSON && !serviceRequest.getIgnoreResponseData()) {
 						/*
-						 * We think anything json is coming from the Aircandi SERVICE (except Bing)
+						 * We think anything json is coming from the Aircandi service (except Bing)
 						 */
 						ServiceData serviceData = (ServiceData) HttpService.jsonToObject((String) response, ObjectType.NONE, ServiceDataWrapper.TRUE);
 						
 						if (stopwatch != null) {
-							stopwatch.segmentTime("Http SERVICE: try " + String.valueOf(tryCount) + ": response content json (" + String.valueOf(((String)response).length()) + " bytes) decoded to object");
+							stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": response content json (" + String.valueOf(((String)response).length()) + " bytes) decoded to object");
 						}
 						
 						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
@@ -339,7 +339,7 @@ public class HttpService {
 					}
 
 					if (stopwatch != null) {
-						stopwatch.segmentTime("Http SERVICE: try " + String.valueOf(tryCount) + ": successful response processing completed");
+						stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": successful response processing completed");
 					}
 
 					return response;
@@ -347,7 +347,7 @@ public class HttpService {
 				else if (isTemporaryRedirect(httpResponse)) {
 					/*
 					 * If we get a 307 Temporary Redirect, we'll point the HTTP method to the redirected location, and
-					 * let the next RETRY deliver the request to the right location.
+					 * let the next retry deliver the request to the right location.
 					 */
 					Header[] locationHeaders = httpResponse.getHeaders("location");
 					String redirectedLocation = locationHeaders[0].getValue();
@@ -356,14 +356,14 @@ public class HttpService {
 					httpRequest.setURI(redirectedUri);
 
 					if (stopwatch != null) {
-						stopwatch.segmentTime("Http SERVICE: try " + String.valueOf(tryCount) + ": starting temp redirect");
+						stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": starting temp redirect");
 					}
 
 				}
 				else {
 					/*
 					 * We got a non-success http status code so break it down and
-					 * decide if makes sense to RETRY.
+					 * decide if makes sense to retry.
 					 */
 					String responseContent = convertStreamToString(httpResponse.getEntity().getContent());
 
@@ -373,7 +373,7 @@ public class HttpService {
 
 					if (serviceRequest.getResponseFormat() == ResponseFormat.JSON) {
 						/*
-						 * We think anything json is coming from the Aircandi SERVICE.
+						 * We think anything json is coming from the Aircandi service.
 						 */
 						ServiceData serviceData = (ServiceData) HttpService.jsonToObject(responseContent, ObjectType.NONE, ServiceDataWrapper.TRUE);
 						Integer clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
@@ -393,18 +393,18 @@ public class HttpService {
 
 					if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, proxibaseException, tryCount)) {
 						/*
-						 * If we got a duplicate error code back from the SERVICE, it could be because we tried
-						 * to double insert after a RETRY. In that case we want to eat the error and return success
+						 * If we got a duplicate error code back from the service, it could be because we tried
+						 * to double insert after a retry. In that case we want to eat the error and return success
 						 * to the caller. That means we also need to return the inserted entity.
 						 */
 						if (stopwatch != null) {
-							stopwatch.segmentTime("Http SERVICE: try " + String.valueOf(tryCount) + ": throwing exception");
+							stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": throwing exception");
 						}
 						throw proxibaseException;
 					}
 
 					if (stopwatch != null) {
-						stopwatch.segmentTime("Http SERVICE: try " + String.valueOf(tryCount) + ": failure, retrying");
+						stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount) + ": failure, retrying");
 					}
 				}
 			}
@@ -413,15 +413,15 @@ public class HttpService {
 				 * This could be any of these:
 				 * 
 				 * Primaries:
-				 * - UnknownHostException: hostname didn't exist IN the dns system
-				 * - ConnectTimeoutException: timeout expired trying to connect to SERVICE
+				 * - UnknownHostException: hostname didn't exist in the dns system
+				 * - ConnectTimeoutException: timeout expired trying to connect to service
 				 * - SocketException: thrown during socket creation or setting options
 				 * - SocketTimeoutException: timeout expired on a socket waiting for data
 				 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
 				 * 
 				 * - SSLException: Special note here. We can get this when a ssl connection has been
-				 * established with the SERVICE and then the device switches networks. That causes the
-				 * SERVICE to reset the connection and we get a read error.
+				 * established with the service and then the device switches networks. That causes the
+				 * service to reset the connection and we get a read error.
 				 * 
 				 * Secondaries
 				 * - Zillions
@@ -431,14 +431,14 @@ public class HttpService {
 
 					final HttpServiceException proxibaseException = makeHttpServiceException(null, null, e);
 					if (stopwatch != null) {
-						stopwatch.segmentTime("Http SERVICE: try " + String.valueOf(tryCount + 1) + ": throwing IO exception");
+						stopwatch.segmentTime("Http service: try " + String.valueOf(tryCount + 1) + ": throwing IO exception");
 					}
 					throw proxibaseException;
 
 				}
 				else {
 					/*
-					 * Ok to RETRY, check our connection again
+					 * Ok to retry, check our connection again
 					 */
 					ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
 
@@ -493,7 +493,7 @@ public class HttpService {
 		else if (serviceRequest.getRequestType() == RequestType.METHOD) {
 			httpRequest = new HttpPost();
 
-			/* METHOD parameters */
+			/* Method parameters */
 			if (serviceRequest.getParameters() != null && serviceRequest.getParameters().size() != 0) {
 				if (jsonBody.toString().length() == 0) {
 					jsonBody.append("{");
@@ -549,12 +549,12 @@ public class HttpService {
 			}
 		}
 
-		/* ADD headers and set the Uri */
+		/* Add headers and set the Uri */
 		addHeaders(httpRequest, serviceRequest);
 		query = serviceRequest.getQuery(); // $codepro.audit.disable variableDeclaredInLoop
 		String uriString = (query == null) ? serviceRequest.getUri() : serviceRequest.getUri() + query.queryString();
 
-		/* ADD session info to uri if supplied */
+		/* Add session info to uri if supplied */
 		String sessionInfo = sessionInfo(serviceRequest);
 		if (!sessionInfo.equals("")) {
 			if (uriString.contains("?")) {
@@ -568,7 +568,7 @@ public class HttpService {
 		httpRequest.setURI(uriFromString(uriString));
 
 		if (stopwatch != null) {
-			stopwatch.segmentTime("Http SERVICE: request construction complete");
+			stopwatch.segmentTime("Http service: request construction complete");
 		}
 
 		return httpRequest;
@@ -634,7 +634,7 @@ public class HttpService {
 				httpException = new HttpServiceException("Network connects to a walled garden", ErrorType.CLIENT, exception, statusCode);
 			}
 			else if (exception instanceof SocketException) {
-				httpException = new HttpServiceException("DEVICE is not connected to a NETWORK: "
+				httpException = new HttpServiceException("Device is not connected to a network: "
 						+ String.valueOf(ServiceConstants.CONNECT_TRIES) + " tries over "
 						+ String.valueOf(ServiceConstants.CONNECT_WAIT * ServiceConstants.CONNECT_TRIES / 1000) + " second window"
 						, ErrorType.CLIENT
@@ -651,7 +651,7 @@ public class HttpService {
 		else if (statusCode != null) {
 
 			if (statusCode == HttpStatus.SC_NOT_FOUND) {
-				httpException = new HttpServiceException("SERVICE or target not found", ErrorType.SERVICE, new HttpServiceException.NotFoundException());
+				httpException = new HttpServiceException("Service or target not found", ErrorType.SERVICE, new HttpServiceException.NotFoundException());
 			}
 			else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
 				/* missing, expired or invalid session */
@@ -680,7 +680,7 @@ public class HttpService {
 				httpException = new HttpServiceException("Weak password", ErrorType.SERVICE, new HttpServiceException.PasswordException());
 			}
 			else if (statusCode == HttpStatus.SC_GATEWAY_TIMEOUT) {
-				/* This can happen if SERVICE crashes during request */
+				/* This can happen if service crashes during request */
 				httpException = new HttpServiceException("Gateway timeout", ErrorType.SERVICE, new HttpServiceException.GatewayTimeoutException());
 			}
 			else if (statusCode == HttpStatus.SC_CONFLICT) {
@@ -690,7 +690,7 @@ public class HttpService {
 				httpException = new HttpServiceException("Request entity too large", ErrorType.SERVICE, new HttpServiceException.AircandiServiceException());
 			}
 			else {
-				httpException = new HttpServiceException("SERVICE error: UNKNOWN status code: " + String.valueOf(httpStatusCode)
+				httpException = new HttpServiceException("Service error: unknown status code: " + String.valueOf(httpStatusCode)
 						, ErrorType.SERVICE
 						, new HttpServiceException.AircandiServiceException());
 			}
@@ -729,7 +729,7 @@ public class HttpService {
 
 		if (exception instanceof ClientProtocolException) {
 			/*
-			 * Can't recover from this with a RETRY.
+			 * Can't recover from this with a retry.
 			 */
 			return false;
 		}
@@ -741,7 +741,7 @@ public class HttpService {
 
 		if (exception instanceof SocketTimeoutException) {
 			/*
-			 * We timed OUT waiting for data. Could be a poor connection or the SERVICE could be down.
+			 * We timed out waiting for data. Could be a poor connection or the service could be down.
 			 */
 			Logger.d(this, "Retrying on " + exception.getClass().getName() + ": " + exception.getMessage());
 			return true;
@@ -750,8 +750,8 @@ public class HttpService {
 		if (exception instanceof SocketException) {
 			/*
 			 * This can be caused by the server refusing the connection or resetting the connection. I've
-			 * seen this when a server doesn't have the item being requested. I've also seen this IN
-			 * cases where a RETRY succeeds.
+			 * seen this when a server doesn't have the item being requested. I've also seen this in
+			 * cases where a retry succeeds.
 			 */
 			Logger.d(this, "Retrying on " + exception.getClass().getName() + ": " + exception.getMessage());
 			return true;
@@ -762,7 +762,7 @@ public class HttpService {
 			 * This can be caused as a result of the server resetting the connection.
 			 * 
 			 * Special note here. We can get this when a ssl connection has been
-			 * established with the SERVICE and then the device switches networks. That causes the SERVICE to reset the
+			 * established with the service and then the device switches networks. That causes the service to reset the
 			 * connection and we get a read error.
 			 */
 			if (exception.getMessage().toLowerCase(Locale.US).contains("connection reset")) {
@@ -774,21 +774,21 @@ public class HttpService {
 		if (exception instanceof HttpServiceException) {
 			final HttpServiceException proxibaseException = (HttpServiceException) exception;
 			/*
-			 * It is possible that a RETRY might succeed after a 500 internal SERVICE error but I think
-			 * it is more conservative to just fail and let the user RETRY if they want to.
+			 * It is possible that a retry might succeed after a 500 internal service error but I think
+			 * it is more conservative to just fail and let the user retry if they want to.
 			 */
 			if (proxibaseException.getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
 				return false;
 			}
 
 			/*
-			 * For 503 SERVICE unavailable errors, we want to RETRY, but we need to use
+			 * For 503 service unavailable errors, we want to retry, but we need to use
 			 * an exponential back-off strategy so that we don't overload a server with a flood of retries. If we've
-			 * surpassed our RETRY limit we handle the error response as a non-retryable error and go ahead and throw it
+			 * surpassed our retry limit we handle the error response as a non-retryable error and go ahead and throw it
 			 * back to the user as an exception.
 			 * 
-			 * We also RETRY 504 gateway timeout errors because this could have been
-			 * caused by SERVICE crash during the request and the SERVICE will be restarted.
+			 * We also retry 504 gateway timeout errors because this could have been
+			 * caused by service crash during the request and the service will be restarted.
 			 */
 			if (proxibaseException.getStatusCode() == HttpStatus.SC_SERVICE_UNAVAILABLE
 					|| proxibaseException.getStatusCode() == HttpStatus.SC_GATEWAY_TIMEOUT) {
@@ -800,13 +800,13 @@ public class HttpService {
 
 	private void pauseExponentially(int retries) throws HttpClientException {
 		/*
-		 * Exponential sleep on failed request to avoid flooding a SERVICE with retries.
+		 * Exponential sleep on failed request to avoid flooding a service with retries.
 		 */
 		long delay = 0;
 		final long scaleFactor = 100;
 		delay = (long) (Math.pow(2, retries) * scaleFactor);
 		delay = Math.min(delay, ServiceConstants.MAX_BACKOFF_IN_MILLISECONDS);
-		Logger.d(this, "Retryable error detected, will RETRY IN " + delay + "ms, attempt number: " + retries);
+		Logger.d(this, "Retryable error detected, will retry in " + delay + "ms, attempt number: " + retries);
 
 		try {
 			Thread.sleep(delay);
@@ -866,15 +866,15 @@ public class HttpService {
 			httpAction.addHeader("Content-Type", "application/json");
 		}
 		if (serviceRequest.getResponseFormat() == ResponseFormat.JSON) {
-			httpAction.addHeader("ACCEPT", "application/json");
+			httpAction.addHeader("Accept", "application/json");
 		}
 		if (serviceRequest.getResponseFormat() == ResponseFormat.BYTES) {
-			httpAction.addHeader("ACCEPT", "image/jpeg");
-			httpAction.addHeader("ACCEPT", "image/png");
-			httpAction.addHeader("ACCEPT", "image/gif");
+			httpAction.addHeader("Accept", "image/jpeg");
+			httpAction.addHeader("Accept", "image/png");
+			httpAction.addHeader("Accept", "image/gif");
 		}
 		if (serviceRequest.getAuthType() == AuthType.BASIC) {
-			httpAction.addHeader("Authorization", "BASIC " + serviceRequest.getPasswordBase64());
+			httpAction.addHeader("Authorization", "Basic " + serviceRequest.getPasswordBase64());
 		}
 	}
 
@@ -931,7 +931,7 @@ public class HttpService {
 	}
 
 	// ----------------------------------------------------------------------------------------
-	// JSON methods
+	// Json methods
 	// ----------------------------------------------------------------------------------------
 
 	public static Object jsonToObject(final String jsonString, ObjectType objectType) {
@@ -1018,7 +1018,7 @@ public class HttpService {
 				 */
 				if (serviceData.d != null) {
 
-					/* It's the results of a bing QUERY */
+					/* It's the results of a bing query */
 					rootMap = (LinkedHashMap<String, Object>) serviceData.d;
 					if (objectType == ObjectType.IMAGE_RESULT) {
 
@@ -1039,7 +1039,7 @@ public class HttpService {
 					}
 					else {
 
-						/* The data property is an object and we put it IN an array */
+						/* The data property is an object and we put it in an array */
 						final Map<String, Object> map = (LinkedHashMap<String, Object>) serviceData.data;
 						maps = new ArrayList<LinkedHashMap<String, Object>>();
 						maps.add((LinkedHashMap<String, Object>) map);
@@ -1184,8 +1184,8 @@ public class HttpService {
 
 		/*
 		 * Order of precedent
-		 * 1. object.updateScope: PropertyValue = exclude nulls, OBJECT = include nulls.
-		 * 2. excludeNulls parameter: forces exclusion even if updateScope = OBJECT.
+		 * 1. object.updateScope: PropertyValue = exclude nulls, Object = include nulls.
+		 * 2. excludeNulls parameter: forces exclusion even if updateScope = Object.
 		 */
 		Boolean excludeNulls = (excludeNullsProposed == ExcludeNulls.TRUE);
 		try {

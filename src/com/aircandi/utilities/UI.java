@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.bitmaps.BitmapManager;
@@ -141,15 +142,16 @@ public class UI {
 						if (serviceResponse.exception != null && serviceResponse.exception.getStatusCode() != null) {
 							Float statusCode = serviceResponse.exception.getStatusCode();
 							String exception = serviceResponse.exception.getInnerException().getClass().getSimpleName();
-							if (statusCode == HttpStatus.SC_NOT_FOUND) {
-								UI.showToastNotification("PHOTO not found", Toast.LENGTH_SHORT);
+							if (statusCode == HttpStatus.SC_NOT_FOUND || statusCode == HttpStatus.SC_FORBIDDEN) {
+								Logger.w(AirImageView.class, "Photo not found: " + photo.getUri());
 							}
 							else if (statusCode == HttpStatus.SC_NOT_ACCEPTABLE) {
-								UI.showToastNotification("UNKNOWN photo format", Toast.LENGTH_SHORT);
+								Logger.w(AirImageView.class, "Unknown image format for: " + photo.getUri());
 							}
 							else {
-								UI.showToastNotification("Unhandled status code: " + String.valueOf(statusCode), Toast.LENGTH_LONG);
-								UI.showToastNotification("Unhandled exception: " + exception, Toast.LENGTH_LONG);
+								Logger.w(AirImageView.class, "Unknown failure for: " + photo.getUri());
+								Logger.w(AirImageView.class, "Status code: " + String.valueOf(statusCode));
+								Logger.w(AirImageView.class, "Exception: " + exception);
 							}
 						}
 						if (photoView.getBrokenPhoto() != null) {
@@ -201,7 +203,7 @@ public class UI {
 			/*
 			 * Create a new bitmap from the original using the matrix to transform the result.
 			 * Potential for OM condition because if the garbage collector is behind, we could
-			 * have several large bitmaps IN memory at the same time.
+			 * have several large bitmaps in memory at the same time.
 			 */
 			bitmapScaled = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 		}
@@ -322,11 +324,11 @@ public class UI {
 		InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);
 		inputManager.hideSoftInputFromWindow(new View(context).getWindowToken(), 0);
 	}
-	
+
 	@SuppressWarnings("ucd")
 	public static void showSoftInput(Context context) {
 		InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);
-		inputManager.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+		inputManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 	}
 
 	@SuppressWarnings("ucd")

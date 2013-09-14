@@ -20,7 +20,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	@Expose
 	public String				action;
 	@Expose
-	public String				type;	// WATCH, NEARBY, NETWORK
+	public String				type;	// watch, nearby, network
 	@Expose
 	public Entity				entity;
 	@Expose
@@ -32,7 +32,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	@Expose
 	public Number				sentDate;
 
-	/* CLIENT only */
+	/* client only */
 	public Intent				intent;
 	public String				title;
 	public String				subtitle;
@@ -44,7 +44,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 		 * Properties involved with editing are copied from one entity to another.
 		 */
 		notification.action = (String) map.get("action");
-		notification.type = (String) map.get("TYPE");
+		notification.type = (String) map.get("type");
 		notification.title = (String) map.get("title");
 		notification.subtitle = (String) map.get("subtitle");
 		notification.sentDate = (Number) map.get("sentDate");

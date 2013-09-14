@@ -261,7 +261,7 @@ public class Animate {
 				anim = new TranslateAnimation(c, attrs);
 			}
 			else {
-				throw new RuntimeException("UNKNOWN animation name: " + parser.getName());
+				throw new RuntimeException("Unknown animation name: " + parser.getName());
 			}
 
 			if (parent != null) {

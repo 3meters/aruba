@@ -157,14 +157,14 @@ public class AndroidManager {
 		/*
 		 * Activity Action: Deliver some data to someone else. Who the data is being delivered to is not specified; it
 		 * is up to the receiver of this action to ask the user where the data should be sent.
-		 * When launching a SEND intent, you should usually wrap it IN a chooser (through createChooser), which will
+		 * When launching a SEND intent, you should usually wrap it in a chooser (through createChooser), which will
 		 * give the proper interface for the user to pick how to send your data and allow you to specify a prompt
 		 * indicating what they are doing.
 		 * 
-		 * Input: getType is the MIME TYPE of the data being sent. get*Extra can have either a EXTRA_TEXT or
-		 * EXTRA_STREAM field, containing the data to be sent. If using EXTRA_TEXT, the MIME TYPE should be
-		 * "text/plain"; otherwise it should be the MIME TYPE of the data IN EXTRA_STREAM. If using EXTRA_TEXT, you can
-		 * also optionally supply EXTRA_HTML_TEXT for clients to retrieve your text with HTML formatting.
+		 * Input: getType is the MIME type of the data being sent. get*Extra can have either a EXTRA_TEXT or
+		 * EXTRA_STREAM field, containing the data to be sent. If using EXTRA_TEXT, the MIME type should be
+		 * "text/plain"; otherwise it should be the MIME type of the data in EXTRA_STREAM. If using EXTRA_TEXT, you can
+		 * also optionally supply EXTRA_HTML_TEXT for clients to retrieve your text with html formatting.
 		 * 
 		 * As of android.os.Build.VERSION_CODES.JELLY_BEAN, the data being sent can be supplied through
 		 * setClipData(ClipData). This allows you to use FLAG_GRANT_READ_URI_PERMISSION when sharing content: URIs and

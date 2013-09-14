@@ -227,8 +227,8 @@ public class PhotoPicker extends BaseBrowse implements IList {
 					ImageResult imageResult = mImages.get(position);
 					Photo photo = imageResult.getPhoto();
 					/*
-					 * PHOTO gets set for images that are already being used like pictures linked to places so
-					 * an empty photo means the image is coming from external SERVICE like bing.
+					 * Photo gets set for images that are already being used like pictures linked to places so
+					 * an empty photo means the image is coming from external service like bing.
 					 */
 					if (photo == null) {
 						photo = new Photo(imageResult.getMediaUrl(), null, null, null, PhotoSource.external);
@@ -261,7 +261,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		 */
 		if (mPlacePhotoMode && mEntity != null) {
 
-			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_PICTURE, Constants.SCHEMA_ENTITY_PICTURE, Direction.IN, false, false);
+			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_PICTURE, Constants.SCHEMA_ENTITY_PICTURE, Direction.in, false, false);
 			settings.appClass = Pictures.class;
 			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 			if (shortcuts.size() > 0) {
@@ -311,11 +311,11 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(mSearch.getWindowToken(), 0);
 
-		/* Stash QUERY so we can restore it IN the FUTURE */
+		/* Stash query so we can restore it in the future */
 		Aircandi.settingsEditor.putString(Constants.SETTING_PICTURE_SEARCH_LAST, mQuery);
 		Aircandi.settingsEditor.commit();
 
-		/* ADD QUERY to AUTO complete array */
+		/* Add query to auto complete array */
 		try {
 			org.json.JSONObject jsonSearchMap = new org.json.JSONObject(Aircandi.settings.getString(Constants.SETTING_PICTURE_SEARCHES, "{}"));
 			jsonSearchMap.put(mQuery, mQuery);
@@ -326,7 +326,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 			exception.printStackTrace();
 		}
 
-		/* Make sure the latest search appears IN AUTO complete */
+		/* Make sure the latest search appears in auto complete */
 		initAutoComplete();
 		bindAutoCompleteAdapter();
 
@@ -397,7 +397,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 				+ "&Market=%27en-US%27&Adult=%27Strict%27&ImageFilters=%27size%3alarge%27"
 				+ "&$top=" + String.valueOf(count)
 				+ "&$skip=" + String.valueOf(offset)
-				+ "&$format=JSON";
+				+ "&$format=Json";
 
 		final ServiceRequest serviceRequest = new ServiceRequest(bingUrl, RequestType.GET, ResponseFormat.JSON);
 		serviceRequest.setAuthType(AuthType.BASIC)
@@ -473,7 +473,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 
 				Place place = (Place) mEntity;
 				/*
-				 * PLACE provider is foursquare
+				 * Place provider is foursquare
 				 */
 				if (place.getProvider().type != null && place.getProvider().type.equals("foursquare")) {
 
@@ -711,7 +711,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 				final Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
 
 				if (bitmap == null) {
-					throw new IllegalStateException("STREAM could not be decoded to a bitmap: " + uri);
+					throw new IllegalStateException("Stream could not be decoded to a bitmap: " + uri);
 				}
 				final BitmapDrawable drawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
 				mBitmapCache.put(uri, new SoftReference(bitmap));

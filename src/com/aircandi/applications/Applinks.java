@@ -19,7 +19,7 @@ public class Applinks {
 	@SuppressWarnings("ucd")
 	public static void viewFor(Context context, String entityId, String linkType, Direction direction) {
 		if (direction == null) {
-			direction = Direction.IN;
+			direction = Direction.in;
 		}
 		IntentBuilder intentBuilder = new IntentBuilder(context, EntityList.class)
 				.setEntityId(entityId)
@@ -35,7 +35,7 @@ public class Applinks {
 
 	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction, String title) {
 		if (direction == null) {
-			direction = Direction.IN;
+			direction = Direction.in;
 		}
 		IntentBuilder intentBuilder = new IntentBuilder(context, EntityList.class)
 				.setEntityId(entityId)

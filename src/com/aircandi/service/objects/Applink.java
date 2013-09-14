@@ -21,7 +21,7 @@ public class Applink extends Entity implements Cloneable, Serializable {
 	public static final String	collectionId		= "applinks";
 
 	// --------------------------------------------------------------------------------------------
-	// SERVICE fields
+	// service fields
 	// --------------------------------------------------------------------------------------------
 
 	@Expose

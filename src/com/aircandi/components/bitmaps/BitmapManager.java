@@ -55,7 +55,7 @@ public class BitmapManager {
 	private BitmapManager() {
 		mBitmapLoader = new BitmapLoader();
 		/*
-		 * GET memory class of this device, exceeding this amount will throw an
+		 * get memory class of this device, exceeding this amount will throw an
 		 * OutOfMemory exception.
 		 */
 		final int memClass = ((ActivityManager) Aircandi.applicationContext.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
@@ -68,7 +68,7 @@ public class BitmapManager {
 		mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
 			@Override
 			protected int sizeOf(String key, Bitmap bitmap) {
-				/* The cache size will be measured IN bytes rather than number of items. */
+				/* The cache size will be measured in bytes rather than number of items. */
 				return UI.getImageMemorySize(bitmap.getHeight(), bitmap.getWidth(), bitmap.hasAlpha());
 			}
 		};
@@ -310,7 +310,7 @@ public class BitmapManager {
 
 		if (cursor != null) {
 
-			/* Means the image is IN the media store */
+			/* Means the image is in the media store */
 			String imageData = "";
 			if (cursor.moveToFirst()) {
 				final int dataColumn = cursor.getColumnIndex(Images.Media.DATA);
@@ -324,7 +324,7 @@ public class BitmapManager {
 		}
 		else {
 
-			/* The image is IN the local file system */
+			/* The image is in the local file system */
 			imageFile = new File(photoUri.toString().replace("file://", ""));
 
 			final ExifInterface exif;

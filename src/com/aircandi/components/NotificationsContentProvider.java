@@ -61,7 +61,7 @@ public class NotificationsContentProvider extends ContentProvider {
 				queryBuilder.appendWhere(NotificationTable.COLUMN_ID + "=" + uri.getLastPathSegment());
 				break;
 			default:
-				throw new IllegalArgumentException("UNKNOWN URI: " + uri);
+				throw new IllegalArgumentException("Unknown URI: " + uri);
 		}
 
 		SQLiteDatabase database = DatabaseHelper.getInstance().getWritableDatabase();
@@ -90,7 +90,7 @@ public class NotificationsContentProvider extends ContentProvider {
 				id = database.insert(NotificationTable.TABLE_NOTIFICATIONS, null, values);
 				break;
 			default:
-				throw new IllegalArgumentException("UNKNOWN URI: " + uri);
+				throw new IllegalArgumentException("Unknown URI: " + uri);
 		}
 
 		getContext().getContentResolver().notifyChange(uri, null);
@@ -123,7 +123,7 @@ public class NotificationsContentProvider extends ContentProvider {
 				}
 				break;
 			default:
-				throw new IllegalArgumentException("UNKNOWN URI: " + uri);
+				throw new IllegalArgumentException("Unknown URI: " + uri);
 		}
 		getContext().getContentResolver().notifyChange(uri, null);
 
@@ -157,7 +157,7 @@ public class NotificationsContentProvider extends ContentProvider {
 				}
 				break;
 			default:
-				throw new IllegalArgumentException("UNKNOWN URI: " + uri);
+				throw new IllegalArgumentException("Unknown URI: " + uri);
 		}
 
 		getContext().getContentResolver().notifyChange(uri, null);
@@ -176,7 +176,7 @@ public class NotificationsContentProvider extends ContentProvider {
 			HashSet<String> availableColumns = new HashSet<String>(Arrays.asList(available));
 			/* Check if all columns which are requested are available */
 			if (!availableColumns.containsAll(requestedColumns)) {
-				throw new IllegalArgumentException("UNKNOWN columns IN projection");
+				throw new IllegalArgumentException("Unknown columns in projection");
 			}
 		}
 	}

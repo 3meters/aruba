@@ -64,7 +64,7 @@ public class BitmapLoader {
 		synchronized (mBitmapQueue.mQueue) {
 			/*
 			 * The image requestor may have called for other images before. So there may be some
-			 * old tasks IN the queue. We need to discard them.
+			 * old tasks in the queue. We need to discard them.
 			 */
 			mBitmapQueue.clean(bitmapRequest.getImageRequestor());
 			mBitmapQueue.mQueue.offer(bitmapRequest);
@@ -88,7 +88,7 @@ public class BitmapLoader {
 
 	public static ServiceResponse downloadAsBitmapSampled(String url, RequestListener listener) {
 		/*
-		 * We request a byte array for decoding because of a bug IN pre 2.3 versions of android.
+		 * We request a byte array for decoding because of a bug in pre 2.3 versions of android.
 		 */
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(url)
@@ -128,7 +128,7 @@ public class BitmapLoader {
 				}
 			}
 			else {
-				/* Turn byte array into bitmap that fits IN our desired max size */
+				/* Turn byte array into bitmap that fits in our desired max size */
 				Logger.v(null, url + ": " + String.valueOf(imageBytes.length) + " bytes received");
 				bitmap = BitmapManager.getInstance().bitmapForByteArraySampled(imageBytes, null, null);
 			}
@@ -148,7 +148,7 @@ public class BitmapLoader {
 
 	private static ServiceResponse downloadAsByteArray(String url, RequestListener listener) {
 		/*
-		 * We request a byte array for decoding because of a bug IN pre 2.3 versions of android.
+		 * We request a byte array for decoding because of a bug in pre 2.3 versions of android.
 		 */
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(url)
@@ -183,7 +183,7 @@ public class BitmapLoader {
 				consume();
 				try {
 					synchronized (mBitmapQueue.mQueue) {
-						/* Thread waits until there are any images to load IN the queue */
+						/* Thread waits until there are any images to load in the queue */
 						mBitmapQueue.mQueue.wait();
 					}
 				}
@@ -215,7 +215,7 @@ public class BitmapLoader {
 						float estimatedTime = System.nanoTime();
 						/*
 						 * Gets bitmap at native size and downsamples if necessary to stay within the max
-						 * size IN
+						 * size in
 						 * memory.
 						 */
 						serviceResponse = downloadAsByteArray(bitmapRequest.getImageUri(), new RequestListener() {
@@ -247,10 +247,10 @@ public class BitmapLoader {
 								estimatedTime = System.nanoTime() - startTime;
 								startTime = System.nanoTime();
 								Logger.v(BitmapLoader.this,
-										bitmapRequest.getImageUri() + ": POST processing: " + String.valueOf(estimatedTime / 1000000)
+										bitmapRequest.getImageUri() + ": post processing: " + String.valueOf(estimatedTime / 1000000)
 												+ "ms");
 								/*
-								 * Stuff it into the cache. Overwrites if it already exists. This is a perf hit IN
+								 * Stuff it into the cache. Overwrites if it already exists. This is a perf hit in
 								 * the process because writing files is slow.
 								 * 
 								 * We aren't doing anything to shrink the raw size of the image before storing it to
@@ -260,7 +260,7 @@ public class BitmapLoader {
 								bitmap = BitmapManager.getInstance().putImageBytes(bitmapRequest.getImageUri(), (byte[]) serviceResponse.data,
 										bitmapRequest.getImageSize());
 
-								/* UPDATE progress */
+								/* Update progress */
 								if (bitmapRequest.getRequestListener() != null) {
 									bitmapRequest.getRequestListener().onProgressChanged(80);
 								}

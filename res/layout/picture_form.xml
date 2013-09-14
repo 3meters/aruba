@@ -64,8 +64,8 @@
                         android:layout_height="@dimen/image_picture_form"
                         aircandi:layout="@layout/widget_webimageview_zoom"
                         aircandi:sizeHint="@dimen/image_picture_form"
-                        android:background="@drawable/selector_image"
                         android:adjustViewBounds="true"
+                        android:background="@drawable/selector_image"
                         android:clickable="true"
                         android:onClick="onImageClick"
                         android:scaleType="centerCrop" />
@@ -79,9 +79,12 @@
 
                 <LinearLayout
                     android:id="@+id/place_holder"
-                    android:layout_width="match_parent"
+                    android:layout_width="@dimen/image_picture_form"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
+                    android:background="@drawable/selector_button"
+                    android:clickable="true"
+                    android:onClick="onShortcutClick"
                     android:orientation="horizontal"
                     android:visibility="visible" >
 
@@ -89,8 +92,9 @@
                         android:id="@+id/place_photo"
                         android:layout_width="@dimen/image_small"
                         android:layout_height="@dimen/image_small"
-                        android:layout_marginRight="5dp"
                         android:layout_marginLeft="3dp"
+                        android:layout_marginRight="5dp"
+                        aircandi:layout="@layout/widget_webimageview_framed"
                         aircandi:showBusy="true"
                         aircandi:sizeHint="@dimen/image_medium"
                         android:background="@drawable/selector_image"
@@ -103,6 +107,7 @@
                         android:orientation="vertical" >
 
                         <com.aircandi.ui.widgets.AirTextView
+                            android:id="@+id/place_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="bottom"

@@ -19,7 +19,7 @@ public class MapFragment extends SherlockMapFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View root = super.onCreateView(inflater, container, savedInstanceState);
 		mMap = getMap();
-		// Check if we were successful IN obtaining the map.
+		// Check if we were successful in obtaining the map.
 		if (checkReady()) {
 			setUpMap();
 		}

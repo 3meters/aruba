@@ -70,7 +70,7 @@ public class NetworkManager {
 		intentFilter.addAction(WIFI_AP_STATE_CHANGED_ACTION);
 		mApplicationContext.registerReceiver(mWifiStateChangedReceiver, intentFilter);
 		/*
-		 * Enables registration for changes IN NETWORK status from http stack
+		 * Enables registration for changes in network status from http stack
 		 */
 		mNetworkStateChangedFilter = new IntentFilter();
 		mNetworkStateChangedFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -85,13 +85,13 @@ public class NetworkManager {
 					boolean noConnection = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
 
 					if (noConnection) {
-						UI.showToastNotification("Lost NETWORK connection", Toast.LENGTH_SHORT);
+						UI.showToastNotification("Lost network connection", Toast.LENGTH_SHORT);
 					}
 					if (wifi.isAvailable()) {
-						UI.showToastNotification("Wifi NETWORK is available", Toast.LENGTH_SHORT);
+						UI.showToastNotification("Wifi network is available", Toast.LENGTH_SHORT);
 					}
 					if (mobile.isAvailable()) {
-						UI.showToastNotification("Mobile NETWORK is available", Toast.LENGTH_SHORT);
+						UI.showToastNotification("Mobile network is available", Toast.LENGTH_SHORT);
 					}
 				}
 			}
@@ -111,7 +111,7 @@ public class NetworkManager {
 		}
 		catch (HttpServiceException exception) {
 			/*
-			 * We got a SERVICE side error that either stopped us IN our tracks or
+			 * We got a service side error that either stopped us in our tracks or
 			 * we gave up after performing a series of retries.
 			 */
 			serviceResponse = new ServiceResponse(ResponseCode.FAILED, null, exception);
@@ -133,7 +133,7 @@ public class NetworkManager {
 		ConnectedState connectedState = ConnectedState.NORMAL;
 		while (!NetworkManager.getInstance().isConnected()) {
 			attempts++;
-			Logger.v(this, "No NETWORK connection: attempt: " + String.valueOf(attempts));
+			Logger.v(this, "No network connection: attempt: " + String.valueOf(attempts));
 
 			if (attempts >= ServiceConstants.CONNECT_TRIES) {
 				connectedState = ConnectedState.NONE;
@@ -148,7 +148,7 @@ public class NetworkManager {
 			}
 		}
 
-		/* We have a NETWORK connection so now check for a walled garden */
+		/* We have a network connection so now check for a walled garden */
 		if (!isMobileNetwork()) {
 			if (isWalledGardenConnection()) {
 				connectedState = ConnectedState.WALLED_GARDEN;
@@ -195,7 +195,7 @@ public class NetworkManager {
 
 	@SuppressWarnings("ucd")
 	protected Boolean isMobileNetwork() {
-		/* Check if we're connected to a data NETWORK, and if so - if it's a mobile NETWORK. */
+		/* Check if we're connected to a data network, and if so - if it's a mobile network. */
 		Boolean isMobileNetwork = null;
 		if (mConnectivityManager != null) {
 			final NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
@@ -210,7 +210,7 @@ public class NetworkManager {
 	 */
 	@SuppressWarnings("ucd")
 	protected Integer getNetworkTypeId() {
-		/* Check if we're connected to a data NETWORK, and if so - if it's a mobile NETWORK. */
+		/* Check if we're connected to a data network, and if so - if it's a mobile network. */
 		Integer networkTypeId = null;
 		if (mConnectivityManager != null) {
 			final NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();

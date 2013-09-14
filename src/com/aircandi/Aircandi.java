@@ -13,6 +13,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -87,6 +89,7 @@ public class Aircandi extends Application {
 	public static PackageManager			packageManager;
 
 	public static DisplayMetrics			displayMetrics;
+	public static SoundPool					soundPool;
 	public static Stopwatch					stopwatch1;
 	public static Stopwatch					stopwatch2;
 	public static Stopwatch					stopwatch3;
@@ -145,6 +148,7 @@ public class Aircandi extends Application {
 		applicationContext = getApplicationContext();
 		mainThreadHandler = new Handler(Looper.getMainLooper());
 		packageManager = applicationContext.getPackageManager();
+		soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
 
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
@@ -153,7 +157,7 @@ public class Aircandi extends Application {
 		/* Color hinting */
 		muteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others
 
-		/* Set prefs so we can tell when a change happens that we need to respond to. Theme is set IN setTheme(). */
+		/* Set prefs so we can tell when a change happens that we need to respond to. Theme is set in setTheme(). */
 		snapshotPreferences();
 	}
 

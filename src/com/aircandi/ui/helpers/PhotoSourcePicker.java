@@ -76,7 +76,7 @@ public class PhotoSourcePicker extends BasePicker implements OnItemClickListener
 			}
 			else {
 				
-				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_PICTURE, Constants.SCHEMA_ENTITY_PICTURE, Direction.IN, false, false);
+				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_PICTURE, Constants.SCHEMA_ENTITY_PICTURE, Direction.in, false, false);
 				settings.appClass = Pictures.class;
 				List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 				if (shortcuts.size() > 0) {

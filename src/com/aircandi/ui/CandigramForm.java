@@ -6,8 +6,6 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.media.AudioManager;
-import android.media.SoundPool;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -56,7 +54,6 @@ public class CandigramForm extends BaseEntityForm {
 
 	private Runnable	mTimer;
 	private TextView	mActionInfo;
-	private SoundPool	mSoundPool;
 	private int			mCandigramExitSoundId;
 
 	@Override
@@ -65,8 +62,7 @@ public class CandigramForm extends BaseEntityForm {
 
 		mLinkProfile = LinkProfile.LINKS_FOR_CANDIGRAM;
 		mActionInfo = (TextView) findViewById(R.id.action_info);
-		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
-		mCandigramExitSoundId = mSoundPool.load(this, R.raw.candigram_exit, 1);
+		mCandigramExitSoundId = Aircandi.soundPool.load(this, R.raw.candigram_exit, 1);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -77,7 +73,7 @@ public class CandigramForm extends BaseEntityForm {
 	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
 		/*
-		 * REFRESH the form because something new has been added to it
+		 * Refresh the form because something new has been added to it
 		 * like a comment or post.
 		 */
 		if (mEntityId.equals(event.notification.entity.toId)) {
@@ -126,7 +122,7 @@ public class CandigramForm extends BaseEntityForm {
 				Thread.currentThread().setName("KickEntity");
 				Tracker.sendEvent("ui_action", "kick_entity", null, 0, Aircandi.getInstance().getUser());
 				/*
-				 * Call SERVICE routine to get a move candidate.
+				 * Call service routine to get a move candidate.
 				 */
 				final ModelResult result = EntityManager.getInstance().moveCandigram(mEntity, true, null);
 				return result;
@@ -247,12 +243,12 @@ public class CandigramForm extends BaseEntityForm {
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					if (follow) {
 						Places.view(CandigramForm.this, entity.id);
-						mSoundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
+						Aircandi.soundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
 						finish();
 						Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
 					}
 					else {
-						mSoundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
+						Aircandi.soundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
 						finish();
 						Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
 					}
@@ -295,13 +291,13 @@ public class CandigramForm extends BaseEntityForm {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
-							mSoundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
+							Aircandi.soundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
 							finish();
 							Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
 						}
 						else if (which == Dialog.BUTTON_NEGATIVE) {
 							Places.view(CandigramForm.this, place.id);
-							mSoundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
+							Aircandi.soundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
 							finish();
 							Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
 						}
@@ -385,7 +381,7 @@ public class CandigramForm extends BaseEntityForm {
 		/*
 		 * For now, we assume that the candi form isn't recycled.
 		 * 
-		 * We leave most of the views visible by default so they are visible IN the layout editor.
+		 * We leave most of the views visible by default so they are visible in the layout editor.
 		 * 
 		 * - WebImageView primary image is visible by default
 		 * - WebImageView child views are gone by default
@@ -415,6 +411,8 @@ public class CandigramForm extends BaseEntityForm {
 		final AirImageView photoView = (AirImageView) findViewById(R.id.photo);
 		final TextView name = (TextView) findViewById(R.id.name);
 		final TextView subtitle = (TextView) findViewById(R.id.subtitle);
+		final AirImageView placePhotoView = (AirImageView) findViewById(R.id.place_photo);
+		final TextView placeName = (TextView) findViewById(R.id.place_name);
 
 		final TextView description = (TextView) findViewById(R.id.description);
 		final UserView user_one = (UserView) findViewById(R.id.user_one);
@@ -456,7 +454,7 @@ public class CandigramForm extends BaseEntityForm {
 		/* Set header */
 		Candigram candigram = (Candigram) mEntity;
 		if (candigram.type.equals(Constants.TYPE_APP_TOUR)) {
-			/* Start updating the countdown IN action info */
+			/* Start updating the countdown in action info */
 			mHandler.post(mTimer);
 			((TextView) findViewById(R.id.header)).setText("touring " + getString(R.string.form_title_candigram));
 			UI.setVisibility(mActionInfo, View.VISIBLE);
@@ -475,6 +473,26 @@ public class CandigramForm extends BaseEntityForm {
 			description.setText(Html.fromHtml(mEntity.description));
 			UI.setVisibility(findViewById(R.id.section_description), View.VISIBLE);
 		}
+		
+		/* Place context */
+		View placeHolder = findViewById(R.id.place_holder);
+		UI.setVisibility(placeHolder, View.GONE);
+		Link link = candigram.getParentLink(Constants.TYPE_LINK_CANDIGRAM);
+		if (link != null && link.shortcut != null) {
+			if (placePhotoView != null) {
+				Photo photo = link.shortcut.getPhoto();
+				UI.drawPhoto(placePhotoView, photo);
+				UI.setVisibility(placePhotoView, View.VISIBLE);
+			}
+			UI.setVisibility(placeName, View.GONE);
+			if (link.shortcut.name != null && !link.shortcut.name.equals("")) {
+				placeName.setText(Html.fromHtml(link.shortcut.name));
+				UI.setVisibility(placeName, View.VISIBLE);
+			}
+			placeHolder.setTag(link.shortcut);
+			UI.setVisibility(placeHolder, View.VISIBLE);
+		}
+		
 
 		/* Stats */
 
@@ -486,7 +504,7 @@ public class CandigramForm extends BaseEntityForm {
 		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();
 
 		/* Synthetic applink shortcuts */
-		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.IN, true, true);
+		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
 		settings.appClass = Applinks.class;
 		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 		if (shortcuts.size() > 0) {
@@ -502,8 +520,8 @@ public class CandigramForm extends BaseEntityForm {
 					, R.layout.temp_place_switchboard_item);
 		}
 
-		/* SERVICE applink shortcuts */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.IN, false, true);
+		/* service applink shortcuts */
+		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 		settings.appClass = Applinks.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 		if (shortcuts.size() > 0) {
@@ -518,7 +536,7 @@ public class CandigramForm extends BaseEntityForm {
 		}
 
 		/* Shortcuts for places linked to this candigram */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_CANDIGRAM, Constants.SCHEMA_ENTITY_PLACE, Direction.OUT, false, false);
+		settings = new ShortcutSettings(Constants.TYPE_LINK_CANDIGRAM, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 		settings.appClass = Places.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
 		if (shortcuts.size() > 0) {
@@ -584,12 +602,12 @@ public class CandigramForm extends BaseEntityForm {
 	@Override
 	protected void drawStats() {
 
-		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.IN);
+		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
 		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
 		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
 
-		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.IN);
+		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
 		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
 		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
@@ -618,7 +636,7 @@ public class CandigramForm extends BaseEntityForm {
 			Long next = candigram.hopNextDate.longValue();
 			String timeTill = DateTime.interval(now, next, IntervalContext.FUTURE);
 			if (!timeTill.equals("now")) {
-				action = "leaving IN" + "\n" + timeTill;
+				action = "leaving in" + "\n" + timeTill;
 			}
 			else {
 				action = "waiting to leave";

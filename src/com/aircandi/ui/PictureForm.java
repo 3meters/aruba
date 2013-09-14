@@ -49,7 +49,7 @@ public class PictureForm extends BaseEntityForm {
 	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
 		/*
-		 * REFRESH the form because something new has been added to it
+		 * Refresh the form because something new has been added to it
 		 * like a comment or post.
 		 */
 		if (mEntityId.equals(event.notification.entity.toId)) {
@@ -85,7 +85,7 @@ public class PictureForm extends BaseEntityForm {
 		/*
 		 * For now, we assume that the candi form isn't recycled.
 		 * 
-		 * We leave most of the views visible by default so they are visible IN the layout editor.
+		 * We leave most of the views visible by default so they are visible in the layout editor.
 		 * 
 		 * - WebImageView primary image is visible by default
 		 * - WebImageView child views are gone by default
@@ -97,9 +97,9 @@ public class PictureForm extends BaseEntityForm {
 		}		
 		
 		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);
+		final TextView name = (TextView) findViewById(R.id.name);
 		final AirImageView photoView = (AirImageView) findViewById(R.id.photo);
 		final AirImageView placePhotoView = (AirImageView) findViewById(R.id.place_photo);
-		final TextView name = (TextView) findViewById(R.id.name);
 		final TextView placeName = (TextView) findViewById(R.id.place_name);
 		final TextView subtitle = (TextView) findViewById(R.id.subtitle);
 
@@ -150,8 +150,9 @@ public class PictureForm extends BaseEntityForm {
 			UI.setVisibility(findViewById(R.id.section_description), View.VISIBLE);
 		}
 		
-		/* PLACE context */
-		UI.setVisibility(findViewById(R.id.place_holder), View.GONE);
+		/* Place context */
+		View placeHolder = findViewById(R.id.place_holder);
+		UI.setVisibility(placeHolder, View.GONE);
 		if (mEntity.place != null) {
 			if (placePhotoView != null) {
 				Photo photo = mEntity.place.getPhoto();
@@ -163,7 +164,8 @@ public class PictureForm extends BaseEntityForm {
 				placeName.setText(Html.fromHtml(mEntity.place.name));
 				UI.setVisibility(placeName, View.VISIBLE);
 			}
-			UI.setVisibility(findViewById(R.id.place_holder), View.VISIBLE);
+			placeHolder.setTag(mEntity.place.getShortcut());
+			UI.setVisibility(placeHolder, View.VISIBLE);
 		}
 
 		/* Stats */
@@ -176,7 +178,7 @@ public class PictureForm extends BaseEntityForm {
 		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();
 
 		/* Synthetic applink shortcuts */
-		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.IN, true, true);
+		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
 		settings.appClass = Applinks.class;
 		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 		if (shortcuts.size() > 0) {
@@ -190,8 +192,8 @@ public class PictureForm extends BaseEntityForm {
 					, R.layout.temp_place_switchboard_item);
 		}
 
-		/* SERVICE applink shortcuts */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.IN, false, true);
+		/* Service applink shortcuts */
+		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 		settings.appClass = Applinks.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
 		if (shortcuts.size() > 0) {
@@ -263,12 +265,12 @@ public class PictureForm extends BaseEntityForm {
 	@Override
 	protected void drawStats() {
 		
-		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.IN);
+		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
 		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
 		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
 
-		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.IN);
+		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
 		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
 		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);

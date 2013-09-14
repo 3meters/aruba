@@ -106,7 +106,7 @@ public class LinkOptions extends ServiceObject {
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_APPLINK, true, false, true, false, limit));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_COMMENT, false, false, true));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PICTURE, true, false, true, false, 1)); // just one so we can preview
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CANDIGRAM, true, false, true, true, limit).setDirection(Direction.OUT));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CANDIGRAM, true, false, true, true, limit).setDirection(Direction.out));
 				if (user != null) {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, true, false, true, false, limit, Maps.asMap("_from", user.id)));
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, false, limit, Maps.asMap("_from", user.id)));
@@ -131,9 +131,9 @@ public class LinkOptions extends ServiceObject {
 			}
 			else if (linkProfile == LinkProfile.LINKS_FOR_USER) {
 				Number limit = ServiceConstants.LIMIT_USER_OWNED_ENTITIES;
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, false, limit).setDirection(Direction.OUT));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, false, limit).setDirection(Direction.BOTH));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, false, limit).setDirection(Direction.BOTH));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, true, false, true, false, limit).setDirection(Direction.out));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, false, false, true, false, limit).setDirection(Direction.both));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, true, false, true, false, limit).setDirection(Direction.both));
 			}
 			return linkOptions;
 		}

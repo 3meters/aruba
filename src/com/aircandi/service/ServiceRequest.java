@@ -10,7 +10,7 @@ import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.objects.Session;
 
 /**
- * Here is the typical code to construct a SERVICE request:
+ * Here is the typical code to construct a service request:
  * 
  * <pre>
  * 

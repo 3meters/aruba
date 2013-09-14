@@ -14,8 +14,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
-import android.media.AudioManager;
-import android.media.SoundPool;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -101,7 +99,6 @@ public class RadarFragment extends BaseFragment implements
 	private String					mDebugLocation			= "--";
 	private PullToRefreshAttacher	mPullToRefreshAttacher;
 
-	private SoundPool				mSoundPool;
 	private int						mNewCandiSoundId;
 	private final List<Entity>		mEntities				= new ArrayList<Entity>();
 	private RadarListAdapter		mRadarAdapter;
@@ -110,8 +107,7 @@ public class RadarFragment extends BaseFragment implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
-		mNewCandiSoundId = mSoundPool.load(getSherlockActivity(), R.raw.notification_candi_discovered, 1);
+		mNewCandiSoundId = Aircandi.soundPool.load(getSherlockActivity(), R.raw.notification_candi_discovered, 1);
 	}
 
 	@Override
@@ -150,6 +146,10 @@ public class RadarFragment extends BaseFragment implements
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				if (!mAttributionHidden) {
+					showAttribution(false);
+					mAttributionHidden = true;
+				}
 				final Place entity = (Place) mRadarAdapter.getItems().get(position);
 				Bundle extras = null;
 				if (entity.synthetic) {
@@ -188,7 +188,7 @@ public class RadarFragment extends BaseFragment implements
 		 * - Didn't complete location fix before user switched away from radar
 		 * - While away, user enabled wifi
 		 * - Beacons we used for last fix have changed
-		 * - BEACON fix is thirty minutes old or more
+		 * - Beacon fix is thirty minutes old or more
 		 * 
 		 * Cases that trigger a ui refresh
 		 * 
@@ -204,9 +204,9 @@ public class RadarFragment extends BaseFragment implements
 			providerChange = true;
 		}
 		mEntityModelProvider = provider;
-		showAttribution(provider, providerChange);
+		//showAttribution(provider, providerChange);
 
-		/* Adapter snapshots the items IN mEntities */
+		/* Adapter snapshots the items in mEntities */
 		if (mRadarAdapter == null) {
 			Logger.d(getSherlockActivity(), "Databind: adapter null - start first place search");
 
@@ -216,17 +216,30 @@ public class RadarFragment extends BaseFragment implements
 
 				@Override
 				public void run() {
+					String provider = Aircandi.settings.getString(
+							Constants.PREF_PLACE_PROVIDER,
+							Constants.PREF_PLACE_PROVIDER_DEFAULT);
+					
+					handleAttribution(provider, false);									
 					searchForPlaces();
 				}
 			}, 500);
 
 		}
+		else if (mList.getAdapter() == null) {
+			/*
+			 * View is being recreated but we already have data.
+			 */
+			Logger.d(getSherlockActivity(), "Databind: list adapter null - reset and repaint");
+			mList.setAdapter(mRadarAdapter);
+			mRadarAdapter.notifyDataSetChanged();
+		}
 		else if (LocationManager.getInstance().getLocationLocked() == null) {
 			/*
-			 * Gets set everytime we accept a location change IN onLocationChange. Means
+			 * Gets set everytime we accept a location change in onLocationChange. Means
 			 * we didn't get an acceptable fix yet from either the NETWORK or gps providers.
 			 */
-			Logger.d(getSherlockActivity(), "Databind: no location fix - RETRY");
+			Logger.d(getSherlockActivity(), "Databind: no location fix - retry");
 			LocationManager.getInstance().lockLocationBurst();
 		}
 		else if (ProximityManager.getInstance().beaconRefreshNeeded(LocationManager.getInstance().getLocationLocked())) {
@@ -294,14 +307,6 @@ public class RadarFragment extends BaseFragment implements
 
 			}.execute();
 		}
-		else if (mList.getAdapter() == null) {
-			/*
-			 * View is being recreated but we already have data.
-			 */
-			Logger.d(getSherlockActivity(), "Databind: list adapter null - reset and repaint");
-			mList.setAdapter(mRadarAdapter);
-			mRadarAdapter.notifyDataSetChanged();
-		}
 		else {
 
 			CacheStamp stamp = EntityManager.getInstance().getCacheStamp();
@@ -333,9 +338,12 @@ public class RadarFragment extends BaseFragment implements
 		}
 	}
 
-	private String showAttribution(String provider, Boolean change) {
+	private String handleAttribution(String provider, Boolean change) {
 		UI.setVisibility(mAttributionFoursquare, View.INVISIBLE);
 		UI.setVisibility(mAttributionGoogle, View.INVISIBLE);
+		if (mAttributionHolder.getVisibility() == View.INVISIBLE) {
+			mAttributionHolder.setVisibility(View.VISIBLE);
+		}
 
 		if (provider.equals(Constants.TYPE_PROVIDER_FOURSQUARE)) {
 			UI.setVisibility(mAttributionFoursquare, View.VISIBLE);
@@ -443,7 +451,7 @@ public class RadarFragment extends BaseFragment implements
 				Logger.d(getSherlockActivity(), "Entities for beacons finished event: ** done **");
 				mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
 				mCacheStamp = EntityManager.getInstance().getCacheStamp();
-				mPullToRefreshAttacher.setRefreshComplete();
+				mPullToRefreshAttacher.setRefreshComplete();				
 			}
 		});
 	}
@@ -594,7 +602,7 @@ public class RadarFragment extends BaseFragment implements
 							@Override
 							protected Object doInBackground(Object... params) {
 								Thread.currentThread().setName("PlaySound");
-								mSoundPool.play(mNewCandiSoundId, 0.2f, 0.2f, 0, 0, 1f);
+								Aircandi.soundPool.play(mNewCandiSoundId, 0.2f, 0.2f, 0, 0, 1f);
 								return null;
 							}
 
@@ -622,7 +630,7 @@ public class RadarFragment extends BaseFragment implements
 	@SuppressWarnings("ucd")
 	public void onMessage(final MessageEvent event) {
 		/*
-		 * Refreshes radar so newly created place can pop IN.
+		 * Refreshes radar so newly created place can pop in.
 		 */
 		if (event.notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			getSherlockActivity().runOnUiThread(new Runnable() {
@@ -650,6 +658,11 @@ public class RadarFragment extends BaseFragment implements
 		 */
 		Logger.d(getSherlockActivity(), "Starting refresh");
 		Tracker.sendEvent("ui_action", "refresh_radar", null, 0, Aircandi.getInstance().getUser());
+		String provider = Aircandi.settings.getString(
+				Constants.PREF_PLACE_PROVIDER,
+				Constants.PREF_PLACE_PROVIDER_DEFAULT);
+		
+		handleAttribution(provider, false);				
 		searchForPlaces();
 	}
 
@@ -670,7 +683,7 @@ public class RadarFragment extends BaseFragment implements
 	@Override
 	public void onError() {
 		/*
-		 * Location updates can trigger SERVICE calls. Gets restarted
+		 * Location updates can trigger service calls. Gets restarted
 		 * when the user manually triggers a refresh.
 		 */
 		LocationManager.getInstance().stopLocationBurst();
@@ -715,7 +728,7 @@ public class RadarFragment extends BaseFragment implements
 				protected Object doInBackground(Object... params) {
 					/*
 					 * We have special handling for connected state because search triggers a wifi scan which
-					 * which IN turn seems to have its own need to access the NETWORK. Their logic works for quite
+					 * which in turn seems to have its own need to access the NETWORK. Their logic works for quite
 					 * awhile before giving up.
 					 */
 					ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
@@ -777,7 +790,7 @@ public class RadarFragment extends BaseFragment implements
 	public void startScanService(int scanInterval) {
 
 		/* Start first scan right away */
-		Logger.d(this, "Starting wifi scan SERVICE");
+		Logger.d(this, "Starting wifi scan service");
 		final Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
 		getSherlockActivity().startService(scanIntent);
 
@@ -798,7 +811,7 @@ public class RadarFragment extends BaseFragment implements
 		final Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
 		final PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
 		alarmManager.cancel(pendingIntent);
-		Logger.d(this, "Stopped wifi scan SERVICE");
+		Logger.d(this, "Stopped wifi scan service");
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -835,7 +848,7 @@ public class RadarFragment extends BaseFragment implements
 						beaconMessage.append(System.getProperty("line.separator") + "Location provider: " + location.getProvider());
 					}
 					else {
-						beaconMessage.append(System.getProperty("line.separator") + "Location fix: NONE");
+						beaconMessage.append(System.getProperty("line.separator") + "Location fix: none");
 					}
 				}
 				else {
@@ -993,7 +1006,7 @@ public class RadarFragment extends BaseFragment implements
 		 */
 		super.onStart();
 		/*
-		 * Check for location SERVICE everytime we start.
+		 * Check for location service everytime we start.
 		 */
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 			/* We won't continue if location services are disabled */

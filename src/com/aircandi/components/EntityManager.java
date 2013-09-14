@@ -85,7 +85,7 @@ public class EntityManager {
 
 	ServiceResponse dispatch(ServiceRequest serviceRequest) {
 		/*
-		 * We use this as a choke point for all calls to the aircandi SERVICE.
+		 * We use this as a choke point for all calls to the aircandi service.
 		 */
 		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest, null);
 		return serviceResponse;
@@ -100,13 +100,13 @@ public class EntityManager {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Combo SERVICE/cache queries
+	// Combo service/cache queries
 	// --------------------------------------------------------------------------------------------
 
 	public synchronized ModelResult getEntity(String entityId, Boolean refresh, LinkOptions linkOptions) {
 		/*
-		 * Retrieves entity from cache if available otherwise downloads the entity from the SERVICE. If refresh is true
-		 * then bypasses the cache and downloads from the SERVICE.
+		 * Retrieves entity from cache if available otherwise downloads the entity from the service. If refresh is true
+		 * then bypasses the cache and downloads from the service.
 		 */
 		final ModelResult result = getEntities(Arrays.asList(entityId), refresh, linkOptions);
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
@@ -123,7 +123,7 @@ public class EntityManager {
 
 	private synchronized ModelResult getEntities(List<String> entityIds, Boolean refresh, LinkOptions linkOptions) {
 		/*
-		 * Results IN a SERVICE request if missing entities or refresh is true.
+		 * Results in a service request if missing entities or refresh is true.
 		 */
 		final ModelResult result = new ModelResult();
 
@@ -164,7 +164,7 @@ public class EntityManager {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// SERVICE queries
+	// service queries
 	// --------------------------------------------------------------------------------------------
 
 	public synchronized CacheStamp loadCacheStamp(String entityId, CacheStamp cacheStamp) {
@@ -332,7 +332,7 @@ public class EntityManager {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// USER updates
+	// user updates
 	// --------------------------------------------------------------------------------------------
 
 	public ModelResult signin(String email, String password) {
@@ -364,7 +364,7 @@ public class EntityManager {
 		final User user = Aircandi.getInstance().getUser();
 		if (user != null && user.session != null) {
 			/*
-			 * We use a short timeout with no RETRY because failure doesn't
+			 * We use a short timeout with no retry because failure doesn't
 			 * really hurt anything.
 			 */
 			final ServiceRequest serviceRequest = new ServiceRequest()
@@ -423,7 +423,7 @@ public class EntityManager {
 					.setUseSecret(true)
 					.setResponseFormat(ResponseFormat.JSON);
 
-			/* INSERT user. */
+			/* insert user. */
 			result.serviceResponse = dispatch(serviceRequest);
 
 			if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
@@ -442,7 +442,7 @@ public class EntityManager {
 
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					/*
-					 * UPDATE user to capture the uri for the image we saved.
+					 * Update user to capture the uri for the image we saved.
 					 */
 					serviceRequest = new ServiceRequest()
 							.setUri(user.getEntryUri())
@@ -491,12 +491,12 @@ public class EntityManager {
 	public ModelResult getUserStats(String entityId) {
 		ModelResult result = new ModelResult();
 
-		// http://ariseditions.com:8080/data/actions?countBy=_user,TYPE&find={"_user":"us.000000.00000.000.000001"}
+		// http://ariseditions.com:8080/data/actions?countBy=_user,type&find={"_user":"us.000000.00000.000.000001"}
 		try {
 			final ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST
 							+ "actions?countBy="
-							+ URLEncoder.encode("_user,TYPE", "utf-8")
+							+ URLEncoder.encode("_user,type", "utf-8")
 							+ "&find="
 							+ URLEncoder.encode("{\"_user\":\"" + entityId + "\"}", "utf-8"))
 					.setRequestType(RequestType.GET)
@@ -522,7 +522,7 @@ public class EntityManager {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// ENTITY updates
+	// Entity updates
 	// --------------------------------------------------------------------------------------------
 
 	private ModelResult insertEntity(Entity entity) {
@@ -531,12 +531,12 @@ public class EntityManager {
 
 	public ModelResult insertEntity(Entity entity, Link link, List<Beacon> beacons, Beacon primaryBeacon, Bitmap bitmap) {
 		/*
-		 * Inserts the entity IN the entity SERVICE collection and Links are created to all the included beacons. The
-		 * inserted entity is retrieved from the SERVICE and pushed into the local cache. The cached entity is returned
-		 * IN the data property of the result object.
+		 * Inserts the entity in the entity service collection and Links are created to all the included beacons. The
+		 * inserted entity is retrieved from the service and pushed into the local cache. The cached entity is returned
+		 * in the data property of the result object.
 		 * 
-		 * Updates activityDate IN the database:
-		 * - on any upstream entities linked to IN the process
+		 * Updates activityDate in the database:
+		 * - on any upstream entities linked to in the process
 		 * - beacons links can be created
 		 * - custom link can be created
 		 * - create link is created from user but not followed
@@ -623,12 +623,12 @@ public class EntityManager {
 					}
 				}
 
-				/* LINK */
+				/* Link */
 				if (link != null) {
 					parameters.putString("link", "object:" + HttpService.objectToJson(link, UseAnnotations.TRUE, ExcludeNulls.TRUE));
 				}
 
-				/* ENTITY */
+				/* Entity */
 				parameters.putString("entity", "object:" + HttpService.objectToJson(entity, UseAnnotations.TRUE, ExcludeNulls.TRUE));
 
 				if (entity.synthetic) {
@@ -685,7 +685,7 @@ public class EntityManager {
 
 	public ModelResult updateEntity(Entity entity, Bitmap bitmap) {
 		/*
-		 * Updates activityDate IN the database:
+		 * Updates activityDate in the database:
 		 * - on the updated entity
 		 * - on any upstream entities the updated entity is linked to
 		 * - inactive links are excluded
@@ -729,9 +729,9 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			/*
-			 * Optimization: We crawl entities IN the cache and update embedded
+			 * Optimization: We crawl entities in the cache and update embedded
 			 * user objects so we don't have to refresh all the affected entities
-			 * from the SERVICE.
+			 * from the service.
 			 */
 			if (entity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
 				mEntityCache.updateEntityUser(entity);
@@ -747,7 +747,7 @@ public class EntityManager {
 
 	public ModelResult deleteEntity(String entityId, Boolean cacheOnly) {
 		/*
-		 * Updates activityDate IN the database:
+		 * Updates activityDate in the database:
 		 * - on any upstream entities the deleted entity was linked to
 		 * - inactive links are excluded
 		 * - like/create/WATCH links are not followed
@@ -758,7 +758,7 @@ public class EntityManager {
 		if (!cacheOnly) {
 			entity = mEntityCache.get(entityId);
 			/*
-			 * DELETE the entity and all links and observations it is associated with. We attempt to continue even
+			 * Delete the entity and all links and observations it is associated with. We attempt to continue even
 			 * if the call to delete the image failed.
 			 */
 			Logger.i(this, "Deleting entity: " + entity.name);
@@ -856,10 +856,10 @@ public class EntityManager {
 			}
 		}
 
-		/* ENTITY */
+		/* Entity */
 		parameters.putString("entityId", entity.id);
 
-		/* METHOD */
+		/* Method */
 		String methodName = untuning ? "untrackEntity" : "trackEntity";
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
@@ -873,13 +873,13 @@ public class EntityManager {
 
 		result.serviceResponse = dispatch(serviceRequest);
 
-		/* Reproduce the SERVICE call effect locally */
+		/* Reproduce the service call effect locally */
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 			if (beacons != null) {
 				for (Beacon beacon : beacons) {
 					Boolean primary = (primaryBeacon != null && primaryBeacon.id.equals(beacon.id));
-					Link link = entity.getLink(Constants.TYPE_LINK_PROXIMITY, beacon.id, Direction.OUT);
+					Link link = entity.getLink(Constants.TYPE_LINK_PROXIMITY, beacon.id, Direction.out);
 					if (link != null) {
 						if (primary) {
 							if (untuning) {
@@ -892,8 +892,8 @@ public class EntityManager {
 								}
 							}
 							/*
-							 * If score goes to zero then the proximity links got deleted by the SERVICE.
-							 * We want to mirror that IN the cache without reloading the entity.
+							 * If score goes to zero then the proximity links got deleted by the service.
+							 * We want to mirror that in the cache without reloading the entity.
 							 */
 							if (link.getProximityScore() <= 0) {
 								Iterator<Link> iterLinks = entity.linksOut.iterator();
@@ -933,7 +933,7 @@ public class EntityManager {
 		final Bundle parameters = new Bundle();
 		parameters.putString("fromId", fromId); 		// required
 		parameters.putString("toId", toId);				// required
-		parameters.putString("TYPE", type);				// required
+		parameters.putString("type", type);				// required
 		parameters.putBoolean("strong", strong);
 		parameters.putString("actionType", actionType);
 
@@ -948,7 +948,7 @@ public class EntityManager {
 
 		result.serviceResponse = dispatch(serviceRequest);
 		/*
-		 * We update the cache directly instead of refreshing from the SERVICE
+		 * We update the cache directly instead of refreshing from the service
 		 */
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			/*
@@ -967,7 +967,7 @@ public class EntityManager {
 		final Bundle parameters = new Bundle();
 		parameters.putString("fromId", fromId); 		// required
 		parameters.putString("toId", toId);				// required
-		parameters.putString("TYPE", type);				// required
+		parameters.putString("type", type);				// required
 		parameters.putString("actionType", actionType);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
@@ -981,7 +981,7 @@ public class EntityManager {
 
 		result.serviceResponse = dispatch(serviceRequest);
 		/*
-		 * We update the cache directly instead of refreshing from the SERVICE
+		 * We update the cache directly instead of refreshing from the service
 		 */
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			/*
@@ -996,7 +996,7 @@ public class EntityManager {
 
 	public ModelResult replaceEntitiesForEntity(String entityId, List<Entity> entitiesForEntity, String linkType) {
 		/*
-		 * Updates activityDate IN the database:
+		 * Updates activityDate in the database:
 		 * - on the parent entity
 		 * - on any other upstream entities
 		 * - inactive links are not followed
@@ -1044,7 +1044,7 @@ public class EntityManager {
 
 	public ModelResult moveCandigram(Entity entity, Boolean skipMove, String toId) {
 		/*
-		 * moveCandigrams updates activityDate IN the database:
+		 * moveCandigrams updates activityDate in the database:
 		 * - on the candigram
 		 * - on the old place candigram was linked to
 		 * - on the new place candigram is linked to
@@ -1057,7 +1057,7 @@ public class EntityManager {
 
 		/* Construct entity, link, and observation */
 		final Bundle parameters = new Bundle();
-		parameters.putString("method", "RANGE");
+		parameters.putString("method", "range");
 		if (toId != null) {
 			parameters.putString("toId", toId);
 		}
@@ -1088,7 +1088,7 @@ public class EntityManager {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Other SERVICE tasks
+	// Other service tasks
 	// --------------------------------------------------------------------------------------------
 
 	public CacheStamp getCacheStamp() {
@@ -1199,7 +1199,7 @@ public class EntityManager {
 			final String imageKey = String.valueOf((user != null) ? user.id : Aircandi.getInstance().getUser().id) + "_" + stringDate + ".jpg";
 			S3.putImage(imageKey, bitmap, Constants.IMAGE_QUALITY_S3);
 
-			/* UPDATE the photo object for the entity or user */
+			/* Update the photo object for the entity or user */
 			if (entity != null) {
 				entity.photo = new Photo(imageKey, null, bitmap.getWidth(), bitmap.getHeight(), PhotoSource.aircandi);
 			}
@@ -1219,7 +1219,7 @@ public class EntityManager {
 		/* Decorate and clone */
 		final Entity entity = Place.upsizeFromSynthetic(synthetic);
 
-		/* INSERT IN database */
+		/* insert in database */
 		ModelResult result = EntityManager.getInstance().insertEntity(entity);
 
 		/*

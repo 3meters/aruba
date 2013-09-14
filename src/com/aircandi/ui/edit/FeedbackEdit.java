@@ -31,7 +31,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		/*
-		 * FEEDBACK are not really an entity TYPE so we handle
+		 * FEEDBACK are not really an entity type so we handle
 		 * all the expected initialization.
 		 */
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);

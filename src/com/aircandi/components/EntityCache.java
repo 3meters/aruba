@@ -51,7 +51,7 @@ public class EntityCache implements Map<String, Entity> {
 
 	private ServiceResponse dispatch(ServiceRequest serviceRequest, Stopwatch stopwatch) {
 		/*
-		 * We use this as a choke point for all calls to the aircandi SERVICE.
+		 * We use this as a choke point for all calls to the aircandi service.
 		 */
 		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest, stopwatch);
 		return serviceResponse;
@@ -79,11 +79,11 @@ public class EntityCache implements Map<String, Entity> {
 			if (entity.linksInCounts == null) {
 				entity.linksInCounts = new ArrayList<Count>();
 			}
-			else if (entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.IN) == null) {
+			else if (entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.in) == null) {
 				entity.linksInCounts.add(new Count(Constants.TYPE_LINK_APPLINK, shortcuts.size()));
 			}
 			else {
-				entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.IN).count = entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.IN).count.intValue()
+				entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.in).count = entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.in).count.intValue()
 						+ shortcuts.size();
 			}
 			for (Shortcut shortcut : shortcuts) {
@@ -99,8 +99,8 @@ public class EntityCache implements Map<String, Entity> {
 
 	public ServiceResponse loadEntity(String entityId, LinkOptions linkOptions) {
 		/*
-		 * Retrieves entity from cache if available otherwise downloads the entity from the SERVICE. If refresh is true
-		 * then bypasses the cache and downloads from the SERVICE.
+		 * Retrieves entity from cache if available otherwise downloads the entity from the service. If refresh is true
+		 * then bypasses the cache and downloads from the service.
 		 */
 		final List<String> entityIds = new ArrayList<String>();
 		entityIds.add(entityId);
@@ -184,7 +184,7 @@ public class EntityCache implements Map<String, Entity> {
 
 			if (loadedEntities != null && loadedEntities.size() > 0) {
 				for (Entity entity : loadedEntities) {
-					if (cursor != null && cursor.direction != null && cursor.direction.equals("OUT")) {
+					if (cursor != null && cursor.direction != null && cursor.direction.equals("out")) {
 						entity.fromId = entityId;
 					}
 					else {
@@ -227,13 +227,13 @@ public class EntityCache implements Map<String, Entity> {
 		}
 
 		if (stopwatch != null) {
-			stopwatch.segmentTime("Load entities: SERVICE call started");
+			stopwatch.segmentTime("Load entities: service call started");
 		}
 
 		ServiceResponse serviceResponse = dispatch(serviceRequest, stopwatch);
 
 		if (stopwatch != null) {
-			stopwatch.segmentTime("Load entities: SERVICE call complete");
+			stopwatch.segmentTime("Load entities: service call complete");
 		}
 
 		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
@@ -319,7 +319,7 @@ public class EntityCache implements Map<String, Entity> {
 				}
 			}
 
-			/* Places LOCKED IN by proximity trump places LOCKED IN by location */
+			/* Places LOCKED in by proximity trump places LOCKED in by location */
 			final List<Place> proximityPlaces = (List<Place>) EntityManager.getInstance().getPlaces(null, true);
 
 			Iterator<Place> iterProximityPlaces = proximityPlaces.iterator();
@@ -370,7 +370,7 @@ public class EntityCache implements Map<String, Entity> {
 
 	public synchronized void updateEntityUser(Entity entity) {
 		/*
-		 * Updates user objects that are embedded IN entities.
+		 * Updates user objects that are embedded in entities.
 		 */
 		User user = (User) entity;
 		for (Entry<String, Entity> entry : entrySet()) {
@@ -431,11 +431,11 @@ public class EntityCache implements Map<String, Entity> {
 				toEntity.linksInCounts = new ArrayList<Count>();
 				toEntity.linksInCounts.add(new Count(type, 1));
 			}
-			else if (toEntity.getCount(type, Direction.IN) == null) {
+			else if (toEntity.getCount(type, Direction.in) == null) {
 				toEntity.linksInCounts.add(new Count(type, 1));
 			}
 			else {
-				toEntity.getCount(type, Direction.IN).count = toEntity.getCount(type, Direction.IN).count.intValue() + 1;
+				toEntity.getCount(type, Direction.in).count = toEntity.getCount(type, Direction.in).count.intValue() + 1;
 			}
 
 			Link link = new Link(toId, type, true, fromId);
@@ -448,7 +448,7 @@ public class EntityCache implements Map<String, Entity> {
 			toEntity.linksIn.add(link);
 		}
 		/*
-		 * Fixup OUT links too.
+		 * Fixup out links too.
 		 */
 		Entity fromEntity = get(fromId);
 		if (fromEntity != null) {
@@ -461,11 +461,11 @@ public class EntityCache implements Map<String, Entity> {
 				fromEntity.linksOutCounts = new ArrayList<Count>();
 				fromEntity.linksOutCounts.add(new Count(type, 1));
 			}
-			else if (fromEntity.getCount(type, Direction.OUT) == null) {
+			else if (fromEntity.getCount(type, Direction.out) == null) {
 				fromEntity.linksOutCounts.add(new Count(type, 1));
 			}
 			else {
-				fromEntity.getCount(type, Direction.OUT).count = fromEntity.getCount(type, Direction.OUT).count.intValue() + 1;
+				fromEntity.getCount(type, Direction.out).count = fromEntity.getCount(type, Direction.out).count.intValue() + 1;
 			}
 
 			Link link = new Link(toId, type, true, fromId);
@@ -485,13 +485,13 @@ public class EntityCache implements Map<String, Entity> {
 
 	public synchronized Entity removeEntityTree(String entityId) {
 		/*
-		 * Clean OUT entity and every entity related to entity
+		 * Clean out entity and every entity related to entity
 		 */
 		Entity staleEntity = remove(entityId);
 		if (staleEntity != null) {
 			staleEntity.stale = true;
 
-			List<Entity> entities = (List<Entity>) staleEntity.getLinkedEntitiesByLinkTypes(null, null, Direction.IN, true);
+			List<Entity> entities = (List<Entity>) staleEntity.getLinkedEntitiesByLinkTypes(null, null, Direction.in, true);
 			for (Entity childEntity : entities) {
 				staleEntity = remove(childEntity.id);
 				if (staleEntity != null) {
@@ -523,7 +523,7 @@ public class EntityCache implements Map<String, Entity> {
 		if (toEntity != null) {
 
 			if (toEntity.linksInCounts != null) {
-				Count count = toEntity.getCount(type, Direction.IN);
+				Count count = toEntity.getCount(type, Direction.in);
 				if (count != null) {
 					count.count = count.count.intValue() - 1;
 				}
@@ -540,13 +540,13 @@ public class EntityCache implements Map<String, Entity> {
 		}
 
 		/*
-		 * Fixup OUT links too
+		 * Fixup out links too
 		 */
 		Entity fromEntity = get(fromId);
 		if (fromEntity != null) {
 
 			if (fromEntity.linksOutCounts != null) {
-				Count count = fromEntity.getCount(type, Direction.OUT);
+				Count count = fromEntity.getCount(type, Direction.out);
 				if (count != null) {
 					count.count = count.count.intValue() - 1;
 				}

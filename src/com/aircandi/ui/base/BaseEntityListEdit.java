@@ -86,7 +86,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 		/*
 		 * Before entities are customized, they have no position and are
 		 * sorted by the modified date on the link. Once entity customization
-		 * is saved to the SERVICE, the position field has been set on the set of
+		 * is saved to the service, the position field has been set on the set of
 		 * entities.
 		 */
 		if (mAdapter == null) {

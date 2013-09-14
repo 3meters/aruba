@@ -1,5 +1,7 @@
 package com.aircandi.components;
 
+import java.util.Locale;
+
 import org.apache.http.HttpStatus;
 
 import android.app.Notification;
@@ -53,7 +55,7 @@ public class NotificationManager {
 	public void registerDeviceWithGCM() {
 		/*
 		 * Registration gets redone if app version code changes. Registration id
-		 * and associated app version code are stored IN shared prefs.
+		 * and associated app version code are stored in shared prefs.
 		 */
 		if (!GCMRegistrar.isRegistered(Aircandi.applicationContext)) {
 			GCMRegistrar.register(Aircandi.applicationContext, Constants.SENDER_ID);
@@ -77,7 +79,7 @@ public class NotificationManager {
 						&& !GCMRegistrar.isRegisteredOnServer(Aircandi.applicationContext)
 						&& Aircandi.getInstance().getUser() != null) {
 
-					Logger.i(this, "GCM: Registering device with Aircandi notification SERVICE");
+					Logger.i(this, "GCM: Registering device with Aircandi notification service");
 
 					Device device = new Device(Aircandi.getInstance().getUser().id, GCMRegistrar.getRegistrationId(Aircandi.applicationContext));
 					device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, AircandiForm.class);
@@ -86,7 +88,7 @@ public class NotificationManager {
 					ModelResult result = EntityManager.getInstance().registerDevice(device);
 
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-						Logger.i(this, "GCM: DEVICE registered with Aircandi notification SERVICE");
+						Logger.i(this, "GCM: device registered with Aircandi notification service");
 						final String jsonResponse = (String) result.serviceResponse.data;
 						mDevice = (Device) HttpService.jsonToObject(jsonResponse, ObjectType.DEVICE);
 						GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, true);
@@ -104,20 +106,20 @@ public class NotificationManager {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("UnregisterDevice");
 
-				/* SERVICE notifications */
+				/* service notifications */
 				if (registrationId != null && registrationId.length() > 0) {
 
-					Logger.i(this, "GCM: Unregistering device with Aircandi notification SERVICE");
+					Logger.i(this, "GCM: Unregistering device with Aircandi notification service");
 					ModelResult result = EntityManager.getInstance().unregisterDevice(registrationId);
 
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-						Logger.i(this, "GCM: DEVICE unregistered with Aircandi notification SERVICE");
+						Logger.i(this, "GCM: device unregistered with Aircandi notification service");
 						GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
 					}
 					else {
 						if (result.serviceResponse.exception != null && result.serviceResponse.exception.getStatusCode() != null) {
 							if (result.serviceResponse.exception.getStatusCode() == (float) HttpStatus.SC_NOT_FOUND) {
-								Logger.i(this, "GCM: DEVICE already unregistered with Aircandi notification SERVICE");
+								Logger.i(this, "GCM: device already unregistered with Aircandi notification service");
 								GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
 							}
 						}
@@ -141,20 +143,20 @@ public class NotificationManager {
 	public void decorateNotification(AirNotification notification) {
 		/*
 		 * Title and subtitle properties are added base on the context
-		 * of the notification and the TYPE of entity.
+		 * of the notification and the type of entity.
 		 */
 		if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
 				&& notification.entity.type.equals(Constants.TYPE_APP_TOUR)
 				&& notification.action.equals("move")) {
-			notification.title = "A " + Constants.SCHEMA_ENTITY_CANDIGRAM.toString();
+			notification.title = "A " + Constants.SCHEMA_ENTITY_CANDIGRAM.toString().toLowerCase(Locale.US);
 			if (notification.entity.name != null) {
 				notification.title += "called " + notification.entity.name;
 			}
-			if (notification.type.equals("NEARBY")) {
-				notification.subtitle = "Has dropped IN near you";
+			if (notification.type.equals("nearby")) {
+				notification.subtitle = "Has dropped in near you";
 			}
-			else if (notification.type.equals("WATCH")) {
-				notification.subtitle = "Has dropped IN";
+			else if (notification.type.equals("watch")) {
+				notification.subtitle = "Has dropped in";
 			}
 			
 			if (notification.toEntity != null && notification.toEntity.name != null) {
@@ -176,7 +178,7 @@ public class NotificationManager {
 			category = notification.entity.schema;
 		}
 
-		if (notification.type.equals("NEARBY")) {
+		if (notification.type.equals("nearby")) {
 			if (notification.action.equals("insert")) {
 				notification.subtitle = "Added a new " + category + " near you";
 			}
@@ -184,7 +186,7 @@ public class NotificationManager {
 				notification.subtitle = "Kicked a " + category + " near you";
 			}
 		}
-		else if (notification.type.equals("WATCH")) {
+		else if (notification.type.equals("watch")) {
 			if (notification.action.equals("insert")) {
 				notification.subtitle = "Added a new " + category;
 			}

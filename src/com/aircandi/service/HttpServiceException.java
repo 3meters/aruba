@@ -2,14 +2,14 @@ package com.aircandi.service;
 
 /**
  * Extension of ProxibaseClientException that represents an error response returned
- * by the Proxibase web SERVICE. Receiving an exception of this TYPE indicates that
- * the caller's request was correctly transmitted to the SERVICE, but for some
- * reason, the SERVICE was not able to process it, and returned an error
+ * by the Proxibase web service. Receiving an exception of this type indicates that
+ * the caller's request was correctly transmitted to the service, but for some
+ * reason, the service was not able to process it, and returned an error
  * response instead.
  * <p>
  * ProxibaseServiceException provides callers several pieces of information that can be used to obtain more information
  * about the error and why it occurred. In particular, the errorType field can be used to determine if the caller's
- * request was invalid, or the SERVICE encountered an error on the server side while processing it.
+ * request was invalid, or the service encountered an error on the server side while processing it.
  */
 @SuppressWarnings("ucd")
 public class HttpServiceException extends HttpClientException {
@@ -64,18 +64,18 @@ public class HttpServiceException extends HttpClientException {
 	 * Indicates who is responsible (if known) for a failed request.
 	 * <p>
 	 * For example, if a client is using an invalid Proxibase access key, the returned exception will indicate that
-	 * there is an error IN the request the caller is sending. Retrying that same request will *not* result IN a
-	 * successful response. The CLIENT ErrorType indicates that there is a problem IN the request the user is sending
+	 * there is an error in the request the caller is sending. Retrying that same request will *not* result in a
+	 * successful response. The client ErrorType indicates that there is a problem in the request the user is sending
 	 * (ex: incorrect access keys, invalid parameter value, missing parameter, etc.), and that the caller must take some
-	 * action to correct the request before it should be resent. CLIENT errors are typically associated an HTTP error
-	 * code IN the 4xx RANGE.
+	 * action to correct the request before it should be resent. client errors are typically associated an HTTP error
+	 * code in the 4xx RANGE.
 	 * <p>
-	 * The SERVICE ErrorType indicates that although the request the caller sent was valid, the SERVICE was unable to
-	 * fulfill the request because of problems on the SERVICE's side. These types of errors can be retried by the caller
-	 * since the caller's request was valid and the problem occurred while processing the request on the SERVICE side.
-	 * SERVICE errors will be accompanied by an HTTP error code IN the 5xx RANGE.
+	 * The service ErrorType indicates that although the request the caller sent was valid, the service was unable to
+	 * fulfill the request because of problems on the service's side. These types of errors can be retried by the caller
+	 * since the caller's request was valid and the problem occurred while processing the request on the service side.
+	 * service errors will be accompanied by an HTTP error code in the 5xx RANGE.
 	 * <p>
-	 * Finally, if there isn't enough information to determine who's fault the error response is, an UNKNOWN ErrorType
+	 * Finally, if there isn't enough information to determine who's fault the error response is, an Unknown ErrorType
 	 * will be set.
 	 */
 	public static enum ErrorType {

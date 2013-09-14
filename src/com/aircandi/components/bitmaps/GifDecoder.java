@@ -48,10 +48,10 @@ public class GifDecoder {
 	protected Bitmap			lastBitmap;							// previous frame
 	protected byte[]			block				= new byte[256];	// current data block
 	protected int				blockSize			= 0;				// block size last graphic control extension info
-	protected int				dispose				= 0;				// 0=no action; 1=leave IN place; 2=restore to bg; 3=restore to prev
+	protected int				dispose				= 0;				// 0=no action; 1=leave in place; 2=restore to bg; 3=restore to prev
 	protected int				lastDispose			= 0;
 	protected boolean			transparency		= false;			// use transparent color
-	protected int				delay				= 0;				// delay IN milliseconds
+	protected int				delay				= 0;				// delay in milliseconds
 	protected int				transIndex;							// transparent color index
 	// LZW decoder working arrays
 	protected short[]			prefix;
@@ -76,7 +76,7 @@ public class GifDecoder {
 	 * 
 	 * @param n
 	 *            int index of frame
-	 * @return delay IN milliseconds
+	 * @return delay in milliseconds
 	 */
 	public int getDelay(int n) {
 		delay = -1;
@@ -98,7 +98,7 @@ public class GifDecoder {
 	/**
 	 * Gets the first (or only) image read.
 	 * 
-	 * @return BufferedBitmap containing first frame, or null if NONE.
+	 * @return BufferedBitmap containing first frame, or null if none.
 	 */
 	public Bitmap getBitmap() {
 		return getFrame(0);
@@ -119,7 +119,7 @@ public class GifDecoder {
 	protected void setPixels() {
 		// expose destination image's pixels as int array
 		final int[] dest = new int[width * height];
-		// fill IN starting image contents based on last image's dispose code
+		// fill in starting image contents based on last image's dispose code
 		if (lastDispose > 0) {
 			if (lastDispose == 3) {
 				// use image before last
@@ -150,7 +150,7 @@ public class GifDecoder {
 				}
 			}
 		}
-		// copy each source line to the appropriate place IN the destination
+		// copy each source line to the appropriate place in the destination
 		int pass = 1;
 		int inc = 8;
 		int iline = 0;
@@ -181,14 +181,14 @@ public class GifDecoder {
 			line += iy;
 			if (line < height) {
 				int k = line * width;
-				int dx = k + ix; // start of line IN dest
+				int dx = k + ix; // start of line in dest
 				int dlim = dx + iw; // end of dest line
 				if ((k + width) < dlim) {
 					dlim = k + width; // PAST dest edge
 				}
-				int sx = i * iw; // start of line IN source
+				int sx = i * iw; // start of line in source
 				while (dx < dlim) {
-					// map color and insert IN destination
+					// map color and insert in destination
 					int index = ((int) pixels[sx++]) & 0xff;
 					int c = act[index];
 					if (c != 0) {
@@ -297,7 +297,7 @@ public class GifDecoder {
 					count--;
 					continue;
 				}
-				// GET the next code.
+				// get the next code.
 				code = datum & code_mask;
 				datum >>= code_size;
 				bits -= code_size;
@@ -388,7 +388,7 @@ public class GifDecoder {
 	/**
 	 * Reads next variable length block from input.
 	 * 
-	 * @return number of bytes stored IN "buffer"
+	 * @return number of bytes stored in "buffer"
 	 */
 	protected int readBlock() {
 		blockSize = read();
@@ -516,7 +516,7 @@ public class GifDecoder {
 			dispose = 1; // elect to keep old image if discretionary
 		}
 		transparency = (packed & 1) != 0;
-		delay = readShort() * 10; // delay IN milliseconds
+		delay = readShort() * 10; // delay in milliseconds
 		transIndex = read(); // transparent color index
 		read(); // block terminator
 	}

@@ -81,7 +81,7 @@ public class Dialogs {
 		final AlertDialog alert = builder.create();
 		alert.show();
 
-		/* Hardcoded size for body text IN the alert */
+		/* Hardcoded size for body text in the alert */
 		final TextView textView = (TextView) alert.findViewById(android.R.id.message);
 		if (textView != null) {
 			textView.setTextSize(14);
@@ -179,7 +179,7 @@ public class Dialogs {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
 								Tracker.sendEvent("ui_action", "update_aircandi", "com.aircandi", 0, Aircandi.getInstance().getUser());
-								Logger.d(this, "UPDATE: navigating to market install/update page");
+								Logger.d(this, "Update: navigating to market install/update page");
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(Constants.APP_MARKET_URI));
 								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 								intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);

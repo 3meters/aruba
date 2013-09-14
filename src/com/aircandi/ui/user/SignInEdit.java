@@ -136,7 +136,7 @@ public class SignInEdit extends BaseEdit {
 					final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.NONE, ServiceDataWrapper.TRUE);
 					final User user = serviceData.user;
 					user.session = serviceData.session;
-					Logger.i(this, "USER signed IN: " + user.name + " (" + user.id + ")");
+					Logger.i(this, "USER signed in: " + user.name + " (" + user.id + ")");
 
 					Aircandi.getInstance().setUser(user);
 

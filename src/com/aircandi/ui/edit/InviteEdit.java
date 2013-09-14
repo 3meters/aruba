@@ -39,7 +39,7 @@ public class InviteEdit extends BaseEntityEdit {
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		/*
-		 * FEEDBACK are not really an entity TYPE so we have to handle
+		 * FEEDBACK are not really an entity type so we have to handle
 		 * all the expected initialization.
 		 */
 		mDescription = (AirEditText) findViewById(R.id.description);
@@ -197,7 +197,7 @@ public class InviteEdit extends BaseEntityEdit {
 		final String message = mDescription.getEditableText().toString();
 		final List<String> emails = new ArrayList(Arrays.asList(email.split("\\s*,\\s*")));
 
-		/* Stash message so we can restore it IN the FUTURE */
+		/* Stash message so we can restore it in the FUTURE */
 		Aircandi.settingsEditor.putString(Constants.SETTING_INVITE_MESSAGE_LAST, message);
 		Aircandi.settingsEditor.commit();
 

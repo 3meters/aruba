@@ -257,13 +257,13 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public static class PhotoSource {
-		public static String	external			= "external";				// set IN photo picker when using third party photo.
+		public static String	external			= "external";				// set in photo picker when using third party photo.
 		public static String	aircandi			= "aircandi";				// set when photo is stored by use and used to construct full uri to image data (s3)
-		public static String	assets				= "assets";					// set when using SERVICE image and used to construct full uri to image data IN SERVICE
+		public static String	assets				= "assets";					// set when using service image and used to construct full uri to image data in service
 		public static String	assets_categories	= "assets.categories";		// ditto to above
 		public static String	facebook			= "facebook";				// set if photo comes from facebook but not currently used
 		public static String	twitter				= "twitter";				// set if photo comes from twitter but not currently used
 		public static String	resource			= "resource";				// set as default for shortcut and applink photos
-		public static String	cache				= "cache";					// set when picking new photo returns a bitmap that is IN the bitmap cache.
+		public static String	cache				= "cache";					// set when picking new photo returns a bitmap that is in the bitmap cache.
 	}
 }

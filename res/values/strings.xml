@@ -405,6 +405,7 @@
     <string name="candigram_button_finish">send</string>
     <string name="candigram_type_tour_verbose">touring</string>
     <string name="candigram_type_bounce_verbose">bouncing</string>
+    <string name="candigram_label_place">currently at:</string>
     
     <!-- Invite -->
     

@@ -104,8 +104,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		/*
 		 * Intent inputs:
 		 * - Both: Edit_Only
-		 * - NEW: Schema (required), Parent_Entity_Id
-		 * - EDIT: ENTITY (required)
+		 * - New: Schema (required), Parent_Entity_Id
+		 * - Edit: Entity (required)
 		 */
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -284,7 +284,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				}
 			}
 			else {
-				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.IN, false, true);
+				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 				shortcuts = (List<Shortcut>) entity.getShortcuts(settings, null);
 			}
 
@@ -440,7 +440,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 							usePhotoDefault();
 						}
 						else if (pictureSource.equals(Constants.PHOTO_SOURCE_FACEBOOK)) {
-							mEntity.photo = new Photo("https://graph.facebook.com/" + ((Applink) mEntity).appId + "/picture?TYPE=large", null, null, null,
+							mEntity.photo = new Photo("https://graph.facebook.com/" + ((Applink) mEntity).appId + "/picture?type=large", null, null, null,
 									PhotoSource.facebook);
 							drawPhoto();
 						}
@@ -459,7 +459,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				Tracker.sendEvent("ui_action", "select_picture_device", null, 0, Aircandi.getInstance().getUser());
 				final Uri photoUri = intent.getData();
 
-				/* Bitmap size is trimmed if necessary to fit our max IN memory image size. */
+				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
 				Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(photoUri);
 				if (bitmap != null && mImageRequestListener != null) {
 					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, false);
@@ -470,7 +470,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0, Aircandi.getInstance().getUser());
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
 				
-				/* Bitmap size is trimmed if necessary to fit our max IN memory image size. */
+				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
 				final Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
 				if (bitmap != null && mImageRequestListener != null) {
 					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, false);
@@ -754,7 +754,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 						result = EntityManager.getInstance().replaceEntitiesForEntity(insertedEntity.id, mApplinks, Constants.TYPE_LINK_APPLINK);
 						/*
 						 * Need to update the linkIn for the entity or these won't show
-						 * without a SERVICE refresh.
+						 * without a service refresh.
 						 */
 					}
 
@@ -802,7 +802,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					result = EntityManager.getInstance().replaceEntitiesForEntity(mEntity.id, mApplinks, Constants.TYPE_LINK_APPLINK);
 				}
 
-				/* UPDATE entity */
+				/* Update entity */
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 					Tracker.sendEvent("ui_action", "entity_update", mEntity.schema, 0, Aircandi.getInstance().getUser());
@@ -811,19 +811,19 @@ public abstract class BaseEntityEdit extends BaseEdit {
 						bitmap = mEntity.photo.getBitmap();
 					}
 
-					/* Something IN the call caused us to lose the most recent picture. */
+					/* Something in the call caused us to lose the most recent picture. */
 					result = EntityManager.getInstance().updateEntity(mEntity, bitmap);
 
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 						if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
 							if (Aircandi.getInstance().getUser().id.equals(mEntity.id)) {
 
-								/* We also need to update the user that has been persisted for AUTO sign IN. */
+								/* We also need to update the user that has been persisted for AUTO sign in. */
 								final String jsonUser = HttpService.objectToJson(mEntity);
 								Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
 								Aircandi.settingsEditor.commit();
 
-								/* UPDATE the global user but retain the session info */
+								/* Update the global user but retain the session info */
 								((User) mEntity).session = Aircandi.getInstance().getUser().session;
 								Aircandi.getInstance().setUser((User) mEntity);
 							}
@@ -854,7 +854,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	@Override
 	protected void delete() {
 		/*
-		 * TODO: We need to update the SERVICE so the recursive entity delete also deletes any associated resources
+		 * TODO: We need to update the service so the recursive entity delete also deletes any associated resources
 		 * stored with S3. As currently coded, we will be orphaning any images associated with child entities.
 		 */
 

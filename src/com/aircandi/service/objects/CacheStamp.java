@@ -8,8 +8,9 @@ import com.aircandi.service.Expose;
  * @author Jayma
  */
 @SuppressWarnings("ucd")
-public class CacheStamp {
-
+public class CacheStamp extends ServiceObject {
+	
+	private static final long	serialVersionUID	= 706592482666845156L;
 	@Expose
 	public Number	activityDate;
 	@Expose
@@ -61,6 +62,7 @@ public class CacheStamp {
 		}
 		catch (CloneNotSupportedException exception) {
 			exception.printStackTrace();
+			throw new AssertionError();
 		}
 		return cacheStamp;
 	}

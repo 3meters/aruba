@@ -144,9 +144,9 @@ public final class Constants {
 
 	/* Verb types */
 	public static final String	TYPE_APP_LIKE								= "like";																					//$NON-NLS-1$
-	public static final String	TYPE_APP_WATCH								= "WATCH";																					//$NON-NLS-1$
+	public static final String	TYPE_APP_WATCH								= "watch";																					//$NON-NLS-1$
 
-	/* ENTITY types */
+	/* Entity types */
 	public static final String	TYPE_APP_COMMENT							= "comment";																				//$NON-NLS-1$
 	public static final String	TYPE_APP_PICTURE							= "picture";																				//$NON-NLS-1$
 	public static final String	TYPE_APP_CANDIGRAM							= "candigram";																				//$NON-NLS-1$
@@ -158,7 +158,7 @@ public final class Constants {
 
 	public static final String	TYPE_LINK_PROXIMITY							= "proximity";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_LIKE								= "like";																					//$NON-NLS-1$
-	public static final String	TYPE_LINK_WATCH								= "WATCH";																					//$NON-NLS-1$
+	public static final String	TYPE_LINK_WATCH								= "watch";																					//$NON-NLS-1$
 	public static final String	TYPE_LINK_APPLINK							= "applink";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_PICTURE							= "post";																					//$NON-NLS-1$
 	public static final String	TYPE_LINK_CANDIGRAM							= "candigram";																				//$NON-NLS-1$
@@ -178,8 +178,8 @@ public final class Constants {
 	public static final String	TYPE_PROVIDER_AIRCANDI						= "aircandi";																				//$NON-NLS-1$
 	public static final String	TYPE_PROVIDER_USER							= "user";																					//$NON-NLS-1$
 
-	public static final String	TYPE_NOTIFICATION_WATCH						= "WATCH";																					//$NON-NLS-1$
-	public static final String	TYPE_NOTIFICATION_NEARBY					= "NEARBY";																				//$NON-NLS-1$
+	public static final String	TYPE_NOTIFICATION_WATCH						= "watch";																					//$NON-NLS-1$
+	public static final String	TYPE_NOTIFICATION_NEARBY					= "nearby";																				//$NON-NLS-1$
 
 	public static final String	PHOTO_SOURCE_DEFAULT						= "default";																				//$NON-NLS-1$
 	public static final String	PHOTO_SOURCE_SEARCH							= "search";																				//$NON-NLS-1$
@@ -281,10 +281,10 @@ public final class Constants {
 	public static final int		DIST_FIVE_KILOMETERS						= 5000;
 
 	/*
-	 * UPDATE criteria for active and passive location updates.
+	 * Update criteria for active and passive location updates.
 	 * 
 	 * We use aggresive criteria for passive updates because they are free
-	 * and we aren't doing any processing IN response to them.
+	 * and we aren't doing any processing in response to them.
 	 */
 	public static long			MAXIMUM_AGE									= Constants.TIME_THIRTY_MINUTES;
 	public static long			MAXIMUM_AGE_PREFERRED						= Constants.TIME_TWO_MINUTES;

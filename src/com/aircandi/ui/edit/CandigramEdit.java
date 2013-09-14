@@ -63,7 +63,7 @@ public class CandigramEdit extends BaseEntityEdit {
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
 		mSpinnerItem = getThemeTone().equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
-		mSpinnerTypeData = Candigrams.getSpinnerData(this, PropertyType.TYPE);
+		mSpinnerTypeData = Candigrams.getSpinnerData(this, PropertyType.type);
 		mSpinnerRangeData = Candigrams.getSpinnerData(this, PropertyType.RANGE);
 		mSpinnerDurationData = Candigrams.getSpinnerData(this, PropertyType.DURATION);
 		mSpinnerHopsData = Candigrams.getSpinnerData(this, PropertyType.HOPS);
@@ -233,7 +233,7 @@ public class CandigramEdit extends BaseEntityEdit {
 	public void draw() {
 		super.draw();
 
-		/* PLACE content */
+		/* Place content */
 		Candigram candigram = (Candigram) mEntity;
 
 		if (mSpinnerType != null) {
@@ -446,7 +446,7 @@ public class CandigramEdit extends BaseEntityEdit {
 		}
 
 		/*
-		 * Set origin location so SERVICE can determine eligible area for HOPS
+		 * Set origin location so service can determine eligible area for HOPS
 		 */
 		if (mParentId != null) {
 			Entity place = EntityManager.getEntity(mParentId);

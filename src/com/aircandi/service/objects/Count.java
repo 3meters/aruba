@@ -36,7 +36,7 @@ public class Count extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public static Count setPropertiesFromMap(Count stat, Map map, Boolean nameMapping) {
-		stat.type = (String) map.get("TYPE");
+		stat.type = (String) map.get("type");
 		stat.count = (Number) map.get("count");
 		return stat;
 	}

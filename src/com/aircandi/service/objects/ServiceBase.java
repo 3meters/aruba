@@ -60,7 +60,7 @@ public abstract class ServiceBase extends ServiceObject {
 	@Expose
 	public Map<String, Object>	cdata;
 
-	/* USER ids */
+	/* user ids */
 
 	@Expose(serialize = false, deserialize = true)
 	@SerializedName(name = "_owner")
@@ -114,9 +114,9 @@ public abstract class ServiceBase extends ServiceObject {
 		base.id = (String) (nameMapping ? (map.get("_id") != null) ? map.get("_id") : map.get("id") : map.get("id"));
 		base.name = (String) map.get("name");
 		base.schema = (String) map.get("schema");
-		base.type = (String) map.get("TYPE");
+		base.type = (String) map.get("type");
 		base.enabled = (Boolean) map.get("enabled");
-		base.locked = (Boolean) map.get("LOCKED");
+		base.locked = (Boolean) map.get("locked");
 		base.system = (Boolean) map.get("system");
 		base.data = (HashMap<String, Object>) map.get("data");
 		base.cdata = (HashMap<String, Object>) map.get("cdata");
@@ -174,7 +174,7 @@ public abstract class ServiceBase extends ServiceObject {
 	// --------------------------------------------------------------------------------------------
 
 	/**
-	 * OBJECT: All properties are serialized including nulls.</br>
+	 * object: All properties are serialized including nulls.</br>
 	 * PropertyValue: Only non-null properties are serialized.</br>
 	 * 
 	 * @author Jayma

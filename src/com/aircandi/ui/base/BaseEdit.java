@@ -72,8 +72,6 @@ public abstract class BaseEdit extends BaseActivity implements IEdit {
 		Routing.route(this, Route.CANCEL);
 	}
 
-	public abstract void onAccept();
-
 	@Override
 	public void onCancel(Boolean force) {
 		if (!force && isDirty()) {

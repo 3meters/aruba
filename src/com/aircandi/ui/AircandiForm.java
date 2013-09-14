@@ -48,17 +48,17 @@ import com.aircandi.utilities.Routing.Route;
  * Back: Pause->Stop->Destroyed
  * Other Candi Activity: Pause->Stop||Restart->Start->Resume
  * 
- * Alert Dialog: NONE
+ * Alert Dialog: none
  * Dialog Activity: Pause||Resume
- * Overflow menu: NONE
- * ProgressIndicator: NONE
+ * Overflow menu: none
+ * ProgressIndicator: none
  * 
  * Preferences: Pause->Stop->||Restart->Start->Resume
  * PROFILE: Pause->Stop->||Restart->Start->Resume
  * 
- * Power off with Aircandi IN foreground: Pause->Stop
- * Power on with Aircandi IN foreground: Nothing
- * Unlock screen with Aircandi IN foreground: Restart->Start->Resume
+ * Power off with Aircandi in foreground: Pause->Stop
+ * Power on with Aircandi in foreground: Nothing
+ * Unlock screen with Aircandi in foreground: Restart->Start->Resume
  */
 
 public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
@@ -78,13 +78,13 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 			return;
 		}
 
-		/* Make sure we have successfully registered this device with aircandi SERVICE */
+		/* Make sure we have successfully registered this device with aircandi service */
 		NotificationManager.getInstance().registerDeviceWithAircandi();
 
 		/* Check if the device is tethered */
 		tetherAlert();
 
-		// The attacher should always be created IN the Activity's onCreate
+		// The attacher should always be created in the Activity's onCreate
 		mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 	}
 
@@ -148,7 +148,7 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 
 		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-		/* Replace whatever is IN the fragment_container view with this fragment */
+		/* Replace whatever is in the fragment_container view with this fragment */
 		transaction.replace(R.id.fragment_holder, fragment);
 
 		/* Commit the transaction */
@@ -211,7 +211,7 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 	@Override
 	public void onStart() {
 		/*
-		 * Check for location SERVICE everytime we start.
+		 * Check for location service everytime we start.
 		 */
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 			/* We won't continue if location services are disabled */

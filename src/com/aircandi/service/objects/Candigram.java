@@ -15,7 +15,7 @@ public class Candigram extends Entity implements Cloneable, Serializable {
 	public static final String	collectionId		= "candigrams";
 
 	// --------------------------------------------------------------------------------------------
-	// SERVICE fields
+	// service fields
 	// --------------------------------------------------------------------------------------------
 
 	@Expose
@@ -35,7 +35,7 @@ public class Candigram extends Entity implements Cloneable, Serializable {
 	public Number				hopCount;
 
 	// --------------------------------------------------------------------------------------------
-	// CLIENT fields (NONE are transferred)
+	// client fields (NONE are transferred)
 	// --------------------------------------------------------------------------------------------
 
 	public Candigram() {}

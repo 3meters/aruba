@@ -76,7 +76,7 @@ public class PhotoForm extends BaseBrowse implements IForm {
 	@Override
 	public void databind(BindingMode mode) {
 		/*
-		 * PHOTO form is a special case that doesn't share enough
+		 * Photo form is a special case that doesn't share enough
 		 * functionality to move this databind to a base class.
 		 */
 		List<Photo> photos = EntityManager.getInstance().getPhotos();

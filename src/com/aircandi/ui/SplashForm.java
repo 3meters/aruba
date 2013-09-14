@@ -133,7 +133,7 @@ public class SplashForm extends SherlockActivity {
 
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
-					/* SERVICE notifications */
+					/* service notifications */
 					GCMRegistrar.checkDevice(SplashForm.this); 	// Does device support GCM
 					GCMRegistrar.checkManifest(SplashForm.this); 	// Is manifest setup correctly for GCM
 					String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
@@ -148,7 +148,7 @@ public class SplashForm extends SherlockActivity {
 					Aircandi.getInstance().setUsingEmulator(Aircandi.usingEmulator);
 
 					/*
-					 * GET setup for location snapshots. Initialize will populate location
+					 * get setup for location snapshots. Initialize will populate location
 					 * with the best of any cached location fixes. A single update will
 					 * be launched if the best cached location fix doesn't meet our freshness
 					 * and accuracy requirements.
@@ -187,7 +187,7 @@ public class SplashForm extends SherlockActivity {
 		final String jsonSession = Aircandi.settings.getString(Constants.SETTING_USER_SESSION, null);
 
 		if (jsonUser != null && jsonSession != null) {
-			Logger.i(this, "Auto sign IN...");
+			Logger.i(this, "Auto sign in...");
 			final User user = (User) HttpService.jsonToObject(jsonUser, ObjectType.USER);
 			if (user != null) {
 				user.session = (Session) HttpService.jsonToObject(jsonSession, ObjectType.SESSION);

@@ -61,7 +61,7 @@ public class LocationManager {
 
 			@Override
 			public void run() {
-				Logger.d(LocationManager.this, "Burst mode stopped: timed OUT");
+				Logger.d(LocationManager.this, "Burst mode stopped: timed out");
 				Aircandi.mainThreadHandler.removeCallbacks(mBurstTimeout);
 				mLocationManager.removeUpdates(mLocationListenerPendingIntent);
 				mLocationModeBurstNetwork = false;
@@ -164,11 +164,11 @@ public class LocationManager {
 						location.accuracy = mLocationLocked.getAccuracy();
 					}
 					if (mLocationLocked.hasBearing()) {
-						/* Direction of travel IN degrees East of true North. */
+						/* Direction of travel in degrees East of true North. */
 						location.bearing = mLocationLocked.getBearing();
 					}
 					if (mLocationLocked.hasSpeed()) {
-						/* Speed of the device over ground IN meters/second. */
+						/* Speed of the device over ground in meters/second. */
 						location.speed = mLocationLocked.getSpeed();
 					}
 					location.provider = mLocationLocked.getProvider();
