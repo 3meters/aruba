@@ -1,11 +1,13 @@
 package com.aircandi.ui.widgets;
 
+import it.sephiroth.android.library.imagezoom.ImageViewTouch;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -34,8 +36,6 @@ public class AirImageView extends RelativeLayout {
 	private Integer						mBrokenDrawable;
 	private Photo						mBrokenPhoto;
 	private ScaleType					mScaleType			= ScaleType.CENTER_CROP;
-	private FixedAlong					mFixedAlong			= FixedAlong.NONE;
-	private int							squareDimen			= 1;
 
 	private static final String			androidNamespace	= "http://schemas.android.com/apk/res/android";
 	private static final ScaleType[]	sScaleTypeArray		= {
@@ -66,13 +66,6 @@ public class AirImageView extends RelativeLayout {
 		mShowBusy = ta.getBoolean(R.styleable.AirImageView_showBusy, true);
 		mLayoutId = ta.getResourceId(R.styleable.AirImageView_layout, R.layout.widget_webimageview);
 		mBrokenDrawable = ta.getResourceId(R.styleable.AirImageView_brokenDrawable, R.drawable.img_broken);
-		String fixedAlong = ta.getString(R.styleable.AirImageView_fixedAlong);
-		if (fixedAlong != null) {
-			mFixedAlong = FixedAlong.valueOf(fixedAlong);
-			if (mFixedAlong == null) {
-				mFixedAlong = FixedAlong.NONE;
-			}
-		}
 
 		ta.recycle();
 
@@ -129,13 +122,15 @@ public class AirImageView extends RelativeLayout {
 	@Override
 	public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+	}
 
-		if (mFixedAlong != FixedAlong.NONE) {
-			int square = (mFixedAlong == FixedAlong.WIDTH) ? getMeasuredWidth() : getMeasuredHeight();
-			if (square > squareDimen) {
-				squareDimen = square;
-			}
-			setMeasuredDimension(squareDimen, squareDimen);
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		if (mImageMain instanceof ImageViewTouch) {
+			return mImageMain.onTouchEvent(event);
+		}
+		else {
+			return super.onTouchEvent(event);
 		}
 	}
 
@@ -204,15 +199,5 @@ public class AirImageView extends RelativeLayout {
 
 	public void setBrokenPhoto(Photo brokenPhoto) {
 		mBrokenPhoto = brokenPhoto;
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Classes
-	// --------------------------------------------------------------------------------------------
-
-	public static enum FixedAlong {
-		NONE,
-		WIDTH,
-		HEIGHT
 	}
 }

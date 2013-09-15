@@ -33,7 +33,6 @@ import com.aircandi.applications.Pictures;
 import com.aircandi.applications.Places;
 import com.aircandi.applications.Users;
 import com.aircandi.components.AndroidManager;
-import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -347,11 +346,10 @@ public final class Routing {
 			photo.setCreatedAt(entity.modifiedDate.longValue());
 			photo.setName(entity.name);
 			photo.setUser(entity.creator);
-			EntityManager.getInstance().getPhotos().clear();
-			EntityManager.getInstance().getPhotos().add(photo);
+			final String jsonPhoto = HttpService.objectToJson(photo);
+			
 			intent = new Intent(activity, PhotoForm.class);
-			intent.putExtra(Constants.EXTRA_URI, photo.getUri());
-			intent.putExtra(Constants.EXTRA_PAGING_ENABLED, false);
+			intent.putExtra(Constants.EXTRA_PHOTO, jsonPhoto);
 
 			activity.startActivity(intent);
 			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_PAGE);

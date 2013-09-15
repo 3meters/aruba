@@ -1,5 +1,7 @@
 package com.aircandi.utilities;
 
+import it.sephiroth.android.library.imagezoom.ImageViewTouch;
+
 import org.apache.http.HttpStatus;
 
 import android.app.Service;
@@ -29,7 +31,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
+import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
@@ -49,6 +51,12 @@ public class UI {
 	}
 
 	public static void drawPhoto(final AirImageView photoView, final Photo photo, final RequestListener listener) {
+		/*
+		 * There are only a few places that don't use this code to handle images:
+		 * - Notification icons - can't use AirImageView
+		 * - Actionbar icons - can't use AirImageView (shortcutpicker, placeform)
+		 * - Photo detail - can't use AirImageView, using ImageViewTouch
+		 */
 
 		if (photo != null && photo.hasBitmap()) {
 			photoView.showLoading(false);
@@ -105,9 +113,9 @@ public class UI {
 		 * We don't pass photoView so we handle getting the bitmap displayed.
 		 */
 		final BitmapRequest bitmapRequest = new BitmapRequest()
-				.setImageUri(photo.getUri())
-				.setImageSize(photoView.getSizeHint())
-				.setImageRequestor(photoView)
+				.setBitmapUri(photo.getUri())
+				.setBitmapRequestor(photoView)
+				.setBitmapSize(photoView.getSizeHint())
 				.setRequestListener(new RequestListener() {
 
 					@Override
@@ -120,15 +128,15 @@ public class UI {
 						final ServiceResponse serviceResponse = (ServiceResponse) response;
 						if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
-							final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+							final BitmapResponse bitmapResponse = (BitmapResponse) serviceResponse.data;
 							/*
 							 * Make sure we still need the bitmap we got
 							 */
-							if (imageResponse.bitmap != null && imageResponse.photoUri.equals(photo.getUri())) {
-								final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), imageResponse.bitmap);
+							if (bitmapResponse.bitmap != null && bitmapResponse.photoUri.equals(photo.getUri())) {
+								final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmapResponse.bitmap);
 								UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
 								if (listener != null) {
-									listener.onComplete(response, photo, imageResponse.bitmap, false);
+									listener.onComplete(response, photo, bitmapResponse.bitmap, false);
 								}
 							}
 						}
@@ -282,6 +290,27 @@ public class UI {
 		});
 	}
 
+	public static void showDrawableInImageView(final Drawable drawable, final ImageViewTouch imageView, final float minZoom, final float maxZoom, final boolean animate, final Animation animation) {
+		/*
+		 * Make sure this on the main thread
+		 */
+		Aircandi.mainThreadHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				if (imageView != null) {
+					imageView.setImageDrawable(drawable, null, minZoom, maxZoom);
+					if (animate) {
+						animation.setFillEnabled(true);
+						animation.setFillAfter(true);
+						imageView.startAnimation(animation);
+					}
+					imageView.postInvalidate();
+				}
+			}
+		});
+	}
+	
 	public static void setImageBitmapWithFade(final ImageView imageView, final Bitmap bitmap) {
 		Resources resources = imageView.getResources();
 		BitmapDrawable bitmapDrawable = new BitmapDrawable(resources, bitmap);

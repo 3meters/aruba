@@ -58,7 +58,6 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	private void initialize() {
-		attribution();
 		if (!Aircandi.applicationUpdateRequired) {
 			if (Aircandi.firstStartApp) {
 				warmup();
@@ -76,7 +75,9 @@ public class SplashForm extends SherlockActivity {
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("unused")
 	private void attribution() {
+		/* Should be the first method called in initialize */
 		UI.setVisibility(findViewById(R.id.image_foursquare), View.GONE);
 		UI.setVisibility(findViewById(R.id.image_google), View.GONE);
 		String provider = Aircandi.settings.getString(

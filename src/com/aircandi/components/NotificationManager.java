@@ -21,7 +21,7 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
+import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
 import com.aircandi.events.MessageEvent;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
@@ -158,13 +158,13 @@ public class NotificationManager {
 			else if (notification.type.equals("watch")) {
 				notification.subtitle = "Has dropped in";
 			}
-			
+
 			if (notification.toEntity != null && notification.toEntity.name != null) {
 				notification.subtitle += " at \"" + notification.toEntity.name + "\"";
 			}
 			return;
 		}
-		
+
 		notification.title = notification.user.name;
 
 		String category = null;
@@ -251,7 +251,7 @@ public class NotificationManager {
 				, 0
 				, airNotification.intent
 				, PendingIntent.FLAG_CANCEL_CURRENT);
-		
+
 		String imageUri = null;
 		if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
 				&& airNotification.entity.type.equals(Constants.TYPE_APP_TOUR)
@@ -263,26 +263,26 @@ public class NotificationManager {
 		}
 
 		if (imageUri != null) {
-			final BitmapRequest bitmapRequest = new BitmapRequest();
-			bitmapRequest.setImageUri(imageUri);
-			bitmapRequest.setImageRequestor(airNotification);
-			bitmapRequest.setImageSize((int) Aircandi.applicationContext.getResources().getDimensionPixelSize(R.dimen.notification_large_icon_width));
-			bitmapRequest.setRequestListener(new RequestListener() {
+			final BitmapRequest bitmapRequest = new BitmapRequest()
+					.setBitmapUri(imageUri)
+					.setBitmapRequestor(airNotification)
+					.setBitmapSize((int) Aircandi.applicationContext.getResources().getDimensionPixelSize(R.dimen.notification_large_icon_width))
+					.setRequestListener(new RequestListener() {
 
-				@Override
-				public void onComplete(Object response) {
+						@Override
+						public void onComplete(Object response) {
 
-					final ServiceResponse serviceResponse = (ServiceResponse) response;
-					if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
+							final ServiceResponse serviceResponse = (ServiceResponse) response;
+							if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
-						final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-						builder.setLargeIcon(imageResponse.bitmap);
-						Notification notification = builder.build();
-						notification.contentIntent = pendingIntent;
-						mNotificationManager.notify(airNotification.type, 0, notification);
-					}
-				}
-			});
+								final BitmapResponse bitmapResponse = (BitmapResponse) serviceResponse.data;
+								builder.setLargeIcon(bitmapResponse.bitmap);
+								Notification notification = builder.build();
+								notification.contentIntent = pendingIntent;
+								mNotificationManager.notify(airNotification.type, 0, notification);
+							}
+						}
+					});
 			BitmapManager.getInstance().masterFetch(bitmapRequest);
 		}
 		else {

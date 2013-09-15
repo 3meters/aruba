@@ -37,7 +37,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -53,7 +52,6 @@ import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
@@ -74,6 +72,7 @@ import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.ui.base.IList;
 import com.aircandi.ui.widgets.AirAutoCompleteTextView;
+import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
@@ -221,7 +220,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		mGridView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if (((EndlessImageAdapter) mGridView.getAdapter()).getItemViewType(position) != Adapter.IGNORE_ITEM_VIEW_TYPE) {
 
 					ImageResult imageResult = mImages.get(position);
@@ -406,7 +405,8 @@ public class PhotoPicker extends BaseBrowse implements IList {
 
 		serviceResponse = NetworkManager.getInstance().request(serviceRequest, null);
 
-		final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects((String) serviceResponse.data, ObjectType.IMAGE_RESULT, ServiceDataWrapper.TRUE);
+		final ServiceData serviceData = (ServiceData) HttpService
+				.jsonToObjects((String) serviceResponse.data, ObjectType.IMAGE_RESULT, ServiceDataWrapper.TRUE);
 		final List<ImageResult> images = (ArrayList<ImageResult>) serviceData.data;
 		serviceResponse.data = images;
 
@@ -619,7 +619,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 			if (view == null) {
 				view = LayoutInflater.from(PhotoPicker.this).inflate(R.layout.temp_picture_search_item, null);
 				holder = new ViewHolder();
-				holder.photoView = (ImageView) view.findViewById(R.id.photo);
+				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
 				Integer nudge = mResources.getDimensionPixelSize(R.dimen.grid_item_height_kick);
 				final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mPhotoWidthPixels, mPhotoWidthPixels - nudge);
 				holder.photoView.setLayoutParams(params);
@@ -635,7 +635,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 			if (itemData != null) {
 				holder.data = itemData;
 				holder.photoView.setTag(itemData.getThumbnail().getUrl());
-				holder.photoView.setImageBitmap(null);
+				holder.photoView.getImageView().setImageBitmap(null);
 				mDrawableManager.fetchDrawableOnThread(itemData.getThumbnail().getUrl(), holder);
 			}
 			return view;
@@ -664,7 +664,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 			synchronized (mBitmapCache) {
 				if (mBitmapCache.containsKey(uri) && mBitmapCache.get(uri).get() != null) {
 					final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), mBitmapCache.get(uri).get());
-					UI.showDrawableInImageView(bitmapDrawable, holder.photoView, false, Animate.fadeInMedium());
+					UI.showDrawableInImageView(bitmapDrawable, holder.photoView.getImageView(), false, Animate.fadeInMedium());
 					return;
 				}
 			}
@@ -676,7 +676,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 					final DrawableManager drawableManager = getDrawableManager().get();
 					if (drawableManager != null) {
 						if (((String) holder.photoView.getTag()).equals(uri)) {
-							UI.showDrawableInImageView((Drawable) message.obj, holder.photoView, true,
+							UI.showDrawableInImageView((Drawable) message.obj, holder.photoView.getImageView(), true,
 									Animate.fadeInMedium());
 						}
 					}
@@ -737,6 +737,13 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		public WeakReference<DrawableManager> getDrawableManager() {
 			return mDrawableManager;
 		}
+	}
+
+	public static class ViewHolder {
+
+		public AirImageView	photoView;
+		public ImageResult	data;
+
 	}
 
 }

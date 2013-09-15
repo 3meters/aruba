@@ -1,47 +1,45 @@
 package com.aircandi.ui;
 
 import it.sephiroth.android.library.imagezoom.ImageViewTouch;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import android.content.Context;
+import it.sephiroth.android.library.imagezoom.ImageViewTouchBase.DisplayType;
 import android.content.res.Configuration;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Window;
+import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
-import com.aircandi.ServiceConstants;
-import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.PhotoPagerAdapter;
 import com.aircandi.components.bitmaps.BitmapManager;
-import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
 import com.aircandi.components.bitmaps.BitmapRequest;
+import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
+import com.aircandi.components.bitmaps.ImageResult;
+import com.aircandi.service.HttpService;
+import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.ui.base.IForm;
+import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.UserView;
+import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.UI;
 
 public class PhotoForm extends BaseBrowse implements IForm {
 
-	private List<Photo>	mPhotosForPaging	= new ArrayList<Photo>();
-	private String		mImageUri;
-	private ViewPager	mViewPager;
-	private Boolean		mPagingEnabled		= false;
+	private Photo			mPhoto;
+	private AirImageView	mPhotoView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -51,17 +49,19 @@ public class PhotoForm extends BaseBrowse implements IForm {
 	}
 
 	@Override
+	public void unpackIntent() {
+		final Bundle extras = this.getIntent().getExtras();
+		if (extras != null) {
+			final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
+			mPhoto = (Photo) HttpService.jsonToObject(jsonPhoto, ObjectType.PHOTO);
+		}
+	}
+
+	@Override
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 
-		final Bundle extras = this.getIntent().getExtras();
-		if (extras != null) {
-			mImageUri = extras.getString(Constants.EXTRA_URI);
-			mPagingEnabled = extras.getBoolean(Constants.EXTRA_PAGING_ENABLED, false);
-		}
-
 		setSupportProgressBarIndeterminateVisibility(true);
-		databind(BindingMode.AUTO);
 	}
 
 	@Override
@@ -74,136 +74,97 @@ public class PhotoForm extends BaseBrowse implements IForm {
 	}
 
 	@Override
-	public void databind(BindingMode mode) {
-		/*
-		 * Photo form is a special case that doesn't share enough
-		 * functionality to move this databind to a base class.
-		 */
-		List<Photo> photos = EntityManager.getInstance().getPhotos();
-		final Photo photo = EntityManager.getInstance().getPhoto(mImageUri);
-		if (!mPagingEnabled) {
-			photos = new ArrayList<Photo>();
-			photos.add(photo);
-			final View layout = ((ViewStub) findViewById(R.id.stub_picture_detail)).inflate();
-			buildPictureDetail(this, photo, layout);
-		}
-		else {
-			updateViewPager(photos);
-		}
-	}
+	public void databind(BindingMode mode) {}
 
-	public static View buildPictureDetail(final Context context, Photo photo, View layout) {
+	@Override
+	public void draw() {
 
-		final SherlockFragmentActivity activity = (SherlockFragmentActivity) context;
-		final TextView name = (TextView) layout.findViewById(R.id.name);
-		final UserView user = (UserView) layout.findViewById(R.id.author);
-		final ProgressBar progress = (ProgressBar) layout.findViewById(R.id.progressBar);
-		final ViewGroup progressGroup = (ViewGroup) layout.findViewById(R.id.progress_group);
-		final ImageView image = (ImageView) layout.findViewById(R.id.photo);
-		((ImageViewTouch) image).setFitToScreen(true);
-		((ImageViewTouch) image).setScrollEnabled(true);
+		mPhotoView = (AirImageView) findViewById(R.id.photo);
+		ViewGroup form = (ViewGroup) findViewById(R.id.form_holder);
+		form.setOnTouchListener(new OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				UI.showToastNotification("touched", Toast.LENGTH_SHORT);
+				return false;
+			}
+		});
+
+		final TextView name = (TextView) findViewById(R.id.name);
+		final UserView user = (UserView) findViewById(R.id.author);
+		final ProgressBar progress = (ProgressBar) findViewById(R.id.progressBar);
+		final ViewGroup progressGroup = (ViewGroup) findViewById(R.id.progress_group);
+		final ImageViewTouch imageView = (ImageViewTouch) mPhotoView.getImageView();
+		imageView.setDisplayType(DisplayType.FIT_TO_SCREEN);
+		imageView.setScrollEnabled(true);
 
 		/* Title */
 		UI.setVisibility(name, View.GONE);
-		if (photo.getName() != null && !photo.getName().equals("")) {
-			name.setText(photo.getName());
+		if (mPhoto.getName() != null && !mPhoto.getName().equals("")) {
+			name.setText(mPhoto.getName());
 			UI.setVisibility(name, View.VISIBLE);
 		}
 
 		/* Author block */
 		UI.setVisibility(user, View.GONE);
-		if (photo.getUser() != null) {
-			user.databind(photo.getUser(), photo.getCreatedAt().longValue(), false);
+		if (mPhoto.getUser() != null) {
+			user.databind(mPhoto.getUser(), mPhoto.getCreatedAt().longValue(), false);
 			UI.setVisibility(user, View.VISIBLE);
 		}
 
 		/* Image */
-		String photoUri = photo.getUri();
-		if (!photoUri.startsWith("http:") && !photoUri.startsWith("https:") && !photoUri.startsWith("resource:")) {
-			photoUri = ServiceConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
-		}
+		final String photoUri = mPhoto.getUri();
 		final ViewHolder holder = new ViewHolder();
-		holder.photoView = image;
+		holder.photoView = mPhotoView;
 		holder.photoView.setTag(photoUri);
-		holder.photoView.setImageBitmap(null);
+		holder.photoView.getImageView().setImageBitmap(null);
 
-		final BitmapRequest bitmapRequest = new BitmapRequest(photoUri, image);
-		bitmapRequest.setImageRequestor(image);
-		bitmapRequest.setImageUri(photoUri);
-		bitmapRequest.setImageView(image);
-		bitmapRequest.setRequestListener(new RequestListener() {
-
-			@Override
-			public void onComplete(Object response) {
-				final ServiceResponse serviceResponse = (ServiceResponse) response;
-				activity.runOnUiThread(new Runnable() {
+		final BitmapRequest bitmapRequest = new BitmapRequest()
+				.setBitmapUri(photoUri)
+				.setBitmapRequestor(mPhotoView)
+				.setRequestListener(new RequestListener() {
 
 					@Override
-					public void run() {
-						if (serviceResponse.responseCode != ResponseCode.SUCCESS) {
-							image.setScaleType(ScaleType.CENTER);
-							image.setImageResource(R.drawable.img_broken);
+					public void onComplete(Object response) {
+						final ServiceResponse serviceResponse = (ServiceResponse) response;
+						
+						if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
+							final BitmapResponse bitmapResponse = (BitmapResponse) serviceResponse.data;
+							if (bitmapResponse.bitmap != null && bitmapResponse.photoUri.equals(photoUri)) {
+								
+								final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmapResponse.bitmap);
+								UI.showDrawableInImageView(bitmapDrawable, (ImageViewTouch) mPhotoView.getImageView(), 1.0f, 4.0f, true, Animate.fadeInMedium());
+							}
+						}
+						else {
+							mPhotoView.getImageView().setScaleType(ScaleType.CENTER);
+							mPhotoView.getImageView().setImageResource(R.drawable.img_broken);
 						}
 						progressGroup.setVisibility(View.GONE);
-						activity.setSupportProgressBarIndeterminateVisibility(false);
+						setSupportProgressBarIndeterminateVisibility(false);						
 					}
-				});
-			}
-
-			@Override
-			public void onProgressChanged(final int progressPcnt) {
-				activity.runOnUiThread(new Runnable() {
 
 					@Override
-					public void run() {
-						progress.setProgress(progressPcnt);
-						if (progressPcnt == 100) {
-							progressGroup.setVisibility(View.GONE);
-						}
+					public void onProgressChanged(final int progressPcnt) {
+						runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								progress.setProgress(progressPcnt);
+								if (progressPcnt == 100) {
+									progressGroup.setVisibility(View.GONE);
+								}
+							}
+						});
 					}
 				});
-			}
-		});
 		BitmapManager.getInstance().masterFetch(bitmapRequest);
-		return layout;
 	}
 
 	@Override
-	public void draw() {}
-
-	private void updateViewPager(List<Photo> photos)
-	{
-		if (mViewPager == null) {
-
-			mViewPager = (ViewPager) findViewById(R.id.view_pager);
-			mViewPager.setVisibility(View.VISIBLE);
-			mPhotosForPaging = photos;
-
-			mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-
-				@Override
-				public void onPageSelected(int position) {}
-			});
-
-			mViewPager.setAdapter(new PhotoPagerAdapter(this, mViewPager, mPhotosForPaging));
-
-			synchronized (mPhotosForPaging) {
-				for (int i = 0; i < mPhotosForPaging.size(); i++) {
-					if (mPhotosForPaging.get(i).getUri() != null) {
-						if (mPhotosForPaging.get(i).getUri().equals(mImageUri)) {
-							mViewPager.setCurrentItem(i, false);
-							break;
-						}
-					}
-					else {
-						if (mPhotosForPaging.get(i).getUri().equals(mImageUri)) {
-							mViewPager.setCurrentItem(i, false);
-							break;
-						}
-					}
-				}
-			}
-		}
+	protected void onResume() {
+		super.onResume();
+		draw();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -213,7 +174,7 @@ public class PhotoForm extends BaseBrowse implements IForm {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		final ImageView image = (ImageView) findViewById(R.id.photo);
-		((ImageViewTouch) image).setFitToScreen(true);
+		((ImageViewTouch) image).setDisplayType(DisplayType.FIT_TO_SCREEN);
 		super.onConfigurationChanged(newConfig);
 	}
 
@@ -222,4 +183,13 @@ public class PhotoForm extends BaseBrowse implements IForm {
 		return R.layout.picture_detail;
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Classes
+	// --------------------------------------------------------------------------------------------
+
+	public static class ViewHolder {
+
+		public AirImageView	photoView;
+		public ImageResult	data;
+	}
 }

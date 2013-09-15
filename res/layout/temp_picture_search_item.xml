@@ -1,21 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/selector_button" >
 
-    <ImageView
+    <com.aircandi.ui.widgets.AirImageView
         android:id="@+id/photo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        aircandi:layout="@layout/widget_webimageview"
+        android:adjustViewBounds="true"
         android:scaleType="centerCrop" />
-
-    <View
-        android:id="@+id/candi_view_group"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/selector_image"
-        android:clickable="true"
-        android:duplicateParentState="true" />
 
 </RelativeLayout>

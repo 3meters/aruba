@@ -20,7 +20,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
+import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.HttpService.RequestListener;
@@ -66,31 +66,33 @@ public class ShortcutPicker extends BasePicker {
 		/* We use this to access the source suggestions */
 
 		if (mShortcuts != null && mShortcuts.size() > 0) {
-			setActivityTitle(mShortcuts.get(0).app);
+			Shortcut shortcut = mShortcuts.get(0);
+			setActivityTitle(shortcut.app);
 
 			/* Show default photo based on the type of the shortcut set */
-			Photo photo = new Photo(Applink.getDefaultPhotoUri(mShortcuts.get(0).schema), null, null, null, PhotoSource.assets);
-			final BitmapRequest bitmapRequest = new BitmapRequest();
-			bitmapRequest.setImageUri(photo.getUri());
-			bitmapRequest.setImageRequestor(this);
-			bitmapRequest.setRequestListener(new RequestListener() {
+			
+			Photo photo = new Photo(Applink.getDefaultPhotoUri(shortcut.schema), null, null, null, PhotoSource.assets);
+			final BitmapRequest bitmapRequest = new BitmapRequest()
+					.setBitmapUri(photo.getUri())
+					.setBitmapRequestor(shortcut)
+					.setRequestListener(new RequestListener() {
 
-				@Override
-				public void onComplete(Object response) {
+						@Override
+						public void onComplete(Object response) {
 
-					final ServiceResponse serviceResponse = (ServiceResponse) response;
-					if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
-						runOnUiThread(new Runnable() {
+							final ServiceResponse serviceResponse = (ServiceResponse) response;
+							if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
+								runOnUiThread(new Runnable() {
 
-							@Override
-							public void run() {
-								final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-								mActionBar.setIcon(new BitmapDrawable(Aircandi.applicationContext.getResources(), imageResponse.bitmap));
+									@Override
+									public void run() {
+										final BitmapResponse bitmapResponse = (BitmapResponse) serviceResponse.data;
+										mActionBar.setIcon(new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmapResponse.bitmap));
+									}
+								});
 							}
-						});
-					}
-				}
-			});
+						}
+					});
 			BitmapManager.getInstance().masterFetch(bitmapRequest);
 		}
 

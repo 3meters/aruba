@@ -721,6 +721,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 					}
 					if (holder.photoView.getPhoto() == null || !holder.photoView.getPhoto().getUri().equals(photo.getUri())) {
 						holder.photoView.getImageView().setImageDrawable(null);
+						holder.photoView.getImageView().invalidate();
 						UI.drawPhoto(holder.photoView, photo);
 					}
 				}

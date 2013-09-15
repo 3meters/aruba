@@ -9,38 +9,37 @@ import com.aircandi.service.HttpService.RequestListener;
 
 public class BitmapRequest {
 
-	private String						mImageUri				= null;
-	private WeakReference<Object>		mImageRequestor			= null;
+	private String						mBitmapUri				= null;
+	private WeakReference<Object>		mBitmapRequestor			= null;
 	private RequestListener				mRequestListener		= null;
 	private WeakReference<ImageView>	mImageView				= null;
-	private Integer						mImageSize				= null;
+	private Integer						mBitmapSize				= null;
 	private Integer						mBrokenDrawableResId	= null;
 
 	public BitmapRequest() {}
 
-	public BitmapRequest(String photoUri, ImageView imageView) {
-		mImageUri = photoUri;
-		mImageView = new WeakReference<ImageView>(imageView);
+	public BitmapRequest(String photoUri) {
+		mBitmapUri = photoUri;
 	}
 
-	public String getImageUri() {
-		return mImageUri;
+	public String getBitmapUri() {
+		return mBitmapUri;
 	}
 
-	public BitmapRequest setImageUri(String photoUri) {
-		mImageUri = photoUri;
+	public BitmapRequest setBitmapUri(String photoUri) {
+		mBitmapUri = photoUri;
 		return this;
 	}
 
-	public Object getImageRequestor() {
-		if (mImageRequestor != null) {
-			return mImageRequestor.get();
+	public Object getBitmapRequestor() {
+		if (mBitmapRequestor != null) {
+			return mBitmapRequestor.get();
 		}
 		return null;
 	}
 
-	public BitmapRequest setImageRequestor(Object imageRequestor) {
-		mImageRequestor = new WeakReference<Object>(imageRequestor);
+	public BitmapRequest setBitmapRequestor(Object imageRequestor) {
+		mBitmapRequestor = new WeakReference<Object>(imageRequestor);
 		return this;
 	}
 
@@ -65,12 +64,12 @@ public class BitmapRequest {
 		return this;
 	}
 
-	public Integer getImageSize() {
-		return mImageSize;
+	public Integer getBitmapSize() {
+		return mBitmapSize;
 	}
 
-	public BitmapRequest setImageSize(Integer imageSize) {
-		mImageSize = imageSize;
+	public BitmapRequest setBitmapSize(Integer imageSize) {
+		mBitmapSize = imageSize;
 		return this;
 	}
 
@@ -82,12 +81,12 @@ public class BitmapRequest {
 		mBrokenDrawableResId = brokenDrawableResId;
 	}
 
-	public static class ImageResponse {
+	public static class BitmapResponse {
 
 		public Bitmap	bitmap;
 		public String	photoUri;
 
-		ImageResponse(Bitmap bitmap, String photoUri) {
+		BitmapResponse(Bitmap bitmap, String photoUri) {
 			this.bitmap = bitmap;
 			this.photoUri = photoUri;
 		}

@@ -135,6 +135,6 @@
         android:maxWidth="100dp"
         android:scaleType="fitCenter"
         android:src="@drawable/img_foursquare_powered_dark"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
 </merge>

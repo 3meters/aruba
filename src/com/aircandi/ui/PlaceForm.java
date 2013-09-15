@@ -25,7 +25,7 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
+import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
 import com.aircandi.events.MessageEvent;
 import com.aircandi.service.HttpService.RequestListener;
 import com.aircandi.service.objects.Count;
@@ -187,6 +187,7 @@ public class PlaceForm extends BaseEntityForm {
 		 * - WebImageView child views are gone by default
 		 * - Header views are visible by default
 		 */
+		
 		setActivityTitle(mEntity.name);
 		if (mMenuItemEdit != null) {
 			mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
@@ -197,34 +198,35 @@ public class PlaceForm extends BaseEntityForm {
 
 		/* Action bar icon */
 		if (((Place) mEntity).category != null) {
-			final BitmapRequest bitmapRequest = new BitmapRequest();
-			bitmapRequest.setImageUri(((Place) mEntity).category.photo.getUri());
-			bitmapRequest.setImageRequestor(this);
-			bitmapRequest.setRequestListener(new RequestListener() {
+			Place place = (Place) mEntity;
+			final BitmapRequest bitmapRequest = new BitmapRequest()
+					.setBitmapUri(place.category.photo.getUri())
+					.setBitmapRequestor(place.category)
+					.setRequestListener(new RequestListener() {
 
-				@Override
-				public void onComplete(Object response) {
+						@Override
+						public void onComplete(Object response) {
 
-					final ServiceResponse serviceResponse = (ServiceResponse) response;
-					if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
-						runOnUiThread(new Runnable() {
+							final ServiceResponse serviceResponse = (ServiceResponse) response;
+							if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
+								runOnUiThread(new Runnable() {
 
-							@Override
-							public void run() {
-								final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-								final int color = mResources.getColor(getThemeTone().equals("dark") ? R.color.gray_00_pcnt
-										: R.color.gray_90_pcnt);
-								ColorFilter colorFilter = new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY);
-								BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(),
-										imageResponse.bitmap);
-								bitmapDrawable.setColorFilter(colorFilter);
-								bitmapDrawable.setAlpha(getThemeTone().equals("dark") ? 204 : 153);
-								mActionBar.setIcon(bitmapDrawable);
+									@Override
+									public void run() {
+										final BitmapResponse bitmapResponse = (BitmapResponse) serviceResponse.data;
+										final int color = mResources.getColor(getThemeTone().equals("dark") ? R.color.gray_00_pcnt
+												: R.color.gray_90_pcnt);
+										ColorFilter colorFilter = new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY);
+										BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(),
+												bitmapResponse.bitmap);
+										bitmapDrawable.setColorFilter(colorFilter);
+										bitmapDrawable.setAlpha(getThemeTone().equals("dark") ? 204 : 153);
+										mActionBar.setIcon(bitmapDrawable);
+									}
+								});
 							}
-						});
-					}
-				}
-			});
+						}
+					});
 			BitmapManager.getInstance().masterFetch(bitmapRequest);
 		}
 
@@ -391,7 +393,7 @@ public class PlaceForm extends BaseEntityForm {
 
 	@Override
 	protected void drawStats() {
-		
+
 		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
 		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);

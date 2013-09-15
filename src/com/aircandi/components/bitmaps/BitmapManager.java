@@ -18,7 +18,6 @@ import android.os.AsyncTask;
 import android.provider.MediaStore.Images;
 import android.support.v4.util.LruCache;
 import android.util.TypedValue;
-import android.widget.ImageView;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
@@ -26,7 +25,7 @@ import com.aircandi.components.Exceptions;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
+import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.UI;
 import com.aircandi.utilities.Utilities;
@@ -103,14 +102,14 @@ public class BitmapManager {
 				if (bitmapRequest.getRequestListener() != null) {
 					bitmapRequest.getRequestListener().onStart();
 				}
-								
+
 				BitmapManager.getInstance().downloadBitmap(bitmapRequest);
 			}
 		}
 	}
 
 	public static Boolean isDrawable(BitmapRequest bitmapRequest) {
-		if (bitmapRequest.getImageUri().toLowerCase(Locale.US).startsWith("resource:")) {
+		if (bitmapRequest.getBitmapUri().toLowerCase(Locale.US).startsWith("resource:")) {
 			return true;
 		}
 		return false;
@@ -119,22 +118,23 @@ public class BitmapManager {
 	public ServiceResponse fetchDrawable(final BitmapRequest bitmapRequest) {
 
 		final ServiceResponse serviceResponse = new ServiceResponse();
-		final String rawResourceName = bitmapRequest.getImageUri().substring(bitmapRequest.getImageUri().indexOf("resource:") + 9);
+		final String rawResourceName = bitmapRequest.getBitmapUri().substring(bitmapRequest.getBitmapUri().indexOf("resource:") + 9);
 		final String resolvedResourceName = resolveResourceName(rawResourceName);
 		if (resolvedResourceName == null) {
 			serviceResponse.responseCode = ResponseCode.FAILED;
 			if (bitmapRequest.getRequestListener() != null) {
-				bitmapRequest.getRequestListener().onComplete(serviceResponse);
+				bitmapRequest.getRequestListener().onError(serviceResponse);
 			}
 			return serviceResponse;
 		}
 
-		final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable",
-				Aircandi.getInstance().getPackageName());
+		final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName
+				, "drawable"
+				, Aircandi.getInstance().getPackageName());
 
 		String memCacheKey = String.valueOf(resourceId);
-		if (bitmapRequest.getImageSize() != null) {
-			memCacheKey += "." + String.valueOf(bitmapRequest.getImageSize());
+		if (bitmapRequest.getBitmapSize() != null) {
+			memCacheKey += "." + String.valueOf(bitmapRequest.getBitmapSize());
 		}
 
 		Bitmap bitmap = null;
@@ -143,7 +143,7 @@ public class BitmapManager {
 			bitmap = mMemoryCache.get(memKeyHashed);
 
 			if (bitmap == null) {
-				bitmap = loadBitmapFromResourcesSampled(resourceId, bitmapRequest.getImageSize());
+				bitmap = loadBitmapFromResourcesSampled(resourceId, bitmapRequest.getBitmapSize());
 				synchronized (mMemoryCache) {
 					mMemoryCache.put(memKeyHashed, bitmap);
 				}
@@ -151,7 +151,7 @@ public class BitmapManager {
 		}
 
 		if (bitmapRequest.getRequestListener() != null) {
-			serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
+			serviceResponse.data = new BitmapResponse(bitmap, bitmapRequest.getBitmapUri());
 			bitmapRequest.getRequestListener().onComplete(serviceResponse);
 		}
 
@@ -173,13 +173,13 @@ public class BitmapManager {
 	public ServiceResponse fetchBitmap(final BitmapRequest bitmapRequest) {
 
 		final ServiceResponse serviceResponse = new ServiceResponse();
-		final Bitmap bitmap = getBitmap(bitmapRequest.getImageUri(), bitmapRequest.getImageSize());
+		final Bitmap bitmap = getBitmap(bitmapRequest.getBitmapUri(), bitmapRequest.getBitmapSize());
 
 		if (bitmap != null) {
-			serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
+			serviceResponse.data = new BitmapResponse(bitmap, bitmapRequest.getBitmapUri());
 
 			if (bitmapRequest.getRequestListener() != null) {
-				serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
+				serviceResponse.data = new BitmapResponse(bitmap, bitmapRequest.getBitmapUri());
 				bitmapRequest.getRequestListener().onComplete(serviceResponse);
 			}
 
@@ -533,11 +533,4 @@ public class BitmapManager {
 		throw new CloneNotSupportedException();
 	}
 
-	@SuppressWarnings("ucd")
-	public static class ViewHolder {
-
-		public ImageView	photoView;
-		public ImageResult	data;
-
-	}
 }

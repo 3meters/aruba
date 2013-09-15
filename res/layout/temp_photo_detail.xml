@@ -17,7 +17,9 @@
             android:id="@+id/form_picture_placeholder"
             style="@style/form_picture_placeholder"
             android:layout_width="match_parent"
-            android:layout_height="10dp" />
+            android:layout_height="10dp"
+            android:focusable="false"
+            android:focusableInTouchMode="false" />
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -29,11 +31,20 @@
             android:progressDrawable="@drawable/shape_progress" />
     </RelativeLayout>
 
+    <com.aircandi.ui.widgets.AirImageView
+        android:id="@+id/photo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        aircandi:layout="@layout/widget_photoview_touch"
+        aircandi:showBusy="false" />
+
+    <!--
     <it.sephiroth.android.library.imagezoom.ImageViewTouch
         android:id="@+id/photo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:ignore="MissingRegistered" />
+        tools:ignore="MissingRegistered" />
+    -->
 
     <LinearLayout
         style="?attr/buttonBarStyle"

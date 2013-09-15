@@ -370,6 +370,11 @@ public class CandigramEdit extends BaseEntityEdit {
 		if (!super.validate()) {
 			return false;
 		}
+		/*
+		 * Transfering values from the controls to the entity is easier
+		 * with candigrams.
+		 */
+		gather();
 		Candigram candigram = (Candigram) mEntity;
 		if (candigram.type == null) {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
