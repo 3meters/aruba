@@ -65,7 +65,6 @@ public class UI {
 		}
 		else {
 			photoView.getImageView().setImageDrawable(null);
-			photoView.getImageView().setTag(photo.getUri());
 			photoView.setPhoto(photo);
 			aircandi(photoView, photo, listener);
 		}
@@ -132,11 +131,20 @@ public class UI {
 							/*
 							 * Make sure we still need the bitmap we got
 							 */
-							if (bitmapResponse.bitmap != null && bitmapResponse.photoUri.equals(photo.getUri())) {
-								final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmapResponse.bitmap);
-								UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
-								if (listener != null) {
-									listener.onComplete(response, photo, bitmapResponse.bitmap, false);
+							if (bitmapResponse.bitmap != null) {
+								/*
+								 * photoView could have been part of a view that got recycled and now has
+								 * a different photo target.
+								 */
+								if (bitmapResponse.photoUri.equals(photoView.getPhoto().getUri())) {
+									final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmapResponse.bitmap);
+									UI.showDrawableInImageView(bitmapDrawable, photoView.getImageView(), true, Animate.fadeInMedium());
+									/*
+									 * Original caller might have additional work to do with the bitmap.
+									 */
+									if (listener != null) {
+										listener.onComplete(response, photo, bitmapResponse.bitmap, false);
+									}
 								}
 							}
 						}
@@ -163,7 +171,6 @@ public class UI {
 							}
 						}
 						if (photoView.getBrokenPhoto() != null) {
-							photoView.getImageView().setTag(photo.getUri());
 							photoView.setPhoto(photo);
 							aircandi(photoView, photoView.getBrokenPhoto(), listener);
 						}
@@ -290,7 +297,8 @@ public class UI {
 		});
 	}
 
-	public static void showDrawableInImageView(final Drawable drawable, final ImageViewTouch imageView, final float minZoom, final float maxZoom, final boolean animate, final Animation animation) {
+	public static void showDrawableInImageView(final Drawable drawable, final ImageViewTouch imageView, final float minZoom, final float maxZoom,
+			final boolean animate, final Animation animation) {
 		/*
 		 * Make sure this on the main thread
 		 */
@@ -310,7 +318,7 @@ public class UI {
 			}
 		});
 	}
-	
+
 	public static void setImageBitmapWithFade(final ImageView imageView, final Bitmap bitmap) {
 		Resources resources = imageView.getResources();
 		BitmapDrawable bitmapDrawable = new BitmapDrawable(resources, bitmap);

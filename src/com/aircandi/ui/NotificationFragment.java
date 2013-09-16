@@ -34,6 +34,7 @@ import com.aircandi.components.NotificationsContentProvider;
 import com.aircandi.service.HttpService;
 import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirNotification;
+import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.ui.widgets.AirImageView;
@@ -67,7 +68,8 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 				/* Build intent that can be used in association with the notification */
 				if (notification.entity != null) {
 					if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-						notification.intent = Comments.viewForGetIntent(getSherlockActivity(), notification.entity.toId, Constants.TYPE_LINK_COMMENT, null, null);
+						notification.intent = Comments.viewForGetIntent(getSherlockActivity(), notification.entity.toId, Constants.TYPE_LINK_COMMENT, null,
+								null);
 					}
 					else {
 						Class<?> clazz = BaseEntityForm.viewFormBySchema(notification.entity.schema);
@@ -344,9 +346,10 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 					if (notification.entity.photo == null && !notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 						holder.photoView.setVisibility(View.GONE);
 					}
-
-					holder.photoView.getImageView().setImageDrawable(null);
-					UI.drawPhoto(holder.photoView, notification.entity.getPhoto());
+					Photo photo = notification.entity.getPhoto();
+					if (holder.photoView.getPhoto() == null || !photo.getUri().equals(holder.photoView.getPhoto().getUri())) {
+						UI.drawPhoto(holder.photoView, notification.entity.getPhoto());
+					}
 				}
 
 				UI.setVisibility(holder.description, View.GONE);
@@ -364,7 +367,6 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 
 				if (holder.photoUserView != null) {
 					holder.photoUserView.setTag(notification);
-					holder.photoUserView.getImageView().setImageDrawable(null);
 					UI.drawPhoto(holder.photoUserView, notification.user.getPhoto());
 				}
 

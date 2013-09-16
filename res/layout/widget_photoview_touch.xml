@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <it.sephiroth.android.library.imagezoom.ImageViewTouch
+        android:id="@+id/image_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:ignore="MissingRegistered" />
+
+</merge>

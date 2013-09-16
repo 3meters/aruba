@@ -271,7 +271,6 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 				if (holder.photoView != null) {
 					holder.photoView.setTag(applink);
-					holder.photoView.getImageView().setImageDrawable(null);
 					UI.drawPhoto(holder.photoView, applink.getPhoto());
 				}
 			}

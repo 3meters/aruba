@@ -489,7 +489,6 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 
 				if (holder.photoView != null) {
 					holder.photoView.setTag(entity);
-					holder.photoView.getImageView().setImageDrawable(null);
 					UI.drawPhoto(holder.photoView, entity.getPhoto());
 				}
 			}

@@ -230,16 +230,15 @@ public class CandiView extends RelativeLayout {
 				return;
 			}
 
-			/* Clear image as quickly as possible */
-			mPhotoView.getImageView().setImageDrawable(null);
-			mPhotoView.getImageView().invalidate();
-
 			/* Don't use gradient if we are not using a photo */
 			if (mInfoHolder != null) {
 				mInfoHolder.setBackgroundResource((mEntity.photo != null) ? R.drawable.overlay_picture_fadeout : 0);
 			}
 
-			UI.drawPhoto(mPhotoView, mEntity.getPhoto());
+			Photo photo = mEntity.getPhoto();
+			if (mPhotoView.getPhoto() == null || !photo.getUri().equals(mPhotoView.getPhoto().getUri())) {
+				UI.drawPhoto(mPhotoView, photo);
+			}
 		}
 	}
 

@@ -189,7 +189,10 @@ public class ShortcutPicker extends BasePicker {
 
 				if (holder.photoView != null) {
 					holder.photoView.setTag(shortcut);
-					UI.drawPhoto(holder.photoView, shortcut.getPhoto());
+					Photo photo = shortcut.getPhoto();
+					if (holder.photoView.getPhoto() == null || !photo.getUri().equals(holder.photoView.getPhoto().getUri())) {
+						UI.drawPhoto(holder.photoView, photo);
+					}
 				}
 			}
 			return view;
