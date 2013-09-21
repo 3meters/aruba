@@ -63,7 +63,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	/* Theme */
 	private String		mPrefTheme;
 	private String		mThemeTone;
-	private Boolean		mIsDialog;
 
 	/* Menus */
 	protected MenuItem	mMenuItemEdit;
@@ -111,11 +110,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 			if (getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
 				mThemeTone = (String) resourceName.coerceToString();
 			}
-
-			/* Default sizing if this is a dialog */
-			if (mIsDialog) {
-				setDialogSize(getResources().getConfiguration());
-			}
 		}
 	}
 
@@ -156,9 +150,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		Logger.d(this, "Configuration changed");
-		if (mIsDialog) {
-			setDialogSize(newConfig);
-		}
 		super.onConfigurationChanged(newConfig);
 	}
 
@@ -309,7 +300,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	public void setTheme(Boolean isDialog, Boolean isTransparent) {
 		mPrefTheme = Aircandi.settings.getString(Constants.PREF_THEME, Constants.PREF_THEME_DEFAULT);
-		mIsDialog = isDialog;
 		/*
 		 * ActionBarSherlock takes over the title area if version < 4.0 (Ice Cream Sandwich).
 		 */
@@ -334,19 +324,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 		}
 
 		setTheme(themeId);
-	}
-
-	@SuppressLint("NewApi")
-	private void setDialogSize(Configuration newConfig) {
-
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB_MR2) {
-			//			final android.view.WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
-			//			final int HEIGHT = Math.min(newConfig.screenHeightDp, 450);
-			//			final int WIDTH = Math.min(newConfig.screenWidthDp, 350);
-			//			params.height = ImageUtils.getRawPixels(mActivity, HEIGHT);
-			//			params.width = ImageUtils.getRawPixels(mActivity, WIDTH);
-			//			mActivity.getWindow().setAttributes(params);
-		}
 	}
 
 	protected Boolean isDialog() {

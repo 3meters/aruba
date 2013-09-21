@@ -9,11 +9,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
+
+import javax.net.ssl.SSLContext;
 
 import android.os.Build;
 
@@ -28,12 +32,41 @@ import com.aircandi.utilities.Json;
 import com.squareup.okhttp.OkHttpClient;
 
 public class OkHttpUrlConnection extends BaseConnection {
-	
-	private OkHttpClient client;
+	/*
+	 * Seems to throw SocketTimeout for everything
+	 * 
+	 * - All the normal reasons for a read timeout while input/output streaming
+	 * - Service host reachable but service not running.
+	 * 
+	 * Retry handling
+	 * 
+	 * - Only applies to trying to establish a connection and sending the request body.
+	 * - Doesn't retry if there is no connection (service was never reached).
+	 * - Doesn't retry if request body == null or stream isn't retryable.
+	 * - Doesn't retry if SSLHandshakeException, CertificateException, ProtocolException.
+	 * - Doesn't retry if IOException is during response streaming.
+	 */
+
+	private OkHttpClient	client;
 
 	public OkHttpUrlConnection() {
 		client = new OkHttpClient();
 		client.setFollowProtocolRedirects(true);
+		client.setConnectTimeout(ServiceConstants.TIMEOUT_CONNECTION, TimeUnit.MILLISECONDS);
+		client.setReadTimeout(ServiceConstants.TIMEOUT_SOCKET_QUERIES, TimeUnit.MILLISECONDS);
+		/*
+		 * Hack to deal with ssl context conflict that blows up any other
+		 * software we are using that also works with ssl.
+		 */
+		SSLContext sslContext;
+		try {
+			sslContext = SSLContext.getInstance("TLS");
+			sslContext.init(null, null, null);
+		}
+		catch (GeneralSecurityException e) {
+			throw new AssertionError(); // The system has no TLS. Just give up.
+		}
+		client.setSslSocketFactory(sslContext.getSocketFactory());
 	}
 
 	@Override
@@ -43,14 +76,12 @@ public class OkHttpUrlConnection extends BaseConnection {
 		serviceResponse.activityName = serviceRequest.getActivityName();
 		HttpURLConnection connection = null;
 		InputStream inputStream = null;
-		
+
 		try {
 
 			AirHttpRequest request = OkHttpUrlConnection.buildHttpRequest(serviceRequest, stopwatch);
 			URL url = new URL(request.uri);
 			connection = client.open(url);
-			connection.setReadTimeout(ServiceConstants.TIMEOUT_SOCKET_QUERIES);
-			connection.setConnectTimeout(ServiceConstants.TIMEOUT_CONNECTION);
 
 			if (request.requestType == RequestType.GET) {
 				connection.setRequestMethod("GET");
@@ -72,6 +103,9 @@ public class OkHttpUrlConnection extends BaseConnection {
 				connection.setRequestProperty(header.key, header.value);
 			}
 
+			/*
+			 * Execute the request
+			 */
 			if (request.requestType == RequestType.GET) {
 				inputStream = get(connection);
 			}
@@ -145,7 +179,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 				 * We got a non-success http status code so break it down.
 				 */
 				if (inputStream != null) {
-					
+
 					final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 					final StringBuilder stringBuilder = new StringBuilder(); // $codepro.audit.disable defineInitialCapacity
 

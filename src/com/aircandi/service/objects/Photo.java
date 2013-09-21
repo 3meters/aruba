@@ -84,8 +84,8 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 
 		photo.prefix = (String) map.get("prefix");
 		photo.suffix = (String) map.get("suffix");
-		photo.width = (Number) map.get("WIDTH");
-		photo.height = (Number) map.get("HEIGHT");
+		photo.width = (Number) map.get("width");
+		photo.height = (Number) map.get("height");
 		photo.source = (String) map.get("source");
 		photo.createdDate = (Number) map.get("createdDate");
 		photo.name = (String) map.get("name");
@@ -163,7 +163,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 				photoUri = prefix + String.valueOf(width.intValue()) + "x" + String.valueOf(height.intValue()) + suffix;
 			}
 			else {
-				photoUri = getSizedUri(250, 250);
+				photoUri = getSizedUri(256, 256);
 			}
 		}
 
@@ -176,7 +176,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 					photoUri = ServiceConstants.URL_PROXIBASE_SERVICE + photoUri;
 				}
 				else if (source.equals(PhotoSource.assets_categories)) {
-					photoUri = ServiceConstants.URL_PROXIBASE_SERVICE + photoUri;
+					photoUri = ServiceConstants.URL_PROXIBASE_SERVICE_ASSETS_CATEGORIES + photoUri;
 				}
 			}
 		}
@@ -186,7 +186,12 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	public String getSizedUri(Number pWidth, Number pHeight) {
 		String photoUri = prefix;
 		if (prefix != null && suffix != null) {
-			photoUri = prefix + String.valueOf(pWidth) + "x" + String.valueOf(pHeight) + suffix;
+			if (source.equals(PhotoSource.foursquare_icon)) {
+				photoUri = prefix + String.valueOf(88) + suffix;
+			}
+			else {
+				photoUri = prefix + String.valueOf(pWidth) + "x" + String.valueOf(pHeight) + suffix;
+			}
 		}
 		if (photoUri != null && !photoUri.startsWith("resource:") && source != null) {
 			if (source.equals(PhotoSource.aircandi)) {
@@ -257,13 +262,14 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public static class PhotoSource {
-		public static String	external			= "external";				// set in photo picker when using third party photo.
-		public static String	aircandi			= "aircandi";				// set when photo is stored by use and used to construct full uri to image data (s3)
-		public static String	assets				= "assets";					// set when using service image and used to construct full uri to image data in service
-		public static String	assets_categories	= "assets.categories";		// ditto to above
-		public static String	facebook			= "facebook";				// set if photo comes from facebook but not currently used
-		public static String	twitter				= "twitter";				// set if photo comes from twitter but not currently used
-		public static String	resource			= "resource";				// set as default for shortcut and applink photos
-		public static String	cache				= "cache";					// set when picking new photo returns a bitmap that is in the bitmap cache.
+		public static String	external			= "external";			// set in photo picker when using third party photo.
+		public static String	aircandi			= "aircandi";			// set when photo is stored by use and used to construct full uri to image data (s3)
+		public static String	assets				= "assets";			// set when using service image and used to construct full uri to image data in service
+		public static String	assets_categories	= "assets.categories";	// ditto to above
+		public static String	facebook			= "facebook";			// set if photo comes from facebook but not currently used
+		public static String	twitter				= "twitter";			// set if photo comes from twitter but not currently used
+		public static String	resource			= "resource";			// set as default for shortcut and applink photos
+		public static String	cache				= "cache";				// set when picking new photo returns a bitmap that is in the bitmap cache.
+		public static String	foursquare_icon		= "foursquare_icon";	// set when photo is stored by use and used to construct full uri to image data (s3)
 	}
 }

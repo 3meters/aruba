@@ -120,38 +120,38 @@ public class ImageResult
 	}
 
 	/**
-	 * Gets the WIDTH.
+	 * Gets the width.
 	 * 
-	 * @return the WIDTH
+	 * @return the width
 	 */
 	public Long getWidth() {
 		return width;
 	}
 
 	/**
-	 * Sets the WIDTH.
+	 * Sets the width.
 	 * 
 	 * @param value
-	 *            the new WIDTH
+	 *            the new width
 	 */
 	public void setWidth(Long value) {
 		width = value;
 	}
 
 	/**
-	 * Gets the HEIGHT.
+	 * Gets the height.
 	 * 
-	 * @return the HEIGHT
+	 * @return the height
 	 */
 	public Long getHeight() {
 		return height;
 	}
 
 	/**
-	 * Sets the HEIGHT.
+	 * Sets the height.
 	 * 
 	 * @param value
-	 *            the new HEIGHT
+	 *            the new height
 	 */
 	public void setHeight(Long value) {
 		height = value;
@@ -291,9 +291,9 @@ public class ImageResult
 		}
 
 		/**
-		 * Gets the WIDTH.
+		 * Gets the width.
 		 * 
-		 * @return the WIDTH
+		 * @return the width
 		 */
 		public Long getWidth() {
 			return width;
@@ -310,19 +310,19 @@ public class ImageResult
 		}
 
 		/**
-		 * Gets the HEIGHT.
+		 * Gets the height.
 		 * 
-		 * @return the HEIGHT
+		 * @return the height
 		 */
 		public Long getHeight() {
 			return height;
 		}
 
 		/**
-		 * Sets the HEIGHT.
+		 * Sets the height.
 		 * 
 		 * @param value
-		 *            the new HEIGHT
+		 *            the new height
 		 */
 		public void setHeight(Long value) {
 			height = value;

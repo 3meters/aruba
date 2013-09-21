@@ -94,6 +94,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public Boolean				checked				= false;					// Used to track selection in lists.
 	public Boolean				synthetic			= false;					// Entity is not persisted with service.
 	public Boolean				shortcuts			= false;					// Do links have shortcuts?
+	public Boolean				proximity			= false;					// Was this found based on proximity
 
 	public Entity() {}
 

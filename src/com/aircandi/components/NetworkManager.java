@@ -121,6 +121,7 @@ public class NetworkManager {
 		 */
 		System.setProperty("http.maxConnections", String.valueOf(ServiceConstants.DEFAULT_MAX_CONNECTIONS));
 		System.setProperty("http.keepAlive", Constants.SUPPORTS_FROYO ? "true" : "false");
+		//System.setProperty("sun.net.http.retryPost", "false");
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
@@ -165,6 +166,7 @@ public class NetworkManager {
 			}
 			if (serviceResponse.exception != null) {
 				Logger.w(this, "Service exception: " + serviceResponse.exception.getClass().getSimpleName());
+				Logger.w(this, "Service exception: " + serviceResponse.exception.getLocalizedMessage());
 			}
 			else {
 				Logger.w(this, "Service error: (code: " + String.valueOf(serviceResponse.statusCode) + ") " + serviceResponse.statusMessage);

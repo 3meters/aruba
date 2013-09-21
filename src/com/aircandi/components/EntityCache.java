@@ -245,6 +245,9 @@ public class EntityCache implements Map<String, Entity> {
 			}
 
 			if (loadedEntities != null && loadedEntities.size() > 0) {
+				for (Entity entity : loadedEntities) {
+					entity.proximity = true;
+				}
 				decorate(loadedEntities, linkOptions);
 				upsertEntities(loadedEntities);
 				if (stopwatch != null) {
@@ -300,6 +303,8 @@ public class EntityCache implements Map<String, Entity> {
 			final List<Entity> entities = (List<Entity>) serviceData.data;
 			serviceResponse.data = serviceData;
 			for (Entity entity : entities) {
+				entity.proximity = false;
+
 				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 
 					Place place = (Place) entity;
@@ -496,8 +501,8 @@ public class EntityCache implements Map<String, Entity> {
 		}
 	}
 
-	public synchronized Integer removeEntities(String schema, String type, Boolean synthetic) {
-		
+	public synchronized Integer removeEntities(String schema, String type, Boolean synthetic, Boolean proximity) {
+
 		Integer removeCount = 0;
 		final Iterator iterEntities = keySet().iterator();
 		Entity entity = null;
@@ -506,8 +511,10 @@ public class EntityCache implements Map<String, Entity> {
 			if (schema.equals(Constants.SCHEMA_ANY) || entity.schema.equals(schema)) {
 				if (type == null || type.equals(Constants.TYPE_ANY) || (entity.type != null && entity.type.equals(type))) {
 					if (synthetic == null || entity.synthetic == synthetic) {
-						iterEntities.remove();
-						removeCount++;
+						if (proximity == null || entity.proximity == proximity) {
+							iterEntities.remove();
+							removeCount++;
+						}
 					}
 				}
 			}

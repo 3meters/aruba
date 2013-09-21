@@ -160,7 +160,7 @@ public class ProximityManager {
 		 * Makes sure that the beacon collection is an accurate representation
 		 * of the latest wifi scan.
 		 */
-		mEntityCache.removeEntities(Constants.SCHEMA_ENTITY_BEACON, Constants.TYPE_ANY, null);
+		mEntityCache.removeEntities(Constants.SCHEMA_ENTITY_BEACON, Constants.TYPE_ANY, null, null);
 		/*
 		 * insert beacons for the latest scan results.
 		 */
@@ -217,7 +217,7 @@ public class ProximityManager {
 			beaconIds.add(beacon.id);
 		}
 
-		Integer removeCount = mEntityCache.removeEntities(Constants.SCHEMA_ENTITY_PLACE, null, false);
+		Integer removeCount = mEntityCache.removeEntities(Constants.SCHEMA_ENTITY_PLACE, null, false, true);
 		Logger.v(this, "Removed proximity places from cache: count = " + String.valueOf(removeCount));
 
 		/*

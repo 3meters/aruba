@@ -249,7 +249,7 @@ public class RadarFragment extends BaseFragment implements
 		}
 		else if (providerChange) {
 			Logger.d(getSherlockActivity(), "Databind: Start location search - provider change");
-			Integer removeCount = EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_PLACE, null, true);
+			Integer removeCount = EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_PLACE, null, true, false);
 			Logger.v(this, "Removed synthetic places from cache: count = " + String.valueOf(removeCount));
 			showBusy();
 			mRadarAdapter.getItems().clear();
@@ -275,7 +275,7 @@ public class RadarFragment extends BaseFragment implements
 				UI.showToastNotification("Wifi disabled", Toast.LENGTH_SHORT);
 			}
 			ProximityManager.getInstance().getWifiList().clear();
-			EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null);
+			EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null, null);
 			LocationManager.getInstance().setLocationLocked(null);
 		}
 		else if (NetworkManager.getInstance().getWifiState() == WifiManager.WIFI_STATE_ENABLED
@@ -749,7 +749,7 @@ public class RadarFragment extends BaseFragment implements
 		Aircandi.stopwatch1.start("Search for places by beacon");
 		mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
 		if (NetworkManager.getInstance().isWifiEnabled()) {
-			EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null);
+			EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_BEACON, null, null, null);
 			ProximityManager.getInstance().scanForWifi(ScanReason.QUERY);
 		}
 	}

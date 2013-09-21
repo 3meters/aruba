@@ -1,6 +1,8 @@
 package com.aircandi.utilities;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -104,6 +106,7 @@ public final class Errors {
 						return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_connection_none));
 					}
 				}
+				
 				if (exception instanceof WalledGardenException) {
 					return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_connection_walled_garden));
 				}
@@ -111,11 +114,12 @@ public final class Errors {
 				/*
 				 * Network request failed for some reason:
 				 * 
+				 * - ConnectException: Couldn't connect to the service host.
+				 * - ConnectTimeoutException: Timeout trying to establish connection to service host.
 				 * - SocketException: thrown during socket creation or setting options, we don't have a connection
-				 * - ConnectTimeoutException: timeout expired trying to connect to service
-				 * - SocketTimeoutException: timeout expired on a socket. poor connection or slow service.
+				 * - SocketTimeoutException: Timeout trying to send/receive data to the service. Service might not be up.
 				 * - WalledGardenException: have a connection but user was taken to a different host than requested
-				 * - UnknownHostException: ?
+				 * - UnknownHostException: The ip address of the host could not be determined.
 				 * - ClientProtocolException: malformed request and a bug.
 				 * - NotFoundException: Reached service but requested something that isn't there.
 				 * - UnauthorizedException: Reached service but user doesn't have needed permissions.
@@ -127,22 +131,28 @@ public final class Errors {
 				 * - UnknownHostException: hostname didn't exist in the dns system
 				 */
 				if (exception instanceof ConnectTimeoutException) {
-					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_connection_poor));
+					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unavailable));
 				}
 				else if (exception instanceof SocketTimeoutException) {
 					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_connection_poor));
 				}
+				if (exception instanceof ConnectException) {
+					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unavailable));
+				}
 				else if (exception instanceof SocketException) {
-					return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_connection_none));
+					return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_service_unavailable));
 				}
 				else if (exception instanceof UnknownHostException) {
 					return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_client_unknown_host));
+				}
+				else if (exception instanceof FileNotFoundException) {
+					return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_service_file_not_found));
 				}
 				else if (exception instanceof ClientProtocolException) {
 					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_client_request_error));
 				}
 				else {
-					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_connection_none));
+					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown));
 				}
 			}
 			else {

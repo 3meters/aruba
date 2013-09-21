@@ -158,17 +158,24 @@ public class UI {
 						if (serviceResponse.exception != null || serviceResponse.statusCode != null) {
 
 							Integer statusCode = serviceResponse.statusCode;
-							if (statusCode == HttpStatus.SC_NOT_FOUND || statusCode == HttpStatus.SC_FORBIDDEN) {
-								Logger.w(AirImageView.class, "Photo not found: " + photo.getUri());
-							}
-							else if (statusCode == HttpStatus.SC_NOT_ACCEPTABLE) {
-								Logger.w(AirImageView.class, "Unknown image format for: " + photo.getUri());
+							if (statusCode == null) {
+								if (serviceResponse.exception != null) {
+									Logger.w(AirImageView.class, "Exception trying to download image: " + serviceResponse.exception.getClass().getSimpleName());
+								}								
 							}
 							else {
-								Logger.w(AirImageView.class, "Unknown failure for: " + photo.getUri());
-								Logger.w(AirImageView.class, "Status code: " + String.valueOf(statusCode));
-								if (serviceResponse.exception != null) {
-									Logger.w(AirImageView.class, "Exception: " + serviceResponse.exception.getClass().getSimpleName());
+								if (statusCode == HttpStatus.SC_NOT_FOUND || statusCode == HttpStatus.SC_FORBIDDEN) {
+									Logger.w(AirImageView.class, "Photo not found: " + photo.getUri());
+								}
+								else if (statusCode == HttpStatus.SC_NOT_ACCEPTABLE) {
+									Logger.w(AirImageView.class, "Unknown image format for: " + photo.getUri());
+								}
+								else {
+									Logger.w(AirImageView.class, "Unknown failure for: " + photo.getUri());
+									Logger.w(AirImageView.class, "Status code: " + String.valueOf(statusCode));
+									if (serviceResponse.exception != null) {
+										Logger.w(AirImageView.class, "Exception: " + serviceResponse.exception.getClass().getSimpleName());
+									}
 								}
 							}
 						}
