@@ -27,6 +27,8 @@ public class AirLocation extends ServiceObject implements Cloneable, Serializabl
 	public Number				speed;
 	@Expose
 	public String				provider;
+	@Expose
+	public Boolean				zombie = false ;
 
 	public AirLocation() {}
 
@@ -57,6 +59,7 @@ public class AirLocation extends ServiceObject implements Cloneable, Serializabl
 		location.bearing = (Number) map.get("bearing");
 		location.speed = (Number) map.get("speed");
 		location.provider = (String) map.get("provider");
+		location.zombie = (Boolean) map.get("zombie");
 		return location;
 	}
 	

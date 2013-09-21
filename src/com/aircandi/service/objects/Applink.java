@@ -8,8 +8,8 @@ import com.aircandi.R;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.EntityManager;
 import com.aircandi.service.Expose;
-import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.Photo.PhotoSource;
+import com.aircandi.utilities.Json;
 
 /**
  * @author Jayma
@@ -95,7 +95,7 @@ public class Applink extends Entity implements Cloneable, Serializable {
 
 	public static Applink builder(Entity entity, String type, String name, String image, Boolean synthetic) {
 
-		final Applink applink = (Applink) EntityManager.getInstance().loadEntityFromResources(R.raw.applink_entity, ObjectType.APPLINK);
+		final Applink applink = (Applink) EntityManager.getInstance().loadEntityFromResources(R.raw.applink_entity, Json.ObjectType.APPLINK);
 		applink.id = entity.id + "." + type;
 		applink.schema = Constants.SCHEMA_ENTITY_APPLINK;
 		applink.type = type;

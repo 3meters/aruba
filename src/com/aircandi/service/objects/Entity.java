@@ -92,7 +92,6 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public Boolean				hidden				= false;					// Flag entities not currently visible because of fencing.
 	public Float				distance;										// Used to cache most recent distance calculation.
 	public Boolean				checked				= false;					// Used to track selection in lists.
-	public Boolean				stale				= false;					// Used to determine that an entity ref is no longer current.
 	public Boolean				synthetic			= false;					// Entity is not persisted with service.
 	public Boolean				shortcuts			= false;					// Do links have shortcuts?
 
@@ -731,7 +730,6 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			entity.hidden = (Boolean) (map.get("hidden") != null ? map.get("hidden") : false);
 			entity.synthetic = (Boolean) (map.get("synthetic") != null ? map.get("synthetic") : false);
 			entity.shortcuts = (Boolean) (map.get("shortcuts") != null ? map.get("shortcuts") : false);
-			entity.stale = (Boolean) (map.get("stale") != null ? map.get("stale") : false);
 			entity.checked = (Boolean) (map.get("checked") != null ? map.get("checked") : false);
 			entity.placeId = (String) (nameMapping ? map.get("_place") : map.get("placeId"));
 			entity.linkModifiedDate = (Number) map.get("linkModifiedDate");

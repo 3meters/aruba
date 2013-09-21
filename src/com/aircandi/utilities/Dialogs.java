@@ -20,7 +20,7 @@ import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.Logger;
 import com.aircandi.components.Tracker;
-import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutMeta;

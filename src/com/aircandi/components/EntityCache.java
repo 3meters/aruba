@@ -15,13 +15,10 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
-import com.aircandi.service.HttpService.RequestType;
-import com.aircandi.service.HttpService.ResponseFormat;
-import com.aircandi.service.HttpService.ServiceDataWrapper;
+import com.aircandi.service.RequestType;
+import com.aircandi.service.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Count;
@@ -35,6 +32,7 @@ import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.Json;
 
 @SuppressWarnings("ucd")
 public class EntityCache implements Map<String, Entity> {
@@ -113,7 +111,7 @@ public class EntityCache implements Map<String, Entity> {
 		final Bundle parameters = new Bundle();
 		parameters.putStringArrayList("entityIds", (ArrayList<String>) entityIds);
 		if (linkOptions != null) {
-			parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
+			parameters.putString("links", "object:" + Json.objectToJson(linkOptions));
 		}
 
 		if (linkOptions != null && linkOptions.ignoreInactive != null) {
@@ -134,7 +132,7 @@ public class EntityCache implements Map<String, Entity> {
 
 		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.ENTITY, ServiceDataWrapper.TRUE);
+			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.ENTITY, Json.ServiceDataWrapper.TRUE);
 			final List<Entity> loadedEntities = (List<Entity>) serviceData.data;
 			serviceResponse.data = serviceData;
 
@@ -153,11 +151,11 @@ public class EntityCache implements Map<String, Entity> {
 		parameters.putString("entityId", entityId);
 
 		if (linkOptions != null) {
-			parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
+			parameters.putString("links", "object:" + Json.objectToJson(linkOptions));
 		}
 
 		if (cursor != null) {
-			parameters.putString("cursor", "object:" + HttpService.objectToJson(cursor));
+			parameters.putString("cursor", "object:" + Json.objectToJson(cursor));
 		}
 
 		if (linkOptions != null && linkOptions.ignoreInactive != null) {
@@ -178,7 +176,7 @@ public class EntityCache implements Map<String, Entity> {
 
 		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.ENTITY, ServiceDataWrapper.TRUE);
+			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.ENTITY, Json.ServiceDataWrapper.TRUE);
 			final List<Entity> loadedEntities = (List<Entity>) serviceData.data;
 			serviceResponse.data = serviceData;
 
@@ -205,11 +203,11 @@ public class EntityCache implements Map<String, Entity> {
 		parameters.putStringArrayList("beaconIds", (ArrayList<String>) beaconIds);
 
 		if (linkOptions != null) {
-			parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
+			parameters.putString("links", "object:" + Json.objectToJson(linkOptions));
 		}
 
 		if (cursor != null) {
-			parameters.putString("cursor", "object:" + HttpService.objectToJson(cursor));
+			parameters.putString("cursor", "object:" + Json.objectToJson(cursor));
 		}
 
 		if (registrationId != null) {
@@ -238,7 +236,7 @@ public class EntityCache implements Map<String, Entity> {
 
 		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.ENTITY, ServiceDataWrapper.TRUE);
+			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.ENTITY, Json.ServiceDataWrapper.TRUE);
 			final List<Entity> loadedEntities = (List<Entity>) serviceData.data;
 			serviceResponse.data = serviceData;
 
@@ -262,7 +260,7 @@ public class EntityCache implements Map<String, Entity> {
 	public ServiceResponse loadEntitiesNearLocation(AirLocation location, LinkOptions linkOptions, List<String> excludePlaceIds) {
 
 		final Bundle parameters = new Bundle();
-		parameters.putString("location", "object:" + HttpService.objectToJson(location));
+		parameters.putString("location", "object:" + Json.objectToJson(location));
 		parameters.putInt("limit", 50);
 		parameters.putString("provider",
 				Aircandi.settings.getString(
@@ -274,7 +272,7 @@ public class EntityCache implements Map<String, Entity> {
 						Constants.PREF_SEARCH_RADIUS_DEFAULT)));
 
 		if (linkOptions != null) {
-			parameters.putString("links", "object:" + HttpService.objectToJson(linkOptions));
+			parameters.putString("links", "object:" + Json.objectToJson(linkOptions));
 		}
 
 		if (excludePlaceIds != null && excludePlaceIds.size() > 0) {
@@ -282,7 +280,7 @@ public class EntityCache implements Map<String, Entity> {
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_PLACES + "getNearLocation")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_PLACES + "near")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
@@ -296,19 +294,20 @@ public class EntityCache implements Map<String, Entity> {
 		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 			final String jsonResponse = (String) serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.PLACE, ServiceDataWrapper.TRUE);
+			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.PLACE, Json.ServiceDataWrapper.TRUE);
 
 			/* Do a bit of fixup */
 			final List<Entity> entities = (List<Entity>) serviceData.data;
 			serviceResponse.data = serviceData;
 			for (Entity entity : entities) {
 				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-					/* No id means it's a synthetic */
+
 					Place place = (Place) entity;
 					place.locked = false;
 					place.enabled = true;
 
-					if (entity.id == null) {
+					/* No id means it's a synthetic */
+					if (place.id == null) {
 						place.id = place.getProvider().id;
 						place.modifiedDate = DateTime.nowDate().getTime();
 						place.synthetic = true;
@@ -319,31 +318,28 @@ public class EntityCache implements Map<String, Entity> {
 				}
 			}
 
-			/* Places LOCKED in by proximity trump places LOCKED in by location */
-			final List<Place> proximityPlaces = (List<Place>) EntityManager.getInstance().getPlaces(null, true);
-
-			Iterator<Place> iterProximityPlaces = proximityPlaces.iterator();
-			Iterator<Entity> iterLocationPlaces = entities.iterator();
-
-			while (iterLocationPlaces.hasNext()) {
-				Entity locPlace = iterLocationPlaces.next();
-
-				while (iterProximityPlaces.hasNext()) {
-					Place proxPlace = iterProximityPlaces.next();
-
-					if (proxPlace.id.equals(locPlace.id)) {
-						iterLocationPlaces.remove();
-					}
-					else if (!proxPlace.getProvider().type.equals("aircandi")) {
-						if (proxPlace.getProvider().id.equals(locPlace.id)) {
-							iterLocationPlaces.remove();
-						}
-					}
-				}
-			}
-
-			/* Remove all synthetic places from the cache just to help constrain the cache size */
-			removeEntities(Constants.SCHEMA_ENTITY_PLACE, null, true);
+			//			/* Places LOCKED in by proximity trump places LOCKED in by location */
+			//			final List<Place> proximityPlaces = (List<Place>) EntityManager.getInstance().getPlaces(null, true);
+			//
+			//			Iterator<Place> iterProximityPlaces = proximityPlaces.iterator();
+			//			Iterator<Entity> iterLocationPlaces = entities.iterator();
+			//
+			//			while (iterLocationPlaces.hasNext()) {
+			//				Entity locPlace = iterLocationPlaces.next();
+			//
+			//				while (iterProximityPlaces.hasNext()) {
+			//					Place proxPlace = iterProximityPlaces.next();
+			//
+			//					if (proxPlace.id.equals(locPlace.id)) {
+			//						iterLocationPlaces.remove();
+			//					}
+			//					else if (!proxPlace.getProvider().type.equals("aircandi")) {
+			//						if (proxPlace.getProvider().id.equals(locPlace.id)) {
+			//							iterLocationPlaces.remove();
+			//						}
+			//					}
+			//				}
+			//			}
 
 			/* Push place entities to cache */
 			decorate(entities, new LinkOptions(null, null, false, null));
@@ -483,38 +479,40 @@ public class EntityCache implements Map<String, Entity> {
 	// Cache deletes
 	// --------------------------------------------------------------------------------------------
 
-	public synchronized Entity removeEntityTree(String entityId) {
+	public synchronized void removeEntityTree(String entityId) {
 		/*
-		 * Clean out entity and every entity related to entity
+		 * Clean out entity and every entity related to entity. Is not recursive
 		 */
-		Entity staleEntity = remove(entityId);
-		if (staleEntity != null) {
-			staleEntity.stale = true;
-
-			List<Entity> entities = (List<Entity>) staleEntity.getLinkedEntitiesByLinkTypes(null, null, Direction.in, true);
+		Entity removedEntity = remove(entityId);
+		if (removedEntity != null) {
+			/*
+			 * getLinked..() with traverse = true will return entities that are multiple links away.
+			 * We get both strong and weak linked entities.
+			 */
+			List<Entity> entities = (List<Entity>) removedEntity.getLinkedEntitiesByLinkTypes(null, null, Direction.in, true);
 			for (Entity childEntity : entities) {
-				staleEntity = remove(childEntity.id);
-				if (staleEntity != null) {
-					staleEntity.stale = true;
-				}
+				remove(childEntity.id);
 			}
 		}
-		return staleEntity;
 	}
 
-	public synchronized void removeEntities(String schema, String type, Boolean synthetic) {
-		final Iterator iter = keySet().iterator();
+	public synchronized Integer removeEntities(String schema, String type, Boolean synthetic) {
+		
+		Integer removeCount = 0;
+		final Iterator iterEntities = keySet().iterator();
 		Entity entity = null;
-		while (iter.hasNext()) {
-			entity = get(iter.next());
+		while (iterEntities.hasNext()) {
+			entity = get(iterEntities.next());
 			if (schema.equals(Constants.SCHEMA_ANY) || entity.schema.equals(schema)) {
 				if (type == null || type.equals(Constants.TYPE_ANY) || (entity.type != null && entity.type.equals(type))) {
 					if (synthetic == null || entity.synthetic == synthetic) {
-						iter.remove();
+						iterEntities.remove();
+						removeCount++;
 					}
 				}
 			}
 		}
+		return removeCount;
 	}
 
 	public void removeLink(String toId, String type, String fromId) {

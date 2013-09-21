@@ -135,10 +135,8 @@
     <string name="alert_kicked_follow">Follow</string>
     <string name="alert_kicked">Kick!</string>
     
-    <!-- Errors: network -->
+    <!-- Errors: service responses -->
 
-    <string name="error_signup_missmatched_passwords_title">Password</string>
-    <string name="error_signup_missmatched_passwords_message">Passwords do not match</string>
     <string name="error_signup_email_taken">Email address is already being used.</string>
     <string name="error_signup_password_weak">Password is too weak. Passwords must be at least 6 characters long, not be part of your user name, and not be certain commmon words.</string>
     <string name="error_change_password_unauthorized">Old password is invalid.</string>
@@ -149,6 +147,11 @@
     <string name="error_session_expired_title">Session expired</string>
     <string name="error_session_expired">Your login session expired. Please re-sign in.</string>
     <string name="error_session_invalid">Your login session is invalid. Please re-sign in.</string>
+    
+    <!-- Errors: form validation -->
+    
+    <string name="error_signup_missmatched_passwords_title">Password</string>
+    <string name="error_signup_missmatched_passwords_message">Passwords do not match</string>
     <string name="error_weburi_invalid">Web address isn\'t in a valid format.</string>
     <string name="error_missing_fullname">Enter a name.</string>
     <string name="error_missing_email">Enter an email address.</string>
@@ -176,18 +179,24 @@
 
     <!-- Errors: connectivity -->
 
-    <string name="error_connection_walled_garden">You need to sign in to enable internet access</string>
-    <string name="error_connection_none">Check network connection and retry</string>
-    <string name="error_connection_poor">Network connection is poor, retry later</string>
-    <string name="error_service_unavailable">Service is unavailable, retry later</string>
+    <string name="error_connection_generic">Sorry, there was a communication error and we couldn\'t get the information. Try again and it might work.</string>
+    <string name="error_connection_walled_garden">You may need to sign in to enable internet access.</string>
+    <string name="error_connection_airplane_mode">You are not connected to the network.\nTurn off Airplane Mode?</string>
+    <string name="error_connection_none">You appear to be offline or are not connected to the network.</string>
+    <string name="error_connection_poor">Your network connection is weak. Try again and it might work</string>
+    <string name="error_service_unavailable">Aircandi\'s servers are overloaded. Please excuse us!</string>
     <string name="error_client_unknown_host">The website you entered can\'t be found.</string>
     <string name="error_client_request_error">Aircandi request error</string>
     <string name="error_client_request_not_found">Resource not found</string>
     <string name="error_service_unauthorized">Unauthorized request</string>
     <string name="error_service_forbidden">Requested operation is not valid</string>
-    <string name="error_service_gateway_timeout">Did not receive timely response from service</string>
-    <string name="error_service_unknown">Unknown service error</string>
+    <string name="error_service_gateway_timeout">Aircandi\'s servers are overloaded. Please excuse us!</string>
+    <string name="error_service_unknown">Oops, something went wrong. Try again and it might work.</string>
 
+    <!-- Errors: other -->
+
+    <string name="error_update_required">You need to sign in to enable internet access</string>
+    
     <!-- Toast -->
 
     <string name="toast_applinks_refreshed">Links refreshed.</string>

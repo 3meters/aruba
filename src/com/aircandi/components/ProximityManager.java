@@ -17,13 +17,13 @@ import android.net.wifi.WifiManager;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.events.BeaconsLockedEvent;
 import com.aircandi.events.EntitiesByProximityFinishedEvent;
 import com.aircandi.events.EntitiesChangedEvent;
 import com.aircandi.events.MonitoringWifiScanReceivedEvent;
 import com.aircandi.events.PlacesNearLocationFinishedEvent;
 import com.aircandi.events.QueryWifiScanReceivedEvent;
+import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
@@ -204,7 +204,7 @@ public class ProximityManager {
 
 		/*
 		 * Call the proxi service to see if the new beacons have been tagged with any entities. If call comes back
-		 * null then there was a NETWORK or service problem. The user got a toast notification from the service. We
+		 * null then there was a network or service problem. The user got a toast notification from the service. We
 		 * are making synchronous calls inside an asynchronous thread.
 		 */
 		ServiceResponse serviceResponse = new ServiceResponse();
@@ -215,6 +215,25 @@ public class ProximityManager {
 
 		for (Beacon beacon : beacons) {
 			beaconIds.add(beacon.id);
+		}
+
+		Integer removeCount = mEntityCache.removeEntities(Constants.SCHEMA_ENTITY_PLACE, null, false);
+		Logger.v(this, "Removed proximity places from cache: count = " + String.valueOf(removeCount));
+
+		/*
+		 * Early exit if there aren't any beacons around
+		 */
+		if (beaconIds.size() == 0) {
+			mLastBeaconLoadDate = DateTime.nowDate().getTime();
+
+			/* All cached place entities that qualify based on current distance pref setting */
+			final List<Entity> entitiesForEvent = (List<Entity>) EntityManager.getInstance().getPlaces(null, null);
+			Aircandi.stopwatch1.segmentTime("Entities for beacons: objects processed");
+
+			BusProvider.getInstance().post(new EntitiesByProximityFinishedEvent());
+			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent, "getEntitiesByProximity"));
+			return serviceResponse;
+
 		}
 
 		/* ADD current registrationId */
@@ -234,7 +253,7 @@ public class ProximityManager {
 			Aircandi.stopwatch1.segmentTime("Entities for beacons: objects processed");
 
 			BusProvider.getInstance().post(new EntitiesByProximityFinishedEvent());
-			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
+			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent, "getEntitiesByProximity"));
 		}
 
 		return serviceResponse;
@@ -264,7 +283,7 @@ public class ProximityManager {
 		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final List<Entity> entitiesForEvent = (List<Entity>) EntityManager.getInstance().getPlaces(null, null);
 			BusProvider.getInstance().post(new PlacesNearLocationFinishedEvent());
-			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
+			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent, "getEntitiesNearLocation"));
 		}
 		return serviceResponse;
 	}

@@ -20,20 +20,19 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
 import com.aircandi.components.bitmaps.ImageResult;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
-import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.RequestListener;
+import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.ui.base.IForm;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.UI;
 
 public class PhotoForm extends BaseBrowse implements IForm {
@@ -53,7 +52,7 @@ public class PhotoForm extends BaseBrowse implements IForm {
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
 			final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
-			mPhoto = (Photo) HttpService.jsonToObject(jsonPhoto, ObjectType.PHOTO);
+			mPhoto = (Photo) Json.jsonToObject(jsonPhoto, Json.ObjectType.PHOTO);
 		}
 	}
 

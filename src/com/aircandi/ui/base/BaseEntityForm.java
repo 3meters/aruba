@@ -61,6 +61,7 @@ import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -175,7 +176,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 						}
 					}
 					else {
-						Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
+						Errors.handleError(BaseEntityForm.this, result.serviceResponse);
 						return;
 					}
 				}
@@ -245,8 +246,9 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 					drawStats();
 				}
 				else {
-					if (result.serviceResponse.exception.getStatusCode() != ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
-						Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
+					if (result.serviceResponse.statusCodeService != null
+							&& result.serviceResponse.statusCodeService != ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
+						Errors.handleError(BaseEntityForm.this, result.serviceResponse);
 					}
 				}
 				((ComboButton) findViewById(R.id.button_like)).getViewAnimator().setDisplayedChild(0);
@@ -302,8 +304,9 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 					drawStats();
 				}
 				else {
-					if (result.serviceResponse.exception.getStatusCode() != ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
-						Routing.serviceError(BaseEntityForm.this, result.serviceResponse);
+					if (result.serviceResponse.statusCodeService != null
+							&& result.serviceResponse.statusCodeService != ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
+						Errors.handleError(BaseEntityForm.this, result.serviceResponse);
 					}
 				}
 			}

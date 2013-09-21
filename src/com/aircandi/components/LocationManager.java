@@ -30,7 +30,7 @@ public class LocationManager {
 	private Location							mLocationLatest;
 	private Location							mLocationLocked;
 	private AirLocation							mAirLocationLocked;
-	
+
 	private Boolean								mLocationModeBurstNetwork	= false;
 	private Boolean								mLocationModeBurstGps		= false;
 	protected PendingIntent						mLocationListenerPendingIntent;
@@ -218,7 +218,7 @@ public class LocationManager {
 						BusProvider.getInstance().post(new LocationChangedEvent(mLocationLatest));
 					}
 
-					if (location.getProvider().equals("NETWORK") && mLocationModeBurstNetwork) {
+					if (location.getProvider().toLowerCase(Locale.US).equals("network") && mLocationModeBurstNetwork) {
 						if (location.getAccuracy() <= Constants.DESIRED_ACCURACY_NETWORK) {
 							Logger.d(this, "Network burst mode stopped: desired accuracy reached");
 							if (mLocationModeBurstGps) {
@@ -280,13 +280,13 @@ public class LocationManager {
 			return LocationBetterReason.NOT_NULL;
 		}
 
-		/* A good gps location is always better than an excellent NETWORK location */
-		if (currentBestLocation.getProvider().equals("NETWORK") && locationToEvaluate.getProvider().equals("gps")) {
+		/* A good gps location is always better than an excellent network location */
+		if (currentBestLocation.getProvider().equals("network") && locationToEvaluate.getProvider().equals("gps")) {
 			return LocationBetterReason.PROVIDER;
 		}
 
-		/* Do not replace a good gps location with a NETWORK location */
-		if (currentBestLocation.getProvider().equals("gps") && locationToEvaluate.getProvider().equals("NETWORK")) {
+		/* Do not replace a good gps location with a network location */
+		if (currentBestLocation.getProvider().equals("gps") && locationToEvaluate.getProvider().equals("network")) {
 			return LocationBetterReason.NONE;
 		}
 
@@ -377,7 +377,12 @@ public class LocationManager {
 
 	public void setLocationLocked(Location locationLocked) {
 		mLocationLocked = locationLocked;
-		mAirLocationLocked = getAirLocationForLockedLocation();
+		if (locationLocked == null && mAirLocationLocked != null) {
+			mAirLocationLocked.zombie = true;
+		}
+		else {
+			mAirLocationLocked = getAirLocationForLockedLocation();
+		}
 	}
 
 	public AirLocation getAirLocationLocked() {

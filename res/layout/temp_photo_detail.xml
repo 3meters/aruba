@@ -38,14 +38,6 @@
         aircandi:layout="@layout/widget_photoview_touch"
         aircandi:showBusy="false" />
 
-    <!--
-    <it.sephiroth.android.library.imagezoom.ImageViewTouch
-        android:id="@+id/photo"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:ignore="MissingRegistered" />
-    -->
-
     <LinearLayout
         style="?attr/buttonBarStyle"
         android:layout_width="match_parent"

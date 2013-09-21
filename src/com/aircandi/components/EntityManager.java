@@ -22,17 +22,11 @@ import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ExcludeNulls;
-import com.aircandi.service.HttpService.ObjectType;
-import com.aircandi.service.HttpService.RequestType;
-import com.aircandi.service.HttpService.ResponseFormat;
-import com.aircandi.service.HttpService.ServiceDataWrapper;
-import com.aircandi.service.HttpService.UseAnnotations;
-import com.aircandi.service.HttpServiceException;
+import com.aircandi.service.RequestType;
+import com.aircandi.service.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.CacheStamp;
@@ -57,6 +51,7 @@ import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.UI;
 
 public class EntityManager {
@@ -195,7 +190,7 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.RESULT, ServiceDataWrapper.TRUE);
+			final ServiceData serviceData = (ServiceData) Json.jsonToObject(jsonResponse, Json.ObjectType.RESULT, Json.ServiceDataWrapper.TRUE);
 			if (serviceData.data != null) {
 				cacheStampService = (CacheStamp) serviceData.data;
 			}
@@ -211,7 +206,7 @@ public class EntityManager {
 		parameters.putString("source", "foursquare");
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_PLACES + "getCategories")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_PLACES + "categories")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
@@ -220,7 +215,7 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.CATEGORY, ServiceDataWrapper.TRUE);
+			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.CATEGORY, Json.ServiceDataWrapper.TRUE);
 			mCategories = (List<Category>) serviceData.data;
 			result.serviceResponse.data = mCategories;
 		}
@@ -234,7 +229,7 @@ public class EntityManager {
 
 		final List<String> entityStrings = new ArrayList<String>();
 		for (Entity applink : applinks) {
-			entityStrings.add("object:" + HttpService.objectToJson(applink, UseAnnotations.TRUE, ExcludeNulls.TRUE));
+			entityStrings.add("object:" + Json.objectToJson(applink, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 		}
 		parameters.putStringArrayList("applinks", (ArrayList<String>) entityStrings);
 
@@ -248,7 +243,7 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.APPLINK, ServiceDataWrapper.TRUE);
+			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.APPLINK, Json.ServiceDataWrapper.TRUE);
 			result.data = serviceData.data; // updated collection of applinks
 		}
 		return result;
@@ -259,11 +254,11 @@ public class EntityManager {
 		final ModelResult result = new ModelResult();
 		final Bundle parameters = new Bundle();
 
-		parameters.putString("place", "object:" + HttpService.objectToJson(place, UseAnnotations.TRUE, ExcludeNulls.TRUE));
+		parameters.putString("place", "object:" + Json.objectToJson(place, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 
 		final List<String> entityStrings = new ArrayList<String>();
 		for (Entity applink : applinks) {
-			entityStrings.add("object:" + HttpService.objectToJson(applink, UseAnnotations.TRUE, ExcludeNulls.TRUE));
+			entityStrings.add("object:" + Json.objectToJson(applink, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 		}
 		parameters.putStringArrayList("applinks", (ArrayList<String>) entityStrings);
 		parameters.putInt("timeout", ServiceConstants.SOURCE_SUGGESTIONS_TIMEOUT);
@@ -278,7 +273,7 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.APPLINK, ServiceDataWrapper.TRUE);
+			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.APPLINK, Json.ServiceDataWrapper.TRUE);
 			result.data = serviceData.data; // updated collection of applinks
 		}
 		return result;
@@ -303,7 +298,7 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.PHOTO, ServiceDataWrapper.TRUE);
+			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.PHOTO, Json.ServiceDataWrapper.TRUE);
 			final List<Photo> photos = (List<Photo>) serviceData.data;
 			result.serviceResponse.data = photos;
 		}
@@ -325,7 +320,7 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.SERVICE_ENTRY, ServiceDataWrapper.TRUE);
+			final ServiceData serviceData = (ServiceData) Json.jsonToObject(jsonResponse, Json.ObjectType.SERVICE_ENTRY, Json.ServiceDataWrapper.TRUE);
 			result.serviceResponse.data = ((ServiceEntry) serviceData.data).id;
 		}
 		return result;
@@ -335,7 +330,7 @@ public class EntityManager {
 	// user updates
 	// --------------------------------------------------------------------------------------------
 
-	public ModelResult signin(String email, String password) {
+	public ModelResult signin(String email, String password, String activityName) {
 		final ModelResult result = new ModelResult();
 
 		final Bundle parameters = new Bundle();
@@ -348,8 +343,7 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_AUTH + "signin")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
+				.setActivityName(activityName)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -371,8 +365,6 @@ public class EntityManager {
 					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_AUTH + "signout")
 					.setRequestType(RequestType.GET)
 					.setSession(user.session)
-					.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_QUERIES)
-					.setRetry(false)
 					.setResponseFormat(ResponseFormat.JSON);
 
 			result.serviceResponse = dispatch(serviceRequest);
@@ -381,7 +373,7 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult updatePassword(String userId, String passwordOld, String passwordNew) {
+	public ModelResult updatePassword(String userId, String passwordOld, String passwordNew, String activityName) {
 		final ModelResult result = new ModelResult();
 
 		final Bundle parameters = new Bundle();
@@ -395,8 +387,7 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_USER + "changepw")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
+				.setActivityName(activityName)
 				.setSession(Aircandi.getInstance().getUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
 
@@ -417,9 +408,7 @@ public class EntityManager {
 			ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_USER + "create")
 					.setRequestType(RequestType.INSERT)
-					.setRequestBody(HttpService.objectToJson(user, UseAnnotations.TRUE, ExcludeNulls.TRUE))
-					.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-					.setRetry(false)
+					.setRequestBody(Json.objectToJson(user, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE))
 					.setUseSecret(true)
 					.setResponseFormat(ResponseFormat.JSON);
 
@@ -429,7 +418,7 @@ public class EntityManager {
 			if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 				String jsonResponse = (String) result.serviceResponse.data;
-				ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.NONE, ServiceDataWrapper.TRUE);
+				ServiceData serviceData = (ServiceData) Json.jsonToObject(jsonResponse, Json.ObjectType.NONE, Json.ServiceDataWrapper.TRUE);
 				user = serviceData.user;
 				user.session = serviceData.session;
 				/*
@@ -447,9 +436,7 @@ public class EntityManager {
 					serviceRequest = new ServiceRequest()
 							.setUri(user.getEntryUri())
 							.setRequestType(RequestType.UPDATE)
-							.setRequestBody(HttpService.objectToJson(user, UseAnnotations.TRUE, ExcludeNulls.TRUE))
-							.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-							.setRetry(false)
+							.setRequestBody(Json.objectToJson(user, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE))
 							.setSession(user.session)
 							.setResponseFormat(ResponseFormat.JSON);
 
@@ -458,7 +445,7 @@ public class EntityManager {
 
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 						jsonResponse = (String) result.serviceResponse.data;
-						serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.USER, ServiceDataWrapper.TRUE);
+						serviceData = (ServiceData) Json.jsonToObject(jsonResponse, Json.ObjectType.USER, Json.ServiceDataWrapper.TRUE);
 						final User insertedUser = (User) serviceData.data;
 						insertedUser.session = user.session;
 						result.data = insertedUser;
@@ -509,7 +496,7 @@ public class EntityManager {
 			result.serviceResponse = dispatch(serviceRequest);
 			if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 				final String jsonResponse = (String) result.serviceResponse.data;
-				final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.STAT, ServiceDataWrapper.TRUE);
+				final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.STAT, Json.ServiceDataWrapper.TRUE);
 				final List<Stat> stats = (List<Stat>) serviceData.data;
 				result.data = stats;
 			}
@@ -577,7 +564,7 @@ public class EntityManager {
 
 					for (Beacon beacon : beacons) {
 						AirLocation location = LocationManager.getInstance().getAirLocationLocked();
-						if (location != null) {
+						if (location != null && !location.zombie) {
 
 							beacon.location = new AirLocation();
 
@@ -603,7 +590,7 @@ public class EntityManager {
 
 						beacon.type = Constants.TYPE_BEACON_FIXED;
 						beacon.locked = false;
-						beaconStrings.add("object:" + HttpService.objectToJson(beacon, UseAnnotations.TRUE, ExcludeNulls.TRUE));
+						beaconStrings.add("object:" + Json.objectToJson(beacon, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 					}
 					parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
 				}
@@ -625,11 +612,11 @@ public class EntityManager {
 
 				/* Link */
 				if (link != null) {
-					parameters.putString("link", "object:" + HttpService.objectToJson(link, UseAnnotations.TRUE, ExcludeNulls.TRUE));
+					parameters.putString("link", "object:" + Json.objectToJson(link, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 				}
 
 				/* Entity */
-				parameters.putString("entity", "object:" + HttpService.objectToJson(entity, UseAnnotations.TRUE, ExcludeNulls.TRUE));
+				parameters.putString("entity", "object:" + Json.objectToJson(entity, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 
 				if (entity.synthetic) {
 					parameters.putBoolean("skipNotifications", true);
@@ -640,8 +627,6 @@ public class EntityManager {
 						.setRequestType(RequestType.METHOD)
 						.setParameters(parameters)
 						.setSession(Aircandi.getInstance().getUser().session)
-						.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-						.setRetry(false)
 						.setResponseFormat(ResponseFormat.JSON);
 
 				result.serviceResponse = dispatch(serviceRequest);
@@ -649,16 +634,16 @@ public class EntityManager {
 
 			if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
-				ObjectType serviceDataType = ObjectType.ENTITY;
+				Json.ObjectType serviceDataType = Json.ObjectType.ENTITY;
 
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) serviceDataType = ObjectType.APPLINK;
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_BEACON)) serviceDataType = ObjectType.BEACON;
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) serviceDataType = ObjectType.COMMENT;
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) serviceDataType = ObjectType.PLACE;
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) serviceDataType = ObjectType.POST;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) serviceDataType = Json.ObjectType.APPLINK;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_BEACON)) serviceDataType = Json.ObjectType.BEACON;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) serviceDataType = Json.ObjectType.COMMENT;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) serviceDataType = Json.ObjectType.PLACE;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) serviceDataType = Json.ObjectType.POST;
 
 				final String jsonResponse = (String) result.serviceResponse.data;
-				final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, serviceDataType, ServiceDataWrapper.TRUE);
+				final ServiceData serviceData = (ServiceData) Json.jsonToObject(jsonResponse, serviceDataType, Json.ServiceDataWrapper.TRUE);
 				final Entity insertedEntity = (Entity) serviceData.data;
 				/*
 				 * Optimization: ADD soft 'create' link so user entity doesn't have to be refetched
@@ -713,15 +698,13 @@ public class EntityManager {
 			parameters.putBoolean("skipActivityDate", false);
 			parameters.putBoolean("returnEntity", false);
 			entity.updateScope = UpdateScope.OBJECT;
-			parameters.putString("entity", "object:" + HttpService.objectToJson(entity, UseAnnotations.TRUE, ExcludeNulls.TRUE));
+			parameters.putString("entity", "object:" + Json.objectToJson(entity, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 
 			final ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity")
 					.setRequestType(RequestType.METHOD)
 					.setParameters(parameters)
 					.setSession(Aircandi.getInstance().getUser().session)
-					.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-					.setRetry(false)
 					.setResponseFormat(ResponseFormat.JSON);
 
 			result.serviceResponse = dispatch(serviceRequest);
@@ -772,8 +755,6 @@ public class EntityManager {
 					.setRequestType(RequestType.METHOD)
 					.setParameters(parameters)
 					.setSession(Aircandi.getInstance().getUser().session)
-					.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-					.setRetry(false)
 					.setResponseFormat(ResponseFormat.JSON);
 
 			result.serviceResponse = dispatch(serviceRequest);
@@ -817,7 +798,7 @@ public class EntityManager {
 			for (Beacon beacon : beacons) {
 				if (beacon.id.equals(primaryBeacon.id)) {
 					AirLocation location = LocationManager.getInstance().getAirLocationLocked();
-					if (location != null) {
+					if (location != null && !location.zombie) {
 
 						beacon.location = new AirLocation();
 
@@ -844,7 +825,7 @@ public class EntityManager {
 
 				beacon.type = Constants.TYPE_BEACON_FIXED;
 				beacon.locked = false;
-				beaconStrings.add("object:" + HttpService.objectToJson(beacon, UseAnnotations.TRUE, ExcludeNulls.TRUE));
+				beaconStrings.add("object:" + Json.objectToJson(beacon, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 				beaconIds.add(beacon.id);
 			}
 
@@ -867,8 +848,6 @@ public class EntityManager {
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
 				.setSession(Aircandi.getInstance().getUser().session)
-				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -942,8 +921,6 @@ public class EntityManager {
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
 				.setSession(Aircandi.getInstance().getUser().session)
-				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -975,8 +952,6 @@ public class EntityManager {
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
 				.setSession(Aircandi.getInstance().getUser().session)
-				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -1022,7 +997,7 @@ public class EntityManager {
 			if (entity.isTempId()) {
 				entity.id = null;
 			}
-			entityStrings.add("object:" + HttpService.objectToJson(entity, UseAnnotations.TRUE, ExcludeNulls.TRUE));
+			entityStrings.add("object:" + Json.objectToJson(entity, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 		}
 		parameters.putStringArrayList("entities", (ArrayList<String>) entityStrings);
 		parameters.putString("linkType", linkType);
@@ -1071,8 +1046,6 @@ public class EntityManager {
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
 				.setSession(Aircandi.getInstance().getUser().session)
-				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -1080,7 +1053,7 @@ public class EntityManager {
 		/* Return the new place the candigram has moved to */
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) HttpService.jsonToObjects(jsonResponse, ObjectType.ENTITY, ServiceDataWrapper.TRUE);
+			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.ENTITY, Json.ServiceDataWrapper.TRUE);
 			result.data = serviceData.data;
 		}
 
@@ -1102,10 +1075,8 @@ public class EntityManager {
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST + Device.collectionId)
 				.setRequestType(RequestType.INSERT)
-				.setRequestBody(HttpService.objectToJson(device, UseAnnotations.TRUE, ExcludeNulls.TRUE))
+				.setRequestBody(Json.objectToJson(device, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE))
 				.setIgnoreResponseData(true)
-				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
 				.setSession(Aircandi.getInstance().getUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
 
@@ -1122,8 +1093,6 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "unregisterDevice")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -1140,9 +1109,7 @@ public class EntityManager {
 			final ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST + document.getCollection())
 					.setRequestType(RequestType.INSERT)
-					.setRequestBody(HttpService.objectToJson(document, UseAnnotations.TRUE, ExcludeNulls.TRUE))
-					.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-					.setRetry(false)
+					.setRequestBody(Json.objectToJson(document, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE))
 					.setSession(Aircandi.getInstance().getUser().session)
 					.setResponseFormat(ResponseFormat.JSON);
 
@@ -1172,8 +1139,6 @@ public class EntityManager {
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
 				.setSession(Aircandi.getInstance().getUser().session)
-				.setSocketTimeout(ServiceConstants.TIMEOUT_SOCKET_UPDATES)
-				.setRetry(false)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -1194,12 +1159,12 @@ public class EntityManager {
 		/*
 		 * Push it to S3. It is always formatted/compressed as a jpeg.
 		 */
-		try {
-			final String stringDate = DateTime.nowString(DateTime.DATE_NOW_FORMAT_FILENAME);
-			final String imageKey = String.valueOf((user != null) ? user.id : Aircandi.getInstance().getUser().id) + "_" + stringDate + ".jpg";
-			S3.putImage(imageKey, bitmap, Constants.IMAGE_QUALITY_S3);
+		final String stringDate = DateTime.nowString(DateTime.DATE_NOW_FORMAT_FILENAME);
+		final String imageKey = String.valueOf((user != null) ? user.id : Aircandi.getInstance().getUser().id) + "_" + stringDate + ".jpg";
+		ServiceResponse serviceResponse = S3.putImage(imageKey, bitmap, Constants.IMAGE_QUALITY_S3);
 
-			/* Update the photo object for the entity or user */
+		/* Update the photo object for the entity or user */
+		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			if (entity != null) {
 				entity.photo = new Photo(imageKey, null, bitmap.getWidth(), bitmap.getHeight(), PhotoSource.aircandi);
 			}
@@ -1207,11 +1172,8 @@ public class EntityManager {
 				user.photo = new Photo(imageKey, null, bitmap.getWidth(), bitmap.getHeight(), PhotoSource.aircandi);
 			}
 		}
-		catch (HttpServiceException exception) {
-			return new ServiceResponse(ResponseCode.FAILED, null, exception);
-		}
 
-		return new ServiceResponse();
+		return serviceResponse;
 	}
 
 	public ModelResult upsizeSynthetic(Place synthetic) {
@@ -1338,7 +1300,7 @@ public class EntityManager {
 		return categoryStrings;
 	}
 
-	public Entity loadEntityFromResources(Integer entityResId, ObjectType objectType) {
+	public Entity loadEntityFromResources(Integer entityResId, Json.ObjectType objectType) {
 		InputStream inputStream = null;
 		BufferedReader reader = null;
 		try {
@@ -1350,7 +1312,7 @@ public class EntityManager {
 				text.append(line);
 			}
 			final String jsonEntity = text.toString();
-			final Entity entity = (Entity) HttpService.jsonToObject(jsonEntity, objectType);
+			final Entity entity = (Entity) Json.jsonToObject(jsonEntity, objectType);
 			return entity;
 		}
 		catch (IOException exception) {

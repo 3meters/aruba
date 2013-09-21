@@ -13,8 +13,8 @@ import android.util.Log;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpServiceException;
+import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.service.ServiceResponse;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -22,16 +22,6 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 
-/*
- * How much of AWS am I using just to push images?
- * 
- * import com.amazonaws.AmazonClientException;
- * import com.amazonaws.AmazonServiceException;
- * import com.amazonaws.services.s3.AmazonS3;
- * import com.amazonaws.services.s3.AmazonS3Client;
- * import com.amazonaws.services.s3.model.CannedAccessControlList;
- * import com.amazonaws.services.s3.model.ObjectMetadata;
- */
 public class S3 {
 
 	static {
@@ -53,10 +43,8 @@ public class S3 {
 		return AmazonS3Holder.instance;
 	}
 
-	/* Jayma: Added routines */
+	public static ServiceResponse putImage(String imageKey, Bitmap bitmap, Integer quality) {
 
-	public static void putImage(String imageKey, Bitmap bitmap, Integer quality) throws HttpServiceException {
-		
 		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
 		final byte[] bitmapBytes = outputStream.toByteArray();
@@ -68,12 +56,13 @@ public class S3 {
 		try {
 			S3.getInstance().putObject(Constants.S3_BUCKET_IMAGES, imageKey, inputStream, metadata);
 			S3.getInstance().setObjectAcl(Constants.S3_BUCKET_IMAGES, imageKey, CannedAccessControlList.PublicRead);
+			return new ServiceResponse();
 		}
 		catch (final AmazonServiceException exception) {
-			throw HttpService.makeHttpServiceException(null, null, exception);
+			return new ServiceResponse(ResponseCode.FAILED, null, exception);
 		}
 		catch (final AmazonClientException exception) {
-			throw HttpService.makeHttpServiceException(null, null, exception);
+			return new ServiceResponse(ResponseCode.FAILED, null, exception);
 		}
 		finally {
 			try {
@@ -81,74 +70,8 @@ public class S3 {
 				inputStream.close();
 			}
 			catch (IOException exception) {
-				throw HttpService.makeHttpServiceException(null, null, exception);
+				return new ServiceResponse(ResponseCode.FAILED, null, exception);
 			}
 		}
 	}
-
-	/**
-	 * Push image byte array to S3.
-	 * 
-	 * @param imageKey
-	 * @param bitmapBytes
-	 * @throws HttpServiceException
-	 */
-	@SuppressWarnings("ucd")
-	public static void putImageByteArray(String imageKey, byte[] bitmapBytes, String imageFormat) throws HttpServiceException {
-		final ByteArrayInputStream inputStream = new ByteArrayInputStream(bitmapBytes);
-		final ObjectMetadata metadata = new ObjectMetadata();
-		metadata.setContentLength(bitmapBytes.length);
-		metadata.setContentType("image/" + imageFormat);
-
-		try {
-			S3.getInstance().putObject(Constants.S3_BUCKET_IMAGES, imageKey, inputStream, metadata);
-			S3.getInstance().setObjectAcl(Constants.S3_BUCKET_IMAGES, imageKey, CannedAccessControlList.PublicRead);
-		}
-		catch (final AmazonServiceException exception) {
-			throw HttpService.makeHttpServiceException(null, null, exception);
-		}
-		catch (final AmazonClientException exception) {
-			throw HttpService.makeHttpServiceException(null, null, exception);
-		}
-		finally {
-			try {
-				inputStream.close();
-			}
-			catch (IOException exception) {
-				throw HttpService.makeHttpServiceException(null, null, exception);
-			}
-		}
-	}
-
-	//	public static void deleteImage(String imageKey) throws ProxibaseServiceException {
-	//
-	//		/* If the image is stored with S3 then it will be deleted */
-	//		try {
-	//			S3.getInstance().deleteObject(CandiConstants.S3_BUCKET_IMAGES, imageKey);
-	//		}
-	//		catch (final AmazonServiceException exception) {
-	//			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.SERVICE, ErrorCode.AmazonServiceException, exception);
-	//		}
-	//		catch (final AmazonClientException exception) {
-	//			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.CLIENT, ErrorCode.AmazonClientException, exception);
-	//		}
-	//	}
-	//
-	//	public static void flagImageForDeletion(String imageKey, long deleteDate) throws ProxibaseServiceException {
-	//
-	//		/* If the image is stored with S3 then it will be deleted */
-	//		try {
-	//			CopyObjectRequest req = new CopyObjectRequest(CandiConstants.S3_BUCKET_IMAGES, imageKey, CandiConstants.S3_BUCKET_IMAGES, imageKey);
-	//			ObjectMetadata metadata = S3.getInstance().getObjectMetadata(CandiConstants.S3_BUCKET_IMAGES, imageKey);
-	//			metadata.addUserMetadata("deleteDate", String.valueOf(deleteDate));
-	//			req.setNewObjectMetadata(metadata);
-	//			S3.getInstance().copyObject(req);
-	//		}
-	//		catch (final AmazonServiceException exception) {
-	//			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.SERVICE, ErrorCode.AmazonServiceException, exception);
-	//		}
-	//		catch (final AmazonClientException exception) {
-	//			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.CLIENT, ErrorCode.AmazonClientException, exception);
-	//		}
-	//	}
 }

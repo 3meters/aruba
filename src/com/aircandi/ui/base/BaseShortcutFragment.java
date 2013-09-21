@@ -39,6 +39,7 @@ import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
+import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -97,7 +98,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						}
 					}
 					else {
-						Routing.serviceError(getSherlockActivity(), result.serviceResponse);
+						Errors.handleError(getSherlockActivity(), result.serviceResponse);
 					}
 					hideBusy();
 				}

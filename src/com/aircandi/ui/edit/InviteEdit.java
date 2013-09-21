@@ -28,7 +28,7 @@ import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.ui.widgets.AirEditText;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.Dialogs;
-import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.UI;
 
 public class InviteEdit extends BaseEntityEdit {
@@ -226,7 +226,7 @@ public class InviteEdit extends BaseEntityEdit {
 					finish();
 				}
 				else {
-					Routing.serviceError(InviteEdit.this, result.serviceResponse);
+					Errors.handleError(InviteEdit.this, result.serviceResponse);
 				}
 			}
 		}.execute();

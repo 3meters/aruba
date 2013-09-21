@@ -50,6 +50,7 @@ import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.DateTime.IntervalContext;
+import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -456,7 +457,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 			if (result.serviceResponse.responseCode != ResponseCode.SUCCESS) {
 				hideBusy();
-				Routing.serviceError(BaseEntityList.this, result.serviceResponse);
+				Errors.handleError(BaseEntityList.this, result.serviceResponse);
 				Aircandi.stopwatch3.stop(this.getClass().getSimpleName() + " databind failed");
 				return false;
 			}

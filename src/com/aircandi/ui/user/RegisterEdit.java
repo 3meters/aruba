@@ -20,12 +20,13 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.service.HttpService;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Errors;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -213,8 +214,8 @@ public class RegisterEdit extends BaseEntityEdit {
 					UI.showToastNotification(getResources().getString(R.string.alert_signed_in)
 							+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
-					final String jsonUser = HttpService.objectToJson(insertedUser);
-					final String jsonSession = HttpService.objectToJson(insertedUser.session);
+					final String jsonUser = Json.objectToJson(insertedUser);
+					final String jsonSession = Json.objectToJson(insertedUser.session);
 
 					Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
 					Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, jsonSession);
@@ -230,7 +231,7 @@ public class RegisterEdit extends BaseEntityEdit {
 					 * TODO: Need to handle AmazonClientException.
 					 * Does clearing the password fields always make sense?
 					 */
-					Routing.serviceError(RegisterEdit.this, result.serviceResponse);
+					Errors.handleError(RegisterEdit.this, result.serviceResponse);
 				}
 			}
 		}.execute();

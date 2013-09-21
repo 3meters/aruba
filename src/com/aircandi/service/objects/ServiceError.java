@@ -1,9 +1,9 @@
 package com.aircandi.service.objects;
 
+import java.util.List;
 import java.util.Map;
 
 import com.aircandi.service.Expose;
-
 
 /**
  * @author Jayma
@@ -12,17 +12,17 @@ import com.aircandi.service.Expose;
 public class ServiceError {
 
 	@Expose
-	public String	name;
+	public String		name;
 	@Expose
-	public Number	code;
+	public Number		code;
 	@Expose
-	public String	message;
+	public String		message;
 	@Expose
-	public String	errors;
+	public String		errors;
 	@Expose
-	public String	appStack;	// optional
+	public List<String>	appStack;	// optional
 	@Expose
-	public String	stack;
+	public String		stack;
 
 	public ServiceError() {}
 
@@ -33,8 +33,11 @@ public class ServiceError {
 		serviceError.name = (String) map.get("name");
 		serviceError.code = (Number) map.get("code");
 		serviceError.message = (String) map.get("message");
-		serviceError.appStack = (String) map.get("appStack");
 		serviceError.stack = (String) map.get("stack");
+
+		if (map.get("appStack") != null) {
+			serviceError.appStack = (List<String>) map.get("appStack");
+		}
 
 		return serviceError;
 	}

@@ -17,13 +17,11 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
-import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.RequestListener;
+import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
@@ -31,6 +29,7 @@ import com.aircandi.service.objects.Shortcut;
 import com.aircandi.ui.base.BasePicker;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.BounceListView;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
 
@@ -47,7 +46,7 @@ public class ShortcutPicker extends BasePicker {
 			final List<String> jsonShortcuts = extras.getStringArrayList(Constants.EXTRA_SHORTCUTS);
 			if (jsonShortcuts != null) {
 				for (String jsonShortcut : jsonShortcuts) {
-					Shortcut shortcut = (Shortcut) HttpService.jsonToObject(jsonShortcut, ObjectType.SHORTCUT);
+					Shortcut shortcut = (Shortcut) Json.jsonToObject(jsonShortcut, Json.ObjectType.SHORTCUT);
 					mShortcuts.add(shortcut);
 				}
 			}

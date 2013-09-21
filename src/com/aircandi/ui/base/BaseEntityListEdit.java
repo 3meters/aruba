@@ -26,16 +26,13 @@ import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.EntityManager;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ExcludeNulls;
-import com.aircandi.service.HttpService.ObjectType;
-import com.aircandi.service.HttpService.UseAnnotations;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.BounceListView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -64,7 +61,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 			final List<String> jsonEntities = extras.getStringArrayList(Constants.EXTRA_ENTITIES);
 			if (jsonEntities != null) {
 				for (String jsonEntity : jsonEntities) {
-					Entity entity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.ENTITY);
+					Entity entity = (Entity) Json.jsonToObject(jsonEntity, Json.ObjectType.ENTITY);
 					mEntities.add(entity);
 				}
 			}
@@ -135,7 +132,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 				final List<String> jsonEntities = new ArrayList<String>();
 
 				for (Entity entity : mEntities) {
-					jsonEntities.add(HttpService.objectToJson(entity, UseAnnotations.FALSE, ExcludeNulls.TRUE));
+					jsonEntities.add(Json.objectToJson(entity, Json.UseAnnotations.FALSE, Json.ExcludeNulls.TRUE));
 				}
 
 				intent.putStringArrayListExtra(Constants.EXTRA_ENTITIES, (ArrayList<String>) jsonEntities);
@@ -233,7 +230,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 					final Bundle extras = intent.getExtras();
 					final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
 					if (jsonEntity != null) {
-						final Entity entityUpdated = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.ENTITY);
+						final Entity entityUpdated = (Entity) Json.jsonToObject(jsonEntity, Json.ObjectType.ENTITY);
 						if (entityUpdated != null) {
 							for (Entity entity : mEntities) {
 								if (entity.id.equals(entityUpdated.id)) {
@@ -252,7 +249,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 					final Bundle extras = intent.getExtras();
 					final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
 					if (jsonEntity != null) {
-						final Entity entityNew = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.ENTITY);
+						final Entity entityNew = (Entity) Json.jsonToObject(jsonEntity, Json.ObjectType.ENTITY);
 						if (entityNew != null) {
 							entityNew.checked = false;
 							mEntities.add(entityNew);

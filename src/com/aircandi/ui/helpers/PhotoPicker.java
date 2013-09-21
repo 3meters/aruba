@@ -50,16 +50,13 @@ import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.ImageResult;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
-import com.aircandi.service.HttpService.RequestType;
-import com.aircandi.service.HttpService.ResponseFormat;
-import com.aircandi.service.HttpService.ServiceDataWrapper;
+import com.aircandi.service.RequestType;
+import com.aircandi.service.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ServiceRequest.AuthType;
+import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Photo;
@@ -74,7 +71,8 @@ import com.aircandi.ui.base.IList;
 import com.aircandi.ui.widgets.AirAutoCompleteTextView;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.utilities.Animate;
-import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Errors;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.UI;
 import com.commonsware.cwac.endless.EndlessAdapter;
 
@@ -235,7 +233,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 					photo.name = mTitleOptional;
 
 					final Intent intent = new Intent();
-					final String jsonPhoto = HttpService.objectToJson(photo);
+					final String jsonPhoto = Json.objectToJson(photo);
 					intent.putExtra(Constants.EXTRA_PHOTO, jsonPhoto);
 					setResult(Activity.RESULT_OK, intent);
 					finish();
@@ -405,8 +403,8 @@ public class PhotoPicker extends BaseBrowse implements IList {
 
 		serviceResponse = NetworkManager.getInstance().request(serviceRequest, null);
 
-		final ServiceData serviceData = (ServiceData) HttpService
-				.jsonToObjects((String) serviceResponse.data, ObjectType.IMAGE_RESULT, ServiceDataWrapper.TRUE);
+		final ServiceData serviceData = (ServiceData) Json
+				.jsonToObjects((String) serviceResponse.data, Json.ObjectType.IMAGE_RESULT, Json.ServiceDataWrapper.TRUE);
 		final List<ImageResult> images = (ArrayList<ImageResult>) serviceData.data;
 		serviceResponse.data = images;
 
@@ -510,7 +508,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 					}
 					else {
 						hideBusy();
-						Routing.serviceError(PhotoPicker.this, serviceResponse);
+						Errors.handleError(PhotoPicker.this, serviceResponse);
 						return false;
 					}
 
@@ -569,7 +567,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 				}
 				else {
 					hideBusy();
-					Routing.serviceError(PhotoPicker.this, serviceResponse);
+					Errors.handleError(PhotoPicker.this, serviceResponse);
 					return false;
 				}
 			}

@@ -15,7 +15,7 @@ import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.ui.base.BaseEdit;
 import com.aircandi.utilities.Dialogs;
-import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.UI;
 
 @SuppressWarnings("ucd")
@@ -77,7 +77,8 @@ public class PasswordEdit extends BaseEdit {
 				final ModelResult result = EntityManager.getInstance().updatePassword(
 						mEntityId,
 						mPasswordOld.getText().toString(),
-						mPassword.getText().toString());
+						mPassword.getText().toString(),
+						PasswordEdit.class.getSimpleName());
 				return result;
 			}
 
@@ -95,7 +96,7 @@ public class PasswordEdit extends BaseEdit {
 				}
 				else {
 					mPassword.setText("");
-					Routing.serviceError(PasswordEdit.this, result.serviceResponse);
+					Errors.handleError(PasswordEdit.this, result.serviceResponse);
 				}
 			}
 		}.execute();

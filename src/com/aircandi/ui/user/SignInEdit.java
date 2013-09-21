@@ -20,16 +20,14 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
-import com.aircandi.service.HttpService.ServiceDataWrapper;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
-import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Errors;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.UI;
 import com.aircandi.utilities.Utilities;
 
@@ -121,7 +119,7 @@ public class SignInEdit extends BaseEdit {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("SignIn");
-				final ModelResult result = EntityManager.getInstance().signin(email, password);
+				final ModelResult result = EntityManager.getInstance().signin(email, password, SignInEdit.class.getSimpleName());
 				return result;
 			}
 
@@ -133,7 +131,7 @@ public class SignInEdit extends BaseEdit {
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 					final String jsonResponse = (String) result.serviceResponse.data;
-					final ServiceData serviceData = (ServiceData) HttpService.jsonToObject(jsonResponse, ObjectType.NONE, ServiceDataWrapper.TRUE);
+					final ServiceData serviceData = (ServiceData) Json.jsonToObject(jsonResponse, Json.ObjectType.NONE, Json.ServiceDataWrapper.TRUE);
 					final User user = serviceData.user;
 					user.session = serviceData.session;
 					Logger.i(this, "USER signed in: " + user.name + " (" + user.id + ")");
@@ -146,8 +144,8 @@ public class SignInEdit extends BaseEdit {
 					UI.showToastNotification(getResources().getString(R.string.alert_signed_in)
 							+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
-					final String jsonUser = HttpService.objectToJson(user);
-					final String jsonSession = HttpService.objectToJson(user.session);
+					final String jsonUser = Json.objectToJson(user);
+					final String jsonSession = Json.objectToJson(user.session);
 
 					Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
 					Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, jsonSession);
@@ -159,7 +157,7 @@ public class SignInEdit extends BaseEdit {
 					Animate.doOverridePendingTransition(SignInEdit.this, TransitionType.FORM_TO_PAGE);
 				}
 				else {
-					Routing.serviceError(SignInEdit.this, result.serviceResponse);
+					Errors.handleError(SignInEdit.this, result.serviceResponse);
 				}
 			}
 		}.execute();

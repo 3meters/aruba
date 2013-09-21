@@ -17,19 +17,18 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
 import com.aircandi.events.MessageEvent;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
-import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.RequestListener;
+import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Device;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.AircandiForm;
+import com.aircandi.utilities.Json;
 import com.google.android.gcm.GCMRegistrar;
 
 @SuppressWarnings("ucd")
@@ -90,7 +89,7 @@ public class NotificationManager {
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 						Logger.i(this, "GCM: device registered with Aircandi notification service");
 						final String jsonResponse = (String) result.serviceResponse.data;
-						mDevice = (Device) HttpService.jsonToObject(jsonResponse, ObjectType.DEVICE);
+						mDevice = (Device) Json.jsonToObject(jsonResponse, Json.ObjectType.DEVICE);
 						GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, true);
 					}
 				}
@@ -117,11 +116,9 @@ public class NotificationManager {
 						GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
 					}
 					else {
-						if (result.serviceResponse.exception != null && result.serviceResponse.exception.getStatusCode() != null) {
-							if (result.serviceResponse.exception.getStatusCode() == (float) HttpStatus.SC_NOT_FOUND) {
-								Logger.i(this, "GCM: device already unregistered with Aircandi notification service");
-								GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
-							}
+						if (result.serviceResponse.statusCode != null && result.serviceResponse.statusCode == HttpStatus.SC_NOT_FOUND) {
+							Logger.i(this, "GCM: device already unregistered with Aircandi notification service");
+							GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
 						}
 						else {
 							/* TODO: What should we do if unregister fails? */

@@ -11,9 +11,9 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.aircandi.Constants;
 import com.aircandi.R;
-import com.aircandi.service.HttpService;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityEdit;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Utilities;
 
 public class AddressBuilder extends BaseEntityEdit {
@@ -87,7 +87,7 @@ public class AddressBuilder extends BaseEntityEdit {
 	private void save() {
 		final Intent intent = new Intent();
 		if (mEntity != null) {
-			final String jsonEntity = HttpService.objectToJson(mEntity);
+			final String jsonEntity = Json.objectToJson(mEntity);
 			intent.putExtra(Constants.EXTRA_PLACE, jsonEntity);
 		}
 		setResult(Activity.RESULT_OK, intent);

@@ -21,13 +21,13 @@ import com.aircandi.ServiceConstants;
 import com.aircandi.applications.Applinks;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
 import com.aircandi.events.MessageEvent;
-import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.RequestListener;
+import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
@@ -41,6 +41,7 @@ import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -109,7 +110,7 @@ public class PlaceForm extends BaseEntityForm {
 					databind(BindingMode.AUTO);
 				}
 				else {
-					Routing.serviceError(PlaceForm.this, result.serviceResponse);
+					Errors.handleError(PlaceForm.this, result.serviceResponse);
 				}
 			}
 		}.execute();

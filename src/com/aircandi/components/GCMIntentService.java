@@ -5,10 +5,9 @@ import android.content.Intent;
 
 import com.aircandi.Constants;
 import com.aircandi.applications.Comments;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.ui.base.BaseEntityForm;
+import com.aircandi.utilities.Json;
 import com.google.android.gcm.GCMBaseIntentService;
 
 public class GCMIntentService extends GCMBaseIntentService {
@@ -18,7 +17,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 	}
 
 	/*
-	 * Note: The methods below run in the intent service's thread and hence are free to make NETWORK calls without the
+	 * Note: The methods below run in the intent service's thread and hence are free to make network calls without the
 	 * risk of blocking the UI thread.
 	 */
 
@@ -39,7 +38,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		 * payload, its contents are available as extras in the intent.
 		 */
 		String jsonNotification = messageIntent.getStringExtra("notification");
-		AirNotification notification = (AirNotification) HttpService.jsonToObject(jsonNotification, ObjectType.AIR_NOTIFICATION);
+		AirNotification notification = (AirNotification) Json.jsonToObject(jsonNotification, Json.ObjectType.AIR_NOTIFICATION);
 
 		/* Build intent that can be used in association with the notification */
 		if (notification.entity != null) {

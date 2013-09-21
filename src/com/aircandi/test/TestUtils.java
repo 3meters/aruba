@@ -6,9 +6,7 @@ import java.net.ConnectException;
 import org.apache.http.client.ClientProtocolException;
 
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpServiceException;
+import com.aircandi.service.ServiceResponse;
 
 public class TestUtils {
 
@@ -38,6 +36,7 @@ public class TestUtils {
 	 * @return
 	 */
 
+	@SuppressWarnings("unused")
 	public static ServiceResponse getFailureServiceResponse(Float httpStatusCode, Class type) {
 		Exception exception = null;
 		if (type.equals(ClientProtocolException.class)) {
@@ -50,8 +49,7 @@ public class TestUtils {
 			exception = new ConnectException();
 		}
 
-		final HttpServiceException proxibaseException = HttpService.makeHttpServiceException(httpStatusCode, null, exception);
-		final ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.FAILED, null, proxibaseException);
+		final ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.FAILED, null, null);
 		return serviceResponse;
 	}
 }

@@ -10,9 +10,6 @@ import android.os.Bundle;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.IntentBuilder;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ExcludeNulls;
-import com.aircandi.service.HttpService.UseAnnotations;
 import com.aircandi.service.objects.AirMarker;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link;
@@ -22,6 +19,7 @@ import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.MapForm;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Json;
 
 public class Maps {
 
@@ -45,7 +43,7 @@ public class Maps {
 							marker.current = true;
 							marker.iconResId = R.drawable.img_marker_candigram;
 						}
-						markerStrings.add(HttpService.objectToJson(marker, UseAnnotations.FALSE, ExcludeNulls.TRUE));
+						markerStrings.add(Json.objectToJson(marker, Json.UseAnnotations.FALSE, Json.ExcludeNulls.TRUE));
 					}
 				}
 				if (markerStrings.size() > 0) {

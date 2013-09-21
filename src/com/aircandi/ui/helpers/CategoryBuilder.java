@@ -23,12 +23,11 @@ import com.aircandi.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.BaseEdit;
 import com.aircandi.ui.widgets.AirImageView;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.UI;
 
 public class CategoryBuilder extends BaseEdit {
@@ -58,7 +57,7 @@ public class CategoryBuilder extends BaseEdit {
 		if (extras != null) {
 			final String jsonCategory = extras.getString(Constants.EXTRA_CATEGORY);
 			if (jsonCategory != null) {
-				mOriginalCategory = (Category) HttpService.jsonToObject(jsonCategory, ObjectType.CATEGORY);
+				mOriginalCategory = (Category) Json.jsonToObject(jsonCategory, Json.ObjectType.CATEGORY);
 			}
 		}
 	}
@@ -150,7 +149,7 @@ public class CategoryBuilder extends BaseEdit {
 			category.id = mSubSubCategory.id;
 			category.name = mSubSubCategory.name;
 			category.photo = mSubSubCategory.photo;
-			final String jsonCategory = HttpService.objectToJson(category);
+			final String jsonCategory = Json.objectToJson(category);
 			intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
 		}
 		else if (mSubCategory != null) {
@@ -158,7 +157,7 @@ public class CategoryBuilder extends BaseEdit {
 			category.id = mSubCategory.id;
 			category.name = mSubCategory.name;
 			category.photo = mSubCategory.photo;
-			final String jsonCategory = HttpService.objectToJson(category);
+			final String jsonCategory = Json.objectToJson(category);
 			intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
 		}
 		else if (mCategory != null) {
@@ -166,7 +165,7 @@ public class CategoryBuilder extends BaseEdit {
 			category.id = mCategory.id;
 			category.name = mCategory.name;
 			category.photo = mCategory.photo;
-			final String jsonCategory = HttpService.objectToJson(category);
+			final String jsonCategory = Json.objectToJson(category);
 			intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
 		}
 		setResult(Activity.RESULT_OK, intent);

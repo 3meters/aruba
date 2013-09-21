@@ -21,7 +21,7 @@ import com.aircandi.ui.widgets.AirEditText;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Dialogs;
-import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.UI;
 
 public class FeedbackEdit extends BaseEntityEdit {
@@ -133,7 +133,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 					finish();
 				}
 				else {
-					Routing.serviceError(FeedbackEdit.this, result.serviceResponse);
+					Errors.handleError(FeedbackEdit.this, result.serviceResponse);
 				}
 			}
 		}.execute();

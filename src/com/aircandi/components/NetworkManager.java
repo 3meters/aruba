@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -14,24 +15,69 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
+import android.provider.Settings;
 import android.widget.Toast;
 
 import com.aircandi.BuildConfig;
+import com.aircandi.Constants;
 import com.aircandi.ServiceConstants;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpServiceException;
+import com.aircandi.service.BaseConnection;
+import com.aircandi.service.OkHttpUrlConnection;
 import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ServiceResponse;
+import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.UI;
 
 /**
  * Designed as a singleton. The private Constructor prevents any other class from instantiating.
  */
 
+@SuppressWarnings("unused")
 public class NetworkManager {
+	/*
+	 * Http 1.1 Status Codes (subset)
+	 * 
+	 * - 200: OK
+	 * - 201: Created
+	 * - 202: Accepted
+	 * - 203: Non-authoritative information
+	 * - 204: Request fulfilled but no content returned (message body empty).
+	 * - 3xx: Redirection
+	 * - 400: Bad request. Malformed syntax.
+	 * - 401: Unauthorized. Request requires user authentication.
+	 * - 403: Forbidden
+	 * - 404: Not found
+	 * - 405: Method not allowed
+	 * - 408: Request timeout
+	 * - 415: Unsupported media type
+	 * - 500: Internal server error
+	 * - 503: Service unavailable. Caused by temporary overloading or maintenance.
+	 * 
+	 * Notes:
+	 * 
+	 * - We get a 403 from amazon when trying to fetch something from S3 that isn't there.
+	 */
+
+	/*
+	 * Timeouts
+	 * 
+	 * - Connection timeout is the max time allowed to make initial connection with the remote server.
+	 * - Sockettimeout is the max inactivity time allowed between two consecutive data packets.
+	 * - AndroidHttpClient sets both to 60 seconds.
+	 */
+
+	/*
+	 * Exceptions when executing HTTP methods using HttpClient
+	 * 
+	 * - IOException: Generic transport exceptions (unreliable connection, socket timeout, generally non-fatal.
+	 * ClientProtocolException, SocketException and InterruptedIOException are sub classes of IOException.
+	 * 
+	 * - HttpException: Protocol exceptions. These tend to be fatal and suggest something fundamental is wrong with the
+	 * request such as a violation of the http protocol.
+	 */
 
 	/* monitor platform changes */
 	private IntentFilter					mNetworkStateChangedFilter;
-	@SuppressWarnings("unused")
 	private BroadcastReceiver				mNetworkStateIntentReceiver;
 
 	private Context							mApplicationContext;
@@ -41,6 +87,7 @@ public class NetworkManager {
 	private WifiManager						mWifiManager;
 	private ConnectivityManager				mConnectivityManager;
 	private ConnectedState					mConnectedState					= ConnectedState.NORMAL;
+	private BaseConnection					mConnection;
 
 	public static final String				EXTRA_WIFI_AP_STATE				= "wifi_state";
 	public static final String				WIFI_AP_STATE_CHANGED_ACTION	= "android.net.wifi.WIFI_AP_STATE_CHANGED";
@@ -62,8 +109,18 @@ public class NetworkManager {
 	}
 
 	public void initialize() {
+
 		mWifiManager = (WifiManager) mApplicationContext.getSystemService(Context.WIFI_SERVICE);
 		mConnectivityManager = (ConnectivityManager) mApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+		mConnection = new OkHttpUrlConnection();
+		//mConnection = new HttpClientConnection();
+		//mConnection = new HttpUrlConnection();
+
+		/*
+		 * Setting system properties needed for HttpUrlConnection
+		 */
+		System.setProperty("http.maxConnections", String.valueOf(ServiceConstants.DEFAULT_MAX_CONNECTIONS));
+		System.setProperty("http.keepAlive", Constants.SUPPORTS_FROYO ? "true" : "false");
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
@@ -96,25 +153,27 @@ public class NetworkManager {
 				}
 			}
 		};
-		//mApplicationContext.registerReceiver(mNetworkStateIntentReceiver, mNetworkStateChangedFilter);
 	}
 
-	public ServiceResponse request(ServiceRequest serviceRequest, Stopwatch stopwatch) {
-		/*
-		 * Don't assume this is being called from the UI thread.
-		 */
-		ServiceResponse serviceResponse = new ServiceResponse();
-		try {
-			/* Could be string, input stream, or array of bytes */
-			final Object response = HttpService.getInstance().request(serviceRequest, stopwatch);
-			serviceResponse = new ServiceResponse(ResponseCode.SUCCESS, response, null);
+	public ServiceResponse request(final ServiceRequest serviceRequest, final Stopwatch stopwatch) {
+		ServiceResponse serviceResponse = (ServiceResponse) mConnection.request(serviceRequest, stopwatch);
+
+		if (serviceResponse.responseCode == ResponseCode.FAILED) {
+			serviceResponse.errorResponse = Errors.getErrorResponse(mApplicationContext, serviceResponse);
+			if (stopwatch != null) {
+				stopwatch.segmentTime("Service call failed");
+			}
+			if (serviceResponse.exception != null) {
+				Logger.w(this, "Service exception: " + serviceResponse.exception.getClass().getSimpleName());
+			}
+			else {
+				Logger.w(this, "Service error: (code: " + String.valueOf(serviceResponse.statusCode) + ") " + serviceResponse.statusMessage);
+			}
 		}
-		catch (HttpServiceException exception) {
-			/*
-			 * We got a service side error that either stopped us in our tracks or
-			 * we gave up after performing a series of retries.
-			 */
-			serviceResponse = new ServiceResponse(ResponseCode.FAILED, null, exception);
+		else {
+			if (stopwatch != null) {
+				stopwatch.segmentTime("Http service: successful response processing completed");
+			}
 		}
 		return serviceResponse;
 	}
@@ -161,23 +220,17 @@ public class NetworkManager {
 		return mConnectedState;
 	}
 
-	public boolean isConnected() {
-		if (mApplicationContext != null) {
-			if (mConnectivityManager != null) {
-				final NetworkInfo[] info = mConnectivityManager.getAllNetworkInfo();
-				if (info != null) {
-					for (int i = 0; i < info.length; i++) {
-						if (info[i].getState() == State.CONNECTED) {
-							return true;
-						}
-					}
-				}
-			}
-		}
-		return false;
+	@SuppressWarnings("deprecation")
+	public static boolean isAirplaneMode(Context context) {
+		ContentResolver cr = context.getContentResolver();
+		return Settings.System.getInt(cr, Settings.System.AIRPLANE_MODE_ON, 0) != 0;
 	}
 
-	@SuppressWarnings("unused")
+	public boolean isConnected() {
+		NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
+		return (activeNetwork != null && activeNetwork.isConnectedOrConnecting());
+	}
+
 	private boolean isConnectedOrConnecting() {
 		final ConnectivityManager cm = (ConnectivityManager) mApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 		if (cm != null) {
@@ -324,31 +377,14 @@ public class NetworkManager {
 		}
 	}
 
-	@SuppressWarnings("ucd")
-	public static class ServiceResponse {
-
-		public Object				data;
-		public ResponseCode			responseCode	= ResponseCode.SUCCESS;
-
-		public HttpServiceException	exception;
-
-		public ServiceResponse() {}
-
-		public ServiceResponse(ResponseCode resultCode, Object data, HttpServiceException exception) {
-			responseCode = resultCode;
-			this.data = data;
-			this.exception = exception;
-		}
-	}
-
 	public static enum ResponseCode {
-		SUCCESS, 
+		SUCCESS,
 		FAILED
 	}
 
 	public static enum ConnectedState {
-		NONE, 
-		NORMAL, 
+		NONE,
+		NORMAL,
 		WALLED_GARDEN,
 	}
 }

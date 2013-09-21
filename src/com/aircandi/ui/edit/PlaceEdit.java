@@ -13,14 +13,13 @@ import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.TabManager;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.ui.widgets.BuilderButton;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 
@@ -86,7 +85,7 @@ public class PlaceEdit extends BaseEntityEdit {
 
 					final String jsonPlace = extras.getString(Constants.EXTRA_PLACE);
 					if (jsonPlace != null) {
-						final Place placeUpdated = (Place) HttpService.jsonToObject(jsonPlace, ObjectType.PLACE);
+						final Place placeUpdated = (Place) Json.jsonToObject(jsonPlace, Json.ObjectType.PLACE);
 						if (placeUpdated.phone != null) {
 							placeUpdated.phone = placeUpdated.phone.replaceAll("[^\\d.]", "");
 						}
@@ -100,7 +99,7 @@ public class PlaceEdit extends BaseEntityEdit {
 					final Bundle extras = intent.getExtras();
 					final String jsonCategory = extras.getString(Constants.EXTRA_CATEGORY);
 					if (jsonCategory != null) {
-						final Category categoryUpdated = (Category) HttpService.jsonToObject(jsonCategory, ObjectType.CATEGORY);
+						final Category categoryUpdated = (Category) Json.jsonToObject(jsonCategory, Json.ObjectType.CATEGORY);
 						if (categoryUpdated != null) {
 							mDirty = true;
 							((Place) mEntity).category = categoryUpdated;
@@ -117,7 +116,7 @@ public class PlaceEdit extends BaseEntityEdit {
 					final List<String> jsonApplinks = extras.getStringArrayList(Constants.EXTRA_ENTITIES);
 					mApplinks.clear();
 					for (String jsonApplink : jsonApplinks) {
-						Applink applink = (Applink) HttpService.jsonToObject(jsonApplink, ObjectType.APPLINK);
+						Applink applink = (Applink) Json.jsonToObject(jsonApplink, Json.ObjectType.APPLINK);
 						mApplinks.add(applink);
 					}
 					mDirty = true;

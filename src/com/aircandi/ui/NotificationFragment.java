@@ -31,8 +31,6 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NotificationManager;
 import com.aircandi.components.NotificationTable;
 import com.aircandi.components.NotificationsContentProvider;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.BaseEntityForm;
@@ -41,6 +39,7 @@ import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
 
@@ -314,7 +313,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 			@SuppressWarnings("unused")
 			Long sentDate = cursor.getLong(sentDateIndex);
 			String jsonObject = cursor.getString(objectIndex);
-			AirNotification notification = (AirNotification) HttpService.jsonToObject(jsonObject, ObjectType.AIR_NOTIFICATION);
+			AirNotification notification = (AirNotification) Json.jsonToObject(jsonObject, Json.ObjectType.AIR_NOTIFICATION);
 
 			/* Decorate again in case the logic has changed since the notification was stored */
 			NotificationManager.getInstance().decorateNotification(notification);

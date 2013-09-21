@@ -23,7 +23,7 @@ import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.SectionLayout;
-import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.UI;
 
 @SuppressWarnings("ucd")
@@ -79,7 +79,7 @@ public class UserForm extends BaseEntityForm {
 					}
 				}
 				else {
-					Routing.serviceError(UserForm.this, result.serviceResponse);
+					Errors.handleError(UserForm.this, result.serviceResponse);
 				}
 				hideBusy();
 			}

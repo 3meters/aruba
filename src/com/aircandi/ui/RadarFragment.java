@@ -20,8 +20,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.widget.AbsListView;
@@ -46,9 +48,7 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.NetworkManager.ConnectedState;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ScanReason;
 import com.aircandi.components.ProximityManager.WifiScanResult;
@@ -63,6 +63,7 @@ import com.aircandi.events.MessageEvent;
 import com.aircandi.events.MonitoringWifiScanReceivedEvent;
 import com.aircandi.events.PlacesNearLocationFinishedEvent;
 import com.aircandi.events.QueryWifiScanReceivedEvent;
+import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Entity;
@@ -74,6 +75,7 @@ import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -146,10 +148,6 @@ public class RadarFragment extends BaseFragment implements
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				if (!mAttributionHidden) {
-					showAttribution(false);
-					mAttributionHidden = true;
-				}
 				final Place entity = (Place) mRadarAdapter.getItems().get(position);
 				Bundle extras = null;
 				if (entity.synthetic) {
@@ -219,8 +217,8 @@ public class RadarFragment extends BaseFragment implements
 					String provider = Aircandi.settings.getString(
 							Constants.PREF_PLACE_PROVIDER,
 							Constants.PREF_PLACE_PROVIDER_DEFAULT);
-					
-					handleAttribution(provider, false);									
+
+					handleAttribution(provider, false);
 					searchForPlaces();
 				}
 			}, 500);
@@ -237,7 +235,7 @@ public class RadarFragment extends BaseFragment implements
 		else if (LocationManager.getInstance().getLocationLocked() == null) {
 			/*
 			 * Gets set everytime we accept a location change in onLocationChange. Means
-			 * we didn't get an acceptable fix yet from either the NETWORK or gps providers.
+			 * we didn't get an acceptable fix yet from either the network or gps providers.
 			 */
 			Logger.d(getSherlockActivity(), "Databind: no location fix - retry");
 			LocationManager.getInstance().lockLocationBurst();
@@ -251,7 +249,8 @@ public class RadarFragment extends BaseFragment implements
 		}
 		else if (providerChange) {
 			Logger.d(getSherlockActivity(), "Databind: Start location search - provider change");
-			EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_PLACE, null, true);
+			Integer removeCount = EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_PLACE, null, true);
+			Logger.v(this, "Removed synthetic places from cache: count = " + String.valueOf(removeCount));
 			showBusy();
 			mRadarAdapter.getItems().clear();
 			mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
@@ -420,7 +419,7 @@ public class RadarFragment extends BaseFragment implements
 					@Override
 					protected Object doInBackground(Object... params) {
 						Thread.currentThread().setName("GetEntitiesForBeacons");
-						final ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesByProximity();
+						ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesByProximity();
 						return serviceResponse;
 					}
 
@@ -428,7 +427,7 @@ public class RadarFragment extends BaseFragment implements
 					protected void onPostExecute(Object result) {
 						final ServiceResponse serviceResponse = (ServiceResponse) result;
 						if (serviceResponse.responseCode != ResponseCode.SUCCESS) {
-							Routing.serviceError(getSherlockActivity(), serviceResponse);
+							Errors.handleError(getSherlockActivity(), serviceResponse);
 							onError();
 						}
 					}
@@ -451,7 +450,7 @@ public class RadarFragment extends BaseFragment implements
 				Logger.d(getSherlockActivity(), "Entities for beacons finished event: ** done **");
 				mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
 				mCacheStamp = EntityManager.getInstance().getCacheStamp();
-				mPullToRefreshAttacher.setRefreshComplete();				
+				mPullToRefreshAttacher.setRefreshComplete();
 			}
 		});
 	}
@@ -495,8 +494,9 @@ public class RadarFragment extends BaseFragment implements
 
 					if (locationLocked != null) {
 
-						/* We never go from gps provider to NETWORK provider */
-						if (locationLocked.getProvider().equals("gps") && locationCandidate.getProvider().equals("NETWORK")) {
+						/* We never go from gps provider to network provider */
+						if (locationLocked.getProvider().equals("gps") && locationCandidate.getProvider().equals("network")) {
+							Logger.d(getSherlockActivity(), "Location changed event: location rejected - no switching from gps to network");
 							return;
 						}
 
@@ -505,11 +505,13 @@ public class RadarFragment extends BaseFragment implements
 							final float accuracyImprovement = locationLocked.getAccuracy() / locationCandidate.getAccuracy();
 							boolean isSignificantlyMoreAccurate = (accuracyImprovement >= 1.5);
 							if (!isSignificantlyMoreAccurate) {
+								Logger.d(getSherlockActivity(), "Location changed event: location rejected - not significantly more accurate");
 								return;
 							}
 						}
 					}
 
+					Logger.d(getSherlockActivity(), "Location changed event: better location accepted");
 					LocationManager.getInstance().setLocationLocked(locationCandidate);
 					mBusyManager.updateAccuracyIndicator();
 					BusProvider.getInstance().post(new LocationLockedEvent(LocationManager.getInstance().getLocationLocked()));
@@ -520,7 +522,7 @@ public class RadarFragment extends BaseFragment implements
 					}
 
 					final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
-					if (location != null) {
+					if (location != null && !location.zombie) {
 
 						mBusyManager.showBusy();
 
@@ -541,7 +543,7 @@ public class RadarFragment extends BaseFragment implements
 							protected void onPostExecute(Object result) {
 								final ServiceResponse serviceResponse = (ServiceResponse) result;
 								if (serviceResponse.responseCode != ResponseCode.SUCCESS) {
-									Routing.serviceError(getSherlockActivity(), serviceResponse);
+									Errors.handleError(getSherlockActivity(), serviceResponse);
 									onError();
 								}
 							}
@@ -590,8 +592,15 @@ public class RadarFragment extends BaseFragment implements
 				/* Point radar adapter at the updated entities */
 				final int previousCount = mRadarAdapter.getCount();
 				final List<Entity> entities = event.entities;
+				
+				Logger.d(getSherlockActivity(), "Databind: fresh entities: source = " + event.changeSource + ", count = " + String.valueOf(entities.size()));
+//					StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+//					for (StackTraceElement element: stackTrace) {
+//						Logger.v(this, "Databind: " + element.toString());
+//					}
 				mRadarAdapter.setItems(entities);
 				mRadarAdapter.notifyDataSetChanged();
+				
 				Aircandi.stopwatch1.stop("Search for places by beacon complete");
 
 				/* ADD some sparkle */
@@ -661,8 +670,8 @@ public class RadarFragment extends BaseFragment implements
 		String provider = Aircandi.settings.getString(
 				Constants.PREF_PLACE_PROVIDER,
 				Constants.PREF_PLACE_PROVIDER_DEFAULT);
-		
-		handleAttribution(provider, false);				
+
+		handleAttribution(provider, false);
 		searchForPlaces();
 	}
 
@@ -711,63 +720,29 @@ public class RadarFragment extends BaseFragment implements
 
 	private void searchForPlaces() {
 
-		/* We won't perform a search if location access is disabled */
-		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
-			Routing.route(getSherlockActivity(), Route.SETTINGS_LOCATION);
-		}
-		else {
-			new AsyncTask() {
+		new AsyncTask() {
 
-				@Override
-				protected void onPreExecute() {
-					mPullToRefreshAttacher.setRefreshing(true);
-					showBusy();
-				}
+			@Override
+			protected void onPreExecute() {
+				mPullToRefreshAttacher.setRefreshing(true);
+				showBusy();
+			}
 
-				@Override
-				protected Object doInBackground(Object... params) {
-					/*
-					 * We have special handling for connected state because search triggers a wifi scan which
-					 * which in turn seems to have its own need to access the NETWORK. Their logic works for quite
-					 * awhile before giving up.
-					 */
-					ConnectedState connectedState = NetworkManager.getInstance().checkConnectedState();
-					if (connectedState == ConnectedState.NORMAL) {
-						searchForPlacesByBeacon();
+			@Override
+			protected Object doInBackground(Object... params) {
+				searchForPlacesByBeacon();
 
-						/* We give the beacon QUERY a bit of a head start */
-						mHandler.postDelayed(new Runnable() {
+				/* We give the beacon QUERY a bit of a head start */
+				mHandler.postDelayed(new Runnable() {
 
-							@Override
-							public void run() {
-								searchForPlacesByLocation();
-							}
-						}, 500);
+					@Override
+					public void run() {
+						searchForPlacesByLocation();
 					}
-					return connectedState;
-				}
-
-				@Override
-				protected void onPostExecute(Object result) {
-					ConnectedState connectedState = (ConnectedState) result;
-
-					if (connectedState != ConnectedState.NORMAL) {
-						if (Aircandi.stopwatch3.isStarted()) {
-							Aircandi.stopwatch3.stop("Aircandi initialization finished: NETWORK problem");
-						}
-						hideBusy();
-						mPullToRefreshAttacher.setRefreshing(false);
-
-						if (connectedState == ConnectedState.WALLED_GARDEN) {
-							Dialogs.alertDialogSimple(getSherlockActivity(), null, getString(R.string.error_connection_walled_garden));
-						}
-						else if (connectedState == ConnectedState.NONE) {
-							Dialogs.alertDialogSimple(getSherlockActivity(), null, getString(R.string.error_connection_none));
-						}
-					}
-				}
-			}.execute();
-		}
+				}, 500);
+				return null;
+			}
+		}.execute();
 	}
 
 	private void searchForPlacesByBeacon() {
@@ -1069,7 +1044,7 @@ public class RadarFragment extends BaseFragment implements
 	// Classes
 	// --------------------------------------------------------------------------------------------
 
-	private class RadarListAdapter extends ArrayAdapter<Entity> {
+	private class RadarListAdapter extends ArrayAdapter<Entity> implements OnTouchListener {
 
 		private final LayoutInflater	mInflater;
 		private final Integer			mItemLayoutId	= R.layout.temp_listitem_radar;
@@ -1095,6 +1070,7 @@ public class RadarFragment extends BaseFragment implements
 				/* Need this line so clicks bubble up to the listview click handler */
 				holder.candiView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 				view.setTag(holder);
+				view.setOnTouchListener(this);
 			}
 			else {
 				holder = (RadarViewHolder) view.getTag();
@@ -1105,6 +1081,17 @@ public class RadarFragment extends BaseFragment implements
 				holder.candiView.databind(entity);
 			}
 			return view;
+		}
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				if (!mAttributionHidden) {
+					showAttribution(false);
+					mAttributionHidden = true;
+				}
+			}
+			return false;
 		}
 
 		@Override

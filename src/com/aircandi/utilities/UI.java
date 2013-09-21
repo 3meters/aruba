@@ -28,11 +28,11 @@ import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
-import com.aircandi.service.HttpService.RequestListener;
+import com.aircandi.service.RequestListener;
+import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.widgets.AirImageView;
@@ -155,9 +155,9 @@ public class UI {
 					public void onError(Object response) {
 						final ServiceResponse serviceResponse = (ServiceResponse) response;
 
-						if (serviceResponse.exception != null && serviceResponse.exception.getStatusCode() != null) {
-							Float statusCode = serviceResponse.exception.getStatusCode();
-							String exception = serviceResponse.exception.getInnerException().getClass().getSimpleName();
+						if (serviceResponse.exception != null || serviceResponse.statusCode != null) {
+
+							Integer statusCode = serviceResponse.statusCode;
 							if (statusCode == HttpStatus.SC_NOT_FOUND || statusCode == HttpStatus.SC_FORBIDDEN) {
 								Logger.w(AirImageView.class, "Photo not found: " + photo.getUri());
 							}
@@ -167,12 +167,15 @@ public class UI {
 							else {
 								Logger.w(AirImageView.class, "Unknown failure for: " + photo.getUri());
 								Logger.w(AirImageView.class, "Status code: " + String.valueOf(statusCode));
-								Logger.w(AirImageView.class, "Exception: " + exception);
+								if (serviceResponse.exception != null) {
+									Logger.w(AirImageView.class, "Exception: " + serviceResponse.exception.getClass().getSimpleName());
+								}
 							}
 						}
-						if (photoView.getBrokenPhoto() != null) {
-							photoView.setPhoto(photo);
-							aircandi(photoView, photoView.getBrokenPhoto(), listener);
+						Photo brokenPhoto = photoView.getBrokenPhoto();
+						if (brokenPhoto != null && !brokenPhoto.getUri().equals(photo.getUri())) {
+							photoView.setPhoto(brokenPhoto);
+							aircandi(photoView, brokenPhoto, listener);
 						}
 						else {
 							photoView.showLoading(false);

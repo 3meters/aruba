@@ -24,8 +24,6 @@ import com.aircandi.components.NotificationManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Session;
@@ -33,6 +31,8 @@ import com.aircandi.service.objects.User;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Errors;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -119,7 +119,7 @@ public class SplashForm extends SherlockActivity {
 
 				/*
 				 * Fire off a check to make sure the session is valid. This will also
-				 * be the first opportunity to check our NETWORK connection. Also, the
+				 * be the first opportunity to check our network connection. Also, the
 				 * users session window will be extended assuming the session is valid.
 				 */
 				result = EntityManager.getInstance().checkSession();
@@ -168,12 +168,12 @@ public class SplashForm extends SherlockActivity {
 					signinAuto();
 				}
 				else {
-					if (Routing.isNetworkError(result.serviceResponse)) {
-						Routing.serviceError(SplashForm.this, result.serviceResponse);
+					if (Errors.isNetworkError(result.serviceResponse)) {
+						Errors.handleError(SplashForm.this, result.serviceResponse);
 						showButtons(Buttons.RETRY);
 					}
 					else {
-						Routing.serviceError(SplashForm.this, result.serviceResponse);
+						Errors.handleError(SplashForm.this, result.serviceResponse);
 						showButtons(Buttons.ACCOUNT);
 					}
 				}
@@ -189,9 +189,9 @@ public class SplashForm extends SherlockActivity {
 
 		if (jsonUser != null && jsonSession != null) {
 			Logger.i(this, "Auto sign in...");
-			final User user = (User) HttpService.jsonToObject(jsonUser, ObjectType.USER);
+			final User user = (User) Json.jsonToObject(jsonUser, Json.ObjectType.USER);
 			if (user != null) {
-				user.session = (Session) HttpService.jsonToObject(jsonSession, ObjectType.SESSION);
+				user.session = (Session) Json.jsonToObject(jsonSession, Json.ObjectType.SESSION);
 				if (user.session != null) {
 					Aircandi.getInstance().setUser(user);
 					Tracker.startNewSession(Aircandi.getInstance().getUser());
@@ -255,12 +255,12 @@ public class SplashForm extends SherlockActivity {
 					Animate.doOverridePendingTransition(SplashForm.this, TransitionType.PAGE_TO_HELP);
 				}
 				else {
-					if (Routing.isNetworkError(result.serviceResponse)) {
-						Routing.serviceError(SplashForm.this, result.serviceResponse);
+					if (Errors.isNetworkError(result.serviceResponse)) {
+						Errors.handleError(SplashForm.this, result.serviceResponse);
 						showButtons(Buttons.RETRY);
 					}
 					else {
-						Routing.serviceError(SplashForm.this, result.serviceResponse);
+						Errors.handleError(SplashForm.this, result.serviceResponse);
 						showButtons(Buttons.ACCOUNT);
 					}
 				}

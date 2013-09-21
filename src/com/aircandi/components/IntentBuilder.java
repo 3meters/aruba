@@ -6,8 +6,8 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.aircandi.Constants;
-import com.aircandi.service.HttpService;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.utilities.Json;
 
 public class IntentBuilder {
 
@@ -58,7 +58,7 @@ public class IntentBuilder {
 		}
 
 		if (mEntity != null) {
-			final String jsonEntity = HttpService.objectToJson(mEntity);
+			final String jsonEntity = Json.objectToJson(mEntity);
 			intent.putExtra(Constants.EXTRA_ENTITY, jsonEntity);
 		}
 

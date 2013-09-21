@@ -3,9 +3,8 @@ package com.aircandi.ui.base;
 import android.os.Bundle;
 
 import com.aircandi.Constants;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.utilities.Json;
 
 public abstract class BasePicker extends BaseBrowse implements IList {
 
@@ -19,7 +18,7 @@ public abstract class BasePicker extends BaseBrowse implements IList {
 		if (extras != null) {
 			final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
 			if (jsonEntity != null) {
-				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.ENTITY);
+				mEntity = (Entity) Json.jsonToObject(jsonEntity, Json.ObjectType.ENTITY);
 			}
 		}
 	}

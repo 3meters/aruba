@@ -3,10 +3,8 @@ package com.aircandi.service;
 import org.apache.commons.codec.binary.Base64;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 
-import com.aircandi.service.HttpService.RequestListener;
-import com.aircandi.service.HttpService.RequestType;
-import com.aircandi.service.HttpService.ResponseFormat;
 import com.aircandi.service.objects.Session;
 
 /**
@@ -30,25 +28,22 @@ import com.aircandi.service.objects.Session;
  * @author Jayma
  */
 
-@SuppressWarnings("ucd")
 public class ServiceRequest {
 
 	private String			mUri;
 	private String			mRequestBody;
+	private String			mActivityName;
 	private Bundle			mParameters;
-	private Query			mQuery;
 	private RequestType		mRequestType;
 	private ResponseFormat	mResponseFormat;
 	private RequestListener	mRequestListener;
 	private Session			mSession;
 	private String			mUserName;
 	private String			mPassword;
-	private AuthType		mAuthType	= AuthType.NONE;
-	private Integer			mSocketTimeout;
-	private Boolean			mRetry		= true;
-	private Boolean			mUseSecret	= false;
-	private Boolean			mIgnoreResponseData = false;
-	private boolean			mSuppressUI	= false;
+	private AuthType		mAuthType			= AuthType.NONE;
+	private Boolean			mUseSecret			= false;
+	private Boolean			mIgnoreResponseData	= false;
+	private boolean			mSuppressUI			= false;
 
 	@SuppressWarnings("ucd")
 	public enum AuthType {
@@ -72,6 +67,29 @@ public class ServiceRequest {
 
 	public String getUri() {
 		return mUri;
+	}
+
+	public String getUriWithQuery() {
+		String uri = mUri;
+		String sessionInfo = sessionInfo();
+		if (!TextUtils.isEmpty(sessionInfo)) {
+			if (uri.contains("?")) {
+				uri += "&" + sessionInfo;
+			}
+			else {
+				uri += "?" + sessionInfo;
+			}
+		}
+		return uri;
+	}
+
+	private String sessionInfo() {
+		String sessionInfo = "";
+		if (mSession != null) {
+			sessionInfo = "user=" + mSession.ownerId + "&";
+			sessionInfo += "session=" + mSession.key;
+		}
+		return sessionInfo;
 	}
 
 	public ServiceRequest setRequestType(RequestType requestType) {
@@ -108,15 +126,6 @@ public class ServiceRequest {
 
 	public String getRequestBody() {
 		return mRequestBody;
-	}
-
-	public ServiceRequest setQuery(Query query) {
-		mQuery = query;
-		return this;
-	}
-
-	public Query getQuery() {
-		return mQuery;
 	}
 
 	public ServiceRequest setParameters(Bundle parameters) {
@@ -179,24 +188,6 @@ public class ServiceRequest {
 		return this;
 	}
 
-	public Integer getSocketTimeout() {
-		return mSocketTimeout;
-	}
-
-	public ServiceRequest setSocketTimeout(int socketTimeout) {
-		mSocketTimeout = socketTimeout;
-		return this;
-	}
-
-	public Boolean okToRetry() {
-		return mRetry;
-	}
-
-	public ServiceRequest setRetry(Boolean retry) {
-		mRetry = retry;
-		return this;
-	}
-
 	public Boolean getUseSecret() {
 		return mUseSecret;
 	}
@@ -212,6 +203,15 @@ public class ServiceRequest {
 
 	public ServiceRequest setIgnoreResponseData(Boolean ignoreResponseData) {
 		mIgnoreResponseData = ignoreResponseData;
+		return this;
+	}
+
+	public String getActivityName() {
+		return mActivityName;
+	}
+
+	public ServiceRequest setActivityName(String activityName) {
+		mActivityName = activityName;
 		return this;
 	}
 }

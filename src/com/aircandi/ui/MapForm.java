@@ -13,12 +13,11 @@ import android.widget.Toast;
 
 import com.aircandi.Constants;
 import com.aircandi.R;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ObjectType;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirMarker;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.ui.base.BaseEntityForm;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.UI;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -47,7 +46,7 @@ public class MapForm extends BaseEntityForm {
 			final List<String> jsonMarkers = extras.getStringArrayList(Constants.EXTRA_MARKERS);
 			if (jsonMarkers != null) {
 				for (String jsonMarker : jsonMarkers) {
-					AirMarker marker = (AirMarker) HttpService.jsonToObject(jsonMarker, ObjectType.AIR_MARKER);
+					AirMarker marker = (AirMarker) Json.jsonToObject(jsonMarker, Json.ObjectType.AIR_MARKER);
 					mMarkers.add(marker);
 				}
 			}

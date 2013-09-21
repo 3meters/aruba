@@ -45,6 +45,7 @@ import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -141,7 +142,7 @@ public class CandigramForm extends BaseEntityForm {
 					}
 				}
 				else {
-					Routing.serviceError(CandigramForm.this, result.serviceResponse);
+					Errors.handleError(CandigramForm.this, result.serviceResponse);
 				}
 			}
 		}.execute();
@@ -254,7 +255,7 @@ public class CandigramForm extends BaseEntityForm {
 					}
 				}
 				else {
-					Routing.serviceError(CandigramForm.this, result.serviceResponse);
+					Errors.handleError(CandigramForm.this, result.serviceResponse);
 				}
 			}
 		}.execute();

@@ -18,13 +18,12 @@ import com.aircandi.BuildConfig;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.RequestListener;
-import com.aircandi.service.HttpService.RequestType;
-import com.aircandi.service.HttpService.ResponseFormat;
+import com.aircandi.service.RequestListener;
+import com.aircandi.service.RequestType;
+import com.aircandi.service.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ServiceResponse;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.UI;
 
@@ -135,13 +134,10 @@ public class BitmapLoader {
 
 			if (bitmap == null) {
 				Logger.w(null, url + ": stream could not be decoded to a bitmap");
-				serviceResponse.responseCode = ResponseCode.FAILED;
-				serviceResponse.exception = HttpService.makeHttpServiceException(null, null, new IllegalStateException(
-						"STREAM could not be decoded to a bitmap: " + url));
+				return new ServiceResponse(ResponseCode.FAILED, null, new IllegalStateException("STREAM could not be decoded to a bitmap: " + url));				
 			}
-			else {
-				serviceResponse.data = bitmap;
-			}
+			
+			serviceResponse.data = bitmap;
 		}
 		return serviceResponse;
 	}

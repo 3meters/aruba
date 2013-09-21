@@ -38,16 +38,12 @@ import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
-import com.aircandi.service.HttpService;
-import com.aircandi.service.HttpService.ExcludeNulls;
-import com.aircandi.service.HttpService.ObjectType;
-import com.aircandi.service.HttpService.RequestListener;
-import com.aircandi.service.HttpService.UseAnnotations;
+import com.aircandi.service.RequestListener;
+import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Cursor;
@@ -72,6 +68,8 @@ import com.aircandi.ui.widgets.BuilderButton;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Errors;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -111,7 +109,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (extras != null) {
 			final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
 			if (jsonEntity != null) {
-				mEntity = (Entity) HttpService.jsonToObject(jsonEntity, ObjectType.ENTITY);
+				mEntity = (Entity) Json.jsonToObject(jsonEntity, Json.ObjectType.ENTITY);
 			}
 
 			mParentId = extras.getString(Constants.EXTRA_ENTITY_PARENT_ID);
@@ -482,7 +480,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
-					final Photo photo = (Photo) HttpService.jsonToObject(jsonPhoto, ObjectType.PHOTO);
+					final Photo photo = (Photo) Json.jsonToObject(jsonPhoto, Json.ObjectType.PHOTO);
 					photo.setBitmapLocalOnly(true);
 
 					if (mImageRequestWebImageView.getPhoto() == null || !mImageRequestWebImageView.getPhoto().getUri().equals(photo.getUri())) {
@@ -497,7 +495,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 					final Bundle extras = intent.getExtras();
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
-					final Photo photo = (Photo) HttpService.jsonToObject(jsonPhoto, ObjectType.PHOTO);
+					final Photo photo = (Photo) Json.jsonToObject(jsonPhoto, Json.ObjectType.PHOTO);
 					photo.setBitmapLocalOnly(true);
 
 					if (mImageRequestWebImageView.getPhoto() == null || !mImageRequestWebImageView.getPhoto().getUri().equals(photo.getUri())) {
@@ -622,7 +620,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 						doApplinksBuilder();
 					}
 					else {
-						Routing.serviceError(BaseEntityEdit.this, result.serviceResponse);
+						Errors.handleError(BaseEntityEdit.this, result.serviceResponse);
 					}
 					hideBusy();
 				}
@@ -638,7 +636,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (mApplinks.size() > 0) {
 			final List<String> applinkStrings = new ArrayList<String>();
 			for (Entity applink : mApplinks) {
-				applinkStrings.add(HttpService.objectToJson(applink, UseAnnotations.FALSE, ExcludeNulls.TRUE));
+				applinkStrings.add(Json.objectToJson(applink, Json.UseAnnotations.FALSE, Json.ExcludeNulls.TRUE));
 			}
 			extras.putStringArrayList(Constants.EXTRA_ENTITIES, (ArrayList<String>) applinkStrings);
 		}
@@ -775,7 +773,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.CANDIGRAM_OUT);
 				}
 				else {
-					Routing.serviceError(BaseEntityEdit.this, serviceResponse);
+					Errors.handleError(BaseEntityEdit.this, serviceResponse);
 				}
 			}
 
@@ -819,7 +817,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 							if (Aircandi.getInstance().getUser().id.equals(mEntity.id)) {
 
 								/* We also need to update the user that has been persisted for AUTO sign in. */
-								final String jsonUser = HttpService.objectToJson(mEntity);
+								final String jsonUser = Json.objectToJson(mEntity);
 								Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
 								Aircandi.settingsEditor.commit();
 
@@ -844,7 +842,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FORM_TO_PAGE);
 				}
 				else {
-					Routing.serviceError(BaseEntityEdit.this, serviceResponse);
+					Errors.handleError(BaseEntityEdit.this, serviceResponse);
 				}
 			}
 
@@ -890,7 +888,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FORM_TO_PAGE_AFTER_DELETE);
 				}
 				else {
-					Routing.serviceError(BaseEntityEdit.this, result.serviceResponse);
+					Errors.handleError(BaseEntityEdit.this, result.serviceResponse);
 				}
 			}
 
