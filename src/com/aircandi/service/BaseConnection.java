@@ -97,10 +97,6 @@ public abstract class BaseConnection implements IConnection {
 			}
 		}
 
-		if (stopwatch != null) {
-			stopwatch.segmentTime("Http service: request construction complete");
-		}
-
 		return airHttpRequest;
 	}
 

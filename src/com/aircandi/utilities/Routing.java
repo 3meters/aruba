@@ -759,6 +759,7 @@ public final class Routing {
 		UNKNOWN,
 		ADD,
 		NEW,
+		KICK,
 		EDIT,
 		BROWSE,
 		HELP,

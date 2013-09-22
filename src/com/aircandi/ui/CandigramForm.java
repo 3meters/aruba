@@ -347,15 +347,13 @@ public class CandigramForm extends BaseEntityForm {
 
 	@Override
 	public void onAdd() {
-		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
+		if (EntityManager.canUserAdd(mEntity)) {
 			Routing.route(this, Route.NEW_FOR, mEntity);
+			return;
 		}
-		else {
-			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
-					, null
-					, getResources().getString(R.string.alert_entity_locked)
-					, null
-					, this, android.R.string.ok, null, null, null, null);
+		
+		if (mEntity.locked) {
+			Dialogs.locked(this, mEntity);
 		}
 	}
 
@@ -402,10 +400,10 @@ public class CandigramForm extends BaseEntityForm {
 
 		setActivityTitle(mEntity.name);
 		if (mMenuItemEdit != null) {
-			mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
+			mMenuItemEdit.setVisible(UI.showAction(Route.EDIT, mEntity));
 		}
 		if (mMenuItemAdd != null) {
-			mMenuItemAdd.setVisible(EntityManager.canUserAdd(mEntity));
+			mMenuItemAdd.setVisible(UI.showAction(Route.ADD, mEntity));
 		}
 
 		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);

@@ -250,9 +250,6 @@ public class EntityCache implements Map<String, Entity> {
 				}
 				decorate(loadedEntities, linkOptions);
 				upsertEntities(loadedEntities);
-				if (stopwatch != null) {
-					stopwatch.segmentTime("Load entities: entities decorated and pushed to cache");
-				}
 			}
 
 		}
@@ -323,7 +320,7 @@ public class EntityCache implements Map<String, Entity> {
 				}
 			}
 
-			//			/* Places LOCKED in by proximity trump places LOCKED in by location */
+			//			/* Places locked in by proximity trump places locked in by location */
 			//			final List<Place> proximityPlaces = (List<Place>) EntityManager.getInstance().getPlaces(null, true);
 			//
 			//			Iterator<Place> iterProximityPlaces = proximityPlaces.iterator();

@@ -21,7 +21,7 @@ public class LocationChangedReceiver extends BroadcastReceiver {
 
 	/**
 	 * When a new location is received, extract it from the Intent and use
-	 * it to start the service used to update the list of NEARBY places.
+	 * it to start the service used to update the list of nearby places.
 	 * 
 	 * This is the Active receiver, used to receive Location updates when
 	 * the Activity is visible.

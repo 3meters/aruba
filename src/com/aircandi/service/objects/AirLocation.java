@@ -27,7 +27,10 @@ public class AirLocation extends ServiceObject implements Cloneable, Serializabl
 	public Number				speed;
 	@Expose
 	public String				provider;
-	@Expose
+	
+	/*
+	 * Client only
+	 */
 	public Boolean				zombie = false ;
 
 	public AirLocation() {}

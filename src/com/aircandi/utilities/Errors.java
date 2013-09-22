@@ -77,7 +77,79 @@ public final class Errors {
 
 	public static final ErrorResponse getErrorResponse(Context context, ServiceResponse serviceResponse) {
 
-		if (serviceResponse.exception != null) {
+		if (serviceResponse.statusCode != null) {
+			/*
+			 * Status code based error
+			 */
+			if (serviceResponse.statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+				/*
+				 * Reached the service with a good call but the service failed for an unknown reason. Examples
+				 * are service bugs like missing indexes causing mongo queries to throw errors.
+				 * 
+				 * - 500: Something bad and unknown has happened in the service.
+				 */
+				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown));
+			}
+			else if (serviceResponse.statusCode == HttpStatus.SC_NOT_FOUND) {
+				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_client_request_not_found));
+			}
+			else if (serviceResponse.statusCode == HttpStatus.SC_FORBIDDEN) {
+				if (serviceResponse.statusCodeService != null) {
+					if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
+						return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_signup_password_weak));
+					}
+					else if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
+						return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_signup_email_taken));
+					}
+				}
+			}
+			else if (serviceResponse.statusCode == HttpStatus.SC_GATEWAY_TIMEOUT) {
+				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_gateway_timeout));
+			}
+			else if (serviceResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
+				/*
+				 * Reached the service with a good call but failed for a well known reason.
+				 * 
+				 * This could have been caused by any problem while inserting/updating.
+				 * We look first for ones that are known responses from the service.
+				 * 
+				 * - 403.x: password not strong enough
+				 * - 403.x: email not unique
+				 * - 401.2: expired session
+				 * - 401.1: invalid or missing session
+				 */
+				if (serviceResponse.statusCodeService != null) {
+					if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
+						ErrorResponse errorResponse = new ErrorResponse(ResponseType.DIALOG
+								, context.getString(R.string.error_session_expired)
+								, context.getString(R.string.error_session_expired_title));
+						errorResponse.signout = true;
+						return errorResponse;
+					}
+					else if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
+						if (serviceResponse.activityName != null) {
+							if (serviceResponse.activityName.equals("PasswordEdit")) {
+								return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_change_password_unauthorized));
+							}
+							else if (serviceResponse.activityName.equals("SignInEdit")) {
+								return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_signin_invalid_signin));
+							}
+						}
+						ErrorResponse errorResponse = new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_session_invalid));
+						errorResponse.signout = true;
+						return errorResponse;
+					}
+					else if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
+						return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_whitelist_unauthorized));
+					}
+					else if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED) {
+						return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_unverified_unauthorized));
+					}
+				}
+			}
+			return new ErrorResponse(ResponseType.TOAST, "Unhandled status error: " + serviceResponse.statusCode);
+		}
+		else {
 			/*
 			 * Exception based error
 			 */
@@ -106,7 +178,7 @@ public final class Errors {
 						return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_connection_none));
 					}
 				}
-				
+
 				if (exception instanceof WalledGardenException) {
 					return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_connection_walled_garden));
 				}
@@ -117,7 +189,8 @@ public final class Errors {
 				 * - ConnectException: Couldn't connect to the service host.
 				 * - ConnectTimeoutException: Timeout trying to establish connection to service host.
 				 * - SocketException: thrown during socket creation or setting options, we don't have a connection
-				 * - SocketTimeoutException: Timeout trying to send/receive data to the service. Service might not be up.
+				 * - SocketTimeoutException: Timeout trying to send/receive data to the service. Service might not be
+				 * up.
 				 * - WalledGardenException: have a connection but user was taken to a different host than requested
 				 * - UnknownHostException: The ip address of the host could not be determined.
 				 * - ClientProtocolException: malformed request and a bug.
@@ -155,88 +228,12 @@ public final class Errors {
 					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown));
 				}
 			}
-			else {
-				return new ErrorResponse(ResponseType.TOAST, exception.getMessage());
-			}
-		}
-		else {
-			/*
-			 * Status code based error
-			 */
-			if (serviceResponse.statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
-				/*
-				 * Reached the service with a good call but the service failed for an unknown reason. Examples
-				 * are service bugs like missing indexes causing mongo queries to throw errors.
-				 * 
-				 * - 500: Something bad and unknown has happened in the service.
-				 */
-				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown));
-			}
-			else if (serviceResponse.statusCode == HttpStatus.SC_NOT_FOUND) {
-				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_client_request_not_found));
-			}
-			else if (serviceResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
-				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unauthorized));
-			}
-			else if (serviceResponse.statusCode == HttpStatus.SC_FORBIDDEN) {
-				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_forbidden));
-			}
-			else if (serviceResponse.statusCode == HttpStatus.SC_GATEWAY_TIMEOUT) {
-				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_gateway_timeout));
-			}
-			else {
-				/*
-				 * Reached the service with a good call but failed for a well known reason.
-				 * 
-				 * This could have been caused by any problem while inserting/updating.
-				 * We look first for ones that are known responses from the service.
-				 * 
-				 * - 403.x: password not strong enough
-				 * - 403.x: email not unique
-				 * - 401.2: expired session
-				 * - 401.1: invalid or missing session
-				 */
-				if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
-					ErrorResponse errorResponse = new ErrorResponse(ResponseType.DIALOG
-							, context.getString(R.string.error_session_expired)
-							, context.getString(R.string.error_session_expired_title));
-					errorResponse.signout = true;
-					return errorResponse;
-				}
-				else if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
-					if (serviceResponse.activityName.equals("PasswordEdit")) {
-						return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_change_password_unauthorized));
-					}
-					else if (serviceResponse.activityName.equals("SignInEdit")) {
-						return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_signin_invalid_signin));
-					}
-					else {
-						ErrorResponse errorResponse = new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_session_invalid));
-						errorResponse.signout = true;
-						return errorResponse;
-					}
-				}
-				else if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
-					return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_whitelist_unauthorized));
-				}
-				else if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED) {
-					return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_unverified_unauthorized));
-				}
-				else if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
-					return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_signup_password_weak));
-				}
-				else if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE) {
-					return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_signup_email_taken));
-				}
-				else {
-					return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_service_unknown));
-				}
-			}
+			return new ErrorResponse(ResponseType.TOAST, exception.getMessage());
 		}
 	}
 
 	public static Boolean isNetworkError(ServiceResponse serviceResponse) {
-		return (serviceResponse.exception != null && serviceResponse.exception instanceof IOException);
+		return (serviceResponse.statusCode == null && serviceResponse.exception != null && serviceResponse.exception instanceof IOException);
 	}
 
 	// --------------------------------------------------------------------------------------------

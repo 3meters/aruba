@@ -168,10 +168,6 @@ public class OkHttpUrlConnection extends BaseConnection {
 					serviceResponse.data = response;
 				}
 
-				if (stopwatch != null) {
-					stopwatch.segmentTime("Http service: successful response processing completed");
-				}
-
 				return serviceResponse;
 			}
 			else {
@@ -214,7 +210,21 @@ public class OkHttpUrlConnection extends BaseConnection {
 			}
 		}
 		catch (IOException exception) {
-			return new ServiceResponse(ResponseCode.FAILED, null, exception);
+			try {
+				if (connection != null) {
+					serviceResponse.statusCode = connection.getResponseCode();
+					serviceResponse.statusMessage = connection.getResponseMessage();
+					serviceResponse.exception = exception;
+					serviceResponse.responseCode = ResponseCode.FAILED;
+					return serviceResponse;
+				}
+				else {
+					return new ServiceResponse(ResponseCode.FAILED, null, exception);
+				}
+			}
+			catch (IOException secondException) {
+				return new ServiceResponse(ResponseCode.FAILED, null, exception);
+			}
 		}
 		finally {
 			if (inputStream != null) {
@@ -288,6 +298,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 		 * Gingerbread and above support Gzip natively.
 		 */
 		OutputStream outputStream = null;
+		InputStream inputStream = null;
 		try {
 			byte[] data = string.getBytes();
 
@@ -301,7 +312,12 @@ public class OkHttpUrlConnection extends BaseConnection {
 			outputStream.flush();
 			outputStream.close();
 
-			InputStream inputStream = connection.getInputStream();
+			if ((Integer) connection.getResponseCode() / 100 == HttpURLConnection.HTTP_OK / 100) {
+				inputStream = connection.getInputStream();
+			}
+			else {
+				inputStream = connection.getErrorStream();
+			}
 
 			if (connection.getContentEncoding() != null && connection.getContentEncoding().equals("gzip")) {
 				inputStream = new BufferedInputStream(new GZIPInputStream(inputStream), 8 * 1024);
@@ -333,6 +349,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 		 */
 		boolean useGzip = false;
 		OutputStream outputStream = null;
+		InputStream inputStream = null;
 
 		try {
 			byte[] data = string.getBytes();
@@ -346,8 +363,13 @@ public class OkHttpUrlConnection extends BaseConnection {
 			outputStream.write(data);
 			outputStream.flush();
 			outputStream.close();
-
-			InputStream inputStream = connection.getInputStream();
+			
+			if ((Integer) connection.getResponseCode() / 100 == HttpURLConnection.HTTP_OK / 100) {
+				inputStream = connection.getInputStream();
+			}
+			else {
+				inputStream = connection.getErrorStream();
+			}
 
 			final Map<String, List<String>> headers = connection.getHeaderFields();
 			// This is a map, but we can't assume the key we're looking for

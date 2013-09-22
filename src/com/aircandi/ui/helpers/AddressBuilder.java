@@ -14,7 +14,7 @@ import com.aircandi.R;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Json;
-import com.aircandi.utilities.Utilities;
+import com.aircandi.utilities.Type;
 
 public class AddressBuilder extends BaseEntityEdit {
 
@@ -67,11 +67,11 @@ public class AddressBuilder extends BaseEntityEdit {
 	@Override
 	protected void gather() {
 		Place place = (Place) mEntity;
-		place.phone = Utilities.emptyAsNull(((EditText) findViewById(R.id.phone)).getEditableText().toString());
-		place.address = Utilities.emptyAsNull(((EditText) findViewById(R.id.address)).getEditableText().toString());
-		place.city = Utilities.emptyAsNull(((EditText) findViewById(R.id.city)).getEditableText().toString());
-		place.region = Utilities.emptyAsNull(((EditText) findViewById(R.id.state)).getEditableText().toString());
-		place.postalCode = Utilities.emptyAsNull(((EditText) findViewById(R.id.zip_code)).getEditableText().toString());
+		place.phone = Type.emptyAsNull(((EditText) findViewById(R.id.phone)).getEditableText().toString());
+		place.address = Type.emptyAsNull(((EditText) findViewById(R.id.address)).getEditableText().toString());
+		place.city = Type.emptyAsNull(((EditText) findViewById(R.id.city)).getEditableText().toString());
+		place.region = Type.emptyAsNull(((EditText) findViewById(R.id.state)).getEditableText().toString());
+		place.postalCode = Type.emptyAsNull(((EditText) findViewById(R.id.zip_code)).getEditableText().toString());
 	}
 
 	@Override

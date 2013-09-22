@@ -25,6 +25,7 @@ import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Type;
 import com.aircandi.utilities.UI;
 import com.aircandi.utilities.Utilities;
 
@@ -266,11 +267,11 @@ public class ApplinkEdit extends BaseEntityEdit {
 		super.gather();
 
 		if (mAppId != null) {
-			((Applink) mEntity).appId = Utilities.emptyAsNull(mAppId.getText().toString().trim());
+			((Applink) mEntity).appId = Type.emptyAsNull(mAppId.getText().toString().trim());
 		}
 
 		if (mAppUrl != null) {
-			((Applink) mEntity).appUrl = Utilities.emptyAsNull(mAppUrl.getText().toString().trim());
+			((Applink) mEntity).appUrl = Type.emptyAsNull(mAppUrl.getText().toString().trim());
 			if (mEntity.type.equals(Constants.TYPE_APP_WEBSITE)) {
 				String appUrl = ((Applink) mEntity).appUrl;
 				if (!appUrl.startsWith("http://") && !appUrl.startsWith("https://")) {

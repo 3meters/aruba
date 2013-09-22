@@ -128,10 +128,6 @@ public class HttpUrlConnection extends BaseConnection {
 					serviceResponse.data = response;
 				}
 
-				if (stopwatch != null) {
-					stopwatch.segmentTime("Http service: successful response processing completed");
-				}
-
 				return serviceResponse;
 			}
 			else {

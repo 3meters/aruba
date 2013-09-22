@@ -338,15 +338,13 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 
 	@SuppressWarnings("ucd")
 	public void onNewCommentButtonClick(View view) {
-		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
+		if (EntityManager.canUserAdd(mEntity)) {
 			Routing.route(this, Route.COMMENT_NEW, mEntity);
+			return;
 		}
-		else {
-			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
-					, null
-					, mResources.getString(R.string.alert_entity_locked)
-					, null
-					, this, android.R.string.ok, null, null, null, null);
+
+		if (mEntity.locked) {
+			Dialogs.locked(this, mEntity);
 		}
 	}
 
@@ -672,15 +670,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 		 * Setup menu items that are common for entity forms.
 		 */
 		mMenuItemAdd = menu.findItem(R.id.add);
-		if (mMenuItemAdd != null) {
-			mMenuItemAdd.setVisible(EntityManager.canUserAdd(mEntity));
-		}
-
 		mMenuItemEdit = menu.findItem(R.id.edit);
-		if (mMenuItemEdit != null) {
-			mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
-		}
-
 		MenuItem refresh = menu.findItem(R.id.refresh);
 		if (refresh != null) {
 			if (mBusyManager != null) {

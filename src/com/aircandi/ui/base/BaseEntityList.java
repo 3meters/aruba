@@ -50,6 +50,7 @@ import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.DateTime.IntervalContext;
+import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
@@ -301,12 +302,19 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	@Override
 	public void onAdd() {
 		/*
-		 * We assume the new entity button wouldn't be visible if the
-		 * entity is LOCKED.
+		 * The new entity button is visible even if the entity is locked. Now we do
+		 * the actual hard core check.
 		 */
-		Bundle extras = new Bundle();
-		extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mForEntityId);
-		Routing.route(this, Route.NEW, null, mListLinkSchema, extras);
+		if (EntityManager.canUserAdd(mForEntity)) {
+			Bundle extras = new Bundle();
+			extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mForEntityId);
+			Routing.route(this, Route.NEW, null, mListLinkSchema, extras);
+			return;
+		}
+		
+		if (mForEntity.locked) {
+			Dialogs.locked(this, mForEntity);
+		}
 	}
 
 	@SuppressWarnings("ucd")
@@ -364,7 +372,14 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		 */
 		mMenuItemAdd = menu.findItem(R.id.add);
 		if (mMenuItemAdd != null) {
-			mMenuItemAdd.setVisible(canUserAdd());
+			mMenuItemAdd.setVisible(UI.showAction(Route.ADD, mForEntity));
+			mMenuItemAdd.setTitle(R.string.menu_add_entity_item);
+			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+				mMenuItemAdd.setTitle(R.string.menu_add_comment_item);
+			}
+			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+				mMenuItemAdd.setTitle(R.string.menu_add_picture_item);
+			}
 		}
 
 		MenuItem refresh = menu.findItem(R.id.refresh);
@@ -383,26 +398,6 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		}
 
 		return true;
-	}
-
-	protected Boolean canUserAdd() {
-		if (mListNewEnabled) {
-			if (Aircandi.currentPlace != null && !Aircandi.currentPlace.hasActiveProximity()) {
-				if (mForEntity != null ? !mForEntity.isOwnedByCurrentUser() : true) {
-					return false;
-				}
-			}
-			mMenuItemAdd.setTitle(R.string.menu_add_entity_item);
-			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-				mMenuItemAdd.setTitle(R.string.menu_add_comment_item);
-			}
-			else if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-				mMenuItemAdd.setTitle(R.string.menu_add_picture_item);
-			}
-			mMenuItemAdd.setVisible(true);
-			return true;
-		}
-		return false;
 	}
 
 	// --------------------------------------------------------------------------------------------

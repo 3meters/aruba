@@ -91,7 +91,9 @@
     
     <!-- Alerts general -->
 
-    <string name="alert_entity_locked">This candigram has been locked by the owner.</string>
+    <string name="alert_entity_locked_candigram">This candigram has been locked by the owner.</string>
+    <string name="alert_entity_locked_place">This place has been locked by the owner.</string>
+    <string name="alert_entity_locked_picture">This picture has been locked by the owner.</string>
     <string name="alert_wifi_title">Aircandi</string>
     <string name="alert_wifi_tethered">Turn off hotspot tethering for best results using Aircandi.</string>
     <string name="alert_wifi_disabled">Enable wifi for best results using Aircandi.</string>
@@ -424,11 +426,17 @@
     
     <!-- Picture -->
     
-    <string name="picture_label_place">picture added from:</string>
+    <string name="picture_label_place">picture added for:</string>
+    
+    <!-- Radar -->
+    
+    <string name="radar_place_provider_foursquare">Powered by Foursquare</string>
+    <string name="radar_place_provider_google">Powered by Google</string>
+    <string name="radar_place_provider_factual">Powered by Factual</string>
     
     <!-- Comment -->
     
-    <string name="comment_label_place">comment added from:</string>
+    <string name="comment_label_place">comment added for:</string>
     
     <!-- Forms.hints -->
 

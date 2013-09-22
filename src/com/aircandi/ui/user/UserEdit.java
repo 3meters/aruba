@@ -19,6 +19,7 @@ import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
+import com.aircandi.utilities.Type;
 import com.aircandi.utilities.Utilities;
 
 public class UserEdit extends BaseEntityEdit {
@@ -173,10 +174,10 @@ public class UserEdit extends BaseEntityEdit {
 		super.gather();
 
 		User user = (User) mEntity;
-		user.email = Utilities.emptyAsNull(mEmail.getText().toString().trim());;
-		user.bio = Utilities.emptyAsNull(mBio.getText().toString().trim());
-		user.area = Utilities.emptyAsNull(mArea.getText().toString().trim());
-		user.webUri = Utilities.emptyAsNull(mWebUri.getText().toString().trim());
+		user.email = Type.emptyAsNull(mEmail.getText().toString().trim());;
+		user.bio = Type.emptyAsNull(mBio.getText().toString().trim());
+		user.area = Type.emptyAsNull(mArea.getText().toString().trim());
+		user.webUri = Type.emptyAsNull(mWebUri.getText().toString().trim());
 		user.doNotTrack = mDoNotTrack.isChecked();
 	}
 

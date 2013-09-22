@@ -91,8 +91,7 @@ public class RadarFragment extends BaseFragment implements
 	private Integer					mEntityModelWifiState	= WifiManager.WIFI_STATE_UNKNOWN;
 
 	private ListView				mList;
-	private View					mAttributionGoogle;
-	private View					mAttributionFoursquare;
+	private TextView				mAttribution;
 	private View					mAttributionHolder;
 	private Boolean					mAttributionHidden		= false;
 	private MenuItem				mMenuItemBeacons;
@@ -117,8 +116,7 @@ public class RadarFragment extends BaseFragment implements
 
 		View view = super.onCreateView(inflater, container, savedInstanceState);
 		mList = (ListView) view.findViewById(R.id.radar_list);
-		mAttributionGoogle = view.findViewById(R.id.image_google);
-		mAttributionFoursquare = view.findViewById(R.id.image_foursquare);
+		mAttribution = (TextView) view.findViewById(R.id.place_provider);
 		mAttributionHolder = view.findViewById(R.id.attribution_holder);
 		View dismiss = mAttributionHolder.findViewById(R.id.image_dismiss);
 		dismiss.setOnClickListener(new OnClickListener() {
@@ -218,7 +216,7 @@ public class RadarFragment extends BaseFragment implements
 							Constants.PREF_PLACE_PROVIDER,
 							Constants.PREF_PLACE_PROVIDER_DEFAULT);
 
-					handleAttribution(provider, false);
+					handleAttribution(provider);
 					searchForPlaces();
 				}
 			}, 500);
@@ -251,6 +249,7 @@ public class RadarFragment extends BaseFragment implements
 			Logger.d(getSherlockActivity(), "Databind: Start location search - provider change");
 			Integer removeCount = EntityManager.getEntityCache().removeEntities(Constants.SCHEMA_ENTITY_PLACE, null, true, false);
 			Logger.v(this, "Removed synthetic places from cache: count = " + String.valueOf(removeCount));
+			handleAttribution(provider);
 			showBusy();
 			mRadarAdapter.getItems().clear();
 			mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
@@ -290,7 +289,7 @@ public class RadarFragment extends BaseFragment implements
 		else if ((ProximityManager.getInstance().getLastBeaconLockedDate() != null && mEntityModelBeaconDate != null)
 				&& (ProximityManager.getInstance().getLastBeaconLockedDate().longValue() > mEntityModelBeaconDate.longValue())) {
 			/*
-			 * The beacons we are LOCKED to have changed while we were away so we need to
+			 * The beacons we are locked to have changed while we were away so we need to
 			 * search for new places linked to beacons.
 			 */
 			Logger.d(getSherlockActivity(), "Databind: reload places because beacon date has changed");
@@ -337,31 +336,29 @@ public class RadarFragment extends BaseFragment implements
 		}
 	}
 
-	private String handleAttribution(String provider, Boolean change) {
-		UI.setVisibility(mAttributionFoursquare, View.INVISIBLE);
-		UI.setVisibility(mAttributionGoogle, View.INVISIBLE);
-		if (mAttributionHolder.getVisibility() == View.INVISIBLE) {
+	private String handleAttribution(String provider) {
+		if (mAttributionHolder.getVisibility() != View.VISIBLE) {
 			mAttributionHolder.setVisibility(View.VISIBLE);
 		}
 
+		Integer attributionResId = null;
+
 		if (provider.equals(Constants.TYPE_PROVIDER_FOURSQUARE)) {
-			UI.setVisibility(mAttributionFoursquare, View.VISIBLE);
-			if (mAttributionHidden) {
-				showAttribution(true);
-			}
-			mAttributionHidden = false;
+			attributionResId = R.string.radar_place_provider_foursquare;
+		}
+		else if (provider.equals(Constants.TYPE_PROVIDER_FACTUAL)) {
+			attributionResId = R.string.radar_place_provider_factual;
 		}
 		else if (provider.equals(Constants.TYPE_PROVIDER_GOOGLE)) {
-			UI.setVisibility(mAttributionGoogle, View.VISIBLE);
-			if (mAttributionHidden) {
-				showAttribution(true);
-			}
-			mAttributionHidden = false;
+			attributionResId = R.string.radar_place_provider_google;
 		}
-		else {
-			mAttributionHolder.setVisibility(View.INVISIBLE);
-			mAttributionHidden = true;
+
+		mAttribution.setText(getString(attributionResId).toUpperCase(Locale.US));
+		if (mAttributionHidden) {
+			showAttribution(true);
 		}
+		mAttributionHidden = false;
+
 		return provider;
 	}
 
@@ -412,7 +409,6 @@ public class RadarFragment extends BaseFragment implements
 
 			@Override
 			public void run() {
-				Aircandi.stopwatch1.segmentTime("Beacons LOCKED event fired");
 				mEntityModelBeaconDate = ProximityManager.getInstance().getLastBeaconLockedDate();
 				new AsyncTask() {
 
@@ -592,15 +588,15 @@ public class RadarFragment extends BaseFragment implements
 				/* Point radar adapter at the updated entities */
 				final int previousCount = mRadarAdapter.getCount();
 				final List<Entity> entities = event.entities;
-				
+
 				Logger.d(getSherlockActivity(), "Databind: fresh entities: source = " + event.changeSource + ", count = " + String.valueOf(entities.size()));
-//					StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-//					for (StackTraceElement element: stackTrace) {
-//						Logger.v(this, "Databind: " + element.toString());
-//					}
+				//					StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+				//					for (StackTraceElement element: stackTrace) {
+				//						Logger.v(this, "Databind: " + element.toString());
+				//					}
 				mRadarAdapter.setItems(entities);
 				mRadarAdapter.notifyDataSetChanged();
-				
+
 				Aircandi.stopwatch1.stop("Search for places by beacon complete");
 
 				/* ADD some sparkle */
@@ -631,7 +627,7 @@ public class RadarFragment extends BaseFragment implements
 
 	@Subscribe
 	@SuppressWarnings("ucd")
-	public void onWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
+	public void onMonitoringWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
 		updateDevIndicator(event.wifiList, null);
 	}
 
@@ -671,12 +667,16 @@ public class RadarFragment extends BaseFragment implements
 				Constants.PREF_PLACE_PROVIDER,
 				Constants.PREF_PLACE_PROVIDER_DEFAULT);
 
-		handleAttribution(provider, false);
+		handleAttribution(provider);
 		searchForPlaces();
 	}
 
 	@Override
 	public void onAdd() {
+		/*
+		 * No check for user permissions because everyone gets to create a top
+		 * level place.
+		 */
 		if (Aircandi.getInstance().getUser() != null) {
 			Routing.route(getSherlockActivity(), Route.NEW, null, Constants.SCHEMA_ENTITY_PLACE, null);
 		}
@@ -995,19 +995,19 @@ public class RadarFragment extends BaseFragment implements
 		super.onResume();
 		if (getSherlockActivity().isFinishing()) return;
 
-		if (Aircandi.getInstance().getUser() != null
-				&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-				&& Aircandi.getInstance().getUser().developer != null
-				&& Aircandi.getInstance().getUser().developer) {
-			startScanService(Constants.INTERVAL_SCAN_WIFI);
-		}
+//		if (Aircandi.getInstance().getUser() != null
+//				&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+//				&& Aircandi.getInstance().getUser().developer != null
+//				&& Aircandi.getInstance().getUser().developer) {
+//			startScanService(Constants.INTERVAL_SCAN_WIFI);
+//		}
 
 		databind(BindingMode.AUTO);
 	}
 
 	@Override
 	public void onPause() {
-		stopScanService();
+//		stopScanService();
 		super.onPause();
 	}
 

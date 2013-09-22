@@ -80,7 +80,7 @@ public class PlaceForm extends BaseEntityForm {
 
 	private void upsize() {
 		/*
-		 * Upsized places do not automatically link to NEARBY beacons because
+		 * Upsized places do not automatically link to nearby beacons because
 		 * the browsing action isn't enough of an indicator of proximity.
 		 */
 		new AsyncTask() {
@@ -122,15 +122,13 @@ public class PlaceForm extends BaseEntityForm {
 
 	@Override
 	public void onAdd() {
-		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
+		if (EntityManager.canUserAdd(mEntity)) {
 			Routing.route(this, Route.NEW_FOR, mEntity);
+			return;
 		}
-		else {
-			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
-					, null
-					, getResources().getString(R.string.alert_entity_locked)
-					, null
-					, this, android.R.string.ok, null, null, null, null);
+
+		if (mEntity.locked) {
+			Dialogs.locked(this, mEntity);
 		}
 	}
 
@@ -143,15 +141,13 @@ public class PlaceForm extends BaseEntityForm {
 
 	@SuppressWarnings("ucd")
 	public void onTuneButtonClick(View view) {
-		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
+		if (EntityManager.canUserAdd(mEntity)) {
 			Routing.route(this, Route.TUNE, mEntity);
+			return;
 		}
-		else {
-			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
-					, null
-					, mResources.getString(R.string.alert_entity_locked)
-					, null
-					, this, android.R.string.ok, null, null, null, null);
+
+		if (mEntity.locked) {
+			Dialogs.locked(this, mEntity);
 		}
 	}
 
@@ -188,13 +184,13 @@ public class PlaceForm extends BaseEntityForm {
 		 * - WebImageView child views are gone by default
 		 * - Header views are visible by default
 		 */
-		
+
 		setActivityTitle(mEntity.name);
 		if (mMenuItemEdit != null) {
-			mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
+			mMenuItemEdit.setVisible(UI.showAction(Route.EDIT, mEntity));
 		}
 		if (mMenuItemAdd != null) {
-			mMenuItemAdd.setVisible(EntityManager.canUserAdd(mEntity));
+			mMenuItemAdd.setVisible(UI.showAction(Route.ADD, mEntity));
 		}
 
 		/* Action bar icon */

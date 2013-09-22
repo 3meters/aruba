@@ -21,28 +21,18 @@
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/overlay_picture"
+        android:background="@drawable/overlay_attribution"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:visibility="invisible" >
 
-        <ImageView
-            android:id="@+id/image_google"
+        <com.aircandi.ui.widgets.AirTitle
+            android:id="@+id/place_provider"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:maxWidth="100dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/img_google_powered_dark" />
-
-        <ImageView
-            android:id="@+id/image_foursquare"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:maxWidth="100dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/img_foursquare_powered_dark" />
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/text_dark" />
 
         <ImageView
             android:id="@+id/image_dismiss"

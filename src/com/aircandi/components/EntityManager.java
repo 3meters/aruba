@@ -52,6 +52,7 @@ import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Json;
+import com.aircandi.utilities.Type;
 import com.aircandi.utilities.UI;
 
 public class EntityManager {
@@ -558,7 +559,7 @@ public class EntityManager {
 
 				if (beacons != null && beacons.size() > 0) {
 					/*
-					 * Linking to beacons or sending to support NEARBY notifications
+					 * Linking to beacons or sending to support nearby notifications
 					 */
 					final List<String> beaconStrings = new ArrayList<String>();
 
@@ -1204,38 +1205,35 @@ public class EntityManager {
 	public static Boolean canUserAdd(Entity entity) {
 		if (entity == null) return false;
 
-		/* Schema doesn't support it */
-		if (entity.schema.equals(Constants.SCHEMA_ENTITY_USER)
-				|| entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)
-				|| entity.schema.equals(Constants.SCHEMA_ENTITY_BEACON)
-				|| entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-			return false;
-		}
-
 		/* Current user is owner */
 		if (entity.isOwnedByCurrentUser() || entity.isOwnedBySystem()) {
 			return true;
 		}
-
-		/* Not owner and not NEARBY */
-		if (Aircandi.currentPlace == null || (Aircandi.currentPlace != null && !Aircandi.currentPlace.hasActiveProximity())) {
+		
+		/* Locked */
+		if (entity.locked) {
 			return false;
 		}
-		/* Not owner and NEARBY */
+		
 		return true;
 	}
 
-	public static Boolean canUserEdit(Entity entity) {
+	public static Boolean canUserEditOrDelete(Entity entity) {
 		if (entity == null) return false;
 
 		if (entity.isOwnedByCurrentUser() || entity.isOwnedBySystem()) {
 			return true;
 		}
+		
+		if (Type.isTrue(Aircandi.getInstance().getUser().developer)) {
+			return true;
+		}
+		
 		return false;
 	}
 
-	public static Boolean canUserKick(Candigram entity) {
-		if (entity == null) return false;
+	public static Boolean canUserKick(Entity entity) {
+		if (entity == null || !(entity instanceof Candigram)) return false;
 
 		/* Current user is owner */
 		if (entity.isOwnedByCurrentUser() || entity.isOwnedBySystem()) {
@@ -1248,7 +1246,7 @@ public class EntityManager {
 			return true;
 		}
 
-		/* Not owner and NEARBY */
+		/* Not owner and nearby */
 		return false;
 	}
 

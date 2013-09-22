@@ -186,7 +186,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	public String getSizedUri(Number pWidth, Number pHeight) {
 		String photoUri = prefix;
 		if (prefix != null && suffix != null) {
-			if (source.equals(PhotoSource.foursquare_icon)) {
+			if (source.equals(PhotoSource.assets_categories)) {
 				photoUri = prefix + String.valueOf(88) + suffix;
 			}
 			else {

@@ -172,11 +172,6 @@ public class NetworkManager {
 				Logger.w(this, "Service error: (code: " + String.valueOf(serviceResponse.statusCode) + ") " + serviceResponse.statusMessage);
 			}
 		}
-		else {
-			if (stopwatch != null) {
-				stopwatch.segmentTime("Http service: successful response processing completed");
-			}
-		}
 		return serviceResponse;
 	}
 

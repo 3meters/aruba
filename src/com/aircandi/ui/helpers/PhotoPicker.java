@@ -286,9 +286,6 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		startSearch(view);
 	}
 
-	@Override
-	public void onAdd() {}
-
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------

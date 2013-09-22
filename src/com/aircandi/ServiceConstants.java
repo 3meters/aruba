@@ -31,9 +31,9 @@ public final class ServiceConstants {
 	public static final String	INSERT_USER_SECRET								= "larissa";																																	//$NON-NLS-1$
 	public static final String	ADMIN_USER_ID									= "us.000000.00000.000.000000";																												//$NON-NLS-1$
 
-	public static final String	URL_PROXIBASE_SERVICE							= "http://ariseditions.com:8080";																												// local																					// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
+	public static final String	__URL_PROXIBASE_SERVICE							= "http://ariseditions.com:8080";																												// local																					// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
 	public static final String	_URL_PROXIBASE_SERVICE							= "https://api.aircandi.com";																													// production																					//$NON-NLS-1$
-	public static final String	__URL_PROXIBASE_SERVICE							= "https://api.aircandi.com:444";																												// staging																									//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE							= "https://api.aircandi.com:444";																												// staging																									//$NON-NLS-1$
 
 	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS		= "/img/applinks/";																															//$NON-NLS-1$
 	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES		= "/img/categories/";																														//$NON-NLS-1$

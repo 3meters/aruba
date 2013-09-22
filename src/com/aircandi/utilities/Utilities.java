@@ -134,13 +134,6 @@ public class Utilities {
 		return WEB_URL.matcher(webUri).matches();
 	}
 
-	public static String emptyAsNull(String stringValue) {
-		if ("".equals(stringValue)) {
-			return null;
-		}
-		return stringValue;
-	}
-
 	@SuppressWarnings("ucd")
 	public static String loadStringFromRaw(Integer resId) {
 		InputStream inputStream = null;

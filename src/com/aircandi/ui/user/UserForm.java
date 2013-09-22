@@ -96,10 +96,10 @@ public class UserForm extends BaseEntityForm {
 
 		setActivityTitle(mEntity.name);
 		if (mMenuItemEdit != null) {
-			mMenuItemEdit.setVisible(EntityManager.canUserEdit(mEntity));
+			mMenuItemEdit.setVisible(EntityManager.canUserEditOrDelete(mEntity));
 		}
 		if (mMenuItemSignout != null) {
-			mMenuItemSignout.setVisible(EntityManager.canUserEdit(mEntity));
+			mMenuItemSignout.setVisible(EntityManager.canUserEditOrDelete(mEntity));
 		}
 
 		User user = (User) mEntity;
@@ -270,7 +270,7 @@ public class UserForm extends BaseEntityForm {
 
 		mMenuItemSignout = menu.findItem(R.id.signout);
 		if (mMenuItemSignout != null) {
-			mMenuItemSignout.setVisible(EntityManager.canUserEdit(mEntity));
+			mMenuItemSignout.setVisible(EntityManager.canUserEditOrDelete(mEntity));
 		}
 
 		return true;

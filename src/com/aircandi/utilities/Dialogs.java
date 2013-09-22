@@ -268,4 +268,19 @@ public class Dialogs {
 		Tracker.sendEvent("ui_action", "recover_password", null, 0, Aircandi.getInstance().getUser());
 	}
 
+	public static void locked(final Activity activity, Entity entity) {
+		Integer stringResId = null;
+		if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+			stringResId = R.string.alert_entity_locked_place;
+		}
+		else if (entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			stringResId = R.string.alert_entity_locked_candigram;
+		}
+		else if (entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+			stringResId = R.string.alert_entity_locked_picture;
+		}
+		if (stringResId != null) {
+			Dialogs.alertDialogSimple(activity, null, activity.getString(stringResId));
+		}
+	}
 }

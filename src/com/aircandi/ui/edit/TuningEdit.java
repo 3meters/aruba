@@ -161,7 +161,7 @@ public class TuningEdit extends BaseEntityEdit {
 
 				@Override
 				public void run() {
-					Logger.d(TuningEdit.this, "Beacons LOCKED event: tune entity");
+					Logger.d(TuningEdit.this, "Beacons locked event: tune entity");
 					tuneProximity();
 				}
 			});

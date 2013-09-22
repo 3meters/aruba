@@ -72,8 +72,8 @@ import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
+import com.aircandi.utilities.Type;
 import com.aircandi.utilities.UI;
-import com.aircandi.utilities.Utilities;
 
 public abstract class BaseEntityEdit extends BaseEdit {
 
@@ -330,9 +330,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	// --------------------------------------------------------------------------------------------
 	
 	@Override
-	public void onAdd(){}
-
-	@Override
 	public void onAccept() {
 		if (isDirty()) {
 			if (validate()) {
@@ -519,10 +516,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 	protected void gather() {
 		if (findViewById(R.id.name) != null) {
-			mEntity.name = Utilities.emptyAsNull(((TextView) findViewById(R.id.name)).getText().toString().trim());
+			mEntity.name = Type.emptyAsNull(((TextView) findViewById(R.id.name)).getText().toString().trim());
 		}
 		if (findViewById(R.id.description) != null) {
-			mEntity.description = Utilities.emptyAsNull(((TextView) findViewById(R.id.description)).getText().toString().trim());
+			mEntity.description = Type.emptyAsNull(((TextView) findViewById(R.id.description)).getText().toString().trim());
 		}
 		if (findViewById(R.id.chk_locked) != null) {
 			mEntity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
@@ -729,7 +726,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					mEntity.toId = null;
 				}
 
-				/* We always send beacons to support NEARBY notifications */
+				/* We always send beacons to support nearby notifications */
 				beacons = ProximityManager.getInstance().getStrongestBeacons(ServiceConstants.PROXIMITY_BEACON_COVERAGE);
 				primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
 

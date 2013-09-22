@@ -133,7 +133,7 @@ public class UserView extends RelativeLayout {
 					mImageLocked.setVisibility(View.VISIBLE);
 				}
 				else {
-					mImageLocked.setVisibility(View.GONE);
+					mImageLocked.setVisibility(View.INVISIBLE);
 				}
 			}
 

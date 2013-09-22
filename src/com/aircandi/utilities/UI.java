@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.bitmaps.BitmapManager;
@@ -33,11 +34,17 @@ import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
 import com.aircandi.service.RequestListener;
 import com.aircandi.service.ServiceResponse;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.widgets.AirImageView;
+import com.aircandi.utilities.Routing.Route;
 
 public class UI {
+
+	// --------------------------------------------------------------------------------------------
+	// Photos
+	// --------------------------------------------------------------------------------------------
 
 	public static Boolean photosEqual(Photo photoCurrent, Photo photoNew) {
 		if (photoCurrent != null && photoNew != null && photoNew.getUri().equals(photoCurrent.getUri())) {
@@ -161,7 +168,7 @@ public class UI {
 							if (statusCode == null) {
 								if (serviceResponse.exception != null) {
 									Logger.w(AirImageView.class, "Exception trying to download image: " + serviceResponse.exception.getClass().getSimpleName());
-								}								
+								}
 							}
 							else {
 								if (statusCode == HttpStatus.SC_NOT_FOUND || statusCode == HttpStatus.SC_FORBIDDEN) {
@@ -194,17 +201,9 @@ public class UI {
 		BitmapManager.getInstance().masterFetch(bitmapRequest);
 	}
 
-	public static void showToastNotification(final String message, final int duration) {
-		Aircandi.mainThreadHandler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				final CharSequence text = message;
-				final Toast toast = Toast.makeText(Aircandi.applicationContext, text, duration);
-				toast.show();
-			}
-		});
-	}
+	// --------------------------------------------------------------------------------------------
+	// Utilities
+	// --------------------------------------------------------------------------------------------
 
 	public static int getRawPixelsForDisplayPixels(Context context, int displayPixels) {
 		final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
@@ -233,6 +232,42 @@ public class UI {
 			bitmapScaled = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 		}
 		return bitmapScaled;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Display
+	// --------------------------------------------------------------------------------------------
+
+	public static Boolean showAction(Route route, Entity entity) {
+		if (route == Route.EDIT) {
+			if (EntityManager.canUserEditOrDelete(entity)) return true;
+		}
+		else if (route == Route.ADD) {
+			if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)
+					|| entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
+					|| entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+				return true;
+			}
+		}
+		else if (route == Route.DELETE) {
+			if (EntityManager.canUserEditOrDelete(entity)) return true;
+		}
+		else if (route == Route.KICK) {
+			if (EntityManager.canUserKick(entity)) return true;
+		}
+		return false;
+	}
+
+	public static void showToastNotification(final String message, final int duration) {
+		Aircandi.mainThreadHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				final CharSequence text = message;
+				final Toast toast = Toast.makeText(Aircandi.applicationContext, text, duration);
+				toast.show();
+			}
+		});
 	}
 
 	public static void showImageInImageView(final Bitmap bitmap, final ImageView imageView, final boolean animate, final Animation animation) {
@@ -365,6 +400,10 @@ public class UI {
 			view.setVisibility(visibility);
 		}
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Input
+	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
 	public static void hideSoftInput(Context context) {

@@ -61,7 +61,7 @@
                 <com.aircandi.ui.widgets.AirTitle
                     android:id="@+id/message"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="3.83"
                     android:text="@string/splash_message"
                     android:textAppearance="?android:attr/textAppearanceMedium"

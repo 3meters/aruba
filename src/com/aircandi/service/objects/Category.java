@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.aircandi.service.Expose;
-import com.aircandi.service.objects.Photo.PhotoSource;
 
 /**
  * @author Jayma
@@ -53,13 +52,6 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 			category.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"), nameMapping);
 			category.photo.colorize = true;
 			category.photo.colorizeKey = category.name;
-		}
-
-		if (map.get("icon") != null) {
-			category.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("icon"), nameMapping);
-			category.photo.colorize = true;
-			category.photo.colorizeKey = category.name;
-			category.photo.source = PhotoSource.foursquare_icon;
 		}
 		
 		if (map.get("categories") != null) {

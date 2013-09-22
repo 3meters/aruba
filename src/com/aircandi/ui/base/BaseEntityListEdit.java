@@ -172,6 +172,10 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 
 	@Override
 	public void onAdd() {
+		/*
+		 * No permissions check because the user can't get here without the right 
+		 * permissions.
+		 */
 		Bundle extras = new Bundle();
 		extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mEntityId);
 		extras.putBoolean(Constants.EXTRA_SKIP_SAVE, true);
