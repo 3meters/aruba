@@ -7,6 +7,8 @@
     
     <!-- Images -->
 
+    <dimen name="image_extra_extra_large">250dp</dimen>
+    <dimen name="image_extra_large">200dp</dimen>
     <dimen name="image_large">150dp</dimen>
     <dimen name="image_medium">100dp</dimen>
     <dimen name="image_medium_small">75dp</dimen>

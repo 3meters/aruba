@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.TextUtils.TruncateAt;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -46,6 +47,7 @@ import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
+import com.aircandi.service.objects.Shortcut;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.DateTime;
@@ -140,12 +142,16 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 				Logger.v(this, "List item clicked");
 
 				final Entity entity = (Entity) ((ViewHolder) v.getTag()).data;
-				if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-					Routing.shortcut(BaseEntityList.this, entity.getShortcut(), null, null);
-				}
-				else {
-					Routing.route(BaseEntityList.this, Route.BROWSE, entity, null, null);
-				}
+				final Shortcut shortcut = entity.getShortcut();
+				Routing.shortcut(BaseEntityList.this, shortcut, mForEntity, null);				
+				
+				
+//				if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+//					Routing.shortcut(BaseEntityList.this, entity.getShortcut(), null, null);
+//				}
+//				else {
+//					Routing.route(BaseEntityList.this, Route.BROWSE, entity, null, null);
+//				}
 			}
 		};
 		Aircandi.stopwatch3.segmentTime(this.getClass().getSimpleName() + " initialized");
@@ -158,6 +164,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			mButtonNewEntity.setVisibility(View.GONE);
 			showBusy("Loading " + getActivityTitle() + "...", false);
 			mForEntity = EntityManager.getEntity(mForEntityId);
+			invalidateOptionsMenu();
 			mCacheStamp = mForEntity.getCacheStamp();
 			setAdapter();
 		}
@@ -311,7 +318,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			Routing.route(this, Route.NEW, null, mListLinkSchema, extras);
 			return;
 		}
-		
+
 		if (mForEntity.locked) {
 			Dialogs.locked(this, mForEntity);
 		}
@@ -400,6 +407,15 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		return true;
 	}
 
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+		if (mMenuItemAdd != null) {
+			mMenuItemAdd.setVisible(UI.showAction(Route.ADD, mForEntity));
+		}
+		return true;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
@@ -408,7 +424,6 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	protected void onResume() {
 		super.onResume();
 		if (!isFinishing()) {
-			invalidateOptionsMenu();
 			bind(BindingMode.AUTO); // Setting this here because it doesn't mean a service call
 		}
 	}
@@ -423,7 +438,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Classes/enums
+	// Classes
 	// --------------------------------------------------------------------------------------------
 
 	private class EntityAdapter extends EndlessAdapter {
@@ -643,6 +658,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 				UI.setVisibility(holder.description, View.GONE);
 				if (holder.description != null && entity.description != null && entity.description.length() > 0) {
 					holder.description.setMaxLines(5);
+					holder.description.setEllipsize(TruncateAt.END);
 					holder.description.setText(entity.description);
 					UI.setVisibility(holder.description, View.VISIBLE);
 				}

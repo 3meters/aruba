@@ -95,6 +95,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public Boolean				synthetic			= false;					// Entity is not persisted with service.
 	public Boolean				shortcuts			= false;					// Do links have shortcuts?
 	public Boolean				proximity			= false;					// Was this found based on proximity
+	public Boolean				editing				= false;					// Used to flag when we can't use id to match up.
 
 	public Entity() {}
 
@@ -733,6 +734,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			entity.shortcuts = (Boolean) (map.get("shortcuts") != null ? map.get("shortcuts") : false);
 			entity.checked = (Boolean) (map.get("checked") != null ? map.get("checked") : false);
 			entity.placeId = (String) (nameMapping ? map.get("_place") : map.get("placeId"));
+			entity.editing = (Boolean) (map.get("editing") != null ? map.get("checked") : false);
 			entity.linkModifiedDate = (Number) map.get("linkModifiedDate");
 
 			entity.toId = (String) (nameMapping ? map.get("_to") : map.get("toId"));

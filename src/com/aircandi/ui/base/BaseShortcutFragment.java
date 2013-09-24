@@ -1,6 +1,7 @@
 package com.aircandi.ui.base;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -28,6 +29,7 @@ import com.aircandi.applications.Users;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
+import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Link.Direction;
@@ -48,7 +50,7 @@ import com.aircandi.utilities.UI;
 public abstract class BaseShortcutFragment extends BaseFragment {
 
 	protected String		mShortcutType;
-	protected LinkProfile	mLinkProfiles;
+	protected LinkProfile	mLinkProfile;
 	protected ScrollView	mScrollView;
 
 	protected String		mEntityId;
@@ -62,45 +64,86 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	}
 
 	@Override
+	public void beforeDatabind() {
+		/*
+		 * If cache entity is fresher than the one currently bound to or there is
+		 * a cache entity available, go ahead and draw before we check against the service.
+		 */
+		mCacheStamp = null;
+		mEntity = EntityManager.getEntity(mEntityId);
+		if (mEntity != null) {
+			mCacheStamp = mEntity.getCacheStamp();
+			draw();
+		}
+	}
+
+	@Override
 	public void databind(final BindingMode mode) {
+
+		final AtomicBoolean refreshNeeded = new AtomicBoolean(false);
 
 		new AsyncTask() {
 
 			@Override
 			protected void onPreExecute() {
-				showBusy();
+				beforeDatabind();
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 
-				Entity entity = EntityManager.getEntity(mEntityId);
-				Boolean refresh = false;
-				if (entity == null || mode == BindingMode.SERVICE || !entity.shortcuts) {
-					refresh = true;
+				Thread.currentThread().setName("GetEntity");
+				ModelResult result = new ModelResult();
+
+				if (mEntity != null && mEntity.synthetic) {
+					return result;
 				}
 
-				LinkOptions options = LinkOptions.getDefault(mLinkProfiles);
-				final ModelResult result = EntityManager.getInstance().getEntity(mEntityId, refresh, options);
+				refreshNeeded.set(mCacheStamp == null || mEntity == null);
+
+				if (!refreshNeeded.get()) {
+					CacheStamp cacheStamp = EntityManager.getInstance().loadCacheStamp(mEntity.id, mCacheStamp);
+					/*
+					 * We refresh for both modified and activity because both can change what we
+					 * show for an entity including links and link shortcuts.
+					 */
+					if (cacheStamp != null && !cacheStamp.equals(mCacheStamp)) {
+						refreshNeeded.set(true);
+					}
+				}
+
+				if (refreshNeeded.get()) {
+					showBusy();
+					LinkOptions options = LinkOptions.getDefault(mLinkProfile);
+					result = EntityManager.getInstance().getEntity(mEntityId, true, options);
+				}
 
 				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object modelResult) {
-				final ModelResult result = (ModelResult) modelResult;
 
 				if (isAdded()) {
-					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-						if (result.data != null) {
-							mEntity = (Entity) result.data;
-							draw();
+					hideBusy();
+					if (refreshNeeded.get()) {
+						final ModelResult result = (ModelResult) modelResult;
+						if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+							if (result.data != null) {
+								mEntity = (Entity) result.data;
+								mCacheStamp = mEntity.getCacheStamp();
+								draw();
+							}
+						}
+						else {
+							Errors.handleError(getSherlockActivity(), result.serviceResponse);
+							return;
 						}
 					}
-					else {
-						Errors.handleError(getSherlockActivity(), result.serviceResponse);
+					else if (mode == BindingMode.SERVICE) {
+						showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
 					}
-					hideBusy();
+					afterDatabind();
 				}
 			}
 
@@ -147,7 +190,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_candigrams_created
-						, R.string.section_places_more
+						, R.string.section_candigrams_more
 						, mResources.getInteger(R.integer.shortcuts_flow_limit)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);

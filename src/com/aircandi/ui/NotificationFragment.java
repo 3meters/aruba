@@ -12,6 +12,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,7 +33,6 @@ import com.aircandi.components.NotificationManager;
 import com.aircandi.components.NotificationTable;
 import com.aircandi.components.NotificationsContentProvider;
 import com.aircandi.service.objects.AirNotification;
-import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.ui.widgets.AirImageView;
@@ -40,6 +40,7 @@ import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Json;
+import com.aircandi.utilities.Notifications;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
 
@@ -316,7 +317,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 			AirNotification notification = (AirNotification) Json.jsonToObject(jsonObject, Json.ObjectType.AIR_NOTIFICATION);
 
 			/* Decorate again in case the logic has changed since the notification was stored */
-			NotificationManager.getInstance().decorateNotification(notification);
+			Notifications.decorate(notification);
 
 			if (notification != null) {
 				Logger.d(this, "Adapter getView: " + notification.title);
@@ -340,21 +341,20 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 					UI.setVisibility(holder.type, View.VISIBLE);
 				}
 
+				UI.setVisibility(holder.photoView, View.GONE);
 				if (holder.photoView != null) {
-					holder.photoView.setTag(notification);
-					if (notification.entity.photo == null && !notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-						holder.photoView.setVisibility(View.GONE);
-					}
-					Photo photo = notification.entity.getPhoto();
-					if (holder.photoView.getPhoto() == null || !photo.getUri().equals(holder.photoView.getPhoto().getUri())) {
-						UI.drawPhoto(holder.photoView, notification.entity.getPhoto());
+					if (notification.photoTo != null) {
+						if (holder.photoView.getPhoto() == null || !notification.photoTo.getUri().equals(holder.photoView.getPhoto().getUri())) {
+							UI.drawPhoto(holder.photoView, notification.photoTo);
+						}
+						UI.setVisibility(holder.photoView, View.VISIBLE);
 					}
 				}
 
 				UI.setVisibility(holder.description, View.GONE);
-				if (holder.description != null && notification.entity.description != null && notification.entity.description.length() > 0) {
+				if (holder.description != null && !TextUtils.isEmpty(notification.description)) {
 					holder.description.setMaxLines(5);
-					holder.description.setText(notification.entity.description);
+					holder.description.setText(notification.description);
 					UI.setVisibility(holder.description, View.VISIBLE);
 				}
 
@@ -364,9 +364,14 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 					UI.setVisibility(holder.date, View.VISIBLE);
 				}
 
+				UI.setVisibility(holder.photoUserView, View.INVISIBLE);
 				if (holder.photoUserView != null) {
-					holder.photoUserView.setTag(notification);
-					UI.drawPhoto(holder.photoUserView, notification.user.getPhoto());
+					if (notification.photoFrom != null) {
+						if (holder.photoUserView.getPhoto() == null || !notification.photoFrom.getUri().equals(holder.photoUserView.getPhoto().getUri())) {
+							UI.drawPhoto(holder.photoUserView, notification.photoFrom);
+						}
+						UI.setVisibility(holder.photoUserView, View.VISIBLE);
+					}
 				}
 
 				view.setClickable(true);

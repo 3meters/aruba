@@ -17,8 +17,10 @@ import com.aircandi.utilities.Animate.TransitionType;
 
 public class Users {
 
-	public static void view(Context context, String entityId) {
-		IntentBuilder intentBuilder = new IntentBuilder(context, UserForm.class).setEntityId(entityId);
+	public static void view(Context context, String entityId, String parentId) {
+		IntentBuilder intentBuilder = new IntentBuilder(context, UserForm.class)
+				.setEntityId(entityId)
+				.setEntityParentId(parentId);
 		context.startActivity(intentBuilder.create());
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 	}

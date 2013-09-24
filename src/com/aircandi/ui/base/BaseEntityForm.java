@@ -37,6 +37,7 @@ import com.aircandi.applications.Users;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.IntentBuilder;
+import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
@@ -109,6 +110,10 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 		mCacheStamp = null;
 		mEntity = EntityManager.getEntity(mEntityId);
 		if (mEntity != null) {
+			if (mEntity instanceof Place) {
+				Aircandi.currentPlace = mEntity;
+				Logger.v(this, "Setting current place to: " + mEntity.id);
+			}
 			mCacheStamp = mEntity.getCacheStamp();
 			draw();
 		}
@@ -167,6 +172,11 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 
 						if (result.data != null) {
 							mEntity = (Entity) result.data;
+							if (mEntity instanceof Place) {
+								Aircandi.currentPlace = mEntity;
+								Logger.v(this, "Setting current place to: " + mEntity.id);
+							}
+							invalidateOptionsMenu();
 							mCacheStamp = mEntity.getCacheStamp();
 							draw();
 						}
@@ -360,6 +370,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 		 */
 		if (resultCode != Activity.RESULT_CANCELED) {
 			if (requestCode == Constants.ACTIVITY_ENTITY_EDIT) {
+				EntityManager.getInstance().getCacheStampOverrides().put(mParentId, mParentId);
 				if (resultCode == Constants.RESULT_ENTITY_DELETED) {
 					finish();
 					Animate.doOverridePendingTransition(this, TransitionType.PAGE_TO_RADAR_AFTER_DELETE);
@@ -671,6 +682,13 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 		 */
 		mMenuItemAdd = menu.findItem(R.id.add);
 		mMenuItemEdit = menu.findItem(R.id.edit);
+		if (mMenuItemEdit != null) {
+			mMenuItemEdit.setVisible(UI.showAction(Route.EDIT, mEntity));
+		}
+		if (mMenuItemAdd != null) {
+			mMenuItemAdd.setVisible(UI.showAction(Route.ADD, mEntity));
+		}
+
 		MenuItem refresh = menu.findItem(R.id.refresh);
 		if (refresh != null) {
 			if (mBusyManager != null) {
@@ -686,6 +704,18 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 			});
 		}
 
+		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+		if (mMenuItemEdit != null) {
+			mMenuItemEdit.setVisible(UI.showAction(Route.EDIT, mEntity));
+		}
+		if (mMenuItemAdd != null) {
+			mMenuItemAdd.setVisible(UI.showAction(Route.ADD, mEntity));
+		}
 		return true;
 	}
 
@@ -715,10 +745,10 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 		if (!isFinishing()) {
 			if (mEntity instanceof Place) {
 				Aircandi.currentPlace = mEntity;
+				Logger.v(this, "Setting current place to: " + mEntity.id);
 			}
 
 			Animate.doOverridePendingTransition(this, TransitionType.PAGE_BACK);
-			invalidateOptionsMenu();
 			databind(BindingMode.AUTO);	// check to see if the cache stamp is stale
 
 			/* Package receiver */

@@ -97,6 +97,7 @@ public class SplashForm extends SherlockActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("InitializeApp");
+
 				ModelResult result = new ModelResult();
 
 				if (Build.PRODUCT.contains("sdk")) {
@@ -135,8 +136,9 @@ public class SplashForm extends SherlockActivity {
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 					/* service notifications */
-					GCMRegistrar.checkDevice(SplashForm.this); 	// Does device support GCM
+					GCMRegistrar.checkDevice(SplashForm.this); 		// Does device support GCM
 					GCMRegistrar.checkManifest(SplashForm.this); 	// Is manifest setup correctly for GCM
+
 					String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
 					if (registrationId != null) {
 						NotificationManager.getInstance().unregisterDeviceWithAircandi(registrationId);

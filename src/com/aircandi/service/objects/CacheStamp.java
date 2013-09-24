@@ -19,6 +19,8 @@ public class CacheStamp extends ServiceObject {
 	public Boolean	activity	= false;
 	@Expose
 	public Boolean	modified	= false;
+	@Expose
+	public Boolean	override	= false;
 
 	public CacheStamp() {}
 
@@ -41,6 +43,7 @@ public class CacheStamp extends ServiceObject {
 		if (o == this) return true;
 		if (!(o instanceof CacheStamp)) return false;
 		CacheStamp other = (CacheStamp) o;
+		if (other.override || this.override) return false;
 		Boolean activityEqual = (this.activityDate == null ? other.activityDate == null : this.activityDate.equals(other.activityDate));
 		Boolean modifiedEqual = (this.modifiedDate == null ? other.modifiedDate == null : this.modifiedDate.equals(other.modifiedDate));
 		return (activityEqual && modifiedEqual);

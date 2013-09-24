@@ -220,6 +220,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 	public void onListItemClick(View view) {
 		final CheckBox check = (CheckBox) ((View) view.getParent()).findViewById(R.id.checked);
 		mEntityEditing = (Entity) check.getTag();
+		mEntityEditing.editing = true;
 		Bundle extras = new Bundle();
 		extras.putBoolean(Constants.EXTRA_SKIP_SAVE, true);
 		Routing.route(this, Route.EDIT, mEntityEditing, null, null, extras);
@@ -237,7 +238,8 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 						final Entity entityUpdated = (Entity) Json.jsonToObject(jsonEntity, Json.ObjectType.ENTITY);
 						if (entityUpdated != null) {
 							for (Entity entity : mEntities) {
-								if (entity.id.equals(entityUpdated.id)) {
+								if (entity.editing) {
+									entity.editing = false;
 									mEntities.set(mEntities.indexOf(entity), entityUpdated);
 									break;
 								}

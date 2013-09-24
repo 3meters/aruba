@@ -82,7 +82,8 @@
                 android:layout_weight="1"
                 android:gravity="top"
                 android:hint="@string/form_invite_message_hint"
-                android:inputType="textCapSentences|textAutoCorrect|textLongMessage|textMultiLine"
+                android:imeOptions="actionSend"
+                android:inputType="textCapSentences|textAutoCorrect|textShortMessage"
                 android:lines="5"
                 android:minLines="5" />
 

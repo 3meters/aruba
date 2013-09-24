@@ -71,7 +71,6 @@ public class PlaceForm extends BaseEntityForm {
 	public void afterDatabind() {
 		super.afterDatabind();
 
-		Aircandi.currentPlace = mEntity;
 		if (mUpsize && mEntity != null) {
 			mUpsize = false;
 			upsize();
@@ -186,12 +185,6 @@ public class PlaceForm extends BaseEntityForm {
 		 */
 
 		setActivityTitle(mEntity.name);
-		if (mMenuItemEdit != null) {
-			mMenuItemEdit.setVisible(UI.showAction(Route.EDIT, mEntity));
-		}
-		if (mMenuItemAdd != null) {
-			mMenuItemAdd.setVisible(UI.showAction(Route.ADD, mEntity));
-		}
 
 		/* Action bar icon */
 		if (((Place) mEntity).category != null) {

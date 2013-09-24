@@ -50,11 +50,11 @@
 
             <com.aircandi.ui.widgets.AirImageView
                 android:id="@+id/photo"
-                android:layout_width="@dimen/image_medium"
-                android:layout_height="@dimen/image_medium"
+                android:layout_width="@dimen/image_medium_small"
+                android:layout_height="@dimen/image_medium_small"
                 android:layout_marginRight="10dp"
                 aircandi:layout="@layout/widget_webimageview_candi_view"
-                aircandi:sizeHint="@dimen/image_medium" />
+                aircandi:sizeHint="@dimen/image_medium_small" />
 
             <com.aircandi.ui.widgets.AirTextView
                 android:id="@+id/description"

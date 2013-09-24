@@ -11,8 +11,10 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -57,17 +59,18 @@ import com.aircandi.utilities.UI;
 
 public class EntityManager {
 
-	private static final EntityCache	mEntityCache	= new EntityCache();
+	private static final EntityCache	mEntityCache			= new EntityCache();
+	private Map<String, String>			mCacheStampOverrides	= new HashMap<String, String>();
 	private Number						mActivityDate;
 
 	/*
 	 * The photo collection enables swiping between photos while staying at the same level of the hierarchy.
 	 */
-	private List<Photo>					mPhotos			= Collections.synchronizedList(new ArrayList<Photo>());
+	private List<Photo>					mPhotos					= Collections.synchronizedList(new ArrayList<Photo>());
 	/*
 	 * Categories are cached by a background thread.
 	 */
-	private List<Category>				mCategories		= Collections.synchronizedList(new ArrayList<Category>());
+	private List<Category>				mCategories				= Collections.synchronizedList(new ArrayList<Category>());
 
 	private EntityManager() {}
 
@@ -186,7 +189,7 @@ public class EntityManager {
 
 		result.serviceResponse = dispatch(serviceRequest);
 
-		/* In case of a failure, we echo back the provided cache stamp */
+		/* In case of a failure, we echo back the provided cache stamp to the caller */
 		CacheStamp cacheStampService = cacheStamp.clone();
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
@@ -194,6 +197,10 @@ public class EntityManager {
 			final ServiceData serviceData = (ServiceData) Json.jsonToObject(jsonResponse, Json.ObjectType.RESULT, Json.ServiceDataWrapper.TRUE);
 			if (serviceData.data != null) {
 				cacheStampService = (CacheStamp) serviceData.data;
+				if (mCacheStampOverrides.containsKey(entityId)) {
+					Logger.v(this, "Using cache stamp override: " + entityId);
+					cacheStampService.override = true;
+				}
 			}
 		}
 		return cacheStampService;
@@ -1209,12 +1216,12 @@ public class EntityManager {
 		if (entity.isOwnedByCurrentUser() || entity.isOwnedBySystem()) {
 			return true;
 		}
-		
+
 		/* Locked */
 		if (entity.locked) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -1224,11 +1231,12 @@ public class EntityManager {
 		if (entity.isOwnedByCurrentUser() || entity.isOwnedBySystem()) {
 			return true;
 		}
-		
-		if (Type.isTrue(Aircandi.getInstance().getUser().developer)) {
+
+		if (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+				&& Type.isTrue(Aircandi.getInstance().getUser().developer)) {
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -1344,4 +1352,9 @@ public class EntityManager {
 	public static EntityCache getEntityCache() {
 		return mEntityCache;
 	}
+
+	public Map<String, String> getCacheStampOverrides() {
+		return mCacheStampOverrides;
+	}
+
 }

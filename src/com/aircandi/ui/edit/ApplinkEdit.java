@@ -49,7 +49,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-		
+
 		mTypePicker = (Spinner) findViewById(R.id.type_picker);
 		mAppId = (EditText) findViewById(R.id.app_id);
 		mAppUrl = (EditText) findViewById(R.id.app_url);
@@ -95,24 +95,16 @@ public class ApplinkEdit extends BaseEntityEdit {
 		final Applink applink = (Applink) mEntity;
 
 		/* Spinners */
-
 		if (mEditing) {
-			((TextView) findViewById(R.id.type)).setText("LINK type: " + applink.type);
 			UI.setVisibility(findViewById(R.id.type), View.VISIBLE);
 			UI.setVisibility(findViewById(R.id.type_picker), View.GONE);
-			UI.setVisibility(mPhotoHolder, View.VISIBLE);
-			UI.setVisibility(findViewById(R.id.name_holder), View.VISIBLE);
-			UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
-			UI.setVisibility(findViewById(R.id.app_url_holder), View.VISIBLE);
 
-			mName.setHint(R.string.form_applink_name_hint);
-			mAppId.setText(applink.appId);
-			mAppUrl.setText(applink.appUrl);
-			drawPhoto();
+			((TextView) findViewById(R.id.type)).setText("link type: " + applink.type);
 		}
 		else {
 			UI.setVisibility(findViewById(R.id.type), View.GONE);
 			UI.setVisibility(findViewById(R.id.type_picker), View.VISIBLE);
+
 			if (mTypePicker.getAdapter() == null) {
 				mApplinkSuggestionStrings = new ArrayList<String>();
 				mApplinkSuggestionStrings.add("website");
@@ -120,52 +112,51 @@ public class ApplinkEdit extends BaseEntityEdit {
 				mApplinkSuggestionStrings.add("twitter");
 				mApplinkSuggestionStrings.add("email");
 				mApplinkSuggestionStrings.add(getString(R.string.form_applink_type_hint));
-				initializeSpinner(mApplinkSuggestionStrings);
+				initializeTypeSpinner(mApplinkSuggestionStrings);
+			}
+		}
+		if (applink.type != null) {
+
+			mName.setHint(R.string.form_applink_name_hint);
+			UI.setVisibility(findViewById(R.id.app_id_holder), View.GONE);
+			UI.setVisibility(findViewById(R.id.app_url_holder), View.GONE);
+
+			if (applink.type.equals(Constants.TYPE_APP_WEBSITE)) {
+				UI.setVisibility(findViewById(R.id.app_url_holder), View.VISIBLE);
+				mAppUrl.setHint(R.string.form_applink_url_website_hint);
+				mMissingResId = R.string.error_missing_applink_url_website;
+			}
+			else if (applink.type.equals(Constants.TYPE_APP_EMAIL)) {
+				UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
+				mAppId.setHint(R.string.form_applink_id_email_hint);
+				mMissingResId = R.string.error_missing_applink_id_email;
+			}
+			else if (applink.type.equals(Constants.TYPE_APP_FACEBOOK)) {
+				UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
+				mAppId.setHint(R.string.form_applink_id_facebook_hint);
+				mMissingResId = R.string.error_missing_applink_id_facebook;
+			}
+			else if (applink.type.equals(Constants.TYPE_APP_TWITTER)) {
+				UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
+				mAppId.setHint(R.string.form_applink_id_twitter_hint);
+				mMissingResId = R.string.error_missing_applink_id_twitter;
+			}
+			if (applink.appId != null && !applink.appId.equals("")) {
+				if (mAppId != null) {
+					mAppId.setText(applink.appId);
+				}
+			}
+			if (applink.appUrl != null && !applink.appUrl.equals("")) {
+				if (mAppUrl != null) {
+					mAppUrl.setText(applink.appUrl);
+				}
 			}
 
-			if (mEntity.type != null) {
-				mPhotoHolder.setVisibility(View.VISIBLE);
-				mName.setHint(R.string.form_applink_name_hint);
-				UI.setVisibility(findViewById(R.id.app_id_holder), View.GONE);
-				UI.setVisibility(findViewById(R.id.app_url_holder), View.GONE);
-
-				if (mEntity.type.equals(Constants.TYPE_APP_WEBSITE)) {
-					UI.setVisibility(findViewById(R.id.app_url_holder), View.VISIBLE);
-					mAppUrl.setHint(R.string.form_applink_url_website_hint);
-					mMissingResId = R.string.error_missing_applink_url_website;
-				}
-				else if (mEntity.type.equals(Constants.TYPE_APP_EMAIL)) {
-					UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
-					mAppId.setHint(R.string.form_applink_id_email_hint);
-					mMissingResId = R.string.error_missing_applink_id_email;
-				}
-				else if (mEntity.type.equals(Constants.TYPE_APP_FACEBOOK)) {
-					UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
-					mAppId.setHint(R.string.form_applink_id_facebook_hint);
-					mMissingResId = R.string.error_missing_applink_id_facebook;
-				}
-				else if (mEntity.type.equals(Constants.TYPE_APP_TWITTER)) {
-					UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
-					mAppId.setHint(R.string.form_applink_id_twitter_hint);
-					mMissingResId = R.string.error_missing_applink_id_twitter;
-				}
-				if (applink.appId != null && !applink.appId.equals("")) {
-					if (mAppId != null) {
-						mAppId.setText(applink.appId);
-					}
-				}
-				if (applink.appUrl != null && !applink.appUrl.equals("")) {
-					if (mAppUrl != null) {
-						mAppUrl.setText(applink.appUrl);
-					}
-				}
-
-				drawPhoto();
-			}
+			drawPhoto();
 		}
 	}
 
-	private void initializeSpinner(final List<String> items) {
+	private void initializeTypeSpinner(final List<String> items) {
 
 		final ArrayAdapter adapter = new ArrayAdapter(this, mSpinnerItemResId, items) {
 

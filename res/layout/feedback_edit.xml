@@ -24,10 +24,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_weight="1"
-                android:drawableRight="?attr/iconClear"
                 android:gravity="top"
                 android:hint="@string/form_feedback_hint"
-                android:inputType="textCapSentences|textAutoCorrect|textLongMessage|textMultiLine"
+                android:imeOptions="actionSend"
+                android:inputType="textCapSentences|textAutoCorrect|textShortMessage"
                 android:lines="10"
                 android:minLines="10" />
 

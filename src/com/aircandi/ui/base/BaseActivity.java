@@ -265,12 +265,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 			Logger.d(this, "Pref change: entity fencing");
 		}
 
-		if (!Aircandi.getInstance().getPrefShowPlaceRankScore().equals(Aircandi.settings.getBoolean(Constants.PREF_SHOW_PLACE_RANK_SCORE,
-				Constants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT))) {
-			mPrefChangeRefreshUiNeeded = true;
-			Logger.d(this, "Pref change: place rank score");
-		}
-
 		if (!Aircandi.getInstance().getPrefTestingBeacons()
 				.equals(Aircandi.settings.getString(Constants.PREF_TESTING_BEACONS, Constants.PREF_TESTING_BEACONS_DEFAULT))) {
 			mPrefChangeNewSearchNeeded = true;
@@ -445,6 +439,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 		 * 
 		 * Behavior might be modified because we are using ABS.
 		 */
+		Logger.d(this, "Creating options menu");
 		return MenuManager.onCreateOptionsMenu(this, menu);
 	}
 
@@ -456,6 +451,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 		 * 
 		 * Behavior might be modified because we are using ABS.
 		 */
+		Logger.d(this, "Preparing options menu");
 		return true;
 	}
 
@@ -491,9 +487,9 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	@Override
 	protected void onResume() {
-		Logger.d(this, "Activity resuming");
-		BusProvider.getInstance().register(this);
 		super.onResume();
+		Logger.d(this, "Activity resuming");		
+		BusProvider.getInstance().register(this);
 	}
 
 	@Override

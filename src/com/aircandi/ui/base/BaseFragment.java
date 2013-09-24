@@ -3,6 +3,7 @@ package com.aircandi.ui.base;
 import android.app.Activity;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +12,6 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.aircandi.Aircandi;
 import com.aircandi.R;
 import com.aircandi.components.BusProvider;
 import com.aircandi.components.BusyManager;
@@ -24,6 +24,7 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 	protected Resources		mResources;
 	protected BusyManager	mBusyManager;
 	protected CacheStamp	mCacheStamp;
+	protected Handler		mHandler	= new Handler();
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -41,7 +42,6 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 		 */
 		setHasOptionsMenu(true);
 		mResources = getResources();
-		Aircandi.currentPlace = null;
 	}
 
 	@Override
@@ -91,24 +91,57 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 
 	@Override
 	public void showBusy(final Object message, final Boolean actionBarOnly) {
-		if (actionBarOnly == null || !actionBarOnly) {
-			startBodyBusyIndicator();
-		}
-		if (mBusyManager != null) {
-			mBusyManager.showBusy(message);
-		}
+		getSherlockActivity().runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (mBusyManager != null) {
+					mBusyManager.showBusy(message);
+					if (actionBarOnly == null || !actionBarOnly) {
+						startBodyBusyIndicator();
+					}
+				}
+			}
+		});
 	}
 
 	@Override
 	public void hideBusy() {
-		stopBodyBusyIndicator();
-		if (mBusyManager != null) {
-			mBusyManager.hideBusy();
-		}
+
+		getSherlockActivity().runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (mBusyManager != null) {
+					mBusyManager.hideBusy();
+					stopBodyBusyIndicator();
+				}
+			}
+		});
 	}
 
 	@Override
-	public void showBusyTimed(final Integer duration, final Boolean actionBarOnly) {}
+	public void showBusyTimed(final Integer duration, final Boolean actionBarOnly) {
+		getSherlockActivity().runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (mBusyManager != null) {
+					mBusyManager.showBusy();
+					if (actionBarOnly == null || !actionBarOnly) {
+						startBodyBusyIndicator();
+					}
+					mHandler.postDelayed(new Runnable() {
+
+						@Override
+						public void run() {
+							hideBusy();
+						}
+					}, duration);
+				}
+			}
+		});
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// UI

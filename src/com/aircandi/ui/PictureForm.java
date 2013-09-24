@@ -89,12 +89,6 @@ public class PictureForm extends BaseEntityForm {
 		 * - Header views are visible by default
 		 */
 		setActivityTitle(mEntity.name);
-		if (mMenuItemEdit != null) {
-			mMenuItemEdit.setVisible(UI.showAction(Route.EDIT, mEntity));
-		}
-		if (mMenuItemAdd != null) {
-			mMenuItemAdd.setVisible(UI.showAction(Route.ADD, mEntity));
-		}
 		
 		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);
 		final TextView name = (TextView) findViewById(R.id.name);

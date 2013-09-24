@@ -74,7 +74,7 @@ public abstract class BaseEdit extends BaseActivity implements IEdit {
 
 	@Override
 	public void onCancel(Boolean force) {
-		if (!force && isDirty()) {
+		if (!force && mDirty) {
 			confirmDirtyExit();
 		}
 		else {

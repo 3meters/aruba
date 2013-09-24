@@ -95,12 +95,6 @@ public class UserForm extends BaseEntityForm {
 	public void draw() {
 
 		setActivityTitle(mEntity.name);
-		if (mMenuItemEdit != null) {
-			mMenuItemEdit.setVisible(EntityManager.canUserEditOrDelete(mEntity));
-		}
-		if (mMenuItemSignout != null) {
-			mMenuItemSignout.setVisible(EntityManager.canUserEditOrDelete(mEntity));
-		}
 
 		User user = (User) mEntity;
 

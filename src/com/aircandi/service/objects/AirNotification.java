@@ -20,7 +20,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	@Expose
 	public String				action;
 	@Expose
-	public String				type;	// watch, nearby, network
+	public String				type;										// watch, nearby, network
 	@Expose
 	public Entity				entity;
 	@Expose
@@ -36,6 +36,9 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	public Intent				intent;
 	public String				title;
 	public String				subtitle;
+	public String				description;
+	public Photo				photoFrom;
+	public Photo				photoTo;
 
 	public AirNotification() {}
 
@@ -97,7 +100,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 				notification.toEntity = User.setPropertiesFromMap(new User(), entityMap, nameMapping);
 			}
 		}
-		
+
 		if (map.get("fromEntity") != null) {
 			Map<String, Object> entityMap = (HashMap<String, Object>) map.get("fromEntity");
 			String schema = (String) entityMap.get("schema");
@@ -120,7 +123,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 				notification.fromEntity = User.setPropertiesFromMap(new User(), entityMap, nameMapping);
 			}
 		}
-		
+
 		if (map.get("user") != null) {
 			notification.user = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"), nameMapping);
 		}
@@ -128,4 +131,19 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 		return notification;
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Classes
+	// --------------------------------------------------------------------------------------------
+
+	public static class NotificationType {
+		public static String	WATCH_USER	= "watch_user";	// sent because this user is watching another user
+		public static String	WATCH		= "watch";		// sent because this user is watching the entity
+		public static String	NEARBY		= "nearby";		// sent because this user is nearby
+		public static String	OWN			= "own";		// sent because this user is the owner
+	}
+
+	public static class ActionType {
+		public static String	INSERT	= "insert";
+		public static String	MOVE	= "move";
+	}
 }

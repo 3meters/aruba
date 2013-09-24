@@ -8,6 +8,7 @@ import com.aircandi.applications.Comments;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.utilities.Json;
+import com.aircandi.utilities.Notifications;
 import com.google.android.gcm.GCMBaseIntentService;
 
 public class GCMIntentService extends GCMBaseIntentService {
@@ -56,7 +57,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		}
 		
 		/* Customize title and subtitle before storing and broadcasting */
-		NotificationManager.getInstance().decorateNotification(notification);
+		Notifications.decorate(notification);
 
 		/* Stash in our local database */
 		NotificationManager.getInstance().storeNotification(notification, jsonNotification);

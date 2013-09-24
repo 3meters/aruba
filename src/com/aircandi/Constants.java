@@ -115,6 +115,7 @@ public final class Constants {
 	public static final String	SCHEMA_ENTITY_USER							= "user";																					//$NON-NLS-1$
 	public static final String	SCHEMA_LINK									= "link";																					//$NON-NLS-1$
 	public static final String	SCHEMA_INTENT								= "intent";																				//$NON-NLS-1$
+	public static final String	SCHEMA_REMAP_PICTURE						= "picture";																				//$NON-NLS-1$
 
 	public static final String	ACTION_VIEW									= "view";
 	public static final String	ACTION_VIEW_FOR								= "view_for";
@@ -178,9 +179,6 @@ public final class Constants {
 	public static final String	TYPE_PROVIDER_AIRCANDI						= "aircandi";																				//$NON-NLS-1$
 	public static final String	TYPE_PROVIDER_USER							= "user";																					//$NON-NLS-1$
 
-	public static final String	TYPE_NOTIFICATION_WATCH						= "watch";																					//$NON-NLS-1$
-	public static final String	TYPE_NOTIFICATION_NEARBY					= "nearby";																				//$NON-NLS-1$
-
 	public static final String	PHOTO_SOURCE_DEFAULT						= "default";																				//$NON-NLS-1$
 	public static final String	PHOTO_SOURCE_SEARCH							= "search";																				//$NON-NLS-1$
 	public static final String	PHOTO_SOURCE_GALLERY						= "gallery";																				//$NON-NLS-1$
@@ -228,14 +226,17 @@ public final class Constants {
 	public static final String	PREF_SEARCH_RADIUS							= "Pref_Search_Radius";
 	public static final String	PREF_PLACE_PROVIDER							= "Pref_Place_Provider";
 	public static final String	PREF_SOUND_EFFECTS							= "Pref_Sound_Effects";
+
 	public static final String	PREF_NOTIFICATIONS_COMMENTS					= "Pref_Notifications_Comments";
 	public static final String	PREF_NOTIFICATIONS_PICTURES					= "Pref_Notifications_Pictures";
+	public static final String	PREF_NOTIFICATIONS_CANDIGRAMS				= "Pref_Notifications_Candigrams";
 	public static final String	PREF_NOTIFICATIONS_NEARBY					= "Pref_Notifications_Nearby";
+	public static final String	PREF_NOTIFICATIONS_OWN						= "Pref_Notifications_Own";
+	public static final String	PREF_NOTIFICATIONS_WATCH					= "Pref_Notifications_Watch";
 
 	/* Prefs - dev only */
 	public static final String	PREF_ENABLE_DEV								= "Pref_Enable_Dev";
 	public static final String	PREF_ENTITY_FENCING							= "Pref_Entity_Fencing";
-	public static final String	PREF_SHOW_PLACE_RANK_SCORE					= "Pref_Show_Place_Rank_Score";
 	public static final String	PREF_TESTING_BEACONS						= "Pref_Testing_Beacons";
 	public static final String	PREF_TESTING_LOCATION						= "Pref_Testing_Location";
 
@@ -253,17 +254,20 @@ public final class Constants {
 	/* Defaults */
 	public static final String	PREF_THEME_DEFAULT							= "aircandi_theme_midnight";
 	public static final String	PREF_SEARCH_RADIUS_DEFAULT					= "8047";																					// five miles
+	public static final String	PREF_PLACE_PROVIDER_DEFAULT					= TYPE_PROVIDER_FOURSQUARE;
 	public static final Boolean	PREF_SOUND_EFFECTS_DEFAULT					= true;
+
 	public static final Boolean	PREF_NOTIFICATIONS_COMMENTS_DEFAULT			= true;
 	public static final Boolean	PREF_NOTIFICATIONS_PICTURES_DEFAULT			= true;
+	public static final Boolean	PREF_NOTIFICATIONS_CANDIGRAMS_DEFAULT		= true;
 	public static final Boolean	PREF_NOTIFICATIONS_NEARBY_DEFAULT			= true;
+	public static final Boolean	PREF_NOTIFICATIONS_OWN_DEFAULT				= true;
+	public static final Boolean	PREF_NOTIFICATIONS_WATCH_DEFAULT			= true;
 
 	public static final Boolean	PREF_ENABLE_DEV_DEFAULT						= false;
 	public static final Boolean	PREF_ENTITY_FENCING_DEFAULT					= false;
-	public static final Boolean	PREF_SHOW_PLACE_RANK_SCORE_DEFAULT			= false;
 	public static final String	PREF_TESTING_BEACONS_DEFAULT				= "natural";
 	public static final String	PREF_TESTING_LOCATION_DEFAULT				= "natural";
-	public static final String	PREF_PLACE_PROVIDER_DEFAULT					= TYPE_PROVIDER_FOURSQUARE;
 
 	/* For readability */
 	public static final int		DIST_ONE_METER								= 1;

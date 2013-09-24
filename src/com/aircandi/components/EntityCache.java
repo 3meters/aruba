@@ -137,6 +137,16 @@ public class EntityCache implements Map<String, Entity> {
 			serviceResponse.data = serviceData;
 
 			if (loadedEntities != null && loadedEntities.size() > 0) {
+				/*
+				 * Clear out any cache stamp overrides.
+				 */
+				for (Entity entity : loadedEntities) {
+					if (EntityManager.getInstance().getCacheStampOverrides().containsKey(entity.id)) {
+						Logger.v(this, "Clearing cache stamp override: " + entity.id);
+						EntityManager.getInstance().getCacheStampOverrides().remove(entity.id);
+					}
+				}
+
 				decorate(loadedEntities, linkOptions);
 				upsertEntities(loadedEntities);
 			}
@@ -182,6 +192,13 @@ public class EntityCache implements Map<String, Entity> {
 
 			if (loadedEntities != null && loadedEntities.size() > 0) {
 				for (Entity entity : loadedEntities) {
+					/*
+					 * Clear out any cache stamp overrides.
+					 */
+					if (EntityManager.getInstance().getCacheStampOverrides().containsKey(entity.id)) {
+						Logger.v(this, "Clearing cache stamp override: " + entity.id);
+						EntityManager.getInstance().getCacheStampOverrides().remove(entity.id);
+					}
 					if (cursor != null && cursor.direction != null && cursor.direction.equals("out")) {
 						entity.fromId = entityId;
 					}
@@ -247,6 +264,13 @@ public class EntityCache implements Map<String, Entity> {
 			if (loadedEntities != null && loadedEntities.size() > 0) {
 				for (Entity entity : loadedEntities) {
 					entity.proximity = true;
+					/*
+					 * Clear out any cache stamp overrides.
+					 */
+					if (EntityManager.getInstance().getCacheStampOverrides().containsKey(entity.id)) {
+						Logger.v(this, "Clearing cache stamp override: " + entity.id);
+						EntityManager.getInstance().getCacheStampOverrides().remove(entity.id);
+					}
 				}
 				decorate(loadedEntities, linkOptions);
 				upsertEntities(loadedEntities);

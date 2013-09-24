@@ -90,7 +90,9 @@ public class AirImageView extends RelativeLayout {
 		}
 
 		if (mImageMain != null) {
-			mImageMain.setScaleType(mScaleType);
+			if (!(mImageMain instanceof ImageViewTouch)) {
+				mImageMain.setScaleType(mScaleType);
+			}
 			if (isInEditMode()) {
 				mImageMain.setImageResource(R.drawable.img_placeholder_logo);
 			}

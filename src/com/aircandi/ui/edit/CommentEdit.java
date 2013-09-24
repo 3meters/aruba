@@ -28,10 +28,7 @@ public class CommentEdit extends BaseEntityEdit {
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_SEND) {
-					if (validate()) {
-						gather();
-						update();
-					}
+					onAccept();
 					return true;
 				}
 				return false;

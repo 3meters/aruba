@@ -13,8 +13,12 @@ import android.os.Bundle;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.Contacts;
 import android.text.Editable;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.TextView.OnEditorActionListener;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
@@ -39,10 +43,23 @@ public class InviteEdit extends BaseEntityEdit {
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		/*
-		 * FEEDBACK are not really an entity type so we have to handle
+		 * Feedback are not really an entity type so we have to handle
 		 * all the expected initialization.
 		 */
 		mDescription = (AirEditText) findViewById(R.id.description);
+		mDescription.setImeOptions(EditorInfo.IME_ACTION_SEND);
+		mDescription.setOnEditorActionListener(new OnEditorActionListener() {
+
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_SEND) {
+					onAccept();
+					return true;
+				}
+				return false;
+			}
+		});		
+		
 		mEmail = (AirEditText) findViewById(R.id.email);
 
 		String lastMessage = Aircandi.settings.getString(Constants.SETTING_INVITE_MESSAGE_LAST, null);

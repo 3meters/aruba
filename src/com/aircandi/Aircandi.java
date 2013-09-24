@@ -116,7 +116,6 @@ public class Aircandi extends Application {
 	/* Dev preferences */
 	private Boolean							mPrefEnableDev;
 	private Boolean							mPrefEntityFencing;
-	private Boolean							mPrefShowPlaceRankScore;
 	private String							mPrefTestingBeacons;
 	private String							mPrefTestingLocation;
 	private String							mPrefPlaceProvider;
@@ -167,7 +166,6 @@ public class Aircandi extends Application {
 		mPrefPlaceProvider = Aircandi.settings.getString(Constants.PREF_PLACE_PROVIDER, Constants.PREF_PLACE_PROVIDER_DEFAULT);
 		mPrefEnableDev = Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT);
 		mPrefEntityFencing = Aircandi.settings.getBoolean(Constants.PREF_ENTITY_FENCING, Constants.PREF_ENTITY_FENCING_DEFAULT);
-		mPrefShowPlaceRankScore = Aircandi.settings.getBoolean(Constants.PREF_SHOW_PLACE_RANK_SCORE, Constants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT);
 		mPrefTestingBeacons = Aircandi.settings.getString(Constants.PREF_TESTING_BEACONS, Constants.PREF_TESTING_BEACONS_DEFAULT);
 		mPrefTestingLocation = Aircandi.settings.getString(Constants.PREF_TESTING_LOCATION, Constants.PREF_TESTING_LOCATION_DEFAULT);
 	}
@@ -218,10 +216,6 @@ public class Aircandi extends Application {
 
 	public Boolean getPrefEntityFencing() {
 		return mPrefEntityFencing;
-	}
-
-	public Boolean getPrefShowPlaceRankScore() {
-		return mPrefShowPlaceRankScore;
 	}
 
 	public String getPrefTestingBeacons() {

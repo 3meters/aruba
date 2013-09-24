@@ -36,14 +36,32 @@
                 android:id="@+id/Pref_Notifications_Posts"
                 android:defaultValue="true"
                 android:key="Pref_Notifications_Posts"
-                android:summary="@string/Pref_Notifications_Pictures_summary"
-                android:title="@string/Pref_Notifications_Pictures_title" />
+                android:summary="@string/pref_notifications_pictures_summary"
+                android:title="@string/pref_notifications_pictures_title" />
+            <CheckBoxPreference
+                android:id="@+id/Pref_Notifications_Candigrams"
+                android:defaultValue="true"
+                android:key="Pref_Notifications_Candigrams"
+                android:summary="@string/pref_notifications_candigrams_summary"
+                android:title="@string/pref_notifications_candigrams_title" />
             <CheckBoxPreference
                 android:id="@+id/Pref_Notifications_Nearby"
                 android:defaultValue="true"
                 android:key="Pref_Notifications_Nearby"
                 android:summary="@string/pref_notifications_nearby_summary"
                 android:title="@string/pref_notifications_nearby_title" />
+            <CheckBoxPreference
+                android:id="@+id/Pref_Notifications_Watch"
+                android:defaultValue="true"
+                android:key="Pref_Notifications_Watch"
+                android:summary="@string/pref_notifications_watch_summary"
+                android:title="@string/pref_notifications_watch_title" />
+            <CheckBoxPreference
+                android:id="@+id/Pref_Notifications_Own"
+                android:defaultValue="true"
+                android:key="Pref_Notifications_Own"
+                android:summary="@string/pref_notifications_own_summary"
+                android:title="@string/pref_notifications_own_title" />
             <CheckBoxPreference
                 android:id="@+id/Pref_Sound_Effects"
                 android:defaultValue="true"
@@ -55,14 +73,14 @@
         <ListPreference
             android:id="@+id/Pref_Place_Provider"
             android:defaultValue="foursquare"
-            android:dialogTitle="Place provider to use"
+            android:dialogTitle="@string/pref_place_provider_dialog_title"
             android:entries="@array/place_provider_entries"
             android:entryValues="@array/place_provider_values"
             android:key="Pref_Place_Provider"
-            android:negativeButtonText="Cancel"
-            android:positiveButtonText="OK"
-            android:summary="Specify which place provider should be used when scanning for nearby places"
-            android:title="Place provider" />
+            android:negativeButtonText="@string/pref_dialog_cancel"
+            android:positiveButtonText="@string/pref_dialog_ok"
+            android:summary="@string/pref_place_provider_summary"
+            android:title="@string/pref_place_provider_title" />
 
         <Preference
             android:key="Pref_Feedback"

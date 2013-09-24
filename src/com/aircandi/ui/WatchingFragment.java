@@ -14,7 +14,7 @@ public class WatchingFragment extends BaseShortcutFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mLinkProfiles = LinkProfile.LINKS_FOR_USER;
+		mLinkProfile = LinkProfile.LINKS_FOR_USER;
 		mShortcutType = Constants.TYPE_LINK_WATCH;
 	}
 

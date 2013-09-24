@@ -240,20 +240,21 @@ public class UI {
 
 	public static Boolean showAction(Route route, Entity entity) {
 		if (route == Route.EDIT) {
-			if (EntityManager.canUserEditOrDelete(entity)) return true;
+			return EntityManager.canUserEditOrDelete(entity);
 		}
 		else if (route == Route.ADD) {
-			if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)
+
+			if (entity != null && (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)
 					|| entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
-					|| entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+					|| entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE))) {
 				return true;
 			}
 		}
 		else if (route == Route.DELETE) {
-			if (EntityManager.canUserEditOrDelete(entity)) return true;
+			return EntityManager.canUserEditOrDelete(entity);
 		}
 		else if (route == Route.KICK) {
-			if (EntityManager.canUserKick(entity)) return true;
+			return EntityManager.canUserKick(entity);
 		}
 		return false;
 	}

@@ -1,7 +1,5 @@
 package com.aircandi.components;
 
-import java.util.Locale;
-
 import org.apache.http.HttpStatus;
 
 import android.app.Notification;
@@ -25,8 +23,8 @@ import com.aircandi.events.MessageEvent;
 import com.aircandi.service.RequestListener;
 import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.AirNotification;
+import com.aircandi.service.objects.AirNotification.NotificationType;
 import com.aircandi.service.objects.Device;
-import com.aircandi.service.objects.Place;
 import com.aircandi.ui.AircandiForm;
 import com.aircandi.utilities.Json;
 import com.google.android.gcm.GCMRegistrar;
@@ -34,9 +32,8 @@ import com.google.android.gcm.GCMRegistrar;
 @SuppressWarnings("ucd")
 public class NotificationManager {
 
-	private Device									mDevice;
-
 	public static android.app.NotificationManager	mNotificationManager;
+	private Device									mDevice;
 	private Integer									mNewCount	= 0;
 
 	private NotificationManager() {
@@ -50,6 +47,10 @@ public class NotificationManager {
 	public static NotificationManager getInstance() {
 		return NotificationManagerHolder.instance;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// GCM
+	// --------------------------------------------------------------------------------------------	
 
 	public void registerDeviceWithGCM() {
 		/*
@@ -112,7 +113,7 @@ public class NotificationManager {
 					ModelResult result = EntityManager.getInstance().unregisterDevice(registrationId);
 
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-						Logger.i(this, "GCM: device unregistered with Aircandi notification service");
+						Logger.i(this, "GCM: device successfully unregistered with Aircandi notification service");
 						GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
 					}
 					else {
@@ -133,71 +134,12 @@ public class NotificationManager {
 		}.execute();
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Notifications
+	// --------------------------------------------------------------------------------------------	
+
 	public void broadcastNotification(final AirNotification notification) {
 		BusProvider.getInstance().post(new MessageEvent(notification));
-	}
-
-	public void decorateNotification(AirNotification notification) {
-		/*
-		 * Title and subtitle properties are added base on the context
-		 * of the notification and the type of entity.
-		 */
-		if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
-				&& notification.entity.type.equals(Constants.TYPE_APP_TOUR)
-				&& notification.action.equals("move")) {
-			notification.title = "A " + Constants.SCHEMA_ENTITY_CANDIGRAM.toString().toLowerCase(Locale.US);
-			if (notification.entity.name != null) {
-				notification.title += "called " + notification.entity.name;
-			}
-			if (notification.type.equals("nearby")) {
-				notification.subtitle = "Has dropped in near you";
-			}
-			else if (notification.type.equals("watch")) {
-				notification.subtitle = "Has dropped in";
-			}
-
-			if (notification.toEntity != null && notification.toEntity.name != null) {
-				notification.subtitle += " at \"" + notification.toEntity.name + "\"";
-			}
-			return;
-		}
-
-		notification.title = notification.user.name;
-
-		String category = null;
-		if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-			Place place = (Place) notification.entity;
-			if (place.category != null && place.category.name != null) {
-				category = place.category.name;
-			}
-		}
-		if (category == null) {
-			category = notification.entity.schema;
-		}
-
-		if (notification.type.equals("nearby")) {
-			if (notification.action.equals("insert")) {
-				notification.subtitle = "Added a new " + category + " near you";
-			}
-			else if (notification.action.equals("move")) {
-				notification.subtitle = "Kicked a " + category + " near you";
-			}
-		}
-		else if (notification.type.equals("watch")) {
-			if (notification.action.equals("insert")) {
-				notification.subtitle = "Added a new " + category;
-			}
-			else if (notification.action.equals("move")) {
-				notification.subtitle = "Kicked a " + category;
-			}
-		}
-
-		if (notification.entity.name != null) {
-			notification.subtitle += " called \"" + notification.entity.name + "\"";
-		}
-		if (notification.toEntity != null && notification.toEntity.name != null) {
-			notification.subtitle += " to \"" + notification.toEntity.name + "\"";
-		}
 	}
 
 	public void showNotification(final AirNotification airNotification, Context context) {
@@ -206,21 +148,36 @@ public class NotificationManager {
 		 * and then it moves to the right.
 		 */
 		if (airNotification.type != null) {
-			if (airNotification.type.equals(Constants.TYPE_NOTIFICATION_NEARBY)) {
+			if (airNotification.type.equals(NotificationType.NEARBY)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_NEARBY, Constants.PREF_NOTIFICATIONS_NEARBY_DEFAULT)) {
 					return;
 				}
 			}
-			else if (airNotification.type.equals(Constants.TYPE_NOTIFICATION_WATCH)) {
-				if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-					if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_COMMENTS, Constants.PREF_NOTIFICATIONS_COMMENTS_DEFAULT)) {
-						return;
-					}
+			else if (airNotification.type.equals(NotificationType.OWN)) {
+				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_OWN, Constants.PREF_NOTIFICATIONS_OWN_DEFAULT)) {
+					return;
 				}
-				else {
-					if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_PICTURES, Constants.PREF_NOTIFICATIONS_PICTURES_DEFAULT)) {
-						return;
-					}
+			}
+			else if (airNotification.type.equals(NotificationType.WATCH)
+					|| airNotification.type.equals(NotificationType.WATCH_USER)) {
+				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_WATCH, Constants.PREF_NOTIFICATIONS_WATCH_DEFAULT)) {
+					return;
+				}
+			}
+
+			if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_COMMENTS, Constants.PREF_NOTIFICATIONS_COMMENTS_DEFAULT)) {
+					return;
+				}
+			}
+			else if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_PICTURES, Constants.PREF_NOTIFICATIONS_PICTURES_DEFAULT)) {
+					return;
+				}
+			}
+			else if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_CANDIGRAMS, Constants.PREF_NOTIFICATIONS_CANDIGRAMS_DEFAULT)) {
+					return;
 				}
 			}
 		}
@@ -244,20 +201,13 @@ public class NotificationManager {
 
 		airNotification.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		airNotification.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		
 		final PendingIntent pendingIntent = PendingIntent.getActivity(Aircandi.applicationContext
 				, 0
 				, airNotification.intent
 				, PendingIntent.FLAG_CANCEL_CURRENT);
 
-		String imageUri = null;
-		if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
-				&& airNotification.entity.type.equals(Constants.TYPE_APP_TOUR)
-				&& airNotification.action.equals("move")) {
-			imageUri = airNotification.entity.getPhotoUri();
-		}
-		else if (airNotification.user != null) {
-			imageUri = airNotification.user.getPhotoUri();
-		}
+		String imageUri = airNotification.photoFrom.getUri();
 
 		if (imageUri != null) {
 			final BitmapRequest bitmapRequest = new BitmapRequest()
@@ -290,8 +240,8 @@ public class NotificationManager {
 
 	}
 
-	public void cancelNotification(NotificationType type) {
-		mNotificationManager.cancel(type.name(), 0);
+	public void cancelNotification(String type) {
+		mNotificationManager.cancel(type, 0);
 	}
 
 	public void storeNotification(final AirNotification notification, String jsonNotification) {
@@ -303,31 +253,23 @@ public class NotificationManager {
 		mNewCount++;
 	}
 
-	public Device getDevice() {
-		return mDevice;
-	}
-
-	public void setDevice(Device device) {
-		this.mDevice = device;
-	}
-
-	public Integer getNewCount() {
-		return mNewCount;
-	}
+	// --------------------------------------------------------------------------------------------
+	// Properties
+	// --------------------------------------------------------------------------------------------	
 
 	public void setNewCount(Integer newCount) {
 		mNewCount = newCount;
 	}
 
+	public Device getDevice() {
+		return mDevice;
+	}
+
+	public void setDevice(Device device) {
+		mDevice = device;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Classes
 	// --------------------------------------------------------------------------------------------	
-
-	@SuppressWarnings("ucd")
-	public enum NotificationType {
-		NETWORK,
-		NEARBY,
-		WATCH
-	}
-
 }

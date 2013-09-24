@@ -78,6 +78,7 @@ import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
+import com.aircandi.utilities.Type;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
@@ -898,7 +899,7 @@ public class RadarFragment extends BaseFragment implements
 				}
 			}
 
-			String debugLocation = location.getProvider().substring(0, 1).toUpperCase(Locale.ROOT);
+			String debugLocation = location.getProvider().substring(0, 1).toUpperCase(Locale.US);
 			if (location.hasAccuracy()) {
 				debugLocation += String.valueOf((int) location.getAccuracy());
 			}
@@ -926,9 +927,7 @@ public class RadarFragment extends BaseFragment implements
 
 			/* Only show beacon indicator if user is a developer */
 			if (!Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-					|| Aircandi.getInstance().getUser() == null
-					|| Aircandi.getInstance().getUser().developer == null
-					|| !Aircandi.getInstance().getUser().developer) {
+					|| !Type.isTrue(Aircandi.getInstance().getUser().developer)) {
 				mMenuItemBeacons.setVisible(false);
 			}
 			else {

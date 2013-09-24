@@ -112,7 +112,7 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public void onAdd() {
 		BaseFragment fragment = getCurrentFragment();
@@ -226,19 +226,21 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 
 	@Override
 	protected void onResume() {
+		super.onResume();
 		/*
 		 * Lifecycle ordering: (onCreate/onRestart)->onStart->onResume->onAttachedToWindow->onWindowFocusChanged
 		 * 
 		 * OnResume gets called after OnCreate (always) and whenever the activity is being brought back to the
 		 * foreground. Not guaranteed but is usually called just before the activity receives focus.
 		 */
+		Aircandi.currentPlace = null;
+		Logger.v(this, "Setting current place to null");
 		if (mPauseDate != null) {
 			final Long interval = DateTime.nowDate().getTime() - mPauseDate.longValue();
 			if (interval > Constants.INTERVAL_TETHER_ALERT) {
 				tetherAlert();
 			}
 		}
-		super.onResume();
 	}
 
 	@Override

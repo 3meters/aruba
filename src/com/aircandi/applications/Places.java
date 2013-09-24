@@ -19,8 +19,10 @@ public class Places {
 
 	public static int	ICON_COLOR	= R.color.accent_red;
 
-	public static void view(Context context, String entityId) {
-		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceForm.class).setEntityId(entityId);
+	public static void view(Context context, String entityId, String parentId) {
+		IntentBuilder intentBuilder = new IntentBuilder(context, PlaceForm.class)
+				.setEntityId(entityId)
+				.setEntityParentId(parentId);
 		context.startActivity(intentBuilder.create());
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 	}

@@ -628,7 +628,7 @@ public final class Routing {
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_PLACE)) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					Places.view(activity, entity.id);
+					Places.view(activity, shortcut.appId, entity.id);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
 					Places.viewFor(activity, entity.id, shortcut.linkType, direction);
@@ -636,7 +636,7 @@ public final class Routing {
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_USER)) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					Users.view(activity, entity.id);
+					Users.view(activity, shortcut.appId, entity.id);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
 					Users.viewFor(activity, entity.id, shortcut.linkType, direction);
@@ -696,10 +696,10 @@ public final class Routing {
 						Comments.view(activity, shortcut.getId());
 					}
 					else if (shortcut.app.equals(Constants.TYPE_APP_PLACE)) {
-						Places.view(activity, shortcut.getId());
+						Places.view(activity, shortcut.getId(), entity.id);
 					}
 					else if (shortcut.app.equals(Constants.TYPE_APP_USER)) {
-						Users.view(activity, shortcut.getId());
+						Users.view(activity, shortcut.getId(), entity.id);
 					}
 				}
 			}

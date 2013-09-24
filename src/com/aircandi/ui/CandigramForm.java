@@ -105,11 +105,11 @@ public class CandigramForm extends BaseEntityForm {
 	@SuppressWarnings("ucd")
 	public void onKickButtonClick(View view) {
 
-//		if (!EntityManager.canUserKick((Candigram) mEntity)) {
-//			LINK link = mEntity.getParentLink(Constants.TYPE_LINK_CANDIGRAM);
-//			kickUnavailable(link.shortcut.name, link.shortcut.photo, Aircandi.getInstance().getUser());
-//			return;
-//		}
+		//		if (!EntityManager.canUserKick((Candigram) mEntity)) {
+		//			LINK link = mEntity.getParentLink(Constants.TYPE_LINK_CANDIGRAM);
+		//			kickUnavailable(link.shortcut.name, link.shortcut.photo, Aircandi.getInstance().getUser());
+		//			return;
+		//		}
 
 		new AsyncTask() {
 
@@ -243,7 +243,7 @@ public class CandigramForm extends BaseEntityForm {
 				hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					if (follow) {
-						Places.view(CandigramForm.this, entity.id);
+						Places.view(CandigramForm.this, entity.id, mEntity.id);
 						Aircandi.soundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
 						finish();
 						Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
@@ -297,7 +297,7 @@ public class CandigramForm extends BaseEntityForm {
 							Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
 						}
 						else if (which == Dialog.BUTTON_NEGATIVE) {
-							Places.view(CandigramForm.this, place.id);
+							Places.view(CandigramForm.this, place.id, mEntity.id);
 							Aircandi.soundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
 							finish();
 							Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
@@ -351,7 +351,7 @@ public class CandigramForm extends BaseEntityForm {
 			Routing.route(this, Route.NEW_FOR, mEntity);
 			return;
 		}
-		
+
 		if (mEntity.locked) {
 			Dialogs.locked(this, mEntity);
 		}
@@ -387,7 +387,7 @@ public class CandigramForm extends BaseEntityForm {
 		 * - Header views are visible by default
 		 */
 
-		if (mEntity.type.equals("tour") && mTimer == null) {
+		if (mEntity.type.equals("tour") && ((Candigram) mEntity).hopEnabled && mTimer == null) {
 			mTimer = new Runnable() {
 
 				@Override
@@ -397,14 +397,11 @@ public class CandigramForm extends BaseEntityForm {
 				}
 			};
 		}
+		else {
+			setActionText();
+		}
 
 		setActivityTitle(mEntity.name);
-		if (mMenuItemEdit != null) {
-			mMenuItemEdit.setVisible(UI.showAction(Route.EDIT, mEntity));
-		}
-		if (mMenuItemAdd != null) {
-			mMenuItemAdd.setVisible(UI.showAction(Route.ADD, mEntity));
-		}
 
 		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);
 		final AirImageView photoView = (AirImageView) findViewById(R.id.photo);
@@ -472,7 +469,7 @@ public class CandigramForm extends BaseEntityForm {
 			description.setText(Html.fromHtml(mEntity.description));
 			UI.setVisibility(findViewById(R.id.section_description), View.VISIBLE);
 		}
-		
+
 		/* Place context */
 		View placeHolder = findViewById(R.id.place_holder);
 		UI.setVisibility(placeHolder, View.GONE);
@@ -491,7 +488,6 @@ public class CandigramForm extends BaseEntityForm {
 			placeHolder.setTag(link.shortcut);
 			UI.setVisibility(placeHolder, View.VISIBLE);
 		}
-		
 
 		/* Stats */
 
@@ -630,15 +626,24 @@ public class CandigramForm extends BaseEntityForm {
 		Candigram candigram = (Candigram) mEntity;
 		String action = "ready to leave";
 
-		if (candigram.hopNextDate != null) {
-			Long now = DateTime.nowDate().getTime();
-			Long next = candigram.hopNextDate.longValue();
-			String timeTill = DateTime.interval(now, next, IntervalContext.FUTURE);
-			if (!timeTill.equals("now")) {
-				action = "leaving in" + "\n" + timeTill;
-			}
-			else {
-				action = "waiting to leave";
+		if (!candigram.hopEnabled) {
+			action = "parked";
+		}
+
+		if (candigram.hopCount.intValue() >= candigram.hopsMax.intValue()) {
+			action = "finished traveling and back with sender";
+		}
+		else {
+			if (candigram.hopNextDate != null) {
+				Long now = DateTime.nowDate().getTime();
+				Long next = candigram.hopNextDate.longValue();
+				String timeTill = DateTime.interval(now, next, IntervalContext.FUTURE);
+				if (!timeTill.equals("now")) {
+					action = "leaving in" + "\n" + timeTill;
+				}
+				else {
+					action = "waiting to leave";
+				}
 			}
 		}
 		mActionInfo.setText(action);

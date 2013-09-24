@@ -42,17 +42,29 @@
     <string name="pref_search_radius_dialog_title">Select scanning distance</string>
     <string name="pref_theme_title">Themes</string>
     <string name="pref_theme_dialog_title">Select theme</string>
+    
+    <string name="pref_place_provider_dialog_title">Place provider to use</string>
+    <string name="pref_place_provider_title">Place provider</string>
+    <string name="pref_place_provider_summary">Specify which place provider should be used when scanning for nearby places</string>
+    
     <string name="pref_sound_effects_summary">Play sound notifications and effects</string>
     <string name="pref_sound_effects_title">Sounds</string>
 
     <!-- Preferences: notifications -->
 
-    <string name="pref_notifications_comments_title">Notify about comments</string>
-    <string name="pref_notifications_comments_summary">Notify me about comments on my items</string>
-    <string name="Pref_Notifications_Pictures_title">Notify about pictures</string>
-    <string name="Pref_Notifications_Pictures_summary">Notify me when pictures are added to my places</string>
-    <string name="pref_notifications_nearby_title">Notify when nearby</string>
-    <string name="pref_notifications_nearby_summary">Notify me about new places and pictures nearby</string>
+    <string name="pref_notifications_comments_title">Comments</string>
+    <string name="pref_notifications_comments_summary">Notify me about comments on items</string>
+    <string name="pref_notifications_pictures_title">Pictures</string>
+    <string name="pref_notifications_pictures_summary">Notify me when pictures are added</string>
+    <string name="pref_notifications_candigrams_title">Candigrams</string>
+    <string name="pref_notifications_candigrams_summary">Notify me when candigrams are added</string>
+    
+    <string name="pref_notifications_nearby_title">Nearby</string>
+    <string name="pref_notifications_nearby_summary">Notify me about activity nearby</string>
+    <string name="pref_notifications_own_title">Owned</string>
+    <string name="pref_notifications_own_summary">Notify me about activity with items I own</string>
+    <string name="pref_notifications_watch_title">Watching</string>
+    <string name="pref_notifications_watch_summary">Notify me about activity with items I\'m watching</string>
     
     <!-- Help -->
 
@@ -301,6 +313,7 @@
     <string name="section_place_shortcuts_applinks">links</string>
     
     <string name="section_places_more">more places</string>
+    <string name="section_candigrams_more">more candigrams</string>
     <string name="section_pictures_more">more pictures</string>
     <string name="section_users_more">more users</string>
     <string name="section_links_more">more links</string>
