@@ -14,7 +14,6 @@ public class BitmapRequest {
 	private RequestListener				mRequestListener		= null;
 	private WeakReference<ImageView>	mImageView				= null;
 	private Integer						mBitmapSize				= null;
-	private Integer						mBrokenDrawableResId	= null;
 
 	public BitmapRequest() {}
 
@@ -71,14 +70,6 @@ public class BitmapRequest {
 	public BitmapRequest setBitmapSize(Integer imageSize) {
 		mBitmapSize = imageSize;
 		return this;
-	}
-
-	public Integer getBrokenDrawableResId() {
-		return mBrokenDrawableResId;
-	}
-
-	public void setBrokenDrawableResId(Integer brokenDrawableResId) {
-		mBrokenDrawableResId = brokenDrawableResId;
 	}
 
 	public static class BitmapResponse {

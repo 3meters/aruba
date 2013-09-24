@@ -32,7 +32,7 @@ public class Maps {
 			Bundle extras = new Bundle();
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CANDIGRAM, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 			settings.appClass = Places.class;
-			List<Shortcut> shortcuts = (List<Shortcut>) entity.getShortcuts(settings, new Link.SortByModifiedDate());
+			List<Shortcut> shortcuts = (List<Shortcut>) entity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
 			if (shortcuts.size() > 0) {
 				final List<String> markerStrings = new ArrayList<String>();
 				for (Shortcut shortcut : shortcuts) {

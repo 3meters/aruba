@@ -49,6 +49,8 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	public String				name;
 	public String				description;
 	public Boolean				usingDefault		= false;
+	public Photo				photoPlaceholder;
+	public Photo				photoBroken;
 
 	/* Used to stash temp bitmaps. Always access using set/getBitmap() */
 	public String				bitmapKey;
@@ -100,7 +102,15 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		if (map.get("user") != null) {
 			photo.user = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"), nameMapping);
 		}
+		
+		if (map.get("photoPlaceholder") != null) {
+			photo.photoPlaceholder = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photoPlaceholder"), nameMapping);
+		}
 
+		if (map.get("photoBroken") != null) {
+			photo.photoBroken = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photoBroken"), nameMapping);
+		}
+		
 		return photo;
 	}
 

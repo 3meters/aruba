@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
@@ -27,6 +28,7 @@ public class Applinks {
 				.setListLinkDirection(direction.name())
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_APPLINK)
 				.setListItemResId(R.layout.temp_listitem_applink)
+				.setListPageSize(ServiceConstants.PAGE_SIZE_APPLINKS)
 				.setListNewEnabled(true);
 
 		context.startActivity(intentBuilder.create());
@@ -44,6 +46,7 @@ public class Applinks {
 				.setListTitle(title)
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_APPLINK)
 				.setListItemResId(R.layout.temp_listitem_applink)
+				.setListPageSize(ServiceConstants.PAGE_SIZE_APPLINKS)
 				.setListNewEnabled(true);
 
 		return intentBuilder.create();

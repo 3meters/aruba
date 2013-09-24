@@ -66,13 +66,13 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	protected OnClickListener	mClickListener;
 	protected Integer			mPhotoWidthPixels;
 
-	private List<Entity>		mEntities	= new ArrayList<Entity>();
+	private List<Entity>		mEntities			= new ArrayList<Entity>();
 	private Cursor				mCursorSettings;
 	private Button				mButtonNewEntity;
 
-	private long				mOffset		= 0;
-	private static final long	LIST_MAX	= 300L;
-	private static final long	PAGE_SIZE	= 10L;
+	private long				mOffset				= 0;
+	private static final long	LIST_MAX			= 300L;
+	private static final int	PAGE_SIZE_DEFAULT	= 30;
 
 	private EntityAdapter		mAdapter;
 
@@ -85,6 +85,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	protected Integer			mListItemResId;
 	protected Boolean			mListNewEnabled;
 	protected String			mListTitle;
+	protected Integer			mListPageSize;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -112,6 +113,8 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 				mListLinkDirection = "in";
 			}
 			mListNewEnabled = extras.getBoolean(Constants.EXTRA_LIST_NEW_ENABLED, false);
+			mListPageSize = extras.getInt(Constants.EXTRA_LIST_PAGE_SIZE, PAGE_SIZE_DEFAULT);
+
 			mListItemResId = extras.getInt(Constants.EXTRA_LIST_ITEM_RESID, getListItemResId(mListLinkSchema));
 			mListTitle = extras.getString(Constants.EXTRA_LIST_TITLE);
 		}
@@ -143,15 +146,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 				final Entity entity = (Entity) ((ViewHolder) v.getTag()).data;
 				final Shortcut shortcut = entity.getShortcut();
-				Routing.shortcut(BaseEntityList.this, shortcut, mForEntity, null);				
-				
-				
-//				if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-//					Routing.shortcut(BaseEntityList.this, entity.getShortcut(), null, null);
-//				}
-//				else {
-//					Routing.route(BaseEntityList.this, Route.BROWSE, entity, null, null);
-//				}
+				Routing.shortcut(BaseEntityList.this, shortcut, mForEntity, null);
 			}
 		};
 		Aircandi.stopwatch3.segmentTime(this.getClass().getSimpleName() + " initialized");
@@ -263,10 +258,11 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	private ModelResult loadEntities(Boolean refresh) {
 		/*
 		 * Called on a background thread.
+		 * 
+		 * Sorting is applied to links not the entities on the service side.
 		 */
-
 		mCursorSettings = new Cursor()
-				.setLimit(PAGE_SIZE)
+				.setLimit(mListPageSize)
 				.setSort(Maps.asMap("modifiedDate", -1))
 				.setSkip(refresh ? 0 : mEntities.size());
 
@@ -292,6 +288,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 				linkOptions.setIgnoreInactive(true);
 			}
 		}
+
 		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mForEntityId, linkOptions, mCursorSettings, Aircandi.stopwatch3);
 
 		return result;
@@ -489,8 +486,8 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 						}
 					}
 					else {
-						if (mMoreEntities.size() >= PAGE_SIZE) {
-							mOffset += PAGE_SIZE;
+						if (mMoreEntities.size() >= PAGE_SIZE_DEFAULT) {
+							mOffset += PAGE_SIZE_DEFAULT;
 							hideBusy();
 							Aircandi.stopwatch3.stop(this.getClass().getSimpleName() + " databind - more data available");
 							return (getWrappedAdapter().getCount() + mMoreEntities.size()) < LIST_MAX;
@@ -532,6 +529,9 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 					|| mListLinkType.equals(Constants.TYPE_LINK_CREATE)
 					|| mListLinkType.equals(Constants.TYPE_LINK_COMMENT)) {
 				list.sort(new Entity.SortByLinkModifiedDate());
+			}
+			else if (mListLinkType.equals(Constants.TYPE_LINK_APPLINK)) {
+				list.sort(new Entity.SortByPositionModifiedDate());
 			}
 			else {
 				list.sort(new Entity.SortByLinkModifiedDate());

@@ -283,7 +283,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else {
 				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
-				shortcuts = (List<Shortcut>) entity.getShortcuts(settings, null);
+				shortcuts = (List<Shortcut>) entity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
 			}
 
 			Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());

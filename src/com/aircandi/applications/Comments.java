@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
@@ -30,6 +31,7 @@ public class Comments {
 				.setListLinkDirection(direction.name())
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_COMMENT)
 				.setListItemResId(R.layout.temp_listitem_comment)
+				.setListPageSize(ServiceConstants.PAGE_SIZE_COMMENTS)
 				.setListNewEnabled(true);
 
 		context.startActivity(intentBuilder.create());
@@ -47,6 +49,7 @@ public class Comments {
 				.setListTitle(title)
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_COMMENT)
 				.setListItemResId(R.layout.temp_listitem_comment)
+				.setListPageSize(ServiceConstants.PAGE_SIZE_COMMENTS)
 				.setListNewEnabled(true);
 
 		return intentBuilder.create();

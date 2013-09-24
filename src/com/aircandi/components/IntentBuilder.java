@@ -27,6 +27,7 @@ public class IntentBuilder {
 	private String		mListTitle;
 	private Boolean		mListNewEnabled;
 	private Integer		mListItemResId;
+	private Integer		mListPageSize;
 
 	private Bundle		mExtras;
 
@@ -89,7 +90,7 @@ public class IntentBuilder {
 		if (mListNewEnabled != null) {
 			intent.putExtra(Constants.EXTRA_LIST_NEW_ENABLED, mListNewEnabled);
 		}
-		
+
 		if (mListTitle != null) {
 			intent.putExtra(Constants.EXTRA_LIST_TITLE, mListTitle);
 		}
@@ -187,6 +188,15 @@ public class IntentBuilder {
 
 	public IntentBuilder setListTitle(String listTitle) {
 		mListTitle = listTitle;
+		return this;
+	}
+
+	public Integer getListPageSize() {
+		return mListPageSize;
+	}
+
+	public IntentBuilder setListPageSize(Integer listPageSize) {
+		mListPageSize = listPageSize;
 		return this;
 	}
 

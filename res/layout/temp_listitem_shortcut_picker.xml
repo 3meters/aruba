@@ -14,7 +14,6 @@
         android:layout_height="@dimen/image_small"
         android:layout_centerVertical="true"
         android:layout_marginRight="10dp"
-        aircandi:brokenDrawable="@drawable/ic_launcher"
         aircandi:layout="@layout/widget_webimageview"
         aircandi:showBusy="true"
         aircandi:sizeHint="@dimen/image_small"

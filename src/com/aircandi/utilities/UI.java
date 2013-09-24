@@ -186,14 +186,13 @@ public class UI {
 								}
 							}
 						}
-						Photo brokenPhoto = photoView.getBrokenPhoto();
+						Photo brokenPhoto = photo.photoBroken;
 						if (brokenPhoto != null && !brokenPhoto.getUri().equals(photo.getUri())) {
 							photoView.setPhoto(brokenPhoto);
 							aircandi(photoView, brokenPhoto, listener);
 						}
 						else {
 							photoView.showLoading(false);
-							photoView.showBroken(true);
 						}
 					}
 				});

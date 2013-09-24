@@ -171,7 +171,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* Shortcuts for place entities created by user */
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 			settings.appClass = Places.class;
-			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
+			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
 			if (shortcuts.size() > 0) {
 				drawShortcuts(shortcuts
 						, settings
@@ -185,7 +185,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* Shortcuts for place entities created by user */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_CANDIGRAM, Direction.out, false, false);
 			settings.appClass = Candigrams.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
 			if (shortcuts.size() > 0) {
 				drawShortcuts(shortcuts
 						, settings
@@ -199,7 +199,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* Shortcuts for post entities created by user */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PICTURE, Direction.out, false, false);
 			settings.appClass = Pictures.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
 			if (shortcuts.size() > 0) {
 				drawShortcuts(shortcuts
 						, settings
@@ -216,7 +216,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* WATCHING places */
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 			settings.appClass = Places.class;
-			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
+			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
 			if (shortcuts.size() > 0) {
 				drawShortcuts(shortcuts
 						, settings
@@ -230,7 +230,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* WATCHING candigrams */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_CANDIGRAM, Direction.out, false, false);
 			settings.appClass = Candigrams.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
 			if (shortcuts.size() > 0) {
 				drawShortcuts(shortcuts
 						, settings
@@ -244,7 +244,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* WATCHING pictures */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, Direction.out, false, false);
 			settings.appClass = Pictures.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
 			if (shortcuts.size() > 0) {
 				drawShortcuts(shortcuts
 						, settings
@@ -258,7 +258,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			/* WATCHING users */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, Direction.out, false, false);
 			settings.appClass = Users.class;
-			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
+			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
 			if (shortcuts.size() > 0) {
 				drawShortcuts(shortcuts
 						, settings

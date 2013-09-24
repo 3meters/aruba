@@ -36,7 +36,7 @@ public final class ServiceConstants {
 	public static final String	URL_PROXIBASE_SERVICE							= "https://api.aircandi.com:444";																												// staging																									//$NON-NLS-1$
 
 	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS		= "/img/applinks/";																															//$NON-NLS-1$
-	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES		= "/img/categories/";																														//$NON-NLS-1$
+	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES		= "/img/categories/";																															//$NON-NLS-1$
 
 	public static final String	URL_PROXIBASE_SERVICE_REST						= URL_PROXIBASE_SERVICE + "/data/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_USER						= URL_PROXIBASE_SERVICE + "/user/";																											//$NON-NLS-1$
@@ -64,6 +64,13 @@ public final class ServiceConstants {
 	public static final int		LIMIT_CHILD_ENTITIES							= 50;
 	public static final int		SOURCE_SUGGESTIONS_TIMEOUT						= 2000;
 	public static final int		PROXIMITY_BEACON_COVERAGE						= 3;
+
+	public static final int		PAGE_SIZE_APPLINKS								= -1;
+	public static final int		PAGE_SIZE_CANDIGRAMS							= 30;
+	public static final int		PAGE_SIZE_COMMENTS								= 30;
+	public static final int		PAGE_SIZE_PICTURES								= 30;
+	public static final int		PAGE_SIZE_PLACES								= 30;
+	public static final int		PAGE_SIZE_USERS									= 30;
 
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS		= 401.1f;
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED	= 401.2f;																																		// $codepro.audit.disable questionableName

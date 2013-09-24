@@ -42,7 +42,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 	 * 
 	 * - Only applies to trying to establish a connection and sending the request body.
 	 * - Doesn't retry if there is no connection (service was never reached).
-	 * - Doesn't retry if request body == null or stream isn't retryable.
+	 * - Doesn't retry if request body == null or request stream isn't retryable.
 	 * - Doesn't retry if SSLHandshakeException, CertificateException, ProtocolException.
 	 * - Doesn't retry if IOException is during response streaming.
 	 */
@@ -125,12 +125,6 @@ public class OkHttpUrlConnection extends BaseConnection {
 				 * Any 2.XX status code is considered success.
 				 */
 				if (inputStream != null) {
-					/*
-					 * First check to see if we were redirected to something like a signin page.
-					 */
-					if (!url.getHost().equals(connection.getURL().getHost())) {
-						return new ServiceResponse(ResponseCode.FAILED, null, new WalledGardenException());
-					}
 
 					Long contentLength = null;
 					String contentLengthField = connection.getHeaderField("Content-Length");

@@ -501,7 +501,7 @@ public class CandigramForm extends BaseEntityForm {
 		/* Synthetic applink shortcuts */
 		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
 		settings.appClass = Applinks.class;
-		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
+		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByPosition());
 			Boolean canAdd = EntityManager.canUserAdd(mEntity);
@@ -518,7 +518,7 @@ public class CandigramForm extends BaseEntityForm {
 		/* service applink shortcuts */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 		settings.appClass = Applinks.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null);
+		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
 		if (shortcuts.size() > 0) {
 			Collections.sort(shortcuts, new Shortcut.SortByPosition());
 			drawShortcuts(shortcuts
@@ -533,7 +533,7 @@ public class CandigramForm extends BaseEntityForm {
 		/* Shortcuts for places linked to this candigram */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_CANDIGRAM, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 		settings.appClass = Places.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate());
+		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), new Shortcut.SortByPositionModifiedDate());
 		if (shortcuts.size() > 0) {
 			drawShortcuts(shortcuts
 					, settings

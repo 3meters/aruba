@@ -71,16 +71,18 @@ public class Place extends Entity implements Cloneable, Serializable {
 
 	@Override
 	public Photo getPhoto() {
-		if (this.photo != null) {
-			return this.photo;
+		Photo photo = this.photo;
+		if (photo == null) {
+			if (category != null && category.photo != null) {
+				photo = category.photo.clone();
+			}
+			else {
+				photo = getDefaultPhoto();
+			}
 		}
-		else if (category != null && category.photo != null) {
-			Photo photo = category.photo.clone();
-			return photo;
-		}
-		else {
-			return getDefaultPhoto();
-		}
+		photo.photoPlaceholder = getPlaceholderPhoto();
+		photo.photoBroken = getBrokenPhoto();
+		return photo;
 	}
 
 	public Link getLink(Beacon beacon, String linkType) {

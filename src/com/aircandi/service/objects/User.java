@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.aircandi.ServiceConstants;
 import com.aircandi.service.Expose;
 
 /**
@@ -81,38 +80,6 @@ public class User extends Entity {
 	// --------------------------------------------------------------------------------------------		
 
 	@Override
-	public String getPhotoUri() {
-
-		/*
-		 * If a special preview photo is available, we use it otherwise
-		 * we use the standard photo.
-		 * 
-		 * Only posts and collections do not have photo objects
-		 */
-		String photoUri = "resource:img_placeholder_logo_bw";
-		if (photo != null) {
-			photoUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
-			if (photoUri == null) {
-				photoUri = photo.getUri();
-			}
-		}
-		else {
-			if (creator != null) {
-				if (creator.getPhotoUri() != null && !creator.getPhotoUri().equals("")) {
-					photoUri = creator.getPhotoUri();
-				}
-			}
-			if (!photoUri.startsWith("http:")
-					&& !photoUri.startsWith("https:")
-					&& !photoUri.startsWith("resource:")) {
-				photoUri = ServiceConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
-			}
-		}
-
-		return photoUri;
-	}
-
-	@Override
 	public String getCollection() {
 		return collectionId;
 	}
@@ -138,7 +105,7 @@ public class User extends Entity {
 			entity.lastSignedInDate = (Number) map.get("lastSignedInDate");
 			entity.validationDate = (Number) map.get("validationDate");
 			entity.validationNotifyDate = (Number) map.get("validationNotifyDate");
-			
+
 			if (map.get("session") != null) {
 				entity.session = Session.setPropertiesFromMap(new Session(), (HashMap<String, Object>) map.get("session"), nameMapping);
 			}

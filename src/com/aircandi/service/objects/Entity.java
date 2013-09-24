@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.aircandi.Aircandi;
@@ -261,33 +262,39 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return distance;
 	}
 
-	public String getPhotoUri() {
-
-		Photo photo = getPhoto();
-		String photoUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
-		if (photoUri == null) {
-			photoUri = photo.getUri();
-		}
-
-		if (!photoUri.startsWith("http:") && !photoUri.startsWith("https:") && !photoUri.startsWith("resource:")) {
-			photoUri = ServiceConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
-		}
-
-		return photoUri;
-	}
-
 	public Photo getPhoto() {
-		if (this.photo != null) {
-			return this.photo;
+		Photo photo = this.photo;
+		if (photo == null) {
+			photo = getDefaultPhoto();
 		}
-		else {
-			return getDefaultPhoto();
-		}
+		photo.photoPlaceholder = getPlaceholderPhoto();
+		photo.photoBroken = getBrokenPhoto();
+		return photo;
 	}
 
 	public Photo getDefaultPhoto() {
-		Photo photo = new Photo("resource:img_placeholder_logo_bw", null, null, null, null);
-		photo.usingDefault = true;
+		String prefix = "resource:img_placeholder_logo_bw";
+		String source = PhotoSource.resource;
+		if (this.schema != null && this.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+			prefix = ServiceConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + this.type.toLowerCase(Locale.US) + ".png";
+			source = PhotoSource.assets;
+		}
+		Photo photo = new Photo(prefix, null, null, null, source);
+		return photo;
+	}
+	
+	public Photo getPlaceholderPhoto() {
+		return getDefaultPhoto();
+	}
+	
+	public Photo getBrokenPhoto() {
+		String prefix = "resource:img_broken";
+		String source = PhotoSource.resource;
+//		if (this.schema != null && this.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+//			prefix = ServiceConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + this.type.toLowerCase(Locale.US) + ".png";
+//			source = PhotoSource.assets;
+//		}
+		Photo photo = new Photo(prefix, null, null, null, source);
 		return photo;
 	}
 
@@ -512,7 +519,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return null;
 	}
 
-	public List<Shortcut> getShortcuts(ShortcutSettings settings, Comparator<Link> linkSorter) {
+	public List<Shortcut> getShortcuts(ShortcutSettings settings, Comparator<Link> linkSorter, Comparator<Shortcut> shortcutSorter) {
 
 		List<Shortcut> shortcuts = new ArrayList<Shortcut>();
 		List<Link> links = settings.direction == Direction.in ? linksIn : linksOut;
@@ -537,6 +544,10 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				}
 			}
 
+			if (shortcutSorter != null) {
+				Collections.sort(shortcuts, shortcutSorter);
+			}
+			
 			if (shortcuts.size() > 0 && settings.groupedByApp) {
 
 				final Map<String, List<Shortcut>> shortcutLists = new HashMap<String, List<Shortcut>>();
@@ -854,7 +865,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			if (object1.getPosition().intValue() < object2.getPosition().intValue()) {
 				return -1;
 			}
-			if (object1.getPosition().intValue() == object2.getPosition().intValue()) {
+			else if (object1.getPosition().intValue() == object2.getPosition().intValue()) {
 				if (object1.modifiedDate == null || object2.modifiedDate == null) {
 					return 0;
 				}
@@ -872,6 +883,31 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		}
 	}
 
+	public static class SortByPositionLinkModifiedDate implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity object1, Entity object2) {
+			if (object1.getPosition().intValue() < object2.getPosition().intValue()) {
+				return -1;
+			}
+			else if (object1.getPosition().intValue() == object2.getPosition().intValue()) {
+				if (object1.linkModifiedDate == null || object2.linkModifiedDate == null) {
+					return 0;
+				}
+				else {
+					if (object1.linkModifiedDate.longValue() < object2.linkModifiedDate.longValue()) {
+						return 1;
+					}
+					else if (object1.linkModifiedDate.longValue() == object2.linkModifiedDate.longValue()) {
+						return 0;
+					}
+					return -1;
+				}
+			}
+			return 1;
+		}
+	}
+	
 	public static class SortByModifiedDate implements Comparator<Entity> {
 
 		@Override
@@ -910,7 +946,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			if (object1.getPosition() < object2.getPosition()) {
 				return -1;
 			}
-			if (object1.getPosition().equals(object2.getPosition())) {
+			else if (object1.getPosition().equals(object2.getPosition())) {
 				return 0;
 			}
 			return 1;

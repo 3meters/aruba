@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
@@ -36,6 +37,7 @@ public class Pictures {
 				.setListLinkDirection(direction.name())
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_PICTURE)
 				.setListItemResId(R.layout.temp_griditem_entity)
+				.setListPageSize(ServiceConstants.PAGE_SIZE_PICTURES)
 				.setListNewEnabled(true);
 
 		context.startActivity(intentBuilder.create());
@@ -53,6 +55,7 @@ public class Pictures {
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_PICTURE)
 				.setListTitle(title)
 				.setListItemResId(R.layout.temp_griditem_entity)
+				.setListPageSize(ServiceConstants.PAGE_SIZE_PICTURES)
 				.setListNewEnabled(true);
 
 		return intentBuilder.create();

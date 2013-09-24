@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import android.content.Intent;
@@ -128,32 +129,39 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
-	public String getPhotoUri() {
-
-		Photo photo = getPhoto();
-		String photoUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
-		if (photoUri == null) {
-			photoUri = photo.getUri();
-		}
-
-		if (!photoUri.startsWith("http:") && !photoUri.startsWith("https:") && !photoUri.startsWith("resource:")) {
-			photoUri = ServiceConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
-		}
-
-		return photoUri;
-	}
-
 	public Photo getPhoto() {
-		if (this.photo != null) {
-			return this.photo;
+		Photo photo = this.photo;
+		if (photo == null) {
+			photo = getDefaultPhoto();
 		}
-		else {
-			return getDefaultPhoto();
-		}
+		photo.photoPlaceholder = getPlaceholderPhoto();
+		photo.photoBroken = getBrokenPhoto();
+		return photo;
 	}
 
 	public Photo getDefaultPhoto() {
-		Photo photo = new Photo("resource:img_placeholder_logo_bw", null, null, null, null);
+		String prefix = "resource:img_placeholder_logo_bw";
+		String source = PhotoSource.resource;
+		if (this.schema != null && this.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+			prefix = ServiceConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + this.app.toLowerCase(Locale.US) + ".png";
+			source = PhotoSource.assets;
+		}
+		Photo photo = new Photo(prefix, null, null, null, source);
+		return photo;
+	}
+
+	public Photo getPlaceholderPhoto() {
+		return getDefaultPhoto();
+	}
+
+	public Photo getBrokenPhoto() {
+		String prefix = "resource:img_broken";
+		String source = PhotoSource.resource;
+//		if (this.schema != null && this.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+//			prefix = ServiceConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + this.app.toLowerCase(Locale.US) + ".png";
+//			source = PhotoSource.assets;
+//		}
+		Photo photo = new Photo(prefix, null, null, null, source);
 		return photo;
 	}
 
@@ -314,7 +322,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 			if (object1.getPosition().intValue() < object2.getPosition().intValue()) {
 				return -1;
 			}
-			if (object1.getPosition().intValue() == object2.getPosition().intValue()) {
+			else if (object1.getPosition().intValue() == object2.getPosition().intValue()) {
 				if (object1.modifiedDate == null || object2.modifiedDate == null) {
 					return 0;
 				}
@@ -339,7 +347,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 			if (object1.getPosition().intValue() < object2.getPosition().intValue()) {
 				return -1;
 			}
-			if (object1.getPosition().intValue() == object2.getPosition().intValue()) {
+			else if (object1.getPosition().intValue() == object2.getPosition().intValue()) {
 				return 0;
 			}
 			return 1;

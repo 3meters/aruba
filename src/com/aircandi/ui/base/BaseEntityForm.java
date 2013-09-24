@@ -41,7 +41,6 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.LinkOptions;
@@ -636,7 +635,6 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 
 			photoView.setTag(shortcut);
 			photoView.setSizeHint(candiWidthPixels);
-			photoView.setBrokenPhoto(Applink.getDefaultPhoto(shortcut.app));
 			UI.drawPhoto(photoView, shortcut.getPhoto());
 
 			FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(candiWidthPixels, LayoutParams.WRAP_CONTENT);

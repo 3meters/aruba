@@ -9,6 +9,7 @@ import android.content.Intent;
 
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.SpinnerData;
 import com.aircandi.service.objects.Entity;
@@ -46,6 +47,7 @@ public class Candigrams {
 				.setListLinkDirection(direction.name())
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_CANDIGRAM)
 				.setListItemResId(R.layout.temp_listitem_candigram)
+				.setListPageSize(ServiceConstants.PAGE_SIZE_CANDIGRAMS)
 				.setListNewEnabled(true);
 
 		context.startActivity(intentBuilder.create());
@@ -63,6 +65,7 @@ public class Candigrams {
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_CANDIGRAM)
 				.setListTitle(title)
 				.setListItemResId(R.layout.temp_listitem_candigram)
+				.setListPageSize(ServiceConstants.PAGE_SIZE_CANDIGRAMS)
 				.setListNewEnabled(true);
 
 		return intentBuilder.create();

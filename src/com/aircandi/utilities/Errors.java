@@ -22,7 +22,6 @@ import com.aircandi.ServiceConstants;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.service.ClientVersionException;
 import com.aircandi.service.ServiceResponse;
-import com.aircandi.service.WalledGardenException;
 import com.aircandi.ui.SplashForm;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.utilities.Animate.TransitionType;
@@ -178,9 +177,13 @@ public final class Errors {
 						return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_connection_none));
 					}
 				}
-
-				if (exception instanceof WalledGardenException) {
-					return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_connection_walled_garden));
+				else {
+					/* We have a network connection so now check for a walled garden */
+					if (!NetworkManager.getInstance().isMobileNetwork()) {
+						if (NetworkManager.getInstance().isWalledGardenConnection()) {
+							return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_connection_walled_garden));
+						}
+					}					
 				}
 
 				/*

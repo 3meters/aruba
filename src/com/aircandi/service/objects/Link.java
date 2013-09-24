@@ -186,6 +186,21 @@ public class Link extends ServiceBase {
 			return -1;
 		}
 	}
+	
+	public static class SortByPosition implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity object1, Entity object2) {
+
+			if (object1.getPosition() < object2.getPosition()) {
+				return -1;
+			}
+			else if (object1.getPosition().equals(object2.getPosition())) {
+				return 0;
+			}
+			return 1;
+		}
+	}	
 
 	public enum Direction {
 		in,

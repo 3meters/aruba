@@ -113,15 +113,12 @@ public class NetworkManager {
 		mWifiManager = (WifiManager) mApplicationContext.getSystemService(Context.WIFI_SERVICE);
 		mConnectivityManager = (ConnectivityManager) mApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 		mConnection = new OkHttpUrlConnection();
-		//mConnection = new HttpClientConnection();
-		//mConnection = new HttpUrlConnection();
 
 		/*
 		 * Setting system properties needed for HttpUrlConnection
 		 */
 		System.setProperty("http.maxConnections", String.valueOf(ServiceConstants.DEFAULT_MAX_CONNECTIONS));
 		System.setProperty("http.keepAlive", Constants.SUPPORTS_FROYO ? "true" : "false");
-		//System.setProperty("sun.net.http.retryPost", "false");
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
@@ -244,7 +241,7 @@ public class NetworkManager {
 	}
 
 	@SuppressWarnings("ucd")
-	protected Boolean isMobileNetwork() {
+	public Boolean isMobileNetwork() {
 		/* Check if we're connected to a data network, and if so - if it's a mobile network. */
 		Boolean isMobileNetwork = null;
 		if (mConnectivityManager != null) {

@@ -3,7 +3,6 @@ package com.aircandi.ui.widgets;
 import it.sephiroth.android.library.imagezoom.ImageViewTouch;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -16,8 +15,6 @@ import android.widget.RelativeLayout;
 
 import com.aircandi.R;
 import com.aircandi.service.objects.Photo;
-import com.aircandi.utilities.Animate;
-import com.aircandi.utilities.UI;
 
 @SuppressWarnings("ucd")
 public class AirImageView extends RelativeLayout {
@@ -33,8 +30,6 @@ public class AirImageView extends RelativeLayout {
 
 	private boolean						mShowBusy;
 	private Integer						mLayoutId;
-	private Integer						mBrokenDrawable;
-	private Photo						mBrokenPhoto;
 	private ScaleType					mScaleType			= ScaleType.CENTER_CROP;
 
 	private static final String			androidNamespace	= "http://schemas.android.com/apk/res/android";
@@ -65,7 +60,6 @@ public class AirImageView extends RelativeLayout {
 		mSizeHint = ta.getDimensionPixelSize(R.styleable.AirImageView_sizeHint, Integer.MAX_VALUE);
 		mShowBusy = ta.getBoolean(R.styleable.AirImageView_showBusy, true);
 		mLayoutId = ta.getResourceId(R.styleable.AirImageView_layout, R.layout.widget_webimageview);
-		mBrokenDrawable = ta.getResourceId(R.styleable.AirImageView_brokenDrawable, R.drawable.img_broken);
 
 		ta.recycle();
 
@@ -140,19 +134,6 @@ public class AirImageView extends RelativeLayout {
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
-	public void showBroken(final Boolean visible) {
-		mThreadHandler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				if (visible) {
-					final Drawable drawable = AirImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
-					UI.showDrawableInImageView(drawable, mImageMain, true, Animate.fadeInMedium());
-				}
-			}
-		});
-	}
-
 	public void showLoading(final Boolean visible) {
 		mThreadHandler.post(new Runnable() {
 
@@ -189,17 +170,5 @@ public class AirImageView extends RelativeLayout {
 
 	public void setPhoto(Photo photo) {
 		mPhoto = photo;
-	}
-
-	public void setBrokenDrawable(Integer brokenDrawable) {
-		mBrokenDrawable = brokenDrawable;
-	}
-
-	public Photo getBrokenPhoto() {
-		return mBrokenPhoto;
-	}
-
-	public void setBrokenPhoto(Photo brokenPhoto) {
-		mBrokenPhoto = brokenPhoto;
 	}
 }

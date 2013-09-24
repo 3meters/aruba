@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
@@ -33,8 +34,9 @@ public class Users {
 				.setEntityId(entityId)
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
-				.setListLinkSchema(Constants.SCHEMA_ENTITY_PLACE)
+				.setListLinkSchema(Constants.SCHEMA_ENTITY_USER)
 				.setListItemResId(R.layout.temp_listitem_entity)
+				.setListPageSize(ServiceConstants.PAGE_SIZE_USERS)
 				.setListNewEnabled(true);
 
 		context.startActivity(intentBuilder.create());
@@ -49,9 +51,10 @@ public class Users {
 				.setEntityId(entityId)
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
-				.setListLinkSchema(Constants.SCHEMA_ENTITY_PLACE)
+				.setListLinkSchema(Constants.SCHEMA_ENTITY_USER)
 				.setListTitle(title)
 				.setListItemResId(R.layout.temp_listitem_entity)
+				.setListPageSize(ServiceConstants.PAGE_SIZE_USERS)
 				.setListNewEnabled(true);
 
 		return intentBuilder.create();
