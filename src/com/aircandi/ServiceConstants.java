@@ -30,6 +30,7 @@ public final class ServiceConstants {
 
 	public static final String	INSERT_USER_SECRET								= "larissa";																																	//$NON-NLS-1$
 	public static final String	ADMIN_USER_ID									= "us.000000.00000.000.000000";																												//$NON-NLS-1$
+	public static final String	ANONYMOUS_USER_ID								= "us.111111.11111.111.111111";																												//$NON-NLS-1$
 
 	public static final String	__URL_PROXIBASE_SERVICE							= "http://ariseditions.com:8080";																												// local																					// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
 	public static final String	_URL_PROXIBASE_SERVICE							= "https://api.aircandi.com";																													// production																					//$NON-NLS-1$

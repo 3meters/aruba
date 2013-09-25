@@ -229,7 +229,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			if (mEditing) {
 				if (creator != null
 						&& entity.creator != null
-						&& !entity.creator.id.equals(ServiceConstants.ADMIN_USER_ID)) {
+						&& !entity.creator.id.equals(ServiceConstants.ADMIN_USER_ID)
+						&& !mEntity.creator.id.equals(ServiceConstants.ANONYMOUS_USER_ID)) {
 
 					creator.setLabel(getString(R.string.candi_label_user_added_by));
 					creator.databind(entity.creator, entity.createdDate != null ? entity.createdDate.longValue() : null, entity.locked);
@@ -238,7 +239,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				/* Editor block */
 
-				if (editor != null && entity.modifier != null && !entity.modifier.id.equals(ServiceConstants.ADMIN_USER_ID)) {
+				if (editor != null && entity.modifier != null 
+						&& !entity.modifier.id.equals(ServiceConstants.ADMIN_USER_ID)
+						&& !entity.modifier.id.equals(ServiceConstants.ANONYMOUS_USER_ID)) {
 					if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
 						editor.setLabel(getString(R.string.candi_label_user_edited_by));
 						editor.databind(entity.modifier, entity.modifiedDate.longValue(), null);

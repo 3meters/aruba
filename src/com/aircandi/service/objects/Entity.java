@@ -190,7 +190,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		Boolean owned = (ownerId != null && ownerId.equals(ServiceConstants.ADMIN_USER_ID));
 		return owned;
 	}
-
+	
 	// --------------------------------------------------------------------------------------------
 	// Properties
 	// --------------------------------------------------------------------------------------------

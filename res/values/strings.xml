@@ -206,6 +206,8 @@
     <string name="error_service_forbidden">Requested operation is not valid</string>
     <string name="error_service_gateway_timeout">Aircandi\'s servers are overloaded. Please excuse us!</string>
     <string name="error_service_unknown">Oops, something went wrong. Try again and it might work.</string>
+    <string name="error_service_unknown_status">Internal 500 service error.</string>
+   	<string name="error_service_unknown_exception">Unhandled exception</string>
     <string name="error_service_file_not_found">File couldn\'t be found.</string>
     
     <!-- Errors: other -->

@@ -680,7 +680,9 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 				/* Creator */
 
 				UI.setVisibility(holder.creator, View.GONE);
-				if (holder.creator != null && entity.creator != null && !entity.creator.id.equals(ServiceConstants.ADMIN_USER_ID)) {
+				if (holder.creator != null && entity.creator != null
+						&& !entity.creator.id.equals(ServiceConstants.ADMIN_USER_ID)
+						&& !entity.creator.id.equals(ServiceConstants.ANONYMOUS_USER_ID)) {
 					holder.creator.databind(entity.creator, entity.modifiedDate.longValue(), entity.locked);
 					UI.setVisibility(holder.creator, View.VISIBLE);
 				}

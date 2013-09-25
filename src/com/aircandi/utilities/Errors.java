@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
+import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.NetworkManager;
@@ -87,6 +88,10 @@ public final class Errors {
 				 * 
 				 * - 500: Something bad and unknown has happened in the service.
 				 */
+				if (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+						&& Type.isTrue(Aircandi.getInstance().getUser().developer)) {
+					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown_status));
+				}
 				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown));
 			}
 			else if (serviceResponse.statusCode == HttpStatus.SC_NOT_FOUND) {
@@ -183,7 +188,7 @@ public final class Errors {
 						if (NetworkManager.getInstance().isWalledGardenConnection()) {
 							return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_connection_walled_garden));
 						}
-					}					
+					}
 				}
 
 				/*
@@ -228,6 +233,11 @@ public final class Errors {
 					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_client_request_error));
 				}
 				else {
+					if (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+							&& Type.isTrue(Aircandi.getInstance().getUser().developer)) {
+						return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown_exception) + ": "
+								+ exception.getClass().getSimpleName());
+					}
 					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown));
 				}
 			}
