@@ -140,7 +140,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			place.provider.aircandi = Aircandi.getInstance().getUser().id;
 			place.category = new Category();
 			place.category.id = "generic";
-			place.category.photo = new Photo(ServiceConstants.PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES + "generic_88.png", null, null, null,
+			place.category.photo = new Photo("generic_88.png", null, null, null,
 					PhotoSource.assets_categories);
 			place.category.photo.colorize = true;
 		}
@@ -273,27 +273,36 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	}
 
 	public Photo getDefaultPhoto() {
+		
 		String prefix = "resource:img_placeholder_logo_bw";
 		String source = PhotoSource.resource;
-		if (this.schema != null && this.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+		if (this.schema != null && this.schema.equals(Constants.SCHEMA_ENTITY_APPLINK) && this.type != null) {
 			prefix = ServiceConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + this.type.toLowerCase(Locale.US) + ".png";
 			source = PhotoSource.assets;
 		}
 		Photo photo = new Photo(prefix, null, null, null, source);
 		return photo;
 	}
-	
+
+	public static String getDefaultPhotoUri(String schema, String type) {
+
+		String prefix = "resource:img_placeholder_logo_bw";
+		String source = PhotoSource.resource;
+		if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK) && type != null) {
+			prefix = ServiceConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + type.toLowerCase(Locale.US) + ".png";
+			source = PhotoSource.assets;
+		}
+		Photo photo = new Photo(prefix, null, null, null, source);
+		return photo.getUri();
+	}
+
 	public Photo getPlaceholderPhoto() {
 		return getDefaultPhoto();
 	}
-	
+
 	public Photo getBrokenPhoto() {
 		String prefix = "resource:img_broken";
 		String source = PhotoSource.resource;
-//		if (this.schema != null && this.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-//			prefix = ServiceConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + this.type.toLowerCase(Locale.US) + ".png";
-//			source = PhotoSource.assets;
-//		}
 		Photo photo = new Photo(prefix, null, null, null, source);
 		return photo;
 	}
@@ -547,7 +556,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			if (shortcutSorter != null) {
 				Collections.sort(shortcuts, shortcutSorter);
 			}
-			
+
 			if (shortcuts.size() > 0 && settings.groupedByApp) {
 
 				final Map<String, List<Shortcut>> shortcutLists = new HashMap<String, List<Shortcut>>();
@@ -907,7 +916,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			return 1;
 		}
 	}
-	
+
 	public static class SortByModifiedDate implements Comparator<Entity> {
 
 		@Override

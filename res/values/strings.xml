@@ -274,6 +274,7 @@
     <string name="dialog_photo_source_place">Select a place photo</string>
     <string name="dialog_photo_source_facebook">Use Facebook photo</string>
     <string name="dialog_photo_source_twitter">Use Twitter photo</string>
+    <string name="dialog_photo_source_website_thumbnail">Use website thumbnail</string>
     <string name="dialog_photo_source_default">Default</string>
     <string name="dialog_install_title">Install</string>
     <string name="dialog_install_message">An android application is available for this link.</string>
@@ -402,10 +403,13 @@
     <string name="tuning_section_banner">great banner</string>
     <string name="tuning_section_tune">lock it in</string>
     <string name="tuning_section_edit">advanced editing</string>
-    <string name="form_label_tuning_banner">Is there a picture that would make a better banner for this place? Search, browse or use the camera.</string>
-    <string name="form_label_tuning_tune">If you are currently at the place you are browsing, make Aircandi better by tuning the place for faster and more accurate discovery.</string>
-    <string name="form_label_tuning_edit">Update place details like the address or customize links.</string>
-
+    <string name="form_label_tuning_banner_no_name">Is there a picture that would make a better banner for this place? Search, browse or use the camera.</string>
+    <string name="form_label_tuning_banner_name">Is there a picture that would make a better banner for %1$s? Search, browse or use the camera.</string>
+    <string name="form_label_tuning_tune_no_name">If you are currently at the place you are browsing, make Aircandi better by tuning the place for faster and more accurate discovery.</string>
+    <string name="form_label_tuning_tune_name">If you are currently at %1$s, make Aircandi better by tuning for faster and more accurate discovery.</string>
+    <string name="form_label_tuning_edit_no_name">Update place details like the address or customize links.</string>
+    <string name="form_label_tuning_edit_name">Update place details for %1$s like the address or customize links.</string>
+    
     <!-- Candigrams -->
     
     <string name="candigram_label_capture">allow capture</string>

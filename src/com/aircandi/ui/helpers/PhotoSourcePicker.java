@@ -36,7 +36,7 @@ public class PhotoSourcePicker extends BasePicker implements OnItemClickListener
 	private TextView	mName;
 	private ListView	mListView;
 	private ListAdapter	mListAdapter;
-	
+
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
@@ -75,7 +75,7 @@ public class PhotoSourcePicker extends BasePicker implements OnItemClickListener
 						, getString(R.string.dialog_photo_source_place), null, Constants.PHOTO_SOURCE_PLACE));
 			}
 			else {
-				
+
 				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_PICTURE, Constants.SCHEMA_ENTITY_PICTURE, Direction.in, false, false);
 				settings.appClass = Pictures.class;
 				List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
@@ -93,21 +93,28 @@ public class PhotoSourcePicker extends BasePicker implements OnItemClickListener
 		}
 		else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 			Applink applink = (Applink) mEntity;
-			if (applink.appId != null) {
+			if (applink.type != null) {
 				if (applink.type.equals(Constants.TYPE_APP_FACEBOOK)) {
-					listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_facebook_light : R.drawable.ic_action_facebook_dark
+					listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_facebook_light
+							: R.drawable.ic_action_facebook_dark
 							, getString(R.string.dialog_photo_source_facebook), null, Constants.PHOTO_SOURCE_FACEBOOK));
 				}
 				else if (applink.type.equals(Constants.TYPE_APP_TWITTER)) {
 					listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_twitter_light : R.drawable.ic_action_twitter_dark
 							, getString(R.string.dialog_photo_source_twitter), null, Constants.PHOTO_SOURCE_TWITTER));
 				}
+				else if (applink.type.equals(Constants.TYPE_APP_WEBSITE)) {
+					listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_website_light : R.drawable.ic_action_website_dark
+							, getString(R.string.dialog_photo_source_website_thumbnail), null, Constants.PHOTO_SOURCE_WEBSITE_THUMBNAIL));
+				}
 			}
 		}
 
 		/* Everyone gets the default option */
-		listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
-				, getString(R.string.dialog_photo_source_default), null, Constants.PHOTO_SOURCE_DEFAULT));
+		if (mEntity.type == null || !(mEntity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK) && mEntity.type.equals(Constants.TYPE_APP_WEBSITE))) {
+			listData.add(new AirApplication(getThemeTone().equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
+					, getString(R.string.dialog_photo_source_default), null, Constants.PHOTO_SOURCE_DEFAULT));
+		}
 
 		mName.setText(R.string.dialog_photo_source_title);
 
@@ -133,7 +140,7 @@ public class PhotoSourcePicker extends BasePicker implements OnItemClickListener
 	// --------------------------------------------------------------------------------------------
 
 	private class ListAdapter extends ArrayAdapter<Object> {
-		
+
 		private final List<Object>	items;
 
 		private ListAdapter(Context context, List<Object> items) {

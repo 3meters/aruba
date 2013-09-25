@@ -20,8 +20,6 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.service.objects.Applink;
-import com.aircandi.service.objects.Photo;
-import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
@@ -117,28 +115,23 @@ public class ApplinkEdit extends BaseEntityEdit {
 		}
 		if (applink.type != null) {
 
-			mName.setHint(R.string.form_applink_name_hint);
 			UI.setVisibility(findViewById(R.id.app_id_holder), View.GONE);
 			UI.setVisibility(findViewById(R.id.app_url_holder), View.GONE);
 
 			if (applink.type.equals(Constants.TYPE_APP_WEBSITE)) {
 				UI.setVisibility(findViewById(R.id.app_url_holder), View.VISIBLE);
-				mAppUrl.setHint(R.string.form_applink_url_website_hint);
 				mMissingResId = R.string.error_missing_applink_url_website;
 			}
 			else if (applink.type.equals(Constants.TYPE_APP_EMAIL)) {
 				UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
-				mAppId.setHint(R.string.form_applink_id_email_hint);
 				mMissingResId = R.string.error_missing_applink_id_email;
 			}
 			else if (applink.type.equals(Constants.TYPE_APP_FACEBOOK)) {
 				UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
-				mAppId.setHint(R.string.form_applink_id_facebook_hint);
 				mMissingResId = R.string.error_missing_applink_id_facebook;
 			}
 			else if (applink.type.equals(Constants.TYPE_APP_TWITTER)) {
 				UI.setVisibility(findViewById(R.id.app_id_holder), View.VISIBLE);
-				mAppId.setHint(R.string.form_applink_id_twitter_hint);
 				mMissingResId = R.string.error_missing_applink_id_twitter;
 			}
 			if (applink.appId != null && !applink.appId.equals("")) {
@@ -232,7 +225,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 			mEntity.data = new HashMap<String, Object>();
 		}
 		mEntity.data.put("origin", "user");
-		mEntity.photo = new Photo(Applink.getDefaultPhotoUri(type), null, null, null, PhotoSource.assets);
+		mEntity.photo = mEntity.getDefaultPhoto();
 		((Applink) mEntity).appId = null;
 		((Applink) mEntity).appUrl = null;
 	}
@@ -256,17 +249,19 @@ public class ApplinkEdit extends BaseEntityEdit {
 	@Override
 	protected void gather() {
 		super.gather();
+		
+		Applink applink = (Applink) mEntity;
 
 		if (mAppId != null) {
-			((Applink) mEntity).appId = Type.emptyAsNull(mAppId.getText().toString().trim());
+			applink.appId = Type.emptyAsNull(mAppId.getText().toString().trim());
 		}
 
 		if (mAppUrl != null) {
-			((Applink) mEntity).appUrl = Type.emptyAsNull(mAppUrl.getText().toString().trim());
-			if (mEntity.type.equals(Constants.TYPE_APP_WEBSITE)) {
-				String appUrl = ((Applink) mEntity).appUrl;
+			applink.appUrl = Type.emptyAsNull(mAppUrl.getText().toString().trim());
+			if (applink.appUrl != null && applink.type.equals(Constants.TYPE_APP_WEBSITE)) {
+				String appUrl = applink.appUrl;
 				if (!appUrl.startsWith("http://") && !appUrl.startsWith("https://")) {
-					((Applink) mEntity).appUrl = "http://" + appUrl;
+					applink.appUrl = "http://" + appUrl;
 				}
 			}
 		}
@@ -297,16 +292,16 @@ public class ApplinkEdit extends BaseEntityEdit {
 			return false;
 		}
 
-		if (mName != null && mName.getText().length() == 0) {
-			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
-					, null
-					, getResources().getString(R.string.error_missing_entity_label)
-					, null
-					, this
-					, android.R.string.ok
-					, null, null, null, null);
-			return false;
-		}
+//		if (mName != null && mName.getText().length() == 0) {
+//			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+//					, null
+//					, getResources().getString(R.string.error_missing_entity_label)
+//					, null
+//					, this
+//					, android.R.string.ok
+//					, null, null, null, null);
+//			return false;
+//		}
 
 		if (!mEditing && mAppId != null && mAppId.getText().length() == 0 && findViewById(R.id.app_id_holder).getVisibility() == View.VISIBLE) {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert

@@ -468,6 +468,7 @@ public class EntityCache implements Map<String, Entity> {
 			}
 
 			toEntity.linksIn.add(link);
+			toEntity.activityDate = time;
 		}
 		/*
 		 * Fixup out links too.
@@ -498,6 +499,7 @@ public class EntityCache implements Map<String, Entity> {
 			}
 
 			fromEntity.linksOut.add(link);
+			fromEntity.activityDate = time;
 		}
 	}
 

@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -625,7 +626,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 							UI.setVisibility(holder.subtitle, View.VISIBLE);
 						}
 						else {
-							if (place.category != null) {
+							if (place.category != null && !TextUtils.isEmpty(place.category.name)) {
 								holder.subtitle.setText(Html.fromHtml(place.category.name));
 								UI.setVisibility(holder.subtitle, View.VISIBLE);
 							}

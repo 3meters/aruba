@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -90,6 +91,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	protected AirImageView		mImageRequestWebImageView;
 	protected Uri				mMediaFileUri;
 	protected File				mMediaFile;
+	protected String			mPhotoSource;
 
 	/* Inputs */
 	protected Entity			mEntity;
@@ -222,23 +224,26 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			final UserView editor = (UserView) findViewById(R.id.edited_by);
 
 			UI.setVisibility(creator, View.GONE);
-			if (creator != null
-					&& entity.creator != null
-					&& !entity.creator.id.equals(ServiceConstants.ADMIN_USER_ID)) {
-
-				creator.setLabel(getString(R.string.candi_label_user_added_by));
-				creator.databind(entity.creator, entity.createdDate != null ? entity.createdDate.longValue() : null, entity.locked);
-				UI.setVisibility(creator, View.VISIBLE);
-			}
-
-			/* Editor block */
-
 			UI.setVisibility(editor, View.GONE);
-			if (editor != null && entity.modifier != null && !entity.modifier.id.equals(ServiceConstants.ADMIN_USER_ID)) {
-				if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
-					editor.setLabel(getString(R.string.candi_label_user_edited_by));
-					editor.databind(entity.modifier, entity.modifiedDate.longValue(), null);
-					UI.setVisibility(editor, View.VISIBLE);
+			
+			if (mEditing) {
+				if (creator != null
+						&& entity.creator != null
+						&& !entity.creator.id.equals(ServiceConstants.ADMIN_USER_ID)) {
+
+					creator.setLabel(getString(R.string.candi_label_user_added_by));
+					creator.databind(entity.creator, entity.createdDate != null ? entity.createdDate.longValue() : null, entity.locked);
+					UI.setVisibility(creator, View.VISIBLE);
+				}
+
+				/* Editor block */
+
+				if (editor != null && entity.modifier != null && !entity.modifier.id.equals(ServiceConstants.ADMIN_USER_ID)) {
+					if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
+						editor.setLabel(getString(R.string.candi_label_user_edited_by));
+						editor.databind(entity.modifier, entity.modifiedDate.longValue(), null);
+						UI.setVisibility(editor, View.VISIBLE);
+					}
 				}
 			}
 
@@ -257,7 +262,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 	protected void drawPhoto() {
 		if (mPhotoView != null) {
-			if (mPhotoView.getPhoto() == null || !mPhotoView.getPhoto().getUri().equals(mEntity.getPhoto().getUri())) {
+			if (mPhotoView.getPhoto() == null
+					|| mEntity.photo == null
+					|| !mPhotoView.getPhoto().getUri().equals(mEntity.getPhoto().getUri())) {
 				UI.drawPhoto(mPhotoView, mEntity.getPhoto());
 			}
 		}
@@ -328,7 +335,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
-	
+
 	@Override
 	public void onAccept() {
 		if (isDirty()) {
@@ -383,7 +390,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 						mEntity.photo = new Photo(null, null, null, null, PhotoSource.cache);
 						mEntity.photo.setBitmap(imageKey, bitmap); // Could get set to null if we are using the default 
 						mEntity.photo.setBitmapLocalOnly(bitmapLocalOnly);
-						UI.drawPhoto(mPhotoView, mEntity.photo, null);						
+						UI.drawPhoto(mPhotoView, mEntity.photo, null);
 					}
 				}
 			}
@@ -412,39 +419,43 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String pictureSource = extras.getString(Constants.EXTRA_PHOTO_SOURCE);
-					if (pictureSource != null && !pictureSource.equals("")) {
+					final String photoSource = extras.getString(Constants.EXTRA_PHOTO_SOURCE);
 
-						if (pictureSource.equals(Constants.PHOTO_SOURCE_SEARCH)) {
+					if (!TextUtils.isEmpty(photoSource)) {
+						mPhotoSource = photoSource;
+						if (photoSource.equals(Constants.PHOTO_SOURCE_SEARCH)) {
 							String defaultSearch = null;
 							if (mEntity.name != null) {
 								defaultSearch = mEntity.name.trim();
 							}
 							photoSearch(defaultSearch);
 						}
-						else if (pictureSource.equals(Constants.PHOTO_SOURCE_GALLERY)) {
+						else if (photoSource.equals(Constants.PHOTO_SOURCE_GALLERY)) {
 							photoFromGallery();
 						}
-						else if (pictureSource.equals(Constants.PHOTO_SOURCE_CAMERA)) {
+						else if (photoSource.equals(Constants.PHOTO_SOURCE_CAMERA)) {
 							photoFromCamera();
 						}
-						else if (pictureSource.equals(Constants.PHOTO_SOURCE_PLACE)) {
+						else if (photoSource.equals(Constants.PHOTO_SOURCE_PLACE)) {
 							photoFromPlace(mEntity);
 						}
-						else if (pictureSource.equals(Constants.PHOTO_SOURCE_DEFAULT)) {
+						else if (photoSource.equals(Constants.PHOTO_SOURCE_DEFAULT)) {
 							usePhotoDefault();
 						}
-						else if (pictureSource.equals(Constants.PHOTO_SOURCE_FACEBOOK)) {
+						else if (photoSource.equals(Constants.PHOTO_SOURCE_FACEBOOK)) {
 							mEntity.photo = new Photo("https://graph.facebook.com/" + ((Applink) mEntity).appId + "/picture?type=large", null, null, null,
 									PhotoSource.facebook);
 							drawPhoto();
 						}
-						else if (pictureSource.equals(Constants.PHOTO_SOURCE_TWITTER)) {
+						else if (photoSource.equals(Constants.PHOTO_SOURCE_TWITTER)) {
 							mEntity.photo = new Photo(
 									"https://api.twitter.com/1/users/profile_image?screen_name=" + ((Applink) mEntity).appId + "&size=bigger",
 									null,
 									null, null, PhotoSource.twitter);
 							drawPhoto();
+						}
+						else if (photoSource.equals(Constants.PHOTO_SOURCE_WEBSITE_THUMBNAIL)) {
+							usePhotoDefault();
 						}
 					}
 				}
@@ -464,7 +475,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0, Aircandi.getInstance().getUser());
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
-				
+
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
 				final Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
 				if (bitmap != null && mImageRequestListener != null) {
@@ -510,6 +521,21 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
+	protected void buildPhoto() {
+		if (mPhotoSource != null && mEntity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+			if (mPhotoSource.equals(Constants.PHOTO_SOURCE_FACEBOOK)) {
+				mEntity.photo = new Photo("https://graph.facebook.com/" + ((Applink) mEntity).appId + "/picture?type=large", null, null, null,
+						PhotoSource.facebook);
+			}
+			else if (mPhotoSource.equals(Constants.PHOTO_SOURCE_TWITTER)) {
+				mEntity.photo = new Photo(
+						"https://api.twitter.com/1/users/profile_image?screen_name=" + ((Applink) mEntity).appId + "&size=bigger",
+						null,
+						null, null, PhotoSource.twitter);
+			}
+		}
+	}
+
 	protected String getLinkType() {
 		return null;
 	};
@@ -524,6 +550,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (findViewById(R.id.chk_locked) != null) {
 			mEntity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
 		}
+
+		/* Might need to rebuild photo because it requires current property values */
+		buildPhoto();
 	}
 
 	protected void setEntityType(String type) {

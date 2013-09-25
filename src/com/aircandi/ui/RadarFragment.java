@@ -201,7 +201,6 @@ public class RadarFragment extends BaseFragment implements
 			providerChange = true;
 		}
 		mEntityModelProvider = provider;
-		//showAttribution(provider, providerChange);
 
 		/* Adapter snapshots the items in mEntities */
 		if (mRadarAdapter == null) {

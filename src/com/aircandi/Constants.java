@@ -187,6 +187,7 @@ public final class Constants {
 	public static final String	PHOTO_SOURCE_PLACE							= "place";																					//$NON-NLS-1$
 	public static final String	PHOTO_SOURCE_FACEBOOK						= "facebook";																				//$NON-NLS-1$
 	public static final String	PHOTO_SOURCE_TWITTER						= "twitter";																				//$NON-NLS-1$
+	public static final String	PHOTO_SOURCE_WEBSITE_THUMBNAIL				= "website_thumbnail";																		//$NON-NLS-1$
 
 	public static final int		ACTIVITY_MARKET								= 200;
 	public static final int		ACTIVITY_PICTURE_PICK_DEVICE				= 300;

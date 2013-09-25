@@ -4,8 +4,10 @@ import java.util.List;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.aircandi.Aircandi;
 import com.aircandi.R;
@@ -58,6 +60,19 @@ public class TuningEdit extends BaseEntityEdit {
 			if (hasActiveProximityLink) {
 				mFirstTune = false;
 				mButtonUntune.setVisibility(View.VISIBLE);
+			}
+			
+			String labelTune;
+			String labelBanner;
+			String labelEdit;
+			
+			if (!TextUtils.isEmpty(entity.name)) {
+				labelTune = String.format(getString(R.string.form_label_tuning_tune_name), entity.name);
+				labelBanner = String.format(getString(R.string.form_label_tuning_banner_name), entity.name);
+				labelEdit = String.format(getString(R.string.form_label_tuning_edit_name), entity.name);
+				((TextView)findViewById(R.id.label_tune)).setText(labelTune);
+				((TextView)findViewById(R.id.label_banner)).setText(labelBanner);
+				((TextView)findViewById(R.id.label_edit)).setText(labelEdit);
 			}
 
 			drawPhoto();

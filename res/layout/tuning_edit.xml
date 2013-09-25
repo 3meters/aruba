@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="@string/form_label_tuning_tune" />
+                android:text="@string/form_label_tuning_tune_no_name" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -81,7 +81,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="@string/form_label_tuning_banner" />
+                android:text="@string/form_label_tuning_banner_no_name" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -133,7 +133,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="@string/form_label_tuning_edit" />
+                android:text="@string/form_label_tuning_edit_no_name" />
 
             <com.aircandi.ui.widgets.AirButton
                 android:id="@+id/button_edit"
