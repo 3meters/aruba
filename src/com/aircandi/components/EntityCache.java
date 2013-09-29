@@ -77,15 +77,15 @@ public class EntityCache implements Map<String, Entity> {
 			if (entity.linksInCounts == null) {
 				entity.linksInCounts = new ArrayList<Count>();
 			}
-			else if (entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.in) == null) {
-				entity.linksInCounts.add(new Count(Constants.TYPE_LINK_APPLINK, shortcuts.size()));
+			else if (entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in) == null) {
+				entity.linksInCounts.add(new Count(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, shortcuts.size()));
 			}
 			else {
-				entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.in).count = entity.getCount(Constants.TYPE_LINK_APPLINK, Direction.in).count.intValue()
+				entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in).count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in).count.intValue()
 						+ shortcuts.size();
 			}
 			for (Shortcut shortcut : shortcuts) {
-				Link link = new Link(entity.id, shortcut.schema, true, shortcut.getId());
+				Link link = new Link(entity.id, Constants.TYPE_LINK_CONTENT, true, shortcut.getId());
 				link.shortcut = shortcut;
 				entity.linksIn.add(link);
 			}
@@ -438,7 +438,7 @@ public class EntityCache implements Map<String, Entity> {
 		}
 	}
 
-	public void addLink(String toId, String type, String fromId, Shortcut toShortcut, Shortcut fromShortcut) {
+	public void addLink(String toId, String type, String schema, String fromId, Shortcut toShortcut, Shortcut fromShortcut) {
 
 		Long time = DateTime.nowDate().getTime();
 
@@ -451,13 +451,13 @@ public class EntityCache implements Map<String, Entity> {
 
 			if (toEntity.linksInCounts == null) {
 				toEntity.linksInCounts = new ArrayList<Count>();
-				toEntity.linksInCounts.add(new Count(type, 1));
+				toEntity.linksInCounts.add(new Count(type, schema, 1));
 			}
-			else if (toEntity.getCount(type, Direction.in) == null) {
-				toEntity.linksInCounts.add(new Count(type, 1));
+			else if (toEntity.getCount(type, schema, Direction.in) == null) {
+				toEntity.linksInCounts.add(new Count(type, schema, 1));
 			}
 			else {
-				toEntity.getCount(type, Direction.in).count = toEntity.getCount(type, Direction.in).count.intValue() + 1;
+				toEntity.getCount(type, schema, Direction.in).count = toEntity.getCount(type, schema, Direction.in).count.intValue() + 1;
 			}
 
 			Link link = new Link(toId, type, true, fromId);
@@ -482,13 +482,13 @@ public class EntityCache implements Map<String, Entity> {
 
 			if (fromEntity.linksOutCounts == null) {
 				fromEntity.linksOutCounts = new ArrayList<Count>();
-				fromEntity.linksOutCounts.add(new Count(type, 1));
+				fromEntity.linksOutCounts.add(new Count(type, schema, 1));
 			}
-			else if (fromEntity.getCount(type, Direction.out) == null) {
-				fromEntity.linksOutCounts.add(new Count(type, 1));
+			else if (fromEntity.getCount(type, schema, Direction.out) == null) {
+				fromEntity.linksOutCounts.add(new Count(type, schema, 1));
 			}
 			else {
-				fromEntity.getCount(type, Direction.out).count = fromEntity.getCount(type, Direction.out).count.intValue() + 1;
+				fromEntity.getCount(type, schema, Direction.out).count = fromEntity.getCount(type, schema, Direction.out).count.intValue() + 1;
 			}
 
 			Link link = new Link(toId, type, true, fromId);
@@ -517,7 +517,7 @@ public class EntityCache implements Map<String, Entity> {
 			 * getLinked..() with traverse = true will return entities that are multiple links away.
 			 * We get both strong and weak linked entities.
 			 */
-			List<Entity> entities = (List<Entity>) removedEntity.getLinkedEntitiesByLinkTypes(null, null, Direction.in, true);
+			List<Entity> entities = (List<Entity>) removedEntity.getLinkedEntitiesByLinkTypeAndSchema(null, null, Direction.in, true);
 			for (Entity childEntity : entities) {
 				remove(childEntity.id);
 			}
@@ -545,13 +545,13 @@ public class EntityCache implements Map<String, Entity> {
 		return removeCount;
 	}
 
-	public void removeLink(String toId, String type, String fromId) {
+	public void removeLink(String toId, String type, String schema, String fromId) {
 
 		Entity toEntity = get(toId);
 		if (toEntity != null) {
 
 			if (toEntity.linksInCounts != null) {
-				Count count = toEntity.getCount(type, Direction.in);
+				Count count = toEntity.getCount(type, schema, Direction.in);
 				if (count != null) {
 					count.count = count.count.intValue() - 1;
 				}
@@ -574,7 +574,7 @@ public class EntityCache implements Map<String, Entity> {
 		if (fromEntity != null) {
 
 			if (fromEntity.linksOutCounts != null) {
-				Count count = fromEntity.getCount(type, Direction.out);
+				Count count = fromEntity.getCount(type, schema, Direction.out);
 				if (count != null) {
 					count.count = count.count.intValue() - 1;
 				}

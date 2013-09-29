@@ -474,7 +474,7 @@ public class CandigramEdit extends BaseEntityEdit {
 
 	@Override
 	protected String getLinkType() {
-		return Constants.TYPE_LINK_CANDIGRAM;
+		return Constants.TYPE_LINK_CONTENT;
 	};
 
 	// --------------------------------------------------------------------------------------------

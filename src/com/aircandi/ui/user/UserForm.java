@@ -164,14 +164,14 @@ public class UserForm extends BaseEntityForm {
 		UI.setVisibility(stats, View.GONE);
 		final StringBuilder statString = new StringBuilder(500);
 
-		/* Like and WATCH stats */
+		/* Like and watch stats */
 
-		Count count = user.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
-		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
+		Count count = user.getCount(Constants.TYPE_LINK_LIKE, null, Direction.in);
+		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, 0);
 		statString.append("Liked by: " + String.valueOf(count.count.intValue()) + "<br/>");
 
-		count = user.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
-		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
+		count = user.getCount(Constants.TYPE_LINK_WATCH, null, Direction.in);
+		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, 0);
 		statString.append("Watchers: " + String.valueOf(count.count.intValue()) + "<br/>");
 
 		/* Other stats */

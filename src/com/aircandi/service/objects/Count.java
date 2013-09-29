@@ -15,12 +15,15 @@ public class Count extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String				type;
 	@Expose
+	public String				schema;
+	@Expose
 	public Number				count;
 
 	public Count() {}
 
-	public Count(String type, Number count) {
+	public Count(String type, String schema, Number count) {
 		this.type = type;
+		this.schema = schema;
 		this.count = count;
 	}
 
@@ -37,6 +40,7 @@ public class Count extends ServiceObject implements Cloneable, Serializable {
 
 	public static Count setPropertiesFromMap(Count stat, Map map, Boolean nameMapping) {
 		stat.type = (String) map.get("type");
+		stat.schema = (String) map.get("schema");
 		stat.count = (Number) map.get("count");
 		return stat;
 	}

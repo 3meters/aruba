@@ -33,7 +33,7 @@ import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
 public class PictureForm extends BaseEntityForm {
-	
+
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
@@ -67,12 +67,12 @@ public class PictureForm extends BaseEntityForm {
 			Routing.route(this, Route.NEW_FOR, mEntity);
 			return;
 		}
-		
+
 		if (mEntity.locked) {
 			Dialogs.locked(this, mEntity);
 		}
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// UI
 	// --------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ public class PictureForm extends BaseEntityForm {
 		 * - Header views are visible by default
 		 */
 		setActivityTitle(mEntity.name);
-		
+
 		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);
 		final TextView name = (TextView) findViewById(R.id.name);
 		final AirImageView photoView = (AirImageView) findViewById(R.id.photo);
@@ -143,7 +143,7 @@ public class PictureForm extends BaseEntityForm {
 			description.setText(Html.fromHtml(mEntity.description));
 			UI.setVisibility(findViewById(R.id.section_description), View.VISIBLE);
 		}
-		
+
 		/* Place context */
 		View placeHolder = findViewById(R.id.place_holder);
 		UI.setVisibility(placeHolder, View.GONE);
@@ -163,7 +163,7 @@ public class PictureForm extends BaseEntityForm {
 		}
 
 		/* Stats */
-		
+
 		drawStats();
 
 		/* Shortcuts */
@@ -172,7 +172,7 @@ public class PictureForm extends BaseEntityForm {
 		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();
 
 		/* Synthetic applink shortcuts */
-		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
+		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
 		settings.appClass = Applinks.class;
 		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
 		if (shortcuts.size() > 0) {
@@ -181,13 +181,13 @@ public class PictureForm extends BaseEntityForm {
 					, settings
 					, R.string.section_place_shortcuts_applinks
 					, R.string.section_links_more
-					, mResources.getInteger(R.integer.shortcuts_flow_limit)
+					, mResources.getInteger(R.integer.limit_shortcuts_flow)
 					, R.id.shortcut_holder
 					, R.layout.temp_place_switchboard_item);
 		}
 
 		/* Service applink shortcuts */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
+		settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 		settings.appClass = Applinks.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
 		if (shortcuts.size() > 0) {
@@ -196,7 +196,7 @@ public class PictureForm extends BaseEntityForm {
 					, settings
 					, null
 					, R.string.section_links_more
-					, mResources.getInteger(R.integer.shortcuts_flow_limit)
+					, mResources.getInteger(R.integer.limit_shortcuts_flow)
 					, R.id.shortcut_holder
 					, R.layout.temp_place_switchboard_item);
 		}
@@ -235,7 +235,7 @@ public class PictureForm extends BaseEntityForm {
 
 		/* Editor block */
 
-		if (user != null && mEntity.modifier != null 
+		if (user != null && mEntity.modifier != null
 				&& !mEntity.modifier.id.equals(ServiceConstants.ADMIN_USER_ID)
 				&& !mEntity.modifier.id.equals(ServiceConstants.ANONYMOUS_USER_ID)) {
 			if (mEntity.createdDate.longValue() != mEntity.modifiedDate.longValue()) {
@@ -258,22 +258,20 @@ public class PictureForm extends BaseEntityForm {
 	protected void drawButtons() {
 		super.drawButtons();
 	}
-	
+
 	@Override
 	protected void drawStats() {
-		
-		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
-		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
+
+		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, Direction.in);
+		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_PICTURE, 0);
 		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
 		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
 
-		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
-		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
+		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, Direction.in);
+		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, 0);
 		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
 		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
 	}
-
-	
 
 	// --------------------------------------------------------------------------------------------
 	// Menus

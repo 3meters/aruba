@@ -77,10 +77,10 @@ public class Link extends ServiceBase {
 		return score;
 	}
 
-	public Count getStat(String type) {
+	public Count getStat(String type, String schema) {
 		if (this.stats != null) {
 			for (Count count : stats) {
-				if (count.type.equals(type)) {
+				if (count.type.equals(type) && schema == null || count.schema.equals(schema)) {
 					return count;
 				}
 			}
@@ -88,26 +88,26 @@ public class Link extends ServiceBase {
 		return null;
 	}
 
-	public Count incrementStat(String type) {
+	public Count incrementStat(String type, String schema) {
 		Count count = null;
 		if (this.stats == null) {
 			this.stats = new ArrayList<Count>();
 		}
-		if (getStat(type) == null) {
-			count = new Count(type, 1);
+		if (getStat(type, schema) == null) {
+			count = new Count(type, schema, 1);
 			this.stats.add(count);
 		}
 		else {
-			count = getStat(type);
+			count = getStat(type, schema);
 			count.count = count.count.intValue() + 1;
 		}
 		return count;
 	}
 
-	public Count decrementStat(String type) {
+	public Count decrementStat(String type, String schema) {
 		Count count = null;
 		if (this.stats != null) {
-			count = getStat(type);
+			count = getStat(type, schema);
 			if (count != null) {
 				count.count = count.count.intValue() - 1;
 				if (count.count.intValue() <= 0) {

@@ -3,9 +3,7 @@ package com.aircandi.ui.base;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -292,7 +290,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				}
 			}
 			else {
-				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
+				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 				shortcuts = (List<Shortcut>) entity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
 			}
 
@@ -625,16 +623,17 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("BindApplinks");
 
-					Map map = new HashMap<String, Object>();
-					map.put("modifiedDate", -1);
-					Cursor cursor = new Cursor()
-							.setLimit(ServiceConstants.LIMIT_CHILD_ENTITIES)
-							.setSort(Maps.asMap("modifiedDate", -1))
-							.setSkip(0);
-
 					List<String> linkTypes = new ArrayList<String>();
-					linkTypes.add(Constants.TYPE_LINK_APPLINK);
-					cursor.setLinkTypes(linkTypes);
+					List<String> schemas = new ArrayList<String>();
+					linkTypes.add(Constants.TYPE_LINK_CONTENT);
+					schemas.add(Constants.SCHEMA_ENTITY_APPLINK);
+					
+					Cursor cursor = new Cursor()
+							.setLimit(ServiceConstants.PAGE_SIZE_APPLINKS)
+							.setSort(Maps.asMap("modifiedDate", -1))
+							.setSkip(0)
+							.setSchemas(schemas)
+							.setLinkTypes(linkTypes);
 
 					ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mEntity.id, null, cursor, null);
 
@@ -778,7 +777,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					Entity insertedEntity = (Entity) result.data;
 
 					if (mApplinks != null) {
-						result = EntityManager.getInstance().replaceEntitiesForEntity(insertedEntity.id, mApplinks, Constants.TYPE_LINK_APPLINK);
+						result = EntityManager.getInstance().replaceEntitiesForEntity(insertedEntity.id, mApplinks, Constants.SCHEMA_ENTITY_APPLINK);
 						/*
 						 * Need to update the linkIn for the entity or these won't show
 						 * without a service refresh.
@@ -826,7 +825,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				/* Save applinks first */
 				if (mApplinks != null) {
-					result = EntityManager.getInstance().replaceEntitiesForEntity(mEntity.id, mApplinks, Constants.TYPE_LINK_APPLINK);
+					result = EntityManager.getInstance().replaceEntitiesForEntity(mEntity.id, mApplinks, Constants.SCHEMA_ENTITY_APPLINK);
 				}
 
 				/* Update entity */

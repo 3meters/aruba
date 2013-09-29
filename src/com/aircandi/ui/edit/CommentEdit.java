@@ -42,7 +42,7 @@ public class CommentEdit extends BaseEntityEdit {
 
 	@Override
 	protected String getLinkType() {
-		return Constants.TYPE_LINK_COMMENT;
+		return Constants.TYPE_LINK_CONTENT;
 	};
 
 	@Override

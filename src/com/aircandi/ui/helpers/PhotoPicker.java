@@ -258,7 +258,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		 */
 		if (mPlacePhotoMode && mEntity != null) {
 
-			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_PICTURE, Constants.SCHEMA_ENTITY_PICTURE, Direction.in, false, false);
+			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, Direction.in, false, false);
 			settings.appClass = Pictures.class;
 			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
 			if (shortcuts.size() > 0) {

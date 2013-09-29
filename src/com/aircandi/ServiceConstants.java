@@ -7,6 +7,7 @@ public final class ServiceConstants {
 	public static final int		TIMEOUT_SOCKET_QUERIES							= 30000;
 	public static final int		TIMEOUT_SOCKET_UPDATES							= 30000;
 	public static final int		TIMEOUT_CONNECTION								= 20000;
+	public static final int		TIMEOUT_SOURCE_SUGGESTIONS						= 2000;
 
 	public static String		WALLED_GARDEN_URI								= "http://clients3.google.com/generate_204";
 	public static final int		WALLED_GARDEN_SOCKET_TIMEOUT_MS					= 5000;
@@ -30,11 +31,11 @@ public final class ServiceConstants {
 
 	public static final String	INSERT_USER_SECRET								= "larissa";																																	//$NON-NLS-1$
 	public static final String	ADMIN_USER_ID									= "us.000000.00000.000.000000";																												//$NON-NLS-1$
-	public static final String	ANONYMOUS_USER_ID								= "us.111111.11111.111.111111";																												//$NON-NLS-1$
+	public static final String	ANONYMOUS_USER_ID								= "us.000000.00000.000.111111";																												//$NON-NLS-1$
 
-	public static final String	__URL_PROXIBASE_SERVICE							= "http://ariseditions.com:8080";																												// local																					// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE							= "http://ariseditions.com:8080";																												// local																					// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
 	public static final String	_URL_PROXIBASE_SERVICE							= "https://api.aircandi.com";																													// production																					//$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE							= "https://api.aircandi.com:444";																												// staging																									//$NON-NLS-1$
+	public static final String	__URL_PROXIBASE_SERVICE							= "https://api.aircandi.com:444";																												// staging																									//$NON-NLS-1$
 
 	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS		= "/img/applinks/";																															//$NON-NLS-1$
 	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES		= "/img/categories/";																															//$NON-NLS-1$
@@ -56,15 +57,13 @@ public final class ServiceConstants {
 	public static final String	USER_AGENT_DESKTOP								= "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16";					//$NON-NLS-1$
 	public static final String	USER_AGENT_NEXUS_S								= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";	//$NON-NLS-1$
 
-	public static final int		LIMIT_LINKS_DEFAULT								= 50;
-	public static final int		LIMIT_USER_WATCHING_ENTITIES					= 50;
-	public static final int		LIMIT_USER_WATCHING_USERS						= 50;
-	public static final int		LIMIT_USER_OWNED_ENTITIES						= 200;
-	public static final int		LIMIT_RADAR_ENTITIES							= 50;
-	public static final int		LIMIT_RADAR_PLACES								= 50;
-	public static final int		LIMIT_CHILD_ENTITIES							= 50;
-	public static final int		SOURCE_SUGGESTIONS_TIMEOUT						= 2000;
 	public static final int		PROXIMITY_BEACON_COVERAGE						= 3;
+	
+	public static final int		LIMIT_LINKS_DEFAULT								= 50;
+	public static final int		LIMIT_LINKS_LIKE								= 50;
+	public static final int		LIMIT_LINKS_CREATE								= 50;
+	public static final int		LIMIT_LINKS_WATCH								= 50;
+	public static final int		LIMIT_PLACES_RADAR							= 50;	
 
 	public static final int		PAGE_SIZE_APPLINKS								= -1;
 	public static final int		PAGE_SIZE_CANDIGRAMS							= 30;

@@ -177,7 +177,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_places_created
 						, R.string.section_places_more
-						, mResources.getInteger(R.integer.shortcuts_flow_limit)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
@@ -191,7 +191,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_candigrams_created
 						, R.string.section_candigrams_more
-						, mResources.getInteger(R.integer.shortcuts_flow_limit)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
@@ -205,7 +205,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_pictures_created
 						, R.string.section_pictures_more
-						, mResources.getInteger(R.integer.shortcuts_flow_limit)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
@@ -213,7 +213,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 
 		else if (mShortcutType.equals(Constants.TYPE_LINK_WATCH)) {
 
-			/* WATCHING places */
+			/* Watching places */
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 			settings.appClass = Places.class;
 			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
@@ -222,12 +222,12 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_places_watching
 						, R.string.section_places_more
-						, mResources.getInteger(R.integer.shortcuts_flow_limit)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
 
-			/* WATCHING candigrams */
+			/* Watching candigrams */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_CANDIGRAM, Direction.out, false, false);
 			settings.appClass = Candigrams.class;
 			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
@@ -236,12 +236,12 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_candigrams_watching
 						, R.string.section_pictures_more
-						, mResources.getInteger(R.integer.shortcuts_flow_limit)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
 
-			/* WATCHING pictures */
+			/* Watching pictures */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, Direction.out, false, false);
 			settings.appClass = Pictures.class;
 			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
@@ -250,12 +250,12 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_pictures_watching
 						, R.string.section_pictures_more
-						, mResources.getInteger(R.integer.shortcuts_flow_limit)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
 
-			/* WATCHING users */
+			/* Watching users */
 			settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, Direction.out, false, false);
 			settings.appClass = Users.class;
 			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
@@ -264,7 +264,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_users_watching
 						, R.string.section_users_more
-						, mResources.getInteger(R.integer.shortcuts_flow_limit)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}

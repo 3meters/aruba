@@ -139,11 +139,11 @@ public class UserView extends RelativeLayout {
 
 			if (mBoundView.findViewById(R.id.stats_group) != null) {
 				if (mImageWatched != null) {
-					Count count = user.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
+					Count count = user.getCount(Constants.TYPE_LINK_WATCH, null, Direction.in);
 					mWatchCount.setText(String.valueOf(count != null ? count.count.intValue() : 0));
 				}
 				if (mImageLiked != null) {
-					Count count = user.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
+					Count count = user.getCount(Constants.TYPE_LINK_LIKE, null, Direction.in);
 					mLikeCount.setText(String.valueOf(count != null ? count.count.intValue() : 0));
 				}
 			}

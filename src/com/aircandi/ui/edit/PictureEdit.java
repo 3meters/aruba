@@ -34,7 +34,7 @@ public class PictureEdit extends BaseEntityEdit {
 
 	@Override
 	protected String getLinkType() {
-		return Constants.TYPE_LINK_PICTURE;
+		return Constants.TYPE_LINK_CONTENT;
 	};
 
 	@Override

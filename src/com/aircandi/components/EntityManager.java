@@ -22,6 +22,7 @@ import android.os.Bundle;
 import com.aircandi.Aircandi;
 import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
+import com.aircandi.R;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
@@ -269,7 +270,7 @@ public class EntityManager {
 			entityStrings.add("object:" + Json.objectToJson(applink, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 		}
 		parameters.putStringArrayList("applinks", (ArrayList<String>) entityStrings);
-		parameters.putInt("timeout", ServiceConstants.SOURCE_SUGGESTIONS_TIMEOUT);
+		parameters.putInt("timeout", ServiceConstants.TIMEOUT_SOURCE_SUGGESTIONS);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_APPLINKS + "suggest")
@@ -660,6 +661,7 @@ public class EntityManager {
 					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
 					mEntityCache.addLink(insertedEntity.id
 							, Constants.TYPE_LINK_CREATE
+							, insertedEntity.schema
 							, Aircandi.getInstance().getUser().id
 							, insertedEntity.getShortcut()
 							, Aircandi.getInstance().getUser().getShortcut());
@@ -682,7 +684,7 @@ public class EntityManager {
 		 * - on the updated entity
 		 * - on any upstream entities the updated entity is linked to
 		 * - inactive links are excluded
-		 * - like/create/WATCH links are not followed
+		 * - like/create/watch links are not followed
 		 */
 		final ModelResult result = new ModelResult();
 
@@ -741,7 +743,7 @@ public class EntityManager {
 		 * Updates activityDate in the database:
 		 * - on any upstream entities the deleted entity was linked to
 		 * - inactive links are excluded
-		 * - like/create/WATCH links are not followed
+		 * - like/create/watch links are not followed
 		 */
 		final ModelResult result = new ModelResult();
 		Entity entity = null;
@@ -777,7 +779,7 @@ public class EntityManager {
 			 * this entity at either end and clean them up including any counts.
 			 */
 			Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
-			mEntityCache.removeLink(entityId, Constants.TYPE_LINK_CREATE, Aircandi.getInstance().getUser().id);
+			mEntityCache.removeLink(entityId, Constants.TYPE_LINK_CREATE, entity.schema, Aircandi.getInstance().getUser().id);
 
 			if (entity != null && entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 				mActivityDate = DateTime.nowDate().getTime();
@@ -866,14 +868,14 @@ public class EntityManager {
 			if (beacons != null) {
 				for (Beacon beacon : beacons) {
 					Boolean primary = (primaryBeacon != null && primaryBeacon.id.equals(beacon.id));
-					Link link = entity.getLink(Constants.TYPE_LINK_PROXIMITY, beacon.id, Direction.out);
+					Link link = entity.getLink(Constants.TYPE_LINK_PROXIMITY, Constants.SCHEMA_ENTITY_BEACON, beacon.id, Direction.out);
 					if (link != null) {
 						if (primary) {
 							if (untuning) {
-								link.incrementStat(Constants.TYPE_COUNT_LINK_PROXIMITY_MINUS);
+								link.incrementStat(Constants.TYPE_COUNT_LINK_PROXIMITY_MINUS, null);
 							}
 							else {
-								link.incrementStat(Constants.TYPE_COUNT_LINK_PROXIMITY);
+								link.incrementStat(Constants.TYPE_COUNT_LINK_PROXIMITY, null);
 								if (!link.proximity.primary) {
 									link.proximity.primary = true;
 								}
@@ -899,7 +901,7 @@ public class EntityManager {
 						link.proximity = new Proximity();
 						link.proximity.signal = beacon.signal;
 						if (primary) {
-							link.incrementStat(Constants.TYPE_COUNT_LINK_PROXIMITY);
+							link.incrementStat(Constants.TYPE_COUNT_LINK_PROXIMITY, null);
 							link.proximity.primary = true;
 						}
 						if (entity.linksOut == null) {
@@ -914,7 +916,8 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult insertLink(String fromId, String toId, String type, Boolean strong, Shortcut toShortcut, Shortcut fromShortcut, String actionType) {
+	public ModelResult insertLink(String fromId, String toId, String type, String schema, Boolean strong, Shortcut toShortcut, Shortcut fromShortcut,
+			String actionType) {
 		final ModelResult result = new ModelResult();
 
 		final Bundle parameters = new Bundle();
@@ -940,7 +943,7 @@ public class EntityManager {
 			 * Fail could be because of ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
 			 * prevents any user from liking the same entity more than once.
 			 */
-			mEntityCache.addLink(toId, type, fromId, toShortcut, fromShortcut);
+			mEntityCache.addLink(toId, type, schema, fromId, toShortcut, fromShortcut);
 		}
 
 		return result;
@@ -971,19 +974,19 @@ public class EntityManager {
 			 * Fail could be because of ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
 			 * prevents any user from liking the same entity more than once.
 			 */
-			mEntityCache.removeLink(toId, type, fromId);
+			mEntityCache.removeLink(toId, type, null, fromId);
 		}
 
 		return result;
 	}
 
-	public ModelResult replaceEntitiesForEntity(String entityId, List<Entity> entitiesForEntity, String linkType) {
+	public ModelResult replaceEntitiesForEntity(String entityId, List<Entity> entitiesForEntity, String schema) {
 		/*
 		 * Updates activityDate in the database:
 		 * - on the parent entity
 		 * - on any other upstream entities
 		 * - inactive links are not followed
-		 * - like/create/WATCH/proximity links are not followed
+		 * - like/create/watch/proximity links are not followed
 		 */
 		final ModelResult result = new ModelResult();
 
@@ -1008,7 +1011,7 @@ public class EntityManager {
 			entityStrings.add("object:" + Json.objectToJson(entity, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 		}
 		parameters.putStringArrayList("entities", (ArrayList<String>) entityStrings);
-		parameters.putString("linkType", linkType);
+		parameters.putString("schema", schema);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "replaceEntitiesForEntity")
@@ -1033,7 +1036,7 @@ public class EntityManager {
 		 * - on the new place candigram is linked to
 		 * - on any other upstream entities with valid links
 		 * - inactive links are not followed
-		 * - like/create/WATCH/proximity links are not followed
+		 * - like/create/watch/proximity links are not followed
 		 */
 
 		final ModelResult result = new ModelResult();
@@ -1249,7 +1252,7 @@ public class EntityManager {
 		}
 
 		/* Nearby */
-		Entity parent = entity.getParent(Constants.TYPE_LINK_CANDIGRAM);
+		Entity parent = entity.getParent(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE);
 		if (parent != null && parent.hasActiveProximity()) {
 			return true;
 		}
@@ -1275,7 +1278,9 @@ public class EntityManager {
 				proximity);
 
 		Collections.sort(places, new Place.SortByProximityAndDistance());
-		return places.size() > ServiceConstants.LIMIT_RADAR_PLACES ? places.subList(0, ServiceConstants.LIMIT_RADAR_PLACES) : places;
+		Number limit = Aircandi.applicationContext.getResources().getInteger(R.integer.limit_places_radar);
+
+		return places.size() > limit.intValue() ? places.subList(0, limit.intValue()) : places;
 	}
 
 	// --------------------------------------------------------------------------------------------

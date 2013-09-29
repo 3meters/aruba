@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <integer name="shortcuts_flow_limit">21</integer>
+    <integer name="limit_shortcuts_flow">21</integer>
+    
+    <integer name="limit_links_default">22</integer>
+    <integer name="limit_links_like_default">22</integer>
+    <integer name="limit_links_watch_default">22</integer>
+    <integer name="limit_links_create_default">22</integer>
+    <integer name="limit_links_proximity_default">22</integer>
     
 </resources>

@@ -269,7 +269,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 
 	@Override
 	protected String getLinkType() {
-		return Constants.TYPE_LINK_APPLINK;
+		return Constants.TYPE_LINK_CONTENT;
 	};
 
 	// --------------------------------------------------------------------------------------------

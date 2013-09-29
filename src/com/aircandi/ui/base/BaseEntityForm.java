@@ -230,6 +230,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_LIKE
+							, mEntity.schema
 							, false
 							, toShortcut
 							, fromShortcut
@@ -288,6 +289,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_WATCH
+							, mEntity.schema
 							, false
 							, toShortcut
 							, fromShortcut

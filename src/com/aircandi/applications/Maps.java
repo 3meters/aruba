@@ -30,7 +30,7 @@ public class Maps {
 		if (entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 
 			Bundle extras = new Bundle();
-			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CANDIGRAM, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
+			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 			settings.appClass = Places.class;
 			List<Shortcut> shortcuts = (List<Shortcut>) entity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
 			if (shortcuts.size() > 0) {

@@ -325,7 +325,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	@SuppressWarnings("ucd")
 	public void onCommentsClick(View view) {
 		final Entity entity = (Entity) view.getTag();
-		Comments.viewFor(this, entity.id, Constants.TYPE_LINK_COMMENT, null);
+		Comments.viewFor(this, entity.id, Constants.TYPE_LINK_CONTENT, null);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -525,13 +525,8 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			for (Entity entity : mMoreEntities) {
 				list.add(entity);
 			}
-			if (mListLinkType.equals(Constants.TYPE_LINK_CANDIGRAM)
-					|| mListLinkType.equals(Constants.TYPE_LINK_WATCH)
-					|| mListLinkType.equals(Constants.TYPE_LINK_CREATE)
-					|| mListLinkType.equals(Constants.TYPE_LINK_COMMENT)) {
-				list.sort(new Entity.SortByLinkModifiedDate());
-			}
-			else if (mListLinkType.equals(Constants.TYPE_LINK_APPLINK)) {
+			
+			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 				list.sort(new Entity.SortByPositionModifiedDate());
 			}
 			else {
@@ -668,7 +663,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 				UI.setVisibility(holder.comments, View.GONE);
 				if (holder.comments != null) {
-					Count count = entity.getCount(Constants.TYPE_LINK_COMMENT, Direction.in);
+					Count count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, Direction.in);
 					Integer commentCount = count != null ? count.count.intValue() : 0;
 					if (commentCount != null && commentCount > 0) {
 						holder.comments.setText(String.valueOf(commentCount) + ((commentCount == 1) ? " Comment" : " Comments"));

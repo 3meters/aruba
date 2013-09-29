@@ -161,11 +161,8 @@ public final class Constants {
 	public static final String	TYPE_LINK_PROXIMITY							= "proximity";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_LIKE								= "like";																					//$NON-NLS-1$
 	public static final String	TYPE_LINK_WATCH								= "watch";																					//$NON-NLS-1$
-	public static final String	TYPE_LINK_APPLINK							= "applink";																				//$NON-NLS-1$
-	public static final String	TYPE_LINK_PICTURE							= "post";																					//$NON-NLS-1$
-	public static final String	TYPE_LINK_CANDIGRAM							= "candigram";																				//$NON-NLS-1$
+	public static final String	TYPE_LINK_CONTENT							= "content";																				//$NON-NLS-1$
 	public static final String	TYPE_LINK_CREATE							= "create";																				//$NON-NLS-1$
-	public static final String	TYPE_LINK_COMMENT							= "comment";																				//$NON-NLS-1$
 
 	public static final String	TYPE_COUNT_LINK_PROXIMITY					= "link_proximity";																		//$NON-NLS-1$
 	public static final String	TYPE_COUNT_LINK_PROXIMITY_MINUS				= "link_proximity_minus";																	//$NON-NLS-1$

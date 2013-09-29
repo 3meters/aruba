@@ -17,9 +17,9 @@ public class LinkSettings extends ServiceObject {
 	@Expose
 	public String				type;
 	@Expose
-	public Boolean				links				= false;
+	public String				schema;
 	@Expose
-	public Boolean				load				= false;
+	public Boolean				links				= false;
 	@Expose
 	public Boolean				count				= true;
 	@Expose
@@ -33,22 +33,22 @@ public class LinkSettings extends ServiceObject {
 
 	public LinkSettings() {}
 
-	public LinkSettings(String type, Boolean links, Boolean load, Boolean count) {
-		this(type, links, load, count, false); 
-	}
-	
-	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Boolean inactive) {
-		this(type, links, load, count, inactive, ServiceConstants.LIMIT_LINKS_DEFAULT); 
+	public LinkSettings(String type, String schema, Boolean links, Boolean count) {
+		this(type, schema, links, count, false);
 	}
 
-	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Boolean inactive, Number limit) {
-		this(type, links, load, count, inactive, limit, null); 
+	public LinkSettings(String type, String schema, Boolean links, Boolean count, Boolean inactive) {
+		this(type, schema, links, count, inactive, ServiceConstants.LIMIT_LINKS_DEFAULT);
 	}
 
-	public LinkSettings(String type, Boolean links, Boolean load, Boolean count, Boolean inactive, Number limit, Map where) {
+	public LinkSettings(String type, String schema, Boolean links, Boolean count, Boolean inactive, Number limit) {
+		this(type, schema, links, count, inactive, limit, null);
+	}
+
+	public LinkSettings(String type, String schema, Boolean links, Boolean count, Boolean inactive, Number limit, Map where) {
 		this.type = type;
+		this.schema = schema;
 		this.links = links;
-		this.load = load;
 		this.count = count;
 		this.inactive = inactive;
 		this.where = where;
@@ -69,15 +69,6 @@ public class LinkSettings extends ServiceObject {
 
 	public LinkSettings setLinks(Boolean links) {
 		this.links = links;
-		return this;
-	}
-
-	public Boolean getLoad() {
-		return load;
-	}
-
-	public LinkSettings setLoad(Boolean load) {
-		this.load = load;
 		return this;
 	}
 

@@ -283,7 +283,7 @@ public class PlaceForm extends BaseEntityForm {
 		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();
 
 		/* Synthetic applink shortcuts */
-		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
+		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
 		settings.appClass = Applinks.class;
 		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, null);
 		if (shortcuts.size() > 0) {
@@ -292,13 +292,13 @@ public class PlaceForm extends BaseEntityForm {
 					, settings
 					, R.string.section_place_shortcuts_applinks
 					, R.string.section_links_more
-					, mResources.getInteger(R.integer.place_shortcuts_flow_limit)
+					, mResources.getInteger(R.integer.limit_shortcuts_flow)
 					, R.id.shortcut_holder
 					, R.layout.temp_place_switchboard_item);
 		}
 
 		/* service applink shortcuts */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_APPLINK, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
+		settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 		settings.appClass = Applinks.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
 		if (shortcuts.size() > 0) {
@@ -307,7 +307,7 @@ public class PlaceForm extends BaseEntityForm {
 					, settings
 					, null
 					, R.string.section_links_more
-					, mResources.getInteger(R.integer.place_shortcuts_flow_limit)
+					, mResources.getInteger(R.integer.limit_shortcuts_flow)
 					, R.id.shortcut_holder
 					, R.layout.temp_place_switchboard_item);
 		}
@@ -387,13 +387,13 @@ public class PlaceForm extends BaseEntityForm {
 	@Override
 	protected void drawStats() {
 
-		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, Direction.in);
-		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, 0);
+		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, Direction.in);
+		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_PLACE, 0);
 		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
 		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
 
-		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, Direction.in);
-		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, 0);
+		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, Direction.in);
+		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE, 0);
 		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
 		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
 	}

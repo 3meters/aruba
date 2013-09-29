@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <integer name="shortcuts_flow_limit">8</integer>
-    <integer name="place_shortcuts_flow_limit">8</integer>
+    <integer name="limit_shortcuts_flow">8</integer>
+    
+    <integer name="limit_links_default">9</integer>
+    <integer name="limit_links_like_default">9</integer>
+    <integer name="limit_links_watch_default">9</integer>
+    <integer name="limit_links_create_default">9</integer>
+    <integer name="limit_links_proximity_default">9</integer>
+    
+    <integer name="limit_places_radar">50</integer>
+    
     <integer name="anim_extra_long">300</integer>
     
 </resources>
