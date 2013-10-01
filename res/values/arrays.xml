@@ -132,6 +132,7 @@
     <string-array name="candigram_duration_entries">
         <item>30 minutes</item>
         <item>1 hour</item>
+        <item>4 hours</item>
         <item>8 hours</item>
         <item>24 hours</item>
         <item>1 week</item>
@@ -140,6 +141,7 @@
     <string-array name="candigram_duration_values">
         <item>1800000</item>
         <item>3600000</item>
+        <item>14400000</item>
         <item>28800000</item>
         <item>86400000</item>
         <item>604800000</item>
@@ -148,6 +150,7 @@
     <string-array name="candigram_duration_descriptions">
         <item>The candigram travels to a new place every 30 minutes</item>
         <item>The candigram travels to a new place every hour</item>
+        <item>The candigram travels to a new place every 4 hours</item>
         <item>The candigram travels to a new place every 8 hours</item>
         <item>The candigram travels to a new place every day</item>
         <item>The candigram travels to a new place every week</item>

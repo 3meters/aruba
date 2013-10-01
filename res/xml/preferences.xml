@@ -89,19 +89,5 @@
             android:key="Pref_About"
             android:title="About" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/pref_reporting_category_title" >
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="acra.enable"
-            android:summaryOff="@string/pref_acra_disabled"
-            android:summaryOn="@string/pref_acra_enabled"
-            android:title="@string/pref_disable_acra" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="acra.alwaysaccept"
-            android:summaryOff="@string/pref_acra_alwaysaccept_disabled"
-            android:summaryOn="@string/pref_acra_alwaysaccept_enabled"
-            android:title="@string/pref_acra_alwaysaccept" />
-    </PreferenceCategory>
 
 </PreferenceScreen>

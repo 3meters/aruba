@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +40,9 @@ public class ApplicationPicker extends BasePicker implements OnItemClickListener
 
 	@Override
 	public void bind(BindingMode mode) {
-		mName.setText(R.string.dialog_template_picker_title);
+		String schema = mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE) ? Constants.SCHEMA_REMAP_PICTURE : mEntity.schema;
+		String title = !TextUtils.isEmpty(mEntity.name) ? mEntity.name : schema;
+		mName.setText(title);
 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();

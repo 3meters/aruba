@@ -14,6 +14,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -208,6 +209,16 @@ public class UI {
 		final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 		final int pixels = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) displayPixels, metrics);
 		return pixels;
+	}
+
+	public static float getScreenWidthDisplayPixels(Context context) {
+		final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+		return metrics.widthPixels / metrics.density;
+	}
+
+	public static float getScreenWidthRawPixels(Context context) {
+		final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+		return metrics.widthPixels;
 	}
 
 	public static int getImageMemorySize(int height, int width, boolean hasAlpha) {
@@ -411,6 +422,11 @@ public class UI {
 		inputManager.hideSoftInputFromWindow(new View(context).getWindowToken(), 0);
 	}
 
+	public static void hideSoftInput(Context context, IBinder windowToken) {
+		InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);
+		inputManager.hideSoftInputFromWindow(windowToken, 0);
+	}
+	
 	@SuppressWarnings("ucd")
 	public static void showSoftInput(Context context) {
 		InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);
@@ -430,7 +446,7 @@ public class UI {
 				showToastNotification("Large screen", Toast.LENGTH_LONG);
 				break;
 			case Configuration.SCREENLAYOUT_SIZE_NORMAL:
-				showToastNotification("NORMAL screen", Toast.LENGTH_LONG);
+				showToastNotification("Normal screen", Toast.LENGTH_LONG);
 				break;
 			case Configuration.SCREENLAYOUT_SIZE_SMALL:
 				showToastNotification("Small screen", Toast.LENGTH_LONG);

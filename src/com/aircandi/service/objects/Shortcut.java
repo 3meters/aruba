@@ -11,7 +11,6 @@ import java.util.Map;
 import android.content.Intent;
 
 import com.aircandi.Constants;
-import com.aircandi.ServiceConstants;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.service.Expose;
 import com.aircandi.service.objects.Photo.PhotoSource;
@@ -32,7 +31,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String									schema;
 	@Expose
-	public String									app;
+	public String									app;			// usually maps to type property (if exists) on polymorphic entity like applinks 
 	@Expose
 	public String									appId;
 	@Expose
@@ -48,7 +47,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String									action;
 	@Expose
-	public Number									modifiedDate;
+	public Number									sortDate;
 
 	/* client only properties */
 
@@ -56,7 +55,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	public List<Shortcut>							group;
 	public Boolean									synthetic			= false;
 	public Boolean									inactive			= false;
-	public String									linkType;
+	public String									linkType;		// so we know if entity shortcut represents is targeted via like/watch/content etc.
 	public Intent									intent;
 
 	public Shortcut() {}
@@ -71,7 +70,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 		 */
 		shortcut.id = (String) map.get("id");
 		shortcut.name = (String) map.get("name");
-		shortcut.modifiedDate = (Number) map.get("modifiedDate");
+		shortcut.sortDate = (Number) map.get("sortDate");
 		shortcut.schema = (String) map.get("schema");
 		shortcut.app = (String) map.get("app");
 		shortcut.appId = (String) map.get("appId");
@@ -143,8 +142,8 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 		String prefix = "resource:img_placeholder_logo_bw";
 		String source = PhotoSource.resource;
 		if (this.schema != null && this.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-			prefix = ServiceConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + this.app.toLowerCase(Locale.US) + ".png";
-			source = PhotoSource.assets;
+			prefix = this.app.toLowerCase(Locale.US) + ".png";
+			source = PhotoSource.assets_applinks;
 		}
 		Photo photo = new Photo(prefix, null, null, null, source);
 		return photo;
@@ -157,10 +156,6 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	public Photo getBrokenPhoto() {
 		String prefix = "resource:img_broken";
 		String source = PhotoSource.resource;
-//		if (this.schema != null && this.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-//			prefix = ServiceConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + this.app.toLowerCase(Locale.US) + ".png";
-//			source = PhotoSource.assets;
-//		}
 		Photo photo = new Photo(prefix, null, null, null, source);
 		return photo;
 	}
@@ -314,7 +309,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	// Classes
 	// --------------------------------------------------------------------------------------------
 
-	public static class SortByPositionModifiedDate implements Comparator<Shortcut> {
+	public static class SortByPositionSortDate implements Comparator<Shortcut> {
 
 		@Override
 		public int compare(Shortcut object1, Shortcut object2) {
@@ -323,14 +318,14 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 				return -1;
 			}
 			else if (object1.getPosition().intValue() == object2.getPosition().intValue()) {
-				if (object1.modifiedDate == null || object2.modifiedDate == null) {
+				if (object1.sortDate == null || object2.sortDate == null) {
 					return 0;
 				}
 				else {
-					if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
+					if (object1.sortDate.longValue() < object2.sortDate.longValue()) {
 						return 1;
 					}
-					else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
+					else if (object1.sortDate.longValue() == object2.sortDate.longValue()) {
 						return 0;
 					}
 					return -1;
@@ -339,34 +334,4 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 			return 1;
 		}
 	}
-
-	public static class SortByPosition implements Comparator<Shortcut> {
-
-		@Override
-		public int compare(Shortcut object1, Shortcut object2) {
-			if (object1.getPosition().intValue() < object2.getPosition().intValue()) {
-				return -1;
-			}
-			else if (object1.getPosition().intValue() == object2.getPosition().intValue()) {
-				return 0;
-			}
-			return 1;
-		}
-	}
-
-	public static class SortByModifiedDate implements Comparator<Shortcut> { // NO_UCD (unused code)
-
-		@Override
-		public int compare(Shortcut object1, Shortcut object2) {
-
-			if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
-				return 1;
-			}
-			else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
-				return 0;
-			}
-			return -1;
-		}
-	}
-
 }

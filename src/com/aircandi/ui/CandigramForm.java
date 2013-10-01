@@ -12,6 +12,7 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.aircandi.Aircandi;
@@ -33,6 +34,7 @@ import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
+import com.aircandi.service.objects.ServiceBase;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.service.objects.User;
@@ -267,11 +269,13 @@ public class CandigramForm extends BaseEntityForm {
 		ViewGroup customView = customPlaceView((Place) place, place.name, place.getPhoto());
 		final TextView message = (TextView) customView.findViewById(R.id.message);
 
-		if (user.id.equals(Aircandi.getInstance().getUser().id)) {
-			message.setText("You kicked this candigram to: ");
-		}
-		else {
-			message.setText(user.name + " kicked this candigram to: ");
+		if (user != null) {
+			if (user.id.equals(Aircandi.getInstance().getUser().id)) {
+				message.setText("You kicked this candigram to: ");
+			}
+			else {
+				message.setText(user.name + " kicked this candigram to: ");
+			}
 		}
 
 		String dialogTitle = getResources().getString(R.string.alert_kicked_candigram);
@@ -423,6 +427,15 @@ public class CandigramForm extends BaseEntityForm {
 		else {
 			UI.setVisibility(photoView, View.GONE);
 			if (photoView != null) {
+
+				int screenWidthDp = (int) UI.getScreenWidthDisplayPixels(this);
+				int widgetWidthDp = 122;
+				if (screenWidthDp - widgetWidthDp <= 264) {
+					int photoViewWidth = UI.getRawPixelsForDisplayPixels(this, screenWidthDp - widgetWidthDp);
+					LinearLayout.LayoutParams paramsImage = new LinearLayout.LayoutParams(photoViewWidth, photoViewWidth);
+					photoView.setLayoutParams(paramsImage);
+				}
+
 				Photo photo = mEntity.getPhoto();
 				UI.drawPhoto(photoView, photo);
 				if (photo.usingDefault == null || !photo.usingDefault) {
@@ -501,11 +514,10 @@ public class CandigramForm extends BaseEntityForm {
 		/* Synthetic applink shortcuts */
 		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
 		settings.appClass = Applinks.class;
-		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
+		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
 		if (shortcuts.size() > 0) {
-			Collections.sort(shortcuts, new Shortcut.SortByPosition());
+			Collections.sort(shortcuts, new Shortcut.SortByPositionSortDate());
 			Boolean canAdd = EntityManager.canUserAdd(mEntity);
-
 			drawShortcuts(shortcuts
 					, settings
 					, canAdd ? R.string.section_candigram_shortcuts_applinks_can_add : R.string.section_candigram_shortcuts_applinks
@@ -518,9 +530,9 @@ public class CandigramForm extends BaseEntityForm {
 		/* service applink shortcuts */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 		settings.appClass = Applinks.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
+		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
 		if (shortcuts.size() > 0) {
-			Collections.sort(shortcuts, new Shortcut.SortByPosition());
+			Collections.sort(shortcuts, new Shortcut.SortByPositionSortDate());
 			drawShortcuts(shortcuts
 					, settings
 					, null
@@ -533,8 +545,9 @@ public class CandigramForm extends BaseEntityForm {
 		/* Shortcuts for places linked to this candigram */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 		settings.appClass = Places.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new Link.SortByModifiedDate(), new Shortcut.SortByPositionModifiedDate());
+		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new ServiceBase.SortByPositionSortDate(), new Shortcut.SortByPositionSortDate());
 		if (shortcuts.size() > 0) {
+			Collections.sort(shortcuts, new Shortcut.SortByPositionSortDate());
 			drawShortcuts(shortcuts
 					, settings
 					, R.string.section_candigram_shortcuts_places

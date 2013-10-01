@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.aircandi.Constants;
@@ -110,6 +111,15 @@ public class PictureForm extends BaseEntityForm {
 		else {
 			UI.setVisibility(photoView, View.GONE);
 			if (photoView != null) {
+				
+				int screenWidthDp = (int) UI.getScreenWidthDisplayPixels(this);
+				int widgetWidthDp = 122;
+				if (screenWidthDp - widgetWidthDp <= 264) {
+					int photoViewWidth = UI.getRawPixelsForDisplayPixels(this, screenWidthDp - widgetWidthDp);
+					LinearLayout.LayoutParams paramsImage = new LinearLayout.LayoutParams(photoViewWidth, photoViewWidth);
+					photoView.setLayoutParams(paramsImage);
+				}
+				
 				Photo photo = mEntity.getPhoto();
 				UI.drawPhoto(photoView, photo);
 				if (photo.usingDefault == null || !photo.usingDefault) {
@@ -174,9 +184,9 @@ public class PictureForm extends BaseEntityForm {
 		/* Synthetic applink shortcuts */
 		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
 		settings.appClass = Applinks.class;
-		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
+		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
 		if (shortcuts.size() > 0) {
-			Collections.sort(shortcuts, new Shortcut.SortByPosition());
+			Collections.sort(shortcuts, new Shortcut.SortByPositionSortDate());
 			drawShortcuts(shortcuts
 					, settings
 					, R.string.section_place_shortcuts_applinks
@@ -189,9 +199,9 @@ public class PictureForm extends BaseEntityForm {
 		/* Service applink shortcuts */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 		settings.appClass = Applinks.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
+		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
 		if (shortcuts.size() > 0) {
-			Collections.sort(shortcuts, new Shortcut.SortByPosition());
+			Collections.sort(shortcuts, new Shortcut.SortByPositionSortDate());
 			drawShortcuts(shortcuts
 					, settings
 					, null

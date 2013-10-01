@@ -6,6 +6,7 @@ import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -45,27 +47,32 @@ import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.ServiceConstants;
-import com.aircandi.applications.Pictures;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
+import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
+import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.ImageResult;
+import com.aircandi.components.bitmaps.ImageResult.Thumbnail;
 import com.aircandi.service.RequestType;
 import com.aircandi.service.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.ServiceResponse;
+import com.aircandi.service.objects.Count;
+import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
+import com.aircandi.service.objects.LinkOptions;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Provider;
+import com.aircandi.service.objects.ServiceBase;
 import com.aircandi.service.objects.ServiceData;
-import com.aircandi.service.objects.Shortcut;
-import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.ui.base.IList;
 import com.aircandi.ui.widgets.AirAutoCompleteTextView;
@@ -256,23 +263,64 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		/*
 		 * First check to see if there are any candi picture children.
 		 */
-		if (mPlacePhotoMode && mEntity != null) {
-
-			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, Direction.in, false, false);
-			settings.appClass = Pictures.class;
-			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
-			if (shortcuts.size() > 0) {
-				for (Shortcut shortcut : shortcuts) {
-					if (shortcut.photo != null) {
-						ImageResult imageResult = shortcut.photo.getAsImageResult();
-						imageResult.setPhoto(shortcut.photo);
-						mImages.add(imageResult);
-					}
-				}
-			}
+		Count pictures = null;
+		if (mEntity != null) {
+			pictures = mEntity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, Direction.in);
 		}
 
-		if (mPlacePhotoMode || (mQuery != null && !mQuery.equals(""))) {
+		if (mPlacePhotoMode && pictures != null) {
+
+			new AsyncTask() {
+
+				@Override
+				protected void onPreExecute() {
+					showBusy();
+				}
+
+				@Override
+				protected Object doInBackground(Object... params) {
+					Thread.currentThread().setName("PlacePictures");
+
+					LinkOptions linkOptions = LinkOptions.getDefault(LinkProfile.LINKS_FOR_PICTURE);
+
+					List<String> schemas = new ArrayList<String>();
+					schemas.add(Constants.SCHEMA_ENTITY_PICTURE);
+					List<String> linkTypes = new ArrayList<String>();
+					linkTypes.add(Constants.TYPE_LINK_CONTENT);
+
+					Cursor cursor = new Cursor()
+							.setLimit(ServiceConstants.PAGE_SIZE_PICTURES)
+							.setSort(Maps.asMap("modifiedDate", -1))
+							.setSchemas(schemas)
+							.setLinkTypes(linkTypes)
+							.setDirection(Direction.in.name());
+
+					ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mEntity.id, linkOptions, cursor, null);
+
+					return result;
+				}
+
+				@Override
+				protected void onPostExecute(Object response) {
+					ModelResult result = (ModelResult) response;
+					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+						List<Entity> entities = (List<Entity>) result.data;
+						Collections.sort(entities, new ServiceBase.SortByPositionSortDate());
+						for (Entity entity : entities) {
+							Photo photo = entity.getPhoto();
+							ImageResult imageResult = photo.getAsImageResult();
+							imageResult.setPhoto(photo);
+							imageResult.getThumbnail().setHeight(100L);
+							mImages.add(imageResult);
+						}
+					}
+					mGridView.setAdapter(new EndlessImageAdapter(mImages));
+					hideBusy();
+				}
+			}.execute();
+
+		}
+		else if (mPlacePhotoMode || (mQuery != null && !mQuery.equals(""))) {
 			mGridView.setAdapter(new EndlessImageAdapter(mImages));
 		}
 	}
@@ -631,7 +679,8 @@ public class PhotoPicker extends BaseBrowse implements IList {
 				holder.data = itemData;
 				holder.photoView.setTag(itemData.getThumbnail().getUrl());
 				holder.photoView.getImageView().setImageBitmap(null);
-				mDrawableManager.fetchDrawableOnThread(itemData.getThumbnail().getUrl(), holder);
+				Thumbnail thumbnail = itemData.getThumbnail();
+				mDrawableManager.fetchDrawableOnThread(thumbnail.getUrl(), holder, thumbnail.getHeight() != null ? thumbnail.getHeight().intValue() : null);
 			}
 			return view;
 		}
@@ -654,7 +703,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		}
 
 		@SuppressLint("HandlerLeak")
-		private void fetchDrawableOnThread(final String uri, final ViewHolder holder) {
+		private void fetchDrawableOnThread(final String uri, final ViewHolder holder, final Integer size) {
 
 			synchronized (mBitmapCache) {
 				if (mBitmapCache.containsKey(uri) && mBitmapCache.get(uri).get() != null) {
@@ -683,7 +732,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 				@Override
 				public void run() {
 					Thread.currentThread().setName("DrawableManagerFetch");
-					final Drawable drawable = fetchDrawable(uri);
+					final Drawable drawable = fetchDrawable(uri, size);
 					final Message message = handler.obtainMessage(1, drawable);
 					handler.sendMessage(message);
 				}
@@ -691,7 +740,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 			thread.start();
 		}
 
-		private Drawable fetchDrawable(final String uri) {
+		private Drawable fetchDrawable(final String uri, final Integer size) {
 
 			final ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(uri)
@@ -703,7 +752,13 @@ public class PhotoPicker extends BaseBrowse implements IList {
 			if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 				final byte[] imageBytes = (byte[]) serviceResponse.data;
-				final Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+				Bitmap bitmap = null;
+				if (size != null) {
+					bitmap = BitmapManager.getInstance().bitmapForByteArraySampled(imageBytes, size, null);
+				}
+				else {
+					bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+				}
 
 				if (bitmap == null) {
 					throw new IllegalStateException("Stream could not be decoded to a bitmap: " + uri);

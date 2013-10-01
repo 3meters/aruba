@@ -90,6 +90,13 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	protected Uri				mMediaFileUri;
 	protected File				mMediaFile;
 	protected String			mPhotoSource;
+	
+	protected Integer			mInsertProgressResId = R.string.progress_saving;
+	protected Integer			mUpdateProgressResId = R.string.progress_updating;
+	protected Integer			mDeleteProgressResId = R.string.progress_deleting;
+	protected Integer			mInsertedResId = R.string.alert_inserted;
+	protected Integer			mUpdatedResId = R.string.alert_updated;
+	protected Integer			mDeletedResId = R.string.alert_deleted;
 
 	/* Inputs */
 	protected Entity			mEntity;
@@ -175,7 +182,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	public void bind(BindingMode mode) {
 		if (!mEditing && mEntity == null && mEntitySchema != null) {
 			mEntity = Entity.makeEntity(mEntitySchema);
-			setActivityTitle("new " + mEntity.schema);
+			
+			String schema = mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE) ? Constants.SCHEMA_REMAP_PICTURE : mEntity.schema;
+			setActivityTitle("new " + schema);
 			mEntity.creator = Aircandi.getInstance().getUser();
 			mEntity.creatorId = Aircandi.getInstance().getUser().id;
 		}
@@ -187,8 +196,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (mEntity != null) {
 
 			final Entity entity = mEntity;
-			if (mEditing) {
-				setActivityTitle(mEntity.name);
+			if (mEditing) {				
+				String schema = mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE) ? Constants.SCHEMA_REMAP_PICTURE : mEntity.schema;
+				String title = !TextUtils.isEmpty(mEntity.name) ? mEntity.name : schema;
+				setActivityTitle(title);
 			}
 
 			/* Content */
@@ -215,7 +226,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 			/* Shortcuts */
 
-			drawShortcuts(entity);
+			if (findViewById(R.id.applinks) != null) {
+				drawShortcuts(entity);
+			}
 
 			/* Creator block */
 			final UserView creator = (UserView) findViewById(R.id.created_by);
@@ -223,7 +236,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 			UI.setVisibility(creator, View.GONE);
 			UI.setVisibility(editor, View.GONE);
-			
+
 			if (mEditing) {
 				if (creator != null
 						&& entity.creator != null
@@ -237,7 +250,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				/* Editor block */
 
-				if (editor != null && entity.modifier != null 
+				if (editor != null && entity.modifier != null
 						&& !entity.modifier.id.equals(ServiceConstants.ADMIN_USER_ID)
 						&& !entity.modifier.id.equals(ServiceConstants.ANONYMOUS_USER_ID)) {
 					if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
@@ -273,62 +286,60 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 	protected void drawShortcuts(Entity entity) {
 
-		if (findViewById(R.id.applinks) != null) {
-			/*
-			 * We are expecting a builder button with a viewgroup to
-			 * hold a set of images.
-			 */
-			final BuilderButton button = (BuilderButton) findViewById(R.id.applinks);
+		/*
+		 * We are expecting a builder button with a viewgroup to
+		 * hold a set of images.
+		 */
+		final BuilderButton button = (BuilderButton) findViewById(R.id.applinks);
 
-			List<Shortcut> shortcuts = null;
+		List<Shortcut> shortcuts = null;
 
-			if (mApplinks != null) {
-				shortcuts = new ArrayList<Shortcut>();
-				for (Entity applink : mApplinks) {
-					Shortcut shortcut = ((Applink) applink).getShortcut();
-					shortcuts.add(shortcut);
+		if (mApplinks != null) {
+			shortcuts = new ArrayList<Shortcut>();
+			for (Entity applink : mApplinks) {
+				Shortcut shortcut = ((Applink) applink).getShortcut();
+				shortcuts.add(shortcut);
+			}
+		}
+		else {
+			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, false);
+			shortcuts = (List<Shortcut>) entity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
+		}
+
+		Collections.sort(shortcuts, new Shortcut.SortByPositionSortDate());
+
+		if (shortcuts.size() == 0) {
+			button.getTextView().setVisibility(View.VISIBLE);
+			button.getViewGroup().setVisibility(View.GONE);
+		}
+		else {
+			button.getTextView().setVisibility(View.GONE);
+			button.getViewGroup().setVisibility(View.VISIBLE);
+			button.getViewGroup().removeAllViews();
+			final LayoutInflater inflater = LayoutInflater.from(this);
+			final int sizePixels = UI.getRawPixelsForDisplayPixels(this, 30);
+			final int marginPixels = UI.getRawPixelsForDisplayPixels(this, 5);
+
+			/* We only show the first five */
+			int shortcutCount = 0;
+			for (Shortcut shortcut : shortcuts) {
+				if (shortcutCount >= 5) {
+					break;
 				}
-			}
-			else {
-				ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
-				shortcuts = (List<Shortcut>) entity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
-			}
+				View view = inflater.inflate(R.layout.temp_entity_edit_link_item, null);
+				AirImageView photoView = (AirImageView) view.findViewById(R.id.photo);
+				photoView.setSizeHint(sizePixels);
 
-			Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());
+				UI.drawPhoto(photoView, shortcut.getPhoto());
 
-			if (shortcuts.size() == 0) {
-				button.getTextView().setVisibility(View.VISIBLE);
-				button.getViewGroup().setVisibility(View.GONE);
-			}
-			else {
-				button.getTextView().setVisibility(View.GONE);
-				button.getViewGroup().setVisibility(View.VISIBLE);
-				button.getViewGroup().removeAllViews();
-				final LayoutInflater inflater = LayoutInflater.from(this);
-				final int sizePixels = UI.getRawPixelsForDisplayPixels(this, 30);
-				final int marginPixels = UI.getRawPixelsForDisplayPixels(this, 5);
-
-				/* We only show the first five */
-				int shortcutCount = 0;
-				for (Shortcut shortcut : shortcuts) {
-					if (shortcutCount >= 5) {
-						break;
-					}
-					View view = inflater.inflate(R.layout.temp_entity_edit_link_item, null);
-					AirImageView photoView = (AirImageView) view.findViewById(R.id.photo);
-					photoView.setSizeHint(sizePixels);
-
-					UI.drawPhoto(photoView, shortcut.getPhoto());
-
-					LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
-					params.setMargins(marginPixels
-							, marginPixels
-							, marginPixels
-							, marginPixels);
-					view.setLayoutParams(params);
-					button.getViewGroup().addView(view);
-					shortcutCount++;
-				}
+				LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
+				params.setMargins(marginPixels
+						, marginPixels
+						, marginPixels
+						, marginPixels);
+				view.setLayoutParams(params);
+				button.getViewGroup().addView(view);
+				shortcutCount++;
 			}
 		}
 	}
@@ -391,7 +402,12 @@ public abstract class BaseEntityEdit extends BaseEdit {
 						mEntity.photo = new Photo(null, null, null, null, PhotoSource.cache);
 						mEntity.photo.setBitmap(imageKey, bitmap); // Could get set to null if we are using the default 
 						mEntity.photo.setBitmapLocalOnly(bitmapLocalOnly);
-						UI.drawPhoto(mPhotoView, mEntity.photo, null);
+						runOnUiThread(new Runnable(){
+
+							@Override
+							public void run() {
+								UI.drawPhoto(mPhotoView, mEntity.photo, null);
+							}});
 					}
 				}
 			}
@@ -627,7 +643,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					List<String> schemas = new ArrayList<String>();
 					linkTypes.add(Constants.TYPE_LINK_CONTENT);
 					schemas.add(Constants.SCHEMA_ENTITY_APPLINK);
-					
+
 					Cursor cursor = new Cursor()
 							.setLimit(ServiceConstants.PAGE_SIZE_APPLINKS)
 							.setSort(Maps.asMap("modifiedDate", -1))
@@ -726,7 +742,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 			@Override
 			protected void onPreExecute() {
-				mBusyManager.showBusy(R.string.progress_saving);
+				mBusyManager.showBusy(mInsertProgressResId);
 			}
 
 			@Override
@@ -748,7 +764,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				if (mParentId != null) {
 					mEntity.toId = mParentId;
-					link = new Link(mParentId, getLinkType(), true);
+					link = new Link(mParentId, getLinkType(), mEntity.schema, true);
 					if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 						link.strong = false;
 					}
@@ -784,7 +800,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 						 */
 					}
 
-					UI.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
+					UI.showToastNotification(getString(mInsertedResId), Toast.LENGTH_SHORT);
 					final IntentBuilder intentBuilder = new IntentBuilder().setEntityId(insertedEntity.id);
 					setResult(Constants.RESULT_ENTITY_INSERTED, intentBuilder.create());
 				}
@@ -815,7 +831,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 			@Override
 			protected void onPreExecute() {
-				mBusyManager.showBusy(R.string.progress_saving);
+				mBusyManager.showBusy(mUpdateProgressResId);
 			}
 
 			@Override
@@ -864,7 +880,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				hideBusy();
 				if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
-					UI.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
+					UI.showToastNotification(getString(mUpdatedResId), Toast.LENGTH_SHORT);
 					setResult(Constants.RESULT_ENTITY_UPDATED);
 					finish();
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FORM_TO_PAGE);
@@ -888,7 +904,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 			@Override
 			protected void onPreExecute() {
-				mBusyManager.showBusy(R.string.progress_deleting);
+				mBusyManager.showBusy(mDeleteProgressResId);
 			}
 
 			@Override
@@ -910,7 +926,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					 * We either go back to a list or to radar.
 					 */
 					hideBusy();
-					UI.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
+					UI.showToastNotification(getString(mDeletedResId), Toast.LENGTH_SHORT);
 					setResult(Constants.RESULT_ENTITY_DELETED);
 					finish();
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FORM_TO_PAGE_AFTER_DELETE);

@@ -12,7 +12,6 @@ import com.aircandi.R;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.service.objects.AirMarker;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutSettings;
@@ -32,7 +31,7 @@ public class Maps {
 			Bundle extras = new Bundle();
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
 			settings.appClass = Places.class;
-			List<Shortcut> shortcuts = (List<Shortcut>) entity.getShortcuts(settings, new Link.SortByModifiedDate(), null);
+			List<Shortcut> shortcuts = (List<Shortcut>) entity.getShortcuts(settings, null, null);
 			if (shortcuts.size() > 0) {
 				final List<String> markerStrings = new ArrayList<String>();
 				for (Shortcut shortcut : shortcuts) {

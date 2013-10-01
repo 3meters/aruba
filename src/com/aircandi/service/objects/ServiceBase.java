@@ -1,5 +1,6 @@
 package com.aircandi.service.objects;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +23,7 @@ import com.aircandi.service.SerializedName;
 
 @SuppressWarnings("ucd")
 public abstract class ServiceBase extends ServiceObject {
-	
+
 	private static final long	serialVersionUID	= -3650173415935365107L;
 	/*
 	 * Annotation syntax:
@@ -52,6 +53,8 @@ public abstract class ServiceBase extends ServiceObject {
 	public Boolean				locked				= false;
 	@Expose
 	public Boolean				system				= false;
+	@Expose
+	public Number				position;
 
 	/* PropertyValue bags */
 
@@ -80,6 +83,8 @@ public abstract class ServiceBase extends ServiceObject {
 	public Number				modifiedDate;
 	@Expose(serialize = false, deserialize = true)
 	public Number				activityDate;
+	@Expose(serialize = false, deserialize = true)
+	public Number				sortDate;
 
 	/* Users (synthesized for the client) */
 
@@ -105,6 +110,10 @@ public abstract class ServiceBase extends ServiceObject {
 
 	public abstract String getCollection();
 
+	public Integer getPosition() {
+		return position != null ? position.intValue() : 0;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Copy and serialization
 	// --------------------------------------------------------------------------------------------
@@ -118,6 +127,7 @@ public abstract class ServiceBase extends ServiceObject {
 		base.enabled = (Boolean) map.get("enabled");
 		base.locked = (Boolean) map.get("locked");
 		base.system = (Boolean) map.get("system");
+		base.position = (Number) map.get("position");
 		base.data = (HashMap<String, Object>) map.get("data");
 		base.cdata = (HashMap<String, Object>) map.get("cdata");
 
@@ -128,6 +138,7 @@ public abstract class ServiceBase extends ServiceObject {
 		base.createdDate = (Number) map.get("createdDate");
 		base.modifiedDate = (Number) map.get("modifiedDate");
 		base.activityDate = (Number) map.get("activityDate");
+		base.sortDate = (Number) map.get("sortDate");
 
 		if (map.get("creator") != null) {
 			base.creator = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"), nameMapping);
@@ -172,6 +183,31 @@ public abstract class ServiceBase extends ServiceObject {
 	// --------------------------------------------------------------------------------------------
 	// Classes
 	// --------------------------------------------------------------------------------------------
+
+	public static class SortByPositionSortDate implements Comparator<ServiceBase> {
+
+		@Override
+		public int compare(ServiceBase object1, ServiceBase object2) {
+			if (object1.getPosition().intValue() < object2.getPosition().intValue()) {
+				return -1;
+			}
+			else if (object1.getPosition().intValue() == object2.getPosition().intValue()) {
+				if (object1.sortDate == null || object2.sortDate == null) {
+					return 0;
+				}
+				else {
+					if (object1.sortDate.longValue() < object2.sortDate.longValue()) {
+						return 1;
+					}
+					else if (object1.sortDate.longValue() == object2.sortDate.longValue()) {
+						return 0;
+					}
+					return -1;
+				}
+			}
+			return 1;
+		}
+	}
 
 	/**
 	 * object: All properties are serialized including nulls.</br>

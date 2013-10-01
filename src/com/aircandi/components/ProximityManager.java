@@ -242,7 +242,7 @@ public class ProximityManager {
 		String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
 
 		serviceResponse = mEntityCache.loadEntitiesByProximity(beaconIds
-				, LinkOptions.getDefault(LinkProfile.LINKS_FOR_PROXIMITY)
+				, LinkOptions.getDefault(LinkProfile.LINKS_FOR_BEACONS)
 				, null
 				, registrationId
 				, Aircandi.stopwatch1);

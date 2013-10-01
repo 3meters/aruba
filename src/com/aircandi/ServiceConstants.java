@@ -37,7 +37,7 @@ public final class ServiceConstants {
 	public static final String	_URL_PROXIBASE_SERVICE							= "https://api.aircandi.com";																													// production																					//$NON-NLS-1$
 	public static final String	__URL_PROXIBASE_SERVICE							= "https://api.aircandi.com:444";																												// staging																									//$NON-NLS-1$
 
-	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS		= "/img/applinks/";																															//$NON-NLS-1$
+	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_APPLINK_ICONS		= "/img/applinks/";																															//$NON-NLS-1$
 	public static final String	PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES		= "/img/categories/";																															//$NON-NLS-1$
 
 	public static final String	URL_PROXIBASE_SERVICE_REST						= URL_PROXIBASE_SERVICE + "/data/";																											//$NON-NLS-1$
@@ -47,7 +47,7 @@ public final class ServiceConstants {
 	public static final String	URL_PROXIBASE_SERVICE_PLACES					= URL_PROXIBASE_SERVICE + "/places/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_APPLINKS					= URL_PROXIBASE_SERVICE + "/applinks/";																										//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_AUTH						= URL_PROXIBASE_SERVICE + "/auth/";																											//$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS		= URL_PROXIBASE_SERVICE + PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS;																			//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_ASSETS_APPLINK_ICONS		= URL_PROXIBASE_SERVICE + PATH_PROXIBASE_SERVICE_ASSETS_APPLINK_ICONS;																			//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_ASSETS_CATEGORIES			= URL_PROXIBASE_SERVICE + PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES;																			//$NON-NLS-1$
 
 	public static final String	URL_PROXIBASE_MEDIA_IMAGES						= "http://aircandi-images.s3.amazonaws.com/";																									//$NON-NLS-1$
@@ -58,14 +58,14 @@ public final class ServiceConstants {
 	public static final String	USER_AGENT_NEXUS_S								= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";	//$NON-NLS-1$
 
 	public static final int		PROXIMITY_BEACON_COVERAGE						= 3;
-	
+
 	public static final int		LIMIT_LINKS_DEFAULT								= 50;
 	public static final int		LIMIT_LINKS_LIKE								= 50;
 	public static final int		LIMIT_LINKS_CREATE								= 50;
 	public static final int		LIMIT_LINKS_WATCH								= 50;
-	public static final int		LIMIT_PLACES_RADAR							= 50;	
+	public static final int		LIMIT_PLACES_RADAR								= 50;
 
-	public static final int		PAGE_SIZE_APPLINKS								= -1;
+	public static final int		PAGE_SIZE_APPLINKS								= 100;
 	public static final int		PAGE_SIZE_CANDIGRAMS							= 30;
 	public static final int		PAGE_SIZE_COMMENTS								= 30;
 	public static final int		PAGE_SIZE_PICTURES								= 30;

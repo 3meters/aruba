@@ -24,7 +24,6 @@ import com.aircandi.service.RequestListener;
 import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
-import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.ui.base.BasePicker;
 import com.aircandi.ui.widgets.AirImageView;
@@ -70,7 +69,7 @@ public class ShortcutPicker extends BasePicker {
 
 			/* Show default photo based on the type of the shortcut set */
 			
-			Photo photo = new Photo(Entity.getDefaultPhotoUri(shortcut.schema, shortcut.app), null, null, null, PhotoSource.assets);
+			Photo photo = Entity.getDefaultPhoto(shortcut.schema, shortcut.app);
 			final BitmapRequest bitmapRequest = new BitmapRequest()
 					.setBitmapUri(photo.getUri())
 					.setBitmapRequestor(shortcut)

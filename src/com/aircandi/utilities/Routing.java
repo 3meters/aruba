@@ -122,7 +122,7 @@ public final class Routing {
 			IntentBuilder intentBuilder = new IntentBuilder(activity, EntityList.class)
 					.setEntityId(entity.id)
 					.setListLinkType(settings.linkType)
-					.setListLinkSchema(settings.linkSchema)
+					.setListLinkSchema(settings.linkTargetSchema)
 					.setListLinkDirection(settings.direction.name())
 					.setExtras(extras);
 

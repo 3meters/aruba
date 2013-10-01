@@ -87,7 +87,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 		 * entities.
 		 */
 		if (mAdapter == null) {
-			Collections.sort(mEntities, new Entity.SortByPositionModifiedDate());
+			Collections.sort(mEntities, new Entity.SortByPositionSortDate());
 
 			if (mEntities.size() == 0) {
 				mMessage.setText(R.string.sources_builder_empty);
@@ -189,7 +189,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 				mEntities.get(i).position = mEntities.get(i).position.intValue() - 2;
 			}
 		}
-		Collections.sort(mEntities, new Entity.SortByPosition());
+		Collections.sort(mEntities, new Entity.SortByPositionSortDate());
 		Integer position = 0;
 		for (Entity entity : mEntities) {
 			entity.position = position;
@@ -206,7 +206,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 				mEntities.get(i).position = mEntities.get(i).position.intValue() + 2;
 			}
 		}
-		Collections.sort(mEntities, new Entity.SortByPosition());
+		Collections.sort(mEntities, new Entity.SortByPositionSortDate());
 		Integer position = 0;
 		for (Entity entity : mEntities) {
 			entity.position = position;

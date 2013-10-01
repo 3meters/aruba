@@ -102,7 +102,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		if (map.get("user") != null) {
 			photo.user = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"), nameMapping);
 		}
-		
+
 		if (map.get("photoPlaceholder") != null) {
 			photo.photoPlaceholder = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photoPlaceholder"), nameMapping);
 		}
@@ -110,7 +110,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		if (map.get("photoBroken") != null) {
 			photo.photoBroken = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photoBroken"), nameMapping);
 		}
-		
+
 		return photo;
 	}
 
@@ -182,8 +182,8 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 				if (source.equals(PhotoSource.aircandi)) {
 					photoUri = ServiceConstants.URL_PROXIBASE_MEDIA_IMAGES + photoUri;
 				}
-				else if (source.equals(PhotoSource.assets)) {
-					photoUri = ServiceConstants.URL_PROXIBASE_SERVICE + photoUri;
+				else if (source.equals(PhotoSource.assets_applinks)) {
+					photoUri = ServiceConstants.URL_PROXIBASE_SERVICE_ASSETS_APPLINK_ICONS + photoUri;
 				}
 				else if (source.equals(PhotoSource.assets_categories)) {
 					photoUri = ServiceConstants.URL_PROXIBASE_SERVICE_ASSETS_CATEGORIES + photoUri;
@@ -274,11 +274,11 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	// --------------------------------------------------------------------------------------------
 	// Classes
 	// --------------------------------------------------------------------------------------------
-	
+
 	public static class PhotoSource {
 		public static String	external			= "external";			// set in photo picker when using third party photo.
 		public static String	aircandi			= "aircandi";			// set when photo is stored by us and used to construct full uri to image data (s3)
-		public static String	assets				= "assets";				// used when targeting something like the default applink icons
+		public static String	assets_applinks		= "assets.applinks";	// used when targeting something like the default applink icons
 		public static String	assets_categories	= "assets.categories";	// ditto to above
 		public static String	facebook			= "facebook";			// set if photo comes from facebook but not currently used
 		public static String	twitter				= "twitter";			// set if photo comes from twitter but not currently used

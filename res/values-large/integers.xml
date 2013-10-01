@@ -8,5 +8,6 @@
     <integer name="limit_links_watch_default">22</integer>
     <integer name="limit_links_create_default">22</integer>
     <integer name="limit_links_proximity_default">22</integer>
+    <integer name="limit_links_content_default">1</integer>
     
 </resources>

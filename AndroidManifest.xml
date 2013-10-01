@@ -31,7 +31,6 @@
     <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="com.aircandi.permission.MAPS_RECEIVE" />
@@ -60,9 +59,15 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/name_app"
         android:theme="@style/aircandi_theme_midnight" >
+
+        <!-- Service keys -->
+
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCF9Nlm-CGETdgwP1ktNyAoKVgcUGuMzTA" />
+        <meta-data
+            android:name="com.crashlytics.ApiKey"
+            android:value="3f03e3891f0d0c56c4bc1c393db5efe2aa0f90c7" />
 
         <!-- Services -->
 
@@ -278,12 +283,6 @@
                 <category android:name="android.intent.category.PREFERENCE" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="org.acra.CrashReportDialog"
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="true"
-            android:launchMode="singleInstance"
-            android:theme="@android:style/Theme.Dialog" />
     </application>
 
     <!--
@@ -294,8 +293,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
     <uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS" />
-    <uses-permission android:name="android.permission.READ_LOGS" />
-
-    -->
+    <uses-permission android:name="android.permission.READ_LOGS" />    -->
 
 </manifest>

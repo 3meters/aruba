@@ -287,7 +287,7 @@ public class PlaceForm extends BaseEntityForm {
 		settings.appClass = Applinks.class;
 		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, null);
 		if (shortcuts.size() > 0) {
-			Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());
+			Collections.sort(shortcuts, new Shortcut.SortByPositionSortDate());
 			drawShortcuts(shortcuts
 					, settings
 					, R.string.section_place_shortcuts_applinks
@@ -300,9 +300,9 @@ public class PlaceForm extends BaseEntityForm {
 		/* service applink shortcuts */
 		settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
 		settings.appClass = Applinks.class;
-		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionModifiedDate());
+		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
 		if (shortcuts.size() > 0) {
-			Collections.sort(shortcuts, new Shortcut.SortByPositionModifiedDate());
+			Collections.sort(shortcuts, new Shortcut.SortByPositionSortDate());
 			drawShortcuts(shortcuts
 					, settings
 					, null

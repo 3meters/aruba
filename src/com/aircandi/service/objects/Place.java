@@ -85,17 +85,6 @@ public class Place extends Entity implements Cloneable, Serializable {
 		return photo;
 	}
 
-	public Link getLink(Beacon beacon, String linkType) {
-		if (linksOut != null) {
-			for (Link link : linksOut) {
-				if (link.toId.equals(beacon.id) && link.type.equals(linkType)) {
-					return link;
-				}
-			}
-		}
-		return null;
-	}
-
 	public String getBeaconId() {
 		final Beacon beacon = getActiveBeacon(Constants.TYPE_LINK_PROXIMITY, true);
 		if (beacon != null) {

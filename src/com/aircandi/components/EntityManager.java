@@ -779,7 +779,7 @@ public class EntityManager {
 			 * this entity at either end and clean them up including any counts.
 			 */
 			Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
-			mEntityCache.removeLink(entityId, Constants.TYPE_LINK_CREATE, entity.schema, Aircandi.getInstance().getUser().id);
+			mEntityCache.removeLink(Aircandi.getInstance().getUser().id, entityId, Constants.TYPE_LINK_CREATE);
 
 			if (entity != null && entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 				mActivityDate = DateTime.nowDate().getTime();
@@ -897,7 +897,7 @@ public class EntityManager {
 						}
 					}
 					else {
-						link = new Link(beacon.id, Constants.TYPE_LINK_PROXIMITY, false, entity.id);
+						link = new Link(entity.id, beacon.id, Constants.TYPE_LINK_PROXIMITY, Constants.SCHEMA_ENTITY_BEACON, false);
 						link.proximity = new Proximity();
 						link.proximity.signal = beacon.signal;
 						if (primary) {
@@ -974,7 +974,7 @@ public class EntityManager {
 			 * Fail could be because of ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
 			 * prevents any user from liking the same entity more than once.
 			 */
-			mEntityCache.removeLink(toId, type, null, fromId);
+			mEntityCache.removeLink(fromId, toId, type);
 		}
 
 		return result;
@@ -1080,30 +1080,18 @@ public class EntityManager {
 		return cacheStamp;
 	}
 
-	public ModelResult registerDevice(Device device) {
-		ModelResult result = new ModelResult();
-
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST + Device.collectionId)
-				.setRequestType(RequestType.INSERT)
-				.setRequestBody(Json.objectToJson(device, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE))
-				.setIgnoreResponseData(true)
-				.setSession(Aircandi.getInstance().getUser().session)
-				.setResponseFormat(ResponseFormat.JSON);
-
-		result.serviceResponse = dispatch(serviceRequest);
-		return result;
-	}
-
-	public ModelResult unregisterDevice(String registrationId) {
+	public ModelResult registerDevice(Boolean register, Device device) {
+		
 		ModelResult result = new ModelResult();
 		final Bundle parameters = new Bundle();
-		parameters.putString("registrationId", registrationId);
+		parameters.putBoolean("register", register);
+		parameters.putString("device", "object:" + Json.objectToJson(device, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "unregisterDevice")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "registerDevice")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
+				.setSession(Aircandi.getInstance().getUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);

@@ -2,10 +2,14 @@ package com.aircandi.ui.edit;
 
 import java.util.List;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -34,6 +38,9 @@ import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Routing;
+import com.aircandi.utilities.Routing.Route;
+import com.aircandi.utilities.UI;
 
 public class CandigramEdit extends BaseEntityEdit {
 
@@ -59,6 +66,11 @@ public class CandigramEdit extends BaseEntityEdit {
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
+		
+		mInsertProgressResId = R.string.progress_starting;
+		mDeleteProgressResId = R.string.progress_stopping;
+		mInsertedResId = R.string.alert_started;
+		mDeletedResId = R.string.alert_stopped;
 
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
 		mSpinnerItem = getThemeTone().equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
@@ -322,6 +334,7 @@ public class CandigramEdit extends BaseEntityEdit {
 			mViewFlipper.setInAnimation(this, R.anim.slide_in_right);
 			mViewFlipper.setOutAnimation(this, R.anim.slide_out_left);
 			mViewFlipper.setDisplayedChild(mViewFlipper.getDisplayedChild() + 1);
+			UI.hideSoftInput(this, mViewFlipper.getWindowToken());
 		}
 	}
 
@@ -331,6 +344,7 @@ public class CandigramEdit extends BaseEntityEdit {
 			mViewFlipper.setInAnimation(this, R.anim.slide_in_left);
 			mViewFlipper.setOutAnimation(this, R.anim.slide_out_right);
 			mViewFlipper.setDisplayedChild(mViewFlipper.getDisplayedChild() - 1);
+			UI.hideSoftInput(this, mViewFlipper.getWindowToken());
 		}
 	}
 
@@ -361,6 +375,32 @@ public class CandigramEdit extends BaseEntityEdit {
 		}
 	}
 
+	@Override
+	protected void confirmDirtyExit() {
+		final AlertDialog dialog = Dialogs.alertDialog(null
+				, getResources().getString(R.string.alert_dirty_exit_title_candigram)
+				, getResources().getString(R.string.alert_dirty_exit_message_candigram)
+				, null
+				, CandigramEdit.this
+				, R.string.alert_dirty_start
+				, android.R.string.cancel
+				, R.string.alert_dirty_discard
+				, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							onAccept();
+						}
+						else if (which == Dialog.BUTTON_NEUTRAL) {
+							Routing.route(CandigramEdit.this, Route.CANCEL_FORCE);
+						}
+					}
+				}
+				, null);
+		dialog.setCanceledOnTouchOutside(false);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
@@ -380,6 +420,27 @@ public class CandigramEdit extends BaseEntityEdit {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_candigram_type)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			return false;
+		}
+
+		if (candigram.photo == null && TextUtils.isEmpty(candigram.name) && TextUtils.isEmpty(candigram.description)) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_candigram_content)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			return false;
+		}
+		else if (candigram.photo == null) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_candigram_photo)
 					, null
 					, this
 					, android.R.string.ok

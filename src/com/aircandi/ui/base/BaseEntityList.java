@@ -525,13 +525,8 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			for (Entity entity : mMoreEntities) {
 				list.add(entity);
 			}
-			
-			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-				list.sort(new Entity.SortByPositionModifiedDate());
-			}
-			else {
-				list.sort(new Entity.SortByLinkModifiedDate());
-			}
+
+			list.sort(new Entity.SortByPositionSortDate()); // Position is ignored if null
 			notifyDataSetChanged();
 		}
 	}

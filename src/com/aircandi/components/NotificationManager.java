@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
@@ -85,7 +86,7 @@ public class NotificationManager {
 					device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, AircandiForm.class);
 					device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
 
-					ModelResult result = EntityManager.getInstance().registerDevice(device);
+					ModelResult result = EntityManager.getInstance().registerDevice(true, device);
 
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 						Logger.i(this, "GCM: device registered with Aircandi notification service");
@@ -107,10 +108,11 @@ public class NotificationManager {
 				Thread.currentThread().setName("UnregisterDevice");
 
 				/* service notifications */
-				if (registrationId != null && registrationId.length() > 0) {
+				if (!TextUtils.isEmpty(registrationId)) {
 
 					Logger.i(this, "GCM: Unregistering device with Aircandi notification service");
-					ModelResult result = EntityManager.getInstance().unregisterDevice(registrationId);
+					Device device = new Device(Aircandi.getInstance().getUser().id, registrationId);
+					ModelResult result = EntityManager.getInstance().registerDevice(false, device);
 
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 						Logger.i(this, "GCM: device successfully unregistered with Aircandi notification service");

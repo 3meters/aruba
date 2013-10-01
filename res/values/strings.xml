@@ -112,8 +112,10 @@
     <string name="alert_wifi_settings">Settings</string>
     <string name="alert_wifi_cancel" tools:ignore="ButtonCase">Cancel</string>
     <string name="alert_deleted">deleted</string>
-    <string name="alert_updated">saved</string>
+    <string name="alert_updated">updated</string>
     <string name="alert_inserted">saved</string>
+    <string name="alert_started">started</string>
+    <string name="alert_stopped">stopped</string>
     <string name="alert_signed_in">signed in as</string>
     <string name="alert_password_changed">password changed for</string>
     <string name="alert_about_title">about</string>
@@ -129,10 +131,14 @@
     <!-- Alerts: confirm dirty -->
 
     <string name="alert_dirty_save">Save</string>
+    <string name="alert_dirty_start">Start</string>
+    <string name="alert_dirty_send">Send</string>
     <string name="alert_dirty_discard">Discard</string>
     <string name="alert_dirty_exit_title">Editing</string>
     <string name="alert_dirty_exit_message">Do you want to save your editing changes?</string>
-
+    <string name="alert_dirty_exit_title_candigram">Candigram</string>
+    <string name="alert_dirty_exit_message_candigram">Do you want to start your candigram?</string>
+    
     <!-- Alerts: confirm delete -->
 
     <string name="alert_delete_title">Confirm delete</string>
@@ -185,6 +191,7 @@
     <string name="error_missing_candigram_hops">Select the maximum number of visits.</string>
     <string name="error_missing_candigram_duration">Select the length of visit.</string>
     <string name="error_missing_candigram_photo">Select a photo.</string>
+    <string name="error_missing_candigram_content">Select a photo or enter a message.</string>
     <string name="error_missing_invite_email">Enter at least one email address.</string>
     
     <!-- Errors: network or location -->
@@ -225,6 +232,9 @@
 
     <string name="progress_signing_out">Signing out&#8230;</string>
     <string name="progress_saving">Saving&#8230;</string>
+    <string name="progress_starting">Starting&#8230;</string>
+    <string name="progress_stopping">Starting&#8230;</string>
+    <string name="progress_updating">Updating&#8230;</string>
     <string name="progress_sending">Sending&#8230;</string>
     <string name="progress_tuning">Tuning&#8230;</string>
     <string name="progress_deleting">Deleting&#8230;</string>
@@ -433,7 +443,7 @@
     <string name="candigram_wizard_content">Add a picture, subject or message to your candigram.</string>
     <string name="candigram_wizard_settings">Choose how your candigram travels and what other aircandi users can do with it.</string>
     
-    <string name="candigram_button_finish">send</string>
+    <string name="candigram_button_finish">start</string>
     <string name="candigram_type_tour_verbose">touring</string>
     <string name="candigram_type_bounce_verbose">bouncing</string>
     <string name="candigram_label_place">currently at:</string>
@@ -493,7 +503,7 @@
     <string name="signin_message_general">Sign in to create and share candi with other Aircandi users!</string>
     <string name="picture_search_loading">loading…</string>
 
-    <!-- Crash reporting -->
+    <!-- Crash reporting 
 
     <string name="crash_toast_text" tools:ignore="UnusedResources">Ouch! Aircandi stopped, but a report can be sent to help us fix the error!</string>
     <string name="crash_sent_toast_text">Ouch! Aircandi stopped, but a report has been sent to help us fix the error!</string>
@@ -514,6 +524,6 @@
     <string name="pref_acra_user_email_summary" tools:ignore="UnusedResources,UnusedResources">Optionally include your email address</string>
     <string name="pref_acra_alwaysaccept">Auto accept</string>
     <string name="pref_acra_alwaysaccept_enabled">Reports always sent</string>
-    <string name="pref_acra_alwaysaccept_disabled">Report confirmation required</string>
+    <string name="pref_acra_alwaysaccept_disabled">Report confirmation required</string>-->
 
 </resources>

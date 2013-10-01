@@ -24,7 +24,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	@Expose
 	public Entity				entity;
 	@Expose
-	public User					user;
+	public User					user;										// can be null
 	@Expose
 	public Entity				toEntity;
 	@Expose

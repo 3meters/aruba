@@ -225,7 +225,6 @@ public class ApplinkEdit extends BaseEntityEdit {
 			mEntity.data = new HashMap<String, Object>();
 		}
 		mEntity.data.put("origin", "user");
-		mEntity.photo = mEntity.getDefaultPhoto();
 		((Applink) mEntity).appId = null;
 		((Applink) mEntity).appUrl = null;
 	}

@@ -93,9 +93,7 @@ public class CandiView extends RelativeLayout {
 				}
 			}
 			else {
-				if (mEntity != null
-						&& entity.id != null && mEntity.id != null
-						&& entity.id.equals(mEntity.id)) {
+				if (mEntity != null && entity.id != null && mEntity.id != null && entity.id.equals(mEntity.id)) {
 					mEntity = entity;
 					showDistance(entity);
 					return;

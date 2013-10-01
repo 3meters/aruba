@@ -1,7 +1,6 @@
 package com.aircandi.service.objects;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,6 +34,8 @@ public class Link extends ServiceBase {
 	public Boolean				strong;
 	@Expose
 	public Boolean				inactive = false;
+	@Expose(serialize = false, deserialize = true)
+	public String				targetSchema;		// Used when stored in linksIn or linksOut
 
 	@Expose
 	public Proximity			proximity;
@@ -45,15 +46,17 @@ public class Link extends ServiceBase {
 
 	public Link() {}
 
-	public Link(String toId, String type, Boolean strong) {
+	public Link(String toId, String type, String targetSchema, Boolean strong) {
 		this.toId = toId;
 		this.type = type;
+		this.targetSchema = targetSchema;
 		this.strong = strong;
 	}
 
-	public Link(String toId, String type, Boolean strong, String fromId) {
+	public Link(String fromId, String toId, String type, String targetSchema, Boolean strong) {
 		this.toId = toId;
 		this.type = type;
+		this.targetSchema = targetSchema;
 		this.strong = strong;
 		this.fromId = fromId;
 	}
@@ -137,6 +140,7 @@ public class Link extends ServiceBase {
 		link.toCollectionId = (String) map.get("toCollectionId");
 		link.strong = (Boolean) map.get("strong");
 		link.inactive = (Boolean) map.get("inactive");
+		link.targetSchema = (String) map.get("targetSchema");
 
 		if (map.get("proximity") != null) {
 			link.proximity = Proximity.setPropertiesFromMap(new Proximity(), (HashMap<String, Object>) map.get("proximity"), nameMapping);
@@ -171,37 +175,7 @@ public class Link extends ServiceBase {
 	// --------------------------------------------------------------------------------------------
 	// Classes
 	// --------------------------------------------------------------------------------------------
-
-	public static class SortByModifiedDate implements Comparator<Link> {
-
-		@Override
-		public int compare(Link object1, Link object2) {
-
-			if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
-				return 1;
-			}
-			else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
-				return 0;
-			}
-			return -1;
-		}
-	}
 	
-	public static class SortByPosition implements Comparator<Entity> {
-
-		@Override
-		public int compare(Entity object1, Entity object2) {
-
-			if (object1.getPosition() < object2.getPosition()) {
-				return -1;
-			}
-			else if (object1.getPosition().equals(object2.getPosition())) {
-				return 0;
-			}
-			return 1;
-		}
-	}	
-
 	public enum Direction {
 		in,
 		out,

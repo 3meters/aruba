@@ -143,6 +143,9 @@ public class Notifications {
 				&& notification.action.equals(ActionType.MOVE)) {
 			return notification.entity.name;
 		}
+		else if (notification.user == null) {
+			return notification.entity.name;
+		}
 		else {
 			return notification.user.name;
 		}
@@ -164,6 +167,9 @@ public class Notifications {
 		if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
 				&& notification.entity.type.equals(Constants.TYPE_APP_TOUR)
 				&& notification.action.equals(ActionType.MOVE)) {
+			return notification.entity.getPhoto();
+		}
+		else if (notification.user == null) {
 			return notification.entity.getPhoto();
 		}
 		else {
