@@ -80,6 +80,7 @@ public class LocationManager {
 		 * This will produce rapid updates across all available providers until we get an acceptable
 		 * location fix.
 		 */
+		NetworkManager.getInstance().updateCrashlytics();								
 		mLocationManager.removeUpdates(mLocationListenerPendingIntent);
 
 		setLocation(null);

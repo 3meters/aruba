@@ -383,6 +383,7 @@ public class RadarFragment extends BaseFragment implements
 	public void onQueryWifiScanReceived(final QueryWifiScanReceivedEvent event) {
 
 		updateDevIndicator(event.wifiList, null);
+		NetworkManager.getInstance().updateCrashlytics();						
 		getSherlockActivity().runOnUiThread(new Runnable() {
 
 			@Override
@@ -520,7 +521,9 @@ public class RadarFragment extends BaseFragment implements
 					final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
 					if (location != null && !location.zombie) {
 
+						NetworkManager.getInstance().updateCrashlytics();								
 						mBusyManager.showBusy();
+						
 
 						new AsyncTask() {
 
@@ -726,6 +729,7 @@ public class RadarFragment extends BaseFragment implements
 			protected void onPreExecute() {
 				mPullToRefreshAttacher.setRefreshing(true);
 				showBusy();
+				NetworkManager.getInstance().updateCrashlytics();				
 			}
 
 			@Override
@@ -876,6 +880,7 @@ public class RadarFragment extends BaseFragment implements
 
 						Aircandi.wifiCount = wifiCount;
 						mDebugWifi = String.valueOf(wifiCount);
+						
 					}
 				});
 

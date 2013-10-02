@@ -13,8 +13,6 @@ import net.minidev.json.parser.ContainerFactory;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 
-import org.acra.ACRA;
-
 import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
 import com.aircandi.components.bitmaps.ImageResult;
@@ -42,6 +40,7 @@ import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
+import com.crashlytics.android.Crashlytics;
 
 public class Json {
 
@@ -272,7 +271,7 @@ public class Json {
 			 * Sometimes we get back something that isn't a json object so we
 			 * catch the exception, log it and keep going.
 			 */
-			ACRA.getErrorReporter().handleSilentException(e);
+			Crashlytics.logException(e);
 			if (BuildConfig.DEBUG) {
 				e.printStackTrace();
 			}

@@ -1,5 +1,6 @@
 package com.aircandi.utilities;
 
+import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -231,6 +232,9 @@ public final class Errors {
 				}
 				else if (exception instanceof ClientProtocolException) {
 					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_client_request_error));
+				}
+				else if (exception instanceof EOFException) {
+					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_client_request_stream_error));
 				}
 				else {
 					if (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)

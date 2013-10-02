@@ -87,9 +87,8 @@ public class Aircandi extends Application {
 		stopwatch1 = new Stopwatch("Stopwatch1"); // $codepro.audit.disable stringLiterals
 		stopwatch2 = new Stopwatch("Stopwatch2"); // $codepro.audit.disable stringLiterals
 		stopwatch3 = new Stopwatch("Stopwatch3"); // $codepro.audit.disable stringLiterals
-
-		/* Start crash reporting */
-		Crashlytics.start(this);
+		
+		Crashlytics.start(this);		
 
 		applicationContext = getApplicationContext();
 		mainThreadHandler = new Handler(Looper.getMainLooper());
@@ -143,6 +142,9 @@ public class Aircandi extends Application {
 
 	public void setUser(User user) {
 		mUser = user;
+		Crashlytics.setUserIdentifier(user.id);
+		Crashlytics.setUserName(user.name);
+		Crashlytics.setUserEmail(user.email);
 	}
 
 	public User getUser() {

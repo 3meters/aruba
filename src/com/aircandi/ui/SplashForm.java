@@ -117,7 +117,8 @@ public class SplashForm extends SherlockActivity {
 				/* Connectivity MONITORING */
 				NetworkManager.getInstance().setContext(getApplicationContext());
 				NetworkManager.getInstance().initialize();
-
+				NetworkManager.getInstance().updateCrashlytics();
+				
 				/*
 				 * Fire off a check to make sure the session is valid. This will also
 				 * be the first opportunity to check our network connection. Also, the

@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.os.Bundle;
 import android.text.Html;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -17,6 +18,7 @@ import com.aircandi.applications.Applinks;
 import com.aircandi.components.EntityManager;
 import com.aircandi.events.MessageEvent;
 import com.aircandi.service.objects.Count;
+import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo;
@@ -93,9 +95,12 @@ public class PictureForm extends BaseEntityForm {
 
 		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);
 		final TextView name = (TextView) findViewById(R.id.name);
+		final TextView placeName = (TextView) findViewById(R.id.place_name);
+		final TextView parentName = (TextView) findViewById(R.id.parent_name);
+		final TextView parentLabel = (TextView) findViewById(R.id.parent_label);
 		final AirImageView photoView = (AirImageView) findViewById(R.id.photo);
 		final AirImageView placePhotoView = (AirImageView) findViewById(R.id.place_photo);
-		final TextView placeName = (TextView) findViewById(R.id.place_name);
+		final AirImageView parentPhotoView = (AirImageView) findViewById(R.id.parent_photo);
 		final TextView subtitle = (TextView) findViewById(R.id.subtitle);
 
 		final TextView description = (TextView) findViewById(R.id.description);
@@ -111,7 +116,7 @@ public class PictureForm extends BaseEntityForm {
 		else {
 			UI.setVisibility(photoView, View.GONE);
 			if (photoView != null) {
-				
+
 				int screenWidthDp = (int) UI.getScreenWidthDisplayPixels(this);
 				int widgetWidthDp = 122;
 				if (screenWidthDp - widgetWidthDp <= 264) {
@@ -119,7 +124,7 @@ public class PictureForm extends BaseEntityForm {
 					LinearLayout.LayoutParams paramsImage = new LinearLayout.LayoutParams(photoViewWidth, photoViewWidth);
 					photoView.setLayoutParams(paramsImage);
 				}
-				
+
 				Photo photo = mEntity.getPhoto();
 				UI.drawPhoto(photoView, photo);
 				if (photo.usingDefault == null || !photo.usingDefault) {
@@ -152,6 +157,34 @@ public class PictureForm extends BaseEntityForm {
 		if (description != null && mEntity.description != null && !mEntity.description.equals("")) {
 			description.setText(Html.fromHtml(mEntity.description));
 			UI.setVisibility(findViewById(R.id.section_description), View.VISIBLE);
+		}
+
+		/* Parent context */
+		View parentHolder = findViewById(R.id.parent_holder);
+		UI.setVisibility(parentHolder, View.GONE);
+		Link link = mEntity.getLink(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, null, Direction.out);
+		if (link == null) {
+			link = mEntity.getLink(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, null, Direction.out);
+		}
+		if (link != null && link.shortcut != null) {
+			if (parentPhotoView != null) {
+				Photo photo = link.shortcut.getPhoto();
+				UI.drawPhoto(parentPhotoView, photo);
+				UI.setVisibility(parentPhotoView, View.VISIBLE);
+			}
+			UI.setVisibility(parentName, View.GONE);
+			if (parentName != null && !TextUtils.isEmpty(link.shortcut.name)) {
+				parentName.setText(Html.fromHtml(link.shortcut.name));
+				UI.setVisibility(parentName, View.VISIBLE);
+			}
+			if (link.shortcut.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+				parentLabel.setText(getString(R.string.picture_label_parent_candigram));
+			}
+			else if (link.shortcut.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				parentLabel.setText(getString(R.string.picture_label_parent_place));
+			}
+			parentHolder.setTag(link.shortcut);
+			UI.setVisibility(parentHolder, View.VISIBLE);
 		}
 
 		/* Place context */

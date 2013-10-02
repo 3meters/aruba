@@ -208,6 +208,7 @@
     <string name="error_service_unavailable">Aircandi\'s servers are overloaded. Please excuse us!</string>
     <string name="error_client_unknown_host">The website you entered can\'t be found.</string>
     <string name="error_client_request_error">Aircandi request error</string>
+    <string name="error_client_request_stream_error">Download was interrupted. Try again and it might work.</string>
     <string name="error_client_request_not_found">Resource not found</string>
     <string name="error_service_unauthorized">Unauthorized request</string>
     <string name="error_service_forbidden">Requested operation is not valid</string>
@@ -455,7 +456,9 @@
     
     <!-- Picture -->
     
-    <string name="picture_label_place">picture added for:</string>
+    <string name="picture_label_place">picture added for place:</string>
+    <string name="picture_label_parent_candigram">picture added to candigram:</string>
+    <string name="picture_label_parent_place">picture added to place:</string>
     
     <!-- Radar -->
     

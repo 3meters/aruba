@@ -613,7 +613,7 @@ public class EntityManager {
 						parameters.putInt("applinksTimeout", 10000);
 					}
 
-					/* PROVIDER id if this is a custom place */
+					/* Provider id if this is a custom place */
 					if (place.provider.aircandi != null) {
 						place.provider.aircandi = entity.id;
 					}

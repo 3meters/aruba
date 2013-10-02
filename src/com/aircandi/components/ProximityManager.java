@@ -140,6 +140,7 @@ public class ProximityManager {
 					}
 				}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
+				NetworkManager.getInstance().updateCrashlytics();								
 				Aircandi.stopwatch3.start("Start wifi scan: reason = " + reason.toString());
 				mWifiManager.startScan();
 			}
@@ -262,7 +263,6 @@ public class ProximityManager {
 	}
 
 	public synchronized ServiceResponse getEntitiesNearLocation(AirLocation location) {
-
 		/*
 		 * We find all aircandi place entities in the cache (via proximity or location) that are active based
 		 * on the current search parameters (beacons and search radius) and could be supplied by the place provider. We
@@ -302,16 +302,6 @@ public class ProximityManager {
 				return true;
 			}
 		}
-
-		//		final Location lastKnownLocation = LocationManager.getInstance().getLastKnownLocation();
-		//		if (lastKnownLocation != null) {
-		//			final Boolean hasMoved = LocationManager.hasMoved(lastKnownLocation, activeLocation, Constants.DIST_ONE_HUNDRED_METERS);
-		//			if (hasMoved) {
-		//				Logger.v(this, "Refresh needed: moved location");
-		//				return true;
-		//			}
-		//		}
-
 		return false;
 	}
 

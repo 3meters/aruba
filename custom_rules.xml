@@ -2,7 +2,15 @@
 <project
     name="aircandi_custom"
     default="revision" >
+
+    <property
+        name="android.local.dir"
+        value="D:\Files\Proxibase\Android\" />
     
+   	<!-- See the instructions at the top of crashlytics_build.xml
+         for information about nonstandard builds. 
+    <import file="${android.local.dir}crashlytics\crashlytics_build.xml"/>
+    -->
     
     <!-- extra output directory -->
 

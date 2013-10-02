@@ -1,16 +1,15 @@
 package com.aircandi.components;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.util.Locale;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
@@ -23,10 +22,13 @@ import com.aircandi.Constants;
 import com.aircandi.ServiceConstants;
 import com.aircandi.service.BaseConnection;
 import com.aircandi.service.OkHttpUrlConnection;
+import com.aircandi.service.RequestType;
+import com.aircandi.service.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ServiceResponse;
 import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.UI;
+import com.crashlytics.android.Crashlytics;
 
 /**
  * Designed as a singleton. The private Constructor prevents any other class from instantiating.
@@ -214,10 +216,9 @@ public class NetworkManager {
 		return mConnectedState;
 	}
 
-	@SuppressWarnings("deprecation")
 	public static boolean isAirplaneMode(Context context) {
 		ContentResolver cr = context.getContentResolver();
-		return Settings.System.getInt(cr, Settings.System.AIRPLANE_MODE_ON, 0) != 0;
+		return Settings.Global.getInt(cr, Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
 	}
 
 	public boolean isConnected() {
@@ -256,7 +257,7 @@ public class NetworkManager {
 	 * @return Based on ConnectivityManager.TYPE_*. Can return null.
 	 */
 	@SuppressWarnings("ucd")
-	protected Integer getNetworkTypeId() {
+	public Integer getNetworkTypeId() {
 		/* Check if we're connected to a data network, and if so - if it's a mobile network. */
 		Integer networkTypeId = null;
 		if (mConnectivityManager != null) {
@@ -268,29 +269,35 @@ public class NetworkManager {
 		return networkTypeId;
 	}
 
-	public boolean isWalledGardenConnection() {
-		HttpURLConnection urlConnection = null;
-		try {
-			URL url = new URL(ServiceConstants.WALLED_GARDEN_URI);
-			urlConnection = (HttpURLConnection) url.openConnection();
-			urlConnection.setInstanceFollowRedirects(false);
-			urlConnection.setConnectTimeout(ServiceConstants.WALLED_GARDEN_SOCKET_TIMEOUT_MS);
-			urlConnection.setReadTimeout(ServiceConstants.WALLED_GARDEN_SOCKET_TIMEOUT_MS);
-			urlConnection.setUseCaches(false);
-			urlConnection.getInputStream();
-			// We got a valid response, but not from the real google
-			return urlConnection.getResponseCode() != 204;
+	@SuppressWarnings("ucd")
+	public String getNetworkType() {
+		/* Check if we're connected to a data network, and if so - if it's a mobile network. */
+		Integer networkTypeId = null;
+		if (mConnectivityManager != null) {
+			final NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
+			if (activeNetwork != null) {
+				networkTypeId = activeNetwork.getType();
+			}
 		}
-		catch (IOException e) {
+		return getNetworkTypeLabel(networkTypeId);
+	}
+
+	public boolean isWalledGardenConnection() {
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ServiceConstants.WALLED_GARDEN_URI)
+				.setRequestType(RequestType.GET)
+				.setResponseFormat(ResponseFormat.NONE);
+
+		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest, null);
+		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
+			return serviceResponse.statusCode != 204;
+		}
+		else {
 			if (BuildConfig.DEBUG) {
-				Logger.w(this, "Walled garden check - probably not a portal: exception " + e);
+				Logger.w(this, "Walled garden check - probably not a portal: exception " + serviceResponse.exception);
 			}
 			return false;
-		}
-		finally {
-			if (urlConnection != null) {
-				urlConnection.disconnect();
-			}
 		}
 	}
 
@@ -339,9 +346,64 @@ public class NetworkManager {
 		return isTethered;
 	}
 
+	private String getNetworkTypeLabel(Integer networkTypeId) {
+
+		String networkTypeLabel = null;
+		if (networkTypeId == null) {
+			networkTypeLabel = "None";
+		}
+		else if (networkTypeId == 0) {
+			networkTypeLabel = "Mobile";
+		}
+		else if (networkTypeId == 1) {
+			networkTypeLabel = "Wifi";
+		}
+		else if (networkTypeId == 2) {
+			networkTypeLabel = "Mobile MMS";
+		}
+		else if (networkTypeId == 3) {
+			networkTypeLabel = "Mobile SUPL";
+		}
+		else if (networkTypeId == 4) {
+			networkTypeLabel = "Mobile DUN";
+		}
+		else if (networkTypeId == 5) {
+			networkTypeLabel = "Mobile HiPri";
+		}
+		else if (networkTypeId == 6) {
+			networkTypeLabel = "WiMax";
+		}
+		else if (networkTypeId == 7) {
+			networkTypeLabel = "Bluetooth";
+		}
+		else if (networkTypeId == 8) {
+			networkTypeLabel = "Dummy";
+		}
+		else if (networkTypeId == 9) {
+			networkTypeLabel = "Ethernet";
+		}
+		return networkTypeLabel;
+
+	}
+
 	// --------------------------------------------------------------------------------------------
-	// Classes
+	// Methods
 	// --------------------------------------------------------------------------------------------
+
+	public void updateCrashlytics() {
+		Location location = LocationManager.getInstance().getLocationLocked();
+
+		Crashlytics.setBool("airplane_mode", NetworkManager.isAirplaneMode(mApplicationContext));
+		Crashlytics.setBool("connected", NetworkManager.getInstance().isConnected());
+		Crashlytics.setString("network_type", NetworkManager.getInstance().getNetworkType().toLowerCase(Locale.US));
+		Crashlytics.setBool("wifi_tethered", NetworkManager.getInstance().isWifiTethered());
+		Crashlytics.setBool("wifi_enabled", NetworkManager.getInstance().isWifiEnabled());
+		Crashlytics.setFloat("beacons_visible", ProximityManager.getInstance().getWifiList().size());
+		if (location != null) {
+			Crashlytics.setFloat("location_accurary", location.getAccuracy());
+			Crashlytics.setString("location_provider", location.getProvider());
+		}
+	}
 
 	public Integer getWifiState() {
 		return mWifiState;
@@ -355,6 +417,10 @@ public class NetworkManager {
 		return mConnectedState;
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Classes
+	// --------------------------------------------------------------------------------------------
+
 	private class WifiStateChangedReceiver extends BroadcastReceiver {
 
 		@Override
@@ -364,9 +430,33 @@ public class NetworkManager {
 			String action = intent.getAction();
 			if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
 				mWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
+				if (mWifiState == WifiManager.WIFI_STATE_DISABLED) {
+					Crashlytics.setString("wifi_state", "disabled");
+				}
+				else if (mWifiState == WifiManager.WIFI_STATE_ENABLED) {
+					Crashlytics.setString("wifi_state", "enabled");
+				}
+				else if (mWifiState == WifiManager.WIFI_STATE_ENABLING) {
+					Crashlytics.setString("wifi_state", "enabling");
+				}
+				else if (mWifiState == WifiManager.WIFI_STATE_DISABLING) {
+					Crashlytics.setString("wifi_state", "disabling");
+				}
 			}
 			else if (action.equals(WIFI_AP_STATE_CHANGED_ACTION)) {
 				mWifiApState = intent.getIntExtra(EXTRA_WIFI_AP_STATE, WifiManager.WIFI_STATE_UNKNOWN);
+				if (mWifiApState == WifiManager.WIFI_STATE_DISABLED) {
+					Crashlytics.setString("wifi_ap_state", "disabled");
+				}
+				else if (mWifiApState == WifiManager.WIFI_STATE_ENABLED) {
+					Crashlytics.setString("wifi_ap_state", "enabled");
+				}
+				else if (mWifiApState == WifiManager.WIFI_STATE_ENABLING) {
+					Crashlytics.setString("wifi_ap_state", "enabling");
+				}
+				else if (mWifiApState == WifiManager.WIFI_STATE_DISABLING) {
+					Crashlytics.setString("wifi_ap_state", "disabling");
+				}
 			}
 		}
 	}

@@ -260,6 +260,9 @@ public class OkHttpUrlConnection extends BaseConnection {
 		else if (airHttpRequest.responseFormat == ResponseFormat.STREAM) {
 			return inputStream;
 		}
+		else if (airHttpRequest.responseFormat == ResponseFormat.NONE) {
+			return null;
+		}
 		else {
 			final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 			final StringBuilder stringBuilder = new StringBuilder(); // $codepro.audit.disable defineInitialCapacity

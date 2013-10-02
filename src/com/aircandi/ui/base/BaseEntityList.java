@@ -328,6 +328,11 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		Comments.viewFor(this, entity.id, Constants.TYPE_LINK_CONTENT, null);
 	}
 
+	@Override
+	public void onRefresh() {
+		bind(BindingMode.SERVICE); // Called from Routing
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
@@ -343,7 +348,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	private LinkOptions getLinkOptions(String schema) {
 		if (schema != null) {
 			if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-				return LinkOptions.getDefault(LinkProfile.NO_LINKS);
+				return LinkOptions.getDefault(LinkProfile.LINKS_FOR_COMMENT);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 				return LinkOptions.getDefault(LinkProfile.LINKS_FOR_PICTURE);

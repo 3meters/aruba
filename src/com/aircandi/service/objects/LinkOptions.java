@@ -121,6 +121,16 @@ public class LinkOptions extends ServiceObject {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, false, true, false, limitLike));
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, false, true, false, limitWatch));
 				}
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, 
+						true, true, false, 1).setDirection(Direction.out));
+			}
+			else if (linkProfile == LinkProfile.LINKS_FOR_COMMENT) {
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, 
+						true, true, false, 1).setDirection(Direction.out));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, 
+						true, true, false, 1).setDirection(Direction.out));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, 
+						true, true, false, 1).setDirection(Direction.out));
 			}
 			else if (linkProfile == LinkProfile.LINKS_FOR_USER) {
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_PLACE,
@@ -160,6 +170,7 @@ public class LinkOptions extends ServiceObject {
 		LINKS_FOR_PLACE,
 		LINKS_FOR_CANDIGRAM,
 		LINKS_FOR_PICTURE,
+		LINKS_FOR_COMMENT,
 		LINKS_FOR_USER,
 		NO_LINKS,
 	}
