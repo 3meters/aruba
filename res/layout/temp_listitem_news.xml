@@ -36,34 +36,37 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:textStyle="italic"
             android:ellipsize="end"
             android:maxLines="2"
             android:text="@string/dummy_subtitle"
-            android:textColor="?attr/textColorSecondary" />
+            android:textColor="?attr/textColorSecondary"
+            android:textStyle="italic" />
 
         <LinearLayout
+            android:id="@+id/shortcut_holder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:orientation="vertical" >
+            android:orientation="horizontal"
+            android:visibility="visible" >
 
-            <com.aircandi.ui.widgets.AirImageView
-                android:id="@+id/photo"
-                android:layout_width="@dimen/image_medium_small"
-                android:layout_height="@dimen/image_medium_small"
-                android:layout_marginRight="10dp"
-                aircandi:layout="@layout/widget_webimageview_candi_view"
-                aircandi:sizeHint="@dimen/image_medium_small" />
-
-            <com.aircandi.ui.widgets.AirTextView
-                android:id="@+id/description"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:id="@+id/shortcut_one"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:text="@string/dummy_description"
-                android:visibility="gone" />
+                android:layout_marginRight="8dp"
+                android:orientation="vertical" >
+
+                <include layout="@layout/temp_shortcut_item" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/shortcut_two"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <include layout="@layout/temp_shortcut_item" />
+            </LinearLayout>
         </LinearLayout>
 
         <com.aircandi.ui.widgets.AirTextView

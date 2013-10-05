@@ -238,6 +238,7 @@ public final class Constants {
 	public static final String	PREF_ENTITY_FENCING							= "Pref_Entity_Fencing";
 	public static final String	PREF_TESTING_BEACONS						= "Pref_Testing_Beacons";
 	public static final String	PREF_TESTING_LOCATION						= "Pref_Testing_Location";
+	public static final String	PREF_TESTING_SELF_NOTIFY					= "Pref_Testing_Self_Notify";
 
 	/* SETTINGS */
 	public static final String	SETTING_USER								= "Setting_User";
@@ -267,6 +268,7 @@ public final class Constants {
 	public static final Boolean	PREF_ENTITY_FENCING_DEFAULT					= false;
 	public static final String	PREF_TESTING_BEACONS_DEFAULT				= "natural";
 	public static final String	PREF_TESTING_LOCATION_DEFAULT				= "natural";
+	public static final Boolean	PREF_TESTING_SELF_NOTIFY_DEFAULT			= false;
 
 	/* For readability */
 	public static final int		DIST_ONE_METER								= 1;

@@ -108,16 +108,18 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 	@Override
 	public void hideBusy() {
 
-		getSherlockActivity().runOnUiThread(new Runnable() {
+		if (getSherlockActivity() != null) {
+			getSherlockActivity().runOnUiThread(new Runnable() {
 
-			@Override
-			public void run() {
-				if (mBusyManager != null) {
-					mBusyManager.hideBusy();
-					stopBodyBusyIndicator();
+				@Override
+				public void run() {
+					if (mBusyManager != null) {
+						mBusyManager.hideBusy();
+						stopBodyBusyIndicator();
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	@Override
@@ -183,19 +185,22 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 
 		MenuItem refresh = menu.findItem(R.id.refresh);
 		if (refresh != null) {
-			if (mBusyManager != null) {
-				mBusyManager.setRefreshImage(refresh.getActionView().findViewById(R.id.refresh_image));
-				mBusyManager.setRefreshProgress(refresh.getActionView().findViewById(R.id.refresh_progress));
-			}
-
-			refresh.getActionView().findViewById(R.id.refresh_frame).setTag(refresh);
-			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					MenuItem item = (MenuItem) view.getTag();
-					onOptionsItemSelected(item);
+			View actionView = refresh.getActionView();
+			if (actionView != null) {
+				if (mBusyManager != null) {
+					mBusyManager.setRefreshImage(actionView.findViewById(R.id.refresh_image));
+					mBusyManager.setRefreshProgress(actionView.findViewById(R.id.refresh_progress));
 				}
-			});
+
+				actionView.findViewById(R.id.refresh_frame).setTag(refresh);
+				actionView.findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						MenuItem item = (MenuItem) view.getTag();
+						onOptionsItemSelected(item);
+					}
+				});
+			}
 		}
 		super.onCreateOptionsMenu(menu, inflater);
 	}

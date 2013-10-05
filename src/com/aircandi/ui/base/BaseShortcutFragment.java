@@ -436,7 +436,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 
 			/* Show hint if source has app that hasn't been installed */
 			final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
-			if (meta != null && !meta.installDeclined
+			if ((meta == null || !meta.installDeclined)
 					&& shortcut.getIntentSupport()
 					&& shortcut.appExists()
 					&& !shortcut.appInstalled()) {

@@ -3,9 +3,11 @@ package com.aircandi.components;
 import android.content.Context;
 import android.content.Intent;
 
+import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.applications.Comments;
 import com.aircandi.service.objects.AirNotification;
+import com.aircandi.service.objects.AirNotification.ActionType;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Notifications;
@@ -41,6 +43,21 @@ public class GCMIntentService extends GCMBaseIntentService {
 		String jsonNotification = messageIntent.getStringExtra("notification");
 		AirNotification notification = (AirNotification) Json.jsonToObject(jsonNotification, Json.ObjectType.AIR_NOTIFICATION);
 
+		/* We don't self notify unless dev settings are on and self notify is enabled */
+		if (!Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+				|| !Aircandi.settings.getBoolean(Constants.PREF_TESTING_SELF_NOTIFY, Constants.PREF_TESTING_SELF_NOTIFY_DEFAULT)) {
+			if (notification.user != null && Aircandi.getInstance().getUser() != null && notification.user.id.equals(Aircandi.getInstance().getUser().id)) {
+				return;
+			}
+		}
+
+		/* We filter out notifications that target the 'from' side of a move */
+		if (notification.action.equals(ActionType.MOVE)) {
+			if (notification.typeTargetId != null && notification.fromEntity != null && notification.typeTargetId.equals(notification.fromEntity.id)) {
+				return;
+			}
+		}
+
 		/* Build intent that can be used in association with the notification */
 		if (notification.entity != null) {
 			if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
@@ -55,7 +72,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 				notification.intent = intentBuilder.create();
 			}
 		}
-		
+
 		/* Customize title and subtitle before storing and broadcasting */
 		Notifications.decorate(notification);
 

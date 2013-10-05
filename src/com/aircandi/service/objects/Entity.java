@@ -223,7 +223,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					signalThresholdFluid = signalFence.floatValue() - 5;
 				}
 
-				/* Hide entities that are not within entity declared virtual RANGE */
+				/* Hide entities that are not within entity declared virtual range */
 				if (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
 						&& Aircandi.settings.getBoolean(Constants.PREF_ENTITY_FENCING, Constants.PREF_ENTITY_FENCING_DEFAULT)
 						&& beacon.signal.intValue() < signalThresholdFluid) {
@@ -459,7 +459,6 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		}
 		return null;
 	}
-
 
 	public Link getLink(String type, String targetSchema, String targetId, Direction direction) {
 		List<Link> links = linksIn;
@@ -704,6 +703,14 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	public void removeLink() {}
 
+	public String getSchemaMapped() {
+		String schema = this.schema;
+		if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+			schema = Constants.SCHEMA_REMAP_PICTURE;
+		}
+		return schema;
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	// Copy and serialization
 	// --------------------------------------------------------------------------------------------

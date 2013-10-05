@@ -100,7 +100,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 			}
 
 			for (AirHttpRequest.Header header : request.headers) {
-				connection.setRequestProperty(header.key, header.value);
+				connection.addRequestProperty(header.key, header.value);
 			}
 
 			/*
@@ -318,11 +318,9 @@ public class OkHttpUrlConnection extends BaseConnection {
 
 			if (connection.getContentEncoding() != null && connection.getContentEncoding().equals("gzip")) {
 				inputStream = new BufferedInputStream(new GZIPInputStream(inputStream), 8 * 1024);
-				Logger.v(this, "Content encoding: gzip");
 			}
 			else {
 				inputStream = new BufferedInputStream(inputStream, 8 * 1024);
-				Logger.v(this, "Content encoding: none");
 			}
 
 			return inputStream;
@@ -428,11 +426,9 @@ public class OkHttpUrlConnection extends BaseConnection {
 
 		if (connection.getContentEncoding() != null && connection.getContentEncoding().equals("gzip")) {
 			inputStream = new BufferedInputStream(new GZIPInputStream(inputStream), 8 * 1024);
-			Logger.v(this, "Content encoding: gzip");
 		}
 		else {
 			inputStream = new BufferedInputStream(inputStream, 8 * 1024);
-			Logger.v(this, "Content encoding: none");
 		}
 
 		return inputStream;

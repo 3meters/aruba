@@ -161,7 +161,9 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			showBusy("Loading " + getActivityTitle() + "...", false);
 			mForEntity = EntityManager.getEntity(mForEntityId);
 			invalidateOptionsMenu();
-			mCacheStamp = mForEntity.getCacheStamp();
+			if (mForEntity != null) {
+				mCacheStamp = mForEntity.getCacheStamp();
+			}
 			setAdapter();
 		}
 		else {

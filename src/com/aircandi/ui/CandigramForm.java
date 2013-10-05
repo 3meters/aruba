@@ -391,7 +391,7 @@ public class CandigramForm extends BaseEntityForm {
 		 * - Header views are visible by default
 		 */
 
-		if (mEntity.type.equals("tour") && ((Candigram) mEntity).hopEnabled && mTimer == null) {
+		if (mEntity.type.equals("tour") && !((Candigram) mEntity).parked && mTimer == null) {
 			mTimer = new Runnable() {
 
 				@Override
@@ -642,12 +642,11 @@ public class CandigramForm extends BaseEntityForm {
 		Candigram candigram = (Candigram) mEntity;
 		String action = "ready to leave";
 
-		if (!candigram.hopEnabled) {
+		if (candigram.parked) {
 			action = "parked";
-		}
-
-		if (candigram.hopCount.intValue() >= candigram.hopsMax.intValue()) {
-			action = "finished traveling and back with sender";
+			if (candigram.hopCount.intValue() >= candigram.hopsMax.intValue()) {
+				action = "finished traveling and back with sender";
+			}
 		}
 		else {
 			if (candigram.hopNextDate != null) {

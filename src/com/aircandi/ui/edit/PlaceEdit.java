@@ -19,6 +19,7 @@ import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.ui.widgets.BuilderButton;
+import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
@@ -30,7 +31,7 @@ public class PlaceEdit extends BaseEntityEdit {
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-		
+
 		if (mEntity != null) {
 			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
 				mTabManager = new TabManager(Constants.TABS_ENTITY_FORM_ID, mActionBar, (ViewFlipper) findViewById(R.id.flipper_form));
@@ -42,7 +43,6 @@ public class PlaceEdit extends BaseEntityEdit {
 
 	@Override
 	public void draw() {
-		super.draw();
 
 		/* Place content */
 		Place place = (Place) mEntity;
@@ -58,6 +58,7 @@ public class PlaceEdit extends BaseEntityEdit {
 				((BuilderButton) findViewById(R.id.category)).setText(place.category.name);
 			}
 		}
+		super.draw();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -132,6 +133,31 @@ public class PlaceEdit extends BaseEntityEdit {
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected boolean validate() {
+		if (!super.validate()) {
+			return false;
+		}
+		/*
+		 * Transfering values from the controls to the entity is easier
+		 * with candigrams.
+		 */
+		gather();
+		Place place = (Place) mEntity;
+		if (place.name == null) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_place_name)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			return false;
+		}
+
+		return true;
+	}
 
 	@Override
 	protected void gather() {

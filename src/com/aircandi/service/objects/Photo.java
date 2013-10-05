@@ -51,6 +51,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	public Boolean				usingDefault		= false;
 	public Photo				photoPlaceholder;
 	public Photo				photoBroken;
+	public Shortcut				shortcut;
 
 	/* Used to stash temp bitmaps. Always access using set/getBitmap() */
 	public String				bitmapKey;

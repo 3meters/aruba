@@ -45,11 +45,10 @@
 
     <ImageView
         android:id="@+id/indicator"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_alignRight="@+id/photo"
         android:layout_alignTop="@+id/photo"
-        android:layout_margin="6dp"
         android:src="?attr/iconGooglePlay"
         android:visibility="visible" />
 

@@ -560,52 +560,52 @@ public class EntityManager {
 				/* Construct entity, link, and observation */
 				final Bundle parameters = new Bundle();
 
-				/* Primary beacon id */
-				if (primaryBeacon != null) {
-					parameters.putString("primaryBeaconId", primaryBeacon.id);
-				}
-
-				if (beacons != null && beacons.size() > 0) {
-					/*
-					 * Linking to beacons or sending to support nearby notifications
-					 */
-					final List<String> beaconStrings = new ArrayList<String>();
-
-					for (Beacon beacon : beacons) {
-						AirLocation location = LocationManager.getInstance().getAirLocationLocked();
-						if (location != null && !location.zombie) {
-
-							beacon.location = new AirLocation();
-
-							beacon.location.lat = location.lat;
-							beacon.location.lng = location.lng;
-
-							if (location.altitude != null) {
-								beacon.location.altitude = location.altitude;
-							}
-							if (location.accuracy != null) {
-								beacon.location.accuracy = location.accuracy;
-							}
-							if (location.bearing != null) {
-								beacon.location.bearing = location.bearing;
-							}
-							if (location.speed != null) {
-								beacon.location.speed = location.speed;
-							}
-							if (location.provider != null) {
-								beacon.location.provider = location.provider;
-							}
-						}
-
-						beacon.type = Constants.TYPE_BEACON_FIXED;
-						beacon.locked = false;
-						beaconStrings.add("object:" + Json.objectToJson(beacon, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
-					}
-					parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
-				}
-
 				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 					Place place = (Place) entity;
+
+					/* Primary beacon id */
+					if (primaryBeacon != null) {
+						parameters.putString("primaryBeaconId", primaryBeacon.id);
+					}
+
+					if (beacons != null && beacons.size() > 0) {
+						/*
+						 * Linking to beacons or sending to support nearby notifications
+						 */
+						final List<String> beaconStrings = new ArrayList<String>();
+
+						for (Beacon beacon : beacons) {
+							AirLocation location = LocationManager.getInstance().getAirLocationLocked();
+							if (location != null && !location.zombie) {
+
+								beacon.location = new AirLocation();
+
+								beacon.location.lat = location.lat;
+								beacon.location.lng = location.lng;
+
+								if (location.altitude != null) {
+									beacon.location.altitude = location.altitude;
+								}
+								if (location.accuracy != null) {
+									beacon.location.accuracy = location.accuracy;
+								}
+								if (location.bearing != null) {
+									beacon.location.bearing = location.bearing;
+								}
+								if (location.speed != null) {
+									beacon.location.speed = location.speed;
+								}
+								if (location.provider != null) {
+									beacon.location.provider = location.provider;
+								}
+							}
+
+							beacon.type = Constants.TYPE_BEACON_FIXED;
+							beacon.locked = false;
+							beaconStrings.add("object:" + Json.objectToJson(beacon, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
+						}
+						parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
+					}
 
 					/* Sources configuration */
 					if (!place.getProvider().type.equals("aircandi")) {
@@ -618,10 +618,12 @@ public class EntityManager {
 						place.provider.aircandi = entity.id;
 					}
 				}
+				else {
 
-				/* Link */
-				if (link != null) {
-					parameters.putString("link", "object:" + Json.objectToJson(link, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
+					/* Link */
+					if (link != null) {
+						parameters.putString("link", "object:" + Json.objectToJson(link, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
+					}
 				}
 
 				/* Entity */
@@ -1081,7 +1083,7 @@ public class EntityManager {
 	}
 
 	public ModelResult registerDevice(Boolean register, Device device) {
-		
+
 		ModelResult result = new ModelResult();
 		final Bundle parameters = new Bundle();
 		parameters.putBoolean("register", register);

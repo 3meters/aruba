@@ -173,7 +173,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 	@Override
 	public void onAdd() {
 		/*
-		 * No permissions check because the user can't get here without the right 
+		 * No permissions check because the user can't get here without the right
 		 * permissions.
 		 */
 		Bundle extras = new Bundle();
@@ -184,12 +184,20 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 
 	@SuppressWarnings("ucd")
 	public void onMoveUpButtonClick(View view) {
-		for (int i = mEntities.size() - 1; i >= 0; i--) {
-			if (mEntities.get(i).checked) {
-				mEntities.get(i).position = mEntities.get(i).position.intValue() - 2;
+		Boolean scrolled = false;
+		for (int i = 0; i < mEntities.size(); i++) {
+			if (i > 0) {
+				if (mEntities.get(i).checked) {
+					Entity hold = mEntities.get(i - 1);
+					mEntities.set(i - 1, mEntities.get(i));
+					mEntities.set(i, hold);
+					if (!scrolled && mList.getFirstVisiblePosition() >= (i - 1)) {
+						mList.smoothScrollToPosition(i - 1);
+						scrolled = true;
+					}
+				}
 			}
 		}
-		Collections.sort(mEntities, new Entity.SortByPositionSortDate());
 		Integer position = 0;
 		for (Entity entity : mEntities) {
 			entity.position = position;
@@ -201,12 +209,20 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 
 	@SuppressWarnings("ucd")
 	public void onMoveDownButtonClick(View view) {
+		Boolean scrolled = false;
 		for (int i = mEntities.size() - 1; i >= 0; i--) {
-			if (mEntities.get(i).checked) {
-				mEntities.get(i).position = mEntities.get(i).position.intValue() + 2;
+			if (i < (mEntities.size() - 1)) {
+				if (mEntities.get(i).checked) {
+					Entity hold = mEntities.get(i + 1);
+					mEntities.set(i + 1, mEntities.get(i));
+					mEntities.set(i, hold);
+					if (!scrolled && mList.getLastVisiblePosition() <= (i + 1)) {
+						mList.smoothScrollToPosition(i + 1);
+						scrolled = true;
+					}
+				}
 			}
 		}
-		Collections.sort(mEntities, new Entity.SortByPositionSortDate());
 		Integer position = 0;
 		for (Entity entity : mEntities) {
 			entity.position = position;

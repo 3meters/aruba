@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi"
     android:installLocation="auto"
-    android:versionCode="58"
-    android:versionName="0.9.16" >
+    android:versionCode="60"
+    android:versionName="0.9.18" >
 
     <supports-screens
         android:anyDensity="true"

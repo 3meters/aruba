@@ -511,7 +511,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 			}
 
 			/*
-			 * Make button shortcut
+			 * Make 'more' button shortcut
 			 */
 			Shortcut shortcut = Shortcut.builder(mEntity
 					, Constants.SCHEMA_INTENT
@@ -619,7 +619,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 
 			/* Show hint if source has app that hasn't been installed */
 			final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
-			if (meta != null && !meta.installDeclined
+			if ((meta == null || !meta.installDeclined)
 					&& shortcut.getIntentSupport()
 					&& shortcut.appExists()
 					&& !shortcut.appInstalled()) {

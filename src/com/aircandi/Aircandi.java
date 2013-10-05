@@ -65,6 +65,7 @@ public class Aircandi extends Application {
 	/* Dev preferences */
 	private Boolean							mPrefEnableDev;
 	private Boolean							mPrefEntityFencing;
+	private Boolean							mPrefTestingSelfNotify;
 	private String							mPrefTestingBeacons;
 	private String							mPrefTestingLocation;
 	private String							mPrefPlaceProvider;
@@ -114,6 +115,7 @@ public class Aircandi extends Application {
 		mPrefEntityFencing = Aircandi.settings.getBoolean(Constants.PREF_ENTITY_FENCING, Constants.PREF_ENTITY_FENCING_DEFAULT);
 		mPrefTestingBeacons = Aircandi.settings.getString(Constants.PREF_TESTING_BEACONS, Constants.PREF_TESTING_BEACONS_DEFAULT);
 		mPrefTestingLocation = Aircandi.settings.getString(Constants.PREF_TESTING_LOCATION, Constants.PREF_TESTING_LOCATION_DEFAULT);
+		mPrefTestingSelfNotify = Aircandi.settings.getBoolean(Constants.PREF_TESTING_SELF_NOTIFY, Constants.PREF_TESTING_SELF_NOTIFY_DEFAULT);
 	}
 
 	public static String getVersionName(Context context, Class cls) {
@@ -193,5 +195,13 @@ public class Aircandi extends Application {
 
 	public void setNavigationDrawerCurrentView(Class<?> navigationDrawerCurrentView) {
 		mNavigationDrawerCurrentView = navigationDrawerCurrentView;
+	}
+
+	public Boolean getPrefTestingSelfNotify() {
+		return mPrefTestingSelfNotify;
+	}
+
+	public void setPrefTestingSelfNotify(Boolean prefTestingSelfNotify) {
+		mPrefTestingSelfNotify = prefTestingSelfNotify;
 	}
 }

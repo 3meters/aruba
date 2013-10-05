@@ -90,13 +90,13 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	protected Uri				mMediaFileUri;
 	protected File				mMediaFile;
 	protected String			mPhotoSource;
-	
-	protected Integer			mInsertProgressResId = R.string.progress_saving;
-	protected Integer			mUpdateProgressResId = R.string.progress_updating;
-	protected Integer			mDeleteProgressResId = R.string.progress_deleting;
-	protected Integer			mInsertedResId = R.string.alert_inserted;
-	protected Integer			mUpdatedResId = R.string.alert_updated;
-	protected Integer			mDeletedResId = R.string.alert_deleted;
+
+	protected Integer			mInsertProgressResId	= R.string.progress_saving;
+	protected Integer			mUpdateProgressResId	= R.string.progress_updating;
+	protected Integer			mDeleteProgressResId	= R.string.progress_deleting;
+	protected Integer			mInsertedResId			= R.string.alert_inserted;
+	protected Integer			mUpdatedResId			= R.string.alert_updated;
+	protected Integer			mDeletedResId			= R.string.alert_deleted;
 
 	/* Inputs */
 	protected Entity			mEntity;
@@ -182,9 +182,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	public void bind(BindingMode mode) {
 		if (!mEditing && mEntity == null && mEntitySchema != null) {
 			mEntity = Entity.makeEntity(mEntitySchema);
-			
-			String schema = mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE) ? Constants.SCHEMA_REMAP_PICTURE : mEntity.schema;
-			setActivityTitle("new " + schema);
+			setActivityTitle("new " + mEntity.getSchemaMapped());
 			mEntity.creator = Aircandi.getInstance().getUser();
 			mEntity.creatorId = Aircandi.getInstance().getUser().id;
 		}
@@ -196,9 +194,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (mEntity != null) {
 
 			final Entity entity = mEntity;
-			if (mEditing) {				
-				String schema = mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE) ? Constants.SCHEMA_REMAP_PICTURE : mEntity.schema;
-				String title = !TextUtils.isEmpty(mEntity.name) ? mEntity.name : schema;
+			if (mEditing) {
+				String title = !TextUtils.isEmpty(mEntity.name) ? mEntity.name : mEntity.getSchemaMapped();
 				setActivityTitle(title);
 			}
 
@@ -353,7 +350,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (isDirty()) {
 			if (validate()) {
 
-				/* Pull all the control values back into the entity object */
+				/* 
+				 * Pull all the control values back into the entity object. Validate
+				 * does that too but we don't know if validate is always being performed. 
+				 */
 				gather();
 
 				if (mSkipSave) {
@@ -402,12 +402,13 @@ public abstract class BaseEntityEdit extends BaseEdit {
 						mEntity.photo = new Photo(null, null, null, null, PhotoSource.cache);
 						mEntity.photo.setBitmap(imageKey, bitmap); // Could get set to null if we are using the default 
 						mEntity.photo.setBitmapLocalOnly(bitmapLocalOnly);
-						runOnUiThread(new Runnable(){
+						runOnUiThread(new Runnable() {
 
 							@Override
 							public void run() {
 								UI.drawPhoto(mPhotoView, mEntity.photo, null);
-							}});
+							}
+						});
 					}
 				}
 			}
@@ -773,9 +774,11 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					mEntity.toId = null;
 				}
 
-				/* We always send beacons to support nearby notifications */
-				beacons = ProximityManager.getInstance().getStrongestBeacons(ServiceConstants.PROXIMITY_BEACON_COVERAGE);
-				primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
+				/* We only send beacons if a place is being inserted */
+				if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					beacons = ProximityManager.getInstance().getStrongestBeacons(ServiceConstants.PROXIMITY_BEACON_COVERAGE);
+					primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
+				}
 
 				Tracker.sendEvent("ui_action", "entity_insert", mEntity.type, 0, Aircandi.getInstance().getUser());
 
@@ -853,7 +856,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 						bitmap = mEntity.photo.getBitmap();
 					}
 
-					/* Something in the call caused us to lose the most recent picture. */
 					result = EntityManager.getInstance().updateEntity(mEntity, bitmap);
 
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {

@@ -186,6 +186,19 @@ public class UserEdit extends BaseEntityEdit {
 		if (!super.validate()) {
 			return false;
 		}
+		gather();
+		User user = (User) mEntity;
+		
+		if (user.name == null) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_fullname)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			return false;
+		}
 
 		if (!Utilities.validEmail(mEmail.getText().toString())) {
 			Dialogs.alertDialogSimple(this, null, getString(R.string.error_invalid_email));

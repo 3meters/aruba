@@ -40,8 +40,7 @@ public class ApplicationPicker extends BasePicker implements OnItemClickListener
 
 	@Override
 	public void bind(BindingMode mode) {
-		String schema = mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE) ? Constants.SCHEMA_REMAP_PICTURE : mEntity.schema;
-		String title = !TextUtils.isEmpty(mEntity.name) ? mEntity.name : schema;
+		String title = !TextUtils.isEmpty(mEntity.name) ? mEntity.name : mEntity.getSchemaMapped();
 		mName.setText(title);
 
 		/* Shown as a dialog so doesn't have an action bar */

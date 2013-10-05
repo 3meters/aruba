@@ -108,9 +108,7 @@ public abstract class BaseConnection implements IConnection {
 			airHttpRequest.headers.add(new Header("Accept", "application/json"));
 		}
 		if (serviceRequest.getResponseFormat() == ResponseFormat.BYTES) {
-			airHttpRequest.headers.add(new Header("Accept", "image/jpeg"));
-			airHttpRequest.headers.add(new Header("Accept", "image/png"));
-			airHttpRequest.headers.add(new Header("Accept", "image/gif"));
+			airHttpRequest.headers.add(new Header("Accept", "image/png, image/gif, image/jpeg, image/bmp"));
 		}
 		if (serviceRequest.getAuthType() == AuthType.BASIC) {
 			airHttpRequest.headers.add(new Header("Authorization", "Basic " + serviceRequest.getPasswordBase64()));

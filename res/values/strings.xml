@@ -80,10 +80,12 @@
     <string name="dummy_title">Zoka Coffee Roaster &amp; Tea Company</string>
     <string name="dummy_title_short">Zoka Coffee</string>
     <string name="dummy_subtitle">Roasters &amp; Tea Company</string>
+    <string name="dummy_subtitle_notification">added a big fabulous candigram to a place you are watching very closely.</string>
     <string name="dummy_category_name">Restaurant</string>
     <string name="dummy_uri">http://goodeats.com</string>
     <string name="dummy_name">Jay Massena</string>
-    <string name="dummy_section_title">section</string>
+    <string name="dummy_label">candigram</string>
+    <string name="dummy_title">Zoka Coffee Roaster &amp; Tea Company</string>
     <string name="dummy_location">Seattle, WA</string>
     <string name="dummy_address">"2200 N 56th (at Keystone Pl N)\nSeattle, WA 98103\n(206) 545&#8211;4277"</string>
     <string name="dummy_comments">21 comments</string>
@@ -192,7 +194,9 @@
     <string name="error_missing_candigram_duration">Select the length of visit.</string>
     <string name="error_missing_candigram_photo">Select a photo.</string>
     <string name="error_missing_candigram_content">Select a photo or enter a message.</string>
+    <string name="error_missing_candigram_name">Enter a title.</string>
     <string name="error_missing_invite_email">Enter at least one email address.</string>
+    <string name="error_missing_place_name">Enter a name.</string>
     
     <!-- Errors: network or location -->
 
@@ -208,7 +212,7 @@
     <string name="error_service_unavailable">Aircandi\'s servers are overloaded. Please excuse us!</string>
     <string name="error_client_unknown_host">The website you entered can\'t be found.</string>
     <string name="error_client_request_error">Aircandi request error</string>
-    <string name="error_client_request_stream_error">Download was interrupted. Try again and it might work.</string>
+    <string name="error_client_request_stream_error">Connection was interrupted. Try again and it might work.</string>
     <string name="error_client_request_not_found">Resource not found</string>
     <string name="error_service_unauthorized">Unauthorized request</string>
     <string name="error_service_forbidden">Requested operation is not valid</string>
@@ -412,6 +416,7 @@
     <string name="form_label_password_old">old password</string>
     <string name="form_label_email">email</string>
     <string name="form_label_locked">locked</string>
+    <string name="form_label_parked">parked</string>
     <string name="form_label_do_not_track">browse in private</string>
     <string name="tuning_section_banner">great banner</string>
     <string name="tuning_section_tune">lock it in</string>
@@ -448,6 +453,9 @@
     <string name="candigram_type_tour_verbose">touring</string>
     <string name="candigram_type_bounce_verbose">bouncing</string>
     <string name="candigram_label_place">currently at:</string>
+
+    <string name="candigram_parked_true_help">The candigram is parked</string>
+    <string name="candigram_parked_false_help">The candigram is free to travel</string>
     
     <!-- Invite -->
     

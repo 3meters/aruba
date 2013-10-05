@@ -4,6 +4,7 @@ import com.aircandi.Constants;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.AirNotification.ActionType;
 import com.aircandi.service.objects.AirNotification.NotificationType;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 
 public class Notifications {
@@ -56,82 +57,135 @@ public class Notifications {
 		notification.title = title(notification);
 		notification.subtitle = subtitle(notification);
 		notification.description = description(notification);
-		notification.photoFrom = photoFrom(notification);
-		notification.photoTo = photoTo(notification);
-	}
-
-	public static String schemaFixup(String schema) {
-		if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-			return Constants.SCHEMA_REMAP_PICTURE;
-		}
-		return schema;
+		notification.photoBy = photoBy(notification);
+		notification.photoOne = photoOne(notification);
 	}
 
 	public static String subtitle(AirNotification notification) {
-		if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
-				&& notification.entity.type.equals(Constants.TYPE_APP_TOUR)
-				&& notification.action.equals(ActionType.MOVE)) {
+		if (notification.action.equals(ActionType.MOVE)) {
+			if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM) && notification.typeTargetId != null) {
 
-			if (notification.type.equals(NotificationType.NEARBY)) {
-				return "A candigram has traveled to a place nearby";
-			}
-			else if (notification.type.equals(NotificationType.WATCH)) {
-				return "A candigram has traveled to a place you are watching";
-			}
-			else if (notification.type.equals(NotificationType.OWN)) {
-				return String.format("A candigram has traveled to a place %1$s of yours.", notification.toEntity.name);
+				if (notification.entity.type.equals(Constants.TYPE_APP_BOUNCE)) {
+
+					if (notification.type.equals(NotificationType.NEARBY)) {
+						return "kicked a candigram to a place nearby.";
+					}
+					else if (notification.type.equals(NotificationType.WATCH)) {
+						if (notification.typeTargetId.equals(notification.entity.id)) {
+							return "kicked a candigram you\'re watching to a new place.";
+						}
+						else if (notification.toEntity != null && notification.typeTargetId.equals(notification.toEntity.id)) {
+							return "kicked a candigram to a place you\'re watching.";
+						}
+						else if (notification.fromEntity != null && notification.typeTargetId.equals(notification.fromEntity.id)) {
+							return "kicked a candigram from a place you\'re watching.";
+						}
+					}
+					else if (notification.type.equals(NotificationType.WATCH_USER)) {
+						return "kicked a candigram to a new place.";
+					}
+					else if (notification.type.equals(NotificationType.OWN)) {
+						if (notification.typeTargetId.equals(notification.entity.id)) {
+							return "kicked a candigram you started to a new place.";
+						}
+						else if (notification.toEntity != null && notification.typeTargetId.equals(notification.toEntity.id)) {
+							return "kicked a candigram to a place of yours.";
+						}
+						else if (notification.fromEntity != null && notification.typeTargetId.equals(notification.fromEntity.id)) {
+							return "kicked a candigram from a place of yours.";
+						}
+					}
+				}
+				else if (notification.entity.type.equals(Constants.TYPE_APP_TOUR)) {
+
+					if (notification.type.equals(NotificationType.NEARBY)) {
+						return "A candigram has traveled to a place nearby";
+					}
+					else if (notification.type.equals(NotificationType.WATCH)) {
+
+						if (notification.typeTargetId.equals(notification.entity.id)) {
+							return "A candigram you\'re watching has traveled to a new place";
+						}
+						else if (notification.toEntity != null && notification.typeTargetId.equals(notification.toEntity.id)) {
+							return "A candigram has traveled to a place you\'re watching";
+						}
+						else if (notification.fromEntity != null && notification.typeTargetId.equals(notification.fromEntity.id)) {
+							return "A candigram has left a place you\'re watching";
+						}
+					}
+					else if (notification.type.equals(NotificationType.OWN)) {
+						if (notification.typeTargetId.equals(notification.entity.id)) {
+							return "A candigram of yours has traveled to a new place.";
+						}
+						else if (notification.toEntity != null && notification.typeTargetId.equals(notification.toEntity.id)) {
+							return "A candigram has traveled to a place of yours";
+						}
+						else if (notification.fromEntity != null && notification.typeTargetId.equals(notification.fromEntity.id)) {
+							return "A candigram has left a place of yours";
+						}
+					}
+				}
 			}
 		}
-		if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
-				&& notification.entity.type.equals(Constants.TYPE_APP_BOUNCE)
-				&& notification.action.equals(ActionType.MOVE)) {
+		else if (notification.action.equals(ActionType.INSERT)) {
+			if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 
-			if (notification.type.equals(NotificationType.NEARBY)) {
-				return String.format("kicked a %1$s to a %2$s nearby.", schemaFixup(notification.entity.schema), schemaFixup(notification.toEntity.schema));
+				if (notification.type.equals(NotificationType.NEARBY)) {
+					return String.format("commented on a %1$s nearby.", notification.toEntity.getSchemaMapped());
+				}
+				else if (notification.type.equals(NotificationType.WATCH)) {
+					return String.format("commented on a %1$s you are watching.", notification.toEntity.getSchemaMapped());
+				}
+				else if (notification.type.equals(NotificationType.WATCH_USER)) {
+					return String.format("commented on a %1$s.", notification.toEntity.getSchemaMapped());
+				}
+				else if (notification.type.equals(NotificationType.OWN)) {
+					return String.format("commented on a %1$s of yours.", notification.toEntity.getSchemaMapped());
+				}
 			}
-			else if (notification.type.equals(NotificationType.WATCH)) {
-				return String.format("kicked a %1$s to a %2$s you are watching.", schemaFixup(notification.entity.schema),
-						schemaFixup(notification.toEntity.schema));
-			}
-			else if (notification.type.equals(NotificationType.WATCH_USER)) {
-				return String.format("kicked a %1$s to a %2$s.", schemaFixup(notification.entity.schema), schemaFixup(notification.toEntity.schema));
-			}
-			else if (notification.type.equals(NotificationType.OWN)) {
-				return String.format("kicked a %1$s to a %2$s of yours.", schemaFixup(notification.entity.schema), schemaFixup(notification.toEntity.schema));
-			}
-		}
-		else if (notification.action.equals(ActionType.INSERT)
-				&& notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			else if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 
-			if (notification.type.equals(NotificationType.NEARBY)) {
-				return String.format("commented on a %1$s nearby.", schemaFixup(notification.toEntity.schema));
+				if (notification.type.equals(NotificationType.NEARBY)) {
+					return String.format("added a %1$s to a %2$s nearby.", notification.entity.getSchemaMapped(), notification.toEntity.getSchemaMapped());
+				}
+				else if (notification.type.equals(NotificationType.WATCH)) {
+					return String.format("added a %1$s to a %2$s you are watching.", notification.entity.getSchemaMapped(),
+							notification.toEntity.getSchemaMapped());
+				}
+				else if (notification.type.equals(NotificationType.WATCH_USER)) {
+					return String.format("added a %1$s to a %2$s.", notification.entity.getSchemaMapped(), notification.toEntity.getSchemaMapped());
+				}
+				else if (notification.type.equals(NotificationType.OWN)) {
+					return String
+							.format("added a %1$s to a %2$s of yours.", notification.entity.getSchemaMapped(), notification.toEntity.getSchemaMapped());
+				}
 			}
-			else if (notification.type.equals(NotificationType.WATCH)) {
-				return String.format("commented on a %1$s you are watching.", schemaFixup(notification.toEntity.schema));
-			}
-			else if (notification.type.equals(NotificationType.WATCH_USER)) {
-				return String.format("commented on a %1$s.", schemaFixup(notification.toEntity.schema));
-			}
-			else if (notification.type.equals(NotificationType.OWN)) {
-				return String.format("commented on a %1$s of yours.", schemaFixup(notification.toEntity.schema));
-			}
-		}
-		else if (notification.action.equals(ActionType.INSERT)
-				&& notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)
-				|| notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			else if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 
-			if (notification.type.equals(NotificationType.NEARBY)) {
-				return String.format("added a %1$s to a %2$s nearby.", schemaFixup(notification.entity.schema), schemaFixup(notification.toEntity.schema));
+				if (notification.type.equals(NotificationType.NEARBY)) {
+					return String
+							.format("started a %1$s at a %2$s nearby.", notification.entity.getSchemaMapped(), notification.toEntity.getSchemaMapped());
+				}
+				else if (notification.type.equals(NotificationType.WATCH)) {
+					return String.format("started a %1$s at a %2$s you are watching.", notification.entity.getSchemaMapped(),
+							notification.toEntity.getSchemaMapped());
+				}
+				else if (notification.type.equals(NotificationType.WATCH_USER)) {
+					return String.format("started a %1$s at a %2$s.", notification.entity.getSchemaMapped(), notification.toEntity.getSchemaMapped());
+				}
+				else if (notification.type.equals(NotificationType.OWN)) {
+					return String
+							.format("started a %1$s at a %2$s of yours.", notification.entity.getSchemaMapped(), notification.toEntity.getSchemaMapped());
+				}
 			}
-			else if (notification.type.equals(NotificationType.WATCH)) {
-				return String.format("added a %1$s to a %2$s you are watching.", schemaFixup(notification.entity.schema),
-						schemaFixup(notification.toEntity.schema));
-			}
-			else if (notification.type.equals(NotificationType.WATCH_USER)) {
-				return String.format("added a %1$s to a %2$s.", schemaFixup(notification.entity.schema), schemaFixup(notification.toEntity.schema));
-			}
-			else if (notification.type.equals(NotificationType.OWN)) {
-				return String.format("added a %1$s to a %2$s of yours.", schemaFixup(notification.entity.schema), schemaFixup(notification.toEntity.schema));
+			else if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+
+				if (notification.type.equals(NotificationType.NEARBY)) {
+					return "marked a new place nearby.";
+				}
+				else if (notification.type.equals(NotificationType.WATCH_USER)) {
+					return "marked a new place.";
+				}
 			}
 		}
 		return null;
@@ -151,30 +205,54 @@ public class Notifications {
 		}
 	}
 
-	public static Photo photoTo(AirNotification notification) {
+	public static Photo photoBy(AirNotification notification) {
+		Photo photo = null;
 		if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
 				&& notification.entity.type.equals(Constants.TYPE_APP_TOUR)
 				&& notification.action.equals(ActionType.MOVE)) {
-			return notification.toEntity.getPhoto();
-		}
-		else if (!notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-			return notification.entity.getPhoto();
-		}
-		return null;
-	}
-
-	public static Photo photoFrom(AirNotification notification) {
-		if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
-				&& notification.entity.type.equals(Constants.TYPE_APP_TOUR)
-				&& notification.action.equals(ActionType.MOVE)) {
-			return notification.entity.getPhoto();
+			photo = notification.entity.getPhoto();
+			photo.name = notification.entity.name;
+			photo.shortcut = notification.entity.getShortcut();
 		}
 		else if (notification.user == null) {
-			return notification.entity.getPhoto();
+			photo = Entity.getDefaultPhoto(Constants.SCHEMA_ENTITY_USER, null);
 		}
 		else {
-			return notification.user.getPhoto();
+			photo = notification.user.getPhoto();
+			photo.name = notification.user.name;
+			photo.shortcut = notification.user.getShortcut();
 		}
+		return photo;
+	}
+
+	public static Photo photoOne(AirNotification notification) {
+		Photo photo = null;
+
+		if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
+				&& notification.entity.type.equals(Constants.TYPE_APP_TOUR)
+				&& notification.action.equals(ActionType.MOVE)) {
+			photo = notification.toEntity.getPhoto();
+			photo.name = notification.toEntity.getSchemaMapped();
+			photo.shortcut = notification.toEntity.getShortcut();
+		}
+		else if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			photo = notification.toEntity.getPhoto();
+			photo.name = notification.toEntity.getSchemaMapped();
+			photo.shortcut = notification.toEntity.getShortcut();
+		}
+		else {
+			photo = notification.entity.getPhoto();
+			photo.name = notification.entity.getSchemaMapped();
+			photo.shortcut = notification.entity.getShortcut();
+		}
+		return photo;
+	}
+
+	public static Photo photoTwo(AirNotification notification) {
+		Photo photo = notification.fromEntity.getPhoto();
+		photo.name = notification.fromEntity.name;
+		photo.shortcut = notification.fromEntity.getShortcut();
+		return photo;
 	}
 
 	public static String description(AirNotification notification) {

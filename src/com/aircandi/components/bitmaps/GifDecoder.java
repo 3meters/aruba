@@ -72,7 +72,7 @@ public class GifDecoder {
 	}
 
 	/**
-	 * Gets display DURATION for specified frame.
+	 * Gets display duration for specified frame.
 	 * 
 	 * @param n
 	 *            int index of frame

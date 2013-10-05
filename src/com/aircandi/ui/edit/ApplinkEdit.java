@@ -88,7 +88,6 @@ public class ApplinkEdit extends BaseEntityEdit {
 
 	@Override
 	public void draw() {
-		super.draw();
 
 		final Applink applink = (Applink) mEntity;
 
@@ -147,6 +146,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 
 			drawPhoto();
 		}
+		super.draw();
 	}
 
 	private void initializeTypeSpinner(final List<String> items) {

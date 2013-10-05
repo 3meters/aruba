@@ -215,7 +215,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	}
 
 	protected Integer getListItemResId(String notificationType) {
-		Integer itemResId = R.layout.temp_listitem_news;
+		Integer itemResId = R.layout.temp_listitem_news_v3;
 		return itemResId;
 	}
 
@@ -303,8 +303,14 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 				holder.type = (TextView) view.findViewById(R.id.type);
 				holder.description = (TextView) view.findViewById(R.id.description);
 				holder.date = (TextView) view.findViewById(R.id.timesince);
-				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
-				holder.photoUserView = (AirImageView) view.findViewById(R.id.photo_user);
+				holder.byPhotoView = (AirImageView) view.findViewById(R.id.photo_user);
+
+				holder.shortcutOne = view.findViewById(R.id.shortcut_one);
+				if (holder.shortcutOne != null) {
+					holder.photoViewOne = (AirImageView) holder.shortcutOne.findViewById(R.id.photo_one);
+					holder.nameOne = (TextView) holder.shortcutOne.findViewById(R.id.name_one);
+				}
+
 				view.setTag(holder);
 			}
 
@@ -322,6 +328,16 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 			if (notification != null) {
 				Logger.d(this, "Adapter getView: " + notification.title);
 				holder.data = notification;
+
+				UI.setVisibility(holder.byPhotoView, View.INVISIBLE);
+				if (holder.byPhotoView != null) {
+					if (notification.photoBy != null) {
+						if (holder.byPhotoView.getPhoto() == null || !notification.photoBy.getUri().equals(holder.byPhotoView.getPhoto().getUri())) {
+							UI.drawPhoto(holder.byPhotoView, notification.photoBy);
+						}
+						UI.setVisibility(holder.byPhotoView, View.VISIBLE);
+					}
+				}
 
 				UI.setVisibility(holder.name, View.GONE);
 				if (holder.name != null && notification.title != null && notification.title.length() > 0) {
@@ -341,13 +357,17 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 					UI.setVisibility(holder.type, View.VISIBLE);
 				}
 
-				UI.setVisibility(holder.photoView, View.GONE);
-				if (holder.photoView != null) {
-					if (notification.photoTo != null) {
-						if (holder.photoView.getPhoto() == null || !notification.photoTo.getUri().equals(holder.photoView.getPhoto().getUri())) {
-							UI.drawPhoto(holder.photoView, notification.photoTo);
+				/* Shortcuts */
+
+				UI.setVisibility(holder.shortcutOne, View.GONE);
+				if (holder.shortcutOne != null) {
+					if (notification.photoOne != null) {
+						if (holder.photoViewOne.getPhoto() == null || !notification.photoOne.getUri().equals(holder.photoViewOne.getPhoto().getUri())) {
+							UI.drawPhoto(holder.photoViewOne, notification.photoOne);
 						}
-						UI.setVisibility(holder.photoView, View.VISIBLE);
+						holder.nameOne.setText(notification.photoOne.name);
+						holder.photoViewOne.setTag(notification.photoOne.shortcut);
+						UI.setVisibility(holder.shortcutOne, View.VISIBLE);
 					}
 				}
 
@@ -362,16 +382,6 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 				if (holder.date != null && notification.sentDate != null) {
 					holder.date.setText(DateTime.interval(notification.sentDate.longValue(), DateTime.nowDate().getTime(), IntervalContext.PAST));
 					UI.setVisibility(holder.date, View.VISIBLE);
-				}
-
-				UI.setVisibility(holder.photoUserView, View.INVISIBLE);
-				if (holder.photoUserView != null) {
-					if (notification.photoFrom != null) {
-						if (holder.photoUserView.getPhoto() == null || !notification.photoFrom.getUri().equals(holder.photoUserView.getPhoto().getUri())) {
-							UI.drawPhoto(holder.photoUserView, notification.photoFrom);
-						}
-						UI.setVisibility(holder.photoUserView, View.VISIBLE);
-					}
 				}
 
 				view.setClickable(true);
@@ -403,8 +413,8 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	public static class ViewHolder {
 
 		public TextView		name;
-		public AirImageView	photoView;
-		public AirImageView	photoUserView;
+		public AirImageView	byPhotoView;
+
 		public TextView		subtitle;
 		public TextView		description;
 		public TextView		type;
@@ -413,6 +423,11 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 		@SuppressWarnings("ucd")
 		public String		photoUri;		// Used for verification after fetching image
 		public Object		data;			// object binding to
+
+		public View			shortcutOne;
+		public AirImageView	photoViewOne;
+		public TextView		nameOne;
+
 	}
 
 }

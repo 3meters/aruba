@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -150,6 +151,10 @@ public class PhotoPicker extends BaseBrowse implements IList {
 			showBusy(R.string.progress_searching, false);
 		}
 		else {
+			
+			int inputType = mSearch.getInputType(); 
+			inputType &= ~EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE; 
+			mSearch.setRawInputType(inputType); 
 
 			final Bundle extras = this.getIntent().getExtras();
 			if (extras != null) {
@@ -761,7 +766,9 @@ public class PhotoPicker extends BaseBrowse implements IList {
 				}
 
 				if (bitmap == null) {
-					throw new IllegalStateException("Stream could not be decoded to a bitmap: " + uri);
+					serviceResponse.exception =  new IllegalStateException("Stream could not be decoded to a bitmap: " + uri);
+					serviceResponse.responseCode = ResponseCode.FAILED;
+					return null;
 				}
 				final BitmapDrawable drawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
 				mBitmapCache.put(uri, new SoftReference(bitmap));

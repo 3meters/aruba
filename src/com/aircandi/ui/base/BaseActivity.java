@@ -259,6 +259,11 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 			Logger.d(this, "Pref change: dev ui");
 		}
 
+		if (!Aircandi.getInstance().getPrefTestingSelfNotify()
+				.equals(Aircandi.settings.getBoolean(Constants.PREF_TESTING_SELF_NOTIFY, Constants.PREF_TESTING_SELF_NOTIFY_DEFAULT))) {
+			Logger.d(this, "Pref change: testing self notify");
+		}
+		
 		if (!Aircandi.getInstance().getPrefEntityFencing()
 				.equals(Aircandi.settings.getBoolean(Constants.PREF_ENTITY_FENCING, Constants.PREF_ENTITY_FENCING_DEFAULT))) {
 			mPrefChangeNewSearchNeeded = true;

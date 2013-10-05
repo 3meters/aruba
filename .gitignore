@@ -16,3 +16,4 @@ archive/
 /.settings
 *.db
 /AndroidUnusedResources1.6.2.jar
+/res/values/com_crashlytics_export_strings.xml

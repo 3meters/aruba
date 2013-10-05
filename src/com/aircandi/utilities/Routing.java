@@ -88,11 +88,12 @@ public final class Routing {
 			}
 
 			final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
-			if (meta != null && !meta.installDeclined
+			if ((meta == null || !meta.installDeclined)
 					&& shortcut.getIntentSupport()
 					&& shortcut.appExists()
 					&& !shortcut.appInstalled()) {
 				Dialogs.install(activity, shortcut, entity);
+				return true;
 			}
 
 			if (shortcut.group != null && shortcut.group.size() > 1) {
@@ -687,19 +688,19 @@ public final class Routing {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
 					if (shortcut.app.equals(Constants.TYPE_APP_PICTURE)
 							|| shortcut.app.equals(Constants.TYPE_APP_POST)) {
-						Pictures.view(activity, shortcut.getId(), entity.id);
+						Pictures.view(activity, shortcut.getId(), entity != null ? entity.id : null);
 					}
 					else if (shortcut.app.equals(Constants.TYPE_APP_CANDIGRAM)) {
-						Candigrams.view(activity, shortcut.getId(), entity.id);
+						Candigrams.view(activity, shortcut.getId(), entity != null ? entity.id : null);
 					}
 					else if (shortcut.app.equals(Constants.TYPE_APP_COMMENT)) {
 						Comments.view(activity, shortcut.getId());
 					}
 					else if (shortcut.app.equals(Constants.TYPE_APP_PLACE)) {
-						Places.view(activity, shortcut.getId(), entity.id);
+						Places.view(activity, shortcut.getId(), entity != null ? entity.id : null);
 					}
 					else if (shortcut.app.equals(Constants.TYPE_APP_USER)) {
-						Users.view(activity, shortcut.getId(), entity.id);
+						Users.view(activity, shortcut.getId(), entity != null ? entity.id : null);
 					}
 				}
 			}

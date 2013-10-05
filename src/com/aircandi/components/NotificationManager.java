@@ -26,6 +26,7 @@ import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.AirNotification.NotificationType;
 import com.aircandi.service.objects.Device;
+import com.aircandi.service.objects.User;
 import com.aircandi.ui.AircandiForm;
 import com.aircandi.utilities.Json;
 import com.google.android.gcm.GCMRegistrar;
@@ -111,7 +112,8 @@ public class NotificationManager {
 				if (!TextUtils.isEmpty(registrationId)) {
 
 					Logger.i(this, "GCM: Unregistering device with Aircandi notification service");
-					Device device = new Device(Aircandi.getInstance().getUser().id, registrationId);
+					User user = Aircandi.getInstance().getUser();
+					Device device = new Device(user != null ? user.id : null, registrationId);
 					ModelResult result = EntityManager.getInstance().registerDevice(false, device);
 
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
@@ -203,13 +205,13 @@ public class NotificationManager {
 
 		airNotification.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		airNotification.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		
+
 		final PendingIntent pendingIntent = PendingIntent.getActivity(Aircandi.applicationContext
 				, 0
 				, airNotification.intent
 				, PendingIntent.FLAG_CANCEL_CURRENT);
 
-		String imageUri = airNotification.photoFrom.getUri();
+		String imageUri = airNotification.photoBy.getUri();
 
 		if (imageUri != null) {
 			final BitmapRequest bitmapRequest = new BitmapRequest()

@@ -170,11 +170,20 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 
 	public String getPackageName() {
 		String packageName = null;
-		if (schema.equals("facebook")) {
+		if (app.equals("facebook")) {
 			packageName = "com.facebook.katana";
 		}
-		else if (schema.equals("twitter")) {
+		else if (app.equals("twitter")) {
 			packageName = "com.twitter.android";
+		}
+		else if (app.equals("foursquare")) {
+			packageName = "com.joelapenna.foursquared";
+		}
+		else if (app.equals("tripadvisor")) {
+			packageName = "com.tripadvisor.tripadvisor";
+		}
+		else if (app.equals("yelp")) {
+			packageName = "com.yelp.android";
 		}
 		return packageName;
 	}

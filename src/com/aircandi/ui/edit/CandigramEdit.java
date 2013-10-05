@@ -15,6 +15,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -63,10 +66,13 @@ public class CandigramEdit extends BaseEntityEdit {
 	private SpinnerData	mSpinnerDurationData;
 	private SpinnerData	mSpinnerHopsData;
 
+	private CheckBox	mParked;
+	private TextView	mHintParked;
+
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-		
+
 		mInsertProgressResId = R.string.progress_starting;
 		mDeleteProgressResId = R.string.progress_stopping;
 		mInsertedResId = R.string.alert_started;
@@ -74,6 +80,9 @@ public class CandigramEdit extends BaseEntityEdit {
 
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
 		mSpinnerItem = getThemeTone().equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
+
+		mParked = (CheckBox) findViewById(R.id.chk_parked);
+		mHintParked = (TextView) findViewById(R.id.hint_parked);
 
 		mSpinnerTypeData = Candigrams.getSpinnerData(this, PropertyType.type);
 		mSpinnerRangeData = Candigrams.getSpinnerData(this, PropertyType.RANGE);
@@ -166,7 +175,7 @@ public class CandigramEdit extends BaseEntityEdit {
 					mHintDuration.setVisibility(View.VISIBLE);
 					if (candigram.duration == null
 							|| candigram.duration.intValue() != Integer.parseInt(mSpinnerDurationData.getEntryValues().get(position))) {
-						if (!mFirstDraw) {
+						if (!mFirstDraw && findViewById(R.id.duration_holder).getVisibility() == View.VISIBLE) {
 							mDirty = true;
 						}
 					}
@@ -199,6 +208,22 @@ public class CandigramEdit extends BaseEntityEdit {
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) {}
 		});
+
+		if (mParked != null) {
+			mParked.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					Candigram candigram = (Candigram) mEntity;
+					mHintParked.setText(getString(isChecked ? R.string.candigram_parked_true_help : R.string.candigram_parked_false_help));
+					if (candigram.parked != isChecked) {
+						if (!mFirstDraw) {
+							mDirty = true;
+						}
+					}
+				}
+			});
+		}
 
 		if (mEditing) {
 			/*
@@ -243,10 +268,14 @@ public class CandigramEdit extends BaseEntityEdit {
 
 	@Override
 	public void draw() {
-		super.draw();
 
 		/* Place content */
 		Candigram candigram = (Candigram) mEntity;
+
+		if (mParked != null) {
+			mParked.setChecked(candigram.parked);
+			mHintParked.setText(getString(candigram.parked ? R.string.candigram_parked_true_help : R.string.candigram_parked_false_help));
+		}
 
 		if (mSpinnerType != null) {
 			if (candigram.type != null) {
@@ -306,6 +335,7 @@ public class CandigramEdit extends BaseEntityEdit {
 				mSpinnerHops.setSelection(Candigrams.HOPS_DEFAULT_POSITION);
 			}
 		}
+		super.draw();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -322,6 +352,16 @@ public class CandigramEdit extends BaseEntityEdit {
 				Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 						, null
 						, getResources().getString(R.string.error_missing_candigram_photo)
+						, null
+						, this
+						, android.R.string.ok
+						, null, null, null, null);
+				return;
+			}
+			else if (TextUtils.isEmpty(((TextView)findViewById(R.id.name)).getText())) {
+				Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+						, null
+						, getResources().getString(R.string.error_missing_candigram_name)
 						, null
 						, this
 						, android.R.string.ok
@@ -447,6 +487,16 @@ public class CandigramEdit extends BaseEntityEdit {
 					, null, null, null, null);
 			return false;
 		}
+		else if (candigram.name == null) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_candigram_name)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			return false;
+		}
 
 		if (candigram.range == null) {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
@@ -509,6 +559,10 @@ public class CandigramEdit extends BaseEntityEdit {
 			if (candigram.type.equals("tour")) {
 				candigram.duration = Integer.parseInt(mSpinnerDurationData.getEntryValues().get(mSpinnerDuration.getSelectedItemPosition()));
 			}
+		}
+
+		if (mParked != null) {
+			candigram.parked = mParked.isChecked();
 		}
 
 		/*

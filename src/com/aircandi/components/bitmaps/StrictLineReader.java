@@ -37,7 +37,7 @@ class StrictLineReader implements Closeable {
 
     /*
      * Buffered data is stored in {@code buf}. As long as no exception occurs, 0 <= pos <= end
-     * and the data in the RANGE [pos, end) is buffered for reading. At end of input, if there is
+     * and the data in the range [pos, end) is buffered for reading. At end of input, if there is
      * an unterminated line, we set end == -1, otherwise end == pos. If the underlying
      * {@code InputStream} throws an {@code IOException}, end may remain as either pos or -1.
      */

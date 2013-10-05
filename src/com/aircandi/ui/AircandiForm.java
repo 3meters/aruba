@@ -4,6 +4,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.view.View;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
@@ -17,6 +18,7 @@ import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NotificationManager;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
+import com.aircandi.service.objects.Shortcut;
 import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.utilities.DateTime;
@@ -112,6 +114,12 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
+
+	@SuppressWarnings("ucd")
+	public void onShortcutClick(View view) {
+		final Shortcut shortcut = (Shortcut) view.getTag();
+		Routing.shortcut(this, shortcut, null, null);
+	}
 
 	@Override
 	public void onAdd() {

@@ -22,6 +22,8 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	@Expose
 	public String				type;										// watch, nearby, network
 	@Expose
+	public String				typeTargetId;								// which entity is the target of the notification type
+	@Expose
 	public Entity				entity;
 	@Expose
 	public User					user;										// can be null
@@ -37,8 +39,8 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	public String				title;
 	public String				subtitle;
 	public String				description;
-	public Photo				photoFrom;
-	public Photo				photoTo;
+	public Photo				photoBy;
+	public Photo				photoOne;
 
 	public AirNotification() {}
 
@@ -48,6 +50,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 		 */
 		notification.action = (String) map.get("action");
 		notification.type = (String) map.get("type");
+		notification.typeTargetId = (String) map.get("typeTargetId");
 		notification.title = (String) map.get("title");
 		notification.subtitle = (String) map.get("subtitle");
 		notification.sentDate = (Number) map.get("sentDate");
@@ -90,6 +93,9 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 				notification.toEntity = Post.setPropertiesFromMap(new Post(), entityMap, nameMapping);
 			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+				notification.toEntity = Candigram.setPropertiesFromMap(new Candigram(), entityMap, nameMapping);
+			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 				notification.toEntity = Applink.setPropertiesFromMap(new Applink(), entityMap, nameMapping);
 			}
@@ -112,6 +118,9 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 				notification.fromEntity = Post.setPropertiesFromMap(new Post(), entityMap, nameMapping);
+			}
+			else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+				notification.fromEntity = Candigram.setPropertiesFromMap(new Candigram(), entityMap, nameMapping);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 				notification.fromEntity = Applink.setPropertiesFromMap(new Applink(), entityMap, nameMapping);
@@ -138,7 +147,7 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	public static class NotificationType {
 		public static String	WATCH_USER	= "watch_user";	// sent because this user is watching another user
 		public static String	WATCH		= "watch";		// sent because this user is watching the entity
-		public static String	NEARBY		= "nearby";		// sent because this user is nearby
+		public static String	NEARBY		= "nearby";	// sent because this user is nearby
 		public static String	OWN			= "own";		// sent because this user is the owner
 	}
 
