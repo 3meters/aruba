@@ -1,21 +1,33 @@
 package com.aircandi.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
 
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
+import com.aircandi.components.EntityManager;
+import com.aircandi.components.Maps;
+import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirMarker;
+import com.aircandi.service.objects.Cursor;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
+import com.aircandi.service.objects.ServiceBase;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.utilities.Json;
 import com.aircandi.utilities.UI;
@@ -61,25 +73,87 @@ public class MapForm extends BaseEntityForm {
 	}
 
 	@Override
-	public void databind(BindingMode mode) {
+	public void databind(final BindingMode mode) {
 		/*
 		 * Just here for a pre-databinding check.
 		 */
 		if (checkPlayServices()) {
-			findViewById(R.id.fragment_holder).setVisibility(View.VISIBLE);
-			super.databind(mode);
+
+			new AsyncTask() {
+
+				@Override
+				protected void onPreExecute() {
+					showBusy();
+				}
+
+				@Override
+				protected Object doInBackground(Object... params) {
+					Thread.currentThread().setName("GetMapMarkers");
+
+					List<String> linkTypes = new ArrayList<String>();
+					List<String> schemas = new ArrayList<String>();
+					linkTypes.add(Constants.TYPE_LINK_CONTENT);
+					schemas.add(Constants.SCHEMA_ENTITY_PLACE);
+
+					Cursor cursor = new Cursor()
+							.setLimit(ServiceConstants.PAGE_SIZE_PLACES_MAP)
+							.setSort(Maps.asMap("modifiedDate", -1))
+							.setSkip(0)
+							.setSchemas(schemas)
+							.setLinkTypes(linkTypes)
+							.setDirection(Direction.out.name());;
+
+					ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mEntityId, null, cursor, null);
+
+					return result;
+				}
+
+				@Override
+				protected void onPostExecute(Object response) {
+
+					ModelResult result = (ModelResult) response;
+					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+						List<Entity> entities = (List<Entity>) result.data;
+						Collections.sort(entities, new ServiceBase.SortByPositionSortDate());
+						for (Entity entity : entities) {
+
+							if (entity.location != null) {
+								Boolean exists = false;
+								for (AirMarker marker : mMarkers) {
+									if (marker.id.equals(entity.id)) {
+										exists = true;
+										break;
+									}
+								}
+
+								if (!exists) {
+									AirMarker marker = new AirMarker(entity.id, entity.name, null, entity.location.lat, entity.location.lng, false,
+											R.drawable.img_marker_candigram_inactive);
+									mMarkers.add(marker);
+								}
+							}
+						}
+					}
+					hideBusy();
+					findViewById(R.id.fragment_holder).setVisibility(View.VISIBLE);
+					MapForm.super.databind(mode);
+				}
+
+			}.execute();
 		}
 	}
 
 	@Override
 	public void draw() {
-		if (mEntity.name != null && !mEntity.name.equals("")) {
+		if (!TextUtils.isEmpty(mEntity.name)) {
 			setActivityTitle(mEntity.name);
 		}
+
 		if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
 			UI.showToastNotification("Google Play Services not available", Toast.LENGTH_SHORT);
 			return;
 		}
+
 		if (getVersionFromPackageManager(this) >= 2) {
 			setUpMap();
 		}

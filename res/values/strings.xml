@@ -21,6 +21,7 @@
     <string name="menu_test_item">Test</string>
     <string name="menu_send_item">Send</string>
     <string name="menu_invite_item">Invite</string>
+    <string name="menu_feedback_item">Feedback</string>
     <string name="menu_delete_item">Delete</string>
     <string name="menu_accept_item">Accept</string>
     <string name="menu_cancel_item">Cancel</string>
@@ -28,7 +29,7 @@
     <!-- Tabs -->
 
     <string name="tab_radar_item">radar</string>
-    <string name="tab_notifications_item">feed</string>
+    <string name="tab_notifications_item">news</string>
     <string name="tab_watching_item">watch</string>
     <string name="tab_created_item">mine</string>
         
@@ -85,7 +86,6 @@
     <string name="dummy_uri">http://goodeats.com</string>
     <string name="dummy_name">Jay Massena</string>
     <string name="dummy_label">candigram</string>
-    <string name="dummy_title">Zoka Coffee Roaster &amp; Tea Company</string>
     <string name="dummy_location">Seattle, WA</string>
     <string name="dummy_address">"2200 N 56th (at Keystone Pl N)\nSeattle, WA 98103\n(206) 545&#8211;4277"</string>
     <string name="dummy_comments">21 comments</string>
@@ -192,11 +192,11 @@
     <string name="error_missing_candigram_range">Select the travel range.</string>
     <string name="error_missing_candigram_hops">Select the maximum number of visits.</string>
     <string name="error_missing_candigram_duration">Select the length of visit.</string>
-    <string name="error_missing_candigram_photo">Select a photo.</string>
     <string name="error_missing_candigram_content">Select a photo or enter a message.</string>
     <string name="error_missing_candigram_name">Enter a title.</string>
     <string name="error_missing_invite_email">Enter at least one email address.</string>
     <string name="error_missing_place_name">Enter a name.</string>
+    <string name="error_missing_photo">Select a photo.</string>
     
     <!-- Errors: network or location -->
 
@@ -459,8 +459,12 @@
     
     <!-- Invite -->
     
-    <string name="invite_heading">invite your friends to Aircandi</string>
+    <string name="invite_heading">Invite your friends to Aircandi.</string>
     <string name="invite_message_default">I enjoy Aircandi and I thought you might like it too!</string>
+    
+    <!-- Feedback -->
+    
+    <string name="feedback_message">How can we make Aircandi better for you?</string>
     
     <!-- Picture -->
     

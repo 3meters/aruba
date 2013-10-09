@@ -2,7 +2,6 @@ package com.aircandi.service.objects;
 
 import java.util.Map;
 
-import com.aircandi.ServiceConstants;
 import com.aircandi.service.Expose;
 import com.aircandi.service.objects.Link.Direction;
 
@@ -23,8 +22,6 @@ public class LinkSettings extends ServiceObject {
 	@Expose
 	public Boolean				count				= true;
 	@Expose
-	public Boolean				inactive			= false;
-	@Expose
 	public Map					where;
 	@Expose
 	public Number				limit;
@@ -33,24 +30,15 @@ public class LinkSettings extends ServiceObject {
 
 	public LinkSettings() {}
 
-	public LinkSettings(String type, String schema, Boolean links, Boolean count) {
-		this(type, schema, links, count, false);
+	public LinkSettings(String type, String schema, Boolean links, Boolean count, Number limit) {
+		this(type, schema, links, count, limit, null);
 	}
 
-	public LinkSettings(String type, String schema, Boolean links, Boolean count, Boolean inactive) {
-		this(type, schema, links, count, inactive, ServiceConstants.LIMIT_LINKS_DEFAULT);
-	}
-
-	public LinkSettings(String type, String schema, Boolean links, Boolean count, Boolean inactive, Number limit) {
-		this(type, schema, links, count, inactive, limit, null);
-	}
-
-	public LinkSettings(String type, String schema, Boolean links, Boolean count, Boolean inactive, Number limit, Map where) {
+	public LinkSettings(String type, String schema, Boolean links, Boolean count, Number limit, Map where) {
 		this.type = type;
 		this.schema = schema;
 		this.links = links;
 		this.count = count;
-		this.inactive = inactive;
 		this.where = where;
 		this.limit = limit;
 	}
@@ -105,15 +93,6 @@ public class LinkSettings extends ServiceObject {
 
 	public LinkSettings setDirection(Direction direction) {
 		this.direction = direction.name();
-		return this;
-	}
-
-	public Boolean getInactive() {
-		return inactive;
-	}
-
-	public LinkSettings setInactive(Boolean inactive) {
-		this.inactive = inactive;
 		return this;
 	}
 }

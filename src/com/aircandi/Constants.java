@@ -47,6 +47,7 @@ public final class Constants {
 	public static final String	EXTRA_LIST_LINK_TYPE						= "com.aircandi.EXTRA_LIST_LINK_TYPE";														//$NON-NLS-1$
 	public static final String	EXTRA_LIST_LINK_SCHEMA						= "com.aircandi.EXTRA_LIST_SCHEMA";														//$NON-NLS-1$
 	public static final String	EXTRA_LIST_LINK_DIRECTION					= "com.aircandi.EXTRA_LIST_DIRECTION";														//$NON-NLS-1$
+	public static final String	EXTRA_LIST_LINK_INACTIVE					= "com.aircandi.EXTRA_LIST_INACTIVE";														//$NON-NLS-1$
 	public static final String	EXTRA_LIST_NEW_ENABLED						= "com.aircandi.EXTRA_LIST_NEW_ENABLED";													//$NON-NLS-1$
 	public static final String	EXTRA_LIST_ITEM_RESID						= "com.aircandi.EXTRA_LIST_ITEM_RESID";													//$NON-NLS-1$
 	public static final String	EXTRA_LIST_TITLE							= "com.aircandi.EXTRA_LIST_TITLE";															//$NON-NLS-1$
@@ -219,6 +220,7 @@ public final class Constants {
 	public static final boolean	SUPPORTS_HONEYCOMB							= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB;
 	public static final boolean	SUPPORTS_ICE_CREAM_SANDWICH					= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 	public static final boolean	SUPPORTS_JELLY_BEAN							= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN;
+	public static final boolean	SUPPORTS_JELLY_BEAN_MR1						= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
 	/* Prefs - users */
 	public static final String	PREF_THEME									= "Pref_Theme";
@@ -252,7 +254,7 @@ public final class Constants {
 	public static final String	SETTING_NAVIGATION_DRAWER_OPENED_BY_USER	= "Setting_Navigation_Drawer_Opened_By_User";
 
 	/* Defaults */
-	public static final String	PREF_THEME_DEFAULT							= "aircandi_theme_midnight";
+	public static final String	PREF_THEME_DEFAULT							= "aircandi_theme_snow";
 	public static final String	PREF_SEARCH_RADIUS_DEFAULT					= "8047";																					// five miles
 	public static final String	PREF_PLACE_PROVIDER_DEFAULT					= TYPE_PROVIDER_FOURSQUARE;
 	public static final Boolean	PREF_SOUND_EFFECTS_DEFAULT					= true;

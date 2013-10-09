@@ -29,14 +29,14 @@ public class Maps {
 		if (entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 
 			Bundle extras = new Bundle();
-			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
+			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, Direction.out, null, false, false);
 			settings.appClass = Places.class;
 			List<Shortcut> shortcuts = (List<Shortcut>) entity.getShortcuts(settings, null, null);
 			if (shortcuts.size() > 0) {
 				final List<String> markerStrings = new ArrayList<String>();
 				for (Shortcut shortcut : shortcuts) {
 					if (shortcut.location != null) {
-						AirMarker marker = new AirMarker(shortcut.name, null, shortcut.location.lat, shortcut.location.lng, false,
+						AirMarker marker = new AirMarker(shortcut.id, shortcut.name, null, shortcut.location.lat, shortcut.location.lng, false,
 								R.drawable.img_marker_candigram_inactive);
 						if (!shortcut.inactive) {
 							marker.current = true;

@@ -83,6 +83,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	protected String			mListLinkSchema;
 	protected String			mListLinkType;
 	protected String			mListLinkDirection;
+	protected String			mListLinkInactive;
 	protected Integer			mListItemResId;
 	protected Boolean			mListNewEnabled;
 	protected String			mListTitle;
@@ -113,6 +114,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			if (mListLinkDirection == null) {
 				mListLinkDirection = "in";
 			}
+			mListLinkInactive = extras.getString(Constants.EXTRA_LIST_LINK_INACTIVE);
 			mListNewEnabled = extras.getBoolean(Constants.EXTRA_LIST_NEW_ENABLED, false);
 			mListPageSize = extras.getInt(Constants.EXTRA_LIST_PAGE_SIZE, PAGE_SIZE_DEFAULT);
 
@@ -269,6 +271,10 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 				.setSort(Maps.asMap("modifiedDate", -1))
 				.setSkip(refresh ? 0 : mEntities.size());
 
+		if (mListLinkInactive != null) {
+			mCursorSettings.setWhere(Maps.asMap("inactive", Boolean.parseBoolean(mListLinkInactive)));
+		}
+
 		if (mListLinkSchema != null) {
 			List<String> schemas = new ArrayList<String>();
 			schemas.add(mListLinkSchema);
@@ -286,11 +292,6 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		}
 
 		LinkOptions linkOptions = getLinkOptions(mListLinkSchema);
-		if (mForEntity != null && mForEntity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
-			if (mListLinkSchema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-				linkOptions.setIgnoreInactive(true);
-			}
-		}
 
 		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mForEntityId, linkOptions, mCursorSettings, Aircandi.stopwatch3);
 
@@ -472,8 +473,8 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 			if (result.serviceResponse.responseCode != ResponseCode.SUCCESS) {
 				hideBusy();
-				Errors.handleError(BaseEntityList.this, result.serviceResponse);
 				Aircandi.stopwatch3.stop(this.getClass().getSimpleName() + " databind failed");
+				Errors.handleError(BaseEntityList.this, result.serviceResponse);
 				return false;
 			}
 			else {

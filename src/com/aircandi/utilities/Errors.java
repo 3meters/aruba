@@ -68,11 +68,13 @@ public final class Errors {
 			 * Mostly because a more current client version is required.
 			 */
 			Aircandi.applicationUpdateRequired = true;
-			final Intent intent = new Intent(activity, SplashForm.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			activity.startActivity(intent);
-			activity.finish();
-			Animate.doOverridePendingTransition(activity, TransitionType.FORM_TO_PAGE);
+			if (activity != null && !activity.getClass().getSimpleName().equals("SplashForm")) {
+				final Intent intent = new Intent(activity, SplashForm.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				activity.startActivity(intent);
+				activity.finish();
+				Animate.doOverridePendingTransition(activity, TransitionType.FORM_TO_PAGE);
+			}
 		}
 	}
 
@@ -164,7 +166,7 @@ public final class Errors {
 				 * This gets returned by any network call to service where this aircandi version
 				 * is not allowed to access the service api.
 				 */
-				ErrorResponse errorResponse = new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.dialog_update_message));
+				ErrorResponse errorResponse = new ErrorResponse(ResponseType.NONE, context.getString(R.string.dialog_update_message));
 				errorResponse.splash = true;
 				return errorResponse;
 			}

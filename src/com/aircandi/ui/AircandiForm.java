@@ -200,7 +200,7 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 		}
 	}
 
-	private BaseFragment getCurrentFragment() {
+	public BaseFragment getCurrentFragment() {
 		return (BaseFragment) mCurrentFragment;
 	}
 
@@ -241,7 +241,7 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 		 * OnResume gets called after OnCreate (always) and whenever the activity is being brought back to the
 		 * foreground. Not guaranteed but is usually called just before the activity receives focus.
 		 */
-		Aircandi.currentPlace = null;
+		Aircandi.getInstance().setCurrentPlace(null);
 		Logger.v(this, "Setting current place to null");
 		if (mPauseDate != null) {
 			final Long interval = DateTime.nowDate().getTime() - mPauseDate.longValue();

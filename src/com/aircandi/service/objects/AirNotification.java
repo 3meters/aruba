@@ -22,8 +22,6 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	@Expose
 	public String				type;										// watch, nearby, network
 	@Expose
-	public String				typeTargetId;								// which entity is the target of the notification type
-	@Expose
 	public Entity				entity;
 	@Expose
 	public User					user;										// can be null
@@ -50,7 +48,6 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 		 */
 		notification.action = (String) map.get("action");
 		notification.type = (String) map.get("type");
-		notification.typeTargetId = (String) map.get("typeTargetId");
 		notification.title = (String) map.get("title");
 		notification.subtitle = (String) map.get("subtitle");
 		notification.sentDate = (Number) map.get("sentDate");
@@ -145,10 +142,14 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	// --------------------------------------------------------------------------------------------
 
 	public static class NotificationType {
-		public static String	WATCH_USER	= "watch_user";	// sent because this user is watching another user
-		public static String	WATCH		= "watch";		// sent because this user is watching the entity
 		public static String	NEARBY		= "nearby";	// sent because this user is nearby
-		public static String	OWN			= "own";		// sent because this user is the owner
+		public static String	WATCH		= "watch";		// sent because this user is watching the entity
+		public static String	WATCH_TO	= "watch_to";	// sent because this user is watching the 'to' entity
+		public static String	WATCH_FROM	= "watch_from";		// sent because this user is watching the 'from' entity
+		public static String	WATCH_USER	= "watch_user";		// sent because this user is watching another user
+		public static String	OWN			= "own";		// sent because this user is the owner of the entity
+		public static String	OWN_TO		= "own_to";	// sent because this user is the owner of the 'to' entity
+		public static String	OWN_FROM	= "own_from";	// sent because this user is the owner of the 'from' entity
 	}
 
 	public static class ActionType {

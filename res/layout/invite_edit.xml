@@ -4,9 +4,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/content_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/backgroundButtonBar"
+        android:padding="10dp"
+        android:text="@string/invite_heading"
+        android:textColor="?attr/textColorSecondary" />
+
     <com.aircandi.ui.widgets.BounceScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/content_message"
         android:fillViewport="true"
         android:isScrollContainer="false" >
 
@@ -18,31 +28,6 @@
             android:orientation="vertical" >
 
             <!-- Title and Content -->
-
-            <LinearLayout
-                android:id="@+id/header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="5dp"
-                android:orientation="vertical" >
-
-                <com.aircandi.ui.widgets.AirTitle
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:text="@string/invite_heading"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textColor="@color/accent_blue" />
-
-                <View
-                    android:id="@+id/rule"
-                    android:layout_width="match_parent"
-                    android:layout_height="1px"
-                    android:background="?attr/ruleColorStrong" />
-            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -82,8 +67,7 @@
                 android:layout_weight="1"
                 android:gravity="top"
                 android:hint="@string/form_invite_message_hint"
-                android:imeOptions="actionSend"
-                android:inputType="textCapSentences|textAutoCorrect|textShortMessage"
+                android:inputType="textCapSentences|textAutoCorrect|textShortMessage|textMultiLine"
                 android:lines="5"
                 android:minLines="5" />
 

@@ -59,18 +59,13 @@ public final class ServiceConstants {
 
 	public static final int		PROXIMITY_BEACON_COVERAGE						= 3;
 
-	public static final int		LIMIT_LINKS_DEFAULT								= 50;
-	public static final int		LIMIT_LINKS_LIKE								= 50;
-	public static final int		LIMIT_LINKS_CREATE								= 50;
-	public static final int		LIMIT_LINKS_WATCH								= 50;
-	public static final int		LIMIT_PLACES_RADAR								= 50;
-
 	public static final int		PAGE_SIZE_APPLINKS								= 100;
 	public static final int		PAGE_SIZE_CANDIGRAMS							= 30;
 	public static final int		PAGE_SIZE_COMMENTS								= 30;
 	public static final int		PAGE_SIZE_PICTURES								= 30;
 	public static final int		PAGE_SIZE_PLACES								= 30;
 	public static final int		PAGE_SIZE_USERS									= 30;
+	public static final int		PAGE_SIZE_PLACES_MAP							= 50;
 
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS		= 401.1f;
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED	= 401.2f;																																		// $codepro.audit.disable questionableName

@@ -110,7 +110,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 		mEntity = EntityManager.getEntity(mEntityId);
 		if (mEntity != null) {
 			if (mEntity instanceof Place) {
-				Aircandi.currentPlace = mEntity;
+				Aircandi.getInstance().setCurrentPlace(mEntity);
 				Logger.v(this, "Setting current place to: " + mEntity.id);
 			}
 			mCacheStamp = mEntity.getCacheStamp();
@@ -172,7 +172,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 						if (result.data != null) {
 							mEntity = (Entity) result.data;
 							if (mEntity instanceof Place) {
-								Aircandi.currentPlace = mEntity;
+								Aircandi.getInstance().setCurrentPlace(mEntity);
 								Logger.v(this, "Setting current place to: " + mEntity.id);
 							}
 							invalidateOptionsMenu();
@@ -230,10 +230,9 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_LIKE
-							, mEntity.schema
 							, false
-							, toShortcut
 							, fromShortcut
+							, toShortcut
 							, Constants.TYPE_LINK_LIKE);
 				}
 				else {
@@ -261,7 +260,6 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 						Errors.handleError(BaseEntityForm.this, result.serviceResponse);
 					}
 				}
-				((ComboButton) findViewById(R.id.button_like)).getViewAnimator().setDisplayedChild(0);
 			}
 		}.execute();
 
@@ -289,10 +287,9 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_WATCH
-							, mEntity.schema
 							, false
-							, toShortcut
 							, fromShortcut
+							, toShortcut
 							, Constants.TYPE_LINK_WATCH);
 				}
 				else {
@@ -501,7 +498,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 				intent = Comments.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, titleResId != null ? getString(titleResId) : null);
 			}
 			if (settings.appClass.equals(Places.class)) {
-				intent = Places.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, titleResId != null ? getString(titleResId) : null);
+				intent = Places.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, settings.linkInactive, titleResId != null ? getString(titleResId) : null);
 			}
 			if (settings.appClass.equals(Pictures.class)) {
 				intent = Pictures.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, titleResId != null ? getString(titleResId) : null);
@@ -744,7 +741,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 		 */
 		if (!isFinishing()) {
 			if (mEntity instanceof Place) {
-				Aircandi.currentPlace = mEntity;
+				Aircandi.getInstance().setCurrentPlace(mEntity);
 				Logger.v(this, "Setting current place to: " + mEntity.id);
 			}
 

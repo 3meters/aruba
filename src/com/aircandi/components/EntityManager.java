@@ -320,7 +320,7 @@ public class EntityManager {
 		final ModelResult result = new ModelResult();
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST + collection + "/genId")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST + collection + "?genId=1")
 				.setRequestType(RequestType.GET)
 				.setSuppressUI(true)
 				.setResponseFormat(ResponseFormat.JSON);
@@ -661,12 +661,12 @@ public class EntityManager {
 				 */
 				if (!entity.synthetic) {
 					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
-					mEntityCache.addLink(insertedEntity.id
+					mEntityCache.addLink(Aircandi.getInstance().getUser().id
+							, insertedEntity.id
 							, Constants.TYPE_LINK_CREATE
-							, insertedEntity.schema
-							, Aircandi.getInstance().getUser().id
-							, insertedEntity.getShortcut()
-							, Aircandi.getInstance().getUser().getShortcut());
+							, false
+							, Aircandi.getInstance().getUser().getShortcut()
+							, insertedEntity.getShortcut());
 				}
 
 				result.data = insertedEntity;
@@ -918,8 +918,13 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult insertLink(String fromId, String toId, String type, String schema, Boolean strong, Shortcut toShortcut, Shortcut fromShortcut,
-			String actionType) {
+	public ModelResult insertLink(String fromId
+			, String toId
+			, String type
+			, Boolean strong
+			, Shortcut fromShortcut
+			, Shortcut toShortcut
+			, String actionType) {
 		final ModelResult result = new ModelResult();
 
 		final Bundle parameters = new Bundle();
@@ -945,7 +950,7 @@ public class EntityManager {
 			 * Fail could be because of ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
 			 * prevents any user from liking the same entity more than once.
 			 */
-			mEntityCache.addLink(toId, type, schema, fromId, toShortcut, fromShortcut);
+			mEntityCache.addLink(fromId, toId, type, strong, fromShortcut, toShortcut);
 		}
 
 		return result;

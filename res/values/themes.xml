@@ -50,8 +50,8 @@
         <item name="textColorBullet">@color/brand_pink</item>
         <item name="textColorBars">@color/text_dark</item>
         <item name="textColorProgress">@color/text_dark</item>
-        <item name="textColorCandiView">@color/text_dark</item>
-        <item name="textColorCandiViewSynthetic">@color/text_dark</item>
+        <item name="textColorCandiView">@color/text_color</item>
+        <item name="textColorCandiViewSynthetic">@color/text_color</item>
         <item name="textOutlineRadar">true</item>
         <item name="badgeColor">@color/text_dark</item>
         <item name="badgeColorSynthetic">@color/text_dark</item>
@@ -144,15 +144,6 @@
         <item name="textAppearanceExtraSmall">@style/textAppearanceExtraSmall</item>
         <item name="textAppearanceTiny">@style/textAppearanceTiny</item>
         
-        <!-- Dialogs 
-        <item name="android:alertDialogTheme">@style/Theme.Sherlock.Light.Dialog</item>
-        <item name="android:dialogTheme">@android:style/Theme.Holo.Light.Dialog</item>
-        <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_holo</item>
-        <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_holo</item>
-        <item name="dialogTitleDecorLayout">@layout/dialog_title_holo</item>
-        <item name="alertDialogCenterButtons">false</item>
-        <item name="alertDialogIcon">@android:drawable/ic_dialog_alert_holo_light</item>        -->
-
         <!-- Text and line colors -->
 
         <item name="ruleColor">@color/rule_15_light</item>
@@ -164,8 +155,8 @@
         <item name="textColorBullet">@color/brand_pink</item>
         <item name="textColorBars">@color/text_light</item>
         <item name="textColorProgress">@color/text_light</item>
-        <item name="textColorCandiView">@color/text_dark</item>
-        <item name="textColorCandiViewSynthetic">@color/text_dark</item>
+        <item name="textColorCandiView">@color/text_color</item>
+        <item name="textColorCandiViewSynthetic">@color/text_color</item>
         <item name="textOutlineRadar">false</item>
         <item name="badgeColor">@color/text_dark</item>
         <item name="badgeColorSynthetic">@color/text_dark</item>
@@ -247,6 +238,10 @@
 
     <style name="aircandi_theme_snow" parent="aircandi_theme_light" />
 
+    <style name="aircandi_theme_snow_notitlebar" parent="aircandi_theme_light">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+    
     <!-- Translucent theme versions -->
 
     <style name="aircandi_theme_midnight_transparent" parent="aircandi_theme_midnight">

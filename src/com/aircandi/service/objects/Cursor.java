@@ -25,16 +25,19 @@ public class Cursor extends ServiceObject {
 	public List<String>			schemas;
 	@Expose
 	public String				direction;
+	@Expose
+	public Map					where;
 
 	public Cursor() {}
 
-	public Cursor(List<String> linkTypes, List<String> schemas, String direction, Map sort, Number skip, Number limit) {
+	public Cursor(List<String> linkTypes, List<String> schemas, String direction, Map where, Map sort, Number skip, Number limit) {
 		this.sort = sort;
 		this.skip = skip;
 		this.limit = limit;
 		this.linkTypes = linkTypes;
 		this.schemas = schemas;
 		this.direction = direction;
+		this.where = where;
 	}
 
 	public Map getSort() {
@@ -88,6 +91,15 @@ public class Cursor extends ServiceObject {
 
 	public Cursor setDirection(String direction) {
 		this.direction = direction;
+		return this;
+	}
+
+	public Map getWhere() {
+		return where;
+	}
+
+	public Cursor setWhere(Map where) {
+		this.where = where;
 		return this;
 	}
 

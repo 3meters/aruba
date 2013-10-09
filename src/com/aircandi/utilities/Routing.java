@@ -741,6 +741,9 @@ public final class Routing {
 		else if (itemId == R.id.invite) {
 			return Route.INVITE;
 		}
+		else if (itemId == R.id.feedback) {
+			return Route.FEEDBACK;
+		}
 		else if (itemId == R.id.cancel) {
 			return Route.CANCEL;
 		}

@@ -14,7 +14,7 @@
             android:title="@string/pref_search_radius_title" />
         <ListPreference
             android:id="@+id/Pref_Theme"
-            android:defaultValue="aircandi_theme_midnight"
+            android:defaultValue="aircandi_theme_snow"
             android:dialogTitle="@string/pref_theme_dialog_title"
             android:entries="@array/theme_entries"
             android:entryValues="@array/theme_values"

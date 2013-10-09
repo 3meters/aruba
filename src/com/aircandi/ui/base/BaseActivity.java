@@ -432,6 +432,12 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 		}
 	}
 
+	private void clearReferences() {
+		Activity currentActivity = Aircandi.getInstance().getCurrentActivity();
+		if (currentActivity != null && currentActivity.equals(this))
+			Aircandi.getInstance().setCurrentActivity(null);
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	// Menus
 	// --------------------------------------------------------------------------------------------
@@ -495,12 +501,14 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 		super.onResume();
 		Logger.d(this, "Activity resuming");		
 		BusProvider.getInstance().register(this);
+		Aircandi.getInstance().setCurrentActivity(this);
 	}
 
 	@Override
 	protected void onPause() {
 		Logger.d(this, "Activity pausing");
 		BusProvider.getInstance().unregister(this);
+		clearReferences();
 		super.onPause();
 	}
 
@@ -515,6 +523,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	protected void onDestroy() {
 		/* This activity gets destroyed everytime we leave using back or finish(). */
 		Logger.d(this, "Activity destroying");
+		clearReferences();
 		super.onDestroy();
 	}
 

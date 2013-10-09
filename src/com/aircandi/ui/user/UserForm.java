@@ -73,6 +73,7 @@ public class UserForm extends BaseEntityForm {
 			protected void onPostExecute(Object modelResult) {
 				final ModelResult result = (ModelResult) modelResult;
 
+				hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					if (result.data != null) {
 						drawStats();
@@ -81,7 +82,6 @@ public class UserForm extends BaseEntityForm {
 				else {
 					Errors.handleError(UserForm.this, result.serviceResponse);
 				}
-				hideBusy();
 			}
 
 		}.execute();

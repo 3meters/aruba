@@ -24,6 +24,7 @@ import com.aircandi.events.MessageEvent;
 import com.aircandi.service.RequestListener;
 import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.AirNotification;
+import com.aircandi.service.objects.AirNotification.ActionType;
 import com.aircandi.service.objects.AirNotification.NotificationType;
 import com.aircandi.service.objects.Device;
 import com.aircandi.service.objects.User;
@@ -186,36 +187,32 @@ public class NotificationManager {
 			}
 		}
 
+		airNotification.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		airNotification.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+		final PendingIntent pendingIntent = PendingIntent.getActivity(Aircandi.applicationContext, 0
+				, airNotification.intent
+				, PendingIntent.FLAG_CANCEL_CURRENT);
+
+		/* Default base notification configuration */
+
 		final NotificationCompat.Builder builder = new NotificationCompat.Builder(Aircandi.applicationContext)
 				.setContentTitle(airNotification.title)
 				.setContentText(airNotification.subtitle)
 				.setSmallIcon(R.drawable.ic_stat_notification)
 				.setAutoCancel(true)
 				.setOnlyAlertOnce(true)
+				.setContentIntent(pendingIntent)
 				.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS)
 				.setWhen(System.currentTimeMillis());
 
-		if (airNotification.entity != null && airNotification.entity.description != null) {
-			NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle();
-			style.setBigContentTitle(airNotification.title);
-			style.bigText(airNotification.entity.description);
-			style.setSummaryText(airNotification.subtitle);
-			builder.setStyle(style);
-		}
+		String byImageUri = airNotification.photoBy.getUri();
 
-		airNotification.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		airNotification.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		/* Large icon */
 
-		final PendingIntent pendingIntent = PendingIntent.getActivity(Aircandi.applicationContext
-				, 0
-				, airNotification.intent
-				, PendingIntent.FLAG_CANCEL_CURRENT);
-
-		String imageUri = airNotification.photoBy.getUri();
-
-		if (imageUri != null) {
+		if (byImageUri != null) {
 			final BitmapRequest bitmapRequest = new BitmapRequest()
-					.setBitmapUri(imageUri)
+					.setBitmapUri(byImageUri)
 					.setBitmapRequestor(airNotification)
 					.setBitmapSize((int) Aircandi.applicationContext.getResources().getDimensionPixelSize(R.dimen.notification_large_icon_width))
 					.setRequestListener(new RequestListener() {
@@ -228,24 +225,77 @@ public class NotificationManager {
 
 								final BitmapResponse bitmapResponse = (BitmapResponse) serviceResponse.data;
 								builder.setLargeIcon(bitmapResponse.bitmap);
-								Notification notification = builder.build();
-								notification.contentIntent = pendingIntent;
-								mNotificationManager.notify(airNotification.type, 0, notification);
+
+								/* Enhance or go with default */
+
+								if (airNotification.entity != null && airNotification.action.equals(ActionType.INSERT)) {
+									if ((airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)
+											|| airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM))
+											&& airNotification.entity.getPhoto().getUri() != null) {
+										useBigPicture(builder, airNotification);
+									}
+									else if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+										useBigText(builder, airNotification);
+									}
+								}
+								else {
+									mNotificationManager.notify(airNotification.action, 0, builder.build());
+								}
 							}
 						}
 					});
+
 			BitmapManager.getInstance().masterFetch(bitmapRequest);
 		}
 		else {
-			Notification notification = builder.build();
-			notification.contentIntent = pendingIntent;
-			mNotificationManager.notify(airNotification.type, 0, notification);
+			mNotificationManager.notify(airNotification.action, 0, builder.build());
 		}
-
 	}
 
-	public void cancelNotification(String type) {
-		mNotificationManager.cancel(type, 0);
+	public void useBigPicture(final NotificationCompat.Builder builder, final AirNotification airNotification) {
+
+		String imageUri = airNotification.entity.getPhoto().getUri();
+		final BitmapRequest bitmapRequest = new BitmapRequest()
+				.setBitmapUri(imageUri)
+				.setBitmapRequestor(airNotification)
+				.setBitmapSize((int) Aircandi.applicationContext.getResources().getDimensionPixelSize(R.dimen.notification_big_picture_width))
+				.setRequestListener(new RequestListener() {
+
+					@Override
+					public void onComplete(Object response) {
+
+						final ServiceResponse serviceResponse = (ServiceResponse) response;
+						if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
+
+							final BitmapResponse bitmapResponse = (BitmapResponse) serviceResponse.data;
+							NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle()
+									.bigPicture(bitmapResponse.bitmap)
+									.setBigContentTitle(airNotification.title)
+									.setSummaryText(airNotification.subtitle);
+
+							builder.setStyle(style);
+
+							mNotificationManager.notify(airNotification.action, 0, builder.build());
+						}
+					}
+				});
+
+		BitmapManager.getInstance().masterFetch(bitmapRequest);
+	}
+
+	public void useBigText(NotificationCompat.Builder builder, AirNotification airNotification) {
+		NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle()
+				.setBigContentTitle(airNotification.title)
+				.bigText(airNotification.entity.description)
+				.setSummaryText(airNotification.subtitle);
+
+		builder.setStyle(style);
+
+		mNotificationManager.notify(airNotification.action, 0, builder.build());
+	}
+
+	public void cancelNotification(String tag) {
+		mNotificationManager.cancel(tag, 0);
 	}
 
 	public void storeNotification(final AirNotification notification, String jsonNotification) {
@@ -253,7 +303,22 @@ public class NotificationManager {
 		ContentValues values = new ContentValues();
 		values.put(NotificationTable.COLUMN_SENT_DATE, notification.sentDate.longValue());
 		values.put(NotificationTable.COLUMN_OBJECT, jsonNotification);
-		Aircandi.applicationContext.getContentResolver().insert(NotificationsContentProvider.CONTENT_URI, values);
+
+		String where = NotificationTable.COLUMN_TARGET_ID
+				+ "=? AND "
+				+ NotificationTable.COLUMN_ACTION + "=?";
+
+		int updateCount = Aircandi.applicationContext.getContentResolver().update(NotificationsContentProvider.CONTENT_URI
+				, values
+				, where
+				, new String[] { notification.entity.id, notification.action });
+
+		if (updateCount == 0) {
+			values.put(NotificationTable.COLUMN_ACTION, notification.action);
+			values.put(NotificationTable.COLUMN_TARGET_ID, notification.entity.id);
+			Aircandi.applicationContext.getContentResolver().insert(NotificationsContentProvider.CONTENT_URI, values);
+		}
+
 		mNewCount++;
 	}
 

@@ -299,7 +299,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 		}
 		else {
-			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, false);
+			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, null, false, false);
 			shortcuts = (List<Shortcut>) entity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
 		}
 
@@ -660,6 +660,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				@Override
 				protected void onPostExecute(Object modelResult) {
 					final ModelResult result = (ModelResult) modelResult;
+					hideBusy();
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 						mApplinks = (List<Entity>) result.data;
 						doApplinksBuilder();
@@ -667,7 +668,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					else {
 						Errors.handleError(BaseEntityEdit.this, result.serviceResponse);
 					}
-					hideBusy();
 				}
 
 			}.execute();

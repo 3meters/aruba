@@ -424,8 +424,8 @@ public class RadarFragment extends BaseFragment implements
 					protected void onPostExecute(Object result) {
 						final ServiceResponse serviceResponse = (ServiceResponse) result;
 						if (serviceResponse.responseCode != ResponseCode.SUCCESS) {
-							Errors.handleError(getSherlockActivity(), serviceResponse);
 							onError();
+							Errors.handleError(getSherlockActivity(), serviceResponse);
 						}
 					}
 
@@ -542,8 +542,8 @@ public class RadarFragment extends BaseFragment implements
 							protected void onPostExecute(Object result) {
 								final ServiceResponse serviceResponse = (ServiceResponse) result;
 								if (serviceResponse.responseCode != ResponseCode.SUCCESS) {
-									Errors.handleError(getSherlockActivity(), serviceResponse);
 									onError();
+									Errors.handleError(getSherlockActivity(), serviceResponse);
 								}
 							}
 
@@ -702,7 +702,6 @@ public class RadarFragment extends BaseFragment implements
 
 		/* Kill busy */
 		mPullToRefreshAttacher.setRefreshComplete();
-		hideBusy();
 		hideBusy();
 	}
 

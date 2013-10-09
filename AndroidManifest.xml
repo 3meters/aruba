@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi"
     android:installLocation="auto"
-    android:versionCode="60"
-    android:versionName="0.9.18" >
+    android:versionCode="62"
+    android:versionName="0.9.20" >
 
     <supports-screens
         android:anyDensity="true"
@@ -293,6 +293,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
     <uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS" />
-    <uses-permission android:name="android.permission.READ_LOGS" />    -->
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    -->
 
 </manifest>

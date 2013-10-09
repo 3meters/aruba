@@ -115,10 +115,6 @@ public class EntityCache implements Map<String, Entity> {
 			parameters.putString("links", "object:" + Json.objectToJson(linkOptions));
 		}
 
-		if (linkOptions != null && linkOptions.ignoreInactive != null) {
-			parameters.putBoolean("ignoreInactive", linkOptions.ignoreInactive);
-		}
-
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
 				.setRequestType(RequestType.METHOD)
@@ -167,10 +163,6 @@ public class EntityCache implements Map<String, Entity> {
 
 		if (cursor != null) {
 			parameters.putString("cursor", "object:" + Json.objectToJson(cursor));
-		}
-
-		if (linkOptions != null && linkOptions.ignoreInactive != null) {
-			parameters.putBoolean("ignoreInactive", linkOptions.ignoreInactive);
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
@@ -439,7 +431,7 @@ public class EntityCache implements Map<String, Entity> {
 		}
 	}
 
-	public void addLink(String toId, String type, String targetSchema, String fromId, Shortcut toShortcut, Shortcut fromShortcut) {
+	public void addLink(String fromId, String toId, String type, Boolean strong, Shortcut fromShortcut, Shortcut toShortcut) {
 
 		Long time = DateTime.nowDate().getTime();
 
@@ -452,16 +444,16 @@ public class EntityCache implements Map<String, Entity> {
 
 			if (toEntity.linksInCounts == null) {
 				toEntity.linksInCounts = new ArrayList<Count>();
-				toEntity.linksInCounts.add(new Count(type, targetSchema, 1));
+				toEntity.linksInCounts.add(new Count(type, fromShortcut.schema, 1));
 			}
-			else if (toEntity.getCount(type, targetSchema, Direction.in) == null) {
-				toEntity.linksInCounts.add(new Count(type, targetSchema, 1));
+			else if (toEntity.getCount(type, fromShortcut.schema, Direction.in) == null) {
+				toEntity.linksInCounts.add(new Count(type, fromShortcut.schema, 1));
 			}
 			else {
-				toEntity.getCount(type, targetSchema, Direction.in).count = toEntity.getCount(type, targetSchema, Direction.in).count.intValue() + 1;
+				toEntity.getCount(type, fromShortcut.schema, Direction.in).count = toEntity.getCount(type, fromShortcut.schema, Direction.in).count.intValue() + 1;
 			}
 
-			Link link = new Link(fromId, toId, type, targetSchema, true);
+			Link link = new Link(fromId, toId, type, fromShortcut.schema, strong);
 			link.modifiedDate = time;
 
 			if (fromShortcut != null) {
@@ -483,16 +475,16 @@ public class EntityCache implements Map<String, Entity> {
 
 			if (fromEntity.linksOutCounts == null) {
 				fromEntity.linksOutCounts = new ArrayList<Count>();
-				fromEntity.linksOutCounts.add(new Count(type, targetSchema, 1));
+				fromEntity.linksOutCounts.add(new Count(type, fromShortcut.schema, 1));
 			}
-			else if (fromEntity.getCount(type, targetSchema, Direction.out) == null) {
-				fromEntity.linksOutCounts.add(new Count(type, targetSchema, 1));
+			else if (fromEntity.getCount(type, fromShortcut.schema, Direction.out) == null) {
+				fromEntity.linksOutCounts.add(new Count(type, fromShortcut.schema, 1));
 			}
 			else {
-				fromEntity.getCount(type, targetSchema, Direction.out).count = fromEntity.getCount(type, targetSchema, Direction.out).count.intValue() + 1;
+				fromEntity.getCount(type, fromShortcut.schema, Direction.out).count = fromEntity.getCount(type, fromShortcut.schema, Direction.out).count.intValue() + 1;
 			}
 
-			Link link = new Link(fromId, toId, type, targetSchema, true);
+			Link link = new Link(fromId, toId, type, fromShortcut.schema, strong);
 			link.modifiedDate = time;
 
 			if (toShortcut != null) {

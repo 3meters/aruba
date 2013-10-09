@@ -24,6 +24,7 @@ public class IntentBuilder {
 	private String		mListLinkSchema;
 	private String		mListLinkType;
 	private String		mListLinkDirection;
+	private String		mListLinkInactive;
 	private String		mListTitle;
 	private Boolean		mListNewEnabled;
 	private Integer		mListItemResId;
@@ -83,6 +84,10 @@ public class IntentBuilder {
 			intent.putExtra(Constants.EXTRA_LIST_LINK_DIRECTION, mListLinkDirection);
 		}
 
+		if (mListLinkInactive != null) {
+			intent.putExtra(Constants.EXTRA_LIST_LINK_INACTIVE, mListLinkInactive);
+		}
+		
 		if (mListItemResId != null) {
 			intent.putExtra(Constants.EXTRA_LIST_ITEM_RESID, mListItemResId);
 		}
@@ -197,6 +202,15 @@ public class IntentBuilder {
 
 	public IntentBuilder setListPageSize(Integer listPageSize) {
 		mListPageSize = listPageSize;
+		return this;
+	}
+
+	public String getListLinkInactive() {
+		return mListLinkInactive;
+	}
+
+	public IntentBuilder setListLinkInactive(String listLinkInactive) {
+		mListLinkInactive = listLinkInactive;
 		return this;
 	}
 

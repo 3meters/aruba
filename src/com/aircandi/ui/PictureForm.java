@@ -54,7 +54,7 @@ public class PictureForm extends BaseEntityForm {
 		 * Refresh the form because something new has been added to it
 		 * like a comment or post.
 		 */
-		if (mEntityId.equals(event.notification.entity.toId)) {
+		if (event.notification.toEntity != null && mEntityId.equals(event.notification.toEntity.id)) {
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -215,7 +215,7 @@ public class PictureForm extends BaseEntityForm {
 		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();
 
 		/* Synthetic applink shortcuts */
-		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
+		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, null, true, true);
 		settings.appClass = Applinks.class;
 		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
 		if (shortcuts.size() > 0) {
@@ -230,7 +230,7 @@ public class PictureForm extends BaseEntityForm {
 		}
 
 		/* Service applink shortcuts */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
+		settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, null, false, true);
 		settings.appClass = Applinks.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
 		if (shortcuts.size() > 0) {

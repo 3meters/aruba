@@ -46,6 +46,7 @@ public class Candigrams {
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_CANDIGRAM)
+				.setListLinkInactive("false")
 				.setListItemResId(R.layout.temp_listitem_candigram)
 				.setListPageSize(ServiceConstants.PAGE_SIZE_CANDIGRAMS)
 				.setListNewEnabled(true);

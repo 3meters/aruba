@@ -351,7 +351,7 @@ public class CandigramEdit extends BaseEntityEdit {
 			if (mEntity.photo == null) {
 				Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 						, null
-						, getResources().getString(R.string.error_missing_candigram_photo)
+						, getResources().getString(R.string.error_missing_photo)
 						, null
 						, this
 						, android.R.string.ok
@@ -480,7 +480,7 @@ public class CandigramEdit extends BaseEntityEdit {
 		else if (candigram.photo == null) {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 					, null
-					, getResources().getString(R.string.error_missing_candigram_photo)
+					, getResources().getString(R.string.error_missing_photo)
 					, null
 					, this
 					, android.R.string.ok

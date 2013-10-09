@@ -177,6 +177,10 @@ public class SplashForm extends SherlockActivity {
 					}
 					else {
 						Errors.handleError(SplashForm.this, result.serviceResponse);
+						if (Aircandi.applicationUpdateRequired) {
+							updateRequired();
+							return;
+						}
 						showButtons(Buttons.ACCOUNT);
 					}
 				}
@@ -259,11 +263,15 @@ public class SplashForm extends SherlockActivity {
 				}
 				else {
 					if (Errors.isNetworkError(result.serviceResponse)) {
-						Errors.handleError(SplashForm.this, result.serviceResponse);
 						showButtons(Buttons.RETRY);
+						Errors.handleError(SplashForm.this, result.serviceResponse);
 					}
 					else {
 						Errors.handleError(SplashForm.this, result.serviceResponse);
+						if (Aircandi.applicationUpdateRequired) {
+							updateRequired();
+							return;
+						}
 						showButtons(Buttons.ACCOUNT);
 					}
 				}

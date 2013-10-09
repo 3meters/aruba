@@ -12,8 +12,10 @@ public class EntityList extends BaseEntityList {
 		/*
 		 * Refreshes the comment list to show new comment.
 		 */
-		if (mForEntityId.equals(event.notification.entity.toId)
+		if (event.notification.toEntity != null 
+				&& mForEntityId.equals(event.notification.toEntity.id)
 				&& mListLinkSchema.equals(event.notification.entity.schema)) {
+			
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {

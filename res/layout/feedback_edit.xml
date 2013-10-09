@@ -4,41 +4,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.aircandi.ui.widgets.BounceScrollView
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/content_message"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true" >
+        android:layout_height="wrap_content"
+        android:background="?attr/backgroundButtonBar"
+        android:padding="10dp"
+        android:text="@string/feedback_message"
+        android:textColor="?attr/textColorSecondary" />
 
-        <LinearLayout
-            style="@style/form_content_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical|top"
-            android:orientation="vertical" >
+    <!-- Title and Content -->
 
-            <!-- Title and Content -->
+    <com.aircandi.ui.widgets.AirEditText
+        android:id="@+id/description"
+        style="@style/form_content_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_above="@+id/created_by"
+        android:layout_below="@+id/content_message"
+        android:gravity="top"
+        android:hint="@string/form_feedback_hint"
+        android:isScrollContainer="true"
+        android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
+        android:minLines="10" />
 
-            <com.aircandi.ui.widgets.AirEditText
-                android:id="@+id/description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:layout_weight="1"
-                android:gravity="top"
-                android:hint="@string/form_feedback_hint"
-                android:imeOptions="actionSend"
-                android:inputType="textCapSentences|textAutoCorrect|textShortMessage"
-                android:lines="10"
-                android:minLines="10" />
-
-            <com.aircandi.ui.widgets.UserView
-                android:id="@+id/created_by"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="3dp"
-                aircandi:layout="@layout/widget_user_view_compact"
-                android:background="?attr/backgroundButton" />
-        </LinearLayout>
-    </com.aircandi.ui.widgets.BounceScrollView>
+    <com.aircandi.ui.widgets.UserView
+        android:id="@+id/created_by"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/form_body_padding"
+        android:layout_marginLeft="@dimen/form_body_padding"
+        aircandi:layout="@layout/widget_user_view_compact"
+        android:background="?attr/backgroundButton" />
 
 </RelativeLayout>

@@ -496,7 +496,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 	// Adapter
 	// --------------------------------------------------------------------------------------------
 
-	private class EndlessImageAdapter extends EndlessAdapter {
+	public class EndlessImageAdapter extends EndlessAdapter {
 
 		private List<ImageResult>	mMoreImages	= new ArrayList<ImageResult>();
 

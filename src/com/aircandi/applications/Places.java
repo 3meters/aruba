@@ -45,7 +45,7 @@ public class Places {
 		Animate.doOverridePendingTransition((Activity) context, TransitionType.PAGE_TO_PAGE);
 	}
 
-	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction, String title) {
+	public static Intent viewForGetIntent(Context context, String entityId, String linkType, Direction direction, Boolean linkInactive, String title) {
 		if (direction == null) {
 			direction = Direction.in;
 		}
@@ -53,6 +53,7 @@ public class Places {
 				.setEntityId(entityId)
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
+				.setListLinkInactive(linkInactive != null ? linkInactive.toString() : null) // we pass string because bundles don't support null for booleans
 				.setListTitle(title)
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_PLACE)
 				.setListItemResId(R.layout.temp_listitem_entity)

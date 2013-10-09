@@ -1,5 +1,6 @@
 package com.aircandi.components;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
@@ -7,8 +8,10 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.applications.Comments;
 import com.aircandi.service.objects.AirNotification;
-import com.aircandi.service.objects.AirNotification.ActionType;
+import com.aircandi.ui.AircandiForm;
+import com.aircandi.ui.NotificationFragment;
 import com.aircandi.ui.base.BaseEntityForm;
+import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Notifications;
 import com.google.android.gcm.GCMBaseIntentService;
@@ -51,17 +54,10 @@ public class GCMIntentService extends GCMBaseIntentService {
 			}
 		}
 
-		/* We filter out notifications that target the 'from' side of a move */
-		if (notification.action.equals(ActionType.MOVE)) {
-			if (notification.typeTargetId != null && notification.fromEntity != null && notification.typeTargetId.equals(notification.fromEntity.id)) {
-				return;
-			}
-		}
-
 		/* Build intent that can be used in association with the notification */
 		if (notification.entity != null) {
 			if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-				notification.intent = Comments.viewForGetIntent(context, notification.entity.toId, Constants.TYPE_LINK_CONTENT, null, null);
+				notification.intent = Comments.viewForGetIntent(context, notification.toEntity.id, Constants.TYPE_LINK_CONTENT, null, null);
 			}
 			else {
 				Class<?> clazz = BaseEntityForm.viewFormBySchema(notification.entity.schema);
@@ -82,7 +78,15 @@ public class GCMIntentService extends GCMBaseIntentService {
 		/* Trigger event so subscribers can decide if they should refresh */
 		NotificationManager.getInstance().broadcastNotification(notification);
 
-		/* Display */
+		/* Display if user is not currently using the notifications activity */
+		Activity currentActivity = Aircandi.getInstance().getCurrentActivity();
+		if (currentActivity != null && currentActivity.getClass().equals(AircandiForm.class)) {
+			BaseFragment fragment = ((AircandiForm) currentActivity).getCurrentFragment();
+			if (fragment.getClass().equals(NotificationFragment.class)) {
+				return;
+			}
+		}
+			
 		NotificationManager.getInstance().showNotification(notification, context);
 	}
 

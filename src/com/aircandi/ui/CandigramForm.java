@@ -9,11 +9,13 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
@@ -79,7 +81,7 @@ public class CandigramForm extends BaseEntityForm {
 		 * Refresh the form because something new has been added to it
 		 * like a comment or post.
 		 */
-		if (mEntityId.equals(event.notification.entity.toId)) {
+		if (event.notification.toEntity != null && mEntityId.equals(event.notification.toEntity.id)) {
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -96,8 +98,18 @@ public class CandigramForm extends BaseEntityForm {
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						EntityManager.getInstance().deleteEntity(event.notification.entity.id, true);
-						kickAlert(event.notification.toEntity, event.notification.user);
+						if (event.notification.entity.type.equals(Constants.TYPE_APP_BOUNCE)) {
+							EntityManager.getInstance().deleteEntity(event.notification.entity.id, true);
+							kickAlert(event.notification.toEntity, event.notification.user);
+						}
+						else if (event.notification.entity.type.equals(Constants.TYPE_APP_TOUR)) {
+							String message = "This candigram has traveled to a new place";
+							if (!TextUtils.isEmpty(event.notification.toEntity.name)) {
+								message += ": " + event.notification.toEntity.name;
+							}
+							UI.showToastNotification(message , Toast.LENGTH_LONG);
+							onRefresh();
+						}
 					}
 				});
 			}
@@ -106,12 +118,6 @@ public class CandigramForm extends BaseEntityForm {
 
 	@SuppressWarnings("ucd")
 	public void onKickButtonClick(View view) {
-
-		//		if (!EntityManager.canUserKick((Candigram) mEntity)) {
-		//			LINK link = mEntity.getParentLink(Constants.TYPE_LINK_CANDIGRAM);
-		//			kickUnavailable(link.shortcut.name, link.shortcut.photo, Aircandi.getInstance().getUser());
-		//			return;
-		//		}
 
 		new AsyncTask() {
 
@@ -512,7 +518,7 @@ public class CandigramForm extends BaseEntityForm {
 		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();
 
 		/* Synthetic applink shortcuts */
-		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, true, true);
+		ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, null, true, true);
 		settings.appClass = Applinks.class;
 		List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
 		if (shortcuts.size() > 0) {
@@ -528,7 +534,7 @@ public class CandigramForm extends BaseEntityForm {
 		}
 
 		/* service applink shortcuts */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, false, true);
+		settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, null, false, true);
 		settings.appClass = Applinks.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
 		if (shortcuts.size() > 0) {
@@ -543,7 +549,7 @@ public class CandigramForm extends BaseEntityForm {
 		}
 
 		/* Shortcuts for places linked to this candigram */
-		settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, Direction.out, false, false);
+		settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, Direction.out, null, false, false);
 		settings.appClass = Places.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new ServiceBase.SortByPositionSortDate(), new Shortcut.SortByPositionSortDate());
 		if (shortcuts.size() > 0) {

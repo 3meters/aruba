@@ -26,8 +26,7 @@
                 android:layout_weight="1"
                 android:gravity="top"
                 android:hint="@string/form_comment_hint"
-                android:imeOptions="actionSend"
-                android:inputType="textCapSentences|textAutoCorrect|textShortMessage"
+                android:inputType="textCapSentences|textAutoCorrect|textShortMessage|textMultiLine"
                 android:minLines="5" />
 
             <com.aircandi.ui.widgets.UserView

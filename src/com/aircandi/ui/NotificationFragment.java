@@ -33,6 +33,7 @@ import com.aircandi.components.NotificationManager;
 import com.aircandi.components.NotificationTable;
 import com.aircandi.components.NotificationsContentProvider;
 import com.aircandi.service.objects.AirNotification;
+import com.aircandi.service.objects.AirNotification.ActionType;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.ui.widgets.AirImageView;
@@ -68,7 +69,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 				/* Build intent that can be used in association with the notification */
 				if (notification.entity != null) {
 					if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-						notification.intent = Comments.viewForGetIntent(getSherlockActivity(), notification.entity.toId, Constants.TYPE_LINK_CONTENT, null,
+						notification.intent = Comments.viewForGetIntent(getSherlockActivity(), notification.toEntity.id, Constants.TYPE_LINK_CONTENT, null,
 								null);
 					}
 					else {
@@ -171,7 +172,12 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 				}
 			});
 		}
+		
+		/* Clear notifications from status bar because user is viewing them */
 
+		NotificationManager.getInstance().cancelNotification(ActionType.INSERT);
+		NotificationManager.getInstance().cancelNotification(ActionType.MOVE);
+		
 		hideBusy();
 	}
 
@@ -215,7 +221,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	}
 
 	protected Integer getListItemResId(String notificationType) {
-		Integer itemResId = R.layout.temp_listitem_news_v3;
+		Integer itemResId = R.layout.temp_listitem_news;
 		return itemResId;
 	}
 

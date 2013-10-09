@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -14,6 +15,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.provider.Settings;
 import android.widget.Toast;
 
@@ -216,9 +218,16 @@ public class NetworkManager {
 		return mConnectedState;
 	}
 
+	@SuppressWarnings("deprecation")
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	public static boolean isAirplaneMode(Context context) {
 		ContentResolver cr = context.getContentResolver();
-		return Settings.Global.getInt(cr, Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
+		if (Constants.SUPPORTS_JELLY_BEAN_MR1) {
+			return Settings.Global.getInt(cr, Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
+		}
+		else {
+			return Settings.System.getInt(cr, Settings.System.AIRPLANE_MODE_ON, 0) != 0;
+		}
 	}
 
 	public boolean isConnected() {

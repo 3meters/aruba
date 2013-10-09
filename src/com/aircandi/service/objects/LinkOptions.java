@@ -23,8 +23,6 @@ public class LinkOptions extends ServiceObject {
 	@Expose
 	public Boolean				shortcuts;
 	@Expose
-	public Boolean				ignoreInactive;
-	@Expose
 	public List<LinkSettings>	active;
 
 	public LinkOptions(Boolean shortcuts, List<LinkSettings> active) {
@@ -75,94 +73,91 @@ public class LinkOptions extends ServiceObject {
 				 * These are the same because LINKS_FOR_BEACONS is used to produce places and we want the same link
 				 * profile for places regardless of what code path fetches them.
 				 */
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, Constants.SCHEMA_ENTITY_BEACON, true, true, false, limitProximity));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, true, true, false, limitApplinks));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, true, false));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, true, true, false, limitContent)); 	// for preview and photo picker
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, true, true, false, limitContent)); // just one so we can preview
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_PROXIMITY, Constants.SCHEMA_ENTITY_BEACON, true, true, limitProximity));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, true, true, limitApplinks));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, true, limitDefault));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, true, true, limitContent)); 	// for preview and photo picker
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, true, true, limitContent, Maps.asMap("inactive", false))); // just one so we can preview
 				if (user != null) {
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER,
-							true, true, false, limitLike, Maps.asMap("_from", user.id)));
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER,
-							true, true, false, limitWatch, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(
+							new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, true, true, limitLike, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(
+							new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch, Maps.asMap("_from", user.id)));
 				}
 				else {
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, false, true, false, limitLike));
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, false, true, false, limitWatch));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, false, true, limitLike));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, false, true, limitWatch));
 				}
 			}
 			else if (linkProfile == LinkProfile.LINKS_FOR_CANDIGRAM) {
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, true, true, false, limitApplinks));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, true));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, true, true, false, 1)); // just one so we can preview
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE,
-						true, true, true, limitDefault).setDirection(Direction.out));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, true, true, limitApplinks));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, true, limitDefault));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, true, true, 1)); // just one so we can preview
+
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, true, true, limitDefault, Maps.asMap("inactive", false))
+								.setDirection(Direction.out));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, true, true, limitDefault, Maps.asMap("inactive", true))
+								.setDirection(Direction.out));
+
 				if (user != null) {
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER,
-							true, true, false, limitLike, Maps.asMap("_from", user.id)));
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER,
-							true, true, false, limitWatch, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(
+							new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, true, true, limitLike, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(
+							new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch, Maps.asMap("_from", user.id)));
 				}
 				else {
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, false, true, false, limitLike));
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, false, true, false, limitWatch));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, false, true, limitLike));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, false, true, limitWatch));
 				}
 			}
 			else if (linkProfile == LinkProfile.LINKS_FOR_PICTURE) {
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, true, true, false, limitApplinks));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, true));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, true, true, limitApplinks));
+				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, true, limitDefault));
 				if (user != null) {
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER,
-							true, true, false, limitLike, Maps.asMap("_from", user.id)));
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER,
-							true, true, false, limitWatch, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(
+							new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, true, true, limitLike, Maps.asMap("_from", user.id)));
+					linkOptions.getActive().add(
+							new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch, Maps.asMap("_from", user.id)));
 				}
 				else {
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, false, true, false, limitLike));
-					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, false, true, false, limitWatch));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, false, true, limitLike));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, false, true, limitWatch));
 				}
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, 
-						true, true, false, 1).setDirection(Direction.out));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, true, true, 1).setDirection(Direction.out));
 			}
 			else if (linkProfile == LinkProfile.LINKS_FOR_COMMENT) {
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, 
-						true, true, false, 1).setDirection(Direction.out));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, 
-						true, true, false, 1).setDirection(Direction.out));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, 
-						true, true, false, 1).setDirection(Direction.out));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, true, true, 1).setDirection(Direction.out));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, true, true, 1).setDirection(Direction.out));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, true, true, 1).setDirection(Direction.out));
 			}
 			else if (linkProfile == LinkProfile.LINKS_FOR_USER) {
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_PLACE,
-						false, true, false, limitLike).setDirection(Direction.both));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_PLACE, false, true, limitLike).setDirection(Direction.both));
 
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PLACE,
-						true, true, false, limitCreate).setDirection(Direction.out));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PICTURE,
-						true, true, false, limitCreate).setDirection(Direction.out));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_CANDIGRAM,
-						true, true, false, limitCreate).setDirection(Direction.out));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PLACE, true, true, limitCreate).setDirection(Direction.out));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PICTURE, true, true, limitCreate).setDirection(Direction.out));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_CANDIGRAM, true, true, limitCreate).setDirection(Direction.out));
 
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE,
-						true, true, false, limitWatch).setDirection(Direction.out));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE,
-						true, true, false, limitWatch).setDirection(Direction.out));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_CANDIGRAM,
-						true, true, false, limitWatch).setDirection(Direction.out));
-				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER,
-						true, true, false, limitWatch).setDirection(Direction.out));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE, true, true, limitWatch).setDirection(Direction.out));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, true, true, limitWatch).setDirection(Direction.out));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_CANDIGRAM, true, true, limitWatch).setDirection(Direction.out));
+				linkOptions.getActive().add(
+						new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch).setDirection(Direction.out));
 			}
 			return linkOptions;
 		}
-	}
-
-	public Boolean getIgnoreInactive() {
-		return ignoreInactive;
-	}
-
-	public LinkOptions setIgnoreInactive(Boolean ignoreInactive) {
-		this.ignoreInactive = ignoreInactive;
-		return this;
 	}
 
 	public enum LinkProfile {

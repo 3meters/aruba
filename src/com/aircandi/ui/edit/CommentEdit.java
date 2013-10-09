@@ -1,11 +1,7 @@
 package com.aircandi.ui.edit;
 
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
@@ -22,18 +18,6 @@ public class CommentEdit extends BaseEntityEdit {
 		super.initialize(savedInstanceState);
 
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-		mDescription.setImeOptions(EditorInfo.IME_ACTION_SEND);
-		mDescription.setOnEditorActionListener(new OnEditorActionListener() {
-
-			@Override
-			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				if (actionId == EditorInfo.IME_ACTION_SEND) {
-					onAccept();
-					return true;
-				}
-				return false;
-			}
-		});
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -65,8 +49,8 @@ public class CommentEdit extends BaseEntityEdit {
 
 	@Override
 	protected void beforeInsert(Entity entity) {
-		if (Aircandi.currentPlace != null) {
-			((Comment) entity).placeId = Aircandi.currentPlace.id;
+		if (Aircandi.getInstance().getCurrentPlace() != null) {
+			((Comment) entity).placeId = Aircandi.getInstance().getCurrentPlace().id;
 		}
 	}
 

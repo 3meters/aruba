@@ -13,6 +13,11 @@
         android:showAsAction="never"
         android:title="@string/menu_invite_item"/>
     <item
+        android:id="@+id/feedback"
+        android:orderInCategory="9987"
+        android:showAsAction="never"
+        android:title="@string/menu_feedback_item"/>
+    <item
         android:id="@+id/settings"
         android:orderInCategory="9990"
         android:showAsAction="never"

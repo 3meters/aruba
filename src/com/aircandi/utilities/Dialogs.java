@@ -200,6 +200,7 @@ public class Dialogs {
 						}
 						else if (which == Dialog.BUTTON_NEGATIVE) {
 							dialog.dismiss();
+							activity.finish();
 						}
 					}
 				}

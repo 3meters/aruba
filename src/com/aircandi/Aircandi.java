@@ -3,6 +3,7 @@ package com.aircandi;
 
 import java.util.Locale;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
@@ -51,11 +52,12 @@ public class Aircandi extends Application {
 
 	public static Boolean					applicationUpdateRequired		= false;
 
-	private User							mUser;
 	public static Boolean					LAUNCHED_NORMALLY;
 
-	/* Hack to share the current place context */
-	public static Entity					currentPlace;
+	/* Current objects */
+	private Entity							mCurrentPlace;
+	private Activity						mCurrentActivity;
+	private User							mCurrentUser;
 
 	/* Common preferences */
 	private String							mPrefTheme;
@@ -88,8 +90,8 @@ public class Aircandi extends Application {
 		stopwatch1 = new Stopwatch("Stopwatch1"); // $codepro.audit.disable stringLiterals
 		stopwatch2 = new Stopwatch("Stopwatch2"); // $codepro.audit.disable stringLiterals
 		stopwatch3 = new Stopwatch("Stopwatch3"); // $codepro.audit.disable stringLiterals
-		
-		Crashlytics.start(this);		
+
+		Crashlytics.start(this);
 
 		applicationContext = getApplicationContext();
 		mainThreadHandler = new Handler(Looper.getMainLooper());
@@ -143,14 +145,14 @@ public class Aircandi extends Application {
 	}
 
 	public void setUser(User user) {
-		mUser = user;
+		mCurrentUser = user;
 		Crashlytics.setUserIdentifier(user.id);
 		Crashlytics.setUserName(user.name);
 		Crashlytics.setUserEmail(user.email);
 	}
 
 	public User getUser() {
-		return mUser;
+		return mCurrentUser;
 	}
 
 	public String getPrefTheme() {
@@ -203,5 +205,21 @@ public class Aircandi extends Application {
 
 	public void setPrefTestingSelfNotify(Boolean prefTestingSelfNotify) {
 		mPrefTestingSelfNotify = prefTestingSelfNotify;
+	}
+
+	public Activity getCurrentActivity() {
+		return mCurrentActivity;
+	}
+
+	public void setCurrentActivity(Activity currentActivity) {
+		mCurrentActivity = currentActivity;
+	}
+
+	public Entity getCurrentPlace() {
+		return mCurrentPlace;
+	}
+
+	public void setCurrentPlace(Entity currentPlace) {
+		mCurrentPlace = currentPlace;
 	}
 }

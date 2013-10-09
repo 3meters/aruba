@@ -25,7 +25,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	public static final Map<String, ShortcutMeta>	shortcutMeta		= Collections.synchronizedMap(new HashMap<String, ShortcutMeta>());
 
 	@Expose
-	private String									id;
+	public String									id;
 	@Expose
 	public String									name;
 	@Expose

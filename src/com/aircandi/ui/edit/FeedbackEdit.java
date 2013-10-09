@@ -5,11 +5,7 @@ import java.util.HashMap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
-import android.view.KeyEvent;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
@@ -41,19 +37,6 @@ public class FeedbackEdit extends BaseEntityEdit {
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 		
 		mDescription = (AirEditText) findViewById(R.id.description);
-		mDescription.setImeOptions(EditorInfo.IME_ACTION_SEND);
-		mDescription.setOnEditorActionListener(new OnEditorActionListener() {
-
-			@Override
-			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				if (actionId == EditorInfo.IME_ACTION_SEND) {
-					onAccept();
-					return true;
-				}
-				return false;
-			}
-		});
-		
 
 		if (mDescription != null) {
 			mDescription.addTextChangedListener(new SimpleTextWatcher() {
