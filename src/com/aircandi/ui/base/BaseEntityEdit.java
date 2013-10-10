@@ -183,8 +183,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (!mEditing && mEntity == null && mEntitySchema != null) {
 			mEntity = Entity.makeEntity(mEntitySchema);
 			setActivityTitle("new " + mEntity.getSchemaMapped());
-			mEntity.creator = Aircandi.getInstance().getUser();
-			mEntity.creatorId = Aircandi.getInstance().getUser().id;
+			mEntity.creator = Aircandi.getInstance().getCurrentUser();
+			mEntity.creatorId = Aircandi.getInstance().getCurrentUser().id;
 		}
 	}
 
@@ -261,10 +261,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			/* Configure UI */
 			UI.setVisibility(findViewById(R.id.button_delete), View.GONE);
 			if (entity.ownerId != null
-					&& (entity.ownerId.equals(Aircandi.getInstance().getUser().id)
+					&& (entity.ownerId.equals(Aircandi.getInstance().getCurrentUser().id)
 					|| (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-							&& Aircandi.getInstance().getUser().developer != null
-							&& Aircandi.getInstance().getUser().developer))) {
+							&& Aircandi.getInstance().getCurrentUser().developer != null
+							&& Aircandi.getInstance().getCurrentUser().developer))) {
 				UI.setVisibility(findViewById(R.id.button_delete), View.VISIBLE);
 			}
 			mFirstDraw = false;
@@ -480,7 +480,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else if (requestCode == Constants.ACTIVITY_PICTURE_PICK_DEVICE) {
 
-				Tracker.sendEvent("ui_action", "select_picture_device", null, 0, Aircandi.getInstance().getUser());
+				Tracker.sendEvent("ui_action", "select_picture_device", null, 0, Aircandi.getInstance().getCurrentUser());
 				final Uri photoUri = intent.getData();
 
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
@@ -491,7 +491,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else if (requestCode == Constants.ACTIVITY_PICTURE_MAKE) {
 
-				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0, Aircandi.getInstance().getUser());
+				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0, Aircandi.getInstance().getCurrentUser());
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
 
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
@@ -502,7 +502,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else if (requestCode == Constants.ACTIVITY_PICTURE_SEARCH) {
 
-				Tracker.sendEvent("ui_action", "select_picture_search", null, 0, Aircandi.getInstance().getUser());
+				Tracker.sendEvent("ui_action", "select_picture_search", null, 0, Aircandi.getInstance().getCurrentUser());
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
@@ -516,7 +516,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else if (requestCode == Constants.ACTIVITY_PICTURE_PICK_PLACE) {
 
-				Tracker.sendEvent("ui_action", "select_picture_place", null, 0, Aircandi.getInstance().getUser());
+				Tracker.sendEvent("ui_action", "select_picture_place", null, 0, Aircandi.getInstance().getCurrentUser());
 				if (intent != null && intent.getExtras() != null) {
 
 					final Bundle extras = intent.getExtras();
@@ -700,7 +700,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			mEntity.photo = null;
 		}
 		drawPhoto();
-		Tracker.sendEvent("ui_action", "set_" + mEntitySchema + "_photo_to_default", null, 0, Aircandi.getInstance().getUser());
+		Tracker.sendEvent("ui_action", "set_" + mEntitySchema + "_photo_to_default", null, 0, Aircandi.getInstance().getCurrentUser());
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -780,8 +780,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
 				}
 
-				Tracker.sendEvent("ui_action", "entity_insert", mEntity.type, 0, Aircandi.getInstance().getUser());
-
 				Bitmap bitmap = null;
 				if (mEntity.photo != null && mEntity.photo.hasBitmap() && !mEntity.photo.isBitmapLocalOnly()) {
 					bitmap = mEntity.photo.getBitmap();
@@ -850,7 +848,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				/* Update entity */
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
-					Tracker.sendEvent("ui_action", "entity_update", mEntity.schema, 0, Aircandi.getInstance().getUser());
 					Bitmap bitmap = null;
 					if (mEntity.photo != null && mEntity.photo.hasBitmap() && !mEntity.photo.isBitmapLocalOnly()) {
 						bitmap = mEntity.photo.getBitmap();
@@ -860,7 +857,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 						if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
-							if (Aircandi.getInstance().getUser().id.equals(mEntity.id)) {
+							if (Aircandi.getInstance().getCurrentUser().id.equals(mEntity.id)) {
 
 								/* We also need to update the user that has been persisted for AUTO sign in. */
 								final String jsonUser = Json.objectToJson(mEntity);
@@ -868,8 +865,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 								Aircandi.settingsEditor.commit();
 
 								/* Update the global user but retain the session info */
-								((User) mEntity).session = Aircandi.getInstance().getUser().session;
-								Aircandi.getInstance().setUser((User) mEntity);
+								((User) mEntity).session = Aircandi.getInstance().getCurrentUser().session;
+								Aircandi.getInstance().setCurrentUser((User) mEntity);
 							}
 						}
 					}
@@ -912,7 +909,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("DeleteEntity");
-				Tracker.sendEvent("ui_action", "entity_delete", mEntity.type, 0, Aircandi.getInstance().getUser());
 				final ModelResult result = EntityManager.getInstance().deleteEntity(mEntity.id, false);
 				return result;
 			}
@@ -958,11 +954,11 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			MenuItem menuItem = menu.findItem(R.id.delete);
 			if (menuItem != null) {
 				menuItem.setVisible(false);
-				if (mEntity.ownerId != null && Aircandi.getInstance().getUser() != null
-						&& (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)
+				if (mEntity.ownerId != null && Aircandi.getInstance().getCurrentUser() != null
+						&& (mEntity.ownerId.equals(Aircandi.getInstance().getCurrentUser().id)
 						|| (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-								&& Aircandi.getInstance().getUser().developer != null
-								&& Aircandi.getInstance().getUser().developer))) {
+								&& Aircandi.getInstance().getCurrentUser().developer != null
+								&& Aircandi.getInstance().getCurrentUser().developer))) {
 					menuItem.setVisible(true);
 				}
 			}

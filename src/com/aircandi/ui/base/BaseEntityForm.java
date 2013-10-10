@@ -209,7 +209,6 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 
 	@SuppressWarnings("ucd")
 	public void onLikeButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "like_" + mEntity.schema, null, 0, Aircandi.getInstance().getUser());
 
 		new AsyncTask() {
 
@@ -223,11 +222,10 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 				Thread.currentThread().setName("LikeEntity");
 				ModelResult result = new ModelResult();
 				if (!mEntity.byAppUser(Constants.TYPE_LINK_LIKE)) {
-					Tracker.sendEvent("ui_action", "like_entity", null, 0, Aircandi.getInstance().getUser());
-					Shortcut fromShortcut = Aircandi.getInstance().getUser().getShortcut();
+					Shortcut fromShortcut = Aircandi.getInstance().getCurrentUser().getShortcut();
 					Shortcut toShortcut = mEntity.getShortcut();
-					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
-					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getUser().id
+					Aircandi.getInstance().getCurrentUser().activityDate = DateTime.nowDate().getTime();
+					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getCurrentUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_LIKE
 							, false
@@ -236,11 +234,11 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 							, Constants.TYPE_LINK_LIKE);
 				}
 				else {
-					Tracker.sendEvent("ui_action", "unlike_" + mEntity.schema, null, 0, Aircandi.getInstance().getUser());
-					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
-					result = EntityManager.getInstance().deleteLink(Aircandi.getInstance().getUser().id
+					Aircandi.getInstance().getCurrentUser().activityDate = DateTime.nowDate().getTime();
+					result = EntityManager.getInstance().deleteLink(Aircandi.getInstance().getCurrentUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_LIKE
+							, mEntity.schema
 							, "unlike");
 				}
 				return result;
@@ -280,11 +278,10 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 				Thread.currentThread().setName("WatchEntity");
 				ModelResult result = new ModelResult();
 				if (!mEntity.byAppUser(Constants.TYPE_LINK_WATCH)) {
-					Tracker.sendEvent("ui_action", "watch_" + mEntity.schema, null, 0, Aircandi.getInstance().getUser());
-					Shortcut fromShortcut = Aircandi.getInstance().getUser().getShortcut();
+					Shortcut fromShortcut = Aircandi.getInstance().getCurrentUser().getShortcut();
 					Shortcut toShortcut = mEntity.getShortcut();
-					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
-					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getUser().id
+					Aircandi.getInstance().getCurrentUser().activityDate = DateTime.nowDate().getTime();
+					result = EntityManager.getInstance().insertLink(Aircandi.getInstance().getCurrentUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_WATCH
 							, false
@@ -293,11 +290,11 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 							, Constants.TYPE_LINK_WATCH);
 				}
 				else {
-					Tracker.sendEvent("ui_action", "unwatch_" + mEntity.schema, null, 0, Aircandi.getInstance().getUser());
-					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
-					result = EntityManager.getInstance().deleteLink(Aircandi.getInstance().getUser().id
+					Aircandi.getInstance().getCurrentUser().activityDate = DateTime.nowDate().getTime();
+					result = EntityManager.getInstance().deleteLink(Aircandi.getInstance().getCurrentUser().id
 							, mEntity.id
 							, Constants.TYPE_LINK_WATCH
+							, mEntity.schema
 							, "unwatch");
 				}
 				return result;
@@ -397,14 +394,16 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putIntArray("ARTICLE_SCROLL_POSITION", new int[] { mScrollView.getScrollX(), mScrollView.getScrollY() });
+		if (mScrollView != null) {
+			outState.putIntArray("ARTICLE_SCROLL_POSITION", new int[] { mScrollView.getScrollX(), mScrollView.getScrollY() });
+		}
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 		final int[] position = savedInstanceState.getIntArray("ARTICLE_SCROLL_POSITION");
-		if (position != null) {
+		if (position != null && mScrollView != null) {
 			mScrollView.post(new Runnable() {
 				@Override
 				public void run() {
@@ -425,7 +424,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 		if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE) && ((Place) mEntity).synthetic) {
 			UI.setVisibility(findViewById(R.id.button_holder), View.GONE);
 		}
-		else if (mEntity.id.equals(Aircandi.getInstance().getUser().id)) {
+		else if (mEntity.id.equals(Aircandi.getInstance().getCurrentUser().id)) {
 			UI.setVisibility(findViewById(R.id.button_holder), View.GONE);
 		}
 		else {
@@ -498,7 +497,8 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 				intent = Comments.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, titleResId != null ? getString(titleResId) : null);
 			}
 			if (settings.appClass.equals(Places.class)) {
-				intent = Places.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, settings.linkInactive, titleResId != null ? getString(titleResId) : null);
+				intent = Places.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, settings.linkInactive,
+						titleResId != null ? getString(titleResId) : null);
 			}
 			if (settings.appClass.equals(Pictures.class)) {
 				intent = Pictures.viewForGetIntent(this, mEntityId, settings.linkType, settings.direction, titleResId != null ? getString(titleResId) : null);
@@ -696,6 +696,8 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
+					String activityName = Aircandi.getInstance().getCurrentActivity().getClass().getSimpleName();
+					Tracker.sendEvent("ui_action", "refresh", activityName, 0, Aircandi.getInstance().getCurrentUser());
 					onRefresh();
 				}
 			});

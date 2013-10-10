@@ -1,6 +1,7 @@
 package com.aircandi.components;
 
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 
 public class NotificationTable {
 	// Database table
@@ -45,13 +46,17 @@ public class NotificationTable {
 		database.execSQL(DATABASE_CREATE_SENT_DATE_INDEX);
 	}
 
-	public static void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-		Logger.w(null, "Upgrading database from version "
-				+ oldVersion
-				+ " to "
-				+ newVersion
-				+ ", which will destroy all old data");
-		database.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTIFICATIONS);
-		onCreate(database);
+	public static void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) throws SQLiteException {
+		if (oldVersion == 1) {
+			upgradeToVersion2(database); // From 1 to 2
+		}
+	}
+
+	private static void upgradeToVersion2(SQLiteDatabase database) {
+		Logger.w(NotificationTable.class, "Upgrading notifications table");
+		database.execSQL("ALTER TABLE " + TABLE_NOTIFICATIONS + " ADD COLUMN target_id STRING;");
+		database.execSQL("ALTER TABLE " + TABLE_NOTIFICATIONS + " ADD COLUMN action STRING;");
+		database.execSQL(DATABASE_CREATE_TARGET_ID_INDEX);
+		database.execSQL(DATABASE_CREATE_SENT_DATE_INDEX);
 	}
 }

@@ -57,7 +57,7 @@ public final class ServiceConstants {
 	public static final String	USER_AGENT_DESKTOP								= "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16";					//$NON-NLS-1$
 	public static final String	USER_AGENT_NEXUS_S								= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";	//$NON-NLS-1$
 
-	public static final int		PROXIMITY_BEACON_COVERAGE						= 3;
+	public static final int		PROXIMITY_BEACON_COVERAGE						= 1;
 
 	public static final int		PAGE_SIZE_APPLINKS								= 100;
 	public static final int		PAGE_SIZE_CANDIGRAMS							= 30;

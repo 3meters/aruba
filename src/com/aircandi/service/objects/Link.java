@@ -83,7 +83,7 @@ public class Link extends ServiceBase {
 	public Count getStat(String type, String schema) {
 		if (this.stats != null) {
 			for (Count count : stats) {
-				if (count.type.equals(type) && schema == null || count.schema.equals(schema)) {
+				if (count.type.equals(type) && (schema == null || count.schema.equals(schema))) {
 					return count;
 				}
 			}

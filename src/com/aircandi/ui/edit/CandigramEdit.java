@@ -229,7 +229,7 @@ public class CandigramEdit extends BaseEntityEdit {
 			/*
 			 * If editing, mEntity is already initialized from intent extras.
 			 */
-			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
+			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getCurrentUser().id))) {
 				mTabManager = new TabManager(Constants.TABS_ENTITY_FORM_ID, mActionBar, mViewFlipper);
 				mTabManager.initialize();
 				mTabManager.doRestoreInstanceState(savedInstanceState);

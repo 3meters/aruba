@@ -26,7 +26,6 @@ import com.aircandi.applications.Places;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.Tracker;
 import com.aircandi.events.MessageEvent;
 import com.aircandi.service.objects.Candigram;
 import com.aircandi.service.objects.Count;
@@ -129,7 +128,6 @@ public class CandigramForm extends BaseEntityForm {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("KickEntity");
-				Tracker.sendEvent("ui_action", "kick_entity", null, 0, Aircandi.getInstance().getUser());
 				/*
 				 * Call service routine to get a move candidate.
 				 */
@@ -146,7 +144,7 @@ public class CandigramForm extends BaseEntityForm {
 					if (result.data != null) {
 						List<Entity> entities = (List<Entity>) result.data;
 						Entity place = entities.get(0);
-						kickCandidate(place, Aircandi.getInstance().getUser());
+						kickCandidate(place, Aircandi.getInstance().getCurrentUser());
 					}
 				}
 				else {
@@ -239,7 +237,6 @@ public class CandigramForm extends BaseEntityForm {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("KickEntity");
-				Tracker.sendEvent("ui_action", "kick_entity", null, 0, Aircandi.getInstance().getUser());
 				final ModelResult result = EntityManager.getInstance().moveCandigram(mEntity, false, entity.id);
 				return result;
 			}
@@ -276,7 +273,7 @@ public class CandigramForm extends BaseEntityForm {
 		final TextView message = (TextView) customView.findViewById(R.id.message);
 
 		if (user != null) {
-			if (user.id.equals(Aircandi.getInstance().getUser().id)) {
+			if (user.id.equals(Aircandi.getInstance().getCurrentUser().id)) {
 				message.setText("You kicked this candigram to: ");
 			}
 			else {

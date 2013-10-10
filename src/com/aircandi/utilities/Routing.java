@@ -157,10 +157,10 @@ public final class Routing {
 
 		else if (route == Route.WATCHING) {
 
-			entity = Aircandi.getInstance().getUser();
+			entity = Aircandi.getInstance().getCurrentUser();
 
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, AircandiForm.class)
-					.setEntityId(Aircandi.getInstance().getUser().id);
+					.setEntityId(Aircandi.getInstance().getCurrentUser().id);
 
 			Intent intent = intentBuilder.create();
 			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -174,10 +174,10 @@ public final class Routing {
 
 		else if (route == Route.CREATED) {
 
-			entity = Aircandi.getInstance().getUser();
+			entity = Aircandi.getInstance().getCurrentUser();
 
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, AircandiForm.class)
-					.setEntityId(Aircandi.getInstance().getUser().id);
+					.setEntityId(Aircandi.getInstance().getCurrentUser().id);
 
 			Intent intent = intentBuilder.create();
 			intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -263,7 +263,7 @@ public final class Routing {
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
 			}
-			Tracker.sendEvent("ui_action", "edit_" + entity.schema, null, 0, Aircandi.getInstance().getUser());
+			Tracker.sendEvent("ui_action", "entity_edit", entity.schema, 0, Aircandi.getInstance().getCurrentUser());
 			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.editFormBySchema(entity.schema))
 					.setEntity(entity)
 					.setExtras(extras);
@@ -280,7 +280,7 @@ public final class Routing {
 
 		else if (route == Route.NEW) {
 
-			Tracker.sendEvent("ui_action", "new_" + schema, null, 0, Aircandi.getInstance().getUser());
+			Tracker.sendEvent("ui_action", "new_" + schema, null, 0, Aircandi.getInstance().getCurrentUser());
 			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.insertFormBySchema(schema))
 					.setEntitySchema(schema)
 					.setExtras(extras);
@@ -304,7 +304,7 @@ public final class Routing {
 
 		else if (route == Route.SIGNIN_PROFILE) {
 
-			entity = Aircandi.getInstance().getUser();
+			entity = Aircandi.getInstance().getCurrentUser();
 			if (entity == null) {
 				throw new IllegalArgumentException("valid user entity required for selected route");
 			}

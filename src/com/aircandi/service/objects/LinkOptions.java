@@ -56,7 +56,7 @@ public class LinkOptions extends ServiceObject {
 			return null;
 		}
 		else {
-			User user = Aircandi.getInstance().getUser();
+			User currentUser = Aircandi.getInstance().getCurrentUser();
 			LinkOptions linkOptions = new LinkOptions().setActive(new ArrayList<LinkSettings>());
 			linkOptions.shortcuts = true;
 			Resources resources = Aircandi.applicationContext.getResources();
@@ -78,11 +78,11 @@ public class LinkOptions extends ServiceObject {
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, true, limitDefault));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, true, true, limitContent)); 	// for preview and photo picker
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, true, true, limitContent, Maps.asMap("inactive", false))); // just one so we can preview
-				if (user != null) {
+				if (currentUser != null) {
 					linkOptions.getActive().add(
-							new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, true, true, limitLike, Maps.asMap("_from", user.id)));
+							new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, true, true, limitLike, Maps.asMap("_from", currentUser.id)));
 					linkOptions.getActive().add(
-							new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch, Maps.asMap("_from", user.id)));
+							new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch, Maps.asMap("_from", currentUser.id)));
 				}
 				else {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, false, true, limitLike));
@@ -101,11 +101,11 @@ public class LinkOptions extends ServiceObject {
 						new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, true, true, limitDefault, Maps.asMap("inactive", true))
 								.setDirection(Direction.out));
 
-				if (user != null) {
+				if (currentUser != null) {
 					linkOptions.getActive().add(
-							new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, true, true, limitLike, Maps.asMap("_from", user.id)));
+							new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, true, true, limitLike, Maps.asMap("_from", currentUser.id)));
 					linkOptions.getActive().add(
-							new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch, Maps.asMap("_from", user.id)));
+							new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch, Maps.asMap("_from", currentUser.id)));
 				}
 				else {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, false, true, limitLike));
@@ -115,11 +115,11 @@ public class LinkOptions extends ServiceObject {
 			else if (linkProfile == LinkProfile.LINKS_FOR_PICTURE) {
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, true, true, limitApplinks));
 				linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, true, limitDefault));
-				if (user != null) {
+				if (currentUser != null) {
 					linkOptions.getActive().add(
-							new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, true, true, limitLike, Maps.asMap("_from", user.id)));
+							new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, true, true, limitLike, Maps.asMap("_from", currentUser.id)));
 					linkOptions.getActive().add(
-							new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch, Maps.asMap("_from", user.id)));
+							new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch, Maps.asMap("_from", currentUser.id)));
 				}
 				else {
 					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, false, true, limitLike));
@@ -136,7 +136,7 @@ public class LinkOptions extends ServiceObject {
 				linkOptions.getActive().add(
 						new LinkSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, true, true, 1).setDirection(Direction.out));
 			}
-			else if (linkProfile == LinkProfile.LINKS_FOR_USER) {
+			else if (linkProfile == LinkProfile.LINKS_FOR_USER_CURRENT) {
 				linkOptions.getActive().add(
 						new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_PLACE, false, true, limitLike).setDirection(Direction.both));
 
@@ -156,6 +156,18 @@ public class LinkOptions extends ServiceObject {
 				linkOptions.getActive().add(
 						new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch).setDirection(Direction.out));
 			}
+			else if (linkProfile == LinkProfile.LINKS_FOR_USER) {
+				if (currentUser != null) {
+					linkOptions.getActive().add(
+							new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, true, true, limitLike, Maps.asMap("_from", currentUser.id)));
+					linkOptions.getActive().add(
+							new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch, Maps.asMap("_from", currentUser.id)));
+				}
+				else {
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, false, true, limitLike));
+					linkOptions.getActive().add(new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, false, true, limitWatch));
+				}
+			}
 			return linkOptions;
 		}
 	}
@@ -167,6 +179,7 @@ public class LinkOptions extends ServiceObject {
 		LINKS_FOR_PICTURE,
 		LINKS_FOR_COMMENT,
 		LINKS_FOR_USER,
-		NO_LINKS,
+		LINKS_FOR_USER_CURRENT,
+		NO_LINKS, 
 	}
 }

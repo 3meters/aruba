@@ -396,19 +396,19 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 						final ModelResult result = (ModelResult) response;
 						/* We continue on even if the service call failed. */
 						if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-							Logger.i(this, "USER signed out: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
+							Logger.i(this, "USER signed out: " + Aircandi.getInstance().getCurrentUser().name + " (" + Aircandi.getInstance().getCurrentUser().id + ")");
 						}
 						else {
-							Logger.w(this, "USER signed out, service call failed: " + Aircandi.getInstance().getUser().id);
+							Logger.w(this, "USER signed out, service call failed: " + Aircandi.getInstance().getCurrentUser().id);
 						}
 
 						/* Stop the current tracking session. Starts again when a user logs in. */
-						Tracker.stopSession(Aircandi.getInstance().getUser());
+						Tracker.stopSession(Aircandi.getInstance().getCurrentUser());
 
 						/* Clear the user and session that is tied into AUTO-signin */
 						com.aircandi.components.NotificationManager.getInstance().unregisterDeviceWithAircandi(
 								GCMRegistrar.getRegistrationId(Aircandi.applicationContext));
-						Aircandi.getInstance().setUser(null);
+						Aircandi.getInstance().setCurrentUser(null);
 
 						Aircandi.settingsEditor.putString(Constants.SETTING_USER, null);
 						Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, null);
@@ -486,7 +486,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	protected void onStart() {
 		if (!isFinishing()) {
 			Logger.d(this, "Activity starting");
-			Tracker.activityStart(this, Aircandi.getInstance().getUser());
+			Tracker.activityStart(this, Aircandi.getInstance().getCurrentUser());
 			if (mPrefChangeReloadNeeded) {
 				final Intent intent = getIntent();
 				startActivity(intent);
@@ -515,7 +515,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	@Override
 	protected void onStop() {
 		Logger.d(this, "Activity stopping");
-		Tracker.activityStop(this, Aircandi.getInstance().getUser());
+		Tracker.activityStop(this, Aircandi.getInstance().getCurrentUser());
 		super.onStop();
 	}
 

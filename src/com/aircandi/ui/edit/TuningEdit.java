@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.aircandi.Aircandi;
 import com.aircandi.R;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.EntityManager;
@@ -18,7 +17,6 @@ import com.aircandi.components.NetworkManager;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.ProximityManager.ScanReason;
-import com.aircandi.components.Tracker;
 import com.aircandi.events.BeaconsLockedEvent;
 import com.aircandi.events.QueryWifiScanReceivedEvent;
 import com.aircandi.service.objects.Beacon;
@@ -91,7 +89,6 @@ public class TuningEdit extends BaseEntityEdit {
 	@SuppressWarnings("ucd")
 	public void onTuneButtonClick(View view) {
 		if (!mTuned) {
-			Tracker.sendEvent("ui_action", "tune_place", null, 0, Aircandi.getInstance().getUser());
 			mUntuning = false;
 			mBusyManager.showBusy(R.string.progress_tuning);
 			if (NetworkManager.getInstance().isWifiEnabled()) {
@@ -107,7 +104,6 @@ public class TuningEdit extends BaseEntityEdit {
 	@SuppressWarnings("ucd")
 	public void onUntuneButtonClick(View view) {
 		if (!mUntuned) {
-			Tracker.sendEvent("ui_action", "untune_place", null, 0, Aircandi.getInstance().getUser());
 			mUntuning = true;
 			mBusyManager.showBusy(R.string.progress_tuning);
 			if (NetworkManager.getInstance().isWifiEnabled()) {

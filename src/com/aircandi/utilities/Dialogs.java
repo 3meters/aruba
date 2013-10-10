@@ -178,7 +178,7 @@ public class Dialogs {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
-								Tracker.sendEvent("ui_action", "update_aircandi", "com.aircandi", 0, Aircandi.getInstance().getUser());
+								Tracker.sendEvent("ui_action", "update_aircandi", "com.aircandi", 0, Aircandi.getInstance().getCurrentUser());
 								Logger.d(this, "Update: navigating to market install/update page");
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(Constants.APP_MARKET_URI));
 								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -225,7 +225,7 @@ public class Dialogs {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
-								Tracker.sendEvent("ui_action", "install_source", shortcut.getPackageName(), 0, Aircandi.getInstance().getUser());
+								Tracker.sendEvent("ui_action", "install_app", shortcut.getPackageName(), 0, Aircandi.getInstance().getCurrentUser());
 								Logger.d(this, "Install: navigating to market install page");
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=" + shortcut.getPackageName()
 										+ "&referrer=utm_source%3Dcom.aircandi"));
@@ -266,7 +266,7 @@ public class Dialogs {
 				, activity.getResources().getString(R.string.alert_send_password_message)
 				, null
 				, activity, android.R.string.ok, null, null, null, null);
-		Tracker.sendEvent("ui_action", "recover_password", null, 0, Aircandi.getInstance().getUser());
+		Tracker.sendEvent("ui_action", "recover_password", null, 0, Aircandi.getInstance().getCurrentUser());
 	}
 
 	public static void locked(final Activity activity, Entity entity) {

@@ -144,14 +144,21 @@ public class Aircandi extends Application {
 		}
 	}
 
-	public void setUser(User user) {
+	public void setCurrentUser(User user) {
 		mCurrentUser = user;
-		Crashlytics.setUserIdentifier(user.id);
-		Crashlytics.setUserName(user.name);
-		Crashlytics.setUserEmail(user.email);
+		if (user != null) {
+			Crashlytics.setUserIdentifier(user.id);
+			Crashlytics.setUserName(user.name);
+			Crashlytics.setUserEmail(user.email);
+		}
+		else {
+			Crashlytics.setUserIdentifier(null);
+			Crashlytics.setUserName(null);
+			Crashlytics.setUserEmail(null);
+		}
 	}
 
-	public User getUser() {
+	public User getCurrentUser() {
 		return mCurrentUser;
 	}
 

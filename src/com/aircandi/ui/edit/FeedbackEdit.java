@@ -14,7 +14,6 @@ import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.Document;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.ui.widgets.AirEditText;
@@ -65,7 +64,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 
 	@Override
 	public void draw() {
-		((UserView) findViewById(R.id.created_by)).databind(Aircandi.getInstance().getUser(), null);
+		((UserView) findViewById(R.id.created_by)).databind(Aircandi.getInstance().getCurrentUser(), null);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -128,7 +127,6 @@ public class FeedbackEdit extends BaseEntityEdit {
 				final ModelResult result = (ModelResult) response;
 
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-					Tracker.sendEvent("ui_action", "send_feedback", null, 0, Aircandi.getInstance().getUser());
 					hideBusy();
 					UI.showToastNotification(getString(R.string.alert_feedback_sent), Toast.LENGTH_SHORT);
 					finish();

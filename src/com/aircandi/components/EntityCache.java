@@ -121,8 +121,8 @@ public class EntityCache implements Map<String, Entity> {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
 
-		if (Aircandi.getInstance().getUser() != null) {
-			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+		if (Aircandi.getInstance().getCurrentUser() != null) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 		}
 
 		ServiceResponse serviceResponse = dispatch(serviceRequest);
@@ -171,8 +171,8 @@ public class EntityCache implements Map<String, Entity> {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
 
-		if (Aircandi.getInstance().getUser() != null) {
-			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+		if (Aircandi.getInstance().getCurrentUser() != null) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 		}
 
 		ServiceResponse serviceResponse = dispatch(serviceRequest, stopwatch);
@@ -230,8 +230,8 @@ public class EntityCache implements Map<String, Entity> {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
 
-		if (Aircandi.getInstance().getUser() != null) {
-			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+		if (Aircandi.getInstance().getCurrentUser() != null) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 		}
 
 		if (stopwatch != null) {
@@ -302,8 +302,8 @@ public class EntityCache implements Map<String, Entity> {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
 
-		if (Aircandi.getInstance().getUser() != null) {
-			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+		if (Aircandi.getInstance().getCurrentUser() != null) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 		}
 
 		ServiceResponse serviceResponse = EntityManager.getInstance().dispatch(serviceRequest);
@@ -500,7 +500,7 @@ public class EntityCache implements Map<String, Entity> {
 	// Cache deletes
 	// --------------------------------------------------------------------------------------------
 
-	public synchronized void removeEntityTree(String entityId) {
+	public synchronized Entity removeEntityTree(String entityId) {
 		/*
 		 * Clean out entity and every entity related to entity. Is not recursive
 		 */
@@ -515,6 +515,7 @@ public class EntityCache implements Map<String, Entity> {
 				remove(childEntity.id);
 			}
 		}
+		return removedEntity;
 	}
 
 	public synchronized Integer removeEntities(String schema, String type, Boolean synthetic, Boolean proximity) {

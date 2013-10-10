@@ -234,6 +234,7 @@ public class EntityManager {
 	public ModelResult refreshApplinks(List<Entity> applinks) {
 
 		final ModelResult result = new ModelResult();
+		Tracker.sendEvent("ui_action", "refresh_applinks", null, 0, Aircandi.getInstance().getCurrentUser());
 		final Bundle parameters = new Bundle();
 
 		final List<String> entityStrings = new ArrayList<String>();
@@ -261,6 +262,7 @@ public class EntityManager {
 	public ModelResult suggestApplinks(List<Entity> applinks, Place place) {
 
 		final ModelResult result = new ModelResult();
+		Tracker.sendEvent("ui_action", "suggest_applinks", null, 0, Aircandi.getInstance().getCurrentUser());
 		final Bundle parameters = new Bundle();
 
 		parameters.putString("place", "object:" + Json.objectToJson(place, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
@@ -341,6 +343,7 @@ public class EntityManager {
 
 	public ModelResult signin(String email, String password, String activityName) {
 		final ModelResult result = new ModelResult();
+		Tracker.sendEvent("ui_action", "signin_user", null, 0, Aircandi.getInstance().getCurrentUser());
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("user", "object:{"
@@ -364,7 +367,7 @@ public class EntityManager {
 	public ModelResult signout() {
 		final ModelResult result = new ModelResult();
 
-		final User user = Aircandi.getInstance().getUser();
+		final User user = Aircandi.getInstance().getCurrentUser();
 		if (user != null && user.session != null) {
 			/*
 			 * We use a short timeout with no retry because failure doesn't
@@ -384,6 +387,7 @@ public class EntityManager {
 
 	public ModelResult updatePassword(String userId, String passwordOld, String passwordNew, String activityName) {
 		final ModelResult result = new ModelResult();
+		Tracker.sendEvent("ui_action", "change_password", null, 0, Aircandi.getInstance().getCurrentUser());
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("user", "object:{"
@@ -397,7 +401,7 @@ public class EntityManager {
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
 				.setActivityName(activityName)
-				.setSession(Aircandi.getInstance().getUser().session)
+				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -409,6 +413,7 @@ public class EntityManager {
 
 		/* Pre-fetch an id so a failed request can be retried */
 		final ModelResult result = getDocumentId(User.collectionId);
+		Tracker.sendEvent("ui_action", "register_user", null, 0, Aircandi.getInstance().getCurrentUser());
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
@@ -476,8 +481,8 @@ public class EntityManager {
 				.setRequestType(RequestType.GET)
 				.setResponseFormat(ResponseFormat.JSON);
 
-		if (Aircandi.getInstance().getUser() != null) {
-			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+		if (Aircandi.getInstance().getCurrentUser() != null) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 		}
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -498,8 +503,8 @@ public class EntityManager {
 					.setRequestType(RequestType.GET)
 					.setResponseFormat(ResponseFormat.JSON);
 
-			if (Aircandi.getInstance().getUser() != null) {
-				serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+			if (Aircandi.getInstance().getCurrentUser() != null) {
+				serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 			}
 
 			result.serviceResponse = dispatch(serviceRequest);
@@ -539,6 +544,8 @@ public class EntityManager {
 		 */
 
 		ModelResult result = new ModelResult();
+		Tracker.sendEvent("ui_action", "entity_insert", entity.schema, 0, Aircandi.getInstance().getCurrentUser());
+
 
 		Logger.i(this, "Inserting entity: " + entity.name);
 
@@ -637,7 +644,7 @@ public class EntityManager {
 						.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity")
 						.setRequestType(RequestType.METHOD)
 						.setParameters(parameters)
-						.setSession(Aircandi.getInstance().getUser().session)
+						.setSession(Aircandi.getInstance().getCurrentUser().session)
 						.setResponseFormat(ResponseFormat.JSON);
 
 				result.serviceResponse = dispatch(serviceRequest);
@@ -660,12 +667,12 @@ public class EntityManager {
 				 * Optimization: ADD soft 'create' link so user entity doesn't have to be refetched
 				 */
 				if (!entity.synthetic) {
-					Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
-					mEntityCache.addLink(Aircandi.getInstance().getUser().id
+					Aircandi.getInstance().getCurrentUser().activityDate = DateTime.nowDate().getTime();
+					mEntityCache.addLink(Aircandi.getInstance().getCurrentUser().id
 							, insertedEntity.id
 							, Constants.TYPE_LINK_CREATE
 							, false
-							, Aircandi.getInstance().getUser().getShortcut()
+							, Aircandi.getInstance().getCurrentUser().getShortcut()
 							, insertedEntity.getShortcut());
 				}
 
@@ -689,6 +696,7 @@ public class EntityManager {
 		 * - like/create/watch links are not followed
 		 */
 		final ModelResult result = new ModelResult();
+		Tracker.sendEvent("ui_action", "entity_update", entity.schema, 0, Aircandi.getInstance().getCurrentUser());
 
 		/* Upload new images to S3 as needed. */
 		if (bitmap != null) {
@@ -716,7 +724,7 @@ public class EntityManager {
 					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity")
 					.setRequestType(RequestType.METHOD)
 					.setParameters(parameters)
-					.setSession(Aircandi.getInstance().getUser().session)
+					.setSession(Aircandi.getInstance().getCurrentUser().session)
 					.setResponseFormat(ResponseFormat.JSON);
 
 			result.serviceResponse = dispatch(serviceRequest);
@@ -752,6 +760,7 @@ public class EntityManager {
 
 		if (!cacheOnly) {
 			entity = mEntityCache.get(entityId);
+			Tracker.sendEvent("ui_action", "entity_delete", entity.schema, 0, Aircandi.getInstance().getCurrentUser());
 			/*
 			 * Delete the entity and all links and observations it is associated with. We attempt to continue even
 			 * if the call to delete the image failed.
@@ -766,22 +775,25 @@ public class EntityManager {
 					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteEntity")
 					.setRequestType(RequestType.METHOD)
 					.setParameters(parameters)
-					.setSession(Aircandi.getInstance().getUser().session)
+					.setSession(Aircandi.getInstance().getCurrentUser().session)
 					.setResponseFormat(ResponseFormat.JSON);
 
 			result.serviceResponse = dispatch(serviceRequest);
 		}
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-			mEntityCache.removeEntityTree(entityId);
+			entity = mEntityCache.removeEntityTree(entityId);
+			if (entity != null) {
+				Tracker.sendEvent("ui_action", "entity_delete", entity.schema, 0, Aircandi.getInstance().getCurrentUser());
+			}
 			/*
 			 * Remove 'create' link
 			 * 
 			 * FIXME: This needs to be generalized to hunt down all links that have
 			 * this entity at either end and clean them up including any counts.
 			 */
-			Aircandi.getInstance().getUser().activityDate = DateTime.nowDate().getTime();
-			mEntityCache.removeLink(Aircandi.getInstance().getUser().id, entityId, Constants.TYPE_LINK_CREATE);
+			Aircandi.getInstance().getCurrentUser().activityDate = DateTime.nowDate().getTime();
+			mEntityCache.removeLink(Aircandi.getInstance().getCurrentUser().id, entityId, Constants.TYPE_LINK_CREATE);
 
 			if (entity != null && entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 				mActivityDate = DateTime.nowDate().getTime();
@@ -859,13 +871,15 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + methodName)
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSession(Aircandi.getInstance().getUser().session)
+				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
 
 		/* Reproduce the service call effect locally */
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+			Tracker.sendEvent("ui_action", untuning ? "untune" : "tune", entity.schema, 0, Aircandi.getInstance().getCurrentUser());
+
 
 			if (beacons != null) {
 				for (Beacon beacon : beacons) {
@@ -926,6 +940,7 @@ public class EntityManager {
 			, Shortcut toShortcut
 			, String actionType) {
 		final ModelResult result = new ModelResult();
+		Tracker.sendEvent("ui_action", "entity_" + type, toShortcut.schema, 0, Aircandi.getInstance().getCurrentUser());		
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("fromId", fromId); 		// required
@@ -938,7 +953,7 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "insertLink")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSession(Aircandi.getInstance().getUser().session)
+				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -956,8 +971,9 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult deleteLink(String fromId, String toId, String type, String actionType) {
+	public ModelResult deleteLink(String fromId, String toId, String type, String schema, String actionType) {
 		final ModelResult result = new ModelResult();
+		Tracker.sendEvent("ui_action", "entity_un" + type, schema, 0, Aircandi.getInstance().getCurrentUser());		
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("fromId", fromId); 		// required
@@ -969,7 +985,7 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteLink")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSession(Aircandi.getInstance().getUser().session)
+				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -1026,8 +1042,8 @@ public class EntityManager {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
 
-		if (Aircandi.getInstance().getUser() != null) {
-			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+		if (Aircandi.getInstance().getCurrentUser() != null) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 		}
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -1047,6 +1063,7 @@ public class EntityManager {
 		 */
 
 		final ModelResult result = new ModelResult();
+		Tracker.sendEvent("ui_action", "kick_entity", null, 0, Aircandi.getInstance().getCurrentUser());
 
 		/* Construct entity, link, and observation */
 		final Bundle parameters = new Bundle();
@@ -1063,7 +1080,7 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "moveCandigrams")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSession(Aircandi.getInstance().getUser().session)
+				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -1098,7 +1115,6 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "registerDevice")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSession(Aircandi.getInstance().getUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -1109,6 +1125,7 @@ public class EntityManager {
 
 		/* Pre-fetch an id so a failed request can be retried */
 		ModelResult result = getDocumentId(Document.collectionId);
+		Tracker.sendEvent("ui_action", "document_insert", document.type, 0, Aircandi.getInstance().getCurrentUser());
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			document.id = (String) result.serviceResponse.data;
@@ -1116,7 +1133,7 @@ public class EntityManager {
 					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST + document.getCollection())
 					.setRequestType(RequestType.INSERT)
 					.setRequestBody(Json.objectToJson(document, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE))
-					.setSession(Aircandi.getInstance().getUser().session)
+					.setSession(Aircandi.getInstance().getCurrentUser().session)
 					.setResponseFormat(ResponseFormat.JSON);
 
 			result.serviceResponse = dispatch(serviceRequest);
@@ -1128,6 +1145,7 @@ public class EntityManager {
 	public ModelResult sendInvite(List<String> emails, String invitor, String message) {
 
 		ModelResult result = new ModelResult();
+		Tracker.sendEvent("ui_action", "send_invite", null, 0, Aircandi.getInstance().getCurrentUser());
 
 		final Bundle parameters = new Bundle();
 		parameters.putStringArrayList("emails", (ArrayList<String>) emails);
@@ -1144,7 +1162,7 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_USER + "invite")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSession(Aircandi.getInstance().getUser().session)
+				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
@@ -1166,7 +1184,7 @@ public class EntityManager {
 		 * Push it to S3. It is always formatted/compressed as a jpeg.
 		 */
 		final String stringDate = DateTime.nowString(DateTime.DATE_NOW_FORMAT_FILENAME);
-		final String imageKey = String.valueOf((user != null) ? user.id : Aircandi.getInstance().getUser().id) + "_" + stringDate + ".jpg";
+		final String imageKey = String.valueOf((user != null) ? user.id : Aircandi.getInstance().getCurrentUser().id) + "_" + stringDate + ".jpg";
 		ServiceResponse serviceResponse = S3.putImage(imageKey, bitmap, Constants.IMAGE_QUALITY_S3);
 
 		/* Update the photo object for the entity or user */
@@ -1231,7 +1249,7 @@ public class EntityManager {
 		}
 
 		if (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-				&& Type.isTrue(Aircandi.getInstance().getUser().developer)) {
+				&& Type.isTrue(Aircandi.getInstance().getCurrentUser().developer)) {
 			return true;
 		}
 

@@ -273,7 +273,7 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 		super.onDestroy();
 
 		/* This is the only place we manually stop the analytics session. */
-		Tracker.stopSession(Aircandi.getInstance().getUser());
+		Tracker.stopSession(Aircandi.getInstance().getCurrentUser());
 
 		/* Don't count on this always getting called when this activity is killed */
 		try {

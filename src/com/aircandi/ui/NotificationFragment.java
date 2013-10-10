@@ -48,6 +48,7 @@ import com.aircandi.utilities.UI;
 public class NotificationFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
 	protected ListView			mListView;
+	protected TextView			mMessage;
 	protected Integer			mLastViewedPosition;
 	protected Integer			mTopOffset;
 	protected Integer			mSavedScrollPositionX;
@@ -91,6 +92,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = super.onCreateView(inflater, container, savedInstanceState);
 		mListView = (ListView) view.findViewById(R.id.list);
+		mMessage = (TextView) view.findViewById(R.id.message);
 		return view;
 	}
 
@@ -145,15 +147,6 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 		return cursorLoader;
 	}
 
-	private void showMessage(Boolean visible) {
-		if (getView() != null) {
-			View view = getView().findViewById(R.id.message);
-			if (view != null) {
-				view.setVisibility(visible ? View.VISIBLE : View.GONE);
-			}
-		}
-	}
-
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 		/*
@@ -172,12 +165,12 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 				}
 			});
 		}
-		
+
 		/* Clear notifications from status bar because user is viewing them */
 
 		NotificationManager.getInstance().cancelNotification(ActionType.INSERT);
 		NotificationManager.getInstance().cancelNotification(ActionType.MOVE);
-		
+
 		hideBusy();
 	}
 
@@ -191,6 +184,13 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
+
+	private void showMessage(Boolean visible) {
+		if (mMessage != null) {
+			mMessage.setText(R.string.list_notifications_empty);
+			mMessage.setVisibility(visible ? View.VISIBLE : View.GONE);
+		}
+	}
 
 	public void clearNotifications() {
 
@@ -332,7 +332,6 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 			Notifications.decorate(notification);
 
 			if (notification != null) {
-				Logger.d(this, "Adapter getView: " + notification.title);
 				holder.data = notification;
 
 				UI.setVisibility(holder.byPhotoView, View.INVISIBLE);

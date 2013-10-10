@@ -274,10 +274,10 @@ public class CandiView extends RelativeLayout {
 					}
 				}
 
-				if (Aircandi.getInstance().getUser() != null
+				if (Aircandi.getInstance().getCurrentUser() != null
 						&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-						&& Aircandi.getInstance().getUser().developer != null
-						&& Aircandi.getInstance().getUser().developer) {
+						&& Aircandi.getInstance().getCurrentUser().developer != null
+						&& Aircandi.getInstance().getCurrentUser().developer) {
 					info = target + info;
 				}
 				else {

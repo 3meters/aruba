@@ -12,11 +12,13 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.aircandi.Aircandi;
 import com.aircandi.R;
 import com.aircandi.components.BusProvider;
 import com.aircandi.components.BusyManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.MenuManager;
+import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.CacheStamp;
 
 public abstract class BaseFragment extends SherlockFragment implements IForm {
@@ -91,18 +93,20 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 
 	@Override
 	public void showBusy(final Object message, final Boolean actionBarOnly) {
-		getSherlockActivity().runOnUiThread(new Runnable() {
+		if (getSherlockActivity() != null) {
+			getSherlockActivity().runOnUiThread(new Runnable() {
 
-			@Override
-			public void run() {
-				if (mBusyManager != null) {
-					mBusyManager.showBusy(message);
-					if (actionBarOnly == null || !actionBarOnly) {
-						startBodyBusyIndicator();
+				@Override
+				public void run() {
+					if (mBusyManager != null) {
+						mBusyManager.showBusy(message);
+						if (actionBarOnly == null || !actionBarOnly) {
+							startBodyBusyIndicator();
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	@Override
@@ -212,6 +216,7 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 		 * ActionBarDrawerToggle will take care of this.
 		 */
 		if (item.getItemId() == R.id.refresh) {
+			Tracker.sendEvent("ui_action", "refresh", this.getClass().getSimpleName(), 0, Aircandi.getInstance().getCurrentUser());
 			onRefresh();
 			return true;
 		}

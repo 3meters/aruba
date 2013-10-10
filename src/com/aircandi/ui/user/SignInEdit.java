@@ -136,13 +136,12 @@ public class SignInEdit extends BaseEdit {
 					user.session = serviceData.session;
 					Logger.i(this, "USER signed in: " + user.name + " (" + user.id + ")");
 
-					Aircandi.getInstance().setUser(user);
+					Aircandi.getInstance().setCurrentUser(user);
 
-					Tracker.startNewSession(Aircandi.getInstance().getUser());
-					Tracker.sendEvent("ui_action", "signin_user", null, 0, Aircandi.getInstance().getUser());
+					Tracker.startNewSession(Aircandi.getInstance().getCurrentUser());
 
 					UI.showToastNotification(getResources().getString(R.string.alert_signed_in)
-							+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
+							+ " " + Aircandi.getInstance().getCurrentUser().name, Toast.LENGTH_SHORT);
 
 					final String jsonUser = Json.objectToJson(user);
 					final String jsonSession = Json.objectToJson(user.session);

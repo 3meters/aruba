@@ -39,6 +39,7 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
+import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Cursor;
@@ -363,7 +364,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 				return LinkOptions.getDefault(LinkProfile.LINKS_FOR_PLACE);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_USER)) {
-				return LinkOptions.getDefault(LinkProfile.LINKS_FOR_USER);
+				return LinkOptions.getDefault(LinkProfile.LINKS_FOR_USER_CURRENT);
 			}
 			else if (schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 				return LinkOptions.getDefault(LinkProfile.NO_LINKS);
@@ -405,6 +406,8 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
+					String activityName = Aircandi.getInstance().getCurrentActivity().getClass().getSimpleName();
+					Tracker.sendEvent("ui_action", "refresh", activityName, 0, Aircandi.getInstance().getCurrentUser());
 					onRefresh();
 				}
 			});
@@ -598,7 +601,6 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			}
 
 			if (entity != null) {
-				Logger.d(this, "Adapter getView: " + entity.name);
 				holder.data = entity;
 				holder.position = position;
 

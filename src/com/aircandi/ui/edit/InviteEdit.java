@@ -23,7 +23,6 @@ import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.Tracker;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.ui.widgets.AirEditText;
 import com.aircandi.ui.widgets.UserView;
@@ -82,7 +81,7 @@ public class InviteEdit extends BaseEntityEdit {
 
 	@Override
 	public void draw() {
-		((UserView) findViewById(R.id.created_by)).databind(Aircandi.getInstance().getUser(), null);
+		((UserView) findViewById(R.id.created_by)).databind(Aircandi.getInstance().getCurrentUser(), null);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -193,7 +192,7 @@ public class InviteEdit extends BaseEntityEdit {
 	protected void insert() {
 		Logger.i(this, "Send invite");
 		final String email = mEmail.getEditableText().toString();
-		final String invitor = Aircandi.getInstance().getUser().name;
+		final String invitor = Aircandi.getInstance().getCurrentUser().name;
 		final String message = mDescription.getEditableText().toString();
 		final List<String> emails = new ArrayList(Arrays.asList(email.split("\\s*,\\s*")));
 
@@ -220,7 +219,6 @@ public class InviteEdit extends BaseEntityEdit {
 				final ModelResult result = (ModelResult) response;
 
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-					Tracker.sendEvent("ui_action", "send_invite", null, 0, Aircandi.getInstance().getUser());
 					hideBusy();
 					UI.showToastNotification(getString(emails.size() > 1 ? R.string.alert_invite_sent_plural : R.string.alert_invite_sent), Toast.LENGTH_SHORT);
 					finish();

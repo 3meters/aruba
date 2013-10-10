@@ -27,7 +27,6 @@ import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.AirNotification.ActionType;
 import com.aircandi.service.objects.AirNotification.NotificationType;
 import com.aircandi.service.objects.Device;
-import com.aircandi.service.objects.User;
 import com.aircandi.ui.AircandiForm;
 import com.aircandi.utilities.Json;
 import com.google.android.gcm.GCMRegistrar;
@@ -80,11 +79,11 @@ public class NotificationManager {
 
 				if (GCMRegistrar.isRegistered(Aircandi.applicationContext)
 						&& !GCMRegistrar.isRegisteredOnServer(Aircandi.applicationContext)
-						&& Aircandi.getInstance().getUser() != null) {
+						&& Aircandi.getInstance().getCurrentUser() != null) {
 
 					Logger.i(this, "GCM: Registering device with Aircandi notification service");
 
-					Device device = new Device(Aircandi.getInstance().getUser().id, GCMRegistrar.getRegistrationId(Aircandi.applicationContext));
+					Device device = new Device(Aircandi.getInstance().getCurrentUser().id, GCMRegistrar.getRegistrationId(Aircandi.applicationContext));
 					device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, AircandiForm.class);
 					device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
 
@@ -113,27 +112,20 @@ public class NotificationManager {
 				if (!TextUtils.isEmpty(registrationId)) {
 
 					Logger.i(this, "GCM: Unregistering device with Aircandi notification service");
-					User user = Aircandi.getInstance().getUser();
-					Device device = new Device(user != null ? user.id : null, registrationId);
+					
+					Device device = new Device(null, registrationId);
 					ModelResult result = EntityManager.getInstance().registerDevice(false, device);
 
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 						Logger.i(this, "GCM: device successfully unregistered with Aircandi notification service");
-						GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
 					}
 					else {
 						if (result.serviceResponse.statusCode != null && result.serviceResponse.statusCode == HttpStatus.SC_NOT_FOUND) {
 							Logger.i(this, "GCM: device already unregistered with Aircandi notification service");
-							GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
-						}
-						else {
-							/* TODO: What should we do if unregister fails? */
 						}
 					}
 				}
-				else {
-					GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
-				}
+				GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
 				return null;
 			}
 		}.execute();

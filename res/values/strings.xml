@@ -38,7 +38,6 @@
     <string name="pref_dialog_ok">OK</string>
     <string name="pref_dialog_cancel">Cancel</string>
     <string name="pref_general_category_title">General settings</string>
-    <string name="pref_reporting_category_title">Reporting settings</string>    
     <string name="pref_search_radius_title">Scanning</string>
     <string name="pref_search_radius_dialog_title">Select scanning distance</string>
     <string name="pref_theme_title">Themes</string>
@@ -214,8 +213,6 @@
     <string name="error_client_request_error">Aircandi request error</string>
     <string name="error_client_request_stream_error">Connection was interrupted. Try again and it might work.</string>
     <string name="error_client_request_not_found">Resource not found</string>
-    <string name="error_service_unauthorized">Unauthorized request</string>
-    <string name="error_service_forbidden">Requested operation is not valid</string>
     <string name="error_service_gateway_timeout">Aircandi\'s servers are overloaded. Please excuse us!</string>
     <string name="error_service_unknown">Oops, something went wrong. Try again and it might work.</string>
     <string name="error_service_unknown_status">Internal 500 service error.</string>
@@ -314,7 +311,6 @@
     <string name="entity_button_picture_first">add the first picture</string>
     <string name="entity_button_applink_first">add the first link</string>
     <string name="entity_button_entity_first">add the first</string>
-    <string name="list_notifications_empty">no notifications</string>
     
     <!-- Applink names -->
     
@@ -485,11 +481,6 @@
     <!-- Forms.hints -->
 
     <string name="form_applink_type_hint">type of link</string>
-    <string name="form_applink_name_hint">label</string>
-    <string name="form_applink_id_facebook_hint">facebook id</string>
-    <string name="form_applink_id_twitter_hint">twitter id</string>
-    <string name="form_applink_id_email_hint">email address</string>
-    <string name="form_applink_url_website_hint">web address</string>
     <string name="form_title_hint">title</string>
     <string name="form_place_title_hint">name</string>
     <string name="form_place_sources_hint">links</string>
@@ -517,7 +508,10 @@
 
     <string name="signin_message_general">Sign in to create and share candi with other Aircandi users!</string>
     <string name="picture_search_loading">loading…</string>
-
+    <string name="list_watching_empty">watch something and find it here</string>
+    <string name="list_created_empty">create something and find it here</string>
+    <string name="list_notifications_empty">no updates</string>
+    
     <!-- Crash reporting 
 
     <string name="crash_toast_text" tools:ignore="UnusedResources">Ouch! Aircandi stopped, but a report can be sent to help us fix the error!</string>

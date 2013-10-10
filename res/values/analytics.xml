@@ -9,6 +9,9 @@
 
     <!-- Enable Activity tracking -->
     <bool name="ga_autoActivityTracking">true</bool>
+    
+  	<!--Enable automatic exception tracking-->
+  	<bool name="ga_reportUncaughtExceptions">false</bool>    
 
     <!--
     	Set how often auto dispatch gets fired in seconds.
@@ -18,25 +21,26 @@
 
     <!--
 		The amount of time (in seconds) your application can stay in the background before the 
-		session is ended. Default is 30 seconds. Negative value disables EasyTracker session management. 
-    -->
+		session is ended. Default is 30 seconds. Negative value disables EasyTracker session management.     -->
     <integer name="ga_sessionTimeout">30</integer>
 
     <!-- Privacy settings that strips the last octet of the IP before storage in service -->
     <bool name="ga_anonymizeIp">false</bool>
 
     <!-- Info on what is being tracked is output to logcat -->
-    <bool name="ga_debug">false</bool>
+    <string name="ga_logLevel">warning</string>
 
     <!-- The screen names that will appear in the reporting -->
 
+    <string name="com.aircandi.ui.AircandiForm">AircandiForm</string>
+    <string name="com.aircandi.ui.CandigramForm">CandigramForm</string>
     <string name="com.aircandi.ui.EntityGrid">EntityGrid</string>
     <string name="com.aircandi.ui.EntityList">EntityList</string>
     <string name="com.aircandi.ui.HelpForm">HelpForm</string>
-    <string name="com.aircandi.ui.AircandiForm">AircandiForm</string>
+    <string name="com.aircandi.ui.MapForm">MapForm</string>
+    <string name="com.aircandi.ui.PhotoForm">PhotoDetailForm</string>
     <string name="com.aircandi.ui.PictureForm">PhotoForm</string>
     <string name="com.aircandi.ui.PlaceForm">PlaceForm</string>
-    <string name="com.aircandi.ui.PhotoForm">PhotoDetailForm</string>
     <string name="com.aircandi.ui.Preferences">Preferences</string>
     <string name="com.aircandi.ui.SplashForm">SplashForm</string>
 
@@ -44,8 +48,11 @@
 
     <string name="com.aircandi.ui.edit.ApplinkEdit">ApplinkEdit</string>
     <string name="com.aircandi.ui.edit.ApplinkListEdit">ApplinkListEdit</string>
+    <string name="com.aircandi.ui.edit.CandigramEdit">CandigramEdit</string>
+    <string name="com.aircandi.ui.edit.CandigramWizard">CandigramWizard</string>
     <string name="com.aircandi.ui.edit.CommentEdit">CommentEdit</string>
     <string name="com.aircandi.ui.edit.FeedbackEdit">FeedbackEdit</string>
+    <string name="com.aircandi.ui.edit.InviteEdit">InviteEdit</string>
     <string name="com.aircandi.ui.edit.PlaceEdit">PlaceEdit</string>
     <string name="com.aircandi.ui.edit.PictureEdit">PhotoEdit</string>
     <string name="com.aircandi.ui.edit.TuningEdit">TuningEdit</string>

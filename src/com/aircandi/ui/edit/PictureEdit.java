@@ -21,7 +21,7 @@ public class PictureEdit extends BaseEntityEdit {
 		super.initialize(savedInstanceState);
 
 		if (mEntity != null) {
-			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
+			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getCurrentUser().id))) {
 				mTabManager = new TabManager(Constants.TABS_ENTITY_FORM_ID, mActionBar, (ViewFlipper) findViewById(R.id.flipper_form));
 				mTabManager.initialize();
 				mTabManager.doRestoreInstanceState(savedInstanceState);

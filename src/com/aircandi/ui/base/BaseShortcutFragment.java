@@ -50,6 +50,7 @@ import com.aircandi.utilities.UI;
 public abstract class BaseShortcutFragment extends BaseFragment {
 
 	protected String		mShortcutType;
+	protected TextView		mMessage;
 	protected LinkProfile	mLinkProfile;
 	protected ScrollView	mScrollView;
 
@@ -60,6 +61,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = super.onCreateView(inflater, container, savedInstanceState);
 		mScrollView = (ScrollView) view.findViewById(R.id.scroll_view);
+		mMessage = (TextView) view.findViewById(R.id.message);
 		return view;
 	}
 
@@ -92,7 +94,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			@Override
 			protected Object doInBackground(Object... params) {
 
-				Thread.currentThread().setName("GetEntity");
+				Thread.currentThread().setName("GetEntityForShortcuts");
 				ModelResult result = new ModelResult();
 
 				if (mEntity != null && mEntity.synthetic) {
@@ -151,10 +153,6 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Events
-	// --------------------------------------------------------------------------------------------
-
-	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
@@ -168,11 +166,14 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 
 		if (mShortcutType.equals(Constants.TYPE_LINK_CREATE)) {
 
+			Boolean empty = true;
+
 			/* Shortcuts for place entities created by user */
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CREATE, Constants.SCHEMA_ENTITY_PLACE, Direction.out, null, false, false);
 			settings.appClass = Places.class;
 			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new ServiceBase.SortByPositionSortDate(), null);
 			if (shortcuts.size() > 0) {
+				empty = false;
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_places_created
@@ -187,6 +188,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			settings.appClass = Candigrams.class;
 			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new ServiceBase.SortByPositionSortDate(), null);
 			if (shortcuts.size() > 0) {
+				empty = false;
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_candigrams_created
@@ -201,6 +203,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			settings.appClass = Pictures.class;
 			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new ServiceBase.SortByPositionSortDate(), null);
 			if (shortcuts.size() > 0) {
+				empty = false;
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_pictures_created
@@ -209,15 +212,20 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
+
+			showMessage(empty);
 		}
 
 		else if (mShortcutType.equals(Constants.TYPE_LINK_WATCH)) {
 
+			Boolean empty = true;
+			
 			/* Watching places */
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE, Direction.out, null, false, false);
 			settings.appClass = Places.class;
 			List<Shortcut> shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new ServiceBase.SortByPositionSortDate(), null);
 			if (shortcuts.size() > 0) {
+				empty = false;
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_places_watching
@@ -232,6 +240,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			settings.appClass = Candigrams.class;
 			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new ServiceBase.SortByPositionSortDate(), null);
 			if (shortcuts.size() > 0) {
+				empty = false;
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_candigrams_watching
@@ -246,6 +255,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			settings.appClass = Pictures.class;
 			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new ServiceBase.SortByPositionSortDate(), null);
 			if (shortcuts.size() > 0) {
+				empty = false;
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_pictures_watching
@@ -260,6 +270,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			settings.appClass = Users.class;
 			shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, new ServiceBase.SortByPositionSortDate(), null);
 			if (shortcuts.size() > 0) {
+				empty = false;
 				drawShortcuts(shortcuts
 						, settings
 						, R.string.section_user_shortcuts_users_watching
@@ -268,6 +279,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
+			
+			showMessage(empty);
 		}
 
 		if (mScrollView != null) {
@@ -473,6 +486,20 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 			photoView.setLayoutParams(paramsImage);
 
 			layout.addView(view);
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Events
+	// --------------------------------------------------------------------------------------------
+
+	// --------------------------------------------------------------------------------------------
+	// Methods
+	// --------------------------------------------------------------------------------------------
+
+	protected void showMessage(Boolean visible) {
+		if (mMessage != null) {
+			mMessage.setVisibility(visible ? View.VISIBLE : View.GONE);
 		}
 	}
 

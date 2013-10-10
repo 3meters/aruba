@@ -389,7 +389,7 @@ public class RadarFragment extends BaseFragment implements
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Wifi scan received event fired");
-				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "wifi_scan_received", null, Aircandi.getInstance().getUser());
+				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "wifi_scan_received", null, Aircandi.getInstance().getCurrentUser());
 				Logger.d(getSherlockActivity(), "Query wifi scan received event: locking beacons");
 
 				if (event.wifiList != null) {
@@ -443,7 +443,7 @@ public class RadarFragment extends BaseFragment implements
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Entities by proximity finished event fired");
-				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "entities_for_beacons", null, Aircandi.getInstance().getUser());
+				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "entities_for_beacons", null, Aircandi.getInstance().getCurrentUser());
 				Logger.d(getSherlockActivity(), "Entities for beacons finished event: ** done **");
 				mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
 				mCacheStamp = EntityManager.getInstance().getCacheStamp();
@@ -515,7 +515,7 @@ public class RadarFragment extends BaseFragment implements
 
 					if (Aircandi.stopwatch2.isStarted()) {
 						Aircandi.stopwatch2.stop("Location acquired");
-						Tracker.sendTiming("location", Aircandi.stopwatch2.getTotalTimeMills(), "location_acquired", null, Aircandi.getInstance().getUser());
+						Tracker.sendTiming("location", Aircandi.stopwatch2.getTotalTimeMills(), "location_acquired", null, Aircandi.getInstance().getCurrentUser());
 					}
 
 					final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
@@ -561,7 +561,7 @@ public class RadarFragment extends BaseFragment implements
 	@SuppressWarnings("ucd")
 	public void onPlacesNearLocationFinished(final PlacesNearLocationFinishedEvent event) {
 		Aircandi.stopwatch2.stop("Places near location complete");
-		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "places_near_location", null, Aircandi.getInstance().getUser());
+		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "places_near_location", null, Aircandi.getInstance().getCurrentUser());
 		mHandler.post(new Runnable() {
 
 			@Override
@@ -665,7 +665,6 @@ public class RadarFragment extends BaseFragment implements
 		 * This only gets called by a user clicking the refresh button.
 		 */
 		Logger.d(getSherlockActivity(), "Starting refresh");
-		Tracker.sendEvent("ui_action", "refresh_radar", null, 0, Aircandi.getInstance().getUser());
 		String provider = Aircandi.settings.getString(
 				Constants.PREF_PLACE_PROVIDER,
 				Constants.PREF_PLACE_PROVIDER_DEFAULT);
@@ -680,7 +679,7 @@ public class RadarFragment extends BaseFragment implements
 		 * No check for user permissions because everyone gets to create a top
 		 * level place.
 		 */
-		if (Aircandi.getInstance().getUser() != null) {
+		if (Aircandi.getInstance().getCurrentUser() != null) {
 			Routing.route(getSherlockActivity(), Route.NEW, null, Constants.SCHEMA_ENTITY_PLACE, null);
 		}
 	}
@@ -801,10 +800,10 @@ public class RadarFragment extends BaseFragment implements
 			final StringBuilder beaconMessage = new StringBuilder(500);
 			List<WifiScanResult> wifiList = ProximityManager.getInstance().getWifiList();
 			synchronized (wifiList) {
-				if (Aircandi.getInstance().getUser() != null
+				if (Aircandi.getInstance().getCurrentUser() != null
 						&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-						&& Aircandi.getInstance().getUser().developer != null
-						&& Aircandi.getInstance().getUser().developer) {
+						&& Aircandi.getInstance().getCurrentUser().developer != null
+						&& Aircandi.getInstance().getCurrentUser().developer) {
 					if (Aircandi.wifiCount > 0) {
 						for (WifiScanResult wifi : wifiList) {
 							if (!wifi.SSID.equals("candi_feed")) {
@@ -930,7 +929,7 @@ public class RadarFragment extends BaseFragment implements
 
 			/* Only show beacon indicator if user is a developer */
 			if (!Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-					|| !Type.isTrue(Aircandi.getInstance().getUser().developer)) {
+					|| !Type.isTrue(Aircandi.getInstance().getCurrentUser().developer)) {
 				mMenuItemBeacons.setVisible(false);
 			}
 			else {

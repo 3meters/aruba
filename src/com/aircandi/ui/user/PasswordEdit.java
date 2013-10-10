@@ -12,7 +12,6 @@ import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.Tracker;
 import com.aircandi.ui.base.BaseEdit;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Errors;
@@ -88,10 +87,9 @@ public class PasswordEdit extends BaseEdit {
 				hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
-					Logger.i(this, "USER changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
-					Tracker.sendEvent("ui_action", "change_password", null, 0, Aircandi.getInstance().getUser());
+					Logger.i(this, "USER changed password: " + Aircandi.getInstance().getCurrentUser().name + " (" + Aircandi.getInstance().getCurrentUser().id + ")");
 					UI.showToastNotification(getResources().getString(R.string.alert_password_changed)
-							+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
+							+ " " + Aircandi.getInstance().getCurrentUser().name, Toast.LENGTH_SHORT);
 					finish();
 				}
 				else {

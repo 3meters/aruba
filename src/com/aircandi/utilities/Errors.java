@@ -92,7 +92,7 @@ public final class Errors {
 				 * - 500: Something bad and unknown has happened in the service.
 				 */
 				if (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-						&& Type.isTrue(Aircandi.getInstance().getUser().developer)) {
+						&& Type.isTrue(Aircandi.getInstance().getCurrentUser().developer)) {
 					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown_status));
 				}
 				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown));
@@ -240,7 +240,7 @@ public final class Errors {
 				}
 				else {
 					if (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-							&& Type.isTrue(Aircandi.getInstance().getUser().developer)) {
+							&& Type.isTrue(Aircandi.getInstance().getCurrentUser().developer)) {
 						return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown_exception) + ": "
 								+ exception.getClass().getSimpleName());
 					}

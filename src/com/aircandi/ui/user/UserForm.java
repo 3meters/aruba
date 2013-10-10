@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
+import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.EntityManager;
@@ -32,7 +33,8 @@ public class UserForm extends BaseEntityForm {
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-		mLinkProfile = LinkProfile.LINKS_FOR_USER;
+		Boolean currentUser = Aircandi.getInstance().getCurrentUser().id.equals(mEntityId);
+		mLinkProfile = currentUser ? LinkProfile.LINKS_FOR_USER_CURRENT : LinkProfile.LINKS_FOR_USER;
 	}
 
 	@Override

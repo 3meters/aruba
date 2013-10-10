@@ -133,7 +133,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			Place place = (Place) entity;
 			place.provider = new ProviderMap();
-			place.provider.aircandi = Aircandi.getInstance().getUser().id;
+			place.provider.aircandi = Aircandi.getInstance().getCurrentUser().id;
 			place.category = new Category();
 			place.category.id = "generic";
 			place.category.photo = new Photo("generic_88.png", null, null, null,
@@ -173,8 +173,8 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 	public Boolean isOwnedByCurrentUser() {
 		Boolean owned = (ownerId != null
-				&& Aircandi.getInstance().getUser() != null
-				&& ownerId.equals(Aircandi.getInstance().getUser().id));
+				&& Aircandi.getInstance().getCurrentUser() != null
+				&& ownerId.equals(Aircandi.getInstance().getCurrentUser().id));
 		return owned;
 	}
 
@@ -203,7 +203,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 			linkProfile = LinkProfile.LINKS_FOR_PICTURE;
 		}
 		else if (this.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
-			linkProfile = LinkProfile.LINKS_FOR_USER;
+			linkProfile = LinkProfile.LINKS_FOR_USER_CURRENT;
 		}
 		return linkProfile;
 	}
@@ -563,7 +563,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 	public Boolean byAppUser(String linkType) {
 		if (linksIn != null) {
 			for (Link link : linksIn) {
-				if (link.type.equals(linkType) && link.fromId.equals(Aircandi.getInstance().getUser().id)) {
+				if (link.type.equals(linkType) && link.fromId.equals(Aircandi.getInstance().getCurrentUser().id)) {
 					return true;
 				}
 			}

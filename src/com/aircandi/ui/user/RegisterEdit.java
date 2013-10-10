@@ -19,7 +19,6 @@ import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Animate;
@@ -174,7 +173,6 @@ public class RegisterEdit extends BaseEntityEdit {
 	@Override
 	protected void update() {
 
-		Tracker.sendEvent("ui_action", "register_user", null, 0, Aircandi.getInstance().getUser());
 		Logger.d(this, "Inserting user: " + mEntity.name);
 
 		new AsyncTask() {
@@ -206,13 +204,13 @@ public class RegisterEdit extends BaseEntityEdit {
 					 * signed in.
 					 */
 					final User insertedUser = (User) result.data;
-					Aircandi.getInstance().setUser(insertedUser);
+					Aircandi.getInstance().setCurrentUser(insertedUser);
 
 					hideBusy();
 					Logger.i(RegisterEdit.this, "Inserted new user: " + mEntity.name + " (" + mEntity.id + ")");
 
 					UI.showToastNotification(getResources().getString(R.string.alert_signed_in)
-							+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
+							+ " " + Aircandi.getInstance().getCurrentUser().name, Toast.LENGTH_SHORT);
 
 					final String jsonUser = Json.objectToJson(insertedUser);
 					final String jsonSession = Json.objectToJson(insertedUser.session);

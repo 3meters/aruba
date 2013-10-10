@@ -2,9 +2,13 @@ package com.aircandi.components;
 
 import android.app.Activity;
 
+import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.Type;
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.MapBuilder;
 
 /*
  * Tracker strategy
@@ -32,22 +36,8 @@ public class Tracker {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
-				EasyTracker.getTracker().sendEvent(category, action, target, value);
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void sendView(String viewName, User user) {
-		/*
-		 * Arguments should be free of whitespace.
-		 */
-		try {
-			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
-				EasyTracker.getTracker().sendView(viewName);
+			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
+				EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder.createEvent(category, action, target, value).build());
 			}
 		}
 		catch (Exception e) {
@@ -60,19 +50,8 @@ public class Tracker {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
-				EasyTracker.getTracker().sendTiming(category, timing, name, label);
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void dispatch(User user) {
-		try {
-			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
-				EasyTracker.getInstance().dispatch();
+			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
+				EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder.createTiming(category, timing, name, label).build());
 			}
 		}
 		catch (Exception e) {
@@ -82,8 +61,8 @@ public class Tracker {
 
 	public static void stopSession(User user) {
 		try {
-			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
-				EasyTracker.getTracker().setStartSession(false);
+			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
+				EasyTracker.getInstance(Aircandi.applicationContext).set(Fields.SESSION_CONTROL, "end");
 			}
 		}
 		catch (Exception e) {
@@ -93,8 +72,8 @@ public class Tracker {
 
 	public static void startNewSession(User user) {
 		try {
-			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
-				EasyTracker.getTracker().setStartSession(true);
+			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
+				EasyTracker.getInstance(Aircandi.applicationContext).set(Fields.SESSION_CONTROL, "start");
 			}
 		}
 		catch (Exception e) {
@@ -104,8 +83,8 @@ public class Tracker {
 
 	public static void activityStart(Activity activity, User user) {
 		try {
-			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
-				EasyTracker.getInstance().activityStart(activity);
+			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
+				EasyTracker.getInstance(Aircandi.applicationContext).activityStart(activity);
 			}
 		}
 		catch (Exception e) {
@@ -115,12 +94,18 @@ public class Tracker {
 
 	public static void activityStop(Activity activity, User user) {
 		try {
-			if (Constants.TRACKING_ENABLED && user != null && (user.developer == null || !user.developer)) {
-				EasyTracker.getInstance().activityStop(activity);
+			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
+				EasyTracker.getInstance(Aircandi.applicationContext).activityStop(activity);
 			}
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static enum Action {
+		ENTITY_KICK,
+		ENTITY_DELETE
+
 	}
 }

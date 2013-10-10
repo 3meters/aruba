@@ -33,7 +33,7 @@ public class PlaceEdit extends BaseEntityEdit {
 		super.initialize(savedInstanceState);
 
 		if (mEntity != null) {
-			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
+			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getCurrentUser().id))) {
 				mTabManager = new TabManager(Constants.TABS_ENTITY_FORM_ID, mActionBar, (ViewFlipper) findViewById(R.id.flipper_form));
 				mTabManager.initialize();
 				mTabManager.doRestoreInstanceState(savedInstanceState);
@@ -163,7 +163,7 @@ public class PlaceEdit extends BaseEntityEdit {
 	protected void gather() {
 		super.gather();
 		if (!mEditing) {
-			((Place) mEntity).provider.aircandi = Aircandi.getInstance().getUser().id;
+			((Place) mEntity).provider.aircandi = Aircandi.getInstance().getCurrentUser().id;
 			/*
 			 * Custom places get the current location.
 			 * 

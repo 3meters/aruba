@@ -37,8 +37,6 @@ import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.android.gcm.GCMRegistrar;
 
 public class SplashForm extends SherlockActivity {
@@ -110,11 +108,7 @@ public class SplashForm extends SherlockActivity {
 				/* AWS Credentials */
 				startGetAWSCredentials();
 
-				/* Google analytics tracking */
-				GoogleAnalytics.getInstance(SplashForm.this).setDebug(false);
-				EasyTracker.getInstance().setContext(getApplicationContext());
-
-				/* Connectivity MONITORING */
+				/* Connectivity monitoring */
 				NetworkManager.getInstance().setContext(getApplicationContext());
 				NetworkManager.getInstance().initialize();
 				NetworkManager.getInstance().updateCrashlytics();
@@ -200,9 +194,8 @@ public class SplashForm extends SherlockActivity {
 			if (user != null) {
 				user.session = (Session) Json.jsonToObject(jsonSession, Json.ObjectType.SESSION);
 				if (user.session != null) {
-					Aircandi.getInstance().setUser(user);
-					Tracker.startNewSession(Aircandi.getInstance().getUser());
-					Tracker.sendEvent("action", "signin_auto", null, 0, Aircandi.getInstance().getUser());
+					Aircandi.getInstance().setCurrentUser(user);
+					Tracker.startNewSession(Aircandi.getInstance().getCurrentUser());
 					Aircandi.mainThreadHandler.postDelayed(new Runnable() {
 
 						@Override
@@ -243,9 +236,9 @@ public class SplashForm extends SherlockActivity {
 			protected Object doInBackground(Object... params) {
 				ModelResult result = new ModelResult();
 
-				if (Aircandi.getInstance().getUser() != null) {
-					LinkOptions options = LinkOptions.getDefault(LinkProfile.LINKS_FOR_USER);
-					result = EntityManager.getInstance().getEntity(Aircandi.getInstance().getUser().id, true, options);
+				if (Aircandi.getInstance().getCurrentUser() != null) {
+					LinkOptions options = LinkOptions.getDefault(LinkProfile.LINKS_FOR_USER_CURRENT);
+					result = EntityManager.getInstance().getEntity(Aircandi.getInstance().getCurrentUser().id, true, options);
 				}
 
 				return result;
