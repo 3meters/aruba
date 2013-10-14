@@ -83,7 +83,6 @@ public class Notifications {
 						return "kicked a candigram you started to a new place.";
 					}
 					else if (notification.type.equals(NotificationType.OWN_TO)) {
-
 						return "kicked a candigram to a place of yours.";
 					}
 				}
@@ -103,6 +102,32 @@ public class Notifications {
 					}
 					else if (notification.type.equals(NotificationType.OWN_TO)) {
 						return "A candigram has traveled to a place of yours";
+					}
+				}
+			}
+		}
+		else if (notification.action.equals(ActionType.EXPAND)) {
+			if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+
+				if (notification.entity.type.equals(Constants.TYPE_APP_EXPAND)) {
+
+					if (notification.type.equals(NotificationType.NEARBY)) {
+						return "repeated a candigram to a place nearby.";
+					}
+					else if (notification.type.equals(NotificationType.WATCH)) {
+						return "repeated a candigram you\'re watching to a new place.";
+					}
+					else if (notification.type.equals(NotificationType.WATCH_TO)) {
+						return "repeated a candigram to a place you\'re watching.";
+					}
+					else if (notification.type.equals(NotificationType.WATCH_USER)) {
+						return "repeated a candigram to a new place.";
+					}
+					else if (notification.type.equals(NotificationType.OWN)) {
+						return "repeated a candigram you started to a new place.";
+					}
+					else if (notification.type.equals(NotificationType.OWN_TO)) {
+						return "repeated a candigram to a place of yours.";
 					}
 				}
 			}
@@ -161,10 +186,10 @@ public class Notifications {
 			else if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 
 				if (notification.type.equals(NotificationType.NEARBY)) {
-					return "marked a new place nearby.";
+					return "tagged a new place nearby.";
 				}
 				else if (notification.type.equals(NotificationType.WATCH_USER)) {
-					return "marked a new place.";
+					return "tagged a new place.";
 				}
 			}
 		}

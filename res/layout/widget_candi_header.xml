@@ -9,13 +9,23 @@
     android:paddingTop="3dp" >
 
     <com.aircandi.ui.widgets.AirButton
-        android:id="@+id/button_kick"
+        android:id="@+id/button_bounce"
         style="@style/form_button_floating"
         android:layout_width="match_parent"
         android:layout_height="@dimen/form_button_height"
         android:layout_marginBottom="3dp"
-        android:onClick="onKickButtonClick"
-        android:text="@string/button_kick"
+        android:onClick="onBounceButtonClick"
+        android:text="@string/button_candigram_bounce"
+        android:visibility="gone" />
+
+    <com.aircandi.ui.widgets.AirButton
+        android:id="@+id/button_expand"
+        style="@style/form_button_floating"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/form_button_height"
+        android:layout_marginBottom="3dp"
+        android:onClick="onExpandButtonClick"
+        android:text="@string/button_candigram_expand"
         android:visibility="gone" />
 
     <LinearLayout
@@ -66,6 +76,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/dummy_watch_stat"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/places_stats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dummy_place_stat"
             android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
 

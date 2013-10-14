@@ -648,8 +648,11 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 						if (entity.type.equals(Constants.TYPE_APP_TOUR)) {
 							typeVerbose = mResources.getString(R.string.candigram_type_tour_verbose);
 						}
-						if (entity.type.equals(Constants.TYPE_APP_BOUNCE)) {
+						else if (entity.type.equals(Constants.TYPE_APP_BOUNCE)) {
 							typeVerbose = mResources.getString(R.string.candigram_type_bounce_verbose);
+						}
+						else if (entity.type.equals(Constants.TYPE_APP_EXPAND)) {
+							typeVerbose = mResources.getString(R.string.candigram_type_expand_verbose);
 						}
 						holder.type.setText(typeVerbose);
 					}

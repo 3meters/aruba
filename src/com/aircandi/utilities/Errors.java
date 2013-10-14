@@ -23,6 +23,8 @@ import com.aircandi.R;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.service.ClientVersionException;
+import com.aircandi.service.ImageSizeException;
+import com.aircandi.service.ImageUnusableException;
 import com.aircandi.service.ServiceResponse;
 import com.aircandi.ui.SplashForm;
 import com.aircandi.ui.base.BaseActivity;
@@ -169,6 +171,12 @@ public final class Errors {
 				ErrorResponse errorResponse = new ErrorResponse(ResponseType.NONE, context.getString(R.string.dialog_update_message));
 				errorResponse.splash = true;
 				return errorResponse;
+			}
+			else if (exception instanceof ImageSizeException) {
+				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_image_too_large));
+			}
+			else if (exception instanceof ImageUnusableException) {
+				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_image_unusable));
 			}
 			else if (exception instanceof IOException) {
 				/*

@@ -10,6 +10,14 @@ public class ServiceResponse {
 	public Integer			statusCode;
 	public Float			statusCodeService;
 	public String			statusMessage;
+	public String			contentType = "none";
+	public String			contentEncoding = "none";
+	public Long				contentLength = 0L;
+	public Long				contentLengthScaled = 0L;
+	public Integer			contentHeight = 0;
+	public Integer			contentWidth = 0;
+	public Integer			contentHeightScaled = 0;
+	public Integer			contentWidthScaled = 0;
 	public ErrorResponse	errorResponse;
 	public String			activityName;
 

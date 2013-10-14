@@ -504,10 +504,12 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				Tracker.sendEvent("ui_action", "select_picture_search", null, 0, Aircandi.getInstance().getCurrentUser());
 				if (intent != null && intent.getExtras() != null) {
+					
 					final Bundle extras = intent.getExtras();
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
 					final Photo photo = (Photo) Json.jsonToObject(jsonPhoto, Json.ObjectType.PHOTO);
 					photo.setBitmapLocalOnly(true);
+					photo.photoBroken = Entity.getBrokenPhoto(); 
 
 					if (mImageRequestWebImageView.getPhoto() == null || !mImageRequestWebImageView.getPhoto().getUri().equals(photo.getUri())) {
 						UI.drawPhoto(mImageRequestWebImageView, photo, mImageRequestListener);
@@ -523,6 +525,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
 					final Photo photo = (Photo) Json.jsonToObject(jsonPhoto, Json.ObjectType.PHOTO);
 					photo.setBitmapLocalOnly(true);
+					photo.photoBroken = Entity.getBrokenPhoto(); 
 
 					if (mImageRequestWebImageView.getPhoto() == null || !mImageRequestWebImageView.getPhoto().getUri().equals(photo.getUri())) {
 						UI.drawPhoto(mImageRequestWebImageView, photo, mImageRequestListener);

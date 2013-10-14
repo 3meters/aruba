@@ -31,7 +31,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String									schema;
 	@Expose
-	public String									app;			// usually maps to type property (if exists) on polymorphic entity like applinks 
+	public String									app;																					// usually maps to type property (if exists) on polymorphic entity like applinks 
 	@Expose
 	public String									appId;
 	@Expose
@@ -55,7 +55,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	public List<Shortcut>							group;
 	public Boolean									synthetic			= false;
 	public Boolean									inactive			= false;
-	public String									linkType;		// so we know if entity shortcut represents is targeted via like/watch/content etc.
+	public String									linkType;																				// so we know if entity shortcut represents is targeted via like/watch/content etc.
 	public Intent									intent;
 
 	public Shortcut() {}
@@ -156,6 +156,12 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	public Photo getBrokenPhoto() {
 		String prefix = "resource:img_broken";
 		String source = PhotoSource.resource;
+		if (this.schema != null && this.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+			if (app.equals(Constants.TYPE_APP_WEBSITE)) {
+				prefix = this.app.toLowerCase(Locale.US) + ".png";
+				source = PhotoSource.assets_applinks;
+			}
+		}
 		Photo photo = new Photo(prefix, null, null, null, source);
 		return photo;
 	}

@@ -25,6 +25,7 @@ public class Candigrams {
 	
 	public static int RANGE_DEFAULT_POSITION = 1;
 	public static int DURATION_DEFAULT_POSITION = 1;
+	public static int LIFETIME_DEFAULT_POSITION = 3;
 	public static int HOPS_DEFAULT_POSITION = 1;
 	public static int ICON_COLOR = R.color.brand_pink_lighter;
 	
@@ -93,7 +94,7 @@ public class Candigrams {
 		Integer valuesResId = null;
 		Integer descriptionsResId = null;
 		
-		if (propertyType == PropertyType.type) {
+		if (propertyType == PropertyType.TYPE) {
 			entriesResId = R.array.candigram_type_entries;
 			valuesResId = R.array.candigram_type_values;
 			descriptionsResId = R.array.candigram_type_descriptions;
@@ -107,6 +108,11 @@ public class Candigrams {
 			entriesResId = R.array.candigram_duration_entries;
 			valuesResId = R.array.candigram_duration_values;
 			descriptionsResId = R.array.candigram_duration_descriptions;
+		}
+		else if (propertyType == PropertyType.LIFETIME) {
+			entriesResId = R.array.candigram_lifetime_entries;
+			valuesResId = R.array.candigram_lifetime_values;
+			descriptionsResId = R.array.candigram_lifetime_descriptions;
 		}
 		else if (propertyType == PropertyType.HOPS) {
 			entriesResId = R.array.candigram_hops_entries;
@@ -131,7 +137,7 @@ public class Candigrams {
 		Integer valuesResId = null;
 		Integer descriptionsResId = null;
 		
-		if (propertyType == PropertyType.type) {
+		if (propertyType == PropertyType.TYPE) {
 			entriesResId = R.array.candigram_type_entries;
 			valuesResId = R.array.candigram_type_values;
 			descriptionsResId = R.array.candigram_type_descriptions;
@@ -167,9 +173,10 @@ public class Candigrams {
 	}
 
 	public enum PropertyType {
-		type,
+		TYPE,
 		RANGE,
 		DURATION,
+		LIFETIME,
 		LOCKED, 
 		HOPS
 	}

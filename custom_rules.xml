@@ -39,8 +39,8 @@
     	<echo>Version code: ${build.code}</echo>
         <echo>Version name: ${build.version}</echo>    			
     
-        <!-- Push version info to the manifest file -->
-   		<SetVersion code="${build.code}" name="${build.version}"/>
+        <!-- Push version info to the manifest file 
+   		<SetVersion code="${build.code}" name="${build.version}"/>-->
 	    	    
 	</target>	
 						

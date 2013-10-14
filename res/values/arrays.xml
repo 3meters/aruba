@@ -69,16 +69,19 @@
     <!-- Candigram type -->
 
     <string-array name="candigram_type_entries">
-        <item>Touring</item>
+        <item>Repeating</item>
         <item>Bouncing</item>
+        <item>Touring</item>
     </string-array>
     <string-array name="candigram_type_values">
-        <item>tour</item>
+        <item>expand</item>
         <item>bounce</item>
+        <item>tour</item>
     </string-array>
     <string-array name="candigram_type_descriptions">
-        <item>Candigram travels to a new place when time runs out</item>
-        <item>Candigram travels to a new place when kicked</item>
+        <item>Candigram expands to new places when repeated</item>
+        <item>Candigram travels to new places when kicked</item>
+        <item>Candigram travels to new places when time runs out</item>
     </string-array>
 
     <!-- Candigram range -->
@@ -156,4 +159,30 @@
         <item>The candigram travels to a new place every week</item>
     </string-array>
         
+    <!-- Candigram lifetime -->
+
+    <string-array name="candigram_lifetime_entries">
+        <item>1 day</item>
+        <item>2 days</item>
+        <item>3 days</item>
+        <item>1 week</item>
+        <item>2 weeks</item>
+    </string-array>
+
+    <string-array name="candigram_lifetime_values">
+        <item>86400000</item>
+        <item>172800000</item>
+        <item>259200000</item>
+        <item>604800000</item>
+        <item>1209600000</item>
+    </string-array>
+
+    <string-array name="candigram_lifetime_descriptions">
+        <item>The candigram will be retired in one day</item>
+        <item>The candigram will be retired in two days</item>
+        <item>The candigram will be retired in three days</item>
+		<item>The candigram will be retired in one week</item>
+		<item>The candigram will be retired in two weeks</item>
+    </string-array>
+    
 </resources>

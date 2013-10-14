@@ -128,30 +128,33 @@
                 android:visibility="invisible" />
         </LinearLayout>
 
+        <!-- Expanding lifetime -->
+
         <LinearLayout
+            android:id="@+id/lifetime_holder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:orientation="vertical"
             android:visibility="gone" >
 
-            <com.aircandi.ui.widgets.AirCheckBox
-                android:id="@+id/chk_capture"
-                android:layout_width="match_parent"
+            <Spinner
+                android:id="@+id/spinner_lifetime"
+                android:layout_width="200dp"
                 android:layout_height="@dimen/form_field_height"
-                android:text="@string/candigram_label_capture"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:spinnerMode="dialog" />
 
             <com.aircandi.ui.widgets.AirTextView
-                android:id="@+id/hint_capture"
+                android:id="@+id/hint_lifetime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:includeFontPadding="false"
                 android:paddingLeft="@dimen/hint_indent_spinner"
+                android:text="@string/candigram_lifetime_help"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?attr/textColorSecondary" />
+                android:textColor="?attr/textColorSecondary"
+                android:visibility="invisible" />
         </LinearLayout>
-
+        
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -159,14 +162,14 @@
             android:orientation="vertical" >
 
             <com.aircandi.ui.widgets.AirCheckBox
-                android:id="@+id/chk_parked"
+                android:id="@+id/chk_stopped"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:text="@string/form_label_parked"
+                android:text="@string/form_label_stopped"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <com.aircandi.ui.widgets.AirTextView
-                android:id="@+id/hint_parked"
+                android:id="@+id/hint_stopped"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/hint_indent_spinner"

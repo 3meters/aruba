@@ -546,7 +546,6 @@ public class EntityManager {
 		ModelResult result = new ModelResult();
 		Tracker.sendEvent("ui_action", "entity_insert", entity.schema, 0, Aircandi.getInstance().getCurrentUser());
 
-
 		Logger.i(this, "Inserting entity: " + entity.name);
 
 		/* Pre-fetch an id so a failed request can be retried */
@@ -880,7 +879,6 @@ public class EntityManager {
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			Tracker.sendEvent("ui_action", untuning ? "untune" : "tune", entity.schema, 0, Aircandi.getInstance().getCurrentUser());
 
-
 			if (beacons != null) {
 				for (Beacon beacon : beacons) {
 					Boolean primary = (primaryBeacon != null && primaryBeacon.id.equals(beacon.id));
@@ -906,6 +904,13 @@ public class EntityManager {
 									Link temp = iterLinks.next();
 									if (temp.equals(link)) {
 										iterLinks.remove();
+										/*
+										 * Entity could be a clone so grab the one in the cache.
+										 */
+										Entity cacheEntity = mEntityCache.get(entity.id);
+										if (cacheEntity != null) {
+											cacheEntity.activityDate = DateTime.nowDate().getTime();
+										}
 										break;
 									}
 								}
@@ -924,6 +929,13 @@ public class EntityManager {
 							entity.linksOut = new ArrayList<Link>();
 						}
 						entity.linksOut.add(link);
+						/*
+						 * Entity could be a clone so grab the one in the cache.
+						 */
+						Entity cacheEntity = mEntityCache.get(entity.id);
+						if (cacheEntity != null) {
+							cacheEntity.activityDate = DateTime.nowDate().getTime();
+						}
 					}
 				}
 			}
@@ -940,7 +952,7 @@ public class EntityManager {
 			, Shortcut toShortcut
 			, String actionType) {
 		final ModelResult result = new ModelResult();
-		Tracker.sendEvent("ui_action", "entity_" + type, toShortcut.schema, 0, Aircandi.getInstance().getCurrentUser());		
+		Tracker.sendEvent("ui_action", "entity_" + type, toShortcut.schema, 0, Aircandi.getInstance().getCurrentUser());
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("fromId", fromId); 		// required
@@ -973,7 +985,7 @@ public class EntityManager {
 
 	public ModelResult deleteLink(String fromId, String toId, String type, String schema, String actionType) {
 		final ModelResult result = new ModelResult();
-		Tracker.sendEvent("ui_action", "entity_un" + type, schema, 0, Aircandi.getInstance().getCurrentUser());		
+		Tracker.sendEvent("ui_action", "entity_un" + type, schema, 0, Aircandi.getInstance().getCurrentUser());
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("fromId", fromId); 		// required
@@ -1051,7 +1063,7 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult moveCandigram(Entity entity, Boolean skipMove, String toId) {
+	public ModelResult moveCandigram(Entity entity, Boolean expand, Boolean skipMove, String toId) {
 		/*
 		 * moveCandigrams updates activityDate in the database:
 		 * - on the candigram
@@ -1063,7 +1075,13 @@ public class EntityManager {
 		 */
 
 		final ModelResult result = new ModelResult();
-		Tracker.sendEvent("ui_action", "kick_entity", null, 0, Aircandi.getInstance().getCurrentUser());
+		if (!skipMove) {
+			String action = expand ? "promote_entity" : "kick_entity";
+			Tracker.sendEvent("ui_action", action, null, 0, Aircandi.getInstance().getCurrentUser());
+		}
+		else {
+			Tracker.sendEvent("ui_action", "preview_entity", null, 0, Aircandi.getInstance().getCurrentUser());
+		}
 
 		/* Construct entity, link, and observation */
 		final Bundle parameters = new Bundle();
@@ -1073,6 +1091,9 @@ public class EntityManager {
 		}
 		if (skipMove != null) {
 			parameters.putBoolean("skipMove", skipMove);
+		}
+		if (Type.isTrue(expand)) {
+			parameters.putBoolean("expand", expand);
 		}
 		parameters.putStringArrayList("entityIds", new ArrayList(Arrays.asList(entity.id)));
 

@@ -24,12 +24,14 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.base.BaseEntityEdit;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
+import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
 public class TuningEdit extends BaseEntityEdit {
 
 	private Button	mButtonTune;
 	private Button	mButtonUntune;
+	private View	mHolderEditing;
 
 	private Boolean	mTuned				= false;
 	private Boolean	mUntuned			= false;
@@ -42,12 +44,17 @@ public class TuningEdit extends BaseEntityEdit {
 		super.initialize(savedInstanceState);
 		mButtonTune = (Button) findViewById(R.id.button_tune);
 		mButtonUntune = (Button) findViewById(R.id.button_untune);
+		mHolderEditing = findViewById(R.id.holder_editing);
 }
 
 	@Override
 	public void draw() {
 
 		if (mEntity != null) {
+			
+			/* Edit or not */
+			
+			mHolderEditing.setVisibility(UI.showAction(Route.EDIT, mEntity) ? View.VISIBLE: View.GONE);
 
 			/* Color */
 
@@ -202,8 +209,7 @@ public class TuningEdit extends BaseEntityEdit {
 
 			@Override
 			protected void onPreExecute() {
-				mBusyManager.showBusy();
-				mBusyManager.startBodyBusyIndicator();
+				showBusy();
 			}
 
 			@Override
@@ -222,7 +228,6 @@ public class TuningEdit extends BaseEntityEdit {
 			protected void onPostExecute(Object response) {
 				setSupportProgressBarIndeterminateVisibility(false);
 				hideBusy();
-				mBusyManager.stopBodyBusyIndicator();
 				
 				if (mTuned || mUntuned) {
 					/* Undoing a tuning */

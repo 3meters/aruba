@@ -39,7 +39,7 @@
     <string name="com.aircandi.ui.HelpForm">HelpForm</string>
     <string name="com.aircandi.ui.MapForm">MapForm</string>
     <string name="com.aircandi.ui.PhotoForm">PhotoDetailForm</string>
-    <string name="com.aircandi.ui.PictureForm">PhotoForm</string>
+    <string name="com.aircandi.ui.PictureForm">PictureForm</string>
     <string name="com.aircandi.ui.PlaceForm">PlaceForm</string>
     <string name="com.aircandi.ui.Preferences">Preferences</string>
     <string name="com.aircandi.ui.SplashForm">SplashForm</string>

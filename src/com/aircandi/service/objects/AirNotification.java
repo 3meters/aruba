@@ -155,5 +155,6 @@ public class AirNotification extends ServiceObject implements Cloneable, Seriali
 	public static class ActionType {
 		public static String	INSERT	= "insert";
 		public static String	MOVE	= "move";
+		public static String	EXPAND	= "expand";
 	}
 }

@@ -552,7 +552,7 @@ public final class Routing {
 		else if (route == Route.PHOTO_SEARCH) {
 
 			IntentBuilder intentBuilder = new IntentBuilder(activity, PhotoPicker.class).setExtras(extras);
-			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_PICK_PLACE);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_SEARCH);
 			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
@@ -585,6 +585,8 @@ public final class Routing {
 	public static void shortcut(final Activity activity, Shortcut shortcut, Entity entity, Direction direction) {
 
 		if (shortcut.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+			Tracker.sendEvent("ui_action", "applink_click", shortcut.app, 0, Aircandi.getInstance().getCurrentUser());
+
 
 			if (shortcut.app.equals(Constants.TYPE_APP_PICTURE)
 					|| shortcut.app.equals(Constants.TYPE_APP_POST)) {

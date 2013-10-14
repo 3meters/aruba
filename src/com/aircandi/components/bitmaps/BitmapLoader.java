@@ -1,6 +1,7 @@
 package com.aircandi.components.bitmaps;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -85,38 +86,27 @@ public class BitmapLoader {
 	// Processing routines
 	// --------------------------------------------------------------------------------------------
 
-	public static ServiceResponse downloadAsBitmapSampled(String url, RequestListener listener) {
+	public static ServiceResponse downloadAsByteArraySampled(String url, RequestListener listener) {
 		/*
 		 * We request a byte array for decoding because of a bug in pre 2.3 versions of android.
 		 */
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(url)
-				.setRequestType(RequestType.GET)
-				.setResponseFormat(ResponseFormat.BYTES)
-				.setRequestListener(listener);
-
-		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest, null);
+		final ServiceResponse serviceResponse = downloadAsByteArray(url, listener);
 
 		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
-			final byte[] imageBytes = (byte[]) serviceResponse.data;
-
-			String extension = "";
-			final int i = url.lastIndexOf('.');
-			if (i > 0) {
-				extension = url.substring(i + 1);
-			}
-
-			Bitmap bitmap = null;
-			if (extension.equals("gif")) {
+			if (serviceResponse.contentType != null && serviceResponse.contentType.equals("image/gif")) {
 				/*
 				 * Potential memory issue: We don't have the same sampling protection as
 				 * we get when decoding a jpeg or png.
 				 */
-				final InputStream inputStream = new ByteArrayInputStream(imageBytes);
+				final InputStream inputStream = new ByteArrayInputStream((byte[]) serviceResponse.data);
 				final GifDecoder decoder = new GifDecoder();
 				decoder.read(inputStream);
-				bitmap = decoder.getBitmap();
+				Bitmap bitmap = decoder.getBitmap();
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream); // should be lossless.
+				serviceResponse.data = outputStream.toByteArray();
+
 				try {
 					inputStream.close();
 				}
@@ -127,17 +117,12 @@ public class BitmapLoader {
 				}
 			}
 			else {
-				/* Turn byte array into bitmap that fits in our desired max size */
-				Logger.v(null, url + ": " + String.valueOf(imageBytes.length) + " bytes received");
-				bitmap = BitmapManager.getInstance().bitmapForByteArraySampled(imageBytes, null, null);
+				serviceResponse.data = BitmapManager.getInstance().byteArraySampled((byte[]) serviceResponse.data, null, null, serviceResponse);
 			}
 
-			if (bitmap == null) {
-				Logger.w(null, url + ": stream could not be decoded to a bitmap");
-				return new ServiceResponse(ResponseCode.FAILED, null, new IllegalStateException("STREAM could not be decoded to a bitmap: " + url));				
+			if (serviceResponse.data == null) {
+				return new ServiceResponse(ResponseCode.FAILED, null, new IllegalStateException("Bytes could not be decoded to a bitmap: " + url));
 			}
-			
-			serviceResponse.data = bitmap;
 		}
 		return serviceResponse;
 	}
@@ -208,13 +193,11 @@ public class BitmapLoader {
 						Bitmap bitmap = null;
 
 						long startTime = System.nanoTime();
-						float estimatedTime = System.nanoTime();
 						/*
-						 * Gets bitmap at native size and downsamples if necessary to stay within the max
-						 * size in
+						 * Gets bitmap at native size and downsamples if necessary to stay within the max size in
 						 * memory.
 						 */
-						serviceResponse = downloadAsByteArray(bitmapRequest.getBitmapUri(), new RequestListener() {
+						serviceResponse = downloadAsByteArraySampled(bitmapRequest.getBitmapUri(), new RequestListener() {
 
 							@Override
 							public void onProgressChanged(int progress) {
@@ -228,23 +211,22 @@ public class BitmapLoader {
 							}
 						});
 
+						float finishTime = System.nanoTime();
 						if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 							if (bitmapRequest.getImageView() == null || bitmapRequest.getImageView().getTag() == null
 									|| bitmapRequest.getImageView().getTag().equals(bitmapRequest.getBitmapUri())) {
 
-								Logger.v(BitmapLoader.this,
-										bitmapRequest.getBitmapUri() + ": Download finished: " + String.valueOf(estimatedTime / 1000000)
-												+ "ms");
+								String imageUri = bitmapRequest.getBitmapUri();
 
-								estimatedTime = System.nanoTime() - startTime;
-								startTime = System.nanoTime();
+								Logger.v(BitmapLoader.this, imageUri + ": Download finished: " + String.valueOf((int) ((finishTime - startTime) / 1000000))
+										+ "ms");
+								Logger.v(BitmapLoader.this, "Download: encoding = " + serviceResponse.contentEncoding
+										+ ", type = " + serviceResponse.contentType
+										+ ", length = " + serviceResponse.contentLength
+										+ ", length decoded = " + serviceResponse.contentLength
+										);
 
-								estimatedTime = System.nanoTime() - startTime;
-								startTime = System.nanoTime();
-								Logger.v(BitmapLoader.this,
-										bitmapRequest.getBitmapUri() + ": post processing: " + String.valueOf(estimatedTime / 1000000)
-												+ "ms");
 								/*
 								 * Stuff it into the cache. Overwrites if it already exists. This is a perf hit in
 								 * the process because writing files is slow.
@@ -252,7 +234,7 @@ public class BitmapLoader {
 								 * We aren't doing anything to shrink the raw size of the image before storing it to
 								 * disk. We also aren't handling the case where the image format is gif.
 								 */
-								Logger.v(BitmapLoader.this, bitmapRequest.getBitmapUri() + ": Pushing into cache...");
+								Logger.v(BitmapLoader.this, imageUri + ": Pushing into cache...");
 								bitmap = BitmapManager.getInstance().putImageBytes(bitmapRequest.getBitmapUri(), (byte[]) serviceResponse.data,
 										bitmapRequest.getBitmapSize());
 

@@ -54,16 +54,19 @@ public class CandigramEdit extends BaseEntityEdit {
 	private Spinner		mSpinnerType;
 	private Spinner		mSpinnerRange;
 	private Spinner		mSpinnerDuration;
+	private Spinner		mSpinnerLifetime;
 	private Spinner		mSpinnerHops;
 
 	private TextView	mHintType;
 	private TextView	mHintRange;
 	private TextView	mHintDuration;
+	private TextView	mHintLifetime;
 	private TextView	mHintHops;
 
 	private SpinnerData	mSpinnerTypeData;
 	private SpinnerData	mSpinnerRangeData;
 	private SpinnerData	mSpinnerDurationData;
+	private SpinnerData	mSpinnerLifetimeData;
 	private SpinnerData	mSpinnerHopsData;
 
 	private CheckBox	mParked;
@@ -81,22 +84,25 @@ public class CandigramEdit extends BaseEntityEdit {
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
 		mSpinnerItem = getThemeTone().equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
-		mParked = (CheckBox) findViewById(R.id.chk_parked);
-		mHintParked = (TextView) findViewById(R.id.hint_parked);
+		mParked = (CheckBox) findViewById(R.id.chk_stopped);
+		mHintParked = (TextView) findViewById(R.id.hint_stopped);
 
-		mSpinnerTypeData = Candigrams.getSpinnerData(this, PropertyType.type);
+		mSpinnerTypeData = Candigrams.getSpinnerData(this, PropertyType.TYPE);
 		mSpinnerRangeData = Candigrams.getSpinnerData(this, PropertyType.RANGE);
 		mSpinnerDurationData = Candigrams.getSpinnerData(this, PropertyType.DURATION);
+		mSpinnerLifetimeData = Candigrams.getSpinnerData(this, PropertyType.LIFETIME);
 		mSpinnerHopsData = Candigrams.getSpinnerData(this, PropertyType.HOPS);
 
 		mHintType = (TextView) findViewById(R.id.hint_type);
 		mHintRange = (TextView) findViewById(R.id.hint_range);
 		mHintDuration = (TextView) findViewById(R.id.hint_duration);
+		mHintLifetime = (TextView) findViewById(R.id.hint_lifetime);
 		mHintHops = (TextView) findViewById(R.id.hint_hops);
 
 		mSpinnerType = (Spinner) findViewById(mEditing ? R.id.spinner_type : R.id.wizard_spinner_type);
 		mSpinnerRange = (Spinner) findViewById(R.id.spinner_range);
 		mSpinnerDuration = (Spinner) findViewById(R.id.spinner_duration);
+		mSpinnerLifetime = (Spinner) findViewById(R.id.spinner_lifetime);
 		mSpinnerHops = (Spinner) findViewById(R.id.spinner_hops);
 
 		mSpinnerType.setAdapter(new SpinnerAdapter(this, mSpinnerItem, mSpinnerTypeData.getEntries(), R.string.candigram_type_hint));
@@ -113,10 +119,17 @@ public class CandigramEdit extends BaseEntityEdit {
 						if (type.equals(Constants.TYPE_APP_TOUR)) {
 							findViewById(R.id.help_touring).setVisibility(View.VISIBLE);
 							findViewById(R.id.help_bouncing).setVisibility(View.GONE);
+							findViewById(R.id.help_expanding).setVisibility(View.GONE);
 						}
-						else {
+						else if (type.equals(Constants.TYPE_APP_BOUNCE)) {
 							findViewById(R.id.help_touring).setVisibility(View.GONE);
 							findViewById(R.id.help_bouncing).setVisibility(View.VISIBLE);
+							findViewById(R.id.help_expanding).setVisibility(View.GONE);
+						}
+						else if (type.equals(Constants.TYPE_APP_EXPAND)) {
+							findViewById(R.id.help_touring).setVisibility(View.GONE);
+							findViewById(R.id.help_bouncing).setVisibility(View.GONE);
+							findViewById(R.id.help_expanding).setVisibility(View.VISIBLE);
 						}
 						findViewById(R.id.type_image_next).setVisibility(View.VISIBLE);
 					}
@@ -126,6 +139,8 @@ public class CandigramEdit extends BaseEntityEdit {
 					}
 
 					findViewById(R.id.duration_holder).setVisibility(type.equals(Constants.TYPE_APP_TOUR) ? View.VISIBLE : View.GONE);
+					findViewById(R.id.hops_holder).setVisibility(type.equals(Constants.TYPE_APP_EXPAND) ? View.GONE : View.VISIBLE);
+					findViewById(R.id.lifetime_holder).setVisibility(type.equals(Constants.TYPE_APP_EXPAND) ? View.VISIBLE : View.GONE);
 
 					if (candigram.type == null || !candigram.type.equals(type)) {
 						if (!mFirstDraw) {
@@ -186,6 +201,29 @@ public class CandigramEdit extends BaseEntityEdit {
 			public void onNothingSelected(AdapterView<?> parent) {}
 		});
 
+		mSpinnerLifetime.setAdapter(new SpinnerAdapter(this, mSpinnerItem, mSpinnerLifetimeData.getEntries(), R.string.candigram_lifetime_hint));
+		mSpinnerLifetime.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+				if (position < mSpinnerLifetime.getAdapter().getCount()) {
+					Candigram candigram = (Candigram) mEntity;
+					mHintLifetime.setText(mSpinnerLifetimeData.getDescriptions().get(position));
+					mHintLifetime.setVisibility(View.VISIBLE);
+					if (candigram.lifetime == null
+							|| candigram.lifetime.intValue() != Integer.parseInt(mSpinnerLifetimeData.getEntryValues().get(position))) {
+						if (!mFirstDraw && findViewById(R.id.lifetime_holder).getVisibility() == View.VISIBLE) {
+							mDirty = true;
+						}
+					}
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {}
+		});
+
 		mSpinnerHops.setAdapter(new SpinnerAdapter(this, mSpinnerItem, mSpinnerHopsData.getEntries(), R.string.candigram_hops_hint));
 		mSpinnerHops.setOnItemSelectedListener(new OnItemSelectedListener() {
 
@@ -215,8 +253,8 @@ public class CandigramEdit extends BaseEntityEdit {
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 					Candigram candigram = (Candigram) mEntity;
-					mHintParked.setText(getString(isChecked ? R.string.candigram_parked_true_help : R.string.candigram_parked_false_help));
-					if (candigram.parked != isChecked) {
+					mHintParked.setText(getString(isChecked ? R.string.candigram_stopped_true_help : R.string.candigram_stopped_false_help));
+					if (candigram.stopped != isChecked) {
 						if (!mFirstDraw) {
 							mDirty = true;
 						}
@@ -273,8 +311,8 @@ public class CandigramEdit extends BaseEntityEdit {
 		Candigram candigram = (Candigram) mEntity;
 
 		if (mParked != null) {
-			mParked.setChecked(candigram.parked);
-			mHintParked.setText(getString(candigram.parked ? R.string.candigram_parked_true_help : R.string.candigram_parked_false_help));
+			mParked.setChecked(candigram.stopped);
+			mHintParked.setText(getString(candigram.stopped ? R.string.candigram_stopped_true_help : R.string.candigram_stopped_false_help));
 		}
 
 		if (mSpinnerType != null) {
@@ -321,6 +359,20 @@ public class CandigramEdit extends BaseEntityEdit {
 				mSpinnerDuration.setSelection(Candigrams.DURATION_DEFAULT_POSITION);
 			}
 		}
+		if (mSpinnerLifetime != null) {
+			if (candigram.lifetime != null) {
+				int i = 0;
+				for (String lifetime : mSpinnerLifetimeData.getEntryValues()) {
+					if (Integer.parseInt(lifetime) == candigram.lifetime.intValue()) {
+						mSpinnerLifetime.setSelection(i);
+					}
+					i++;
+				}
+			}
+			else {
+				mSpinnerLifetime.setSelection(Candigrams.LIFETIME_DEFAULT_POSITION);
+			}
+		}
 		if (mSpinnerHops != null) {
 			if (candigram.hopsMax != null) {
 				int i = 0;
@@ -358,7 +410,7 @@ public class CandigramEdit extends BaseEntityEdit {
 						, null, null, null, null);
 				return;
 			}
-			else if (TextUtils.isEmpty(((TextView)findViewById(R.id.name)).getText())) {
+			else if (TextUtils.isEmpty(((TextView) findViewById(R.id.name)).getText())) {
 				Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 						, null
 						, getResources().getString(R.string.error_missing_candigram_name)
@@ -509,15 +561,17 @@ public class CandigramEdit extends BaseEntityEdit {
 			return false;
 		}
 
-		if (candigram.hopsMax == null) {
-			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
-					, null
-					, getResources().getString(R.string.error_missing_candigram_hops)
-					, null
-					, this
-					, android.R.string.ok
-					, null, null, null, null);
-			return false;
+		if (candigram.type != null && !candigram.type.equals(Constants.TYPE_APP_EXPAND)) {
+			if (candigram.hopsMax == null) {
+				Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+						, null
+						, getResources().getString(R.string.error_missing_candigram_hops)
+						, null
+						, this
+						, android.R.string.ok
+						, null, null, null, null);
+				return false;
+			}
 		}
 
 		if (candigram.type != null && candigram.type.equals(Constants.TYPE_APP_TOUR)) {
@@ -551,18 +605,28 @@ public class CandigramEdit extends BaseEntityEdit {
 		}
 
 		if (mSpinnerHops != null && mSpinnerHops.getSelectedItemPosition() < mSpinnerHopsData.getEntryValues().size()) {
-			candigram.hopsMax = Integer.parseInt(mSpinnerHopsData.getEntryValues().get(mSpinnerHops.getSelectedItemPosition()));
+			candigram.hopsMax = null;
+			if (!candigram.type.equals(Constants.TYPE_APP_EXPAND)) {
+				candigram.hopsMax = Integer.parseInt(mSpinnerHopsData.getEntryValues().get(mSpinnerHops.getSelectedItemPosition()));
+			}
 		}
 
 		if (mSpinnerDuration != null && mSpinnerDuration.getSelectedItemPosition() < mSpinnerDurationData.getEntryValues().size()) {
 			candigram.duration = null;
-			if (candigram.type.equals("tour")) {
+			if (candigram.type.equals(Constants.TYPE_APP_TOUR)) {
 				candigram.duration = Integer.parseInt(mSpinnerDurationData.getEntryValues().get(mSpinnerDuration.getSelectedItemPosition()));
 			}
 		}
 
+		if (mSpinnerLifetime != null && mSpinnerLifetime.getSelectedItemPosition() < mSpinnerLifetimeData.getEntryValues().size()) {
+			candigram.lifetime = null;
+			if (candigram.type.equals(Constants.TYPE_APP_EXPAND)) {
+				candigram.lifetime = Integer.parseInt(mSpinnerLifetimeData.getEntryValues().get(mSpinnerLifetime.getSelectedItemPosition()));
+			}
+		}
+
 		if (mParked != null) {
-			candigram.parked = mParked.isChecked();
+			candigram.stopped = mParked.isChecked();
 		}
 
 		/*

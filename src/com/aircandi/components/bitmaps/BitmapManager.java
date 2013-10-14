@@ -1,5 +1,6 @@
 package com.aircandi.components.bitmaps;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
@@ -420,6 +421,89 @@ public class BitmapManager {
 		}
 
 		return bitmapSampled;
+	}
+
+	/**
+	 * Decode byte array into a bitmap. The byte array is sampled if needed to keep the memory size of the bitmap
+	 * approximately less than or equal to IMAGE_MEMORY_BYTES_MAX. If rotation != 0 then the image is rotated after it
+	 * is decoded.
+	 * 
+	 * @param imageBytes
+	 * @param rotation
+	 * @return
+	 */
+	@SuppressWarnings("ucd")
+	public byte[] byteArraySampled(byte[] imageBytes, Integer size, Integer rotation, ServiceResponse serviceResponse) {
+
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		options.inPurgeable = true;
+		options.inPreferredConfig = Constants.IMAGE_CONFIG_DEFAULT;
+
+		/* Initial decode is just to get the bitmap dimensions */
+		BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
+
+		final int width = options.outWidth;
+		final int height = options.outHeight;
+
+		if (serviceResponse != null) {
+			serviceResponse.contentWidth = options.outWidth;
+			serviceResponse.contentHeight = options.outHeight;
+		}
+
+		int scale = 1;
+		if (size != null) {
+			if (width > size && height > size) {
+				scale = Math.min(width / size, height / size);
+			}
+		}
+		else {
+			final int imageMemorySize = UI.getImageMemorySize(height, width, true);
+			if (imageMemorySize > Constants.IMAGE_MEMORY_BYTES_MAX) {
+				scale = Math.round(((float) imageMemorySize / (float) Constants.IMAGE_MEMORY_BYTES_MAX) / 2f);
+			}
+		}
+
+		/*
+		 * If no scaling required then we just pass the byte array through otherwise
+		 * we scale it using a bitmap and then convert the bitmap back to a byte array.
+		 */
+		if (scale != 1) {
+			options.inSampleSize = scale;
+			options.inJustDecodeBounds = false;
+			Bitmap bitmapSampled = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
+
+			if (bitmapSampled == null) {
+				Logger.w(this, "Byte array could not be decoded to a bitmap");
+				return null;
+			}
+
+			if (serviceResponse != null) {
+				serviceResponse.contentWidthScaled = bitmapSampled.getWidth();
+				serviceResponse.contentHeightScaled = bitmapSampled.getHeight();
+				Logger.v(this, "Byte array needed scaling: width before = "
+						+ String.valueOf(serviceResponse.contentWidth)
+						+ ", width after = "
+						+ String.valueOf(serviceResponse.contentWidthScaled));
+				Logger.v(this, "Byte array needed scaling: height before = "
+						+ String.valueOf(serviceResponse.contentHeight)
+						+ ", height after = "
+						+ String.valueOf(serviceResponse.contentHeightScaled));
+			}
+
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			bitmapSampled.compress(Bitmap.CompressFormat.PNG, 100, outputStream); // should be lossless.
+			byte[] byteArraySampled = outputStream.toByteArray();
+			
+			Logger.v(this, "Byte array needed scaling: size before = "
+					+ String.valueOf(imageBytes.length)
+					+ ", size after = "
+					+ String.valueOf(byteArraySampled.length));
+
+			return byteArraySampled;
+		}
+
+		return imageBytes;
 	}
 
 	/**

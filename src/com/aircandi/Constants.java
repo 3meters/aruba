@@ -97,6 +97,12 @@ public final class Constants {
 	 * Sampling by 4 produces 640x480. Assumes four channel ARGB including alpha.
 	 */
 	public static final int		IMAGE_MEMORY_BYTES_MAX						= 4915200;																					// 4 megapixels
+	/*
+	 * We can choke processing super large images before we ever get a chance to downsample plus they
+	 * take forever and eat the users data allowance.
+	 */
+	public static final int		IMAGE_DOWNLOAD_BYTES_MAX					= 4915200;																					// 4 megapixels
+	public static final int		IMAGE_DOWNLOAD_BYTES_MIN					= 128;																					// 4 megapixels
 	public static final Config	IMAGE_CONFIG_DEFAULT						= Config.ARGB_8888;
 	/*
 	 * Consistent with 5 megapixel sampled by two.
@@ -157,6 +163,7 @@ public final class Constants {
 	public static final String	TYPE_APP_PLACE								= "place";																					//$NON-NLS-1$
 	public static final String	TYPE_APP_USER								= "user";																					//$NON-NLS-1$
 	public static final String	TYPE_APP_BOUNCE								= "bounce";																				//$NON-NLS-1$
+	public static final String	TYPE_APP_EXPAND								= "expand";																				//$NON-NLS-1$
 	public static final String	TYPE_APP_TOUR								= "tour";																					//$NON-NLS-1$
 
 	public static final String	TYPE_LINK_PROXIMITY							= "proximity";																				//$NON-NLS-1$

@@ -169,6 +169,7 @@ public class UI {
 							if (statusCode == null) {
 								if (serviceResponse.exception != null) {
 									Logger.w(AirImageView.class, "Exception trying to download image: " + serviceResponse.exception.getClass().getSimpleName());
+									Errors.handleError(null, serviceResponse);
 								}
 							}
 							else {
@@ -183,6 +184,7 @@ public class UI {
 									Logger.w(AirImageView.class, "Status code: " + String.valueOf(statusCode));
 									if (serviceResponse.exception != null) {
 										Logger.w(AirImageView.class, "Exception: " + serviceResponse.exception.getClass().getSimpleName());
+										Errors.handleError(null, serviceResponse);
 									}
 								}
 							}

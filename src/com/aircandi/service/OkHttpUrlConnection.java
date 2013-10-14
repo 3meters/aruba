@@ -22,6 +22,7 @@ import javax.net.ssl.SSLContext;
 import android.os.Build;
 
 import com.aircandi.Aircandi;
+import com.aircandi.Constants;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -107,10 +108,10 @@ public class OkHttpUrlConnection extends BaseConnection {
 			 * Execute the request
 			 */
 			if (request.requestType == RequestType.GET) {
-				inputStream = get(connection);
+				inputStream = get(connection, serviceResponse);
 			}
 			else {
-				inputStream = post(connection, request.requestBody);
+				inputStream = post(connection, request.requestBody, serviceResponse);
 			}
 
 			if (stopwatch != null) {
@@ -130,9 +131,16 @@ public class OkHttpUrlConnection extends BaseConnection {
 					String contentLengthField = connection.getHeaderField("Content-Length");
 					if (contentLengthField != null) {
 						contentLength = Long.parseLong(contentLengthField);
+						serviceResponse.contentLength = contentLength;
+						if (request.responseFormat == ResponseFormat.BYTES && contentLength > Constants.IMAGE_DOWNLOAD_BYTES_MAX) {
+							return new ServiceResponse(ResponseCode.FAILED, null, new ImageSizeException());
+						}
+						else if (request.responseFormat == ResponseFormat.BYTES && contentLength < Constants.IMAGE_DOWNLOAD_BYTES_MIN) {
+							return new ServiceResponse(ResponseCode.FAILED, null, new ImageUnusableException());
+						}
 					}
 
-					Object response = handleResponse(inputStream, request, contentLength, serviceRequest.getRequestListener());
+					Object response = handleResponse(inputStream, request, serviceResponse, serviceRequest.getRequestListener());
 
 					if (stopwatch != null) {
 						stopwatch.segmentTime("Http service: response content captured");
@@ -235,9 +243,12 @@ public class OkHttpUrlConnection extends BaseConnection {
 		}
 	}
 
-	private Object handleResponse(InputStream inputStream, AirHttpRequest airHttpRequest, Long contentLength, RequestListener listener) throws IOException {
+	private Object handleResponse(InputStream inputStream, AirHttpRequest airHttpRequest, ServiceResponse serviceResponse, RequestListener listener)
+			throws IOException {
 
 		if (airHttpRequest.responseFormat == ResponseFormat.BYTES) {
+			BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+			
 			// this dynamically extends to take the bytes you read
 			ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 
@@ -247,18 +258,17 @@ public class OkHttpUrlConnection extends BaseConnection {
 
 			// we need to know how may bytes were read to write them to the byteBuffer
 			int len = 0;
-			while ((len = inputStream.read(buffer)) != -1) {
+			while ((len = bufferedInputStream.read(buffer)) != -1) {
 				byteBuffer.write(buffer, 0, len);
-				if (listener != null && contentLength != null) {
-					listener.onProgressChanged(((int) (len * 100 / contentLength)));
+
+				if (listener != null && serviceResponse.contentLength != null && serviceResponse.contentLength > 0) {
+					listener.onProgressChanged(((int) (len * 100 / serviceResponse.contentLength)));
 				}
 			}
 
 			// and then we can return your byte array.
+			serviceResponse.contentLength = (long) byteBuffer.size();
 			return byteBuffer.toByteArray();
-		}
-		else if (airHttpRequest.responseFormat == ResponseFormat.STREAM) {
-			return inputStream;
 		}
 		else if (airHttpRequest.responseFormat == ResponseFormat.NONE) {
 			return null;
@@ -272,6 +282,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 				stringBuilder.append(line + System.getProperty("line.separator"));
 			}
 			bufferedReader.close();
+			serviceResponse.contentLength = (long) stringBuilder.length();
 
 			return stringBuilder.toString();
 		}
@@ -281,16 +292,16 @@ public class OkHttpUrlConnection extends BaseConnection {
 	// Post
 	// --------------------------------------------------------------------------------------------
 
-	private InputStream post(HttpURLConnection connection, String string) throws IOException {
+	private InputStream post(HttpURLConnection connection, String string, ServiceResponse serviceResponse) throws IOException {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-			return post_Gingerbread(connection, string);
+			return post_Gingerbread(connection, string, serviceResponse);
 		}
 		else {
-			return post_Froyo(connection, string);
+			return post_Froyo(connection, string, serviceResponse);
 		}
 	}
 
-	private InputStream post_Gingerbread(HttpURLConnection connection, String string) throws IOException {
+	private InputStream post_Gingerbread(HttpURLConnection connection, String string, ServiceResponse serviceResponse) throws IOException {
 		/*
 		 * Gingerbread and above support Gzip natively.
 		 */
@@ -316,14 +327,15 @@ public class OkHttpUrlConnection extends BaseConnection {
 				inputStream = connection.getErrorStream();
 			}
 
+			serviceResponse.contentType = connection.getContentType();
 			if (connection.getContentEncoding() != null && connection.getContentEncoding().equals("gzip")) {
-				inputStream = new BufferedInputStream(new GZIPInputStream(inputStream), 8 * 1024);
+				serviceResponse.contentEncoding = "gzip";
+				return new GZIPInputStream(inputStream);
 			}
 			else {
-				inputStream = new BufferedInputStream(inputStream, 8 * 1024);
+				serviceResponse.contentEncoding = "none";
+				return inputStream;
 			}
-
-			return inputStream;
 		}
 		catch (IOException exception) {
 			throw exception;
@@ -338,7 +350,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 		}
 	}
 
-	private InputStream post_Froyo(HttpURLConnection connection, String string) throws IOException {
+	private InputStream post_Froyo(HttpURLConnection connection, String string, ServiceResponse serviceResponse) throws IOException {
 		/*
 		 * Gingerbread and above support Gzip natively.
 		 */
@@ -358,7 +370,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 			outputStream.write(data);
 			outputStream.flush();
 			outputStream.close();
-			
+
 			if ((Integer) connection.getResponseCode() / 100 == HttpURLConnection.HTTP_OK / 100) {
 				inputStream = connection.getInputStream();
 			}
@@ -387,11 +399,14 @@ public class OkHttpUrlConnection extends BaseConnection {
 				}
 			}
 
+			serviceResponse.contentType = connection.getContentType();
 			if (useGzip) {
-				return new BufferedInputStream(new GZIPInputStream(inputStream), 8 * 1024);
+				serviceResponse.contentEncoding = "gzip";
+				return new GZIPInputStream(inputStream);
 			}
 			else {
-				return new BufferedInputStream(inputStream, 8 * 1024);
+				serviceResponse.contentEncoding = "none";
+				return inputStream;
 			}
 		}
 		catch (IOException exception) {
@@ -411,34 +426,35 @@ public class OkHttpUrlConnection extends BaseConnection {
 	// Get
 	// --------------------------------------------------------------------------------------------
 
-	private InputStream get(HttpURLConnection connection) throws IOException {
+	private InputStream get(HttpURLConnection connection, ServiceResponse serviceResponse) throws IOException {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-			return get_Gingerbread(connection);
+			return get_Gingerbread(connection, serviceResponse);
 		}
 		else {
-			return get_Froyo(connection);
+			return get_Froyo(connection, serviceResponse);
 		}
 	}
 
-	private InputStream get_Gingerbread(HttpURLConnection connection) throws IOException {
+	private InputStream get_Gingerbread(HttpURLConnection connection, ServiceResponse serviceResponse) throws IOException {
 
 		InputStream inputStream = connection.getInputStream();
 
+		serviceResponse.contentType = connection.getContentType();
 		if (connection.getContentEncoding() != null && connection.getContentEncoding().equals("gzip")) {
-			inputStream = new BufferedInputStream(new GZIPInputStream(inputStream), 8 * 1024);
+			serviceResponse.contentEncoding = "gzip";
+			return new GZIPInputStream(inputStream);
 		}
 		else {
-			inputStream = new BufferedInputStream(inputStream, 8 * 1024);
+			serviceResponse.contentEncoding = "none";
+			return inputStream;
 		}
-
-		return inputStream;
 	}
 
-	private InputStream get_Froyo(HttpURLConnection connection) throws IOException {
+	private InputStream get_Froyo(HttpURLConnection connection, ServiceResponse serviceResponse) throws IOException {
 		boolean useGzip = false;
 		connection.setRequestProperty("Accept-Encoding", "gzip");
 
-		InputStream in = connection.getInputStream();
+		InputStream inputStream = connection.getInputStream();
 
 		final Map<String, List<String>> headers = connection.getHeaderFields();
 		// This is a map, but we can't assume the key we're looking for
@@ -461,11 +477,14 @@ public class OkHttpUrlConnection extends BaseConnection {
 			}
 		}
 
+		serviceResponse.contentType = connection.getContentType();
 		if (useGzip) {
-			return new BufferedInputStream(new GZIPInputStream(in), 8 * 1024);
+			serviceResponse.contentEncoding = "gzip";
+			return new GZIPInputStream(inputStream);
 		}
 		else {
-			return new BufferedInputStream(in, 8 * 1024);
+			serviceResponse.contentEncoding = "none";
+			return inputStream;
 		}
 	}
 

@@ -72,9 +72,7 @@
     <string name="help_radar_add_places">Use the action bar to create and share custom places</string>
     <string name="help_place_tune">Tune places to make them better</string>
     <string name="help_place_add">Use the action bar to add pictures and comments</string>
-    <string name="help_candigram_touring">Touring candigrams travel place to place gathering pictures and comments as they go! Watch this candigram and follow it on it\'s tour.</string>
-    <string name="help_candigram_bouncing">A kick sends a bouncing candigram traveling to a new place. Add a picture or comment and watch this candigram go!</string>
-
+    
     <!-- Testing (used for view previews) -->
 
     <string name="dummy_title">Zoka Coffee Roaster &amp; Tea Company</string>
@@ -92,6 +90,7 @@
     <string name="dummy_number">10</string>
     <string name="dummy_like_stat">12 likes</string>
     <string name="dummy_watch_stat">8 watching</string>
+    <string name="dummy_place_stat">28 places</string>
     <string name="dummy_timesince">10 minutes ago</string>
     <string name="dummy_type_candigram">bouncing</string>
     <string name="dummy_datetime">December 23 at 10:12am</string>
@@ -149,12 +148,6 @@
     <string name="alert_source_delete_message_multiple">Are you sure you want to delete these links?</string>
     <string name="alert_notifications_delete_title">Confirm clear</string>
     <string name="alert_notifications_delete_message">Are you sure you want to clear all notifications?</string>
-    
-    <!-- Alerts: kicked candigram -->
-    
-    <string name="alert_kicked_candigram">Bouncing candigram</string>
-    <string name="alert_kicked_follow">Follow</string>
-    <string name="alert_kicked">Kick!</string>
     
     <!-- Errors: service responses -->
 
@@ -222,6 +215,8 @@
     <!-- Errors: other -->
 
     <string name="error_update_required">You need to sign in to enable internet access</string>
+    <string name="error_image_too_large">Photo is too large for the current device.</string>
+    <string name="error_image_unusable">Photo is unusable.</string>
     
     <!-- Toast -->
 
@@ -321,9 +316,7 @@
     
     <!-- EntityForm -->
 
-    <string name="button_tune">tune</string>
-    <string name="button_kick">kick</string>
-    
+    <string name="button_tune">tune</string>    
     <string name="section_place_shortcuts_applinks">links</string>
     
     <string name="section_places_more">more places</string>
@@ -338,8 +331,10 @@
     
     <string name="stats_label_likes">like</string>    
     <string name="stats_label_watching">watching</string>    
+    <string name="stats_label_places">place</string>    
     <string name="stats_label_likes_plural">likes</string>    
     <string name="stats_label_watching_plural">watching</string>    
+    <string name="stats_label_places_plural">places</string>    
     
     <!-- UserForm -->
 
@@ -412,7 +407,7 @@
     <string name="form_label_password_old">old password</string>
     <string name="form_label_email">email</string>
     <string name="form_label_locked">locked</string>
-    <string name="form_label_parked">parked</string>
+    <string name="form_label_stopped">parked</string>
     <string name="form_label_do_not_track">browse in private</string>
     <string name="tuning_section_banner">great banner</string>
     <string name="tuning_section_tune">lock it in</string>
@@ -420,38 +415,63 @@
     <string name="form_label_tuning_banner_no_name">Is there a picture that would make a better banner for this place? Search, browse or use the camera.</string>
     <string name="form_label_tuning_banner_name">Is there a picture that would make a better banner for %1$s? Search, browse or use the camera.</string>
     <string name="form_label_tuning_tune_no_name">If you are currently at the place you are browsing, make Aircandi better by tuning the place for faster and more accurate discovery.</string>
-    <string name="form_label_tuning_tune_name">If you are currently at %1$s, make Aircandi better by tuning for faster and more accurate discovery.</string>
+    <string name="form_label_tuning_tune_name">If you are currently at <i>%1$s</i>, make Aircandi better by tuning for faster and more accurate discovery.</string>
     <string name="form_label_tuning_edit_no_name">Update place details like the address or customize links.</string>
     <string name="form_label_tuning_edit_name">Update place details for %1$s like the address or customize links.</string>
     
     <!-- Candigrams -->
     
-    <string name="candigram_label_capture">allow capture</string>
-    
     <string name="candigram_type_hint">select candigram type</string>
     <string name="candigram_range_hint">travel range</string>
     <string name="candigram_duration_hint">length of visit</string>
+    <string name="candigram_lifetime_hint">time before retirement</string>
     <string name="candigram_hops_hint">number of visits</string>
     
     <string name="candigram_type_help">What type of candigram this is</string>
     <string name="candigram_range_help">How far this candigram can go when it travels</string>
     <string name="candigram_duration_help">How long a touring candigram stays before traveling to a new place</string>
+    <string name="candigram_lifetime_help">How long before a repeating candigram is retired</string>
     <string name="candigram_hops_help">How many places a candigram can travel to</string>
     
     <string name="section_candigram_shortcuts_places">places visited so far</string>
+    <string name="section_candigram_shortcuts_places_expand">places</string>
     <string name="section_candigram_shortcuts_applinks">pictures and comments</string>
     <string name="section_candigram_shortcuts_applinks_can_add">add a picture or comment</string>
-    <string name="candigram_wizard_type">Candigrams travel place to place gathering pictures and comments as they go. Select the type of candigram you want to start!</string>
+    <string name="candigram_wizard_type">Candigrams travel to places gathering pictures and comments as they go. Select the type of candigram you want to start!</string>
     <string name="candigram_wizard_content">Add a picture, subject or message to your candigram.</string>
     <string name="candigram_wizard_settings">Choose how your candigram travels and what other aircandi users can do with it.</string>
     
     <string name="candigram_button_finish">start</string>
     <string name="candigram_type_tour_verbose">touring</string>
+    <string name="candigram_type_expand_verbose">repeating</string>
     <string name="candigram_type_bounce_verbose">bouncing</string>
     <string name="candigram_label_place">currently at:</string>
 
-    <string name="candigram_parked_true_help">The candigram is parked</string>
-    <string name="candigram_parked_false_help">The candigram is free to travel</string>
+    <string name="candigram_stopped_true_help">The candigram is parked</string>
+    <string name="candigram_stopped_false_help">The candigram is free to travel</string>
+    <string name="candigram_stopped_expand_true_help">The candigram is retired</string>
+    <string name="candigram_stopped_expand_false_help">The candigram is active</string>
+    
+    <string name="button_candigram_bounce">kick</string>
+    <string name="button_candigram_expand">repeat</string>
+    
+    <string name="help_candigram_touring">Touring candigrams travel place to place gathering pictures and comments as they go! Watch this candigram and follow it on it\'s tour.</string>
+    <string name="help_candigram_bouncing">A kick sends a bouncing candigram traveling to a new place. Add a picture or comment and watch this candigram go!</string>
+    <string name="help_candigram_expanding">Repeating candigrams expand to more places when they get repeated. Add a picture or comment and watch it grow!</string>
+
+    <!-- Alerts: kicked candigram -->
+    
+    <string name="alert_candigram_bounce">Bouncing candigram</string>
+    <string name="alert_message_candigram_bounce">This candigram will be kicked to:</string>
+    <string name="alert_button_bounce_follow">Follow</string>
+    <string name="alert_button_bounce">Kick!</string>
+    
+    <!-- Alerts: promoted candigram -->
+    
+    <string name="alert_promoted_candigram">Repeating candigram</string>
+    <string name="alert_message_candigram_expand">This candigram will be repeated to:</string>
+    <string name="alert_button_expand_follow">Follow</string>
+    <string name="alert_button_expand">Repeat!</string>
     
     <!-- Invite -->
     

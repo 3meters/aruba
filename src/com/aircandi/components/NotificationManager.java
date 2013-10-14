@@ -112,7 +112,7 @@ public class NotificationManager {
 				if (!TextUtils.isEmpty(registrationId)) {
 
 					Logger.i(this, "GCM: Unregistering device with Aircandi notification service");
-					
+
 					Device device = new Device(null, registrationId);
 					ModelResult result = EntityManager.getInstance().registerDevice(false, device);
 
@@ -240,7 +240,7 @@ public class NotificationManager {
 			BitmapManager.getInstance().masterFetch(bitmapRequest);
 		}
 		else {
-			mNotificationManager.notify(airNotification.action, 0, builder.build());
+			mNotificationManager.notify(getTag(airNotification), 0, builder.build());
 		}
 	}
 
@@ -267,7 +267,7 @@ public class NotificationManager {
 
 							builder.setStyle(style);
 
-							mNotificationManager.notify(airNotification.action, 0, builder.build());
+							mNotificationManager.notify(getTag(airNotification), 0, builder.build());
 						}
 					}
 				});
@@ -283,7 +283,7 @@ public class NotificationManager {
 
 		builder.setStyle(style);
 
-		mNotificationManager.notify(airNotification.action, 0, builder.build());
+		mNotificationManager.notify(getTag(airNotification), 0, builder.build());
 	}
 
 	public void cancelNotification(String tag) {
@@ -315,6 +315,23 @@ public class NotificationManager {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// Methods
+	// --------------------------------------------------------------------------------------------
+
+	public String getTag(AirNotification notification) {
+		if (notification.action.equals(ActionType.EXPAND)) {
+			return Tag.UPDATE;
+		}
+		else if (notification.action.equals(ActionType.MOVE)) {
+			return Tag.UPDATE;
+		}
+		else if (notification.action.equals(ActionType.INSERT)) {
+			return Tag.INSERT;
+		}
+		return Tag.UPDATE;
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// Properties
 	// --------------------------------------------------------------------------------------------	
 
@@ -333,4 +350,9 @@ public class NotificationManager {
 	// --------------------------------------------------------------------------------------------
 	// Classes
 	// --------------------------------------------------------------------------------------------	
+
+	public static class Tag {
+		public static String	INSERT	= "insert";
+		public static String	UPDATE	= "update";
+	}
 }

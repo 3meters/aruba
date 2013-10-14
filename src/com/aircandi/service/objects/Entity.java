@@ -284,7 +284,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return getDefaultPhoto();
 	}
 
-	public Photo getBrokenPhoto() {
+	public static Photo getBrokenPhoto() {
 		String prefix = "resource:img_broken";
 		String source = PhotoSource.resource;
 		Photo photo = new Photo(prefix, null, null, null, source);
@@ -710,7 +710,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		}
 		return schema;
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Copy and serialization
 	// --------------------------------------------------------------------------------------------
