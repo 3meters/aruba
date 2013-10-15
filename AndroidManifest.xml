@@ -192,7 +192,6 @@
         <activity
             android:name="com.aircandi.ui.edit.ApplinkListEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@style/aircandi_theme_dialog_dark"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name="com.aircandi.ui.edit.CommentEdit"

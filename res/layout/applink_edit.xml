@@ -30,7 +30,6 @@
                 android:layout_marginTop="5dp"
                 android:text="@string/dummy_name"
                 android:textColor="@color/accent_blue"
-                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:visibility="visible" />
 
             <Spinner
@@ -91,7 +90,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:text="@string/form_label_applink_edit_name"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="?attr/textColorSecondary" />
 
                 <com.aircandi.ui.widgets.AirEditText
@@ -116,7 +114,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:text="@string/form_label_applink_edit_app_id"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="?attr/textColorSecondary" />
 
                 <com.aircandi.ui.widgets.AirEditText
@@ -141,7 +138,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:text="@string/form_label_applink_edit_app_url"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="?attr/textColorSecondary" />
 
                 <com.aircandi.ui.widgets.AirEditText
@@ -150,9 +146,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="15dp"
                     android:drawableRight="?attr/iconClear"
-                    android:inputType="textMultiLine|textNoSuggestions|textUri"
-                    android:lines="2"
-                    android:maxLines="5" />
+                    android:minHeight="40dp"
+                    android:maxLines="2"                    
+                    android:inputType="textNoSuggestions|textUri" />
             </LinearLayout>
 
             <LinearLayout

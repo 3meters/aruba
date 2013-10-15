@@ -200,13 +200,9 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 				}
 			}
 		}
-		Integer position = 0;
-		for (Entity entity : mEntities) {
-			entity.position = position;
-			position++;
-		}
 		mDirty = true;
-		mList.invalidateViews();
+		rebuildPositions();
+		mAdapter.notifyDataSetChanged();
 	}
 
 	@SuppressWarnings("ucd")
@@ -225,13 +221,9 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 				}
 			}
 		}
-		Integer position = 0;
-		for (Entity entity : mEntities) {
-			entity.position = position;
-			position++;
-		}
 		mDirty = true;
-		mList.invalidateViews();
+		rebuildPositions();
+		mAdapter.notifyDataSetChanged();
 	}
 
 	@SuppressWarnings("ucd")
@@ -263,7 +255,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 								}
 							}
 							mDirty = true;
-							mList.invalidateViews();
+							mAdapter.notifyDataSetChanged();
 						}
 					}
 				}
@@ -277,15 +269,10 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 						if (entityNew != null) {
 							entityNew.checked = false;
 							mEntities.add(entityNew);
-
-							/* Rebuild the position numbering */
-							Integer position = 0;
-							for (Entity entity : mEntities) {
-								entity.position = position;
-								position++;
-							}
+							
 							mDirty = true;
-							mList.invalidateViews();
+							rebuildPositions();
+							mAdapter.notifyDataSetChanged();
 							scrollToBottom();
 						}
 					}
@@ -349,11 +336,12 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							for (int i = mEntities.size() - 1; i >= 0; i--) {
 								if (mEntities.get(i).checked) {
-									mEntities.remove(i);
+									Entity removed = mEntities.remove(i);
+									mAdapter.remove(removed);
 								}
 							}
 							mDirty = true;
-							mList.invalidateViews();
+							mAdapter.notifyDataSetChanged();							
 						}
 					}
 				}
@@ -379,7 +367,15 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 
 	@Override
 	protected void delete() {}
-
+	
+	protected void rebuildPositions() {
+		Integer position = 0;
+		for (Entity entity : mEntities) {
+			entity.position = position;
+			position++;
+		}
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------

@@ -16,6 +16,7 @@
         android:fillViewport="true"
         android:focusable="false"
         android:focusableInTouchMode="false"
+        android:descendantFocusability="blocksDescendants"
         android:visibility="gone" >
 
         <RelativeLayout
@@ -179,8 +180,8 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginTop="8dp"
                     android:orientation="vertical" >
 
                     <com.aircandi.ui.widgets.AirTitle

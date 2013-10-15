@@ -68,7 +68,6 @@
         <attr name="iconAccept" format="reference" />
         <attr name="iconCancel" format="reference" />
         <attr name="iconClear" format="reference" />
-		<attr name="iconSuggest" format="reference" />
 		<attr name="iconStarOn" format="reference" />
 		<attr name="iconStarOff" format="reference" />
 		<attr name="iconHelp" format="reference" />

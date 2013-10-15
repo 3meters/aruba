@@ -7,7 +7,9 @@ public final class ServiceConstants {
 	public static final int		TIMEOUT_SOCKET_QUERIES							= 30000;
 	public static final int		TIMEOUT_SOCKET_UPDATES							= 30000;
 	public static final int		TIMEOUT_CONNECTION								= 20000;
-	public static final int		TIMEOUT_SOURCE_SUGGESTIONS						= 2000;
+	public static final int		TIMEOUT_APPLINK_SEARCH							= 10000;
+	public static final int		TIMEOUT_APPLINK_REFRESH							= 10000;
+	public static final int		TIMEOUT_APPLINK_UPDATE							= 2000;
 
 	public static String		WALLED_GARDEN_URI								= "http://clients3.google.com/generate_204";
 	public static final int		WALLED_GARDEN_SOCKET_TIMEOUT_MS					= 5000;

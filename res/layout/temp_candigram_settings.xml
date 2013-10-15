@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/hint_indent_spinner"
                 android:text="@string/candigram_type_help"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textAppearance="?android:attr/textAppearance"
                 android:textColor="?attr/textColorSecondary"
                 android:visibility="invisible" />
         </LinearLayout>
@@ -70,7 +70,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/hint_indent_spinner"
                 android:text="@string/candigram_range_help"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textAppearance="?android:attr/textAppearance"
                 android:textColor="?attr/textColorSecondary"
                 android:visibility="invisible" />
         </LinearLayout>
@@ -96,7 +96,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/hint_indent_spinner"
                 android:text="@string/candigram_hops_help"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textAppearance="?android:attr/textAppearance"
                 android:textColor="?attr/textColorSecondary"
                 android:visibility="invisible" />
         </LinearLayout>
@@ -123,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/hint_indent_spinner"
                 android:text="@string/candigram_duration_help"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textAppearance="?android:attr/textAppearance"
                 android:textColor="?attr/textColorSecondary"
                 android:visibility="invisible" />
         </LinearLayout>
@@ -150,7 +150,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/hint_indent_spinner"
                 android:text="@string/candigram_lifetime_help"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textAppearance="?android:attr/textAppearance"
                 android:textColor="?attr/textColorSecondary"
                 android:visibility="invisible" />
         </LinearLayout>
@@ -166,14 +166,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:text="@string/form_label_stopped"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:textAppearance="?android:attr/textAppearance" />
 
             <com.aircandi.ui.widgets.AirTextView
                 android:id="@+id/hint_stopped"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/hint_indent_spinner"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textAppearance="?android:attr/textAppearance"
                 android:textColor="?attr/textColorSecondary" />
         </LinearLayout>
 
@@ -188,14 +188,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:text="@string/form_label_locked"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:textAppearance="?android:attr/textAppearance" />
 
             <com.aircandi.ui.widgets.AirTextView
                 android:id="@+id/hint_locked"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/hint_indent_spinner"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textAppearance="?android:attr/textAppearance"
                 android:textColor="?attr/textColorSecondary" />
         </LinearLayout>
     </LinearLayout>

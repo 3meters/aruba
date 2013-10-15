@@ -97,6 +97,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		mScrollView = (ScrollView) findViewById(R.id.scroll_view);
+		mScrollView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 	}
 
 	public void afterDatabind() {}

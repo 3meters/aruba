@@ -17,6 +17,7 @@
         android:fillViewport="true"
         android:focusable="false"
         android:focusableInTouchMode="false"
+        android:descendantFocusability="blocksDescendants"
         android:visibility="gone" >
 
         <RelativeLayout

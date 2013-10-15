@@ -36,7 +36,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 	private Integer			mSpinnerItemResId;
 	private Integer			mMissingResId;
 
-	private List<String>	mApplinkSuggestionStrings;
+	private List<String>	mApplinkSearchStrings;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -103,13 +103,13 @@ public class ApplinkEdit extends BaseEntityEdit {
 			UI.setVisibility(findViewById(R.id.type_picker), View.VISIBLE);
 
 			if (mTypePicker.getAdapter() == null) {
-				mApplinkSuggestionStrings = new ArrayList<String>();
-				mApplinkSuggestionStrings.add("website");
-				mApplinkSuggestionStrings.add("facebook");
-				mApplinkSuggestionStrings.add("twitter");
-				mApplinkSuggestionStrings.add("email");
-				mApplinkSuggestionStrings.add(getString(R.string.form_applink_type_hint));
-				initializeTypeSpinner(mApplinkSuggestionStrings);
+				mApplinkSearchStrings = new ArrayList<String>();
+				mApplinkSearchStrings.add("website");
+				mApplinkSearchStrings.add("facebook");
+				mApplinkSearchStrings.add("twitter");
+				mApplinkSearchStrings.add("email");
+				mApplinkSearchStrings.add(getString(R.string.form_applink_type_hint));
+				initializeTypeSpinner(mApplinkSearchStrings);
 			}
 		}
 		if (applink.type != null) {
@@ -204,8 +204,8 @@ public class ApplinkEdit extends BaseEntityEdit {
 
 				/* Do nothing when the hint item is selected */
 				if (position != parent.getCount()) {
-					if (position < mApplinkSuggestionStrings.size()) {
-						final String sourceType = mApplinkSuggestionStrings.get(position);
+					if (position < mApplinkSearchStrings.size()) {
+						final String sourceType = mApplinkSearchStrings.get(position);
 						setEntityType(sourceType);
 						draw();
 					}
@@ -248,7 +248,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 	@Override
 	protected void gather() {
 		super.gather();
-		
+
 		Applink applink = (Applink) mEntity;
 
 		if (mAppId != null) {
@@ -291,16 +291,16 @@ public class ApplinkEdit extends BaseEntityEdit {
 			return false;
 		}
 
-//		if (mName != null && mName.getText().length() == 0) {
-//			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
-//					, null
-//					, getResources().getString(R.string.error_missing_entity_label)
-//					, null
-//					, this
-//					, android.R.string.ok
-//					, null, null, null, null);
-//			return false;
-//		}
+		//		if (mName != null && mName.getText().length() == 0) {
+		//			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+		//					, null
+		//					, getResources().getString(R.string.error_missing_entity_label)
+		//					, null
+		//					, this
+		//					, android.R.string.ok
+		//					, null, null, null, null);
+		//			return false;
+		//		}
 
 		if (!mEditing && mAppId != null && mAppId.getText().length() == 0 && findViewById(R.id.app_id_holder).getVisibility() == View.VISIBLE) {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert

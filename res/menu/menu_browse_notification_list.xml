@@ -9,9 +9,8 @@
         android:title="@string/menu_refresh_item"/>
     <item
         android:id="@+id/delete_notifications"
-        android:icon="?attr/iconDelete"
         android:orderInCategory="40"
         android:showAsAction="ifRoom"
-        android:title="@string/menu_delete_item"/>
+        android:title="@string/menu_clear_item"/>
 
 </menu>

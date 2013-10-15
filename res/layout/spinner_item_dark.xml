@@ -7,4 +7,5 @@
     android:textColor="@color/text_dark"
     android:layout_width="match_parent"
     android:layout_height="@dimen/form_field_height"
+    android:textAppearance="?android:attr/textAppearance"
     android:maxLines="1" />

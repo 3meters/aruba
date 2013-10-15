@@ -169,6 +169,10 @@ public class BusyManager {
 
 		if (mProgressDialog == null) {
 			/* Dialogs */
+//			String themeTone = ((BaseActivity)mActivity).getThemeTone();
+//			Integer theme = themeTone.equals("dark") ? R.style.aircandi_theme_dark : R.style.aircandi_theme_light; 
+//			mProgressDialog = new ProgressDialog(mActivity, theme);
+			
 			mProgressDialog = new ProgressDialog(mActivity);
 			mProgressDialog.setIndeterminate(true);
 			mProgressDialog.setCancelable(true);

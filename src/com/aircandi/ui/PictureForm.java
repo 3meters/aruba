@@ -305,15 +305,21 @@ public class PictureForm extends BaseEntityForm {
 	@Override
 	protected void drawStats() {
 
-		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, Direction.in);
-		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_PICTURE, 0);
-		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
-		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
+		TextView likeStats = (TextView) findViewById(R.id.like_stats);
+		if (likeStats != null) {
+			Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, Direction.in);
+			if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_PICTURE, 0);
+			String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
+			likeStats.setText(String.valueOf(count.count) + " " + label);
+		}
 
-		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, Direction.in);
-		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, 0);
-		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
-		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
+		TextView watchingStats = (TextView) findViewById(R.id.watching_stats);
+		if (watchingStats != null) {
+			Count count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, Direction.in);
+			if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, 0);
+			String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
+			watchingStats.setText(String.valueOf(count.count) + " " + label);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

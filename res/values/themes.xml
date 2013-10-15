@@ -101,7 +101,6 @@
         <item name="iconSave">@drawable/ic_action_tick_dark</item>
         <item name="iconAccept">@drawable/ic_action_tick_dark</item>
         <item name="iconCancel">@drawable/ic_action_cancel_dark</item>
-        <item name="iconSuggest">@drawable/ic_action_bulb_dark</item>
         <item name="iconStarOn">@drawable/ic_action_star_10_dark</item>
         <item name="iconStarOff">@drawable/ic_action_star_0_dark</item>
         <item name="iconHelp">@drawable/ic_action_help_dark</item>
@@ -206,7 +205,6 @@
         <item name="iconSave">@drawable/ic_action_tick_light</item>
         <item name="iconAccept">@drawable/ic_action_tick_light</item>
         <item name="iconCancel">@drawable/ic_action_cancel_light</item>
-        <item name="iconSuggest">@drawable/ic_action_bulb_light</item>
         <item name="iconStarOn">@drawable/ic_action_star_10_light</item>
         <item name="iconStarOff">@drawable/ic_action_star_0_light</item>
         <item name="iconHelp">@drawable/ic_action_help_light</item>

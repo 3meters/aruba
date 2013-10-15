@@ -231,7 +231,7 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult refreshApplinks(List<Entity> applinks) {
+	public ModelResult refreshApplinks(List<Entity> applinks, Integer timeout, Boolean waitForAllContent) {
 
 		final ModelResult result = new ModelResult();
 		Tracker.sendEvent("ui_action", "refresh_applinks", null, 0, Aircandi.getInstance().getCurrentUser());
@@ -243,6 +243,16 @@ public class EntityManager {
 		}
 		parameters.putStringArrayList("applinks", (ArrayList<String>) entityStrings);
 
+		if (Type.isTrue(waitForAllContent)) {
+			parameters.putBoolean("waitForAllContent", waitForAllContent);
+		}
+		
+		if (timeout == null) {
+			timeout = ServiceConstants.TIMEOUT_APPLINK_SEARCH;
+		}
+
+		parameters.putInt("timeout", timeout);
+		
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_APPLINKS + "refresh")
 				.setRequestType(RequestType.METHOD)
@@ -259,20 +269,31 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult suggestApplinks(List<Entity> applinks, Place place) {
+	public ModelResult searchApplinks(List<Entity> applinks, Place place, Integer timeout, Boolean waitForAllContent) {
 
 		final ModelResult result = new ModelResult();
-		Tracker.sendEvent("ui_action", "suggest_applinks", null, 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("ui_action", "search_applinks", null, 0, Aircandi.getInstance().getCurrentUser());
 		final Bundle parameters = new Bundle();
 
-		parameters.putString("place", "object:" + Json.objectToJson(place, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
-
+		if (place != null) {
+			parameters.putString("place", "object:" + Json.objectToJson(place, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
+		}
+		
 		final List<String> entityStrings = new ArrayList<String>();
 		for (Entity applink : applinks) {
 			entityStrings.add("object:" + Json.objectToJson(applink, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 		}
 		parameters.putStringArrayList("applinks", (ArrayList<String>) entityStrings);
-		parameters.putInt("timeout", ServiceConstants.TIMEOUT_SOURCE_SUGGESTIONS);
+		
+		if (Type.isTrue(waitForAllContent)) {
+			parameters.putBoolean("waitForAllContent", waitForAllContent);
+		}
+		
+		if (timeout == null) {
+			timeout = ServiceConstants.TIMEOUT_APPLINK_SEARCH;
+		}
+
+		parameters.putInt("timeout", timeout);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_APPLINKS + "suggest")

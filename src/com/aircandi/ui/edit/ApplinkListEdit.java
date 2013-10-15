@@ -1,8 +1,11 @@
 package com.aircandi.ui.edit;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,6 +19,7 @@ import android.widget.Toast;
 
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
@@ -24,6 +28,7 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityListEdit;
 import com.aircandi.ui.widgets.AirImageView;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.UI;
 
 public class ApplinkListEdit extends BaseEntityListEdit {
@@ -49,27 +54,48 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 	}
 
 	@SuppressWarnings("ucd")
-	public void onSuggestLinksButtonClick(View view) {
-		suggestApplinks(mEntities, true, (Place) mParent);
+	public void onSearchLinksButtonClick(View view) {
+		searchApplinks(mEntities, true, (Place) mParent);
 	}
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		super.onActivityResult(requestCode, resultCode, intent);
+
+		if (resultCode != Activity.RESULT_CANCELED) {
+			if (requestCode == Constants.ACTIVITY_ENTITY_INSERT) {
+				if (intent != null && intent.getExtras() != null) {
+					final Bundle extras = intent.getExtras();
+					final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
+					if (jsonEntity != null) {
+						
+						final Entity entityNew = (Entity) Json.jsonToObject(jsonEntity, Json.ObjectType.ENTITY);
+						if (entityNew != null) {
+							searchApplinks(mEntities, true, (Place) mParent);							
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	// Services
 	// --------------------------------------------------------------------------------------------
 
-	private void suggestApplinks(final List<Entity> applinks, final Boolean autoInsert, final Place entity) {
+	private void searchApplinks(final List<Entity> applinks, final Boolean autoInsert, final Place entity) {
 
 		new AsyncTask() {
 
 			@Override
 			protected void onPreExecute() {
-				showBusy();
+				showBusy(R.string.progress_applink_search, false);
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("LoadApplinkSuggestions");
-				ModelResult result = EntityManager.getInstance().suggestApplinks(applinks, entity);
+				Thread.currentThread().setName("ApplinkSearch");
+				ModelResult result = EntityManager.getInstance().searchApplinks(applinks, entity, ServiceConstants.TIMEOUT_APPLINK_SEARCH, true);
 				return result;
 			}
 
@@ -92,20 +118,17 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 							int activeCountOld = mEntities.size();
 							int activeCountNew = applinks.size();
-							mEntities = applinks;
 							
-							Integer position = 0;
+							mEntities.clear();
+							mEntities.addAll(applinks);
+							
 							for (Entity entity : mEntities) {
 								entity.checked = false;
-								entity.position = position;
-								position++;
 							}
 							
-							mAdapter.clear();
-							for (Entity entity: mEntities) {
-								mAdapter.add(entity);
-							}
+							rebuildPositions();
 							mAdapter.notifyDataSetChanged();
+							
 							if (activeCountNew == activeCountOld) {
 								UI.showToastNotification(getResources().getString(R.string.toast_applinks_no_links), Toast.LENGTH_SHORT);
 							}
@@ -130,13 +153,19 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 			@Override
 			protected void onPreExecute() {
-				showBusy();
+				showBusy(R.string.progress_applink_refresh, false);
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("LoadSourceSuggestions");
-				ModelResult result = EntityManager.getInstance().refreshApplinks(applinks);
+				Thread.currentThread().setName("ApplinkRefresh");
+				List<Entity> entities = new ArrayList<Entity>();
+				for (Entity applink: applinks) {
+					if (applink.id != null) {
+						entities.add(applink);
+					}
+				}
+				ModelResult result = EntityManager.getInstance().refreshApplinks(entities, ServiceConstants.TIMEOUT_APPLINK_REFRESH, true);
 				return result;
 			}
 
@@ -149,7 +178,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 					if (applinks.size() > 0) {
 						for (Entity entity : mEntities) {
 							for (Entity applink : applinks) {
-								if (applink.id.equals(entity.id)) {
+								if (applink.id != null && entity.id != null && applink.id.equals(entity.id)) {
 									mDirty = true;
 									entity.name = applink.name;
 									entity.description = applink.description;
@@ -161,11 +190,6 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 									((Applink) entity).appUrl = ((Applink) applink).appUrl;
 								}
 							}
-						}
-						mEntities = applinks;
-						mAdapter.clear();
-						for (Entity entity: mEntities) {
-							mAdapter.add(entity);
 						}
 						mAdapter.notifyDataSetChanged();
 						UI.showToastNotification(getResources().getString(R.string.toast_applinks_refreshed), Toast.LENGTH_SHORT);

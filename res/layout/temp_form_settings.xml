@@ -16,14 +16,14 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/form_field_height"
             android:text="@string/form_label_locked"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearance" />
 
         <com.aircandi.ui.widgets.AirTextView
             android:id="@+id/hint_locked"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="@dimen/hint_indent_spinner"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textAppearance="?android:attr/textAppearance"
             android:textColor="?attr/textColorSecondary" />
     </LinearLayout>
 

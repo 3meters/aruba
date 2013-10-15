@@ -61,8 +61,6 @@ public class ShortcutPicker extends BasePicker {
 	@Override
 	public void bind(BindingMode mode) {
 
-		/* We use this to access the source suggestions */
-
 		if (mShortcuts != null && mShortcuts.size() > 0) {
 			Shortcut shortcut = mShortcuts.get(0);
 			setActivityTitle(shortcut.app);

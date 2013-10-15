@@ -72,8 +72,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight=".5"
-            android:onClick="onSuggestLinksButtonClick"
-            android:src="?attr/iconSuggest" />
+            android:onClick="onSearchLinksButtonClick"
+            android:src="?attr/iconSearch" />
 
         <ImageButton
             style="@style/form_button_borderless"
