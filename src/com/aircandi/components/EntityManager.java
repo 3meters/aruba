@@ -231,10 +231,10 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult refreshApplinks(List<Entity> applinks, Integer timeout, Boolean waitForAllContent) {
+	public ModelResult refreshApplinks(List<Entity> applinks, Integer timeout, Boolean waitForContent) {
 
 		final ModelResult result = new ModelResult();
-		Tracker.sendEvent("ui_action", "refresh_applinks", null, 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("ui_action", "applinks_refresh", null, 0, Aircandi.getInstance().getCurrentUser());
 		final Bundle parameters = new Bundle();
 
 		final List<String> entityStrings = new ArrayList<String>();
@@ -243,8 +243,8 @@ public class EntityManager {
 		}
 		parameters.putStringArrayList("applinks", (ArrayList<String>) entityStrings);
 
-		if (Type.isTrue(waitForAllContent)) {
-			parameters.putBoolean("waitForAllContent", waitForAllContent);
+		if (Type.isTrue(waitForContent)) {
+			parameters.putBoolean("waitForContent", waitForContent);
 		}
 		
 		if (timeout == null) {
@@ -272,7 +272,7 @@ public class EntityManager {
 	public ModelResult searchApplinks(List<Entity> applinks, Place place, Integer timeout, Boolean waitForAllContent) {
 
 		final ModelResult result = new ModelResult();
-		Tracker.sendEvent("ui_action", "search_applinks", null, 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("ui_action", "applinks_search", null, 0, Aircandi.getInstance().getCurrentUser());
 		final Bundle parameters = new Bundle();
 
 		if (place != null) {
@@ -286,7 +286,7 @@ public class EntityManager {
 		parameters.putStringArrayList("applinks", (ArrayList<String>) entityStrings);
 		
 		if (Type.isTrue(waitForAllContent)) {
-			parameters.putBoolean("waitForAllContent", waitForAllContent);
+			parameters.putBoolean("waitForContent", waitForAllContent);
 		}
 		
 		if (timeout == null) {
@@ -364,7 +364,7 @@ public class EntityManager {
 
 	public ModelResult signin(String email, String password, String activityName) {
 		final ModelResult result = new ModelResult();
-		Tracker.sendEvent("ui_action", "signin_user", null, 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("ui_action", "user_signin", null, 0, Aircandi.getInstance().getCurrentUser());
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("user", "object:{"
@@ -408,7 +408,7 @@ public class EntityManager {
 
 	public ModelResult updatePassword(String userId, String passwordOld, String passwordNew, String activityName) {
 		final ModelResult result = new ModelResult();
-		Tracker.sendEvent("ui_action", "change_password", null, 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("ui_action", "password_change", null, 0, Aircandi.getInstance().getCurrentUser());
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("user", "object:{"
@@ -434,7 +434,7 @@ public class EntityManager {
 
 		/* Pre-fetch an id so a failed request can be retried */
 		final ModelResult result = getDocumentId(User.collectionId);
-		Tracker.sendEvent("ui_action", "register_user", null, 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("ui_action", "user_register", null, 0, Aircandi.getInstance().getCurrentUser());
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
@@ -939,7 +939,8 @@ public class EntityManager {
 						}
 					}
 					else {
-						link = new Link(entity.id, beacon.id, Constants.TYPE_LINK_PROXIMITY, Constants.SCHEMA_ENTITY_BEACON, false);
+						link = new Link(entity.id, beacon.id, Constants.TYPE_LINK_PROXIMITY, Constants.SCHEMA_ENTITY_BEACON);
+						link.strong = false;
 						link.proximity = new Proximity();
 						link.proximity.signal = beacon.signal;
 						if (primary) {
@@ -979,7 +980,6 @@ public class EntityManager {
 		parameters.putString("fromId", fromId); 		// required
 		parameters.putString("toId", toId);				// required
 		parameters.putString("type", type);				// required
-		parameters.putBoolean("strong", strong);
 		parameters.putString("actionType", actionType);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
@@ -1097,11 +1097,11 @@ public class EntityManager {
 
 		final ModelResult result = new ModelResult();
 		if (!skipMove) {
-			String action = expand ? "promote_entity" : "kick_entity";
+			String action = expand ? "entity_repeat" : "entity_kick";
 			Tracker.sendEvent("ui_action", action, null, 0, Aircandi.getInstance().getCurrentUser());
 		}
 		else {
-			Tracker.sendEvent("ui_action", "preview_entity", null, 0, Aircandi.getInstance().getCurrentUser());
+			Tracker.sendEvent("ui_action", "entity_preview", null, 0, Aircandi.getInstance().getCurrentUser());
 		}
 
 		/* Construct entity, link, and observation */
@@ -1167,7 +1167,7 @@ public class EntityManager {
 
 		/* Pre-fetch an id so a failed request can be retried */
 		ModelResult result = getDocumentId(Document.collectionId);
-		Tracker.sendEvent("ui_action", "document_insert", document.type, 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("ui_action", document.type + "_insert", document.type, 0, Aircandi.getInstance().getCurrentUser());
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			document.id = (String) result.serviceResponse.data;
@@ -1187,7 +1187,7 @@ public class EntityManager {
 	public ModelResult sendInvite(List<String> emails, String invitor, String message) {
 
 		ModelResult result = new ModelResult();
-		Tracker.sendEvent("ui_action", "send_invite", null, 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("ui_action", "invite_send", null, 0, Aircandi.getInstance().getCurrentUser());
 
 		final Bundle parameters = new Bundle();
 		parameters.putStringArrayList("emails", (ArrayList<String>) emails);

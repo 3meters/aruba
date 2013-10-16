@@ -115,7 +115,9 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 				Logger.v(this, "Setting current place to: " + mEntity.id);
 			}
 			mCacheStamp = mEntity.getCacheStamp();
-			draw();
+			if (mFirstDraw) {
+				draw();
+			}
 		}
 	}
 
@@ -698,7 +700,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 				@Override
 				public void onClick(View view) {
 					String activityName = Aircandi.getInstance().getCurrentActivity().getClass().getSimpleName();
-					Tracker.sendEvent("ui_action", "refresh", activityName, 0, Aircandi.getInstance().getCurrentUser());
+					Tracker.sendEvent("ui_action", "form_refresh", activityName, 0, Aircandi.getInstance().getCurrentUser());
 					onRefresh();
 				}
 			});

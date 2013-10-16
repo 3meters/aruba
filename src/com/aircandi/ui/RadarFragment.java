@@ -76,6 +76,7 @@ import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Errors;
+import com.aircandi.utilities.Media;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.Type;
@@ -116,6 +117,8 @@ public class RadarFragment extends BaseFragment implements
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 		View view = super.onCreateView(inflater, container, savedInstanceState);
+		if (view == null) return view;
+
 		mList = (ListView) view.findViewById(R.id.radar_list);
 		mAttribution = (TextView) view.findViewById(R.id.place_provider);
 		mAttributionHolder = view.findViewById(R.id.attribution_holder);
@@ -134,13 +137,15 @@ public class RadarFragment extends BaseFragment implements
 		mPullToRefreshAttacher = ((AircandiForm) getSherlockActivity()).getPullToRefreshAttacher();
 
 		// Now set the ScrollView as the refreshable view, and the refresh listener (this)
-		mPullToRefreshAttacher.addRefreshableView(mList, this);
+		if (mPullToRefreshAttacher != null) {
+			mPullToRefreshAttacher.addRefreshableView(mList, this);
 
-		DefaultHeaderTransformer header = (DefaultHeaderTransformer) mPullToRefreshAttacher.getHeaderTransformer();
-		header.setRefreshingText(getString(R.string.refresh_scanning_for_location));
-		header.setPullText(getString(R.string.refresh_label_pull));
-		header.setReleaseText(getString(R.string.refresh_label_release));
-		FontManager.getInstance().setTypefaceDefault((TextView) getSherlockActivity().findViewById(R.id.ptr_text));
+			DefaultHeaderTransformer header = (DefaultHeaderTransformer) mPullToRefreshAttacher.getHeaderTransformer();
+			header.setRefreshingText(getString(R.string.refresh_scanning_for_location));
+			header.setPullText(getString(R.string.refresh_label_pull));
+			header.setReleaseText(getString(R.string.refresh_label_release));
+			FontManager.getInstance().setTypefaceDefault((TextView) getSherlockActivity().findViewById(R.id.ptr_text));
+		}
 
 		/* Other UI references */
 		mList.setOnItemClickListener(new OnItemClickListener() {
@@ -383,7 +388,7 @@ public class RadarFragment extends BaseFragment implements
 	public void onQueryWifiScanReceived(final QueryWifiScanReceivedEvent event) {
 
 		updateDevIndicator(event.wifiList, null);
-		NetworkManager.getInstance().updateCrashlytics();						
+		NetworkManager.getInstance().updateCrashlytics();
 		getSherlockActivity().runOnUiThread(new Runnable() {
 
 			@Override
@@ -515,15 +520,15 @@ public class RadarFragment extends BaseFragment implements
 
 					if (Aircandi.stopwatch2.isStarted()) {
 						Aircandi.stopwatch2.stop("Location acquired");
-						Tracker.sendTiming("location", Aircandi.stopwatch2.getTotalTimeMills(), "location_acquired", null, Aircandi.getInstance().getCurrentUser());
+						Tracker.sendTiming("location", Aircandi.stopwatch2.getTotalTimeMills(), "location_acquired", null, Aircandi.getInstance()
+								.getCurrentUser());
 					}
 
 					final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
 					if (location != null && !location.zombie) {
 
-						NetworkManager.getInstance().updateCrashlytics();								
+						NetworkManager.getInstance().updateCrashlytics();
 						mBusyManager.showBusy();
-						
 
 						new AsyncTask() {
 
@@ -610,7 +615,7 @@ public class RadarFragment extends BaseFragment implements
 							@Override
 							protected Object doInBackground(Object... params) {
 								Thread.currentThread().setName("PlaySound");
-								Aircandi.soundPool.play(mNewCandiSoundId, 0.2f, 0.2f, 0, 0, 1f);
+								Media.playSound(mNewCandiSoundId, 1.0f);
 								return null;
 							}
 
@@ -727,7 +732,7 @@ public class RadarFragment extends BaseFragment implements
 			protected void onPreExecute() {
 				mPullToRefreshAttacher.setRefreshing(true);
 				showBusy();
-				NetworkManager.getInstance().updateCrashlytics();				
+				NetworkManager.getInstance().updateCrashlytics();
 			}
 
 			@Override
@@ -878,7 +883,7 @@ public class RadarFragment extends BaseFragment implements
 
 						Aircandi.wifiCount = wifiCount;
 						mDebugWifi = String.valueOf(wifiCount);
-						
+
 					}
 				});
 
@@ -996,19 +1001,19 @@ public class RadarFragment extends BaseFragment implements
 		super.onResume();
 		if (getSherlockActivity().isFinishing()) return;
 
-//		if (Aircandi.getInstance().getUser() != null
-//				&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-//				&& Aircandi.getInstance().getUser().developer != null
-//				&& Aircandi.getInstance().getUser().developer) {
-//			startScanService(Constants.INTERVAL_SCAN_WIFI);
-//		}
+		//		if (Aircandi.getInstance().getUser() != null
+		//				&& Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
+		//				&& Aircandi.getInstance().getUser().developer != null
+		//				&& Aircandi.getInstance().getUser().developer) {
+		//			startScanService(Constants.INTERVAL_SCAN_WIFI);
+		//		}
 
 		databind(BindingMode.AUTO);
 	}
 
 	@Override
 	public void onPause() {
-//		stopScanService();
+		//		stopScanService();
 		super.onPause();
 	}
 

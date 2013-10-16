@@ -225,7 +225,7 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 					@Override
 					public void onClick(DialogInterface dialog, int which) {}
 				}, null);
-		Tracker.sendEvent("ui_action", "open_dialog", "about", 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("ui_action", "dialog_open", "about", 0, Aircandi.getInstance().getCurrentUser());
 
 	}
 

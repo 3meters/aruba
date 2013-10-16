@@ -91,6 +91,7 @@ public class PictureForm extends BaseEntityForm {
 		 * - WebImageView child views are gone by default
 		 * - Header views are visible by default
 		 */
+		mFirstDraw = false;
 		setActivityTitle(mEntity.name);
 
 		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);
@@ -125,10 +126,12 @@ public class PictureForm extends BaseEntityForm {
 					photoView.setLayoutParams(paramsImage);
 				}
 
-				Photo photo = mEntity.getPhoto();
-				UI.drawPhoto(photoView, photo);
-				if (photo.usingDefault == null || !photo.usingDefault) {
-					photoView.setClickable(true);
+				if (!UI.photosEqual(photoView.getPhoto(), mEntity.getPhoto())) {
+					Photo photo = mEntity.getPhoto();
+					UI.drawPhoto(photoView, photo);
+					if (photo.usingDefault == null || !photo.usingDefault) {
+						photoView.setClickable(true);
+					}
 				}
 				UI.setVisibility(photoView, View.VISIBLE);
 			}

@@ -21,10 +21,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/photo"
+        android:layout_centerVertical="true"
         android:ellipsize="end"
-        android:maxLines="1"
         android:text="@string/dummy_name"
         android:textColor="?attr/textColor"
-        android:textAppearance="@style/textAppearanceExtraSmall" />
+        android:textAppearance="@style/textAppearance" />
 
 </RelativeLayout>

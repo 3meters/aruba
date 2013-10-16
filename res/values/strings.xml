@@ -128,6 +128,9 @@
     <string name="alert_feedback_sent">Thank you for the feedback!</string>
     <string name="alert_invite_sent">Your invitation has been sent. Thank you!</string>
     <string name="alert_invite_sent_plural">Your invitations have been sent. Thank you!</string>
+    <string name="alert_candigram_toured">This candigram traveled to a new place</string>
+    <string name="alert_candigram_bounced">This candigram was kicked to a new place</string>
+    <string name="alert_candigram_expanded">This candigram was repeated to another place</string>
     
     <!-- Alerts: confirm dirty -->
 
@@ -261,7 +264,7 @@
 
     <string name="picture_picker_places_empty">No photos found for</string>
     <string name="picture_picker_search_empty">No photos found for</string>
-    <string name="sources_builder_empty">No links yet. Use the new menu item to add a custom link."</string>
+    <string name="applink_list_edit_empty">No links yet. Use the new menu item to add a custom link."</string>
 
     <!-- Android choosers -->
 
@@ -410,7 +413,8 @@
     <string name="form_label_password_old">old password</string>
     <string name="form_label_email">email</string>
     <string name="form_label_locked">locked</string>
-    <string name="form_label_stopped">parked</string>
+    <string name="form_label_parked">parked</string>
+    <string name="form_label_retired">retired</string>
     <string name="form_label_do_not_track">browse in private</string>
     <string name="tuning_section_banner">great banner</string>
     <string name="tuning_section_tune">lock it in</string>

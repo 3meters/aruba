@@ -52,8 +52,6 @@ public abstract class ServiceBase extends ServiceObject {
 	@Expose
 	public Boolean				locked				= false;
 	@Expose
-	public Boolean				system				= false;
-	@Expose
 	public Number				position;
 
 	/* PropertyValue bags */
@@ -126,7 +124,6 @@ public abstract class ServiceBase extends ServiceObject {
 		base.type = (String) map.get("type");
 		base.enabled = (Boolean) map.get("enabled");
 		base.locked = (Boolean) map.get("locked");
-		base.system = (Boolean) map.get("system");
 		base.position = (Number) map.get("position");
 		base.data = (HashMap<String, Object>) map.get("data");
 		base.cdata = (HashMap<String, Object>) map.get("cdata");

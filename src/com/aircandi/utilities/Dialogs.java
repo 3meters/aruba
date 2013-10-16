@@ -178,7 +178,7 @@ public class Dialogs {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
-								Tracker.sendEvent("ui_action", "update_aircandi", "com.aircandi", 0, Aircandi.getInstance().getCurrentUser());
+								Tracker.sendEvent("ui_action", "aircandi_update_button_click", "com.aircandi", 0, Aircandi.getInstance().getCurrentUser());
 								Logger.d(this, "Update: navigating to market install/update page");
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(Constants.APP_MARKET_URI));
 								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -225,7 +225,7 @@ public class Dialogs {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
-								Tracker.sendEvent("ui_action", "install_app", shortcut.getPackageName(), 0, Aircandi.getInstance().getCurrentUser());
+								Tracker.sendEvent("ui_action", "app_install_button_click", shortcut.getPackageName(), 0, Aircandi.getInstance().getCurrentUser());
 								Logger.d(this, "Install: navigating to market install page");
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=" + shortcut.getPackageName()
 										+ "&referrer=utm_source%3Dcom.aircandi"));

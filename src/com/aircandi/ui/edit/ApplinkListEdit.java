@@ -37,11 +37,12 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		mListItemResId = R.layout.temp_listitem_applink_edit;
+		mMessage.setText(R.string.applink_list_edit_empty);
 	}
 
 	@Override
 	protected ArrayAdapter getAdapter() {
-		return new ListAdapter(this, mEntities, mListItemResId);
+		return new ListAdapter(this, mEntities, mListItemResId, mMessage);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -55,7 +56,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 	@SuppressWarnings("ucd")
 	public void onSearchLinksButtonClick(View view) {
-		searchApplinks(mEntities, true, (Place) mParent);
+		searchApplinks(mEntities, true, (Place) mParent, true);
 	}
 
 	@Override
@@ -68,22 +69,22 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 					final Bundle extras = intent.getExtras();
 					final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
 					if (jsonEntity != null) {
-						
+
 						final Entity entityNew = (Entity) Json.jsonToObject(jsonEntity, Json.ObjectType.ENTITY);
 						if (entityNew != null) {
-							searchApplinks(mEntities, true, (Place) mParent);							
+							searchApplinks(mEntities, true, (Place) mParent, false);
 						}
 					}
 				}
 			}
 		}
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Services
 	// --------------------------------------------------------------------------------------------
 
-	private void searchApplinks(final List<Entity> applinks, final Boolean autoInsert, final Place entity) {
+	private void searchApplinks(final List<Entity> applinks, final Boolean autoInsert, final Place entity, final Boolean userInitiated) {
 
 		new AsyncTask() {
 
@@ -107,7 +108,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 					/*
 					 * Make sure they have the schema property set
 					 */
-					for (Entity applink: applinks) {
+					for (Entity applink : applinks) {
 						if (applink.schema == null) {
 							applink.schema = Constants.SCHEMA_ENTITY_APPLINK;
 						}
@@ -118,19 +119,21 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 							int activeCountOld = mEntities.size();
 							int activeCountNew = applinks.size();
-							
+
 							mEntities.clear();
 							mEntities.addAll(applinks);
-							
+
 							for (Entity entity : mEntities) {
 								entity.checked = false;
 							}
-							
+
 							rebuildPositions();
 							mAdapter.notifyDataSetChanged();
-							
+
 							if (activeCountNew == activeCountOld) {
-								UI.showToastNotification(getResources().getString(R.string.toast_applinks_no_links), Toast.LENGTH_SHORT);
+								if (userInitiated) {
+									UI.showToastNotification(getResources().getString(R.string.toast_applinks_no_links), Toast.LENGTH_SHORT);
+								}
 							}
 							else {
 								mDirty = true;
@@ -160,7 +163,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("ApplinkRefresh");
 				List<Entity> entities = new ArrayList<Entity>();
-				for (Entity applink: applinks) {
+				for (Entity applink : applinks) {
 					if (applink.id != null) {
 						entities.add(applink);
 					}
@@ -219,8 +222,11 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 	private static class ListAdapter extends EntityListAdapter {
 
-		public ListAdapter(Context context, List<Entity> entities, Integer itemLayoutId) {
+		private TextView	message;
+
+		public ListAdapter(Context context, List<Entity> entities, Integer itemLayoutId, TextView message) {
 			super(context, entities, itemLayoutId);
+			this.message = message;
 		}
 
 		@Override
@@ -299,6 +305,12 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 				}
 			}
 			return view;
+		}
+
+		@Override
+		public void notifyDataSetChanged() {
+			message.setVisibility(getCount() == 0 ? View.VISIBLE : View.GONE);
+			super.notifyDataSetChanged();
 		}
 
 		private static class ViewHolder {

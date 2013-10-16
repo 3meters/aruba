@@ -83,7 +83,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/dummy_place_stat"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:visibility="gone" />
     </LinearLayout>
 
     <com.aircandi.ui.widgets.AirTextView

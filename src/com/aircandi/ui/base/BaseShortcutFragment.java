@@ -60,6 +60,8 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = super.onCreateView(inflater, container, savedInstanceState);
+		if (view == null) return view;
+		
 		mScrollView = (ScrollView) view.findViewById(R.id.scroll_view);
 		mMessage = (TextView) view.findViewById(R.id.message);
 		return view;

@@ -478,9 +478,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					}
 				}
 			}
-			else if (requestCode == Constants.ACTIVITY_PICTURE_PICK_DEVICE) {
+			else if (requestCode == Constants.ACTIVITY_PHOTO_PICK_DEVICE) {
 
-				Tracker.sendEvent("ui_action", "select_picture_device", null, 0, Aircandi.getInstance().getCurrentUser());
+				Tracker.sendEvent("ui_action", "photo_select_from_device", null, 0, Aircandi.getInstance().getCurrentUser());
 				final Uri photoUri = intent.getData();
 
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
@@ -489,9 +489,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, false);
 				}
 			}
-			else if (requestCode == Constants.ACTIVITY_PICTURE_MAKE) {
+			else if (requestCode == Constants.ACTIVITY_PHOTO_MAKE) {
 
-				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0, Aircandi.getInstance().getCurrentUser());
+				Tracker.sendEvent("ui_action", "photo_create_with_camera", null, 0, Aircandi.getInstance().getCurrentUser());
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
 
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
@@ -500,9 +500,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, false);
 				}
 			}
-			else if (requestCode == Constants.ACTIVITY_PICTURE_SEARCH) {
+			else if (requestCode == Constants.ACTIVITY_PHOTO_SEARCH) {
 
-				Tracker.sendEvent("ui_action", "select_picture_search", null, 0, Aircandi.getInstance().getCurrentUser());
+				Tracker.sendEvent("ui_action", "photo_select_using_search", null, 0, Aircandi.getInstance().getCurrentUser());
 				if (intent != null && intent.getExtras() != null) {
 					
 					final Bundle extras = intent.getExtras();
@@ -516,9 +516,9 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					}
 				}
 			}
-			else if (requestCode == Constants.ACTIVITY_PICTURE_PICK_PLACE) {
+			else if (requestCode == Constants.ACTIVITY_PHOTO_PICK_PLACE) {
 
-				Tracker.sendEvent("ui_action", "select_picture_place", null, 0, Aircandi.getInstance().getCurrentUser());
+				Tracker.sendEvent("ui_action", "photo_select_from_place", null, 0, Aircandi.getInstance().getCurrentUser());
 				if (intent != null && intent.getExtras() != null) {
 
 					final Bundle extras = intent.getExtras();
@@ -703,7 +703,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			mEntity.photo = null;
 		}
 		drawPhoto();
-		Tracker.sendEvent("ui_action", "set_" + mEntitySchema + "_photo_to_default", null, 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("ui_action", "photo_set_to_default", null, 0, Aircandi.getInstance().getCurrentUser());
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -768,10 +768,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				if (mParentId != null) {
 					mEntity.toId = mParentId;
-					link = new Link(mParentId, getLinkType(), mEntity.schema, true);
-					if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
-						link.strong = false;
-					}
+					link = new Link(mParentId, getLinkType(), mEntity.schema);
 				}
 				else {
 					mEntity.toId = null;

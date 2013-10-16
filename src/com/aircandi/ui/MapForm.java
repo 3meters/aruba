@@ -145,6 +145,7 @@ public class MapForm extends BaseEntityForm {
 
 	@Override
 	public void draw() {
+		mFirstDraw = false;
 		if (!TextUtils.isEmpty(mEntity.name)) {
 			setActivityTitle(mEntity.name);
 		}

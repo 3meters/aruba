@@ -25,6 +25,17 @@
 
         <!-- Type -->
 
+        <com.aircandi.ui.widgets.AirTextView
+            android:id="@+id/type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="5dp"
+            android:text="@string/dummy_name"
+            android:textColor="@color/accent_blue"
+            android:visibility="gone" />
+
         <LinearLayout
             android:id="@+id/type_holder"
             android:layout_width="match_parent"
@@ -154,8 +165,9 @@
                 android:textColor="?attr/textColorSecondary"
                 android:visibility="invisible" />
         </LinearLayout>
-        
+
         <LinearLayout
+            android:id="@+id/stopped_holder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
@@ -165,7 +177,6 @@
                 android:id="@+id/chk_stopped"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:text="@string/form_label_stopped"
                 android:textAppearance="?android:attr/textAppearance" />
 
             <com.aircandi.ui.widgets.AirTextView

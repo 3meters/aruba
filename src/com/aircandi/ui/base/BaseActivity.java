@@ -59,6 +59,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	public Resources	mResources;
 	public BusyManager	mBusyManager;
 	protected Handler	mHandler					= new Handler();
+	protected Boolean	mFirstDraw					= true;
 
 	/* Theme */
 	private String		mPrefTheme;
@@ -136,7 +137,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	@Override
 	public void onRefresh() {}
-	
+
 	public void onAccept() {}
 
 	@Override
@@ -263,7 +264,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 				.equals(Aircandi.settings.getBoolean(Constants.PREF_TESTING_SELF_NOTIFY, Constants.PREF_TESTING_SELF_NOTIFY_DEFAULT))) {
 			Logger.d(this, "Pref change: testing self notify");
 		}
-		
+
 		if (!Aircandi.getInstance().getPrefEntityFencing()
 				.equals(Aircandi.settings.getBoolean(Constants.PREF_ENTITY_FENCING, Constants.PREF_ENTITY_FENCING_DEFAULT))) {
 			mPrefChangeNewSearchNeeded = true;
@@ -396,7 +397,8 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 						final ModelResult result = (ModelResult) response;
 						/* We continue on even if the service call failed. */
 						if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-							Logger.i(this, "USER signed out: " + Aircandi.getInstance().getCurrentUser().name + " (" + Aircandi.getInstance().getCurrentUser().id + ")");
+							Logger.i(this, "USER signed out: " + Aircandi.getInstance().getCurrentUser().name + " ("
+									+ Aircandi.getInstance().getCurrentUser().id + ")");
 						}
 						else {
 							Logger.w(this, "USER signed out, service call failed: " + Aircandi.getInstance().getCurrentUser().id);
@@ -437,7 +439,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 		if (currentActivity != null && currentActivity.equals(this))
 			Aircandi.getInstance().setCurrentActivity(null);
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Menus
 	// --------------------------------------------------------------------------------------------
@@ -499,17 +501,17 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Logger.d(this, "Activity resuming");		
+		Logger.d(this, "Activity resuming");
 		BusProvider.getInstance().register(this);
 		Aircandi.getInstance().setCurrentActivity(this);
 	}
 
 	@Override
 	protected void onPause() {
+		super.onPause();
 		Logger.d(this, "Activity pausing");
 		BusProvider.getInstance().unregister(this);
 		clearReferences();
-		super.onPause();
 	}
 
 	@Override

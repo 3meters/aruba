@@ -96,6 +96,7 @@ public class UserForm extends BaseEntityForm {
 	@Override
 	public void draw() {
 
+		mFirstDraw = false;
 		setActivityTitle(mEntity.name);
 
 		User user = (User) mEntity;

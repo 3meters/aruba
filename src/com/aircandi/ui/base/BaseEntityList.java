@@ -407,7 +407,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 				@Override
 				public void onClick(View view) {
 					String activityName = Aircandi.getInstance().getCurrentActivity().getClass().getSimpleName();
-					Tracker.sendEvent("ui_action", "refresh", activityName, 0, Aircandi.getInstance().getCurrentUser());
+					Tracker.sendEvent("ui_action", "list_refresh", activityName, 0, Aircandi.getInstance().getCurrentUser());
 					onRefresh();
 				}
 			});

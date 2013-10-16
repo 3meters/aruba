@@ -184,6 +184,7 @@ public class PlaceForm extends BaseEntityForm {
 		 * - Header views are visible by default
 		 */
 
+		mFirstDraw = false;
 		setActivityTitle(mEntity.name);
 
 		/* Action bar icon */

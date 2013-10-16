@@ -49,6 +49,7 @@ import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Errors;
+import com.aircandi.utilities.Media;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -69,441 +70,6 @@ public class CandigramForm extends BaseEntityForm {
 		mCandigramExitSoundId = Aircandi.soundPool.load(this, R.raw.candigram_exit, 1);
 	}
 
-	// --------------------------------------------------------------------------------------------
-	// Events
-	// --------------------------------------------------------------------------------------------
-
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onMessage(final MessageEvent event) {
-		/*
-		 * Refresh the form because something new has been added to it
-		 * like a comment or post.
-		 */
-		if (event.notification.toEntity != null && mEntityId.equals(event.notification.toEntity.id)) {
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					onRefresh();
-				}
-			});
-		}
-		/*
-		 * Candigram has moved/changed and we want to show something. We
-		 * don't get this message if current user triggered the move.
-		 */
-		else if (mEntityId.equals(event.notification.entity.id)) {
-			if (event.notification.action.equals("move")) {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if (event.notification.entity.type.equals(Constants.TYPE_APP_BOUNCE)) {
-							EntityManager.getInstance().deleteEntity(event.notification.entity.id, true);
-							kickAlert(event.notification.toEntity, event.notification.user);
-						}
-						else if (event.notification.entity.type.equals(Constants.TYPE_APP_TOUR)) {
-							String message = "This candigram has traveled to a new place";
-							if (!TextUtils.isEmpty(event.notification.toEntity.name)) {
-								message += ": " + event.notification.toEntity.name;
-							}
-							UI.showToastNotification(message, Toast.LENGTH_LONG);
-							onRefresh();
-						}
-					}
-				});
-			}
-		}
-	}
-
-	@SuppressWarnings("ucd")
-	public void onExpandButtonClick(View view) {
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				showBusy();
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("PromoteEntity");
-				/*
-				 * Call service routine to get a move candidate.
-				 */
-				final ModelResult result = EntityManager.getInstance().moveCandigram(mEntity, true, true, null);
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-				ModelResult result = (ModelResult) response;
-				setSupportProgressBarIndeterminateVisibility(false);
-				hideBusy();
-				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-					if (result.data != null) {
-						List<Entity> entities = (List<Entity>) result.data;
-						Entity place = entities.get(0);
-						promoteCandidate(place, Aircandi.getInstance().getCurrentUser());
-					}
-				}
-				else {
-					Errors.handleError(CandigramForm.this, result.serviceResponse);
-				}
-			}
-		}.execute();
-
-	}
-
-	public void promoteCandidate(final Entity place, final User user) {
-
-		ViewGroup customView = customPlaceView((Place) place, place.name, place.getPhoto());
-		final TextView message = (TextView) customView.findViewById(R.id.message);
-
-		message.setText(getResources().getString(R.string.alert_message_candigram_expand));
-
-		String dialogTitle = getResources().getString(R.string.alert_promoted_candigram);
-		if (mEntity.name != null && !mEntity.name.equals("")) {
-			dialogTitle = mEntity.name;
-		}
-
-		final AlertDialog dialog = Dialogs.alertDialog(null
-				, dialogTitle
-				, null
-				, customView
-				, this
-				, R.string.alert_button_expand
-				, android.R.string.cancel
-				, R.string.alert_button_expand_follow
-				, new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (which == Dialog.BUTTON_POSITIVE) {
-							promoteWrapup(place, user, false);
-						}
-						else if (which == Dialog.BUTTON_NEUTRAL) {
-							promoteWrapup(place, user, true);
-						}
-						else if (which == Dialog.BUTTON_NEGATIVE) {
-							dialog.dismiss();
-						}
-					}
-				}
-				, null);
-		dialog.setCanceledOnTouchOutside(false);
-	}
-
-	public void promoteWrapup(final Entity entity, User user, final Boolean follow) {
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				showBusy();
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("PromoteEntity");
-				final ModelResult result = EntityManager.getInstance().moveCandigram(mEntity, true, false, entity.id);
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-				ModelResult result = (ModelResult) response;
-				setSupportProgressBarIndeterminateVisibility(false);
-				hideBusy();
-				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-					if (follow) {
-						Places.view(CandigramForm.this, entity.id, mEntity.id);
-						Aircandi.soundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
-						finish();
-						Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
-					}
-					else {
-						Aircandi.soundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
-						onRefresh();
-					}
-				}
-				else {
-					Errors.handleError(CandigramForm.this, result.serviceResponse);
-				}
-			}
-		}.execute();
-	}
-
-	public void kickAlert(Entity entity, User user) {
-
-		final Place place = (Place) entity;
-		ViewGroup customView = customPlaceView((Place) place, place.name, place.getPhoto());
-		final TextView message = (TextView) customView.findViewById(R.id.message);
-
-		if (user != null) {
-			if (user.id.equals(Aircandi.getInstance().getCurrentUser().id)) {
-				message.setText("You kicked this candigram to: ");
-			}
-			else {
-				message.setText(user.name + " kicked this candigram to: ");
-			}
-		}
-
-		String dialogTitle = getResources().getString(R.string.alert_candigram_bounce);
-		if (mEntity.name != null && !mEntity.name.equals("")) {
-			dialogTitle = mEntity.name;
-		}
-
-		final AlertDialog dialog = Dialogs.alertDialog(null
-				, dialogTitle
-				, null
-				, customView
-				, this
-				, android.R.string.ok
-				, R.string.alert_button_bounce_follow
-				, null
-				, new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (which == Dialog.BUTTON_POSITIVE) {
-							Aircandi.soundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
-							finish();
-							Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
-						}
-						else if (which == Dialog.BUTTON_NEGATIVE) {
-							Places.view(CandigramForm.this, place.id, mEntity.id);
-							Aircandi.soundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
-							finish();
-							Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
-						}
-					}
-				}
-				, null);
-		dialog.setCanceledOnTouchOutside(false);
-	}
-
-	@SuppressWarnings("ucd")
-	public void onBounceButtonClick(View view) {
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				showBusy();
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("KickEntity");
-				/*
-				 * Call service routine to get a move candidate.
-				 */
-				final ModelResult result = EntityManager.getInstance().moveCandigram(mEntity, false, true, null);
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-				ModelResult result = (ModelResult) response;
-				setSupportProgressBarIndeterminateVisibility(false);
-				hideBusy();
-				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-					if (result.data != null) {
-						List<Entity> entities = (List<Entity>) result.data;
-						Entity place = entities.get(0);
-						kickCandidate(place, Aircandi.getInstance().getCurrentUser());
-					}
-				}
-				else {
-					Errors.handleError(CandigramForm.this, result.serviceResponse);
-				}
-			}
-		}.execute();
-
-	}
-
-	public void kickUnavailable(String placeName, Photo placePhoto, final User user) {
-
-		ViewGroup customView = customPlaceView(null, placeName, placePhoto);
-		final TextView message = (TextView) customView.findViewById(R.id.message);
-
-		message.setText("To kick this candigram, you need to be at: ");
-
-		String dialogTitle = getResources().getString(R.string.alert_candigram_bounce);
-		if (mEntity.name != null && !mEntity.name.equals("")) {
-			dialogTitle = mEntity.name;
-		}
-
-		final AlertDialog dialog = Dialogs.alertDialog(null
-				, dialogTitle
-				, null
-				, customView
-				, this
-				, android.R.string.ok
-				, null
-				, null
-				, new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-					}
-				}
-				, null);
-		dialog.setCanceledOnTouchOutside(false);
-	}
-
-	public void kickCandidate(final Entity place, final User user) {
-
-		ViewGroup customView = customPlaceView((Place) place, place.name, place.getPhoto());
-		final TextView message = (TextView) customView.findViewById(R.id.message);
-
-		message.setText(getResources().getString(R.string.alert_message_candigram_bounce));
-
-		String dialogTitle = getResources().getString(R.string.alert_candigram_bounce);
-		if (mEntity.name != null && !mEntity.name.equals("")) {
-			dialogTitle = mEntity.name;
-		}
-
-		final AlertDialog dialog = Dialogs.alertDialog(null
-				, dialogTitle
-				, null
-				, customView
-				, this
-				, R.string.alert_button_bounce
-				, android.R.string.cancel
-				, R.string.alert_button_bounce_follow
-				, new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (which == Dialog.BUTTON_POSITIVE) {
-							kickWrapup(place, user, false);
-						}
-						else if (which == Dialog.BUTTON_NEUTRAL) {
-							kickWrapup(place, user, true);
-						}
-						else if (which == Dialog.BUTTON_NEGATIVE) {
-							dialog.dismiss();
-						}
-					}
-				}
-				, null);
-		dialog.setCanceledOnTouchOutside(false);
-	}
-
-	public void kickWrapup(final Entity entity, User user, final Boolean follow) {
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				showBusy();
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("KickEntity");
-				final ModelResult result = EntityManager.getInstance().moveCandigram(mEntity, false, false, entity.id);
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-				ModelResult result = (ModelResult) response;
-				setSupportProgressBarIndeterminateVisibility(false);
-				hideBusy();
-				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-					if (follow) {
-						Places.view(CandigramForm.this, entity.id, mEntity.id);
-						Aircandi.soundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
-						finish();
-						Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
-					}
-					else {
-						Aircandi.soundPool.play(mCandigramExitSoundId, 1.5f, 1.5f, 0, 0, 1f);
-						finish();
-						Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
-					}
-				}
-				else {
-					Errors.handleError(CandigramForm.this, result.serviceResponse);
-				}
-			}
-		}.execute();
-	}
-
-	public ViewGroup customPlaceView(Place place, String placeName, Photo placePhoto) {
-
-		final LayoutInflater inflater = LayoutInflater.from(this);
-		final ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.temp_kicked_candigram, null);
-		final TextView name = (TextView) customView.findViewById(R.id.name);
-		final TextView address = (TextView) customView.findViewById(R.id.address);
-		final AirImageView photoView = (AirImageView) customView.findViewById(R.id.photo);
-
-		UI.setVisibility(name, View.GONE);
-		UI.setVisibility(address, View.GONE);
-		if (placeName != null) {
-			name.setText(placeName);
-			UI.setVisibility(name, View.VISIBLE);
-		}
-
-		if (place != null) {
-			String addressBlock = "";
-			if (place.city != null && place.region != null && !place.city.equals("") && !place.region.equals("")) {
-				addressBlock += place.city + ", " + place.region;
-			}
-			else if (place.city != null && !place.city.equals("")) {
-				addressBlock += place.city;
-			}
-			else if (place.region != null && !place.region.equals("")) {
-				addressBlock += place.region;
-			}
-			if (!addressBlock.equals("")) {
-				address.setText(addressBlock);
-				UI.setVisibility(address, View.VISIBLE);
-			}
-		}
-
-		photoView.setTag(place);
-		UI.drawPhoto(photoView, placePhoto);
-		return customView;
-	}
-
-	@Override
-	public void onAdd() {
-		if (EntityManager.canUserAdd(mEntity)) {
-			Routing.route(this, Route.NEW_FOR, mEntity);
-			return;
-		}
-
-		if (mEntity.locked) {
-			Dialogs.locked(this, mEntity);
-		}
-	}
-
-	@Override
-	public void onHelp() {
-		Bundle extras = new Bundle();
-		Integer helpResId = null;
-		if (mEntity.type.equals(Constants.TYPE_APP_BOUNCE)) {
-			helpResId = R.layout.candigram_bouncing_help;
-		}
-		else if (mEntity.type.equals(Constants.TYPE_APP_TOUR)) {
-			helpResId = R.layout.candigram_touring_help;
-		}
-		else if (mEntity.type.equals(Constants.TYPE_APP_EXPAND)) {
-			helpResId = R.layout.candigram_touring_help;
-		}
-		extras.putInt(Constants.EXTRA_HELP_ID, helpResId);
-		Routing.route(this, Route.HELP, null, null, extras);
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// UI
-	// --------------------------------------------------------------------------------------------
-
 	@Override
 	public void draw() {
 		/*
@@ -515,7 +81,7 @@ public class CandigramForm extends BaseEntityForm {
 		 * - WebImageView child views are gone by default
 		 * - Header views are visible by default
 		 */
-
+		mFirstDraw = false;
 		if (mEntity.type.equals(Constants.TYPE_APP_TOUR) && !((Candigram) mEntity).stopped && mTimer == null) {
 			mTimer = new Runnable() {
 
@@ -560,11 +126,13 @@ public class CandigramForm extends BaseEntityForm {
 					LinearLayout.LayoutParams paramsImage = new LinearLayout.LayoutParams(photoViewWidth, photoViewWidth);
 					photoView.setLayoutParams(paramsImage);
 				}
-
-				Photo photo = mEntity.getPhoto();
-				UI.drawPhoto(photoView, photo);
-				if (photo.usingDefault == null || !photo.usingDefault) {
-					photoView.setClickable(true);
+				
+				if (!UI.photosEqual(photoView.getPhoto(), mEntity.getPhoto())) {
+					Photo photo = mEntity.getPhoto();
+					UI.drawPhoto(photoView, photo);
+					if (photo.usingDefault == null || !photo.usingDefault) {
+						photoView.setClickable(true);
+					}
 				}
 				UI.setVisibility(photoView, View.VISIBLE);
 			}
@@ -746,7 +314,7 @@ public class CandigramForm extends BaseEntityForm {
 		/* Visibility */
 		if (mScrollView != null) {
 			mScrollView.setVisibility(View.VISIBLE);
-		}
+		}		
 	}
 
 	@Override
@@ -790,6 +358,364 @@ public class CandigramForm extends BaseEntityForm {
 				UI.setVisibility(findViewById(R.id.button_expand), View.VISIBLE);
 			}
 		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Events
+	// --------------------------------------------------------------------------------------------
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onMessage(final MessageEvent event) {
+		/*
+		 * Refresh the form because something new has been added to it
+		 * like a comment or post.
+		 */
+		if (event.notification.toEntity != null && mEntityId.equals(event.notification.toEntity.id)) {
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					onRefresh();
+				}
+			});
+		}
+		else if (event.notification.entity != null && mEntityId.equals(event.notification.entity.id)) {
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					/*
+					 * Candigram has moved or repeated and we want to show something.
+					 * 
+					 * - We don't get this message if current user triggered the move.
+					 * - Refresh will update stats, show new place.
+					 */
+					String message = null;
+					if (event.notification.entity.type.equals(Constants.TYPE_APP_BOUNCE)) {
+						message = getString(R.string.alert_candigram_bounced);
+					}
+					else if (event.notification.entity.type.equals(Constants.TYPE_APP_TOUR)) {
+						message = getString(R.string.alert_candigram_toured);
+					}
+					else if (event.notification.entity.type.equals(Constants.TYPE_APP_EXPAND)) {
+						message = getString(R.string.alert_candigram_expanded);
+					}
+					if (!TextUtils.isEmpty(event.notification.toEntity.name)) {
+						message += ": " + event.notification.toEntity.name;
+					}
+					UI.showToastNotification(message, Toast.LENGTH_SHORT);
+					onRefresh();
+				}
+			});
+		}
+	}
+
+	@SuppressWarnings("ucd")
+	public void onExpandButtonClick(View view) {
+
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				showBusy();
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("PromoteEntity");
+				/*
+				 * Call service routine to get a move candidate.
+				 */
+				final ModelResult result = EntityManager.getInstance().moveCandigram(mEntity, true, true, null);
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ModelResult result = (ModelResult) response;
+				setSupportProgressBarIndeterminateVisibility(false);
+				hideBusy();
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+					if (result.data != null) {
+						List<Entity> entities = (List<Entity>) result.data;
+						Entity place = entities.get(0);
+						repeatCandidate(place, Aircandi.getInstance().getCurrentUser());
+					}
+				}
+				else {
+					Errors.handleError(CandigramForm.this, result.serviceResponse);
+				}
+			}
+		}.execute();
+
+	}
+
+	@SuppressWarnings("ucd")
+	public void onBounceButtonClick(View view) {
+
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				showBusy();
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("KickEntity");
+				/*
+				 * Call service routine to get a move candidate.
+				 */
+				final ModelResult result = EntityManager.getInstance().moveCandigram(mEntity, false, true, null);
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ModelResult result = (ModelResult) response;
+				setSupportProgressBarIndeterminateVisibility(false);
+				hideBusy();
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+					if (result.data != null) {
+						List<Entity> entities = (List<Entity>) result.data;
+						Entity place = entities.get(0);
+						kickCandidate(place, Aircandi.getInstance().getCurrentUser());
+					}
+				}
+				else {
+					Errors.handleError(CandigramForm.this, result.serviceResponse);
+				}
+			}
+		}.execute();
+
+	}
+
+	@Override
+	public void onAdd() {
+		if (EntityManager.canUserAdd(mEntity)) {
+			Routing.route(this, Route.NEW_FOR, mEntity);
+			return;
+		}
+
+		if (mEntity.locked) {
+			Dialogs.locked(this, mEntity);
+		}
+	}
+
+	@Override
+	public void onHelp() {
+		Bundle extras = new Bundle();
+		Integer helpResId = null;
+		if (mEntity.type.equals(Constants.TYPE_APP_BOUNCE)) {
+			helpResId = R.layout.candigram_bouncing_help;
+		}
+		else if (mEntity.type.equals(Constants.TYPE_APP_TOUR)) {
+			helpResId = R.layout.candigram_touring_help;
+		}
+		else if (mEntity.type.equals(Constants.TYPE_APP_EXPAND)) {
+			helpResId = R.layout.candigram_touring_help;
+		}
+		extras.putInt(Constants.EXTRA_HELP_ID, helpResId);
+		Routing.route(this, Route.HELP, null, null, extras);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Methods
+	// --------------------------------------------------------------------------------------------
+
+	public void kickCandidate(final Entity place, final User user) {
+
+		ViewGroup customView = buildPlaceView((Place) place, place.name, place.getPhoto());
+		final TextView message = (TextView) customView.findViewById(R.id.message);
+
+		message.setText(getResources().getString(R.string.alert_message_candigram_bounce));
+
+		String dialogTitle = getResources().getString(R.string.alert_candigram_bounce);
+		if (mEntity.name != null && !mEntity.name.equals("")) {
+			dialogTitle = mEntity.name;
+		}
+
+		final AlertDialog dialog = Dialogs.alertDialog(null
+				, dialogTitle
+				, null
+				, customView
+				, this
+				, R.string.alert_button_bounce
+				, android.R.string.cancel
+				, R.string.alert_button_bounce_follow
+				, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							kickWrapup(place, user, false);
+						}
+						else if (which == Dialog.BUTTON_NEUTRAL) {
+							kickWrapup(place, user, true);
+						}
+						else if (which == Dialog.BUTTON_NEGATIVE) {
+							dialog.dismiss();
+						}
+					}
+				}
+				, null);
+		dialog.setCanceledOnTouchOutside(false);
+	}
+
+	public void kickWrapup(final Entity entity, User user, final Boolean follow) {
+
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				showBusy();
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("KickEntity");
+				final ModelResult result = EntityManager.getInstance().moveCandigram(mEntity, false, false, entity.id);
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ModelResult result = (ModelResult) response;
+				setSupportProgressBarIndeterminateVisibility(false);
+				hideBusy();
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+					if (follow) {
+						Places.view(CandigramForm.this, entity.id, mEntity.id);
+						Media.playSound(mCandigramExitSoundId, 1.0f);
+						finish();
+						Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
+					}
+					else {
+						Media.playSound(mCandigramExitSoundId, 1.0f);
+						finish();
+						Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
+					}
+				}
+				else {
+					Errors.handleError(CandigramForm.this, result.serviceResponse);
+				}
+			}
+		}.execute();
+	}
+
+	public void repeatCandidate(final Entity place, final User user) {
+
+		ViewGroup customView = buildPlaceView((Place) place, place.name, place.getPhoto());
+		final TextView message = (TextView) customView.findViewById(R.id.message);
+
+		message.setText(getResources().getString(R.string.alert_message_candigram_expand));
+
+		String dialogTitle = getResources().getString(R.string.alert_promoted_candigram);
+		if (mEntity.name != null && !mEntity.name.equals("")) {
+			dialogTitle = mEntity.name;
+		}
+
+		final AlertDialog dialog = Dialogs.alertDialog(null
+				, dialogTitle
+				, null
+				, customView
+				, this
+				, R.string.alert_button_expand
+				, android.R.string.cancel
+				, R.string.alert_button_expand_follow
+				, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							repeatWrapup(place, user, false);
+						}
+						else if (which == Dialog.BUTTON_NEUTRAL) {
+							repeatWrapup(place, user, true);
+						}
+						else if (which == Dialog.BUTTON_NEGATIVE) {
+							dialog.dismiss();
+						}
+					}
+				}
+				, null);
+		dialog.setCanceledOnTouchOutside(false);
+	}
+
+	public void repeatWrapup(final Entity entity, User user, final Boolean follow) {
+
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				showBusy();
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("PromoteEntity");
+				final ModelResult result = EntityManager.getInstance().moveCandigram(mEntity, true, false, entity.id);
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ModelResult result = (ModelResult) response;
+				setSupportProgressBarIndeterminateVisibility(false);
+				hideBusy();
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+					if (follow) {
+						Places.view(CandigramForm.this, entity.id, mEntity.id);
+						Media.playSound(mCandigramExitSoundId, 1.0f);
+						finish();
+						Animate.doOverridePendingTransition(CandigramForm.this, TransitionType.CANDIGRAM_OUT);
+					}
+					else {
+						Media.playSound(mCandigramExitSoundId, 1.0f);
+						onRefresh();
+					}
+				}
+				else {
+					Errors.handleError(CandigramForm.this, result.serviceResponse);
+				}
+			}
+		}.execute();
+	}
+
+	public ViewGroup buildPlaceView(Place place, String placeName, Photo placePhoto) {
+
+		final LayoutInflater inflater = LayoutInflater.from(this);
+		final ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.dialog_candigram, null);
+		final TextView name = (TextView) customView.findViewById(R.id.name);
+		final TextView address = (TextView) customView.findViewById(R.id.address);
+		final AirImageView photoView = (AirImageView) customView.findViewById(R.id.photo);
+
+		UI.setVisibility(name, View.GONE);
+		UI.setVisibility(address, View.GONE);
+		if (placeName != null) {
+			name.setText(placeName);
+			UI.setVisibility(name, View.VISIBLE);
+		}
+
+		if (place != null) {
+			String addressBlock = "";
+			if (place.city != null && place.region != null && !place.city.equals("") && !place.region.equals("")) {
+				addressBlock += place.city + ", " + place.region;
+			}
+			else if (place.city != null && !place.city.equals("")) {
+				addressBlock += place.city;
+			}
+			else if (place.region != null && !place.region.equals("")) {
+				addressBlock += place.region;
+			}
+			if (!addressBlock.equals("")) {
+				address.setText(addressBlock);
+				UI.setVisibility(address, View.VISIBLE);
+			}
+		}
+
+		photoView.setTag(place);
+		UI.drawPhoto(photoView, placePhoto);
+		return customView;
 	}
 
 	private void setActionText() {

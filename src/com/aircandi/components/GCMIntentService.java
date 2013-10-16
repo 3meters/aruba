@@ -49,7 +49,9 @@ public class GCMIntentService extends GCMBaseIntentService {
 		/* We don't self notify unless dev settings are on and self notify is enabled */
 		if (!Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
 				|| !Aircandi.settings.getBoolean(Constants.PREF_TESTING_SELF_NOTIFY, Constants.PREF_TESTING_SELF_NOTIFY_DEFAULT)) {
-			if (notification.user != null && Aircandi.getInstance().getCurrentUser() != null && notification.user.id.equals(Aircandi.getInstance().getCurrentUser().id)) {
+			if (notification.user != null
+					&& Aircandi.getInstance().getCurrentUser() != null
+					&& notification.user.id.equals(Aircandi.getInstance().getCurrentUser().id)) {
 				return;
 			}
 		}
@@ -86,7 +88,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 				return;
 			}
 		}
-			
+
 		NotificationManager.getInstance().showNotification(notification, context);
 	}
 

@@ -195,10 +195,10 @@ public final class Constants {
 	public static final String	PHOTO_SOURCE_WEBSITE_THUMBNAIL				= "website_thumbnail";																		//$NON-NLS-1$
 
 	public static final int		ACTIVITY_MARKET								= 200;
-	public static final int		ACTIVITY_PICTURE_PICK_DEVICE				= 300;
-	public static final int		ACTIVITY_PICTURE_SEARCH						= 305;
-	public static final int		ACTIVITY_PICTURE_MAKE						= 310;
-	public static final int		ACTIVITY_PICTURE_PICK_PLACE					= 315;
+	public static final int		ACTIVITY_PHOTO_PICK_DEVICE				= 300;
+	public static final int		ACTIVITY_PHOTO_SEARCH						= 305;
+	public static final int		ACTIVITY_PHOTO_MAKE						= 310;
+	public static final int		ACTIVITY_PHOTO_PICK_PLACE					= 315;
 	public static final int		ACTIVITY_SIGNIN								= 400;
 	public static final int		ACTIVITY_COMMENT							= 430;
 	public static final int		ACTIVITY_APPLINKS_EDIT						= 535;

@@ -69,7 +69,7 @@ public class CandigramEdit extends BaseEntityEdit {
 	private SpinnerData	mSpinnerLifetimeData;
 	private SpinnerData	mSpinnerHopsData;
 
-	private CheckBox	mParked;
+	private CheckBox	mStopped;
 	private TextView	mHintParked;
 
 	@Override
@@ -84,7 +84,7 @@ public class CandigramEdit extends BaseEntityEdit {
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
 		mSpinnerItem = getThemeTone().equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
-		mParked = (CheckBox) findViewById(R.id.chk_stopped);
+		mStopped = (CheckBox) findViewById(R.id.chk_stopped);
 		mHintParked = (TextView) findViewById(R.id.hint_stopped);
 
 		mSpinnerTypeData = Candigrams.getSpinnerData(this, PropertyType.TYPE);
@@ -247,8 +247,8 @@ public class CandigramEdit extends BaseEntityEdit {
 			public void onNothingSelected(AdapterView<?> parent) {}
 		});
 
-		if (mParked != null) {
-			mParked.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		if (mStopped != null) {
+			mStopped.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -275,10 +275,15 @@ public class CandigramEdit extends BaseEntityEdit {
 			((ViewFlipper) findViewById(R.id.flipper_form)).removeViewAt(0);
 			findViewById(R.id.content_message).setVisibility(View.GONE);
 			findViewById(R.id.settings_message).setVisibility(View.GONE);
+			findViewById(R.id.type_holder).setVisibility(View.GONE); // We don't let users change the type		
+			((TextView) findViewById(R.id.type)).setText("Candigram type: " + mEntity.type);
+			findViewById(R.id.type).setVisibility(View.VISIBLE);
 		}
 		else {
 			findViewById(R.id.type_holder).setVisibility(View.GONE);
+			findViewById(R.id.type).setVisibility(View.GONE);
 			findViewById(R.id.authoring_holder).setVisibility(View.GONE);
+			findViewById(R.id.stopped_holder).setVisibility(View.GONE);
 			mViewFlipper.setDisplayedChild(0);
 			Integer colorResId = R.color.accent_gray_dark;
 			((ImageView) findViewById(R.id.type_image_next)).setColorFilter(mResources.getColor(colorResId), PorterDuff.Mode.SRC_ATOP);
@@ -310,9 +315,20 @@ public class CandigramEdit extends BaseEntityEdit {
 		/* Place content */
 		Candigram candigram = (Candigram) mEntity;
 
-		if (mParked != null) {
-			mParked.setChecked(candigram.stopped);
-			mHintParked.setText(getString(candigram.stopped ? R.string.candigram_stopped_true_help : R.string.candigram_stopped_false_help));
+		if (mStopped != null) {
+			mStopped.setChecked(candigram.stopped);
+			if (candigram.type != null) {
+				if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)
+						|| candigram.type.equals(Constants.TYPE_APP_TOUR)) {
+					mStopped.setText(getString(R.string.form_label_parked));
+					mHintParked.setText(getString(candigram.stopped ? R.string.candigram_stopped_true_help : R.string.candigram_stopped_false_help));
+				}
+				else if (candigram.type.equals(Constants.TYPE_APP_EXPAND)) {
+					mStopped.setText(getString(R.string.form_label_retired));
+					mHintParked.setText(getString(candigram.stopped ? R.string.candigram_stopped_expand_true_help
+							: R.string.candigram_stopped_expand_false_help));
+				}
+			}
 		}
 
 		if (mSpinnerType != null) {
@@ -625,8 +641,8 @@ public class CandigramEdit extends BaseEntityEdit {
 			}
 		}
 
-		if (mParked != null) {
-			candigram.stopped = mParked.isChecked();
+		if (mStopped != null) {
+			candigram.stopped = mStopped.isChecked();
 		}
 
 		/*

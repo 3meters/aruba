@@ -12,7 +12,7 @@
         android:layout_marginBottom="10dp"
         android:text="@string/dummy_name"
         android:textColor="?attr/textColor"
-        android:textAppearance="@style/textAppearanceExtraSmall" />
+        android:textAppearance="@style/textAppearance" />
 
     <LinearLayout
         android:id="@+id/list"

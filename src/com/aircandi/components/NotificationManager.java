@@ -231,7 +231,8 @@ public class NotificationManager {
 									}
 								}
 								else {
-									mNotificationManager.notify(airNotification.action, 0, builder.build());
+									String tag = getTag(airNotification);
+									mNotificationManager.notify(tag, 0, builder.build());
 								}
 							}
 						}
@@ -266,8 +267,8 @@ public class NotificationManager {
 									.setSummaryText(airNotification.subtitle);
 
 							builder.setStyle(style);
-
-							mNotificationManager.notify(getTag(airNotification), 0, builder.build());
+							String tag = getTag(airNotification);
+							mNotificationManager.notify(tag, 0, builder.build());
 						}
 					}
 				});

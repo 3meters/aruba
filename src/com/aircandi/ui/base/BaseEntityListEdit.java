@@ -92,7 +92,6 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 			Collections.sort(mEntities, new Entity.SortByPositionSortDate());
 
 			if (mEntities.size() == 0) {
-				mMessage.setText(R.string.sources_builder_empty);
 				mMessage.setVisibility(View.VISIBLE);
 			}
 			else {
@@ -297,7 +296,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 		}
 
 		final LayoutInflater inflater = LayoutInflater.from(this);
-		final ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.temp_delete_sources, null);
+		final ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.dialog_applinks_delete, null);
 		final TextView message = (TextView) customView.findViewById(R.id.message);
 		final LinearLayout list = (LinearLayout) customView.findViewById(R.id.list);
 		for (Entity entity : mEntities) {
@@ -405,7 +404,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 				@Override
 				public void onClick(View view) {
 					String activityName = Aircandi.getInstance().getCurrentActivity().getClass().getSimpleName();
-					Tracker.sendEvent("ui_action", "refresh", activityName, 0, Aircandi.getInstance().getCurrentUser());
+					Tracker.sendEvent("ui_action", "list_refresh", activityName, 0, Aircandi.getInstance().getCurrentUser());
 					onRefresh();
 				}
 			});

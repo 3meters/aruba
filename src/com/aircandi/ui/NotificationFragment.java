@@ -91,6 +91,8 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = super.onCreateView(inflater, container, savedInstanceState);
+		if (view == null) return view;
+		
 		mListView = (ListView) view.findViewById(R.id.list);
 		mMessage = (TextView) view.findViewById(R.id.message);
 		return view;

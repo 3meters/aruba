@@ -86,7 +86,8 @@ public class EntityCache implements Map<String, Entity> {
 						+ shortcuts.size();
 			}
 			for (Shortcut shortcut : shortcuts) {
-				Link link = new Link(shortcut.getId(), entity.id, Constants.TYPE_LINK_CONTENT, shortcut.schema, true);
+				Link link = new Link(shortcut.getId(), entity.id, Constants.TYPE_LINK_CONTENT, shortcut.schema);
+				link.strong = true;
 				link.shortcut = shortcut;
 				entity.linksIn.add(link);
 			}
@@ -453,7 +454,8 @@ public class EntityCache implements Map<String, Entity> {
 				toEntity.getCount(type, fromShortcut.schema, Direction.in).count = toEntity.getCount(type, fromShortcut.schema, Direction.in).count.intValue() + 1;
 			}
 
-			Link link = new Link(fromId, toId, type, fromShortcut.schema, strong);
+			Link link = new Link(fromId, toId, type, fromShortcut.schema);
+			link.strong = strong;
 			link.modifiedDate = time;
 
 			if (fromShortcut != null) {
@@ -484,7 +486,8 @@ public class EntityCache implements Map<String, Entity> {
 				fromEntity.getCount(type, fromShortcut.schema, Direction.out).count = fromEntity.getCount(type, fromShortcut.schema, Direction.out).count.intValue() + 1;
 			}
 
-			Link link = new Link(fromId, toId, type, fromShortcut.schema, strong);
+			Link link = new Link(fromId, toId, type, fromShortcut.schema);
+			link.strong = strong;
 			link.modifiedDate = time;
 
 			if (toShortcut != null) {

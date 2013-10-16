@@ -263,7 +263,6 @@ public final class Routing {
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
 			}
-			Tracker.sendEvent("ui_action", "entity_edit", entity.schema, 0, Aircandi.getInstance().getCurrentUser());
 			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.editFormBySchema(entity.schema))
 					.setEntity(entity)
 					.setExtras(extras);
@@ -280,7 +279,6 @@ public final class Routing {
 
 		else if (route == Route.NEW) {
 
-			Tracker.sendEvent("ui_action", "new_" + schema, null, 0, Aircandi.getInstance().getCurrentUser());
 			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.insertFormBySchema(schema))
 					.setEntitySchema(schema)
 					.setExtras(extras);
@@ -536,7 +534,7 @@ public final class Routing {
 
 			activity.startActivityForResult(Intent.createChooser(intent
 					, activity.getString(R.string.chooser_gallery_title))
-					, Constants.ACTIVITY_PICTURE_PICK_DEVICE);
+					, Constants.ACTIVITY_PHOTO_PICK_DEVICE);
 			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
@@ -544,7 +542,7 @@ public final class Routing {
 		else if (route == Route.PHOTO_FROM_CAMERA) {
 
 			IntentBuilder intentBuilder = new IntentBuilder(MediaStore.ACTION_IMAGE_CAPTURE).setExtras(extras);
-			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_MAKE);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PHOTO_MAKE);
 			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
@@ -552,7 +550,7 @@ public final class Routing {
 		else if (route == Route.PHOTO_SEARCH) {
 
 			IntentBuilder intentBuilder = new IntentBuilder(activity, PhotoPicker.class).setExtras(extras);
-			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_SEARCH);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PHOTO_SEARCH);
 			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
@@ -563,7 +561,7 @@ public final class Routing {
 				throw new IllegalArgumentException("valid entity required for selected route");
 			}
 			IntentBuilder intentBuilder = new IntentBuilder(activity, PhotoPicker.class).setEntityId(entity.id);
-			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_PICK_PLACE);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PHOTO_PICK_PLACE);
 			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}

@@ -20,7 +20,6 @@ public abstract class BaseEdit extends BaseActivity implements IEdit {
 
 	protected Boolean	mEditing	= false;
 	protected Boolean	mDirty		= false;
-	protected Boolean	mFirstDraw	= true;
 
 	/* Inputs */
 	protected Boolean	mSkipSave	= false;

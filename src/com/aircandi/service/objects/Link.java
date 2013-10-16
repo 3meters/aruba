@@ -26,19 +26,20 @@ public class Link extends ServiceBase {
 	@Expose
 	@SerializedName(name = "_to")
 	public String				toId;
-	@Expose(serialize = false, deserialize = true)
-	public String				fromCollectionId;
-	@Expose(serialize = false, deserialize = true)
-	public String				toCollectionId;
-	@Expose
-	public Boolean				strong;
 	@Expose
 	public Boolean				inactive = false;
+	@Expose
+	public Proximity			proximity;
+	
+	@Expose(serialize = false, deserialize = true)
+	public Boolean				strong;
+	@Expose(serialize = false, deserialize = true)
+	public String				fromSchema;		
+	@Expose(serialize = false, deserialize = true)
+	public String				toSchema;		
 	@Expose(serialize = false, deserialize = true)
 	public String				targetSchema;		// Used when stored in linksIn or linksOut
 
-	@Expose
-	public Proximity			proximity;
 	@Expose(serialize = false, deserialize = true)
 	public Shortcut				shortcut;
 	@Expose(serialize = false, deserialize = true)
@@ -46,18 +47,16 @@ public class Link extends ServiceBase {
 
 	public Link() {}
 
-	public Link(String toId, String type, String targetSchema, Boolean strong) {
+	public Link(String toId, String type, String targetSchema) {
 		this.toId = toId;
 		this.type = type;
 		this.targetSchema = targetSchema;
-		this.strong = strong;
 	}
 
-	public Link(String fromId, String toId, String type, String targetSchema, Boolean strong) {
+	public Link(String fromId, String toId, String type, String targetSchema) {
 		this.toId = toId;
 		this.type = type;
 		this.targetSchema = targetSchema;
-		this.strong = strong;
 		this.fromId = fromId;
 	}
 
@@ -136,10 +135,10 @@ public class Link extends ServiceBase {
 
 		link.fromId = (String) (nameMapping ? map.get("_from") : map.get("fromId"));
 		link.toId = (String) (nameMapping ? map.get("_to") : map.get("toId"));
-		link.fromCollectionId = (String) map.get("fromCollectionId");
-		link.toCollectionId = (String) map.get("toCollectionId");
 		link.strong = (Boolean) map.get("strong");
 		link.inactive = (Boolean) map.get("inactive");
+		link.fromSchema = (String) map.get("fromSchema");
+		link.toSchema = (String) map.get("toSchema");
 		link.targetSchema = (String) map.get("targetSchema");
 
 		if (map.get("proximity") != null) {
