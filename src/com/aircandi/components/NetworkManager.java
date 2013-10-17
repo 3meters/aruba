@@ -29,6 +29,7 @@ import com.aircandi.service.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ServiceResponse;
 import com.aircandi.utilities.Errors;
+import com.aircandi.utilities.Reporting;
 import com.aircandi.utilities.UI;
 import com.crashlytics.android.Crashlytics;
 
@@ -97,7 +98,9 @@ public class NetworkManager {
 	public static final String				WIFI_AP_STATE_CHANGED_ACTION	= "android.net.wifi.WIFI_AP_STATE_CHANGED";
 	public static final int					WIFI_AP_STATE_ENABLED			= 3;
 
-	private NetworkManager() {}
+	private NetworkManager() {
+		mConnection = new OkHttpUrlConnection();
+	}
 
 	private static class NetworkManagerHolder {
 		public static final NetworkManager	instance	= new NetworkManager();
@@ -116,7 +119,6 @@ public class NetworkManager {
 
 		mWifiManager = (WifiManager) mApplicationContext.getSystemService(Context.WIFI_SERVICE);
 		mConnectivityManager = (ConnectivityManager) mApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-		mConnection = new OkHttpUrlConnection();
 
 		/*
 		 * Setting system properties needed for HttpUrlConnection
@@ -399,21 +401,6 @@ public class NetworkManager {
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
-	public void updateCrashlytics() {
-		Location location = LocationManager.getInstance().getLocationLocked();
-
-		Crashlytics.setBool("airplane_mode", NetworkManager.isAirplaneMode(mApplicationContext));
-		Crashlytics.setBool("connected", NetworkManager.getInstance().isConnected());
-		Crashlytics.setString("network_type", NetworkManager.getInstance().getNetworkType().toLowerCase(Locale.US));
-		Crashlytics.setBool("wifi_tethered", NetworkManager.getInstance().isWifiTethered());
-		Crashlytics.setBool("wifi_enabled", NetworkManager.getInstance().isWifiEnabled());
-		Crashlytics.setFloat("beacons_visible", ProximityManager.getInstance().getWifiList().size());
-		if (location != null) {
-			Crashlytics.setFloat("location_accurary", location.getAccuracy());
-			Crashlytics.setString("location_provider", location.getProvider());
-		}
-	}
-
 	public Integer getWifiState() {
 		return mWifiState;
 	}
@@ -439,34 +426,11 @@ public class NetworkManager {
 			String action = intent.getAction();
 			if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
 				mWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
-				if (mWifiState == WifiManager.WIFI_STATE_DISABLED) {
-					Crashlytics.setString("wifi_state", "disabled");
-				}
-				else if (mWifiState == WifiManager.WIFI_STATE_ENABLED) {
-					Crashlytics.setString("wifi_state", "enabled");
-				}
-				else if (mWifiState == WifiManager.WIFI_STATE_ENABLING) {
-					Crashlytics.setString("wifi_state", "enabling");
-				}
-				else if (mWifiState == WifiManager.WIFI_STATE_DISABLING) {
-					Crashlytics.setString("wifi_state", "disabling");
-				}
 			}
 			else if (action.equals(WIFI_AP_STATE_CHANGED_ACTION)) {
 				mWifiApState = intent.getIntExtra(EXTRA_WIFI_AP_STATE, WifiManager.WIFI_STATE_UNKNOWN);
-				if (mWifiApState == WifiManager.WIFI_STATE_DISABLED) {
-					Crashlytics.setString("wifi_ap_state", "disabled");
-				}
-				else if (mWifiApState == WifiManager.WIFI_STATE_ENABLED) {
-					Crashlytics.setString("wifi_ap_state", "enabled");
-				}
-				else if (mWifiApState == WifiManager.WIFI_STATE_ENABLING) {
-					Crashlytics.setString("wifi_ap_state", "enabling");
-				}
-				else if (mWifiApState == WifiManager.WIFI_STATE_DISABLING) {
-					Crashlytics.setString("wifi_ap_state", "disabling");
-				}
 			}
+			Reporting.updateCrashKeys();
 		}
 	}
 

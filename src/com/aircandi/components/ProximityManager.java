@@ -32,6 +32,7 @@ import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.utilities.DateTime;
+import com.aircandi.utilities.Reporting;
 import com.google.android.gcm.GCMRegistrar;
 
 public class ProximityManager {
@@ -140,7 +141,7 @@ public class ProximityManager {
 					}
 				}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
-				NetworkManager.getInstance().updateCrashlytics();								
+				Reporting.updateCrashKeys();								
 				Aircandi.stopwatch3.start("Start wifi scan: reason = " + reason.toString());
 				mWifiManager.startScan();
 			}

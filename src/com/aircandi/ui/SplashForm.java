@@ -33,6 +33,7 @@ import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Json;
+import com.aircandi.utilities.Reporting;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -111,7 +112,7 @@ public class SplashForm extends SherlockActivity {
 				/* Connectivity monitoring */
 				NetworkManager.getInstance().setContext(getApplicationContext());
 				NetworkManager.getInstance().initialize();
-				NetworkManager.getInstance().updateCrashlytics();
+				Reporting.updateCrashKeys();
 				
 				/*
 				 * Fire off a check to make sure the session is valid. This will also

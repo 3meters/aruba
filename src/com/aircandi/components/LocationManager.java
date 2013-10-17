@@ -13,6 +13,7 @@ import com.aircandi.Constants;
 import com.aircandi.events.LocationChangedEvent;
 import com.aircandi.events.LocationTimeoutEvent;
 import com.aircandi.service.objects.AirLocation;
+import com.aircandi.utilities.Reporting;
 
 @SuppressWarnings("ucd")
 public class LocationManager {
@@ -80,7 +81,7 @@ public class LocationManager {
 		 * This will produce rapid updates across all available providers until we get an acceptable
 		 * location fix.
 		 */
-		NetworkManager.getInstance().updateCrashlytics();								
+		Reporting.updateCrashKeys();								
 		mLocationManager.removeUpdates(mLocationListenerPendingIntent);
 
 		setLocation(null);

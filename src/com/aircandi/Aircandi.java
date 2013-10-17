@@ -22,8 +22,8 @@ import com.aircandi.components.Stopwatch;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.AircandiForm;
+import com.aircandi.utilities.Reporting;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.crashlytics.android.Crashlytics;
 
 public class Aircandi extends Application {
 
@@ -91,7 +91,7 @@ public class Aircandi extends Application {
 		stopwatch2 = new Stopwatch("Stopwatch2"); // $codepro.audit.disable stringLiterals
 		stopwatch3 = new Stopwatch("Stopwatch3"); // $codepro.audit.disable stringLiterals
 
-		Crashlytics.start(this);
+		Reporting.startCrashReporting(this);
 
 		applicationContext = getApplicationContext();
 		mainThreadHandler = new Handler(Looper.getMainLooper());
@@ -146,16 +146,7 @@ public class Aircandi extends Application {
 
 	public void setCurrentUser(User user) {
 		mCurrentUser = user;
-		if (user != null) {
-			Crashlytics.setUserIdentifier(user.id);
-			Crashlytics.setUserName(user.name);
-			Crashlytics.setUserEmail(user.email);
-		}
-		else {
-			Crashlytics.setUserIdentifier(null);
-			Crashlytics.setUserName(null);
-			Crashlytics.setUserEmail(null);
-		}
+		Reporting.updateCrashUser(user);
 	}
 
 	public User getCurrentUser() {

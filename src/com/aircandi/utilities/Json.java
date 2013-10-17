@@ -40,7 +40,6 @@ import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
-import com.crashlytics.android.Crashlytics;
 
 public class Json {
 
@@ -266,14 +265,14 @@ public class Json {
 			}
 			return list;
 		}
-		catch (ClassCastException e) {
+		catch (ClassCastException exception) {
 			/*
 			 * Sometimes we get back something that isn't a json object so we
 			 * catch the exception, log it and keep going.
 			 */
-			Crashlytics.logException(e);
+			Reporting.logException(exception);
 			if (BuildConfig.DEBUG) {
-				e.printStackTrace();
+				exception.printStackTrace();
 			}
 		}
 		return null;

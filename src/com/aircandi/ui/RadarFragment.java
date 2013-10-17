@@ -77,6 +77,7 @@ import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Media;
+import com.aircandi.utilities.Reporting;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.Type;
@@ -388,7 +389,7 @@ public class RadarFragment extends BaseFragment implements
 	public void onQueryWifiScanReceived(final QueryWifiScanReceivedEvent event) {
 
 		updateDevIndicator(event.wifiList, null);
-		NetworkManager.getInstance().updateCrashlytics();
+		Reporting.updateCrashKeys();
 		getSherlockActivity().runOnUiThread(new Runnable() {
 
 			@Override
@@ -527,7 +528,7 @@ public class RadarFragment extends BaseFragment implements
 					final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
 					if (location != null && !location.zombie) {
 
-						NetworkManager.getInstance().updateCrashlytics();
+						Reporting.updateCrashKeys();
 						mBusyManager.showBusy();
 
 						new AsyncTask() {
@@ -732,7 +733,7 @@ public class RadarFragment extends BaseFragment implements
 			protected void onPreExecute() {
 				mPullToRefreshAttacher.setRefreshing(true);
 				showBusy();
-				NetworkManager.getInstance().updateCrashlytics();
+				Reporting.updateCrashKeys();
 			}
 
 			@Override
