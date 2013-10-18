@@ -32,33 +32,37 @@ public class Reporting {
 		/* Wifi state */
 
 		Integer wifiState = NetworkManager.getInstance().getWifiState();
-		if (wifiState == WifiManager.WIFI_STATE_DISABLED) {
-			Crashlytics.setString("wifi_state", "disabled");
-		}
-		else if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
-			Crashlytics.setString("wifi_state", "enabled");
-		}
-		else if (wifiState == WifiManager.WIFI_STATE_ENABLING) {
-			Crashlytics.setString("wifi_state", "enabling");
-		}
-		else if (wifiState == WifiManager.WIFI_STATE_DISABLING) {
-			Crashlytics.setString("wifi_state", "disabling");
+		if (wifiState != null) {
+			if (wifiState == WifiManager.WIFI_STATE_DISABLED) {
+				Crashlytics.setString("wifi_state", "disabled");
+			}
+			else if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
+				Crashlytics.setString("wifi_state", "enabled");
+			}
+			else if (wifiState == WifiManager.WIFI_STATE_ENABLING) {
+				Crashlytics.setString("wifi_state", "enabling");
+			}
+			else if (wifiState == WifiManager.WIFI_STATE_DISABLING) {
+				Crashlytics.setString("wifi_state", "disabling");
+			}
 		}
 
 		/* Wifi access point state */
 
 		Integer wifiApState = NetworkManager.getInstance().getWifiApState();
-		if (wifiApState == WifiManager.WIFI_STATE_DISABLED) {
-			Crashlytics.setString("wifi_ap_state", "disabled");
-		}
-		else if (wifiApState == WifiManager.WIFI_STATE_ENABLED) {
-			Crashlytics.setString("wifi_ap_state", "enabled");
-		}
-		else if (wifiApState == WifiManager.WIFI_STATE_ENABLING) {
-			Crashlytics.setString("wifi_ap_state", "enabling");
-		}
-		else if (wifiApState == WifiManager.WIFI_STATE_DISABLING) {
-			Crashlytics.setString("wifi_ap_state", "disabling");
+		if (wifiApState != null) {
+			if (wifiApState == WifiManager.WIFI_STATE_DISABLED) {
+				Crashlytics.setString("wifi_ap_state", "disabled");
+			}
+			else if (wifiApState == WifiManager.WIFI_STATE_ENABLED) {
+				Crashlytics.setString("wifi_ap_state", "enabled");
+			}
+			else if (wifiApState == WifiManager.WIFI_STATE_ENABLING) {
+				Crashlytics.setString("wifi_ap_state", "enabling");
+			}
+			else if (wifiApState == WifiManager.WIFI_STATE_DISABLING) {
+				Crashlytics.setString("wifi_ap_state", "disabling");
+			}
 		}
 	}
 

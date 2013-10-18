@@ -22,7 +22,7 @@
     <!--
 		The amount of time (in seconds) your application can stay in the background before the 
 		session is ended. Default is 30 seconds. Negative value disables EasyTracker session management.     -->
-    <integer name="ga_sessionTimeout">30</integer>
+    <integer name="ga_sessionTimeout">300</integer>
 
     <!-- Privacy settings that strips the last octet of the IP before storage in service -->
     <bool name="ga_anonymizeIp">false</bool>

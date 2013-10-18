@@ -2,7 +2,6 @@ package com.aircandi.components;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Locale;
 
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
@@ -10,7 +9,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
@@ -31,7 +29,6 @@ import com.aircandi.service.ServiceResponse;
 import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Reporting;
 import com.aircandi.utilities.UI;
-import com.crashlytics.android.Crashlytics;
 
 /**
  * Designed as a singleton. The private Constructor prevents any other class from instantiating.

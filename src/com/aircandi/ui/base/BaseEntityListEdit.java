@@ -403,8 +403,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					String activityName = Aircandi.getInstance().getCurrentActivity().getClass().getSimpleName();
-					Tracker.sendEvent("ui_action", "list_refresh", activityName, 0, Aircandi.getInstance().getCurrentUser());
+					Tracker.sendEvent("ui_action", "list_edit_refresh_by_user", mListSchema, 0, Aircandi.getInstance().getCurrentUser());
 					onRefresh();
 				}
 			});

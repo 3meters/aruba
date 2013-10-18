@@ -395,7 +395,12 @@ public class RadarFragment extends BaseFragment implements
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Wifi scan received event fired");
-				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "wifi_scan_received", null, Aircandi.getInstance().getCurrentUser());
+				
+				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills()
+						, "wifi_scan_finished"
+						, NetworkManager.getInstance().getNetworkType()
+						, Aircandi.getInstance().getCurrentUser());
+				
 				Logger.d(getSherlockActivity(), "Query wifi scan received event: locking beacons");
 
 				if (event.wifiList != null) {
@@ -449,7 +454,12 @@ public class RadarFragment extends BaseFragment implements
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Entities by proximity finished event fired");
-				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "entities_for_beacons", null, Aircandi.getInstance().getCurrentUser());
+				
+				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills()
+						, "places_by_proximity_downloaded"
+						, NetworkManager.getInstance().getNetworkType()
+						, Aircandi.getInstance().getCurrentUser());
+				
 				Logger.d(getSherlockActivity(), "Entities for beacons finished event: ** done **");
 				mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
 				mCacheStamp = EntityManager.getInstance().getCacheStamp();
@@ -520,9 +530,13 @@ public class RadarFragment extends BaseFragment implements
 					BusProvider.getInstance().post(new LocationLockedEvent(LocationManager.getInstance().getLocationLocked()));
 
 					if (Aircandi.stopwatch2.isStarted()) {
-						Aircandi.stopwatch2.stop("Location acquired");
-						Tracker.sendTiming("location", Aircandi.stopwatch2.getTotalTimeMills(), "location_acquired", null, Aircandi.getInstance()
-								.getCurrentUser());
+						Aircandi.stopwatch2.stop("Location accepted");
+						
+						Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills()
+								, "location_accepted"
+								, NetworkManager.getInstance().getNetworkType()
+								, Aircandi.getInstance().getCurrentUser());
+						
 					}
 
 					final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
@@ -538,7 +552,7 @@ public class RadarFragment extends BaseFragment implements
 
 								Logger.d(getSherlockActivity(), "Location changed event: getting places near location");
 								Thread.currentThread().setName("GetPlacesNearLocation");
-								Aircandi.stopwatch2.start("GET places near location");
+								Aircandi.stopwatch2.start("Get places near location");
 
 								final ServiceResponse serviceResponse = ProximityManager.getInstance().getEntitiesNearLocation(location);
 								return serviceResponse;
@@ -567,7 +581,12 @@ public class RadarFragment extends BaseFragment implements
 	@SuppressWarnings("ucd")
 	public void onPlacesNearLocationFinished(final PlacesNearLocationFinishedEvent event) {
 		Aircandi.stopwatch2.stop("Places near location complete");
-		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "places_near_location", null, Aircandi.getInstance().getCurrentUser());
+		
+		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills()
+				, "places_near_location_downloaded"
+				, NetworkManager.getInstance().getNetworkType()
+				, Aircandi.getInstance().getCurrentUser());
+		
 		mHandler.post(new Runnable() {
 
 			@Override
@@ -592,7 +611,6 @@ public class RadarFragment extends BaseFragment implements
 			public void run() {
 				Logger.d(getSherlockActivity(), "Entities changed event: updating radar");
 				Aircandi.stopwatch1.segmentTime("Entities changed: start radar display");
-				Aircandi.stopwatch3.stop("Aircandi initialization finished and got first entities");
 
 				/* Point radar adapter at the updated entities */
 				final int previousCount = mRadarAdapter.getCount();

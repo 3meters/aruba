@@ -22,7 +22,6 @@ import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NotificationManager;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
@@ -196,7 +195,6 @@ public class SplashForm extends SherlockActivity {
 				user.session = (Session) Json.jsonToObject(jsonSession, Json.ObjectType.SESSION);
 				if (user.session != null) {
 					Aircandi.getInstance().setCurrentUser(user);
-					Tracker.startNewSession(Aircandi.getInstance().getCurrentUser());
 					Aircandi.mainThreadHandler.postDelayed(new Runnable() {
 
 						@Override

@@ -266,7 +266,7 @@ public class Dialogs {
 				, activity.getResources().getString(R.string.alert_send_password_message)
 				, null
 				, activity, android.R.string.ok, null, null, null, null);
-		Tracker.sendEvent("ui_action", "recover_password", null, 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("support", "password_recover", null, 0, Aircandi.getInstance().getCurrentUser());
 	}
 
 	public static void locked(final Activity activity, Entity entity) {

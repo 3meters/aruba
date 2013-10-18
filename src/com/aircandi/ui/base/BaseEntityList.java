@@ -92,7 +92,6 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Aircandi.stopwatch3.start(this.getClass().getSimpleName() + " create");
 		super.onCreate(savedInstanceState);
 	}
 
@@ -153,7 +152,6 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 				Routing.shortcut(BaseEntityList.this, shortcut, mForEntity, null);
 			}
 		};
-		Aircandi.stopwatch3.segmentTime(this.getClass().getSimpleName() + " initialized");
 	}
 
 	@Override
@@ -258,7 +256,6 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			mActionBar.setIcon(icon);
 			setActivityTitle(mListTitle != null ? mListTitle : "places");
 		}
-		Aircandi.stopwatch3.segmentTime(this.getClass().getSimpleName() + " action bar configured");
 	}
 
 	private ModelResult loadEntities(Boolean refresh) {
@@ -294,7 +291,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 		LinkOptions linkOptions = getLinkOptions(mListLinkSchema);
 
-		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mForEntityId, linkOptions, mCursorSettings, Aircandi.stopwatch3);
+		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mForEntityId, linkOptions, mCursorSettings, null);
 
 		return result;
 	}
@@ -406,8 +403,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					String activityName = Aircandi.getInstance().getCurrentActivity().getClass().getSimpleName();
-					Tracker.sendEvent("ui_action", "list_refresh", activityName, 0, Aircandi.getInstance().getCurrentUser());
+					Tracker.sendEvent("ui_action", "list_refresh_by_user", mListLinkSchema + "_" + mListLinkType, 0, Aircandi.getInstance().getCurrentUser());
 					onRefresh();
 				}
 			});
@@ -476,7 +472,6 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 			if (result.serviceResponse.responseCode != ResponseCode.SUCCESS) {
 				hideBusy();
-				Aircandi.stopwatch3.stop(this.getClass().getSimpleName() + " databind failed");
 				Errors.handleError(BaseEntityList.this, result.serviceResponse);
 				return false;
 			}
@@ -501,7 +496,6 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 						if (mMoreEntities.size() >= PAGE_SIZE_DEFAULT) {
 							mOffset += PAGE_SIZE_DEFAULT;
 							hideBusy();
-							Aircandi.stopwatch3.stop(this.getClass().getSimpleName() + " databind - more data available");
 							return (getWrappedAdapter().getCount() + mMoreEntities.size()) < LIST_MAX;
 						}
 						if (mListNewEnabled) {
@@ -518,7 +512,6 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			}
 
 			hideBusy();
-			Aircandi.stopwatch3.stop(this.getClass().getSimpleName() + " databind complete");
 			return false;
 		}
 

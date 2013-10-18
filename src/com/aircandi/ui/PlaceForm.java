@@ -106,6 +106,7 @@ public class PlaceForm extends BaseEntityForm {
 					mEntityId = upsizedEntity.id;
 					mEntity = null;
 					mCacheStamp = null;
+					mFirstDraw = true;
 					databind(BindingMode.AUTO);
 				}
 				else {

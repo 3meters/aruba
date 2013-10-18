@@ -57,7 +57,6 @@ public class CandigramEdit extends BaseEntityEdit {
 	private Spinner		mSpinnerLifetime;
 	private Spinner		mSpinnerHops;
 
-	private TextView	mHintType;
 	private TextView	mHintRange;
 	private TextView	mHintDuration;
 	private TextView	mHintLifetime;
@@ -93,7 +92,6 @@ public class CandigramEdit extends BaseEntityEdit {
 		mSpinnerLifetimeData = Candigrams.getSpinnerData(this, PropertyType.LIFETIME);
 		mSpinnerHopsData = Candigrams.getSpinnerData(this, PropertyType.HOPS);
 
-		mHintType = (TextView) findViewById(R.id.hint_type);
 		mHintRange = (TextView) findViewById(R.id.hint_range);
 		mHintDuration = (TextView) findViewById(R.id.hint_duration);
 		mHintLifetime = (TextView) findViewById(R.id.hint_lifetime);
@@ -112,41 +110,8 @@ public class CandigramEdit extends BaseEntityEdit {
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
 				if (position < mSpinnerType.getAdapter().getCount()) {
-					Candigram candigram = (Candigram) mEntity;
 					String type = mSpinnerTypeData.getEntryValues().get(position);
-
-					if (!mEditing) {
-						if (type.equals(Constants.TYPE_APP_TOUR)) {
-							findViewById(R.id.help_touring).setVisibility(View.VISIBLE);
-							findViewById(R.id.help_bouncing).setVisibility(View.GONE);
-							findViewById(R.id.help_expanding).setVisibility(View.GONE);
-						}
-						else if (type.equals(Constants.TYPE_APP_BOUNCE)) {
-							findViewById(R.id.help_touring).setVisibility(View.GONE);
-							findViewById(R.id.help_bouncing).setVisibility(View.VISIBLE);
-							findViewById(R.id.help_expanding).setVisibility(View.GONE);
-						}
-						else if (type.equals(Constants.TYPE_APP_EXPAND)) {
-							findViewById(R.id.help_touring).setVisibility(View.GONE);
-							findViewById(R.id.help_bouncing).setVisibility(View.GONE);
-							findViewById(R.id.help_expanding).setVisibility(View.VISIBLE);
-						}
-						findViewById(R.id.type_image_next).setVisibility(View.VISIBLE);
-					}
-					else {
-						mHintType.setText(mSpinnerTypeData.getDescriptions().get(position));
-						mHintType.setVisibility(View.VISIBLE);
-					}
-
-					findViewById(R.id.duration_holder).setVisibility(type.equals(Constants.TYPE_APP_TOUR) ? View.VISIBLE : View.GONE);
-					findViewById(R.id.hops_holder).setVisibility(type.equals(Constants.TYPE_APP_EXPAND) ? View.GONE : View.VISIBLE);
-					findViewById(R.id.lifetime_holder).setVisibility(type.equals(Constants.TYPE_APP_EXPAND) ? View.VISIBLE : View.GONE);
-
-					if (candigram.type == null || !candigram.type.equals(type)) {
-						if (!mFirstDraw) {
-							mDirty = true;
-						}
-					}
+					initByType(type);
 				}
 			}
 
@@ -253,7 +218,15 @@ public class CandigramEdit extends BaseEntityEdit {
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 					Candigram candigram = (Candigram) mEntity;
-					mHintParked.setText(getString(isChecked ? R.string.candigram_stopped_true_help : R.string.candigram_stopped_false_help));
+					
+					if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)
+							|| candigram.type.equals(Constants.TYPE_APP_TOUR)) {
+						mHintParked.setText(getString(isChecked ? R.string.candigram_stopped_true_help : R.string.candigram_stopped_false_help));
+					}
+					else if (candigram.type.equals(Constants.TYPE_APP_EXPAND)) {
+						mHintParked.setText(getString(isChecked ? R.string.candigram_stopped_expand_true_help
+								: R.string.candigram_stopped_expand_false_help));
+					}
 					if (candigram.stopped != isChecked) {
 						if (!mFirstDraw) {
 							mDirty = true;
@@ -263,39 +236,10 @@ public class CandigramEdit extends BaseEntityEdit {
 			});
 		}
 
+		initByMode(savedInstanceState);
 		if (mEditing) {
-			/*
-			 * If editing, mEntity is already initialized from intent extras.
-			 */
-			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getCurrentUser().id))) {
-				mTabManager = new TabManager(Constants.TABS_ENTITY_FORM_ID, mActionBar, mViewFlipper);
-				mTabManager.initialize();
-				mTabManager.doRestoreInstanceState(savedInstanceState);
-			}
-			((ViewFlipper) findViewById(R.id.flipper_form)).removeViewAt(0);
-			findViewById(R.id.content_message).setVisibility(View.GONE);
-			findViewById(R.id.settings_message).setVisibility(View.GONE);
-			findViewById(R.id.type_holder).setVisibility(View.GONE); // We don't let users change the type		
-			((TextView) findViewById(R.id.type)).setText("Candigram type: " + mEntity.type);
-			findViewById(R.id.type).setVisibility(View.VISIBLE);
+			initByType(mEntity.type);
 		}
-		else {
-			findViewById(R.id.type_holder).setVisibility(View.GONE);
-			findViewById(R.id.type).setVisibility(View.GONE);
-			findViewById(R.id.authoring_holder).setVisibility(View.GONE);
-			findViewById(R.id.stopped_holder).setVisibility(View.GONE);
-			mViewFlipper.setDisplayedChild(0);
-			Integer colorResId = R.color.accent_gray_dark;
-			((ImageView) findViewById(R.id.type_image_next)).setColorFilter(mResources.getColor(colorResId), PorterDuff.Mode.SRC_ATOP);
-			((ImageView) findViewById(R.id.content_image_next)).setColorFilter(mResources.getColor(colorResId), PorterDuff.Mode.SRC_ATOP);
-			((ImageView) findViewById(R.id.content_image_previous)).setColorFilter(mResources.getColor(colorResId), PorterDuff.Mode.SRC_ATOP);
-			((ImageView) findViewById(R.id.settings_image_previous)).setColorFilter(mResources.getColor(colorResId), PorterDuff.Mode.SRC_ATOP);
-			findViewById(R.id.content_image_previous).setVisibility(View.VISIBLE);
-			findViewById(R.id.content_image_next).setVisibility(View.VISIBLE);
-			findViewById(R.id.settings_button_finish).setVisibility(View.VISIBLE);
-			findViewById(R.id.settings_image_previous).setVisibility(View.VISIBLE);
-		}
-
 	}
 
 	@Override
@@ -404,6 +348,90 @@ public class CandigramEdit extends BaseEntityEdit {
 			}
 		}
 		super.draw();
+	}
+
+	public void initByMode(Bundle savedInstanceState) {
+		if (mEditing) {
+			/*
+			 * If editing, mEntity is already initialized from intent extras.
+			 */
+			if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getCurrentUser().id))) {
+				mTabManager = new TabManager(Constants.TABS_ENTITY_FORM_ID, mActionBar, mViewFlipper);
+				mTabManager.initialize();
+				mTabManager.doRestoreInstanceState(savedInstanceState);
+			}
+			((ViewFlipper) findViewById(R.id.flipper_form)).removeViewAt(0);
+			findViewById(R.id.content_message).setVisibility(View.GONE);
+			findViewById(R.id.settings_message).setVisibility(View.GONE);
+			findViewById(R.id.type_holder).setVisibility(View.GONE); // We don't let users change the type		
+
+			String typeVerbose = mEntity.type;
+			if (mEntity.type.equals(Constants.TYPE_APP_TOUR)) {
+				typeVerbose = mResources.getString(R.string.candigram_type_tour_verbose);
+			}
+			else if (mEntity.type.equals(Constants.TYPE_APP_BOUNCE)) {
+				typeVerbose = mResources.getString(R.string.candigram_type_bounce_verbose);
+			}
+			else if (mEntity.type.equals(Constants.TYPE_APP_EXPAND)) {
+				typeVerbose = mResources.getString(R.string.candigram_type_expand_verbose);
+			}
+
+			((TextView) findViewById(R.id.type)).setText("Candigram type: " + typeVerbose);
+			findViewById(R.id.type).setVisibility(View.VISIBLE);
+
+		}
+		else {
+			/* Hide controls that don't make sense when in wizard mode */
+			findViewById(R.id.type_holder).setVisibility(View.GONE);
+			findViewById(R.id.type).setVisibility(View.GONE);
+			findViewById(R.id.authoring_holder).setVisibility(View.GONE);
+			findViewById(R.id.stopped_holder).setVisibility(View.GONE);
+
+			/* Go to first page of wizard */
+			mViewFlipper.setDisplayedChild(0);
+			Integer colorResId = R.color.accent_gray_dark;
+			((ImageView) findViewById(R.id.type_image_next)).setColorFilter(mResources.getColor(colorResId), PorterDuff.Mode.SRC_ATOP);
+			((ImageView) findViewById(R.id.content_image_next)).setColorFilter(mResources.getColor(colorResId), PorterDuff.Mode.SRC_ATOP);
+			((ImageView) findViewById(R.id.content_image_previous)).setColorFilter(mResources.getColor(colorResId), PorterDuff.Mode.SRC_ATOP);
+			((ImageView) findViewById(R.id.settings_image_previous)).setColorFilter(mResources.getColor(colorResId), PorterDuff.Mode.SRC_ATOP);
+			findViewById(R.id.content_image_previous).setVisibility(View.VISIBLE);
+			findViewById(R.id.content_image_next).setVisibility(View.VISIBLE);
+			findViewById(R.id.settings_button_finish).setVisibility(View.VISIBLE);
+			findViewById(R.id.settings_image_previous).setVisibility(View.VISIBLE);
+		}
+
+	}
+
+	public void initByType(String type) {
+		Candigram candigram = (Candigram) mEntity;
+		if (!mEditing) {
+			if (type.equals(Constants.TYPE_APP_TOUR)) {
+				findViewById(R.id.help_touring).setVisibility(View.VISIBLE);
+				findViewById(R.id.help_bouncing).setVisibility(View.GONE);
+				findViewById(R.id.help_expanding).setVisibility(View.GONE);
+			}
+			else if (type.equals(Constants.TYPE_APP_BOUNCE)) {
+				findViewById(R.id.help_touring).setVisibility(View.GONE);
+				findViewById(R.id.help_bouncing).setVisibility(View.VISIBLE);
+				findViewById(R.id.help_expanding).setVisibility(View.GONE);
+			}
+			else if (type.equals(Constants.TYPE_APP_EXPAND)) {
+				findViewById(R.id.help_touring).setVisibility(View.GONE);
+				findViewById(R.id.help_bouncing).setVisibility(View.GONE);
+				findViewById(R.id.help_expanding).setVisibility(View.VISIBLE);
+			}
+			findViewById(R.id.type_image_next).setVisibility(View.VISIBLE);
+		}
+
+		findViewById(R.id.duration_holder).setVisibility(type.equals(Constants.TYPE_APP_TOUR) ? View.VISIBLE : View.GONE);
+		findViewById(R.id.hops_holder).setVisibility(type.equals(Constants.TYPE_APP_EXPAND) ? View.GONE : View.VISIBLE);
+		findViewById(R.id.lifetime_holder).setVisibility(type.equals(Constants.TYPE_APP_EXPAND) ? View.VISIBLE : View.GONE);
+
+		if (candigram.type == null || !candigram.type.equals(type)) {
+			if (!mFirstDraw) {
+				mDirty = true;
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

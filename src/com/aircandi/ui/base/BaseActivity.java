@@ -404,9 +404,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 							Logger.w(this, "USER signed out, service call failed: " + Aircandi.getInstance().getCurrentUser().id);
 						}
 
-						/* Stop the current tracking session. Starts again when a user logs in. */
-						Tracker.stopSession(Aircandi.getInstance().getCurrentUser());
-
 						/* Clear the user and session that is tied into AUTO-signin */
 						com.aircandi.components.NotificationManager.getInstance().unregisterDeviceWithAircandi(
 								GCMRegistrar.getRegistrationId(Aircandi.applicationContext));

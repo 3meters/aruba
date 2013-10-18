@@ -92,7 +92,6 @@ public class ProximityManager {
 					public void onReceive(Context context, Intent intent) {
 
 						Aircandi.applicationContext.unregisterReceiver(this);
-						Aircandi.stopwatch3.stop("Recieved wifi scan: reason = " + reason.toString());
 						Aircandi.stopwatch1.segmentTime("Wifi scan received from system: reason = " + reason.toString());
 						Logger.v(ProximityManager.this, "Received wifi scan results for " + reason.name());
 
@@ -142,7 +141,6 @@ public class ProximityManager {
 				}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
 				Reporting.updateCrashKeys();								
-				Aircandi.stopwatch3.start("Start wifi scan: reason = " + reason.toString());
 				mWifiManager.startScan();
 			}
 			else {

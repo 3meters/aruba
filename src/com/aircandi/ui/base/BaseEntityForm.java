@@ -699,8 +699,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					String activityName = Aircandi.getInstance().getCurrentActivity().getClass().getSimpleName();
-					Tracker.sendEvent("ui_action", "form_refresh", activityName, 0, Aircandi.getInstance().getCurrentUser());
+					Tracker.sendEvent("ui_action", "form_refresh_by_user", mEntity.schema, 0, Aircandi.getInstance().getCurrentUser());
 					onRefresh();
 				}
 			});

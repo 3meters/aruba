@@ -16,7 +16,6 @@ import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NotificationManager;
-import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.ui.base.BaseBrowse;
@@ -271,9 +270,6 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 		 */
 		Logger.d(this, "Destroyed");
 		super.onDestroy();
-
-		/* This is the only place we manually stop the analytics session. */
-		Tracker.stopSession(Aircandi.getInstance().getCurrentUser());
 
 		/* Don't count on this always getting called when this activity is killed */
 		try {

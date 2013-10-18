@@ -19,7 +19,6 @@ import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEdit;
@@ -137,8 +136,6 @@ public class SignInEdit extends BaseEdit {
 					Logger.i(this, "USER signed in: " + user.name + " (" + user.id + ")");
 
 					Aircandi.getInstance().setCurrentUser(user);
-
-					Tracker.startNewSession(Aircandi.getInstance().getCurrentUser());
 
 					UI.showToastNotification(getResources().getString(R.string.alert_signed_in)
 							+ " " + Aircandi.getInstance().getCurrentUser().name, Toast.LENGTH_SHORT);

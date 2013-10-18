@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.aircandi.ui.widgets.BounceScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    tools:context="com.aircandi.ui.edit.CandigramEdit" >
+    android:fillViewport="true" >
 
     <ViewFlipper
         android:id="@+id/flipper_form"
@@ -42,7 +40,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="?attr/textColorSecondary" />
 
-            <LinearLayout
+            <RelativeLayout
                 style="@style/form_content_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -53,11 +51,11 @@
                 <!-- Public Image -->
 
                 <LinearLayout
+                    android:id="@+id/photo_holder"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_weight="0" >
+                    android:layout_marginTop="5dp" >
 
                     <com.aircandi.ui.widgets.AirImageView
                         android:id="@+id/photo"
@@ -86,33 +84,43 @@
 
                 <!-- Title and Content -->
 
-                <com.aircandi.ui.widgets.AirEditText
-                    android:id="@+id/name"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/form_field_height"
-                    android:layout_weight="0"
-                    android:drawableRight="?attr/iconClear"
-                    android:hint="@string/form_title_hint"
-                    android:inputType="textCapWords|textAutoCorrect" />
-
-                <com.aircandi.ui.widgets.AirEditText
-                    android:id="@+id/description"
+                <LinearLayout
+                    android:id="@+id/body_holder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:gravity="top"
-                    android:hint="@string/form_description_hint"
-                    android:inputType="textCapSentences|textMultiLine|textAutoCorrect"
-                    android:minLines="5" />
+                    android:layout_below="@+id/photo_holder"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="vertical" >
+
+                    <com.aircandi.ui.widgets.AirEditText
+                        android:id="@+id/name"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/form_field_height"
+                        android:layout_weight="0"
+                        android:drawableRight="?attr/iconClear"
+                        android:hint="@string/form_title_hint"
+                        android:inputType="textCapWords|textAutoCorrect" />
+
+                    <com.aircandi.ui.widgets.AirEditText
+                        android:id="@+id/description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:gravity="top"
+                        android:hint="@string/form_description_hint"
+                        android:inputType="textCapSentences|textMultiLine|textAutoCorrect"
+                        android:minLines="5" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/authoring_holder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_below="@+id/body_holder"
                     android:baselineAligned="false"
                     android:gravity="bottom"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal" >
 
                     <FrameLayout
                         android:layout_width="match_parent"
@@ -146,7 +154,7 @@
                             android:onClick="onUserClick" />
                     </FrameLayout>
                 </LinearLayout>
-            </LinearLayout>
+            </RelativeLayout>
 
             <ImageView
                 android:id="@+id/content_image_previous"
