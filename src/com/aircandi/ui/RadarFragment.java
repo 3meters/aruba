@@ -398,8 +398,7 @@ public class RadarFragment extends BaseFragment implements
 				
 				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills()
 						, "wifi_scan_finished"
-						, NetworkManager.getInstance().getNetworkType()
-						, Aircandi.getInstance().getCurrentUser());
+						, NetworkManager.getInstance().getNetworkType());
 				
 				Logger.d(getSherlockActivity(), "Query wifi scan received event: locking beacons");
 
@@ -457,8 +456,7 @@ public class RadarFragment extends BaseFragment implements
 				
 				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills()
 						, "places_by_proximity_downloaded"
-						, NetworkManager.getInstance().getNetworkType()
-						, Aircandi.getInstance().getCurrentUser());
+						, NetworkManager.getInstance().getNetworkType());
 				
 				Logger.d(getSherlockActivity(), "Entities for beacons finished event: ** done **");
 				mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
@@ -534,8 +532,7 @@ public class RadarFragment extends BaseFragment implements
 						
 						Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills()
 								, "location_accepted"
-								, NetworkManager.getInstance().getNetworkType()
-								, Aircandi.getInstance().getCurrentUser());
+								, NetworkManager.getInstance().getNetworkType());
 						
 					}
 
@@ -584,8 +581,7 @@ public class RadarFragment extends BaseFragment implements
 		
 		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills()
 				, "places_near_location_downloaded"
-				, NetworkManager.getInstance().getNetworkType()
-				, Aircandi.getInstance().getCurrentUser());
+				, NetworkManager.getInstance().getNetworkType());
 		
 		mHandler.post(new Runnable() {
 

@@ -45,9 +45,10 @@ import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
+import com.aircandi.utilities.Utilities;
 import com.google.android.gcm.GCMRegistrar;
 
-public abstract class BaseActivity extends SherlockFragmentActivity implements IBase {
+public abstract class BaseActivity extends SherlockFragmentActivity implements BaseDelegate {
 
 	protected ActionBar	mActionBar;
 	protected String	mActivityTitle;
@@ -228,6 +229,12 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 
 	@Override
 	public void onError() {}
+
+	@Override
+	public void onLowMemory() {
+		Tracker.sendEvent("system", "memory_low", null, Utilities.getMemoryAvailable());
+		super.onLowMemory();
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Preferences
@@ -485,7 +492,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	protected void onStart() {
 		if (!isFinishing()) {
 			Logger.d(this, "Activity starting");
-			Tracker.activityStart(this, Aircandi.getInstance().getCurrentUser());
+			Tracker.activityStart(this);
 			if (mPrefChangeReloadNeeded) {
 				final Intent intent = getIntent();
 				startActivity(intent);
@@ -514,7 +521,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements I
 	@Override
 	protected void onStop() {
 		Logger.d(this, "Activity stopping");
-		Tracker.activityStop(this, Aircandi.getInstance().getCurrentUser());
 		super.onStop();
 	}
 

@@ -32,6 +32,7 @@ import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
+import com.aircandi.utilities.Type;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
@@ -129,7 +130,7 @@ public class PictureForm extends BaseEntityForm {
 				if (!UI.photosEqual(photoView.getPhoto(), mEntity.getPhoto())) {
 					Photo photo = mEntity.getPhoto();
 					UI.drawPhoto(photoView, photo);
-					if (photo.usingDefault == null || !photo.usingDefault) {
+					if (Type.isFalse(photo.usingDefault)) {
 						photoView.setClickable(true);
 					}
 				}
@@ -310,7 +311,7 @@ public class PictureForm extends BaseEntityForm {
 
 		TextView likeStats = (TextView) findViewById(R.id.like_stats);
 		if (likeStats != null) {
-			Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, Direction.in);
+			Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, false, Direction.in);
 			if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_PICTURE, 0);
 			String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
 			likeStats.setText(String.valueOf(count.count) + " " + label);
@@ -318,7 +319,7 @@ public class PictureForm extends BaseEntityForm {
 
 		TextView watchingStats = (TextView) findViewById(R.id.watching_stats);
 		if (watchingStats != null) {
-			Count count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, Direction.in);
+			Count count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, false, Direction.in);
 			if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, 0);
 			String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
 			watchingStats.setText(String.valueOf(count.count) + " " + label);

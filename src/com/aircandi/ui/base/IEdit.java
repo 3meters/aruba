@@ -1,6 +1,6 @@
 package com.aircandi.ui.base;
 
-public interface IEdit extends IBase {
+public interface IEdit extends BaseDelegate {
 
 	public void bind(BindingMode mode);
 

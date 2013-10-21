@@ -1,5 +1,6 @@
 package com.aircandi.service;
 
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,4 +115,43 @@ public abstract class BaseConnection implements IConnection {
 			airHttpRequest.headers.add(new Header("Authorization", "Basic " + serviceRequest.getPasswordBase64()));
 		}
 	}
+
+	protected static Boolean isContentType(String contentType, String target) {
+		if (contentType.contains(target)) {
+			return true;
+		}
+		return false;
+	}
+
+	protected static String getContentType(HttpURLConnection connection, AirHttpRequest request) {
+		String contentType = connection.getContentType();
+		/*
+		 * Some requests come back without contentType set. Example is images from 
+		 * foursquare. The request is diverted to a content delivery network which
+		 * treats content as typeless blobs. So we try to infer the type based
+		 * on what we requested.
+		 */
+		if (contentType == null) {
+			if (request.responseFormat == ResponseFormat.BYTES) {
+				contentType = "image/*";
+			}
+			else if (request.responseFormat == ResponseFormat.JSON) {
+				contentType = "application/json";
+			}
+			else if (request.responseFormat == ResponseFormat.HTML) {
+				contentType = "text/html";
+			}
+			else {
+				contentType = "text/*";
+			}
+		}
+		return contentType;
+	}
+
+	public static class ContentType {
+		public static String	TEXT	= "text";
+		public static String	IMAGE	= "image";
+		public static String	JSON	= "json";
+	}
+
 }

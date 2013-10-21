@@ -144,7 +144,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 							return;
 						}
 					}
-					else if (mode == BindingMode.SERVICE) {
+					else if (mode == BindingMode.MANUAL) {
 						showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
 					}
 					afterDatabind();

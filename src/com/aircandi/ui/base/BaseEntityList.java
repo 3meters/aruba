@@ -1,6 +1,7 @@
 package com.aircandi.ui.base;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -58,6 +59,7 @@ import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
+import com.aircandi.utilities.Type;
 import com.aircandi.utilities.UI;
 import com.commonsware.cwac.endless.EndlessAdapter;
 
@@ -72,7 +74,6 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	private Cursor				mCursorSettings;
 	private Button				mButtonNewEntity;
 
-	private long				mOffset				= 0;
 	private static final long	LIST_MAX			= 300L;
 	private static final int	PAGE_SIZE_DEFAULT	= 30;
 
@@ -158,26 +159,36 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	public void bind(final BindingMode mode) {
 
 		if (mAdapter == null) {
-			mButtonNewEntity.setVisibility(View.GONE);
-			showBusy("Loading " + getActivityTitle() + "...", false);
 			mForEntity = EntityManager.getEntity(mForEntityId);
 			invalidateOptionsMenu();
 			if (mForEntity != null) {
 				mCacheStamp = mForEntity.getCacheStamp();
 			}
-			setAdapter();
+			mAdapter = new EntityAdapter(mEntities);  // triggers data fetch
+			if (mListView != null) {
+				mListView.setAdapter(mAdapter); // triggers data fetchdraw happens in the adapter
+			}
+			else if (mGridView != null) {
+				mGridView.setAdapter(mAdapter); // draw happens in the adapter
+			}
+			return;
 		}
-		else {
 
-			final AtomicBoolean refreshNeeded = new AtomicBoolean(false);
+		final AtomicBoolean refreshNeeded = new AtomicBoolean(false);
 
-			new AsyncTask() {
+		new AsyncTask() {
 
-				@Override
-				protected Object doInBackground(Object... params) {
-					Thread.currentThread().setName("ActivityStaleCheck");
-					ModelResult result = new ModelResult();
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("ActivityStaleCheck");
+				ModelResult result = new ModelResult();
+				/*
+				 * Might not have entities because of a network error so force
+				 * a refresh if mode = manual.
+				 */
+				refreshNeeded.set(mEntities.size() == 0 && mode == BindingMode.MANUAL);
 
+				if (!refreshNeeded.get()) {
 					showBusy();
 					CacheStamp cacheStamp = EntityManager.getInstance().loadCacheStamp(mForEntity.id, mCacheStamp);
 					/*
@@ -186,44 +197,29 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 					 * it directly. The cache stamp should keep us from doing extra refreshes even though
 					 * the ForEntity hasn't changed.
 					 */
-					if (!cacheStamp.equals(mCacheStamp)) {
+					if (cacheStamp != null && !cacheStamp.equals(mCacheStamp)) {
 						refreshNeeded.set(true);
 						mCacheStamp = cacheStamp;
 					}
-					return result;
 				}
 
-				@Override
-				protected void onPostExecute(Object response) {
-					if (refreshNeeded.get()) {
-						/*
-						 * Using brute force to rebuild the data because I've
-						 * beat my head against the wall trying to get other refresh
-						 * mechanisms to work.
-						 */
-						setAdapter();
-					}
-					else if (mode == BindingMode.SERVICE) {
-						showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
-					}
-					else {
-						hideBusy();
-					}
-				}
-			}.execute();
-		}
-	}
+				return result;
+			}
 
-	protected void setAdapter() {
-		mOffset = 0;
-		mEntities.clear();
-		mAdapter = new EntityAdapter(mEntities);
-		if (mListView != null) {
-			mListView.setAdapter(mAdapter); // draw happens in the adapter
-		}
-		else if (mGridView != null) {
-			mGridView.setAdapter(mAdapter); // draw happens in the adapter
-		}
+			@Override
+			protected void onPostExecute(Object response) {
+				if (refreshNeeded.get()) {
+					mEntities.clear();
+					mAdapter.notifyDataSetChanged();
+				}
+				else if (mode == BindingMode.MANUAL) {
+					showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
+				}
+				else {
+					hideBusy();
+				}
+			}
+		}.execute();
 	}
 
 	@Override
@@ -258,7 +254,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		}
 	}
 
-	private ModelResult loadEntities(Boolean refresh) {
+	private ModelResult loadEntities() {
 		/*
 		 * Called on a background thread.
 		 * 
@@ -267,7 +263,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 		mCursorSettings = new Cursor()
 				.setLimit(mListPageSize)
 				.setSort(Maps.asMap("modifiedDate", -1))
-				.setSkip(refresh ? 0 : mEntities.size());
+				.setSkip(mEntities.size());
 
 		if (mListLinkInactive != null) {
 			mCursorSettings.setWhere(Maps.asMap("inactive", Boolean.parseBoolean(mListLinkInactive)));
@@ -331,7 +327,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 	@Override
 	public void onRefresh() {
-		bind(BindingMode.SERVICE); // Called from Routing
+		bind(BindingMode.MANUAL); // Called from Routing
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -403,7 +399,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					Tracker.sendEvent("ui_action", "list_refresh_by_user", mListLinkSchema + "_" + mListLinkType, 0, Aircandi.getInstance().getCurrentUser());
+					Tracker.sendEvent("ui_action", "list_refresh_by_user", mListLinkSchema + "_" + mListLinkType, 0);
 					onRefresh();
 				}
 			});
@@ -449,6 +445,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 	private class EntityAdapter extends EndlessAdapter {
 
 		private List<Entity>	mMoreEntities	= new ArrayList<Entity>();
+		private ModelResult		mResult;
 
 		private EntityAdapter(List<Entity> list) {
 			super(new ListAdapter(list));
@@ -468,49 +465,39 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 			 * This is called on background thread from an AsyncTask started by EndlessAdapter.
 			 */
 			mMoreEntities.clear();
-			final ModelResult result = loadEntities(false);
+			mButtonNewEntity.setVisibility(View.GONE);
 
-			if (result.serviceResponse.responseCode != ResponseCode.SUCCESS) {
+			if (mEntities.size() == 0) {
+				showBusy("Loading " + getActivityTitle() + "...", false);
+			}
+
+			mResult = loadEntities();
+
+			if (mResult.serviceResponse.responseCode != ResponseCode.SUCCESS) {
 				hideBusy();
-				Errors.handleError(BaseEntityList.this, result.serviceResponse);
-				return false;
+				Errors.handleError(BaseEntityList.this, mResult.serviceResponse);
+				return true;
 			}
 			else {
-				if (result.data != null) {
-					mMoreEntities = (List<Entity>) result.data;
+				if (mResult.data != null) {
+					mMoreEntities = (List<Entity>) mResult.data;
 
-					if (mMoreEntities.size() == 0) {
-						if (mOffset == 0) {
-							if (mListNewEnabled) {
-								runOnUiThread(new Runnable() {
-
-									@Override
-									public void run() {
-										mButtonNewEntity.setVisibility(View.VISIBLE);
-									}
-								});
-							}
-						}
-					}
-					else {
-						if (mMoreEntities.size() >= PAGE_SIZE_DEFAULT) {
-							mOffset += PAGE_SIZE_DEFAULT;
-							hideBusy();
-							return (getWrappedAdapter().getCount() + mMoreEntities.size()) < LIST_MAX;
-						}
-						if (mListNewEnabled) {
-							runOnUiThread(new Runnable() {
-
-								@Override
-								public void run() {
-									mButtonNewEntity.setVisibility(View.GONE);
-								}
-							});
-						}
+					if (mMoreEntities.size() >= PAGE_SIZE_DEFAULT) {
+						hideBusy();
+						return (getWrappedAdapter().getCount() + mMoreEntities.size()) < LIST_MAX;
 					}
 				}
 			}
 
+			if (mListNewEnabled && mEntities.size() == 0 && mMoreEntities.size() == 0) {
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						mButtonNewEntity.setVisibility(View.VISIBLE);
+					}
+				});
+			}
 			hideBusy();
 			return false;
 		}
@@ -525,12 +512,12 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 		@Override
 		protected void appendCachedData() {
-			final ArrayAdapter<Entity> list = (ArrayAdapter<Entity>) getWrappedAdapter();
+
 			for (Entity entity : mMoreEntities) {
-				list.add(entity);
+				mEntities.add(entity);
 			}
 
-			list.sort(new Entity.SortByPositionSortDate()); // Position is ignored if null
+			Collections.sort(mEntities, new Entity.SortByPositionSortDate());
 			notifyDataSetChanged();
 		}
 	}
@@ -664,7 +651,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 
 				UI.setVisibility(holder.comments, View.GONE);
 				if (holder.comments != null) {
-					Count count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, Direction.in);
+					Count count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, Direction.in);
 					Integer commentCount = count != null ? count.count.intValue() : 0;
 					if (commentCount != null && commentCount > 0) {
 						holder.comments.setText(String.valueOf(commentCount) + ((commentCount == 1) ? " Comment" : " Comments"));
@@ -709,7 +696,7 @@ public abstract class BaseEntityList extends BaseBrowse implements IList {
 						if (holder.placePhotoView.getPhoto() == null || !holder.placePhotoView.getPhoto().getUri().equals(photo.getUri())) {
 							UI.drawPhoto(holder.placePhotoView, photo);
 						}
-						if (photo.usingDefault == null || !photo.usingDefault) {
+						if (Type.isFalse(photo.usingDefault)) {
 							holder.placePhotoView.setClickable(true);
 						}
 						UI.setVisibility(holder.placePhotoView, View.VISIBLE);

@@ -17,6 +17,8 @@ public class Count extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String				schema;
 	@Expose
+	public Boolean				inactive = false;
+	@Expose
 	public Number				count;
 
 	public Count() {}
@@ -41,6 +43,7 @@ public class Count extends ServiceObject implements Cloneable, Serializable {
 	public static Count setPropertiesFromMap(Count stat, Map map, Boolean nameMapping) {
 		stat.type = (String) map.get("type");
 		stat.schema = (String) map.get("schema");
+		stat.inactive = (Boolean) map.get("inactive");
 		stat.count = (Number) map.get("count");
 		return stat;
 	}

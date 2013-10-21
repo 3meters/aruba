@@ -2,7 +2,7 @@ package com.aircandi.ui.base;
 
 import android.os.Bundle;
 
-public interface IBase {
+public interface BaseDelegate {
 
 	public void onAdd();
 
@@ -26,6 +26,6 @@ public interface IBase {
 	
 	public enum BindingMode {
 		AUTO,
-		SERVICE,
+		MANUAL,
 	}	
 }

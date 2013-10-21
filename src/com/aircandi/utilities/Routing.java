@@ -583,7 +583,7 @@ public final class Routing {
 	public static void shortcut(final Activity activity, Shortcut shortcut, Entity entity, Direction direction) {
 
 		if (shortcut.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-			Tracker.sendEvent("ui_action", "applink_click", shortcut.app, 0, Aircandi.getInstance().getCurrentUser());
+			Tracker.sendEvent("ui_action", "applink_click", shortcut.app, 0);
 
 
 			if (shortcut.app.equals(Constants.TYPE_APP_PICTURE)

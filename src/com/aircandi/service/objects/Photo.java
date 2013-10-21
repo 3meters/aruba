@@ -49,6 +49,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	public String				name;
 	public String				description;
 	public Boolean				usingDefault		= false;
+	public Boolean				usingBroken			= false;
 	public Photo				photoPlaceholder;
 	public Photo				photoBroken;
 	public Shortcut				shortcut;
@@ -97,6 +98,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		photo.colorize = (Boolean) map.get("colorize");
 		photo.colorizeKey = (String) map.get("colorizeKey");
 		photo.usingDefault = (Boolean) map.get("usingDefault");
+		photo.usingBroken = (Boolean) map.get("usingBroken");
 		photo.bitmapKey = (String) map.get("bitmapKey");
 		photo.bitmapLocalOnly = (Boolean) map.get("bitmapLocalOnly");
 

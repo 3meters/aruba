@@ -444,7 +444,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		return false;
 	}
 
-	public Count getCount(String type, String schema, Direction direction) {
+	public Count getCount(String type, String schema, Boolean inactive, Direction direction) {
 		List<Count> linkCounts = linksInCounts;
 		if (direction == Direction.out) {
 			linkCounts = linksOutCounts;
@@ -452,7 +452,9 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 		if (linkCounts != null) {
 			for (Count linkCount : linkCounts) {
-				if ((type == null || linkCount.type.equals(type)) && (schema == null || linkCount.schema.equals(schema))) {
+				if ((type == null || linkCount.type.equals(type))
+						&& (schema == null || linkCount.schema.equals(schema))
+						&& linkCount.inactive == inactive) {
 					return linkCount;
 				}
 			}
@@ -547,7 +549,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 					List<Shortcut> list = shortcutLists.get(iter.next());
 					Shortcut shortcut = list.get(0);
 					shortcut.setCount(0);
-					Count count = getCount(shortcut.linkType, shortcut.app, settings.direction);
+					Count count = getCount(shortcut.linkType, shortcut.app, false, settings.direction);
 					if (count != null) {
 						shortcut.setCount(count.count.intValue());
 					}

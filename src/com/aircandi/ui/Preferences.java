@@ -225,7 +225,7 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 					@Override
 					public void onClick(DialogInterface dialog, int which) {}
 				}, null);
-		Tracker.sendEvent("ui_action", "dialog_open", "about", 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("ui_action", "dialog_open", "about", 0);
 
 	}
 
@@ -276,13 +276,12 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 
 	@Override
 	protected void onStop() {
-		Tracker.activityStop(this, Aircandi.getInstance().getCurrentUser());
 		super.onStop();
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Tracker.activityStart(this, Aircandi.getInstance().getCurrentUser());
+		Tracker.activityStart(this);
 	}
 }

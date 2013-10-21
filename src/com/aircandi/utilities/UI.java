@@ -33,6 +33,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
+import com.aircandi.service.ImageUnusableException;
 import com.aircandi.service.RequestListener;
 import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.Entity;
@@ -65,6 +66,8 @@ public class UI {
 		 * - Actionbar icons - can't use AirImageView (shortcutpicker, placeform)
 		 * - Photo detail - can't use AirImageView, using ImageViewTouch
 		 */
+
+		photo.usingBroken = false;
 
 		if (photo != null && photo.hasBitmap()) {
 			photoView.showLoading(false);
@@ -169,7 +172,9 @@ public class UI {
 							if (statusCode == null) {
 								if (serviceResponse.exception != null) {
 									Logger.w(AirImageView.class, "Exception trying to download image: " + serviceResponse.exception.getClass().getSimpleName());
-									Errors.handleError(null, serviceResponse);
+									if (!(serviceResponse.exception instanceof ImageUnusableException)) {
+										Errors.handleError(null, serviceResponse);
+									}
 								}
 							}
 							else {
@@ -184,13 +189,16 @@ public class UI {
 									Logger.w(AirImageView.class, "Status code: " + String.valueOf(statusCode));
 									if (serviceResponse.exception != null) {
 										Logger.w(AirImageView.class, "Exception: " + serviceResponse.exception.getClass().getSimpleName());
-										Errors.handleError(null, serviceResponse);
+										if (!(serviceResponse.exception instanceof ImageUnusableException)) {
+											Errors.handleError(null, serviceResponse);
+										}
 									}
 								}
 							}
 						}
 						Photo brokenPhoto = photo.photoBroken;
 						if (brokenPhoto != null && !brokenPhoto.getUri().equals(photo.getUri())) {
+							photo.usingBroken = true;
 							photoView.setPhoto(brokenPhoto);
 							aircandi(photoView, brokenPhoto, listener);
 						}
@@ -428,7 +436,7 @@ public class UI {
 		InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);
 		inputManager.hideSoftInputFromWindow(windowToken, 0);
 	}
-	
+
 	@SuppressWarnings("ucd")
 	public static void showSoftInput(Context context) {
 		InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Service.INPUT_METHOD_SERVICE);

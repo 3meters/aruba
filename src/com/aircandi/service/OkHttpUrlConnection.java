@@ -108,10 +108,10 @@ public class OkHttpUrlConnection extends BaseConnection {
 			 * Execute the request
 			 */
 			if (request.requestType == RequestType.GET) {
-				inputStream = get(connection, serviceResponse);
+				inputStream = get(connection, request, serviceResponse);
 			}
 			else {
-				inputStream = post(connection, request.requestBody, serviceResponse);
+				inputStream = post(connection, request.requestBody, request, serviceResponse);
 			}
 
 			if (stopwatch != null) {
@@ -141,6 +141,14 @@ public class OkHttpUrlConnection extends BaseConnection {
 					}
 
 					Object response = handleResponse(inputStream, request, serviceResponse, serviceRequest.getRequestListener());
+
+					/*
+					 * We have cases where we requested an image but got html message instead. We treat
+					 * that as an unusable image and a failure.
+					 */
+					if (request.responseFormat == ResponseFormat.BYTES && response instanceof String) {
+						return new ServiceResponse(ResponseCode.FAILED, null, new ImageUnusableException());
+					}
 
 					if (stopwatch != null) {
 						stopwatch.segmentTime("Http service: response content captured");
@@ -246,9 +254,9 @@ public class OkHttpUrlConnection extends BaseConnection {
 	private Object handleResponse(InputStream inputStream, AirHttpRequest airHttpRequest, ServiceResponse serviceResponse, RequestListener listener)
 			throws IOException {
 
-		if (airHttpRequest.responseFormat == ResponseFormat.BYTES) {
+		if (isContentType(serviceResponse.contentType, ContentType.IMAGE)) {
 			BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-			
+
 			// this dynamically extends to take the bytes you read
 			ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 
@@ -270,10 +278,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 			serviceResponse.contentLength = (long) byteBuffer.size();
 			return byteBuffer.toByteArray();
 		}
-		else if (airHttpRequest.responseFormat == ResponseFormat.NONE) {
-			return null;
-		}
-		else {
+		else if (isContentType(serviceResponse.contentType, ContentType.TEXT) || isContentType(serviceResponse.contentType, ContentType.JSON)) {
 			final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 			final StringBuilder stringBuilder = new StringBuilder(); // $codepro.audit.disable defineInitialCapacity
 
@@ -286,22 +291,24 @@ public class OkHttpUrlConnection extends BaseConnection {
 
 			return stringBuilder.toString();
 		}
+		return null;
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Post
 	// --------------------------------------------------------------------------------------------
 
-	private InputStream post(HttpURLConnection connection, String string, ServiceResponse serviceResponse) throws IOException {
+	private InputStream post(HttpURLConnection connection, String string, AirHttpRequest request, ServiceResponse serviceResponse) throws IOException {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-			return post_Gingerbread(connection, string, serviceResponse);
+			return post_Gingerbread(connection, string, request, serviceResponse);
 		}
 		else {
-			return post_Froyo(connection, string, serviceResponse);
+			return post_Froyo(connection, string, request, serviceResponse);
 		}
 	}
 
-	private InputStream post_Gingerbread(HttpURLConnection connection, String string, ServiceResponse serviceResponse) throws IOException {
+	private InputStream post_Gingerbread(HttpURLConnection connection, String string, AirHttpRequest request, ServiceResponse serviceResponse)
+			throws IOException {
 		/*
 		 * Gingerbread and above support Gzip natively.
 		 */
@@ -327,7 +334,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 				inputStream = connection.getErrorStream();
 			}
 
-			serviceResponse.contentType = connection.getContentType();
+			serviceResponse.contentType = getContentType(connection, request);
 			if (connection.getContentEncoding() != null && connection.getContentEncoding().equals("gzip")) {
 				serviceResponse.contentEncoding = "gzip";
 				return new GZIPInputStream(inputStream);
@@ -350,7 +357,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 		}
 	}
 
-	private InputStream post_Froyo(HttpURLConnection connection, String string, ServiceResponse serviceResponse) throws IOException {
+	private InputStream post_Froyo(HttpURLConnection connection, String string, AirHttpRequest request, ServiceResponse serviceResponse) throws IOException {
 		/*
 		 * Gingerbread and above support Gzip natively.
 		 */
@@ -399,7 +406,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 				}
 			}
 
-			serviceResponse.contentType = connection.getContentType();
+			serviceResponse.contentType = getContentType(connection, request);
 			if (useGzip) {
 				serviceResponse.contentEncoding = "gzip";
 				return new GZIPInputStream(inputStream);
@@ -426,20 +433,20 @@ public class OkHttpUrlConnection extends BaseConnection {
 	// Get
 	// --------------------------------------------------------------------------------------------
 
-	private InputStream get(HttpURLConnection connection, ServiceResponse serviceResponse) throws IOException {
+	private InputStream get(HttpURLConnection connection, AirHttpRequest request, ServiceResponse serviceResponse) throws IOException {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-			return get_Gingerbread(connection, serviceResponse);
+			return get_Gingerbread(connection, request, serviceResponse);
 		}
 		else {
-			return get_Froyo(connection, serviceResponse);
+			return get_Froyo(connection, request, serviceResponse);
 		}
 	}
 
-	private InputStream get_Gingerbread(HttpURLConnection connection, ServiceResponse serviceResponse) throws IOException {
+	private InputStream get_Gingerbread(HttpURLConnection connection, AirHttpRequest request, ServiceResponse serviceResponse) throws IOException {
 
 		InputStream inputStream = connection.getInputStream();
 
-		serviceResponse.contentType = connection.getContentType();
+		serviceResponse.contentType = getContentType(connection, request);
 		if (connection.getContentEncoding() != null && connection.getContentEncoding().equals("gzip")) {
 			serviceResponse.contentEncoding = "gzip";
 			return new GZIPInputStream(inputStream);
@@ -450,7 +457,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 		}
 	}
 
-	private InputStream get_Froyo(HttpURLConnection connection, ServiceResponse serviceResponse) throws IOException {
+	private InputStream get_Froyo(HttpURLConnection connection, AirHttpRequest request, ServiceResponse serviceResponse) throws IOException {
 		boolean useGzip = false;
 		connection.setRequestProperty("Accept-Encoding", "gzip");
 
@@ -477,7 +484,7 @@ public class OkHttpUrlConnection extends BaseConnection {
 			}
 		}
 
-		serviceResponse.contentType = connection.getContentType();
+		serviceResponse.contentType = getContentType(connection, request);
 		if (useGzip) {
 			serviceResponse.contentEncoding = "gzip";
 			return new GZIPInputStream(inputStream);

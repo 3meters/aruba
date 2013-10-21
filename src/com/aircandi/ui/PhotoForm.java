@@ -126,11 +126,11 @@ public class PhotoForm extends BaseBrowse implements IForm {
 					@Override
 					public void onComplete(Object response) {
 						final ServiceResponse serviceResponse = (ServiceResponse) response;
-						
+
 						if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 							final BitmapResponse bitmapResponse = (BitmapResponse) serviceResponse.data;
 							if (bitmapResponse.bitmap != null && bitmapResponse.photoUri.equals(photoUri)) {
-								
+
 								final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmapResponse.bitmap);
 								UI.showDrawableInImageView(bitmapDrawable, (ImageViewTouch) mPhotoView.getImageView(), 1.0f, 4.0f, true, Animate.fadeInMedium());
 							}
@@ -139,8 +139,26 @@ public class PhotoForm extends BaseBrowse implements IForm {
 							mPhotoView.getImageView().setScaleType(ScaleType.CENTER);
 							mPhotoView.getImageView().setImageResource(R.drawable.img_broken);
 						}
-						progressGroup.setVisibility(View.GONE);
-						setSupportProgressBarIndeterminateVisibility(false);						
+						runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								progressGroup.setVisibility(View.GONE);
+								setSupportProgressBarIndeterminateVisibility(false);
+							}
+						});
+					}
+
+					@Override
+					public void onError(Object response) {
+						runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								progressGroup.setVisibility(View.GONE);
+								setSupportProgressBarIndeterminateVisibility(false);
+							}
+						});
 					}
 
 					@Override

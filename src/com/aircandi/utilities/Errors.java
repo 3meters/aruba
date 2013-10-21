@@ -22,6 +22,7 @@ import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.NetworkManager;
+import com.aircandi.components.Tracker;
 import com.aircandi.service.ClientVersionException;
 import com.aircandi.service.ImageSizeException;
 import com.aircandi.service.ImageUnusableException;
@@ -62,6 +63,10 @@ public final class Errors {
 		/*
 		 * Perform any follow-up actions.
 		 */
+		if (errorResponse.track) {
+			Tracker.sendException(serviceResponse.exception);
+		}
+
 		if (errorResponse.signout) {
 			BaseActivity.signout(activity, true);
 		}
@@ -169,14 +174,15 @@ public final class Errors {
 				 * is not allowed to access the service api.
 				 */
 				ErrorResponse errorResponse = new ErrorResponse(ResponseType.NONE, context.getString(R.string.dialog_update_message));
+				errorResponse.track = true;
 				errorResponse.splash = true;
 				return errorResponse;
 			}
 			else if (exception instanceof ImageSizeException) {
-				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_image_too_large));
+				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_image_too_large)).setTrack(true);
 			}
 			else if (exception instanceof ImageUnusableException) {
-				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_image_unusable));
+				return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_image_unusable)).setTrack(true);
 			}
 			else if (exception instanceof IOException) {
 				/*
@@ -208,8 +214,7 @@ public final class Errors {
 				 * - ConnectException: Couldn't connect to the service host.
 				 * - ConnectTimeoutException: Timeout trying to establish connection to service host.
 				 * - SocketException: thrown during socket creation or setting options, we don't have a connection
-				 * - SocketTimeoutException: Timeout trying to send/receive data to the service. Service might not be
-				 * up.
+				 * - SocketTimeoutException: Timeout trying to send/receive data to the service (might not be up).
 				 * - WalledGardenException: have a connection but user was taken to a different host than requested
 				 * - UnknownHostException: The ip address of the host could not be determined.
 				 * - ClientProtocolException: malformed request and a bug.
@@ -223,10 +228,10 @@ public final class Errors {
 				 * - UnknownHostException: hostname didn't exist in the dns system
 				 */
 				if (exception instanceof ConnectTimeoutException) {
-					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unavailable));
+					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unavailable)).setTrack(true);
 				}
 				else if (exception instanceof SocketTimeoutException) {
-					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_connection_poor));
+					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_connection_poor)).setTrack(true);
 				}
 				if (exception instanceof ConnectException) {
 					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unavailable));
@@ -279,6 +284,7 @@ public final class Errors {
 		public ResponseType	errorResponseType;
 		public Boolean		signout	= false;
 		public Boolean		splash	= false;
+		public Boolean		track	= false;
 
 		public ErrorResponse(ResponseType responseType) {
 			this(responseType, null);
@@ -292,6 +298,15 @@ public final class Errors {
 			this.errorMessage = errorMessage;
 			this.errorTitle = errorTitle;
 			this.errorResponseType = responseType;
+		}
+
+		public Boolean getTrack() {
+			return track;
+		}
+
+		public ErrorResponse setTrack(Boolean track) {
+			this.track = track;
+			return this;
 		}
 	}
 }

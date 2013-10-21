@@ -25,6 +25,7 @@ import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.SectionLayout;
 import com.aircandi.utilities.Errors;
+import com.aircandi.utilities.Type;
 import com.aircandi.utilities.UI;
 
 @SuppressWarnings("ucd")
@@ -110,7 +111,7 @@ public class UserForm extends BaseEntityForm {
 		if (photoView != null) {
 			Photo photo = mEntity.getPhoto();
 			UI.drawPhoto(photoView, photo);
-			if (photo.usingDefault == null || !photo.usingDefault) {
+			if (Type.isFalse(photo.usingDefault)) {
 				photoView.setClickable(true);
 			}
 			UI.setVisibility(photoView, View.VISIBLE);
@@ -169,11 +170,11 @@ public class UserForm extends BaseEntityForm {
 
 		/* Like and watch stats */
 
-		Count count = user.getCount(Constants.TYPE_LINK_LIKE, null, Direction.in);
+		Count count = user.getCount(Constants.TYPE_LINK_LIKE, null, false, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, 0);
 		statString.append("Liked by: " + String.valueOf(count.count.intValue()) + "<br/>");
 
-		count = user.getCount(Constants.TYPE_LINK_WATCH, null, Direction.in);
+		count = user.getCount(Constants.TYPE_LINK_WATCH, null, false, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, 0);
 		statString.append("Watchers: " + String.valueOf(count.count.intValue()) + "<br/>");
 

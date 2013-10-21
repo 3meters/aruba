@@ -12,7 +12,6 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.aircandi.Aircandi;
 import com.aircandi.R;
 import com.aircandi.components.BusProvider;
 import com.aircandi.components.BusyManager;
@@ -77,7 +76,7 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 
 	@Override
 	public void onRefresh() {
-		databind(BindingMode.SERVICE); // Called from Routing
+		databind(BindingMode.MANUAL); // Called from Routing
 	}
 
 	@Override
@@ -219,7 +218,7 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 		 * ActionBarDrawerToggle will take care of this.
 		 */
 		if (item.getItemId() == R.id.refresh) {
-			Tracker.sendEvent("ui_action", "form_refresh_by_user", this.getClass().getSimpleName(), 0, Aircandi.getInstance().getCurrentUser());
+			Tracker.sendEvent("ui_action", "form_refresh_by_user", this.getClass().getSimpleName(), 0);
 			onRefresh();
 			return true;
 		}
@@ -233,6 +232,7 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 	@Override
 	public void onStart() {
 		Logger.d(this, "Fragment start");
+		Tracker.fragmentStart(this);
 		super.onStart();
 	}
 

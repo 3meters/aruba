@@ -80,7 +80,7 @@
 
                 <LinearLayout
                     android:id="@+id/parent_holder"
-                    android:layout_width="@dimen/image_extra_extra_large"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:background="@drawable/selector_button"
@@ -103,7 +103,7 @@
 
                     <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:orientation="vertical" >
 

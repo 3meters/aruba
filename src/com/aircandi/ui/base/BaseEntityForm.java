@@ -192,7 +192,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 						return;
 					}
 				}
-				else if (mode == BindingMode.SERVICE) {
+				else if (mode == BindingMode.MANUAL) {
 					showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
 				}
 				afterDatabind();
@@ -207,7 +207,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 
 	@Override
 	public void onRefresh() {
-		databind(BindingMode.SERVICE); // Called from Routing
+		databind(BindingMode.MANUAL); // Called from Routing
 	}
 
 	@SuppressWarnings("ucd")
@@ -699,7 +699,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					Tracker.sendEvent("ui_action", "form_refresh_by_user", mEntity.schema, 0, Aircandi.getInstance().getCurrentUser());
+					Tracker.sendEvent("ui_action", "form_refresh_by_user", mEntity.schema, 0);
 					onRefresh();
 				}
 			});

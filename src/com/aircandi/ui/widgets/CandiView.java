@@ -169,27 +169,27 @@ public class CandiView extends RelativeLayout {
 				final int marginPixels = UI.getRawPixelsForDisplayPixels(this.getContext(), 3);
 
 				/* Post indicator always goes first */
-				Count count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, Direction.in);
+				Count count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, false, Direction.in);
 				if (count != null && count.count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_candigrams_dark", null, sizePixels, marginPixels);
 				}
 
-				count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, Direction.in);
+				count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, false, Direction.in);
 				if (count != null && count.count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_pictures_dark", null, sizePixels, marginPixels);
 				}
 
-				count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, Direction.in);
+				count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, Direction.in);
 				if (count != null && count.count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_comments_dark", null, sizePixels, marginPixels);
 				}
 
-				count = entity.getCount(Constants.TYPE_LINK_LIKE, null, Direction.in);
+				count = entity.getCount(Constants.TYPE_LINK_LIKE, null, false, Direction.in);
 				if (count != null && count.count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_like_holo_dark", String.valueOf(count.count.intValue()), sizePixels, marginPixels);
 				}
 
-				count = entity.getCount(Constants.TYPE_LINK_WATCH, null, Direction.in);
+				count = entity.getCount(Constants.TYPE_LINK_WATCH, null, false, Direction.in);
 				if (count != null && count.count.intValue() > 0) {
 					addApplinkIndicator("resource:ic_watched_holo_dark", String.valueOf(count.count.intValue()), sizePixels, marginPixels);
 				}

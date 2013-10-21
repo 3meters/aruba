@@ -7,6 +7,7 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.Type;
+import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.StandardExceptionParser;
@@ -30,7 +31,7 @@ import com.google.analytics.tracking.android.StandardExceptionParser;
  */
 
 @SuppressWarnings("ucd")
-public class Tracker {
+public class TrackerEasy {
 
 	public static void sendEvent(String category, String action, String target, long value) {
 		/*
@@ -39,7 +40,7 @@ public class Tracker {
 		try {
 			User user = Aircandi.getInstance().getCurrentUser();
 			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				Aircandi.tracker.send(MapBuilder.createEvent(category, action, target, value).build());
+				EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder.createEvent(category, action, target, value).build());
 			}
 		}
 		catch (Exception e) {
@@ -54,7 +55,7 @@ public class Tracker {
 		try {
 			User user = Aircandi.getInstance().getCurrentUser();
 			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				Aircandi.tracker.send(MapBuilder.createTiming(category, timing, name, label).build());
+				EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder.createTiming(category, timing, name, label).build());
 			}
 		}
 		catch (Exception e) {
@@ -69,9 +70,10 @@ public class Tracker {
 		try {
 			User user = Aircandi.getInstance().getCurrentUser();
 			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				Aircandi.tracker.send(MapBuilder.createException(new StandardExceptionParser(Aircandi.applicationContext, null)
-						.getDescription(Thread.currentThread().getName(), exception), false)
-						.build());
+				EasyTracker.getInstance(Aircandi.applicationContext).send(
+						MapBuilder.createException(new StandardExceptionParser(Aircandi.applicationContext, null)
+								.getDescription(Thread.currentThread().getName(), exception), false)
+								.build());
 			}
 		}
 		catch (Exception e) {
@@ -83,11 +85,11 @@ public class Tracker {
 		try {
 			User user = Aircandi.getInstance().getCurrentUser();
 			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				Aircandi.tracker.send(MapBuilder
-						      .createEvent("system", "session_start", null, null)
-						      .set(Fields.SESSION_CONTROL, "start")
-						      .build()
-						    );				
+				EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder
+						.createEvent("system", "session_start", null, null)
+						.set(Fields.SESSION_CONTROL, "start")
+						.build()
+						);
 			}
 		}
 		catch (Exception e) {
@@ -99,11 +101,11 @@ public class Tracker {
 		try {
 			User user = Aircandi.getInstance().getCurrentUser();
 			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				Aircandi.tracker.send(MapBuilder
-					      .createEvent("system", "session_end", null, null)
-					      .set(Fields.SESSION_CONTROL, "end")
-					      .build()
-					    );				
+				EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder
+						.createEvent("system", "session_end", null, null)
+						.set(Fields.SESSION_CONTROL, "end")
+						.build()
+						);
 			}
 		}
 		catch (Exception e) {
@@ -115,11 +117,7 @@ public class Tracker {
 		try {
 			User user = Aircandi.getInstance().getCurrentUser();
 			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				/*
-				 * Screen name as set will be included in all subsequent sends.
-				 */
-				Aircandi.tracker.set(Fields.SCREEN_NAME, activity.getClass().getSimpleName());
-				Aircandi.tracker.send(MapBuilder.createAppView().build());
+				EasyTracker.getInstance(Aircandi.applicationContext).activityStart(activity);
 			}
 		}
 		catch (Exception e) {
@@ -127,15 +125,11 @@ public class Tracker {
 		}
 	}
 
-	public static void fragmentStart(Fragment fragment) {
+	public static void activityStop(Activity activity) {
 		try {
 			User user = Aircandi.getInstance().getCurrentUser();
 			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				/*
-				 * Screen name as set will be included in all subsequent sends.
-				 */
-				Aircandi.tracker.set(Fields.SCREEN_NAME, fragment.getClass().getSimpleName());
-				Aircandi.tracker.send(MapBuilder.createAppView().build());
+				EasyTracker.getInstance(Aircandi.applicationContext).activityStop(activity);
 			}
 		}
 		catch (Exception e) {
@@ -143,6 +137,23 @@ public class Tracker {
 		}
 	}
 	
+	public static void fragmentStart(Fragment fragment) {
+		try {
+			User user = Aircandi.getInstance().getCurrentUser();
+			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
+				/*
+				 * Screen name as set will be included in all subsequent sends.
+				 */
+				EasyTracker.getInstance(Aircandi.applicationContext).set(Fields.SCREEN_NAME, fragment.getClass().getSimpleName());
+				EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder.createAppView().build());
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+
 	public static enum Action {
 		ENTITY_KICK,
 		ENTITY_DELETE

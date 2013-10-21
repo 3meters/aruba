@@ -7,28 +7,31 @@
     <!-- Replace placeholder ID with your tracking ID -->
     <string name="ga_trackingId">UA-33660954-1</string>
 
-    <!-- Enable Activity tracking -->
+    <!--
+         Set to true to track time spent in each Activity.  
+         Set to false to track application-level information only. Default is false.
+    -->
     <bool name="ga_autoActivityTracking">true</bool>
-    
-  	<!--Enable automatic exception tracking-->
-  	<bool name="ga_reportUncaughtExceptions">false</bool>    
+
+    <!-- Enable automatic exception tracking -->
+    <bool name="ga_reportUncaughtExceptions">true</bool>
 
     <!--
     	Set how often auto dispatch gets fired in seconds.
-    	FIXME: Should be set to 30 minutes before app is released.
-    -->
-    <integer name="ga_dispatchPeriod">10</integer>
+    	FIXME: Should be set to 30 minutes before app is released.    -->
+    <integer name="ga_dispatchPeriod">300</integer>
 
     <!--
 		The amount of time (in seconds) your application can stay in the background before the 
-		session is ended. Default is 30 seconds. Negative value disables EasyTracker session management.     -->
+		session is ended. Default is 30 seconds. Negative value disables EasyTracker session management.
+    -->
     <integer name="ga_sessionTimeout">300</integer>
 
     <!-- Privacy settings that strips the last octet of the IP before storage in service -->
     <bool name="ga_anonymizeIp">false</bool>
 
     <!-- Info on what is being tracked is output to logcat -->
-    <string name="ga_logLevel">warning</string>
+    <string name="ga_logLevel">verbose</string>
 
     <!-- The screen names that will appear in the reporting -->
 

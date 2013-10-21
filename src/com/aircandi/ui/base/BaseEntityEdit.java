@@ -480,7 +480,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else if (requestCode == Constants.ACTIVITY_PHOTO_PICK_DEVICE) {
 
-				Tracker.sendEvent("ui_action", "photo_select_from_device", null, 0, Aircandi.getInstance().getCurrentUser());
+				Tracker.sendEvent("ui_action", "photo_select_from_device", null, 0);
 				final Uri photoUri = intent.getData();
 
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
@@ -491,7 +491,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else if (requestCode == Constants.ACTIVITY_PHOTO_MAKE) {
 
-				Tracker.sendEvent("ui_action", "photo_create_with_camera", null, 0, Aircandi.getInstance().getCurrentUser());
+				Tracker.sendEvent("ui_action", "photo_create_with_camera", null, 0);
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
 
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
@@ -502,7 +502,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else if (requestCode == Constants.ACTIVITY_PHOTO_SEARCH) {
 
-				Tracker.sendEvent("ui_action", "photo_select_using_search", null, 0, Aircandi.getInstance().getCurrentUser());
+				Tracker.sendEvent("ui_action", "photo_select_using_search", null, 0);
 				if (intent != null && intent.getExtras() != null) {
 					
 					final Bundle extras = intent.getExtras();
@@ -518,7 +518,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else if (requestCode == Constants.ACTIVITY_PHOTO_PICK_PLACE) {
 
-				Tracker.sendEvent("ui_action", "photo_select_from_place", null, 0, Aircandi.getInstance().getCurrentUser());
+				Tracker.sendEvent("ui_action", "photo_select_from_place", null, 0);
 				if (intent != null && intent.getExtras() != null) {
 
 					final Bundle extras = intent.getExtras();
@@ -703,7 +703,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			mEntity.photo = null;
 		}
 		drawPhoto();
-		Tracker.sendEvent("ui_action", "photo_set_to_default", null, 0, Aircandi.getInstance().getCurrentUser());
+		Tracker.sendEvent("ui_action", "photo_set_to_default", null, 0);
 	}
 
 	// --------------------------------------------------------------------------------------------

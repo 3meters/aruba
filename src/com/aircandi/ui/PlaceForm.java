@@ -44,6 +44,7 @@ import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
+import com.aircandi.utilities.Type;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
@@ -159,7 +160,7 @@ public class PlaceForm extends BaseEntityForm {
 		 * like a comment or post. Or something has moved like a candigram.
 		 */
 		if (mEntityId.equals(event.notification.toEntity.id)) {
-			
+
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -243,7 +244,7 @@ public class PlaceForm extends BaseEntityForm {
 			if (photoView != null) {
 				Photo photo = mEntity.getPhoto();
 				UI.drawPhoto(photoView, photo);
-				if (photo.usingDefault == null || !photo.usingDefault) {
+				if (Type.isFalse(photo.usingDefault)) {
 					photoView.setClickable(true);
 				}
 				UI.setVisibility(photoView, View.VISIBLE);
@@ -389,12 +390,12 @@ public class PlaceForm extends BaseEntityForm {
 	@Override
 	protected void drawStats() {
 
-		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, Direction.in);
+		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, false, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_PLACE, 0);
 		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
 		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
 
-		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, Direction.in);
+		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, false, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE, 0);
 		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
 		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);

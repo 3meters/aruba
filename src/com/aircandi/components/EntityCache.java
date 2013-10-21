@@ -77,12 +77,12 @@ public class EntityCache implements Map<String, Entity> {
 			if (entity.linksInCounts == null) {
 				entity.linksInCounts = new ArrayList<Count>();
 			}
-			else if (entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in) == null) {
+			else if (entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, false, Direction.in) == null) {
 				entity.linksInCounts.add(new Count(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, shortcuts.size()));
 			}
 			else {
-				entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in).count = entity.getCount(
-						Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in).count.intValue()
+				entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, false, Direction.in).count = entity.getCount(
+						Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, false, Direction.in).count.intValue()
 						+ shortcuts.size();
 			}
 			for (Shortcut shortcut : shortcuts) {
@@ -447,11 +447,11 @@ public class EntityCache implements Map<String, Entity> {
 				toEntity.linksInCounts = new ArrayList<Count>();
 				toEntity.linksInCounts.add(new Count(type, fromShortcut.schema, 1));
 			}
-			else if (toEntity.getCount(type, fromShortcut.schema, Direction.in) == null) {
+			else if (toEntity.getCount(type, fromShortcut.schema, false, Direction.in) == null) {
 				toEntity.linksInCounts.add(new Count(type, fromShortcut.schema, 1));
 			}
 			else {
-				toEntity.getCount(type, fromShortcut.schema, Direction.in).count = toEntity.getCount(type, fromShortcut.schema, Direction.in).count.intValue() + 1;
+				toEntity.getCount(type, fromShortcut.schema, false, Direction.in).count = toEntity.getCount(type, fromShortcut.schema, false, Direction.in).count.intValue() + 1;
 			}
 
 			Link link = new Link(fromId, toId, type, fromShortcut.schema);
@@ -479,11 +479,11 @@ public class EntityCache implements Map<String, Entity> {
 				fromEntity.linksOutCounts = new ArrayList<Count>();
 				fromEntity.linksOutCounts.add(new Count(type, fromShortcut.schema, 1));
 			}
-			else if (fromEntity.getCount(type, fromShortcut.schema, Direction.out) == null) {
+			else if (fromEntity.getCount(type, fromShortcut.schema, false, Direction.out) == null) {
 				fromEntity.linksOutCounts.add(new Count(type, fromShortcut.schema, 1));
 			}
 			else {
-				fromEntity.getCount(type, fromShortcut.schema, Direction.out).count = fromEntity.getCount(type, fromShortcut.schema, Direction.out).count.intValue() + 1;
+				fromEntity.getCount(type, fromShortcut.schema, false, Direction.out).count = fromEntity.getCount(type, fromShortcut.schema, false, Direction.out).count.intValue() + 1;
 			}
 
 			Link link = new Link(fromId, toId, type, fromShortcut.schema);
@@ -556,7 +556,7 @@ public class EntityCache implements Map<String, Entity> {
 						
 						/* Adjust the count */
 						if (toEntity.linksInCounts != null) {
-							Count count = toEntity.getCount(type, link.targetSchema, Direction.in);
+							Count count = toEntity.getCount(type, link.targetSchema, false, Direction.in);
 							if (count != null) {
 								count.count = count.count.intValue() - 1;
 							}
@@ -579,7 +579,7 @@ public class EntityCache implements Map<String, Entity> {
 						fromEntity.linksOut.remove(link);
 						fromEntity.activityDate = time;
 						if (fromEntity.linksOutCounts != null) {
-							Count count = fromEntity.getCount(type, link.targetSchema, Direction.out);
+							Count count = fromEntity.getCount(type, link.targetSchema, false, Direction.out);
 							if (count != null) {
 								count.count = count.count.intValue() - 1;
 							}

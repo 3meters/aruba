@@ -52,6 +52,7 @@ import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Media;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
+import com.aircandi.utilities.Type;
 import com.aircandi.utilities.UI;
 import com.squareup.otto.Subscribe;
 
@@ -126,11 +127,11 @@ public class CandigramForm extends BaseEntityForm {
 					LinearLayout.LayoutParams paramsImage = new LinearLayout.LayoutParams(photoViewWidth, photoViewWidth);
 					photoView.setLayoutParams(paramsImage);
 				}
-				
+
 				if (!UI.photosEqual(photoView.getPhoto(), mEntity.getPhoto())) {
 					Photo photo = mEntity.getPhoto();
 					UI.drawPhoto(photoView, photo);
-					if (photo.usingDefault == null || !photo.usingDefault) {
+					if (Type.isFalse(photo.usingDefault)) {
 						photoView.setClickable(true);
 					}
 				}
@@ -314,28 +315,36 @@ public class CandigramForm extends BaseEntityForm {
 		/* Visibility */
 		if (mScrollView != null) {
 			mScrollView.setVisibility(View.VISIBLE);
-		}		
+		}
 	}
 
 	@Override
 	protected void drawStats() {
 
-		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, Direction.in);
+		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, false, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_CANDIGRAM, 0);
 		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
 		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
 
-		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, Direction.in);
+		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, false, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_CANDIGRAM, 0);
 		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
 		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
 
 		UI.setVisibility(findViewById(R.id.places_stats), View.GONE);
 		if (mEntity.type.equals(Constants.TYPE_APP_EXPAND)) {
-			count = mEntity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, Direction.out);
-			if (count == null) count = new Count(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, 0);
-			label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_places : R.string.stats_label_places_plural);
-			((TextView) findViewById(R.id.places_stats)).setText(String.valueOf(count.count) + " " + label);
+			Count active = mEntity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, false, Direction.out);
+			Count inactive = mEntity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, true, Direction.out);
+			Count summed = new Count(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PLACE, 0);
+			if (active != null) {
+				summed.count = summed.count.intValue() + active.count.intValue();
+			}
+			if (inactive != null) {
+				summed.count = summed.count.intValue() + inactive.count.intValue();
+			}
+
+			label = this.getString(summed.count.intValue() == 1 ? R.string.stats_label_places : R.string.stats_label_places_plural);
+			((TextView) findViewById(R.id.places_stats)).setText(String.valueOf(summed.count) + " " + label);
 			UI.setVisibility(findViewById(R.id.places_stats), View.VISIBLE);
 		}
 

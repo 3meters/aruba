@@ -151,10 +151,10 @@ public class PhotoPicker extends BaseBrowse implements IList {
 			showBusy(R.string.progress_searching, false);
 		}
 		else {
-			
-			int inputType = mSearch.getInputType(); 
-			inputType &= ~EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE; 
-			mSearch.setRawInputType(inputType); 
+
+			int inputType = mSearch.getInputType();
+			inputType &= ~EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE;
+			mSearch.setRawInputType(inputType);
 
 			final Bundle extras = this.getIntent().getExtras();
 			if (extras != null) {
@@ -270,7 +270,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 		 */
 		Count pictures = null;
 		if (mEntity != null) {
-			pictures = mEntity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, Direction.in);
+			pictures = mEntity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, false, Direction.in);
 		}
 
 		if (mPlacePhotoMode && pictures != null) {
@@ -766,7 +766,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 				}
 
 				if (bitmap == null) {
-					serviceResponse.exception =  new IllegalStateException("Stream could not be decoded to a bitmap: " + uri);
+					serviceResponse.exception = new IllegalStateException("Stream could not be decoded to a bitmap: " + uri);
 					serviceResponse.responseCode = ResponseCode.FAILED;
 					return null;
 				}

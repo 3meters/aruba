@@ -23,7 +23,6 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.EntityManager;
@@ -403,7 +402,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					Tracker.sendEvent("ui_action", "list_edit_refresh_by_user", mListSchema, 0, Aircandi.getInstance().getCurrentUser());
+					Tracker.sendEvent("ui_action", "list_edit_refresh_by_user", mListSchema, 0);
 					onRefresh();
 				}
 			});

@@ -13,6 +13,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import java.util.regex.Pattern;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.MemoryInfo;
+import android.app.Service;
 import android.content.Context;
 import android.os.Environment;
 import android.widget.Toast;
@@ -186,5 +189,13 @@ public class Utilities {
 		catch (IOException e) {
 			Logger.w(root, e.getMessage());
 		}
+	}
+
+	public static Long getMemoryAvailable() {
+		MemoryInfo memoryInfo = new MemoryInfo();
+		ActivityManager activityManager = (ActivityManager) Aircandi.applicationContext.getSystemService(Service.ACTIVITY_SERVICE);
+		activityManager.getMemoryInfo(memoryInfo);
+		long availableMemory = memoryInfo.availMem / 1048576L;
+		return availableMemory;
 	}
 }
