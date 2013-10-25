@@ -220,7 +220,7 @@ public class RegisterEdit extends BaseEntityEdit {
 					Aircandi.settingsEditor.putString(Constants.SETTING_LAST_EMAIL, insertedUser.email);
 					Aircandi.settingsEditor.commit();
 
-					setResult(Constants.RESULT_USER_SIGNED_IN);
+					setResultCode(Constants.RESULT_USER_SIGNED_IN);
 					finish();
 					Animate.doOverridePendingTransition(RegisterEdit.this, TransitionType.FORM_TO_PAGE);
 				}

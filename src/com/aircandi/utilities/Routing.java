@@ -23,7 +23,7 @@ import com.aircandi.applications.Places;
 import com.aircandi.applications.Users;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.IntentBuilder;
-import com.aircandi.components.Tracker;
+import com.aircandi.components.TrackerBase.TrackerCategory;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.Photo;
@@ -266,7 +266,18 @@ public final class Routing {
 			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.editFormBySchema(entity.schema))
 					.setEntity(entity)
 					.setExtras(extras);
-			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_EDIT);
+			
+			Intent intent = intentBuilder.create();
+			
+//			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+//				PendingIntent pendingIntent = PendingIntent.getActivity(activity, Constants.ACTIVITY_ENTITY_EDIT, intent, PendingIntent.FLAG_ONE_SHOT);
+//				Intent signin = new Intent(activity, SignInEdit.class).putExtra("pendingIntent", pendingIntent);
+//				activity.startActivityForResult(signin, Constants.ACTIVITY_ENTITY_EDIT);
+//				Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
+//				return true;
+//			}
+			
+			activity.startActivityForResult(intent, Constants.ACTIVITY_ENTITY_EDIT);
 			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
@@ -393,7 +404,7 @@ public final class Routing {
 
 		else if (route == Route.CANCEL_HELP) {
 
-			activity.setResult(Activity.RESULT_CANCELED);
+			((BaseActivity)activity).setResultCode(Activity.RESULT_CANCELED);
 			activity.finish();
 			Animate.doOverridePendingTransition(activity, TransitionType.HELP_TO_PAGE);
 			return true;
@@ -583,7 +594,7 @@ public final class Routing {
 	public static void shortcut(final Activity activity, Shortcut shortcut, Entity entity, Direction direction) {
 
 		if (shortcut.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
-			Tracker.sendEvent("ui_action", "applink_click", shortcut.app, 0);
+			Aircandi.tracker.sendEvent(TrackerCategory.UX, "applink_click", shortcut.app, 0);
 
 
 			if (shortcut.app.equals(Constants.TYPE_APP_PICTURE)

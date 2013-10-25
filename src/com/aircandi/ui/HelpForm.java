@@ -27,7 +27,7 @@ public class HelpForm extends BaseBrowse {
 	@Override
 	public void onCancel(Boolean force) {
 		updateRunOnce();
-		setResult(Activity.RESULT_CANCELED);
+		setResultCode(Activity.RESULT_CANCELED);
 		finish();
 		Animate.doOverridePendingTransition(this, TransitionType.HELP_TO_PAGE);
 	}

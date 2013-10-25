@@ -36,7 +36,7 @@ public class Pictures {
 				.setListLinkType(linkType)
 				.setListLinkDirection(direction.name())
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_PICTURE)
-				.setListItemResId(R.layout.temp_griditem_entity)
+				.setListItemResId(R.layout.temp_grid_item_entity)
 				.setListPageSize(ServiceConstants.PAGE_SIZE_PICTURES)
 				.setListNewEnabled(true);
 
@@ -54,7 +54,7 @@ public class Pictures {
 				.setListLinkDirection(direction.name())
 				.setListLinkSchema(Constants.SCHEMA_ENTITY_PICTURE)
 				.setListTitle(title)
-				.setListItemResId(R.layout.temp_griditem_entity)
+				.setListItemResId(R.layout.temp_grid_item_entity)
 				.setListPageSize(ServiceConstants.PAGE_SIZE_PICTURES)
 				.setListNewEnabled(true);
 

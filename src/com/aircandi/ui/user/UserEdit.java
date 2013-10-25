@@ -24,13 +24,13 @@ import com.aircandi.utilities.Utilities;
 
 public class UserEdit extends BaseEntityEdit {
 
-	private EditText	mBio;
-	private EditText	mWebUri;
-	private EditText	mArea;
-	private EditText	mEmail;
-	private CheckBox	mDoNotTrack;
+	private EditText		mBio;
+	private EditText		mWebUri;
+	private EditText		mArea;
+	private EditText		mEmail;
+	private CheckBox		mDoNotTrack;
 
-	private TabManager	mTabManager;
+	private TabManager		mTabManager;
 
 	@Override
 	public void initialize(Bundle savedInstanceState) {
@@ -188,7 +188,7 @@ public class UserEdit extends BaseEntityEdit {
 		}
 		gather();
 		User user = (User) mEntity;
-		
+
 		if (user.name == null) {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 					, null

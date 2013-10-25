@@ -153,10 +153,10 @@ public class EntityCache implements Map<String, Entity> {
 		return serviceResponse;
 	}
 
-	public ServiceResponse loadEntitiesForEntity(String entityId, LinkOptions linkOptions, Cursor cursor, Stopwatch stopwatch) {
+	public ServiceResponse loadEntitiesForEntity(String forEntityId, LinkOptions linkOptions, Cursor cursor, Stopwatch stopwatch) {
 
 		final Bundle parameters = new Bundle();
-		parameters.putString("entityId", entityId);
+		parameters.putString("entityId", forEntityId);
 
 		if (linkOptions != null) {
 			parameters.putString("links", "object:" + Json.objectToJson(linkOptions));
@@ -194,10 +194,10 @@ public class EntityCache implements Map<String, Entity> {
 						EntityManager.getInstance().getCacheStampOverrides().remove(entity.id);
 					}
 					if (cursor != null && cursor.direction != null && cursor.direction.equals("out")) {
-						entity.fromId = entityId;
+						entity.fromId = forEntityId;
 					}
 					else {
-						entity.toId = entityId;
+						entity.toId = forEntityId;
 					}
 				}
 				decorate(loadedEntities, linkOptions);

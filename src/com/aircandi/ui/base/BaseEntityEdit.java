@@ -33,13 +33,12 @@ import com.aircandi.R;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.Tracker;
+import com.aircandi.components.TrackerBase.TrackerCategory;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.RequestListener;
 import com.aircandi.service.ServiceResponse;
@@ -357,8 +356,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				gather();
 
 				if (mSkipSave) {
-					final IntentBuilder intentBuilder = new IntentBuilder().setEntity(mEntity);
-					setResult(Constants.RESULT_ENTITY_EDITED, intentBuilder.create());
+					setResultCode(Activity.RESULT_OK);
 					finish();
 					Animate.doOverridePendingTransition(this, TransitionType.FORM_TO_PAGE);
 				}
@@ -480,7 +478,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else if (requestCode == Constants.ACTIVITY_PHOTO_PICK_DEVICE) {
 
-				Tracker.sendEvent("ui_action", "photo_select_from_device", null, 0);
+				Aircandi.tracker.sendEvent(TrackerCategory.UX, "photo_select_from_device", null, 0);
 				final Uri photoUri = intent.getData();
 
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
@@ -491,7 +489,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else if (requestCode == Constants.ACTIVITY_PHOTO_MAKE) {
 
-				Tracker.sendEvent("ui_action", "photo_create_with_camera", null, 0);
+				Aircandi.tracker.sendEvent(TrackerCategory.UX, "photo_create_with_camera", null, 0);
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
 
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
@@ -502,7 +500,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else if (requestCode == Constants.ACTIVITY_PHOTO_SEARCH) {
 
-				Tracker.sendEvent("ui_action", "photo_select_using_search", null, 0);
+				Aircandi.tracker.sendEvent(TrackerCategory.UX, "photo_select_using_search", null, 0);
 				if (intent != null && intent.getExtras() != null) {
 					
 					final Bundle extras = intent.getExtras();
@@ -518,7 +516,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			}
 			else if (requestCode == Constants.ACTIVITY_PHOTO_PICK_PLACE) {
 
-				Tracker.sendEvent("ui_action", "photo_select_from_place", null, 0);
+				Aircandi.tracker.sendEvent(TrackerCategory.UX, "photo_select_from_place", null, 0);
 				if (intent != null && intent.getExtras() != null) {
 
 					final Bundle extras = intent.getExtras();
@@ -532,10 +530,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					}
 				}
 			}
-			else {
-				super.onActivityResult(requestCode, resultCode, intent);
-			}
 		}
+		super.onActivityResult(requestCode, resultCode, intent);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -703,7 +699,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			mEntity.photo = null;
 		}
 		drawPhoto();
-		Tracker.sendEvent("ui_action", "photo_set_to_default", null, 0);
+		Aircandi.tracker.sendEvent(TrackerCategory.UX, "photo_set_to_default", null, 0);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -800,10 +796,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 						 * without a service refresh.
 						 */
 					}
-
-					UI.showToastNotification(getString(mInsertedResId), Toast.LENGTH_SHORT);
-					final IntentBuilder intentBuilder = new IntentBuilder().setEntityId(insertedEntity.id);
-					setResult(Constants.RESULT_ENTITY_INSERTED, intentBuilder.create());
 				}
 				return result.serviceResponse;
 			}
@@ -813,7 +805,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				hideBusy();
 				if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
-					setResult(Constants.RESULT_ENTITY_INSERTED);
+					UI.showToastNotification(getString(mInsertedResId), Toast.LENGTH_SHORT);
+					setResultCode(Activity.RESULT_OK);
 					finish();
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.CANDIGRAM_OUT);
 				}
@@ -880,7 +873,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 				hideBusy();
 				if (serviceResponse.responseCode == ResponseCode.SUCCESS) {
 					UI.showToastNotification(getString(mUpdatedResId), Toast.LENGTH_SHORT);
-					setResult(Constants.RESULT_ENTITY_UPDATED);
+					setResultCode(Activity.RESULT_OK);
 					finish();
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FORM_TO_PAGE);
 				}
@@ -925,7 +918,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					 */
 					hideBusy();
 					UI.showToastNotification(getString(mDeletedResId), Toast.LENGTH_SHORT);
-					setResult(Constants.RESULT_ENTITY_DELETED);
+					setResultCode(Constants.RESULT_ENTITY_DELETED);
 					finish();
 					Animate.doOverridePendingTransition(BaseEntityEdit.this, TransitionType.FORM_TO_PAGE_AFTER_DELETE);
 				}

@@ -38,7 +38,7 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.MenuManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.Tracker;
+import com.aircandi.components.TrackerBase.TrackerCategory;
 import com.aircandi.ui.SplashForm;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
@@ -81,7 +81,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 			Logger.d(this, "Aircandi not launched normally, routing to splash activity");
 			Intent intent = new Intent(this, SplashForm.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			setResult(Activity.RESULT_CANCELED);
+			setResultCode(Activity.RESULT_CANCELED);
 			startActivity(intent);
 			finish();
 		}
@@ -161,7 +161,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 	}
 
 	public void onCancel(Boolean force) {
-		setResult(Activity.RESULT_CANCELED);
+		setResultCode(Activity.RESULT_CANCELED);
 		finish();
 		Animate.doOverridePendingTransition(this, TransitionType.PAGE_BACK);
 	}
@@ -232,8 +232,15 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 
 	@Override
 	public void onLowMemory() {
-		Tracker.sendEvent("system", "memory_low", null, Utilities.getMemoryAvailable());
+		Aircandi.tracker.sendEvent(TrackerCategory.SYSTEM, "memory_low", null, Utilities.getMemoryAvailable());
 		super.onLowMemory();
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		Aircandi.resultCode = Activity.RESULT_OK;
+		Aircandi.resultIntent = null;
+		super.onActivityResult(requestCode, resultCode, intent);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -444,6 +451,17 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 			Aircandi.getInstance().setCurrentActivity(null);
 	}
 
+	public void setResultCode(int resultCode){
+		setResult(resultCode);
+		Aircandi.resultCode = resultCode;
+	}
+	
+	public void setResultCode(int resultCode, Intent intent){
+		setResult(resultCode, intent);
+		Aircandi.resultCode = resultCode;
+		Aircandi.resultIntent = intent;
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	// Menus
 	// --------------------------------------------------------------------------------------------
@@ -492,7 +510,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 	protected void onStart() {
 		if (!isFinishing()) {
 			Logger.d(this, "Activity starting");
-			Tracker.activityStart(this);
+			Aircandi.tracker.activityStart(this);
 			if (mPrefChangeReloadNeeded) {
 				final Intent intent = getIntent();
 				startActivity(intent);
@@ -521,6 +539,7 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 	@Override
 	protected void onStop() {
 		Logger.d(this, "Activity stopping");
+		Aircandi.tracker.activityStop(this);
 		super.onStop();
 	}
 

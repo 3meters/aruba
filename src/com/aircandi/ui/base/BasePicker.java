@@ -6,7 +6,7 @@ import com.aircandi.Constants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.utilities.Json;
 
-public abstract class BasePicker extends BaseBrowse implements IList {
+public abstract class BasePicker extends BaseBrowse implements ListDelegate {
 
 	protected Entity	mEntity;
 

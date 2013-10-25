@@ -40,7 +40,7 @@ import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.components.Tracker;
+import com.aircandi.components.TrackerBase.TrackerCategory;
 import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.LinkOptions;
@@ -66,7 +66,7 @@ import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 
-public abstract class BaseEntityForm extends BaseBrowse implements IForm {
+public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate {
 
 	protected ScrollView			mScrollView;
 	protected Entity				mEntity;
@@ -358,15 +358,13 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		super.onActivityResult(requestCode, resultCode, intent);
-
 		/*
 		 * Cases that use activity result
 		 * 
 		 * - Candi picker returns entity id for a move
 		 * - Template picker returns type of candi to add as a child
 		 */
-		if (resultCode != Activity.RESULT_CANCELED) {
+		if (resultCode != Activity.RESULT_CANCELED || Aircandi.resultCode != Activity.RESULT_CANCELED) {
 			if (requestCode == Constants.ACTIVITY_ENTITY_EDIT) {
 				EntityManager.getInstance().getCacheStampOverrides().put(mParentId, mParentId);
 				if (resultCode == Constants.RESULT_ENTITY_DELETED) {
@@ -392,6 +390,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 				}
 			}
 		}
+		super.onActivityResult(requestCode, resultCode, intent);
 	}
 
 	@Override
@@ -699,7 +698,12 @@ public abstract class BaseEntityForm extends BaseBrowse implements IForm {
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					Tracker.sendEvent("ui_action", "form_refresh_by_user", mEntity.schema, 0);
+					/*
+					 * Network problems can cause us to be on an entity form without an entity.
+					 */
+					if (mEntity != null) {
+						Aircandi.tracker.sendEvent(TrackerCategory.UX, "form_refresh_by_user", mEntity.schema, 0);
+					}
 					onRefresh();
 				}
 			});

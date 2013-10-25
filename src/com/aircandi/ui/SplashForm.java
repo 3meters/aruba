@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Window;
@@ -38,8 +39,12 @@ import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.google.android.gcm.GCMRegistrar;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 
 public class SplashForm extends SherlockActivity {
+
+	private static final int	PLAY_SERVICES_RESOLUTION_REQUEST	= 9000;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -112,7 +117,7 @@ public class SplashForm extends SherlockActivity {
 				NetworkManager.getInstance().setContext(getApplicationContext());
 				NetworkManager.getInstance().initialize();
 				Reporting.updateCrashKeys();
-				
+
 				/*
 				 * Fire off a check to make sure the session is valid. This will also
 				 * be the first opportunity to check our network connection. Also, the
@@ -131,16 +136,15 @@ public class SplashForm extends SherlockActivity {
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 					/* service notifications */
-					GCMRegistrar.checkDevice(SplashForm.this); 		// Does device support GCM
-					GCMRegistrar.checkManifest(SplashForm.this); 	// Is manifest setup correctly for GCM
+					if (checkPlayServices()) {
+						String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
+						if (registrationId != null) {
+							NotificationManager.getInstance().unregisterDeviceWithAircandi(registrationId);
+							GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
+						}
 
-					String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
-					if (registrationId != null) {
-						NotificationManager.getInstance().unregisterDeviceWithAircandi(registrationId);
-						GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
+						NotificationManager.getInstance().registerDeviceWithGCM();
 					}
-
-					NotificationManager.getInstance().registerDeviceWithGCM();
 
 					/* Proxibase sdk components */
 					Aircandi.getInstance().setUsingEmulator(Aircandi.usingEmulator);
@@ -310,6 +314,22 @@ public class SplashForm extends SherlockActivity {
 		t.start();
 	}
 
+	private boolean checkPlayServices() {
+		int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+		if (status != ConnectionResult.SUCCESS) {
+			if (GooglePlayServicesUtil.isUserRecoverableError(status)) {
+				GooglePlayServicesUtil.getErrorDialog(status, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+			}
+			else {
+				Logger.w(this, "This device is not supported by google play services");
+				UI.showToastNotification("This device is not supported", Toast.LENGTH_LONG);
+				finish();
+			}
+			return false;
+		}
+		return true;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Dialogs
 	// --------------------------------------------------------------------------------------------
@@ -360,6 +380,7 @@ public class SplashForm extends SherlockActivity {
 				startMainApp();
 			}
 		}
+		super.onActivityResult(requestCode, resultCode, intent);
 	}
 
 	// --------------------------------------------------------------------------------------------

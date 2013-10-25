@@ -81,7 +81,7 @@ public class ApplicationPicker extends BasePicker implements OnItemClickListener
 		final AirApplication choice = (AirApplication) view.getTag();
 		final Intent intent = new Intent();
 		intent.putExtra(Constants.EXTRA_ENTITY_SCHEMA, choice.schema);
-		setResult(Activity.RESULT_OK, intent);
+		setResultCode(Activity.RESULT_OK, intent);
 		finish();
 	}
 

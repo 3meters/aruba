@@ -77,70 +77,68 @@ public class MapForm extends BaseEntityForm {
 		/*
 		 * Just here for a pre-databinding check.
 		 */
-		if (checkPlayServices()) {
 
-			new AsyncTask() {
+		new AsyncTask() {
 
-				@Override
-				protected void onPreExecute() {
-					showBusy();
-				}
+			@Override
+			protected void onPreExecute() {
+				showBusy();
+			}
 
-				@Override
-				protected Object doInBackground(Object... params) {
-					Thread.currentThread().setName("GetMapMarkers");
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("GetMapMarkers");
 
-					List<String> linkTypes = new ArrayList<String>();
-					List<String> schemas = new ArrayList<String>();
-					linkTypes.add(Constants.TYPE_LINK_CONTENT);
-					schemas.add(Constants.SCHEMA_ENTITY_PLACE);
+				List<String> linkTypes = new ArrayList<String>();
+				List<String> schemas = new ArrayList<String>();
+				linkTypes.add(Constants.TYPE_LINK_CONTENT);
+				schemas.add(Constants.SCHEMA_ENTITY_PLACE);
 
-					Cursor cursor = new Cursor()
-							.setLimit(ServiceConstants.PAGE_SIZE_PLACES_MAP)
-							.setSort(Maps.asMap("modifiedDate", -1))
-							.setSkip(0)
-							.setSchemas(schemas)
-							.setLinkTypes(linkTypes)
-							.setDirection(Direction.out.name());;
+				Cursor cursor = new Cursor()
+						.setLimit(ServiceConstants.PAGE_SIZE_PLACES_MAP)
+						.setSort(Maps.asMap("modifiedDate", -1))
+						.setSkip(0)
+						.setSchemas(schemas)
+						.setLinkTypes(linkTypes)
+						.setDirection(Direction.out.name());;
 
-					ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mEntityId, null, cursor, null);
+				ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mEntityId, null, cursor, null);
 
-					return result;
-				}
+				return result;
+			}
 
-				@Override
-				protected void onPostExecute(Object response) {
+			@Override
+			protected void onPostExecute(Object response) {
 
-					ModelResult result = (ModelResult) response;
-					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-						List<Entity> entities = (List<Entity>) result.data;
-						Collections.sort(entities, new ServiceBase.SortByPositionSortDate());
-						for (Entity entity : entities) {
+				ModelResult result = (ModelResult) response;
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+					List<Entity> entities = (List<Entity>) result.data;
+					Collections.sort(entities, new ServiceBase.SortByPositionSortDate());
+					for (Entity entity : entities) {
 
-							if (entity.location != null) {
-								Boolean exists = false;
-								for (AirMarker marker : mMarkers) {
-									if (marker.id.equals(entity.id)) {
-										exists = true;
-										break;
-									}
+						if (entity.location != null) {
+							Boolean exists = false;
+							for (AirMarker marker : mMarkers) {
+								if (marker.id.equals(entity.id)) {
+									exists = true;
+									break;
 								}
+							}
 
-								if (!exists) {
-									AirMarker marker = new AirMarker(entity.id, entity.name, null, entity.location.lat, entity.location.lng, false,
-											R.drawable.img_marker_candigram_inactive);
-									mMarkers.add(marker);
-								}
+							if (!exists) {
+								AirMarker marker = new AirMarker(entity.id, entity.name, null, entity.location.lat, entity.location.lng, false,
+										R.drawable.img_marker_candigram_inactive);
+								mMarkers.add(marker);
 							}
 						}
 					}
-					hideBusy();
-					findViewById(R.id.fragment_holder).setVisibility(View.VISIBLE);
-					MapForm.super.databind(mode);
 				}
+				hideBusy();
+				findViewById(R.id.fragment_holder).setVisibility(View.VISIBLE);
+				MapForm.super.databind(mode);
+			}
 
-			}.execute();
-		}
+		}.execute();
 	}
 
 	@Override
@@ -236,25 +234,6 @@ public class MapForm extends BaseEntityForm {
 				}
 			});
 		}
-	}
-
-	private boolean checkPlayServices() {
-		int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-		if (status != ConnectionResult.SUCCESS) {
-			if (GooglePlayServicesUtil.isUserRecoverableError(status)) {
-				showErrorDialog(status);
-			}
-			else {
-				UI.showToastNotification("Maps are not supported for this device", Toast.LENGTH_LONG);
-				finish();
-			}
-			return false;
-		}
-		return true;
-	}
-
-	void showErrorDialog(int code) {
-		GooglePlayServicesUtil.getErrorDialog(code, this, REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -39,12 +39,12 @@
 
 -keep class org.apache.commons.logging.**               { *; }
 -keep class com.amazonaws.services.sqs.QueueUrlHandler  { *; }
-#-keep class com.amazonaws.javax.xml.transform.sax.*     { public *; }
-#-keep class com.amazonaws.javax.xml.stream.**           { *; }
--keep class com.amazonaws.javax.xml.**           { *; }
+#-keep class com.amazonaws.javax.xml.transform.sax.*    { public *; }
+#-keep class com.amazonaws.javax.xml.stream.**          { *; }
+-keep class com.amazonaws.javax.xml.**           		{ *; }
 -keep class com.amazonaws.services.**.model.*Exception* { *; }
 -keep class org.codehaus.**                             { *; }
--keep class com.amazonaws.*Exception* { *; }
+-keep class com.amazonaws.*Exception* 					{ *; }
 
 -keepattributes Signature,*Annotation*
 
@@ -58,6 +58,15 @@
 # -------------------------------------------------------------------------------------------------
 
 -keepattributes SourceFile,LineNumberTable
+
+# -------------------------------------------------------------------------------------------------
+# Flurry specific settings
+# -------------------------------------------------------------------------------------------------
+
+#-keep class com.flurry.** { *; }
+#-dontwarn com.flurry.**
+#-keepattributes *Annotation*,EnclosingMethod
+#-keepclasseswithmembers class * { public <init>(android.content.Context, android.util.AttributeSet, int); }
 
 # -------------------------------------------------------------------------------------------------
 # Otto specific settings

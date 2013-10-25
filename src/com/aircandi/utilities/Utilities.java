@@ -198,4 +198,5 @@ public class Utilities {
 		long availableMemory = memoryInfo.availMem / 1048576L;
 		return availableMemory;
 	}
+
 }

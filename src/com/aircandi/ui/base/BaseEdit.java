@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.WindowManager;
 
+import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.service.objects.Entity;
@@ -16,7 +17,7 @@ import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 
-public abstract class BaseEdit extends BaseActivity implements IEdit {
+public abstract class BaseEdit extends BaseActivity implements EditDelegate {
 
 	protected Boolean	mEditing	= false;
 	protected Boolean	mDirty		= false;
@@ -46,7 +47,9 @@ public abstract class BaseEdit extends BaseActivity implements IEdit {
 	}
 
 	@Override
-	public void initialize(Bundle savedInstanceState) {}
+	public void initialize(Bundle savedInstanceState) {
+		Aircandi.resultCode = Activity.RESULT_OK;		
+	}
 
 	@Override
 	public void bind(BindingMode mode) {}
@@ -77,7 +80,8 @@ public abstract class BaseEdit extends BaseActivity implements IEdit {
 			confirmDirtyExit();
 		}
 		else {
-			setResult(Activity.RESULT_CANCELED);
+			setResultCode(Activity.RESULT_CANCELED);
+			Aircandi.resultCode = Activity.RESULT_CANCELED;
 			finish();
 			Animate.doOverridePendingTransition(this, TransitionType.PAGE_BACK);
 		}

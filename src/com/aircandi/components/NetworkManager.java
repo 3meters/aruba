@@ -358,37 +358,37 @@ public class NetworkManager {
 
 		String networkTypeLabel = null;
 		if (networkTypeId == null) {
-			networkTypeLabel = "None";
+			networkTypeLabel = "none";
 		}
 		else if (networkTypeId == 0) {
-			networkTypeLabel = "Mobile";
+			networkTypeLabel = "mobile";
 		}
 		else if (networkTypeId == 1) {
-			networkTypeLabel = "Wifi";
+			networkTypeLabel = "wifi";
 		}
 		else if (networkTypeId == 2) {
-			networkTypeLabel = "Mobile MMS";
+			networkTypeLabel = "mobile_mms";
 		}
 		else if (networkTypeId == 3) {
-			networkTypeLabel = "Mobile SUPL";
+			networkTypeLabel = "mobile_supl";
 		}
 		else if (networkTypeId == 4) {
-			networkTypeLabel = "Mobile DUN";
+			networkTypeLabel = "mobile_dun";
 		}
 		else if (networkTypeId == 5) {
-			networkTypeLabel = "Mobile HiPri";
+			networkTypeLabel = "mobile_hipri";
 		}
 		else if (networkTypeId == 6) {
-			networkTypeLabel = "WiMax";
+			networkTypeLabel = "wimax";
 		}
 		else if (networkTypeId == 7) {
-			networkTypeLabel = "Bluetooth";
+			networkTypeLabel = "bluetooth";
 		}
 		else if (networkTypeId == 8) {
-			networkTypeLabel = "Dummy";
+			networkTypeLabel = "dummy";
 		}
 		else if (networkTypeId == 9) {
-			networkTypeLabel = "Ethernet";
+			networkTypeLabel = "ethernet";
 		}
 		return networkTypeLabel;
 

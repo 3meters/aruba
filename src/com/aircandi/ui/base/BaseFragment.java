@@ -12,15 +12,16 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.aircandi.Aircandi;
 import com.aircandi.R;
 import com.aircandi.components.BusProvider;
 import com.aircandi.components.BusyManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.MenuManager;
-import com.aircandi.components.Tracker;
+import com.aircandi.components.TrackerBase.TrackerCategory;
 import com.aircandi.service.objects.CacheStamp;
 
-public abstract class BaseFragment extends SherlockFragment implements IForm {
+public abstract class BaseFragment extends SherlockFragment implements FormDelegate {
 
 	protected Resources		mResources;
 	protected BusyManager	mBusyManager;
@@ -218,7 +219,7 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 		 * ActionBarDrawerToggle will take care of this.
 		 */
 		if (item.getItemId() == R.id.refresh) {
-			Tracker.sendEvent("ui_action", "form_refresh_by_user", this.getClass().getSimpleName(), 0);
+			Aircandi.tracker.sendEvent(TrackerCategory.UX, "form_refresh_by_user", this.getClass().getSimpleName(), 0);
 			onRefresh();
 			return true;
 		}
@@ -232,7 +233,7 @@ public abstract class BaseFragment extends SherlockFragment implements IForm {
 	@Override
 	public void onStart() {
 		Logger.d(this, "Fragment start");
-		Tracker.fragmentStart(this);
+		Aircandi.tracker.fragmentStart(this);
 		super.onStart();
 	}
 

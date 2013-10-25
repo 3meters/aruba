@@ -1,10 +1,21 @@
 package com.aircandi.ui;
 
+import android.os.Bundle;
+import android.view.LayoutInflater;
+
+import com.aircandi.R;
 import com.aircandi.events.MessageEvent;
 import com.aircandi.ui.base.BaseEntityList;
 import com.squareup.otto.Subscribe;
 
 public class EntityList extends BaseEntityList {
+	
+	@Override
+	public void initialize(Bundle savedInstanceState) {
+		super.initialize(savedInstanceState);
+		mLoading = LayoutInflater.from(this).inflate(R.layout.temp_list_item_loading, null);		
+	}
+	
 	
 	@Subscribe
 	@SuppressWarnings("ucd")

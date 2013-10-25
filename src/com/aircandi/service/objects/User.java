@@ -84,6 +84,11 @@ public class User extends Entity {
 		return collectionId;
 	}
 
+	public Boolean isAnonymous() {
+		return true;
+		//return id.equals(ServiceConstants.ANONYMOUS_USER_ID);
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	// Copy and serialization
 	// --------------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 package com.aircandi.ui.base;
 
-public interface IForm extends BaseDelegate {
+public interface FormDelegate extends BaseDelegate {
 
 	public void databind(BindingMode mode);
 

@@ -90,7 +90,7 @@ public class AddressBuilder extends BaseEntityEdit {
 			final String jsonEntity = Json.objectToJson(mEntity);
 			intent.putExtra(Constants.EXTRA_PLACE, jsonEntity);
 		}
-		setResult(Activity.RESULT_OK, intent);
+		setResultCode(Activity.RESULT_OK, intent);
 		finish();
 	}
 

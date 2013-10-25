@@ -28,14 +28,14 @@ import com.aircandi.service.RequestListener;
 import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.BaseBrowse;
-import com.aircandi.ui.base.IForm;
+import com.aircandi.ui.base.FormDelegate;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Json;
 import com.aircandi.utilities.UI;
 
-public class PhotoForm extends BaseBrowse implements IForm {
+public class PhotoForm extends BaseBrowse implements FormDelegate {
 
 	private Photo			mPhoto;
 	private AirImageView	mPhotoView;

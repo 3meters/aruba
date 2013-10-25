@@ -2,6 +2,8 @@ package com.aircandi.ui.user;
 
 import java.util.Locale;
 
+import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -32,11 +34,12 @@ import com.aircandi.utilities.Utilities;
 
 public class SignInEdit extends BaseEdit {
 
-	private EditText	mEmail;
-	private EditText	mPassword;
-	private TextView	mMessage;
+	private EditText		mEmail;
+	private EditText		mPassword;
+	private TextView		mMessage;
 
-	private String		mFormMessage;
+	private String			mFormMessage;
+	private PendingIntent	mPendingIntent;
 
 	@Override
 	public void unpackIntent() {
@@ -45,13 +48,14 @@ public class SignInEdit extends BaseEdit {
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mFormMessage = extras.getString(Constants.EXTRA_MESSAGE);
+			mPendingIntent = (PendingIntent) extras.getParcelable("pendingIntent");
 		}
 	}
 
 	@Override
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
-		
+
 		mEmail = (EditText) findViewById(R.id.email);
 		mPassword = (EditText) findViewById(R.id.password);
 		mMessage = (TextView) findViewById(R.id.message);
@@ -147,8 +151,19 @@ public class SignInEdit extends BaseEdit {
 					Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, jsonSession);
 					Aircandi.settingsEditor.putString(Constants.SETTING_LAST_EMAIL, user.email);
 					Aircandi.settingsEditor.commit();
+					
+					if (mPendingIntent != null) {
+						try {
+							mPendingIntent.send();
+							finish();
+							Animate.doOverridePendingTransition(SignInEdit.this, TransitionType.FORM_TO_PAGE);
+						}
+						catch (CanceledException exception) {
+							exception.printStackTrace();
+						}
+					}
 
-					setResult(Constants.RESULT_USER_SIGNED_IN);
+					setResultCode(Constants.RESULT_USER_SIGNED_IN);
 					finish();
 					Animate.doOverridePendingTransition(SignInEdit.this, TransitionType.FORM_TO_PAGE);
 				}

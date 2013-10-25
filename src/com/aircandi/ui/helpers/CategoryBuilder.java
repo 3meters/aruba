@@ -168,7 +168,7 @@ public class CategoryBuilder extends BaseEdit {
 			final String jsonCategory = Json.objectToJson(category);
 			intent.putExtra(Constants.EXTRA_CATEGORY, jsonCategory);
 		}
-		setResult(Activity.RESULT_OK, intent);
+		setResultCode(Activity.RESULT_OK, intent);
 		finish();
 	}
 

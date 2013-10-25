@@ -15,10 +15,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.Logger;
-import com.aircandi.components.Tracker;
+import com.aircandi.components.TrackerBase.TrackerCategory;
 import com.aircandi.service.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Shortcut;
@@ -177,7 +178,7 @@ public class Dialogs {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
-								Tracker.sendEvent("ui_action", "aircandi_update_button_click", "com.aircandi", 0);
+								Aircandi.tracker.sendEvent(TrackerCategory.UX, "aircandi_update_button_click", "com.aircandi", 0);
 								Logger.d(this, "Update: navigating to market install/update page");
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(Constants.APP_MARKET_URI));
 								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -224,7 +225,7 @@ public class Dialogs {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
-								Tracker.sendEvent("ui_action", "app_install_button_click", shortcut.getPackageName(), 0);
+								Aircandi.tracker.sendEvent(TrackerCategory.UX, "app_install_button_click", shortcut.getPackageName(), 0);
 								Logger.d(this, "Install: navigating to market install page");
 								final Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=" + shortcut.getPackageName()
 										+ "&referrer=utm_source%3Dcom.aircandi"));
@@ -260,12 +261,15 @@ public class Dialogs {
 	}
 
 	public static void sendPassword(final Activity activity) {
+		/*
+		 * FIXME: Not actually hooked up to anything.
+		 */
 		Dialogs.alertDialog(R.drawable.ic_launcher
 				, activity.getResources().getString(R.string.alert_send_password_title)
 				, activity.getResources().getString(R.string.alert_send_password_message)
 				, null
 				, activity, android.R.string.ok, null, null, null, null);
-		Tracker.sendEvent("support", "password_recover", null, 0);
+		Aircandi.tracker.sendEvent(TrackerCategory.USER, "password_recover", null, 0);
 	}
 
 	public static void locked(final Activity activity, Entity entity) {

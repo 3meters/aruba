@@ -22,7 +22,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
-import com.aircandi.components.Tracker;
+import com.aircandi.components.TrackerBase.TrackerCategory;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
@@ -225,7 +225,7 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 					@Override
 					public void onClick(DialogInterface dialog, int which) {}
 				}, null);
-		Tracker.sendEvent("ui_action", "dialog_open", "about", 0);
+		Aircandi.tracker.sendEvent(TrackerCategory.UX, "dialog_open", "about", 0);
 
 	}
 
@@ -277,11 +277,12 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 	@Override
 	protected void onStop() {
 		super.onStop();
+		Aircandi.tracker.activityStop(this);
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Tracker.activityStart(this);
+		Aircandi.tracker.activityStart(this);
 	}
 }

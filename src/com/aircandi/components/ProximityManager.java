@@ -54,6 +54,7 @@ public class ProximityManager {
 	private static final WifiScanResult	mWifiMassenaLowerStrong	= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower_strong", -20, true);
 	private static final WifiScanResult	mWifiMassenaLowerWeak	= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower_weak", -100, true);
 	private static final WifiScanResult	mWifiEmpty				= new WifiScanResult("aa:aa:bb:bb:cc:cc", "test_empty", -50, true);
+	private static final String			MockBssid				= "00:00:00:00:00:00";
 
 	private ProximityManager() {
 		if (!Aircandi.getInstance().isUsingEmulator()) {
@@ -99,7 +100,13 @@ public class ProximityManager {
 						mWifiList.clear();
 
 						for (ScanResult scanResult : mWifiManager.getScanResults()) {
-							mWifiList.add(new WifiScanResult(scanResult));
+							/*
+							 * Dev/test could trigger a mock access point and we filter for it
+							 * just to prevent confusion. We add our own below if emulator is active.
+							 */
+							if (!scanResult.BSSID.equals(MockBssid)) {
+								mWifiList.add(new WifiScanResult(scanResult));
+							}
 						}
 
 						final String testingBeacons = Aircandi.settings.getString(Constants.PREF_TESTING_BEACONS, "natural");
@@ -140,7 +147,7 @@ public class ProximityManager {
 					}
 				}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
-				Reporting.updateCrashKeys();								
+				Reporting.updateCrashKeys();
 				mWifiManager.startScan();
 			}
 			else {

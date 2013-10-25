@@ -2,6 +2,7 @@ package com.aircandi.ui.edit;
 
 import java.util.List;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -30,7 +31,6 @@ import com.aircandi.applications.Candigrams;
 import com.aircandi.applications.Candigrams.PropertyType;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.SpinnerData;
 import com.aircandi.components.TabManager;
@@ -491,8 +491,7 @@ public class CandigramEdit extends BaseEntityEdit {
 			if (validate()) {
 
 				if (mSkipSave) {
-					final IntentBuilder intentBuilder = new IntentBuilder().setEntity(mEntity);
-					setResult(Constants.RESULT_ENTITY_EDITED, intentBuilder.create());
+					setResultCode(Activity.RESULT_OK);
 					finish();
 					Animate.doOverridePendingTransition(this, TransitionType.CANDIGRAM_OUT);
 				}

@@ -23,10 +23,11 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.Tracker;
+import com.aircandi.components.TrackerBase.TrackerCategory;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.BounceListView;
@@ -38,7 +39,7 @@ import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 
-public abstract class BaseEntityListEdit extends BaseEdit implements IList {
+public abstract class BaseEntityListEdit extends BaseEdit implements ListDelegate {
 
 	protected BounceListView	mList;
 	protected TextView			mMessage;
@@ -136,7 +137,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 				}
 
 				intent.putStringArrayListExtra(Constants.EXTRA_ENTITIES, (ArrayList<String>) jsonEntities);
-				setResult(Activity.RESULT_OK, intent);
+				setResultCode(Activity.RESULT_OK, intent);
 				finish();
 				Animate.doOverridePendingTransition(this, TransitionType.FORM_TO_PAGE);
 			}
@@ -277,6 +278,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 				}
 			}
 		}
+		super.onActivityResult(requestCode, resultCode, intent);		
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -402,7 +404,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements IList {
 			refresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					Tracker.sendEvent("ui_action", "list_edit_refresh_by_user", mListSchema, 0);
+					Aircandi.tracker.sendEvent(TrackerCategory.UX, "list_edit_refresh_by_user", mListSchema, 0);
 					onRefresh();
 				}
 			});

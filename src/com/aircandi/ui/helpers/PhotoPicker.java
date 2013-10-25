@@ -75,7 +75,7 @@ import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.ServiceBase;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.base.BaseBrowse;
-import com.aircandi.ui.base.IList;
+import com.aircandi.ui.base.ListDelegate;
 import com.aircandi.ui.widgets.AirAutoCompleteTextView;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.utilities.Animate;
@@ -88,7 +88,7 @@ import com.commonsware.cwac.endless.EndlessAdapter;
  * We often will get duplicates because the ordering of images isn't
  * guaranteed while paging.
  */
-public class PhotoPicker extends BaseBrowse implements IList {
+public class PhotoPicker extends BaseBrowse implements ListDelegate {
 
 	private DrawableManager			mDrawableManager;
 
@@ -247,7 +247,7 @@ public class PhotoPicker extends BaseBrowse implements IList {
 					final Intent intent = new Intent();
 					final String jsonPhoto = Json.objectToJson(photo);
 					intent.putExtra(Constants.EXTRA_PHOTO, jsonPhoto);
-					setResult(Activity.RESULT_OK, intent);
+					setResultCode(Activity.RESULT_OK, intent);
 					finish();
 				}
 			}

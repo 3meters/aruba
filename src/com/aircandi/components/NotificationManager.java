@@ -83,7 +83,10 @@ public class NotificationManager {
 
 					Logger.i(this, "GCM: Registering device with Aircandi notification service");
 
-					Device device = new Device(Aircandi.getInstance().getCurrentUser().id, GCMRegistrar.getRegistrationId(Aircandi.applicationContext));
+					Device device = new Device(Aircandi.getInstance().getCurrentUser().id
+							, GCMRegistrar.getRegistrationId(Aircandi.applicationContext)
+							, Aircandi.getInstallId());
+					
 					device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, AircandiForm.class);
 					device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
 
@@ -113,7 +116,7 @@ public class NotificationManager {
 
 					Logger.i(this, "GCM: Unregistering device with Aircandi notification service");
 
-					Device device = new Device(null, registrationId);
+					Device device = new Device(null, registrationId, Aircandi.getInstallId());
 					ModelResult result = EntityManager.getInstance().registerDevice(false, device);
 
 					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {

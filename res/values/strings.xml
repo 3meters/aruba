@@ -535,6 +535,7 @@
 
     <string name="signin_message_general">Sign in to create and share candi with other Aircandi users!</string>
     <string name="picture_search_loading">loading…</string>
+    <string name="list_more">show more</string>
     <string name="list_watching_empty">watch something and find it here</string>
     <string name="list_created_empty">create something and find it here</string>
     <string name="list_notifications_empty">no updates</string>

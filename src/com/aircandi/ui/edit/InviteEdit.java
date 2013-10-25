@@ -145,6 +145,7 @@ public class InviteEdit extends BaseEntityEdit {
 					break;
 			}
 		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -22,7 +22,6 @@ import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.Tracker;
 import com.aircandi.service.ClientVersionException;
 import com.aircandi.service.ImageSizeException;
 import com.aircandi.service.ImageUnusableException;
@@ -40,22 +39,27 @@ public final class Errors {
 		 * First show any required UI
 		 */
 		if (errorResponse.errorResponseType == ResponseType.DIALOG) {
-			Aircandi.mainThreadHandler.post(new Runnable() {
+			if (activity != null) {
+				Aircandi.mainThreadHandler.post(new Runnable() {
 
-				@Override
-				public void run() {
-					Dialogs.alertDialog(R.drawable.ic_launcher
-							, null
-							, errorResponse.errorMessage
-							, null
-							, activity
-							, android.R.string.ok
-							, null
-							, null
-							, null
-							, null);
-				}
-			});
+					@Override
+					public void run() {
+						Dialogs.alertDialog(R.drawable.ic_launcher
+								, null
+								, errorResponse.errorMessage
+								, null
+								, activity
+								, android.R.string.ok
+								, null
+								, null
+								, null
+								, null);
+					}
+				});
+			}
+			else {
+				UI.showToastNotification(errorResponse.errorMessage, Toast.LENGTH_SHORT);
+			}
 		}
 		else if (errorResponse.errorResponseType == ResponseType.TOAST) {
 			UI.showToastNotification(errorResponse.errorMessage, Toast.LENGTH_SHORT);
@@ -64,7 +68,7 @@ public final class Errors {
 		 * Perform any follow-up actions.
 		 */
 		if (errorResponse.track) {
-			Tracker.sendException(serviceResponse.exception);
+			Aircandi.tracker.sendException(serviceResponse.exception);
 		}
 
 		if (errorResponse.signout) {

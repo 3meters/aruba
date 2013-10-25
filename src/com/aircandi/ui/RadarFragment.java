@@ -52,7 +52,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager;
 import com.aircandi.components.ProximityManager.ScanReason;
 import com.aircandi.components.ProximityManager.WifiScanResult;
-import com.aircandi.components.Tracker;
+import com.aircandi.components.TrackerBase.TrackerCategory;
 import com.aircandi.events.BeaconsLockedEvent;
 import com.aircandi.events.EntitiesByProximityFinishedEvent;
 import com.aircandi.events.EntitiesChangedEvent;
@@ -396,7 +396,7 @@ public class RadarFragment extends BaseFragment implements
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Wifi scan received event fired");
 				
-				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills()
+				Aircandi.tracker.sendTiming(TrackerCategory.PERFORMANCE, Aircandi.stopwatch1.getTotalTimeMills()
 						, "wifi_scan_finished"
 						, NetworkManager.getInstance().getNetworkType());
 				
@@ -454,7 +454,7 @@ public class RadarFragment extends BaseFragment implements
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Entities by proximity finished event fired");
 				
-				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills()
+				Aircandi.tracker.sendTiming(TrackerCategory.PERFORMANCE, Aircandi.stopwatch1.getTotalTimeMills()
 						, "places_by_proximity_downloaded"
 						, NetworkManager.getInstance().getNetworkType());
 				
@@ -530,7 +530,7 @@ public class RadarFragment extends BaseFragment implements
 					if (Aircandi.stopwatch2.isStarted()) {
 						Aircandi.stopwatch2.stop("Location accepted");
 						
-						Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills()
+						Aircandi.tracker.sendTiming(TrackerCategory.PERFORMANCE, Aircandi.stopwatch2.getTotalTimeMills()
 								, "location_accepted"
 								, NetworkManager.getInstance().getNetworkType());
 						
@@ -579,7 +579,7 @@ public class RadarFragment extends BaseFragment implements
 	public void onPlacesNearLocationFinished(final PlacesNearLocationFinishedEvent event) {
 		Aircandi.stopwatch2.stop("Places near location complete");
 		
-		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills()
+		Aircandi.tracker.sendTiming(TrackerCategory.PERFORMANCE, Aircandi.stopwatch2.getTotalTimeMills()
 				, "places_near_location_downloaded"
 				, NetworkManager.getInstance().getNetworkType());
 		

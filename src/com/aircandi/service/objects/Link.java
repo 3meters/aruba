@@ -84,7 +84,7 @@ public class Link extends ServiceBase {
 			for (Count count : stats) {
 				if (count.type.equals(type) 
 						&& (schema == null || count.schema.equals(schema))
-						&& !count.inactive) {
+						&& (count.inactive == null || !count.inactive)) {
 					return count;
 				}
 			}

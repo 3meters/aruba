@@ -124,10 +124,8 @@ public class PlaceEdit extends BaseEntityEdit {
 					drawShortcuts(mEntity);
 				}
 			}
-			else {
-				super.onActivityResult(requestCode, resultCode, intent);
-			}
 		}
+		super.onActivityResult(requestCode, resultCode, intent);
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -61,7 +61,6 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		super.onActivityResult(requestCode, resultCode, intent);
 
 		if (resultCode != Activity.RESULT_CANCELED) {
 			if (requestCode == Constants.ACTIVITY_ENTITY_INSERT) {
@@ -78,6 +77,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 				}
 			}
 		}
+		super.onActivityResult(requestCode, resultCode, intent);
 	}
 
 	// --------------------------------------------------------------------------------------------

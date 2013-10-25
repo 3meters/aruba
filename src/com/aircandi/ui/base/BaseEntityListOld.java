@@ -1,6 +1,7 @@
 package com.aircandi.ui.base;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -23,7 +24,6 @@ import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -50,7 +50,6 @@ import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
-import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.UserView;
@@ -62,10 +61,12 @@ import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.Type;
 import com.aircandi.utilities.UI;
+import com.commonsware.cwac.endless.EndlessAdapter;
 
-public abstract class BaseEntityList extends BaseBrowse implements ListDelegate {
+public abstract class BaseEntityListOld extends BaseBrowse implements ListDelegate {
 
-	protected AbsListView		mListView;
+	protected ListView			mListView;
+	protected GridView			mGridView;
 	protected OnClickListener	mClickListener;
 	protected Integer			mPhotoWidthPixels;
 
@@ -74,12 +75,9 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 	private Button				mButtonNewEntity;
 
 	private static final long	LIST_MAX			= 300L;
-	private static final int	PAGE_SIZE_DEFAULT	= 10;
-	private static final int	LAZY_LOAD_THRESHOLD	= 5;
+	private static final int	PAGE_SIZE_DEFAULT	= 30;
 
-	private ListAdapter			mAdapter;
-	private Boolean				mMore				= false;
-	protected View				mLoading;
+	private EntityAdapter		mAdapter;
 
 	/* Inputs */
 	public String				mForEntityId;
@@ -131,9 +129,7 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 		super.initialize(savedInstanceState);
 
 		mListView = (ListView) findViewById(R.id.list);
-		if (mListView == null) {
-			mListView = (GridView) findViewById(R.id.grid);
-		}
+		mGridView = (GridView) findViewById(R.id.grid);
 		mButtonNewEntity = (Button) findViewById(R.id.button_new_entity);
 		mButtonNewEntity.setText(getString(R.string.entity_button_entity_first) + " " + mListLinkSchema);
 
@@ -154,51 +150,53 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 
 				final Entity entity = (Entity) ((ViewHolder) v.getTag()).data;
 				final Shortcut shortcut = entity.getShortcut();
-				Routing.shortcut(BaseEntityList.this, shortcut, mForEntity, null);
+				Routing.shortcut(BaseEntityListOld.this, shortcut, mForEntity, null);
 			}
 		};
-
-		/* Hookup adapter */
-		mForEntity = EntityManager.getEntity(mForEntityId);
-		invalidateOptionsMenu();
-		if (mForEntity != null) {
-			mCacheStamp = mForEntity.getCacheStamp();
-		}
-		/*
-		 * Triggers data fetch because endless wrapper calls cacheInBackground()
-		 * when first created.
-		 */
-		mAdapter = new ListAdapter(mEntities);
-		/*
-		 * Bind adapter to UI triggers view generation but we might not
-		 * have any data yet. When a new chuck of data is added to mEntities,
-		 * notifyDataSetChanged is called on the adapter when then lets the
-		 * UI know to repaint.
-		 */
-		if (mListView != null) {
-			mListView.setAdapter(mAdapter);
-		}
 	}
 
 	@Override
 	public void bind(final BindingMode mode) {
-		/*
-		 * Might not have entities because of a network error so force
-		 * a refresh if mode = manual.
-		 */
-		final AtomicBoolean refreshNeeded = new AtomicBoolean(mEntities.size() == 0);
+
+		if (mAdapter == null) {
+			mForEntity = EntityManager.getEntity(mForEntityId);
+			invalidateOptionsMenu();
+			if (mForEntity != null) {
+				mCacheStamp = mForEntity.getCacheStamp();
+			}
+			/*
+			 * Triggers data fetch because endless wrapper calls cacheInBackground()
+			 * when first created.
+			 */
+			mAdapter = new EntityAdapter(mEntities);
+			/*
+			 * Bind adapter to UI triggers view generation but we might not
+			 * have any data yet. When a new chuck of data is added to mEntities,
+			 * notifyDataSetChanged is called on the adapter when then lets the
+			 * UI know to repaint.
+			 */
+			if (mListView != null) {
+				mListView.setAdapter(mAdapter);
+			}
+			else if (mGridView != null) {
+				mGridView.setAdapter(mAdapter); // draw happens in the adapter
+			}
+			return;
+		}
+
+		final AtomicBoolean refreshNeeded = new AtomicBoolean(false);
 
 		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mButtonNewEntity.setVisibility(View.GONE);
-			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("ActivityStaleCheck");
 				ModelResult result = new ModelResult();
+				/*
+				 * Might not have entities because of a network error so force
+				 * a refresh if mode = manual.
+				 */
+				refreshNeeded.set(mEntities.size() == 0 && mode == BindingMode.MANUAL);
 
 				if (!refreshNeeded.get()) {
 					showBusy();
@@ -215,55 +213,26 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 					}
 				}
 
-				if (refreshNeeded.get()) {
-					showBusy();
-					if (mEntities.size() == 0) {
-						showBusy("Loading " + getActivityTitle() + "...", false);
-					}
-					result = loadEntities(0);
-				}
-
 				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object response) {
-				ModelResult result = (ModelResult) response;
-
-				if (result.serviceResponse.responseCode != ResponseCode.SUCCESS) {
-					hideBusy();
-					Errors.handleError(BaseEntityList.this, result.serviceResponse);
+				if (refreshNeeded.get()) {
+					mEntities.clear();
+					mAdapter = new EntityAdapter(mEntities);
+					if (mListView != null) {
+						mListView.setAdapter(mAdapter);
+					}
+					else if (mGridView != null) {
+						mGridView.setAdapter(mAdapter); // draw happens in the adapter
+					}
+				}
+				else if (mode == BindingMode.MANUAL) {
+					showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
 				}
 				else {
-					if (refreshNeeded.get()) {
-						if (result.data != null) {
-							ServiceData serviceData = (ServiceData) result.serviceResponse.data;
-							mMore = serviceData.more;
-
-							mEntities.clear();
-							mAdapter.setNotifyOnChange(false);
-							mAdapter.clear();
-							mAdapter.addAll((List<Entity>) result.data);
-							mAdapter.sort(new Entity.SortByPositionSortDate());
-							mAdapter.notifyDataSetChanged();
-						}
-						hideBusy();
-					}
-					else if (mode == BindingMode.MANUAL) {
-						showBusyTimed(Constants.INTERVAL_FAKE_BUSY, false);
-					}
-					else {
-						hideBusy();
-					}
-					if (mListNewEnabled && mEntities.size() == 0 && mEntities.size() == 0) {
-						runOnUiThread(new Runnable() {
-
-							@Override
-							public void run() {
-								mButtonNewEntity.setVisibility(View.VISIBLE);
-							}
-						});
-					}
+					hideBusy();
 				}
 			}
 		}.execute();
@@ -301,6 +270,44 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 		}
 	}
 
+	private ModelResult loadEntities() {
+		/*
+		 * Called on a background thread.
+		 * 
+		 * Sorting is applied to links not the entities on the service side.
+		 */
+		mCursorSettings = new Cursor()
+				.setLimit(mListPageSize)
+				.setSort(Maps.asMap("modifiedDate", -1))
+				.setSkip(mEntities.size());
+
+		if (mListLinkInactive != null) {
+			mCursorSettings.setWhere(Maps.asMap("inactive", Boolean.parseBoolean(mListLinkInactive)));
+		}
+
+		if (mListLinkSchema != null) {
+			List<String> schemas = new ArrayList<String>();
+			schemas.add(mListLinkSchema);
+			mCursorSettings.setSchemas(schemas);
+		}
+
+		if (mListLinkType != null) {
+			List<String> linkTypes = new ArrayList<String>();
+			linkTypes.add(mListLinkType);
+			mCursorSettings.setLinkTypes(linkTypes);
+		}
+
+		if (mListLinkDirection != null) {
+			mCursorSettings.setDirection(mListLinkDirection);
+		}
+
+		LinkOptions linkOptions = getLinkOptions(mListLinkSchema);
+
+		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mForEntityId, linkOptions, mCursorSettings, null);
+
+		return result;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
@@ -308,10 +315,6 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 	@SuppressWarnings("ucd")
 	public void onNewEntityButtonClick(View view) {
 		onAdd();
-	}
-
-	public void onMoreButtonClick(View view) {
-		lazyLoad();
 	}
 
 	@Override
@@ -346,86 +349,6 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
-
-	private ModelResult loadEntities(Integer skip) {
-		/*
-		 * Called on a background thread.
-		 * 
-		 * Sorting is applied to links not the entities on the service side.
-		 */
-		mCursorSettings = new Cursor()
-				.setLimit(mListPageSize)
-				.setSort(Maps.asMap("modifiedDate", -1))
-				.setSkip(skip);
-
-		if (mListLinkInactive != null) {
-			mCursorSettings.setWhere(Maps.asMap("inactive", Boolean.parseBoolean(mListLinkInactive)));
-		}
-
-		if (mListLinkSchema != null) {
-			List<String> schemas = new ArrayList<String>();
-			schemas.add(mListLinkSchema);
-			mCursorSettings.setSchemas(schemas);
-		}
-
-		if (mListLinkType != null) {
-			List<String> linkTypes = new ArrayList<String>();
-			linkTypes.add(mListLinkType);
-			mCursorSettings.setLinkTypes(linkTypes);
-		}
-
-		if (mListLinkDirection != null) {
-			mCursorSettings.setDirection(mListLinkDirection);
-		}
-
-		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mForEntityId
-				, getLinkOptions(mListLinkSchema)
-				, mCursorSettings
-				, null);
-
-		return result;
-	}
-
-	private void lazyLoad() {
-
-		final ViewSwitcher switcher = (ViewSwitcher) mLoading.findViewById(R.id.animator_more);
-//		switcher.setInAnimation(Animate.fadeInMedium());
-//		switcher.setOutAnimation(Animate.fadeOutMedium());
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				switcher.setDisplayedChild(1);
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("LazyLoadList");
-				ModelResult result = loadEntities(mEntities.size());
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-				ModelResult result = (ModelResult) response;
-
-				if (result.serviceResponse.responseCode != ResponseCode.SUCCESS) {
-					Errors.handleError(BaseEntityList.this, result.serviceResponse);
-				}
-				else {
-					if (result.data != null) {
-						ServiceData serviceData = (ServiceData) result.serviceResponse.data;
-						mMore = serviceData.more;
-						mAdapter.addAll((List<Entity>) result.data);
-						mAdapter.sort(new Entity.SortByPositionSortDate());
-						mAdapter.notifyDataSetChanged();
-					}
-				}
-				switcher.setDisplayedChild(0);
-			}
-		}.execute();
-	}
 
 	protected Integer getListItemResId(String schema) {
 		Integer itemResId = R.layout.temp_listitem_entity;
@@ -535,30 +458,103 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 	// Classes
 	// --------------------------------------------------------------------------------------------
 
-	public class ListAdapter extends ArrayAdapter<Entity> {
+	private class EntityAdapter extends EndlessAdapter {
 
-		@Override
-		public int getCount() {
-			return mEntities.size() + (mMore ? 1 : 0);
+		private List<Entity>	mMoreEntities	= new ArrayList<Entity>();
+		private ModelResult		mResult;
+
+		private EntityAdapter(List<Entity> list) {
+			super(new ListAdapter(list));
 		}
 
+		@Override
+		protected boolean cacheInBackground() {
+			/*
+			 * Triggered:
+			 * 
+			 * - first time the adapter runs.
+			 * - when this function reported more available and the special pending view
+			 * is being rendered by getView.
+			 * 
+			 * Returning true means we think there are more items available to QUERY for.
+			 * 
+			 * This is called on background thread from an AsyncTask started by EndlessAdapter.
+			 */
+			mMoreEntities.clear();
+			mButtonNewEntity.setVisibility(View.GONE);
+
+			if (mEntities.size() == 0) {
+				showBusy("Loading " + getActivityTitle() + "...", false);
+			}
+
+			mResult = loadEntities();
+
+			if (mResult.serviceResponse.responseCode != ResponseCode.SUCCESS) {
+				hideBusy();
+				Errors.handleError(BaseEntityListOld.this, mResult.serviceResponse);
+				return true;
+			}
+			else {
+				if (mResult.data != null) {
+					mMoreEntities = (List<Entity>) mResult.data;
+
+					if (mMoreEntities.size() >= PAGE_SIZE_DEFAULT) {
+						hideBusy();
+						return (getWrappedAdapter().getCount() + mMoreEntities.size()) < LIST_MAX;
+					}
+				}
+			}
+
+			if (mListNewEnabled && mEntities.size() == 0 && mMoreEntities.size() == 0) {
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						mButtonNewEntity.setVisibility(View.VISIBLE);
+					}
+				});
+			}
+			hideBusy();
+			return false;
+		}
+
+		@Override
+		protected View getPendingView(ViewGroup parent) {
+			if (mEntities.size() == 0) {
+				return new View(BaseEntityListOld.this);
+			}
+			return LayoutInflater.from(BaseEntityListOld.this).inflate(R.layout.temp_list_item_loading, null);
+		}
+
+		@Override
+		protected void appendCachedData() {
+
+			for (Entity entity : mMoreEntities) {
+				mEntities.add(entity);
+			}
+
+			Collections.sort(mEntities, new Entity.SortByPositionSortDate());
+			notifyDataSetChanged();
+		}
+	}
+
+	public class ListAdapter extends ArrayAdapter<Entity> {
+
+		private int	mScrollState	= ScrollManager.SCROLL_STATE_IDLE;
+
 		private ListAdapter(List<Entity> items) {
-			super(BaseEntityList.this, 0, items);
+			super(BaseEntityListOld.this, 0, items);
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 
-			if (position == mEntities.size()) {
-				return mLoading;
-			}
-
 			View view = convertView;
 			final ViewHolder holder;
 			final Entity entity = mEntities.get(position);
 
-			if (view == null || view.findViewById(R.id.animator_more) != null) {
-				view = LayoutInflater.from(BaseEntityList.this).inflate(mListItemResId, null);
+			if (view == null) {
+				view = LayoutInflater.from(BaseEntityListOld.this).inflate(mListItemResId, null);
 				holder = new ViewHolder();
 
 				holder.photoView = (AirImageView) view.findViewById(R.id.photo);
@@ -588,7 +584,7 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 				holder.placeName = (TextView) view.findViewById(R.id.place_name);
 				holder.userName = (TextView) view.findViewById(R.id.user_name);
 
-				if (mListView instanceof GridView) {
+				if (mGridView != null) {
 					Integer nudge = mResources.getDimensionPixelSize(R.dimen.grid_item_height_kick);
 					final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mPhotoWidthPixels, mPhotoWidthPixels - nudge);
 					holder.photoView.getImageView().setLayoutParams(params);
@@ -763,25 +759,25 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 			return true;
 		}
 
-	}
-
-	@SuppressWarnings("unused")
-	private class ScrollManager implements AbsListView.OnScrollListener {
-
-		@Override
-		public void onScrollStateChanged(AbsListView view, int scrollState) {
-			if (scrollState == SCROLL_STATE_IDLE) {
-				if (mMore
-						&& mEntities.size() < LIST_MAX
-						&& mListView.getLastVisiblePosition() >= (mListView.getCount() - LAZY_LOAD_THRESHOLD)) {
-					lazyLoad();
-				}
-			}
+		public int getScrollState() {
+			return mScrollState;
 		}
 
-		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {}
+		public void setScrollState(int scrollState) {
+			mScrollState = scrollState;
+		}
 
+		private class ScrollManager implements AbsListView.OnScrollListener {
+
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				mScrollState = scrollState;
+				notifyDataSetChanged();
+			}
+
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {}
+		}
 	}
 
 	public static class ViewHolder {
