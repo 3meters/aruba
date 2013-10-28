@@ -8,6 +8,7 @@
         <CheckBoxPreference
             android:id="@+id/Pref_Enable_Dev"
             android:defaultValue="false"
+            android:summary="Turns off tracking and enables dev mode only features"
             android:key="Pref_Enable_Dev"
             android:title="Enable developer features" />
 
@@ -43,6 +44,7 @@
             android:defaultValue="true"
             android:key="Pref_Entity_Fencing"
             android:title="Enable entity fencing" />
+        
         <CheckBoxPreference
             android:id="@+id/Pref_Testing_Self_Notify"
             android:defaultValue="false"

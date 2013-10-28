@@ -122,7 +122,7 @@ public class EntityCache implements Map<String, Entity> {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
 
-		if (Aircandi.getInstance().getCurrentUser() != null) {
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 		}
 
@@ -172,7 +172,7 @@ public class EntityCache implements Map<String, Entity> {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
 
-		if (Aircandi.getInstance().getCurrentUser() != null) {
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 		}
 
@@ -231,7 +231,7 @@ public class EntityCache implements Map<String, Entity> {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
 
-		if (Aircandi.getInstance().getCurrentUser() != null) {
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 		}
 
@@ -303,7 +303,7 @@ public class EntityCache implements Map<String, Entity> {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
 
-		if (Aircandi.getInstance().getCurrentUser() != null) {
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 		}
 

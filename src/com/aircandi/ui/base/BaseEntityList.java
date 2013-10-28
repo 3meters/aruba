@@ -74,8 +74,8 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 	private Button				mButtonNewEntity;
 
 	private static final long	LIST_MAX			= 300L;
-	private static final int	PAGE_SIZE_DEFAULT	= 10;
-	private static final int	LAZY_LOAD_THRESHOLD	= 5;
+	private static final int	PAGE_SIZE_DEFAULT	= 20;
+	private static final int	LAZY_LOAD_THRESHOLD	= 10;
 
 	private ListAdapter			mAdapter;
 	private Boolean				mMore				= false;

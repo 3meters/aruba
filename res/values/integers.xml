@@ -2,6 +2,8 @@
 <resources>
 
     <integer name="limit_shortcuts_flow">8</integer>
+    <integer name="limit_shortcuts_flow_create">8</integer>
+   	<integer name="limit_shortcuts_flow_watch">8</integer>
     
     <integer name="limit_links_default">9</integer>
     <integer name="limit_links_like_default">9</integer>

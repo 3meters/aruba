@@ -28,6 +28,7 @@ import com.aircandi.service.objects.User;
 import com.aircandi.ui.AircandiForm;
 import com.aircandi.utilities.Reporting;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.google.analytics.tracking.android.GoogleAnalytics;
 
 public class Aircandi extends Application {
 
@@ -42,6 +43,7 @@ public class Aircandi extends Application {
 	public static Handler					mainThreadHandler;
 	public static PackageManager			packageManager;
 	public static TrackerDelegate			tracker;
+	public static GoogleAnalytics			analytics;
 
 	public static DisplayMetrics			displayMetrics;
 	public static SoundPool					soundPool;
@@ -116,6 +118,7 @@ public class Aircandi extends Application {
 
 		/* Setup the analytics tracker */
 		tracker = new TrackerGoogleEasy();
+		analytics = GoogleAnalytics.getInstance(this);
 		tracker.applicationStart();
 
 		/* Set prefs so we can tell when a change happens that we need to respond to. Theme is set in setTheme(). */

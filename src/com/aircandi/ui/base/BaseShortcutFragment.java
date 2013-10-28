@@ -180,7 +180,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_places_created
 						, R.string.section_places_more
-						, mResources.getInteger(R.integer.limit_shortcuts_flow)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow_create)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
@@ -195,7 +195,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_candigrams_created
 						, R.string.section_candigrams_more
-						, mResources.getInteger(R.integer.limit_shortcuts_flow)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow_create)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
@@ -210,7 +210,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_pictures_created
 						, R.string.section_pictures_more
-						, mResources.getInteger(R.integer.limit_shortcuts_flow)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow_create)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
@@ -232,7 +232,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_places_watching
 						, R.string.section_places_more
-						, mResources.getInteger(R.integer.limit_shortcuts_flow)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow_watch)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
@@ -247,7 +247,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_candigrams_watching
 						, R.string.section_pictures_more
-						, mResources.getInteger(R.integer.limit_shortcuts_flow)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow_watch)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
@@ -262,7 +262,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_pictures_watching
 						, R.string.section_pictures_more
-						, mResources.getInteger(R.integer.limit_shortcuts_flow)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow_watch)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
@@ -277,7 +277,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, settings
 						, R.string.section_user_shortcuts_users_watching
 						, R.string.section_users_more
-						, mResources.getInteger(R.integer.limit_shortcuts_flow)
+						, mResources.getInteger(R.integer.limit_shortcuts_flow_watch)
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}

@@ -53,7 +53,11 @@ public class MenuManager {
 
 			/* BROWSE */
 
-			if (activityName.equals("HelpForm")) {
+			if (activityName.equals("HelpForm") 
+					|| activityName.equals("AboutForm")) {
+				menuInflater.inflate(R.menu.menu_cancel, menu);
+			}
+			else if (activityName.equals("HelpForm")) {
 				menuInflater.inflate(R.menu.menu_cancel, menu);
 			}
 			else {
@@ -106,7 +110,7 @@ public class MenuManager {
 			else if (fragmentName.equals("WatchingFragment")) {
 				menuInflater.inflate(R.menu.menu_browse_watching, menu);
 			}
-			else if (fragmentName.equals("NotificationFragment")) {
+			else if (fragmentName.equals("NewsFragment")) {
 				menuInflater.inflate(R.menu.menu_browse_notification_list, menu);
 			}
 		}

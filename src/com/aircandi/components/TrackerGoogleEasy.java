@@ -4,11 +4,12 @@ import android.app.Activity;
 import android.support.v4.app.Fragment;
 
 import com.aircandi.Aircandi;
+import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
-import com.aircandi.service.objects.User;
-import com.aircandi.utilities.Type;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.GAServiceManager;
+import com.google.analytics.tracking.android.Logger.LogLevel;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.StandardExceptionParser;
 
@@ -33,13 +34,13 @@ import com.google.analytics.tracking.android.StandardExceptionParser;
 @SuppressWarnings("ucd")
 public class TrackerGoogleEasy extends TrackerBase {
 
+	public static final int	GA_DISPATCH_PERIOD			= 300;	// seconds																				// Dispatch period in seconds.
+	public static final int	GA_DISPATCH_PERIOD_DEBUG	= 10;	// seconds																				// Dispatch period in seconds.
+
 	@Override
 	public void activityStart(Activity activity) {
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				EasyTracker.getInstance(Aircandi.applicationContext).activityStart(activity);
-			}
+			EasyTracker.getInstance(Aircandi.applicationContext).activityStart(activity);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -49,10 +50,7 @@ public class TrackerGoogleEasy extends TrackerBase {
 	@Override
 	public void activityStop(Activity activity) {
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				EasyTracker.getInstance(Aircandi.applicationContext).activityStop(activity);
-			}
+			EasyTracker.getInstance(Aircandi.applicationContext).activityStop(activity);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -65,10 +63,7 @@ public class TrackerGoogleEasy extends TrackerBase {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder.createEvent(category, action, target, value).build());
-			}
+			EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder.createEvent(category, action, target, value).build());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -81,10 +76,7 @@ public class TrackerGoogleEasy extends TrackerBase {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder.createTiming(category, timing, name, label).build());
-			}
+			EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder.createTiming(category, timing, name, label).build());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -97,13 +89,10 @@ public class TrackerGoogleEasy extends TrackerBase {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				EasyTracker.getInstance(Aircandi.applicationContext).send(
-						MapBuilder.createException(new StandardExceptionParser(Aircandi.applicationContext, null)
-								.getDescription(Thread.currentThread().getName(), exception), false)
-								.build());
-			}
+			EasyTracker.getInstance(Aircandi.applicationContext).send(
+					MapBuilder.createException(new StandardExceptionParser(Aircandi.applicationContext, null)
+							.getDescription(Thread.currentThread().getName(), exception), false)
+							.build());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -113,34 +102,39 @@ public class TrackerGoogleEasy extends TrackerBase {
 	@Override
 	public void fragmentStart(Fragment fragment) {
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				/*
-				 * Screen name as set will be included in all subsequent sends.
-				 */
-				EasyTracker.getInstance(Aircandi.applicationContext).set(Fields.SCREEN_NAME, fragment.getClass().getSimpleName());
-				EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder.createAppView().build());
-			}
+			/*
+			 * Screen name as set will be included in all subsequent sends.
+			 */
+			EasyTracker.getInstance(Aircandi.applicationContext).set(Fields.SCREEN_NAME, fragment.getClass().getSimpleName());
+			EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder.createAppView().build());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
-	public void applicationStart() {}
+	public void applicationStart() {
+		Boolean enabled = Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT);
+		Aircandi.analytics.setDryRun(enabled);
+		
+		Aircandi.analytics.getLogger().setLogLevel(LogLevel.WARNING);
+		GAServiceManager.getInstance().setLocalDispatchPeriod(GA_DISPATCH_PERIOD);		
+		if (BuildConfig.DEBUG) {
+			Aircandi.analytics.getLogger().setLogLevel(LogLevel.VERBOSE);
+			GAServiceManager.getInstance().setLocalDispatchPeriod(GA_DISPATCH_PERIOD_DEBUG);
+		}
+	}
 
 	@SuppressWarnings("unused")
 	private void startNewSession() {
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder
-						.createEvent(TrackerCategory.SYSTEM, "session_start", null, null)
-						.set(Fields.SESSION_CONTROL, "start")
-						.build()
-						);
-			}
+			EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder
+					.createEvent(TrackerCategory.SYSTEM, "session_start", null, null)
+					.set(Fields.SESSION_CONTROL, "start")
+					.build()
+					);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -150,18 +144,19 @@ public class TrackerGoogleEasy extends TrackerBase {
 	@SuppressWarnings("unused")
 	private void stopSession() {
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder
-						.createEvent(TrackerCategory.SYSTEM, "session_end", null, null)
-						.set(Fields.SESSION_CONTROL, "end")
-						.build()
-						);
-			}
+			EasyTracker.getInstance(Aircandi.applicationContext).send(MapBuilder
+					.createEvent(TrackerCategory.SYSTEM, "session_end", null, null)
+					.set(Fields.SESSION_CONTROL, "end")
+					.build()
+					);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	@Override
+	public void enableDeveloper(Boolean enable) {
+		Aircandi.analytics.setDryRun(enable);
+	}
 }

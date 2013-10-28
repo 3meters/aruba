@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/form_content_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="top"
+    android:orientation="vertical"
+    android:paddingTop="20dp" >
+
+    <!-- Title and Content -->
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:src="?attr/logo" />
+
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/dummy_version" />
+
+    <com.aircandi.ui.widgets.AirTextView
+        android:id="@+id/copyright"
+        android:layout_marginBottom="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/dummy_copyright" />
+    
+    <com.aircandi.ui.widgets.AirButton
+        android:id="@+id/button_terms"
+        style="@style/form_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/form_button_height"
+        android:layout_marginBottom="8dp"
+        android:minWidth="200dp"
+        android:onClick="onTermsButtonClick"
+        android:text="@string/form_button_terms" />
+
+    <com.aircandi.ui.widgets.AirButton
+        android:id="@+id/button_legal"
+        style="@style/form_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/form_button_height"
+        android:layout_marginBottom="8dp"
+        android:onClick="onLegalButtonClick"
+        android:text="@string/form_button_legal" />
+
+    <com.aircandi.ui.widgets.AirButton
+        android:id="@+id/button_privacy"
+        style="@style/form_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/form_button_height"
+        android:onClick="onPrivacyButtonClick"
+        android:text="@string/form_button_privacy" />
+
+</LinearLayout>

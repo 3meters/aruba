@@ -25,7 +25,7 @@ import com.aircandi.utilities.UI;
 
 public class FeedbackEdit extends BaseEntityEdit {
 
-	private Document	mDocument;
+	private Document	mFeedback;
 
 	@Override
 	public void initialize(Bundle savedInstanceState) {
@@ -56,10 +56,10 @@ public class FeedbackEdit extends BaseEntityEdit {
 		/*
 		 * Not a real entity so we completely override databind.
 		 */
-		mDocument = new Document();
-		mDocument.type = "feedback";
-		mDocument.name = "aircandi";
-		mDocument.data = new HashMap<String, Object>();
+		mFeedback = new Document();
+		mFeedback.type = "feedback";
+		mFeedback.name = "aircandi";
+		mFeedback.data = new HashMap<String, Object>();
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 
 	@Override
 	protected void gather() {
-		mDocument.data.put("message", (Object) mDescription.getText().toString().trim());
+		mFeedback.data.put("message", (Object) mDescription.getText().toString().trim());
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -105,7 +105,7 @@ public class FeedbackEdit extends BaseEntityEdit {
 
 	@Override
 	protected void insert() {
-		Logger.i(this, "INSERT feedback");
+		Logger.i(this, "Insert feedback");
 
 		new AsyncTask() {
 
@@ -117,8 +117,8 @@ public class FeedbackEdit extends BaseEntityEdit {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("InsertFeedback");
-				mDocument.createdDate = DateTime.nowDate().getTime();
-				final ModelResult result = EntityManager.getInstance().insertDocument(mDocument);
+				mFeedback.createdDate = DateTime.nowDate().getTime();
+				final ModelResult result = EntityManager.getInstance().insertFeedback(mFeedback);
 				return result;
 			}
 
@@ -127,13 +127,13 @@ public class FeedbackEdit extends BaseEntityEdit {
 				final ModelResult result = (ModelResult) response;
 
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-					hideBusy();
 					UI.showToastNotification(getString(R.string.alert_feedback_sent), Toast.LENGTH_SHORT);
 					finish();
 				}
 				else {
 					Errors.handleError(FeedbackEdit.this, result.serviceResponse);
 				}
+				hideBusy();
 			}
 		}.execute();
 	}

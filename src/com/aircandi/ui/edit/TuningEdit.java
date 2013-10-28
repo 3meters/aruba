@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.aircandi.Aircandi;
 import com.aircandi.R;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.EntityManager;
@@ -55,6 +56,9 @@ public class TuningEdit extends BaseEntityEdit {
 			/* Edit or not */
 			
 			mHolderEditing.setVisibility(UI.showAction(Route.EDIT, mEntity) ? View.VISIBLE: View.GONE);
+			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+				mHolderEditing.setVisibility(View.GONE);
+			}
 
 			/* Color */
 

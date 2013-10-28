@@ -22,7 +22,6 @@
 
     <com.aircandi.ui.widgets.AirEditText
         android:id="@+id/email"
-        
         android:layout_width="match_parent"
         android:layout_height="@dimen/form_field_height"
         android:drawableRight="?attr/iconClear"
@@ -32,20 +31,26 @@
 
     <com.aircandi.ui.widgets.AirEditText
         android:id="@+id/password"
-        
         android:layout_width="match_parent"
         android:layout_height="@dimen/form_field_height"
-        android:layout_marginBottom="10dp"
         android:drawableRight="?attr/iconClear"
         android:hint="@string/form_label_password"
         android:imeOptions="actionGo"
         android:inputType="textPassword"
         android:textSize="18sp" />
 
+    <com.aircandi.ui.widgets.AirCheckBox
+        android:id="@+id/chk_unmask"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/form_field_height"
+        android:layout_marginBottom="10dp"
+        android:text="@string/form_label_password_unmask"
+        android:textAppearance="?android:attr/textAppearance" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="5dp"
         android:gravity="center_vertical"
         android:orientation="horizontal" >
 
@@ -60,14 +65,31 @@
             android:text="@string/form_button_sign_in" />
     </LinearLayout>
 
-    <com.aircandi.ui.widgets.AirButton
-        android:id="@+id/button_send_password"
-        style="@style/form_button"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/form_button_height"
-        android:layout_gravity="center_horizontal"
-        android:minWidth="200dp"
-        android:onClick="onSendPasswordButtonClick"
-        android:text="@string/form_button_send_password" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal" >
+
+        <com.aircandi.ui.widgets.AirButton
+            android:id="@+id/button_send_password"
+            style="@style/form_button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/form_button_height"
+            android:layout_marginRight="3dp"
+            android:layout_weight="1"
+            android:onClick="onSendPasswordButtonClick"
+            android:text="@string/form_button_send_password" />
+
+        <com.aircandi.ui.widgets.AirButton
+            android:id="@+id/button_signup"
+            style="@style/form_button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/form_button_height"
+            android:layout_marginLeft="3dp"
+            android:layout_weight="1"
+            android:onClick="onSignupButtonClick"
+            android:text="@string/form_button_register" />
+    </LinearLayout>
 
 </LinearLayout>

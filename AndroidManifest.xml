@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi"
     android:installLocation="auto"
-    android:versionCode="75"
-    android:versionName="0.9.32" >
+    android:versionCode="76"
+    android:versionName="0.9.33" >
 
     <supports-screens
         android:anyDensity="true"
@@ -158,7 +158,12 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" />
-
+        <activity
+            android:name="com.aircandi.ui.AboutForm"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/name_app"
+            android:windowSoftInputMode="stateHidden" />
+        
         <!-- Editing activities -->
 
         <activity

@@ -420,6 +420,11 @@ public class CandigramForm extends BaseEntityForm {
 
 	@SuppressWarnings("ucd")
 	public void onExpandButtonClick(View view) {
+		
+		if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			Dialogs.signin(this, R.string.alert_signin_message_candigram_expand);
+			return;
+		}		
 
 		new AsyncTask() {
 
@@ -460,6 +465,11 @@ public class CandigramForm extends BaseEntityForm {
 
 	@SuppressWarnings("ucd")
 	public void onBounceButtonClick(View view) {
+		
+		if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			Dialogs.signin(this, R.string.alert_signin_message_candigram_bounce);
+			return;
+		}		
 
 		new AsyncTask() {
 

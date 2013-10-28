@@ -212,6 +212,24 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 
 	@SuppressWarnings("ucd")
 	public void onLikeButtonClick(View view) {
+		
+		if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			Integer messageResId = R.string.alert_signin_message;
+			if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				messageResId = R.string.alert_signin_message_place_like;					
+			}
+			else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+				messageResId = R.string.alert_signin_message_candigram_like;					
+			}
+			else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+				messageResId = R.string.alert_signin_message_picture_like;					
+			}
+			else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+				messageResId = R.string.alert_signin_message_user_like;					
+			}
+			Dialogs.signin(this, messageResId);
+			return;
+		}
 
 		new AsyncTask() {
 
@@ -268,6 +286,24 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 
 	@SuppressWarnings("ucd")
 	public void onWatchButtonClick(View view) {
+
+		if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			Integer messageResId = R.string.alert_signin_message;
+			if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+				messageResId = R.string.alert_signin_message_place_watch;					
+			}
+			else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+				messageResId = R.string.alert_signin_message_candigram_watch;					
+			}
+			else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+				messageResId = R.string.alert_signin_message_picture_watch;					
+			}
+			else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
+				messageResId = R.string.alert_signin_message_user_watch;					
+			}
+			Dialogs.signin(this, messageResId);
+			return;
+		}
 
 		new AsyncTask() {
 
@@ -341,18 +377,6 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 	public void onImageClick(View view) {
 		if (mEntity.photo != null) {
 			Routing.route(this, Route.PHOTO, mEntity);
-		}
-	}
-
-	@SuppressWarnings("ucd")
-	public void onNewCommentButtonClick(View view) {
-		if (EntityManager.canUserAdd(mEntity)) {
-			Routing.route(this, Route.COMMENT_NEW, mEntity);
-			return;
-		}
-
-		if (mEntity.locked) {
-			Dialogs.locked(this, mEntity);
 		}
 	}
 

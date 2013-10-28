@@ -11,9 +11,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.TextView;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
@@ -50,9 +48,7 @@ public class Dialogs {
 		}
 
 		if (titleText != null) {
-			View title = LayoutInflater.from(context).inflate(R.layout.temp_dialog_title, null);
-			((TextView) title.findViewById(R.id.name)).setText(titleText);
-			builder.setCustomTitle(title);
+			builder.setTitle(titleText);
 		}
 
 		if (customView == null) {
@@ -82,10 +78,10 @@ public class Dialogs {
 		alert.show();
 
 		/* Hardcoded size for body text in the alert */
-		final TextView textView = (TextView) alert.findViewById(android.R.id.message);
-		if (textView != null) {
-			textView.setTextSize(14);
-		}
+		// final TextView textView = (TextView) alert.findViewById(android.R.id.message);
+		//		if (textView != null) {
+		//			textView.setTextSize(14);
+		//		}
 
 		/* Prevent dimming the background */
 		if (Constants.SUPPORTS_ICE_CREAM_SANDWICH) {
@@ -116,13 +112,58 @@ public class Dialogs {
 		}
 	}
 
+	public static void signin(final Activity activity, final Integer messageResId) {
+		activity.runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (mWifiAlertDialog == null || !mWifiAlertDialog.isShowing()) {
+					mWifiAlertDialog = alertDialog(null
+							, activity.getString(R.string.alert_signin_title)
+							, activity.getString(messageResId == null ? R.string.alert_signin_message : messageResId)
+							, null
+							, activity
+							, R.string.alert_signin_signin
+							, R.string.alert_signin_cancel
+							, R.string.alert_signin_register
+							, new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									if (which == Dialog.BUTTON_POSITIVE) {
+										Logger.d(this, "Signin check: navigating to signin");
+										Routing.route(activity, Route.SIGNIN);
+									}
+									else if (which == Dialog.BUTTON_NEUTRAL) {
+										Logger.d(this, "Signin check: navigating to register");
+										Routing.route(activity, Route.REGISTER);
+									}
+									else if (which == Dialog.BUTTON_NEGATIVE) {
+										Logger.d(this, "Signin check: user canceled");
+									}
+								}
+							}
+							, new DialogInterface.OnCancelListener() {
+
+								@Override
+								public void onCancel(DialogInterface dialog) {
+									/* Back button can trigger this */
+									Logger.d(this, "Signin check: user canceled");
+								}
+							});
+					mWifiAlertDialog.setCanceledOnTouchOutside(false);
+				}
+			}
+		});
+	}
+
 	public static void wifi(final Activity activity, final Integer messageResId, final RequestListener listener) {
 		activity.runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
 				if (mWifiAlertDialog == null || !mWifiAlertDialog.isShowing()) {
-					mWifiAlertDialog = alertDialog(R.drawable.ic_launcher
+					mWifiAlertDialog = alertDialog(null
 							, activity.getString(R.string.alert_wifi_title)
 							, activity.getString(messageResId)
 							, null
@@ -164,7 +205,7 @@ public class Dialogs {
 
 	public static void update(final Activity activity) {
 
-		final AlertDialog updateDialog = alertDialog(null
+		final AlertDialog updateDialog = alertDialog(R.drawable.ic_launcher
 				, activity.getString(R.string.dialog_update_title)
 				, activity.getString(R.string.dialog_update_message)
 				, null

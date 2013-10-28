@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.aircandi.ServiceConstants;
 import com.aircandi.service.Expose;
 
 /**
@@ -85,8 +86,7 @@ public class User extends Entity {
 	}
 
 	public Boolean isAnonymous() {
-		return true;
-		//return id.equals(ServiceConstants.ANONYMOUS_USER_ID);
+		return id.equals(ServiceConstants.ANONYMOUS_USER_ID);
 	}
 	
 	// --------------------------------------------------------------------------------------------

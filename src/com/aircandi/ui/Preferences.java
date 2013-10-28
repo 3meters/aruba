@@ -1,9 +1,6 @@
 package com.aircandi.ui;
 
-import java.util.Calendar;
-
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -22,10 +19,8 @@ import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
-import com.aircandi.components.TrackerBase.TrackerCategory;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
-import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 
@@ -115,7 +110,7 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 
 				@Override
 				public boolean onPreferenceClick(Preference preference) {
-					doInfoClick();
+					Routing.route(Preferences.this, Route.ABOUT);
 					return true;
 				}
 			});
@@ -132,6 +127,40 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 					return true;
 				}
 			});
+		}
+
+		/* Listen for dev toggle */
+		pref = findPreference("Pref_Enable_Dev");
+		if (pref != null) {
+			Boolean enabled = Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT);
+			enableDeveloper(enabled);
+
+			pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+
+				@Override
+				public boolean onPreferenceChange(Preference preference, Object newValue) {
+					Boolean enabled = (Boolean) newValue;
+					enableDeveloper(enabled);
+					return true;
+				}
+			});
+		}
+
+	}
+
+	private void enableDeveloper(Boolean enable) {
+		findPreference("Pref_Testing_Screen").setEnabled(enable);
+		findPreference("Pref_Entity_Fencing").setEnabled(enable);
+		findPreference("Pref_Testing_Self_Notify").setEnabled(enable);
+		Aircandi.tracker.enableDeveloper(enable);
+	}
+
+	private void handleAnonymous() {
+		/* Hide notification item if anonymous */
+		Preference pref = findPreference("Pref_Notifications_Screen");
+		if (pref != null) {
+			pref.setShouldDisableView(true);
+			pref.setEnabled(!(Aircandi.getInstance().getCurrentUser().isAnonymous()));
 		}
 	}
 
@@ -202,33 +231,6 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 		}
 	}
 
-	private void doInfoClick() {
-		
-		Calendar calendar = Calendar.getInstance();
-		String year = String.valueOf(calendar.get(Calendar.YEAR));
-		
-		final String title = getString(R.string.alert_about_title);
-		
-		final String message = getString(R.string.alert_about_label_version) + " "
-				+ Aircandi.getVersionName(this, AircandiForm.class) + System.getProperty("line.separator")
-				+ getString(R.string.alert_about_label_code) + " "
-				+ String.valueOf(Aircandi.getVersionCode(this, AircandiForm.class)) + System.getProperty("line.separator")
-				+ System.getProperty("line.separator")
-				+ getString(R.string.dialog_about_copyright) + " " + year + System.getProperty("line.separator")
-				+ getString(R.string.dialog_about_factual) + " " + year + System.getProperty("line.separator");
-		
-		Dialogs.alertDialog(R.drawable.ic_launcher
-				, title
-				, message
-				, null
-				, this, android.R.string.ok, null, null, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {}
-				}, null);
-		Aircandi.tracker.sendEvent(TrackerCategory.UX, "dialog_open", "about", 0);
-
-	}
-
 	private void setTheme() {
 		final String prefTheme = Aircandi.settings.getString(Constants.PREF_THEME, Constants.PREF_THEME_DEFAULT);
 		if (prefTheme.equals("aircandi_theme_snow")) {
@@ -284,5 +286,6 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 	protected void onStart() {
 		super.onStart();
 		Aircandi.tracker.activityStart(this);
+		handleAnonymous();
 	}
 }

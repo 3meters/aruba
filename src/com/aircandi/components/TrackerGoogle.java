@@ -4,12 +4,8 @@ import android.app.Activity;
 import android.support.v4.app.Fragment;
 
 import com.aircandi.Aircandi;
-import com.aircandi.Constants;
-import com.aircandi.service.objects.User;
-import com.aircandi.utilities.Type;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GAServiceManager;
-import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.Logger.LogLevel;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.StandardExceptionParser;
@@ -45,7 +41,6 @@ public class TrackerGoogle extends TrackerBase {
 	public static final double		GA_SAMPLE_RATE		= 100.0d;
 
 	public static Tracker			tracker;
-	public static GoogleAnalytics	googleAnalytics;
 
 	@Override
 	public void sendEvent(String category, String action, String target, long value) {
@@ -53,10 +48,7 @@ public class TrackerGoogle extends TrackerBase {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				tracker.send(MapBuilder.createEvent(category.toString(), action, target, value).build());
-			}
+			tracker.send(MapBuilder.createEvent(category.toString(), action, target, value).build());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -69,10 +61,7 @@ public class TrackerGoogle extends TrackerBase {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				tracker.send(MapBuilder.createTiming(category.toString(), timing, name, label).build());
-			}
+			tracker.send(MapBuilder.createTiming(category.toString(), timing, name, label).build());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -85,12 +74,9 @@ public class TrackerGoogle extends TrackerBase {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				tracker.send(MapBuilder.createException(new StandardExceptionParser(Aircandi.applicationContext, null)
-						.getDescription(Thread.currentThread().getName(), exception), false)
-						.build());
-			}
+			tracker.send(MapBuilder.createException(new StandardExceptionParser(Aircandi.applicationContext, null)
+					.getDescription(Thread.currentThread().getName(), exception), false)
+					.build());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -100,14 +86,11 @@ public class TrackerGoogle extends TrackerBase {
 	@Override
 	public void activityStart(Activity activity) {
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				/*
-				 * Screen name as set will be included in all subsequent sends.
-				 */
-				tracker.set(Fields.SCREEN_NAME, activity.getClass().getSimpleName());
-				tracker.send(MapBuilder.createAppView().build());
-			}
+			/*
+			 * Screen name as set will be included in all subsequent sends.
+			 */
+			tracker.set(Fields.SCREEN_NAME, activity.getClass().getSimpleName());
+			tracker.send(MapBuilder.createAppView().build());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -117,14 +100,11 @@ public class TrackerGoogle extends TrackerBase {
 	@Override
 	public void fragmentStart(Fragment fragment) {
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				/*
-				 * Screen name as set will be included in all subsequent sends.
-				 */
-				tracker.set(Fields.SCREEN_NAME, fragment.getClass().getSimpleName());
-				tracker.send(MapBuilder.createAppView().build());
-			}
+			/*
+			 * Screen name as set will be included in all subsequent sends.
+			 */
+			tracker.set(Fields.SCREEN_NAME, fragment.getClass().getSimpleName());
+			tracker.send(MapBuilder.createAppView().build());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -136,25 +116,21 @@ public class TrackerGoogle extends TrackerBase {
 	public void applicationStart() {
 		GAServiceManager.getInstance().setLocalDispatchPeriod(GA_DISPATCH_PERIOD);
 
-		googleAnalytics = GoogleAnalytics.getInstance(Aircandi.applicationContext);
-		googleAnalytics.setDryRun(GA_IS_DRY_RUN);
-		googleAnalytics.getLogger().setLogLevel(GA_LOG_VERBOSITY);
+		Aircandi.analytics.setDryRun(GA_IS_DRY_RUN);
+		Aircandi.analytics.getLogger().setLogLevel(GA_LOG_VERBOSITY);
 
-		tracker = googleAnalytics.getTracker(GA_PROPERTY_ID);
+		tracker = Aircandi.analytics.getTracker(GA_PROPERTY_ID);
 		tracker.set(Fields.SAMPLE_RATE, String.valueOf(GA_SAMPLE_RATE));
 	}
 
 	@SuppressWarnings("unused")
 	private void startNewSession() {
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				tracker.send(MapBuilder
-						.createEvent(TrackerCategory.SYSTEM, "session_start", null, null)
-						.set(Fields.SESSION_CONTROL, "start")
-						.build()
-						);
-			}
+			tracker.send(MapBuilder
+					.createEvent(TrackerCategory.SYSTEM, "session_start", null, null)
+					.set(Fields.SESSION_CONTROL, "start")
+					.build()
+					);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -164,14 +140,11 @@ public class TrackerGoogle extends TrackerBase {
 	@SuppressWarnings("unused")
 	private void stopSession() {
 		try {
-			User user = Aircandi.getInstance().getCurrentUser();
-			if (Constants.TRACKING_ENABLED && user != null && Type.isFalse(user.developer)) {
-				tracker.send(MapBuilder
-						.createEvent(TrackerCategory.SYSTEM, "session_end", null, null)
-						.set(Fields.SESSION_CONTROL, "end")
-						.build()
-						);
-			}
+			tracker.send(MapBuilder
+					.createEvent(TrackerCategory.SYSTEM, "session_end", null, null)
+					.set(Fields.SESSION_CONTROL, "end")
+					.build()
+					);
 		}
 		catch (Exception e) {
 			e.printStackTrace();

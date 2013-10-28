@@ -39,6 +39,9 @@ public abstract class TrackerBase implements TrackerDelegate {
 	@Override
 	public void fragmentStart(Fragment fragment) {}
 
+	@Override
+	public void enableDeveloper(Boolean enable) {}
+
 	public static class TrackerCategory {
 		public static String	UX			= "ux";
 		public static String	SYSTEM		= "system";

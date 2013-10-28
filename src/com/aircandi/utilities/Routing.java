@@ -31,6 +31,7 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutMeta;
 import com.aircandi.service.objects.ShortcutSettings;
+import com.aircandi.ui.AboutForm;
 import com.aircandi.ui.AircandiForm;
 import com.aircandi.ui.EntityList;
 import com.aircandi.ui.HelpForm;
@@ -231,6 +232,11 @@ public final class Routing {
 		}
 
 		else if (route == Route.INVITE) {
+			
+			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+				Dialogs.signin(activity, R.string.alert_signin_message_invite);
+				return true;
+			}						
 
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, InviteEdit.class);
 			activity.startActivity(intentBuilder.create());
@@ -238,6 +244,14 @@ public final class Routing {
 			return true;
 		}
 
+		else if (route == Route.ABOUT) {
+
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, AboutForm.class);
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
+			return true;
+		}
+		
 		else if (route == Route.BROWSE) {
 
 			if (entity == null) {
@@ -263,6 +277,22 @@ public final class Routing {
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
 			}
+			
+			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+				Integer messageResId = R.string.alert_signin_message;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					messageResId = R.string.alert_signin_message_place_edit;					
+				}
+				else if (entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+					messageResId = R.string.alert_signin_message_candigram_edit;					
+				}
+				else if (entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+					messageResId = R.string.alert_signin_message_picture_edit;					
+				}
+				Dialogs.signin(activity, messageResId);
+				return true;
+			}			
+			
 			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.editFormBySchema(entity.schema))
 					.setEntity(entity)
 					.setExtras(extras);
@@ -283,17 +313,58 @@ public final class Routing {
 		}
 
 		else if (route == Route.ADD) {
-
+			
 			((BaseBrowse) activity).onAdd();
 			return true;
 		}
 
 		else if (route == Route.NEW) {
+			
+			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+				Integer messageResId = R.string.alert_signin_message;
+				if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					messageResId = R.string.alert_signin_message_place_add;					
+				}
+				else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+					messageResId = R.string.alert_signin_message_candigram_add;					
+				}
+				else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+					messageResId = R.string.alert_signin_message_picture_add;					
+				}
+				else if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+					messageResId = R.string.alert_signin_message_comment_add;					
+				}
+				Dialogs.signin(activity, messageResId);
+				return true;
+			}			
 
 			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.insertFormBySchema(schema))
 					.setEntitySchema(schema)
 					.setExtras(extras);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_ENTITY_INSERT);
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
+			return true;
+		}
+
+		else if (route == Route.NEW_FOR) {
+
+			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+				Integer messageResId = R.string.alert_signin_message;
+				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+					messageResId = R.string.alert_signin_message_place_add_to;					
+				}
+				else if (entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+					messageResId = R.string.alert_signin_message_candigram_add_to;					
+				}
+				else if (entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+					messageResId = R.string.alert_signin_message_picture_add_to;					
+				}
+				Dialogs.signin(activity, messageResId);
+				return true;
+			}
+			
+			IntentBuilder intentBuilder = new IntentBuilder(activity, ApplicationPicker.class).setEntity(entity);
+			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_APPLICATION_PICK);
 			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
@@ -313,6 +384,11 @@ public final class Routing {
 
 		else if (route == Route.SIGNIN_PROFILE) {
 
+			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+				Dialogs.signin(activity, null);
+				return true;
+			}
+			
 			entity = Aircandi.getInstance().getCurrentUser();
 			if (entity == null) {
 				throw new IllegalArgumentException("valid user entity required for selected route");
@@ -347,6 +423,11 @@ public final class Routing {
 		}
 
 		else if (route == Route.COMMENT_NEW) {
+			
+			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+				Dialogs.signin(activity, null);
+				return true;
+			}						
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
@@ -446,6 +527,24 @@ public final class Routing {
 			return true;
 		}
 
+		else if (route == Route.PRIVACY) {
+
+			final IntentBuilder intentBuilder = new IntentBuilder(android.content.Intent.ACTION_VIEW);
+			intentBuilder.setData(Uri.parse(Constants.URL_AIRCANDI_PRIVACY));
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
+			return true;
+		}
+
+		else if (route == Route.LEGAL) {
+
+			final IntentBuilder intentBuilder = new IntentBuilder(android.content.Intent.ACTION_VIEW);
+			intentBuilder.setData(Uri.parse(Constants.URL_AIRCANDI_LEGAL));
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
+			return true;
+		}
+
 		else if (route == Route.SETTINGS_LOCATION) {
 
 			activity.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
@@ -507,14 +606,6 @@ public final class Routing {
 
 			IntentBuilder intentBuilder = new IntentBuilder(activity, PhotoSourcePicker.class).setEntity(entity);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_PICTURE_SOURCE_PICK);
-			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
-			return true;
-		}
-
-		else if (route == Route.NEW_FOR) {
-
-			IntentBuilder intentBuilder = new IntentBuilder(activity, ApplicationPicker.class).setEntity(entity);
-			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_APPLICATION_PICK);
 			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
@@ -746,6 +837,9 @@ public final class Routing {
 		else if (itemId == R.id.signout) {
 			return Route.SIGNOUT;
 		}
+		else if (itemId == R.id.signin) {
+			return Route.SIGNIN;
+		}
 		else if (itemId == R.id.test) {
 			return Route.TEST;
 		}
@@ -798,6 +892,8 @@ public final class Routing {
 		REGISTER,
 		ACCEPT,
 		TERMS,
+		PRIVACY,
+		LEGAL,
 		SETTINGS_LOCATION,
 		SETTINGS_WIFI,
 		ADDRESS_EDIT,
@@ -816,6 +912,7 @@ public final class Routing {
 		NOTIFICATIONS,
 		CREATED,
 		INVITE,
-		TEST
+		TEST,
+		ABOUT
 	}
 }

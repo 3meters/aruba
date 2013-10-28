@@ -365,7 +365,6 @@ public class EntityManager {
 
 	public ModelResult signin(String email, String password, String activityName) {
 		final ModelResult result = new ModelResult();
-		Aircandi.tracker.sendEvent(TrackerCategory.USER, "user_signin", null, 0);
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("user", "object:{"
@@ -381,36 +380,35 @@ public class EntityManager {
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
+		
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-			Aircandi.tracker.sendEvent(TrackerCategory.UX, "user_signin", null, 0);
+			Aircandi.tracker.sendEvent(TrackerCategory.USER, "user_signin", null, 0);
 		}
 		return result;
-
 	}
 
 	@SuppressWarnings("ucd")
 	public ModelResult signout() {
 		final ModelResult result = new ModelResult();
 
-		final User user = Aircandi.getInstance().getCurrentUser();
-		if (user != null && user.session != null) {
-			/*
-			 * We use a short timeout with no retry because failure doesn't
-			 * really hurt anything.
-			 */
-			final ServiceRequest serviceRequest = new ServiceRequest()
-					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_AUTH + "signout")
-					.setRequestType(RequestType.GET)
-					.setSession(user.session)
-					.setResponseFormat(ResponseFormat.JSON);
+		/*
+		 * We use a short timeout with no retry because failure doesn't
+		 * really hurt anything.
+		 */
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_AUTH + "signout")
+				.setRequestType(RequestType.GET)
+				.setResponseFormat(ResponseFormat.JSON);
 
-			result.serviceResponse = dispatch(serviceRequest);
-
-			if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-				Aircandi.tracker.sendEvent(TrackerCategory.USER, "user_signout", null, 0);
-			}
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 		}
 
+		result.serviceResponse = dispatch(serviceRequest);
+
+		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+			Aircandi.tracker.sendEvent(TrackerCategory.USER, "user_signout", null, 0);
+		}
 		return result;
 	}
 
@@ -429,8 +427,11 @@ public class EntityManager {
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
 				.setActivityName(activityName)
-				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
+
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+		}
 
 		result.serviceResponse = dispatch(serviceRequest);
 
@@ -482,8 +483,11 @@ public class EntityManager {
 							.setUri(user.getEntryUri())
 							.setRequestType(RequestType.UPDATE)
 							.setRequestBody(Json.objectToJson(user, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE))
-							.setSession(user.session)
 							.setResponseFormat(ResponseFormat.JSON);
+
+					if (!user.isAnonymous()) {
+						serviceRequest.setSession(user.session);
+					}
 
 					/* Doing an update so we don't need anything back */
 					result.serviceResponse = dispatch(serviceRequest);
@@ -503,23 +507,6 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult checkSession() {
-		ModelResult result = new ModelResult();
-		Logger.i(this, "Calling checkSession");
-
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "checkSession")
-				.setRequestType(RequestType.GET)
-				.setResponseFormat(ResponseFormat.JSON);
-
-		if (Aircandi.getInstance().getCurrentUser() != null) {
-			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
-		}
-
-		result.serviceResponse = dispatch(serviceRequest);
-		return result;
-	}
-
 	public ModelResult getUserStats(String entityId) {
 		ModelResult result = new ModelResult();
 
@@ -534,7 +521,7 @@ public class EntityManager {
 					.setRequestType(RequestType.GET)
 					.setResponseFormat(ResponseFormat.JSON);
 
-			if (Aircandi.getInstance().getCurrentUser() != null) {
+			if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 				serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 			}
 
@@ -673,8 +660,11 @@ public class EntityManager {
 						.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity")
 						.setRequestType(RequestType.METHOD)
 						.setParameters(parameters)
-						.setSession(Aircandi.getInstance().getCurrentUser().session)
 						.setResponseFormat(ResponseFormat.JSON);
+
+				if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+					serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+				}
 
 				result.serviceResponse = dispatch(serviceRequest);
 			}
@@ -753,8 +743,11 @@ public class EntityManager {
 					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity")
 					.setRequestType(RequestType.METHOD)
 					.setParameters(parameters)
-					.setSession(Aircandi.getInstance().getCurrentUser().session)
 					.setResponseFormat(ResponseFormat.JSON);
+
+			if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+				serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+			}
 
 			result.serviceResponse = dispatch(serviceRequest);
 		}
@@ -804,11 +797,14 @@ public class EntityManager {
 					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteEntity")
 					.setRequestType(RequestType.METHOD)
 					.setParameters(parameters)
-					.setSession(Aircandi.getInstance().getCurrentUser().session)
 					.setResponseFormat(ResponseFormat.JSON);
 
+			if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+				serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+			}
+
 			result.serviceResponse = dispatch(serviceRequest);
-			
+
 		}
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
@@ -899,8 +895,11 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + methodName)
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
+
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+		}
 
 		result.serviceResponse = dispatch(serviceRequest);
 
@@ -993,8 +992,11 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "insertLink")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
+
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+		}
 
 		result.serviceResponse = dispatch(serviceRequest);
 		/*
@@ -1025,8 +1027,11 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteLink")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
+
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+		}
 
 		result.serviceResponse = dispatch(serviceRequest);
 		/*
@@ -1083,7 +1088,7 @@ public class EntityManager {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
 
-		if (Aircandi.getInstance().getCurrentUser() != null) {
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
 		}
 
@@ -1126,8 +1131,11 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "moveCandigrams")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
+
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+		}
 
 		result.serviceResponse = dispatch(serviceRequest);
 
@@ -1140,7 +1148,7 @@ public class EntityManager {
 			else {
 				Aircandi.tracker.sendEvent(TrackerCategory.UX, "entity_preview", null, 0);
 			}
-			
+
 			final String jsonResponse = (String) result.serviceResponse.data;
 			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.ENTITY, Json.ServiceDataWrapper.TRUE);
 			result.data = serviceData.data;
@@ -1185,13 +1193,44 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST + document.getCollection())
 				.setRequestType(RequestType.INSERT)
 				.setRequestBody(Json.objectToJson(document, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE))
-				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
+
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+		}
 
 		result.serviceResponse = dispatch(serviceRequest);
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			Aircandi.tracker.sendEvent(TrackerCategory.USER, document.type + "_insert", document.type, 0);
+		}
+
+		return result;
+	}
+
+	public ModelResult insertFeedback(Document feedback) {
+
+		/* Pre-fetch an id so a failed request can be retried */
+		ModelResult result = getDocumentId(Document.collectionId);
+		feedback.id = (String) result.serviceResponse.data;
+
+		final Bundle parameters = new Bundle();
+		parameters.putString("feedback", "object:" + Json.objectToJson(feedback, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "insertFeedback")
+				.setRequestType(RequestType.METHOD)
+				.setParameters(parameters)
+				.setResponseFormat(ResponseFormat.JSON);
+
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+		}
+
+		result.serviceResponse = dispatch(serviceRequest);
+
+		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+			Aircandi.tracker.sendEvent(TrackerCategory.USER, feedback.type + "_insert", feedback.type, 0);
 		}
 
 		return result;
@@ -1216,8 +1255,11 @@ public class EntityManager {
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_USER + "invite")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
-				.setSession(Aircandi.getInstance().getCurrentUser().session)
 				.setResponseFormat(ResponseFormat.JSON);
+
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+		}
 
 		result.serviceResponse = dispatch(serviceRequest);
 

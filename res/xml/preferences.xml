@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="@string/pref_general_category_title" >
+    <PreferenceCategory
+        android:key="Pref_General_Category"
+        android:title="@string/pref_general_category_title" >
         <ListPreference
             android:id="@+id/Pref_Search_Radius"
             android:defaultValue="457"

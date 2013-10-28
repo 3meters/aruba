@@ -9,7 +9,6 @@ public final class Constants {
 
 	public static final boolean	DEBUG_TRACE									= false;
 	public static final int		LOG_LEVEL									= BuildConfig.DEBUG ? Log.VERBOSE : Log.DEBUG;
-	public static final boolean	TRACKING_ENABLED							= true;
 
 	public static final String	APP_NAME									= "Aircandi";																				//$NON-NLS-1$
 	public static final String	APP_MARKET_URI								= "market://details?id=com.aircandi&referrer=utm_source%3Daircandi_app";
@@ -110,7 +109,9 @@ public final class Constants {
 	public static final int		IMAGE_DIMENSION_MAX							= 960;
 
 	public static final String	URL_AIRCANDI_UPGRADE						= "https://aircandi.com/install";															//$NON-NLS-1$
-	public static final String	URL_AIRCANDI_TERMS							= "https://aircandi.com/pages/terms.html";													//$NON-NLS-1$
+	public static final String	URL_AIRCANDI_TERMS							= "http://aircandi.com/legal/terms";															//$NON-NLS-1$
+	public static final String	URL_AIRCANDI_PRIVACY						= "http://aircandi.com/legal/privacy";															//$NON-NLS-1$
+	public static final String	URL_AIRCANDI_LEGAL							= "http://aircandi.com/legal/android";															//$NON-NLS-1$
 	public static final String	S3_BUCKET_IMAGES							= "aircandi-images";																		// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
 
 	public static final String	SCHEMA_ANY									= "any";																					//$NON-NLS-1$

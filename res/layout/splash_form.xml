@@ -14,7 +14,6 @@
 
     <LinearLayout
         android:id="@+id/dialog"
-        style="?attr/buttonBarStyle"
         android:layout_width="280dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -77,23 +76,24 @@
             android:visibility="gone" >
 
             <com.aircandi.ui.widgets.AirButton
-                android:id="@+id/button_signup"
-                style="@style/form_button"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/form_button_height"
-                android:layout_marginRight="3dp"
-                android:layout_weight="1"
-                android:onClick="onSignupButtonClick"
-                android:text="@string/splash_button_signup" />
-
-            <com.aircandi.ui.widgets.AirButton
                 android:id="@+id/button_signin"
                 style="@style/form_button"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/form_button_height"
+                android:layout_marginRight="2dp"
                 android:layout_weight="1"
                 android:onClick="onSigninButtonClick"
                 android:text="@string/splash_button_signin" />
+
+            <com.aircandi.ui.widgets.AirButton
+                android:id="@+id/button_start"
+                style="@style/form_button"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/form_button_height"
+                android:layout_marginLeft="2dp"
+                android:layout_weight="1"
+                android:onClick="onStartButtonClick"
+                android:text="@string/splash_button_start" />
         </LinearLayout>
 
         <LinearLayout
@@ -106,35 +106,12 @@
             <com.aircandi.ui.widgets.AirButton
                 android:id="@+id/button_retry"
                 style="@style/form_button"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="@dimen/form_button_height"
                 android:layout_marginRight="3dp"
-                android:layout_weight="1"
                 android:onClick="onRetryButtonClick"
                 android:text="@string/splash_button_retry" />
         </LinearLayout>
     </LinearLayout>
-
-    <ImageView
-        android:id="@+id/image_google"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="10dp"
-        android:maxWidth="100dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/img_google_powered_dark"
-        android:visibility="gone" />
-
-    <ImageView
-        android:id="@+id/image_foursquare"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="10dp"
-        android:maxWidth="100dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/img_foursquare_powered_dark"
-        android:visibility="gone" />
 
 </merge>

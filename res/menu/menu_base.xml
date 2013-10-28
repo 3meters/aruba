@@ -8,6 +8,11 @@
         android:showAsAction="ifRoom"
         android:title="@string/menu_profile_item"/>
     <item
+        android:id="@+id/signin"
+        android:orderInCategory="9980"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_signin_item"/>
+    <item
         android:id="@+id/invite"
         android:orderInCategory="9985"
         android:showAsAction="never"

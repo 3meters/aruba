@@ -15,7 +15,6 @@ import com.aircandi.components.Exceptions;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.NotificationManager;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.ui.base.BaseBrowse;
@@ -69,11 +68,11 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 	private Fragment				mRadarFragment;
 
 	private PullToRefreshAttacher	mPullToRefreshAttacher;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-	}	
+	}
 
 	@Override
 	public void initialize(Bundle savedInstanceState) {
@@ -83,9 +82,6 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 			finish();
 			return;
 		}
-
-		/* Make sure we have successfully registered this device with aircandi service */
-		NotificationManager.getInstance().registerDeviceWithAircandi();
 
 		/* Check if the device is tethered */
 		tetherAlert();
@@ -105,12 +101,12 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 			mActionBar.setHomeButtonEnabled(false);
 			mActionBar.setDisplayHomeAsUpEnabled(false);
 
-			mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-			addTab(getString(R.string.tab_radar_item), getString(R.string.tab_radar_item), RadarFragment.class, null);
-			addTab(getString(R.string.tab_watching_item), getString(R.string.tab_watching_item), WatchingFragment.class, null);
-			addTab(getString(R.string.tab_created_item), getString(R.string.tab_created_item), CreatedFragment.class, null);
-			addTab(getString(R.string.tab_notifications_item), getString(R.string.tab_notifications_item), NotificationFragment.class, null);
-
+			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+				showFragment(RadarFragment.class);
+				return;
+			}
+			
+			showTabs(true);
 			mActionBar.selectTab(mActionBar.getTabAt(0));
 		}
 	}
@@ -144,17 +140,54 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 	@Override
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 		TabInfo info = (TabInfo) tab.getTag();
+		showFragment(info.clss);
+	}
 
+	@Override
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {}
+
+	@Override
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {}
+
+	// --------------------------------------------------------------------------------------------
+	// Methods
+	// --------------------------------------------------------------------------------------------
+
+	protected void showTabs(Boolean visible) {
+		if (visible) {
+			mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+			if (getSupportActionBar().getTabCount() == 0) {
+				addTab(getString(R.string.tab_radar_item), getString(R.string.tab_radar_item), RadarFragment.class, null);
+				addTab(getString(R.string.tab_watching_item), getString(R.string.tab_watching_item), WatchingFragment.class, null);
+				addTab(getString(R.string.tab_created_item), getString(R.string.tab_created_item), CreatedFragment.class, null);
+				addTab(getString(R.string.tab_notifications_item), getString(R.string.tab_notifications_item), NewsFragment.class, null);
+			}
+		}
+		else {
+			mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+			getSupportActionBar().removeAllTabs();
+		}
+	}
+
+	public void addTab(String tag, CharSequence label, Class<?> clss, Bundle args) {
+		ActionBar.Tab tab = getSupportActionBar().newTab();
+		tab.setText(label);
+		tab.setTabListener(this);
+		getSupportActionBar().addTab(tab, false);
+		TabInfo info = new TabInfo(tag, clss, args);
+		tab.setTag(info);
+	}
+
+	public void showFragment(Class<?> clazz) {
 		Fragment fragment = null;
-		if (info.clss.getName().equals("com.aircandi.ui.RadarFragment") && mRadarFragment != null) {
+		if (clazz.getName().equals("com.aircandi.ui.RadarFragment") && mRadarFragment != null) {
 			fragment = mRadarFragment;
 		}
 		else {
-			fragment = Fragment.instantiate(this, info.clss.getName(), info.args);
+			fragment = Fragment.instantiate(this, clazz.getName(), null);
 		}
-
 		mCurrentFragment = fragment;
-		if (info.clss.getName().equals("com.aircandi.ui.RadarFragment")) {
+		if (clazz.getName().equals("com.aircandi.ui.RadarFragment")) {
 			mRadarFragment = fragment;
 		}
 
@@ -168,25 +201,6 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 
 		/* Creates call to onPrepareOptionsMenu */
 		invalidateOptionsMenu();
-	}
-
-	@Override
-	public void onTabUnselected(Tab tab, FragmentTransaction ft) {}
-
-	@Override
-	public void onTabReselected(Tab tab, FragmentTransaction ft) {}
-
-	// --------------------------------------------------------------------------------------------
-	// Methods
-	// --------------------------------------------------------------------------------------------
-
-	public void addTab(String tag, CharSequence label, Class<?> clss, Bundle args) {
-		ActionBar.Tab tab = getSupportActionBar().newTab();
-		tab.setText(label);
-		tab.setTabListener(this);
-		getSupportActionBar().addTab(tab, false);
-		TabInfo info = new TabInfo(tag, clss, args);
-		tab.setTag(info);
 	}
 
 	private void tetherAlert() {
@@ -222,18 +236,18 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 
 	@Override
 	public void onStart() {
+		super.onStart();
 		/*
-		 * Check for location service everytime we start.
+		 * Check for location service everytime we start. We won't continue 
+		 * if location services are disabled.
 		 */
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
-			/* We won't continue if location services are disabled */
 			Routing.route(this, Route.SETTINGS_LOCATION);
 			finish();
 		}
-		/*
-		 * Called everytime the activity is started or restarted.
-		 */
-		super.onStart();
+
+		/* Manage tabs */
+		showTabs(!(Aircandi.getInstance().getCurrentUser().isAnonymous()));
 	}
 
 	@Override
@@ -298,8 +312,8 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 	// Classes
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("unused")
 	private static final class TabInfo {
-		@SuppressWarnings("unused")
 		private final String	tag;
 		private final Class<?>	clss;
 		private final Bundle	args;

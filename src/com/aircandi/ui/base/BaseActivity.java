@@ -37,16 +37,19 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.MenuManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.components.NotificationManager;
+import com.aircandi.components.NotificationManager.Tag;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.TrackerBase.TrackerCategory;
+import com.aircandi.service.objects.User;
 import com.aircandi.ui.SplashForm;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.aircandi.utilities.Utilities;
-import com.google.android.gcm.GCMRegistrar;
 
 public abstract class BaseActivity extends SherlockFragmentActivity implements BaseDelegate {
 
@@ -70,6 +73,8 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 	protected MenuItem	mMenuItemEdit;
 	protected MenuItem	mMenuItemAdd;
 	protected MenuItem	mMenuItemSignout;
+	protected MenuItem	mMenuItemSignin;
+	protected MenuItem	mMenuItemProfile;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -402,26 +407,30 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 					protected Object doInBackground(Object... params) {
 						Thread.currentThread().setName("SignOut");
 						final ModelResult result = EntityManager.getInstance().signout();
+						if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+							
+							Logger.i(this, "User signed out: "
+									+ Aircandi.getInstance().getCurrentUser().name
+									+ " (" + Aircandi.getInstance().getCurrentUser().id + ")");
+							
+							User anonymous = (User) EntityManager.getInstance().loadEntityFromResources(R.raw.user_entity, Json.ObjectType.ENTITY);
+							Aircandi.getInstance().setCurrentUser(anonymous);
+							NotificationManager.getInstance().unregisterDeviceWithAircandi();
+							/*
+							 * Cancel any current notifications in the status bar.
+							 */
+							NotificationManager.getInstance().cancelNotification(Tag.INSERT);
+							NotificationManager.getInstance().cancelNotification(Tag.UPDATE);
+						}
+						else {
+							Logger.w(this, "User sign out, service call failed: " + Aircandi.getInstance().getCurrentUser().id);
+						}
 						return result;
 					}
 
 					@SuppressLint("NewApi")
 					@Override
 					protected void onPostExecute(Object response) {
-						final ModelResult result = (ModelResult) response;
-						/* We continue on even if the service call failed. */
-						if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-							Logger.i(this, "USER signed out: " + Aircandi.getInstance().getCurrentUser().name + " ("
-									+ Aircandi.getInstance().getCurrentUser().id + ")");
-						}
-						else {
-							Logger.w(this, "USER signed out, service call failed: " + Aircandi.getInstance().getCurrentUser().id);
-						}
-
-						/* Clear the user and session that is tied into AUTO-signin */
-						com.aircandi.components.NotificationManager.getInstance().unregisterDeviceWithAircandi(
-								GCMRegistrar.getRegistrationId(Aircandi.applicationContext));
-						Aircandi.getInstance().setCurrentUser(null);
 
 						Aircandi.settingsEditor.putString(Constants.SETTING_USER, null);
 						Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, null);
@@ -434,7 +443,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 							((BaseActivity) activity).hideBusy();
 							Routing.route(activity, Route.SPLASH);
 						}
-
 					}
 				}.execute();
 			}
@@ -451,17 +459,17 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 			Aircandi.getInstance().setCurrentActivity(null);
 	}
 
-	public void setResultCode(int resultCode){
+	public void setResultCode(int resultCode) {
 		setResult(resultCode);
 		Aircandi.resultCode = resultCode;
 	}
-	
-	public void setResultCode(int resultCode, Intent intent){
+
+	public void setResultCode(int resultCode, Intent intent) {
 		setResult(resultCode, intent);
 		Aircandi.resultCode = resultCode;
 		Aircandi.resultIntent = intent;
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Menus
 	// --------------------------------------------------------------------------------------------
@@ -508,6 +516,8 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 
 	@Override
 	protected void onStart() {
+		/* Called everytime the activity is started or restarted. */
+		super.onStart();
 		if (!isFinishing()) {
 			Logger.d(this, "Activity starting");
 			Aircandi.tracker.activityStart(this);
@@ -517,7 +527,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 				finish();
 			}
 		}
-		super.onStart();
 	}
 
 	@Override
@@ -539,16 +548,16 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 	@Override
 	protected void onStop() {
 		Logger.d(this, "Activity stopping");
-		Aircandi.tracker.activityStop(this);
 		super.onStop();
+		Aircandi.tracker.activityStop(this);
 	}
 
 	@Override
 	protected void onDestroy() {
 		/* This activity gets destroyed everytime we leave using back or finish(). */
 		Logger.d(this, "Activity destroying");
-		clearReferences();
 		super.onDestroy();
+		clearReferences();
 	}
 
 	@Override

@@ -30,10 +30,10 @@ import com.aircandi.components.DatabaseHelper;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NotificationManager;
+import com.aircandi.components.NotificationManager.Tag;
 import com.aircandi.components.NotificationTable;
 import com.aircandi.components.NotificationsContentProvider;
 import com.aircandi.service.objects.AirNotification;
-import com.aircandi.service.objects.AirNotification.ActionType;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.ui.widgets.AirImageView;
@@ -45,7 +45,7 @@ import com.aircandi.utilities.Notifications;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
 
-public class NotificationFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class NewsFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
 	protected ListView			mListView;
 	protected TextView			mMessage;
@@ -115,11 +115,11 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 				NotificationManager.getInstance().setNewCount(0);
 				if (mAdapter == null) {
 					mAdapter = new ListAdapter(getSherlockActivity(), null, false);
-					getSherlockActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, NotificationFragment.this);
+					getSherlockActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, NewsFragment.this);
 					mListView.setAdapter(mAdapter);
 				}
 				else {
-					getSherlockActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, NotificationFragment.this);
+					getSherlockActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, NewsFragment.this);
 				}
 				setListPosition();
 			}
@@ -170,8 +170,8 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 
 		/* Clear notifications from status bar because user is viewing them */
 
-		NotificationManager.getInstance().cancelNotification(ActionType.INSERT);
-		NotificationManager.getInstance().cancelNotification(ActionType.MOVE);
+		NotificationManager.getInstance().cancelNotification(Tag.INSERT);
+		NotificationManager.getInstance().cancelNotification(Tag.UPDATE);
 
 		hideBusy();
 	}
@@ -212,7 +212,7 @@ public class NotificationFragment extends BaseFragment implements LoaderManager.
 							SQLiteDatabase database = DatabaseHelper.getInstance().getWritableDatabase();
 							Integer deleteCount = database.delete(NotificationTable.TABLE_NOTIFICATIONS, "1", null);
 							UI.showToastNotification("Items deleted: " + String.valueOf(deleteCount), Toast.LENGTH_SHORT);
-							getSherlockActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, NotificationFragment.this);
+							getSherlockActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, NewsFragment.this);
 							getView().findViewById(R.id.message).setVisibility(View.VISIBLE);
 						}
 					}

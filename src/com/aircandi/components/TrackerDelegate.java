@@ -19,6 +19,8 @@ public interface TrackerDelegate {
 	public void activityStop(Activity activity);
 
 	public void applicationStart();
+	
+	public void enableDeveloper(Boolean enable);
 
 	public static enum Action {
 		ENTITY_KICK,

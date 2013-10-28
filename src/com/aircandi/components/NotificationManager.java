@@ -8,9 +8,7 @@ import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.v4.app.NotificationCompat;
-import android.text.TextUtils;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
@@ -70,68 +68,54 @@ public class NotificationManager {
 		}
 	}
 
-	public void registerDeviceWithAircandi() {
-		new AsyncTask() {
+	public ModelResult registerDeviceWithAircandi() {
 
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("RegisterDevice");
+		ModelResult result = new ModelResult();
+		if (GCMRegistrar.isRegistered(Aircandi.applicationContext)) {
+			Logger.i(this, "GCM: Registering device with Aircandi notification service");
 
-				if (GCMRegistrar.isRegistered(Aircandi.applicationContext)
-						&& !GCMRegistrar.isRegisteredOnServer(Aircandi.applicationContext)
-						&& Aircandi.getInstance().getCurrentUser() != null) {
+			Device device = new Device(Aircandi.getInstance().getCurrentUser().id
+					, GCMRegistrar.getRegistrationId(Aircandi.applicationContext)
+					, Aircandi.getInstallId());
 
-					Logger.i(this, "GCM: Registering device with Aircandi notification service");
+			device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, AircandiForm.class);
+			device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
 
-					Device device = new Device(Aircandi.getInstance().getCurrentUser().id
-							, GCMRegistrar.getRegistrationId(Aircandi.applicationContext)
-							, Aircandi.getInstallId());
-					
-					device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, AircandiForm.class);
-					device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
+			result = EntityManager.getInstance().registerDevice(true, device);
 
-					ModelResult result = EntityManager.getInstance().registerDevice(true, device);
-
-					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-						Logger.i(this, "GCM: device registered with Aircandi notification service");
-						final String jsonResponse = (String) result.serviceResponse.data;
-						mDevice = (Device) Json.jsonToObject(jsonResponse, Json.ObjectType.DEVICE);
-						GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, true);
-					}
-				}
-				return null;
+			if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+				Logger.i(this, "GCM: device registered with Aircandi notification service");
+				final String jsonResponse = (String) result.serviceResponse.data;
+				mDevice = (Device) Json.jsonToObject(jsonResponse, Json.ObjectType.DEVICE);
+				GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, true);
 			}
-		}.execute();
+		}
+		return result;
 	}
 
-	public void unregisterDeviceWithAircandi(final String registrationId) {
-		new AsyncTask() {
+	public ModelResult unregisterDeviceWithAircandi() {
 
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("UnregisterDevice");
+		ModelResult result = new ModelResult();
+		final String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
+		if (registrationId != null) {
 
-				/* service notifications */
-				if (!TextUtils.isEmpty(registrationId)) {
+			/* service notifications */
+			Logger.i(this, "GCM: Unregistering this install with Aircandi notification service");
 
-					Logger.i(this, "GCM: Unregistering device with Aircandi notification service");
+			Device device = new Device(null, null, Aircandi.getInstallId());
+			result = EntityManager.getInstance().registerDevice(false, device);
 
-					Device device = new Device(null, registrationId, Aircandi.getInstallId());
-					ModelResult result = EntityManager.getInstance().registerDevice(false, device);
-
-					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-						Logger.i(this, "GCM: device successfully unregistered with Aircandi notification service");
-					}
-					else {
-						if (result.serviceResponse.statusCode != null && result.serviceResponse.statusCode == HttpStatus.SC_NOT_FOUND) {
-							Logger.i(this, "GCM: device already unregistered with Aircandi notification service");
-						}
-					}
-				}
-				GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
-				return null;
+			if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+				Logger.i(this, "GCM: device successfully unregistered with Aircandi notification service");
 			}
-		}.execute();
+			else {
+				if (result.serviceResponse.statusCode != null && result.serviceResponse.statusCode == HttpStatus.SC_NOT_FOUND) {
+					Logger.i(this, "GCM: device already unregistered with Aircandi notification service");
+				}
+			}
+			GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
+		}
+		return result;
 	}
 
 	// --------------------------------------------------------------------------------------------

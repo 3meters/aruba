@@ -38,7 +38,6 @@ import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.google.android.gcm.GCMRegistrar;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
@@ -78,22 +77,6 @@ public class SplashForm extends SherlockActivity {
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
-	@SuppressWarnings("unused")
-	private void attribution() {
-		/* Should be the first method called in initialize */
-		UI.setVisibility(findViewById(R.id.image_foursquare), View.GONE);
-		UI.setVisibility(findViewById(R.id.image_google), View.GONE);
-		String provider = Aircandi.settings.getString(
-				Constants.PREF_PLACE_PROVIDER,
-				Constants.PREF_PLACE_PROVIDER_DEFAULT);
-		if (provider.equals(Constants.TYPE_PROVIDER_FOURSQUARE)) {
-			UI.setVisibility(findViewById(R.id.image_foursquare), View.VISIBLE);
-		}
-		else if (provider.equals(Constants.TYPE_PROVIDER_GOOGLE)) {
-			UI.setVisibility(findViewById(R.id.image_google), View.VISIBLE);
-		}
-	}
-
 	private void warmup() {
 		new AsyncTask() {
 
@@ -118,31 +101,15 @@ public class SplashForm extends SherlockActivity {
 				NetworkManager.getInstance().initialize();
 				Reporting.updateCrashKeys();
 
-				/*
-				 * Fire off a check to make sure the session is valid. This will also
-				 * be the first opportunity to check our network connection. Also, the
-				 * users session window will be extended assuming the session is valid.
-				 */
-				result = EntityManager.getInstance().checkSession();
-
-				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-
-					/* Cache categories - we delay until after the initial rush for data */
-					if (EntityManager.getInstance().getCategories().size() == 0) {
-						result = EntityManager.getInstance().loadCategories();
-					}
+				/* Cache categories */
+				if (EntityManager.getInstance().getCategories().size() == 0) {
+					result = EntityManager.getInstance().loadCategories();
 				}
 
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
 					/* service notifications */
 					if (checkPlayServices()) {
-						String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
-						if (registrationId != null) {
-							NotificationManager.getInstance().unregisterDeviceWithAircandi(registrationId);
-							GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
-						}
-
 						NotificationManager.getInstance().registerDeviceWithGCM();
 					}
 
@@ -210,6 +177,10 @@ public class SplashForm extends SherlockActivity {
 				}
 			}
 		}
+		else {
+			User anonymous = (User) EntityManager.getInstance().loadEntityFromResources(R.raw.user_entity, Json.ObjectType.ENTITY);
+			Aircandi.getInstance().setCurrentUser(anonymous);
+		}
 		showButtons(Buttons.ACCOUNT);
 	}
 
@@ -239,7 +210,7 @@ public class SplashForm extends SherlockActivity {
 			protected Object doInBackground(Object... params) {
 				ModelResult result = new ModelResult();
 
-				if (Aircandi.getInstance().getCurrentUser() != null) {
+				if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 					LinkOptions options = LinkOptions.getDefault(LinkProfile.LINKS_FOR_USER_CURRENT);
 					result = EntityManager.getInstance().getEntity(Aircandi.getInstance().getCurrentUser().id, true, options);
 				}
@@ -348,12 +319,12 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	@SuppressWarnings("ucd")
-	public void onSignupButtonClick(View view) {
+	public void onStartButtonClick(View view) {
 		if (Aircandi.applicationUpdateRequired) {
 			updateRequired();
 			return;
 		}
-		Routing.route(this, Route.REGISTER);
+		startMainApp();
 	}
 
 	@SuppressWarnings("ucd")

@@ -17,4 +17,6 @@ public class RequestListener {
 	public void onComplete(Object response, Photo photo, Bitmap bitmap, Boolean bitmapLocalOnly) {} // $codepro.audit.disable largeNumberOfParameters
 
 	public void onProgressChanged(int progress) {}
+	
+	public void onCancel() {}
 }

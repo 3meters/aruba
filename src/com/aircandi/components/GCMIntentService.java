@@ -9,7 +9,7 @@ import com.aircandi.Constants;
 import com.aircandi.applications.Comments;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.ui.AircandiForm;
-import com.aircandi.ui.NotificationFragment;
+import com.aircandi.ui.NewsFragment;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.utilities.Json;
@@ -84,7 +84,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		Activity currentActivity = Aircandi.getInstance().getCurrentActivity();
 		if (currentActivity != null && currentActivity.getClass().equals(AircandiForm.class)) {
 			BaseFragment fragment = ((AircandiForm) currentActivity).getCurrentFragment();
-			if (fragment.getClass().equals(NotificationFragment.class)) {
+			if (fragment.getClass().equals(NewsFragment.class)) {
 				return;
 			}
 		}
@@ -99,7 +99,6 @@ public class GCMIntentService extends GCMBaseIntentService {
 		 * it unregisters the device.
 		 */
 		Logger.i(this, "GCM: Unregistered");
-		NotificationManager.getInstance().unregisterDeviceWithAircandi(registrationId);
 	}
 
 	@Override
