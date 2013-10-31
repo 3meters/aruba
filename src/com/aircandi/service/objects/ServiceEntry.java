@@ -30,7 +30,7 @@ public class ServiceEntry extends ServiceBase {
 		if (schemaId.equals("us")) schema = "user";
 		if (schemaId.equals("ac")) schema = "action";
 		if (schemaId.equals("se")) schema = "session";
-		if (schemaId.equals("de")) schema = "device";
+		if (schemaId.equals("in")) schema = "install";
 		if (schemaId.equals("li")) schema = "link";
 		if (schemaId.equals("do")) schema = "document";
 
@@ -51,7 +51,7 @@ public class ServiceEntry extends ServiceBase {
 		if (schema.equals("link")) typeId = "li";
 		if (schema.equals("action")) typeId = "ac";
 		if (schema.equals("document")) typeId = "do";
-		if (schema.equals("device")) typeId = "de";
+		if (schema.equals("install")) typeId = "in";
 
 		if (schema.equals("applink")) typeId = "ap";
 		if (schema.equals("beacon")) typeId = "be";

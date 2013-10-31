@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi"
     android:installLocation="auto"
-    android:versionCode="76"
-    android:versionName="0.9.33" >
+    android:versionCode="77"
+    android:versionName="0.9.34" >
 
     <supports-screens
         android:anyDensity="true"
@@ -76,20 +76,19 @@
             android:enabled="true"
             android:label="@string/name_app" />
         
-        <service android:name="com.aircandi.components.GCMIntentService" />
+        <service android:name="com.aircandi.components.GcmIntentService" />
 
         <!-- Receivers -->
 
         <receiver android:name="com.aircandi.components.LocationChangedReceiver" />
         
         <receiver
-            android:name="com.aircandi.components.GCMAircandiBroadcastReceiver"
+            android:name="com.aircandi.components.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-
-                <category android:name="com.aircandi.components" />
+                <category android:name="com.aircandi" />
             </intent-filter>
         </receiver>
 

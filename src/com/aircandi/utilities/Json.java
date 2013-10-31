@@ -27,7 +27,7 @@ import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Candigram;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Comment;
-import com.aircandi.service.objects.Device;
+import com.aircandi.service.objects.Install;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
@@ -259,8 +259,8 @@ public class Json {
 				else if (objectType == Json.ObjectType.CATEGORY) {
 					list.add(Category.setPropertiesFromMap(new Category(), (HashMap) map, nameMapping));
 				}
-				else if (objectType == Json.ObjectType.DEVICE) {
-					list.add(Device.setPropertiesFromMap(new Device(), (HashMap) map, nameMapping));
+				else if (objectType == Json.ObjectType.INSTALL) {
+					list.add(Install.setPropertiesFromMap(new Install(), (HashMap) map, nameMapping));
 				}
 			}
 			return list;
@@ -425,7 +425,7 @@ public class Json {
 		SERVICE_ENTRY,
 		APPLINK,
 		SHORTCUT,
-		DEVICE,
+		INSTALL,
 		AIR_NOTIFICATION,
 		PLACE,
 		POST,

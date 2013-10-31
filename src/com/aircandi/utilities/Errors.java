@@ -23,6 +23,7 @@ import com.aircandi.R;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.service.ClientVersionException;
+import com.aircandi.service.GcmRegistrationIOException;
 import com.aircandi.service.ImageSizeException;
 import com.aircandi.service.ImageUnusableException;
 import com.aircandi.service.ServiceResponse;
@@ -180,6 +181,15 @@ public final class Errors {
 				ErrorResponse errorResponse = new ErrorResponse(ResponseType.NONE, context.getString(R.string.dialog_update_message));
 				errorResponse.track = true;
 				errorResponse.splash = true;
+				return errorResponse;
+			}
+			if (exception instanceof GcmRegistrationIOException) {
+				/*
+				 * This gets returned by any network call to service where this aircandi version
+				 * is not allowed to access the service api.
+				 */
+				ErrorResponse errorResponse = new ErrorResponse(ResponseType.NONE, context.getString(R.string.error_gcm_registration_failed));
+				errorResponse.track = true;
 				return errorResponse;
 			}
 			else if (exception instanceof ImageSizeException) {

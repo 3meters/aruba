@@ -136,25 +136,6 @@
                     android:onClick="onChangePasswordButtonClick"
                     android:text="@string/form_button_change_password" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1px"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginTop="15dp"
-                    android:background="?attr/ruleColor" />
-
-                <CheckBox
-                    android:id="@+id/chk_do_not_track"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/form_field_height"
-                    android:text="@string/form_label_do_not_track" />
-
-                <com.aircandi.ui.widgets.AirTextView
-                    android:id="@+id/do_not_track_hint"
-                    style="@style/form_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="?attr/textColorSecondary" />
             </LinearLayout>
         </ViewFlipper>
     </com.aircandi.ui.widgets.BounceScrollView>

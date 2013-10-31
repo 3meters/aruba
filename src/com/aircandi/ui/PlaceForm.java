@@ -142,6 +142,13 @@ public class PlaceForm extends BaseEntityForm {
 
 	@SuppressWarnings("ucd")
 	public void onTuneButtonClick(View view) {
+
+		if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			Integer messageResId = R.string.alert_signin_message_place_tune;
+			Dialogs.signin(this, messageResId);
+			return;
+		}
+
 		if (EntityManager.canUserAdd(mEntity)) {
 			Routing.route(this, Route.TUNE, mEntity);
 			return;
@@ -371,6 +378,7 @@ public class PlaceForm extends BaseEntityForm {
 		if (userView != null && mEntity.modifier != null
 				&& !mEntity.modifier.id.equals(ServiceConstants.ADMIN_USER_ID)
 				&& !mEntity.modifier.id.equals(ServiceConstants.ANONYMOUS_USER_ID)) {
+
 			if (mEntity.createdDate.longValue() != mEntity.modifiedDate.longValue()) {
 				userView.setLabel(getString(R.string.candi_label_user_edited_by));
 				userView.databind(mEntity.modifier, mEntity.modifiedDate.longValue(), null);

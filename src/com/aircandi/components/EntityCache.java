@@ -208,7 +208,7 @@ public class EntityCache implements Map<String, Entity> {
 		return serviceResponse;
 	}
 
-	public ServiceResponse loadEntitiesByProximity(List<String> beaconIds, LinkOptions linkOptions, Cursor cursor, String registrationId, Stopwatch stopwatch) {
+	public ServiceResponse loadEntitiesByProximity(List<String> beaconIds, LinkOptions linkOptions, Cursor cursor, String installationId, Stopwatch stopwatch) {
 
 		final Bundle parameters = new Bundle();
 		parameters.putStringArrayList("beaconIds", (ArrayList<String>) beaconIds);
@@ -221,8 +221,8 @@ public class EntityCache implements Map<String, Entity> {
 			parameters.putString("cursor", "object:" + Json.objectToJson(cursor));
 		}
 
-		if (registrationId != null) {
-			parameters.putString("registrationId", registrationId);
+		if (installationId != null) {
+			parameters.putString("installationId", installationId);
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()

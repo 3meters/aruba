@@ -33,7 +33,6 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Reporting;
-import com.google.android.gcm.GCMRegistrar;
 
 public class ProximityManager {
 
@@ -246,12 +245,12 @@ public class ProximityManager {
 		}
 
 		/* ADD current registrationId */
-		String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
+		String installationId = Aircandi.getInstallationId();
 
 		serviceResponse = mEntityCache.loadEntitiesByProximity(beaconIds
 				, LinkOptions.getDefault(LinkProfile.LINKS_FOR_BEACONS)
 				, null
-				, registrationId
+				, installationId
 				, Aircandi.stopwatch1);
 
 		if (serviceResponse.responseCode == ResponseCode.SUCCESS) {

@@ -857,7 +857,11 @@ public abstract class BaseEntityEdit extends BaseEdit {
 								Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
 								Aircandi.settingsEditor.commit();
 
-								/* Update the global user but retain the session info */
+								/* 
+								 * Update the global user but retain the session info. We don't need
+								 * to call activateCurrentUser because we don't need to refetch link data
+								 * or change notification registration. 
+								 */
 								((User) mEntity).session = Aircandi.getInstance().getCurrentUser().session;
 								Aircandi.getInstance().setCurrentUser((User) mEntity);
 							}

@@ -59,7 +59,7 @@ public class BitmapManager {
 		 * OutOfMemory exception.
 		 */
 		final int memClass = ((ActivityManager) Aircandi.applicationContext.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
-		Logger.i(this, "DEVICE memory class: " + String.valueOf(memClass));
+		Logger.i(this, "Device memory class: " + String.valueOf(memClass));
 
 		/* Use 1/4th of the available memory for this memory cache. */
 		final int cacheSize = (memClass << 10 << 10) >> 2;

@@ -2,8 +2,6 @@ package com.aircandi.ui.user;
 
 import java.util.Locale;
 
-import android.app.PendingIntent;
-import android.app.PendingIntent.CanceledException;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,20 +21,14 @@ import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.EntityManager;
-import com.aircandi.components.Logger;
+import com.aircandi.components.MessagingManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NotificationManager;
 import com.aircandi.components.ProximityManager.ModelResult;
-import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.LinkProfile;
-import com.aircandi.service.objects.ServiceData;
-import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEdit;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Errors;
-import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -50,7 +42,6 @@ public class SignInEdit extends BaseEdit {
 	private CheckBox		mPasswordUnmask;
 
 	private String			mFormMessage;
-	private PendingIntent	mPendingIntent;
 
 	@Override
 	public void unpackIntent() {
@@ -59,7 +50,6 @@ public class SignInEdit extends BaseEdit {
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mFormMessage = extras.getString(Constants.EXTRA_MESSAGE);
-			mPendingIntent = (PendingIntent) extras.getParcelable("pendingIntent");
 		}
 	}
 
@@ -156,23 +146,9 @@ public class SignInEdit extends BaseEdit {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("SignIn");
-				
 				ModelResult result = EntityManager.getInstance().signin(email, password, SignInEdit.class.getSimpleName());
-				
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-					
-					final String jsonResponse = (String) result.serviceResponse.data;
-					final ServiceData serviceData = (ServiceData) Json.jsonToObject(jsonResponse, Json.ObjectType.NONE, Json.ServiceDataWrapper.TRUE);
-					Aircandi.getInstance().setCurrentUser(serviceData.user);
-					Aircandi.getInstance().getCurrentUser().session = serviceData.session;
-					Logger.i(this, "User signed in: " + Aircandi.getInstance().getCurrentUser().name);
-					
-					/* Load user data */
-					LinkOptions options = LinkOptions.getDefault(LinkProfile.LINKS_FOR_USER_CURRENT);
-					result = EntityManager.getInstance().getEntity(Aircandi.getInstance().getCurrentUser().id, true, options);
-					
-					/* Turn notifications on */
-					NotificationManager.getInstance().registerDeviceWithAircandi(); // might fail but we eat it
+					result = MessagingManager.getInstance().registerInstallWithAircandi();
 				}
 				return result;
 			}
@@ -181,33 +157,11 @@ public class SignInEdit extends BaseEdit {
 			protected void onPostExecute(Object response) {
 
 				final ModelResult result = (ModelResult) response;
-				hideBusy();
+				
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-
 					UI.showToastNotification(getResources().getString(R.string.alert_signed_in)
 							+ " " + Aircandi.getInstance().getCurrentUser().name, Toast.LENGTH_SHORT);
 					
-					User user = Aircandi.getInstance().getCurrentUser();
-
-					final String jsonUser = Json.objectToJson(user);
-					final String jsonSession = Json.objectToJson(user.session);
-
-					Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
-					Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, jsonSession);
-					Aircandi.settingsEditor.putString(Constants.SETTING_LAST_EMAIL, user.email);
-					Aircandi.settingsEditor.commit();
-
-					if (mPendingIntent != null) {
-						try {
-							mPendingIntent.send();
-							finish();
-							Animate.doOverridePendingTransition(SignInEdit.this, TransitionType.FORM_TO_PAGE);
-						}
-						catch (CanceledException exception) {
-							exception.printStackTrace();
-						}
-					}
-
 					setResultCode(Constants.RESULT_USER_SIGNED_IN);
 					finish();
 					Animate.doOverridePendingTransition(SignInEdit.this, TransitionType.FORM_TO_PAGE);
@@ -215,6 +169,8 @@ public class SignInEdit extends BaseEdit {
 				else {
 					Errors.handleError(SignInEdit.this, result.serviceResponse);
 				}
+				hideBusy();
+				
 			}
 		}.execute();
 	}

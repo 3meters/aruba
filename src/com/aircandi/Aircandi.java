@@ -14,9 +14,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 
 import com.aircandi.components.Logger;
@@ -26,6 +28,7 @@ import com.aircandi.components.TrackerGoogleEasy;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.AircandiForm;
+import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Reporting;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.google.analytics.tracking.android.GoogleAnalytics;
@@ -61,7 +64,11 @@ public class Aircandi extends Application {
 
 	public static Boolean					LAUNCHED_NORMALLY;
 	private static String					uniqueId						= null;
+	private static Long						uniqueDate						= null;
+	private static String					uniqueType						= null;
 	private static final String				PREF_UNIQUE_ID					= "PREF_UNIQUE_ID";
+	private static final String				PREF_UNIQUE_ID_DATE				= "PREF_UNIQUE_ID_DATE";
+	private static final String				PREF_UNIQUE_ID_TYPE				= "PREF_UNIQUE_ID_TYPE";
 	public static Intent					resultIntent					= null;
 	public static Integer					resultCode						= Activity.RESULT_OK;
 
@@ -113,6 +120,9 @@ public class Aircandi extends Application {
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		settingsEditor = settings.edit();
 
+		/* Make sure unique id is initialized */
+		Aircandi.getInstallationId();
+
 		/* Color hinting */
 		muteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others
 
@@ -160,12 +170,42 @@ public class Aircandi extends Application {
 		}
 	}
 
-	public synchronized static String getInstallId() {
+	public synchronized static String getInstallType() {
+		if (uniqueType == null) {
+			getInstallationId();
+		}
+		return uniqueType;
+	}
+
+	public synchronized static Long getInstallDate() {
+		if (uniqueDate == null) {
+			getInstallationId();
+		}
+		return uniqueDate;
+	}
+
+	public synchronized static String getInstallationId() {
 		if (uniqueId == null) {
 			uniqueId = Aircandi.settings.getString(PREF_UNIQUE_ID, null);
-			if (uniqueId == null) {
-				uniqueId = UUID.randomUUID().toString();
+			uniqueDate = Aircandi.settings.getLong(PREF_UNIQUE_ID_DATE, 0);
+			uniqueType = Aircandi.settings.getString(PREF_UNIQUE_ID_TYPE, null);
+			if (uniqueId == null || uniqueType == null) {
+				if (Build.SERIAL != null) {
+					uniqueId = Build.SERIAL;
+					uniqueType = Constants.INSTALL_TYPE_SERIAL;
+				}
+				else if (Settings.Secure.ANDROID_ID != null) {
+					uniqueId = Settings.Secure.ANDROID_ID;
+					uniqueType = Constants.INSTALL_TYPE_ANDROID_ID;
+				}
+				else {
+					uniqueId = UUID.randomUUID().toString();
+					uniqueType = Constants.INSTALL_TYPE_RANDOM;
+				}
+				uniqueDate = DateTime.nowDate().getTime();
+				Aircandi.settingsEditor.putString(PREF_UNIQUE_ID_TYPE, uniqueType);
 				Aircandi.settingsEditor.putString(PREF_UNIQUE_ID, uniqueId);
+				Aircandi.settingsEditor.putLong(PREF_UNIQUE_ID_DATE, uniqueDate);
 				Aircandi.settingsEditor.commit();
 			}
 		}

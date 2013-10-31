@@ -4,11 +4,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.aircandi.Constants;
@@ -28,7 +24,6 @@ public class UserEdit extends BaseEntityEdit {
 	private EditText		mWebUri;
 	private EditText		mArea;
 	private EditText		mEmail;
-	private CheckBox		mDoNotTrack;
 
 	private TabManager		mTabManager;
 
@@ -44,7 +39,6 @@ public class UserEdit extends BaseEntityEdit {
 		mWebUri = (EditText) findViewById(R.id.web_uri);
 		mArea = (EditText) findViewById(R.id.area);
 		mEmail = (EditText) findViewById(R.id.email);
-		mDoNotTrack = (CheckBox) findViewById(R.id.chk_do_not_track);
 
 		if (mBio != null) {
 			mBio.addTextChangedListener(new SimpleTextWatcher() {
@@ -98,26 +92,6 @@ public class UserEdit extends BaseEntityEdit {
 				}
 			});
 		}
-		if (mDoNotTrack != null) {
-			mDoNotTrack.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-				@Override
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					if (((User) mEntity).doNotTrack != isChecked) {
-						if (!mFirstDraw) {
-							mDirty = true;
-						}
-					}
-
-					if (isChecked) {
-						((TextView) findViewById(R.id.do_not_track_hint)).setText(R.string.form_do_not_track_on_hint);
-					}
-					else {
-						((TextView) findViewById(R.id.do_not_track_hint)).setText(R.string.form_do_not_track_off_hint);
-					}
-				}
-			});
-		}
 	}
 
 	@Override
@@ -130,16 +104,6 @@ public class UserEdit extends BaseEntityEdit {
 		mWebUri.setText(user.webUri);
 		mArea.setText(user.area);
 		mEmail.setText(user.email);
-		if (user.doNotTrack == null) {
-			user.doNotTrack = false;
-		}
-		mDoNotTrack.setChecked(user.doNotTrack);
-		if (user.doNotTrack) {
-			((TextView) findViewById(R.id.do_not_track_hint)).setText(R.string.form_do_not_track_on_hint);
-		}
-		else {
-			((TextView) findViewById(R.id.do_not_track_hint)).setText(R.string.form_do_not_track_off_hint);
-		}
 
 		((ViewGroup) findViewById(R.id.flipper_form)).setVisibility(View.VISIBLE);
 
@@ -178,7 +142,6 @@ public class UserEdit extends BaseEntityEdit {
 		user.bio = Type.emptyAsNull(mBio.getText().toString().trim());
 		user.area = Type.emptyAsNull(mArea.getText().toString().trim());
 		user.webUri = Type.emptyAsNull(mWebUri.getText().toString().trim());
-		user.doNotTrack = mDoNotTrack.isChecked();
 	}
 
 	@Override

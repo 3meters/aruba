@@ -21,6 +21,7 @@ import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.Logger;
+import com.aircandi.components.MessagingManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.User;
@@ -29,7 +30,6 @@ import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Errors;
-import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 import com.aircandi.utilities.UI;
@@ -186,9 +186,20 @@ public class RegisterEdit extends BaseEntityEdit {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("InsertUser");
 
-				final ModelResult result = EntityManager.getInstance().registerUser((User) mEntity
-						, null
+				ModelResult result = EntityManager.getInstance().registerUser((User) mEntity
 						, mEntity.photo != null ? mEntity.photo.getBitmap() : null);
+
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+					/*
+					 * We automatically consider the user signed in.
+					 */
+					final User user = (User) result.data;
+					Aircandi.getInstance().setCurrentUser(user);
+					result = EntityManager.getInstance().activateCurrentUser();
+					if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+						result = MessagingManager.getInstance().registerInstallWithAircandi();
+					}
+				}
 
 				return result;
 			}
@@ -198,39 +209,17 @@ public class RegisterEdit extends BaseEntityEdit {
 				final ModelResult result = (ModelResult) response;
 
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-					/*
-					 * mUser has been set to the user and session we got back from
-					 * the service when it was inserted. We now consider the user
-					 * signed in.
-					 */
-					final User insertedUser = (User) result.data;
-					Aircandi.getInstance().setCurrentUser(insertedUser);
 
-					hideBusy();
 					Logger.i(RegisterEdit.this, "Inserted new user: " + mEntity.name + " (" + mEntity.id + ")");
-
-					UI.showToastNotification(getResources().getString(R.string.alert_signed_in)
-							+ " " + Aircandi.getInstance().getCurrentUser().name, Toast.LENGTH_SHORT);
-
-					final String jsonUser = Json.objectToJson(insertedUser);
-					final String jsonSession = Json.objectToJson(insertedUser.session);
-
-					Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
-					Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, jsonSession);
-					Aircandi.settingsEditor.putString(Constants.SETTING_LAST_EMAIL, insertedUser.email);
-					Aircandi.settingsEditor.commit();
-
+					UI.showToastNotification(getString(R.string.alert_signed_in) + " " + Aircandi.getInstance().getCurrentUser().name, Toast.LENGTH_SHORT);
 					setResultCode(Constants.RESULT_USER_SIGNED_IN);
 					finish();
 					Animate.doOverridePendingTransition(RegisterEdit.this, TransitionType.FORM_TO_PAGE);
 				}
 				else {
-					/*
-					 * TODO: Need to handle AmazonClientException.
-					 * Does clearing the password fields always make sense?
-					 */
 					Errors.handleError(RegisterEdit.this, result.serviceResponse);
 				}
+				hideBusy();
 			}
 		}.execute();
 	}

@@ -24,6 +24,7 @@ import com.aircandi.BuildConfig;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.ServiceConstants;
+import com.aircandi.components.MessagingManager.Tag;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.TrackerBase.TrackerCategory;
@@ -37,12 +38,13 @@ import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Candigram;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Cursor;
-import com.aircandi.service.objects.Device;
 import com.aircandi.service.objects.Document;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Install;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions;
+import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
@@ -364,7 +366,7 @@ public class EntityManager {
 	// --------------------------------------------------------------------------------------------
 
 	public ModelResult signin(String email, String password, String activityName) {
-		final ModelResult result = new ModelResult();
+		ModelResult result = new ModelResult();
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("user", "object:{"
@@ -380,15 +382,60 @@ public class EntityManager {
 				.setResponseFormat(ResponseFormat.JSON);
 
 		result.serviceResponse = dispatch(serviceRequest);
-		
+
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+
+			final String jsonResponse = (String) result.serviceResponse.data;
+			final ServiceData serviceData = (ServiceData) Json.jsonToObject(jsonResponse, Json.ObjectType.NONE, Json.ServiceDataWrapper.TRUE);
+			User user = serviceData.user;
+			user.session = serviceData.session;
+			Aircandi.getInstance().setCurrentUser(user);
+
+			activateCurrentUser();
+			
 			Aircandi.tracker.sendEvent(TrackerCategory.USER, "user_signin", null, 0);
+			Logger.i(this, "User signed in: " + Aircandi.getInstance().getCurrentUser().name);
 		}
 		return result;
 	}
 
+	public ModelResult activateCurrentUser() {
+
+		ModelResult result = new ModelResult();
+		User user = Aircandi.getInstance().getCurrentUser();
+
+		if (user.isAnonymous()) {
+
+			/* Cancel any current notifications in the status bar */
+			MessagingManager.getInstance().cancelNotification(Tag.INSERT);
+			MessagingManager.getInstance().cancelNotification(Tag.UPDATE);
+
+			/* Clear user settings */
+			Aircandi.settingsEditor.putString(Constants.SETTING_USER, null);
+			Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, null);
+			Aircandi.settingsEditor.commit();
+		}
+		else {
+
+			/* Load user data */
+			LinkOptions options = LinkOptions.getDefault(LinkProfile.LINKS_FOR_USER_CURRENT);
+			result = EntityManager.getInstance().getEntity(user.id, true, options);
+
+			/* Update settings */
+			final String jsonUser = Json.objectToJson(user);
+			final String jsonSession = Json.objectToJson(user.session);
+
+			Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
+			Aircandi.settingsEditor.putString(Constants.SETTING_USER_SESSION, jsonSession);
+			Aircandi.settingsEditor.putString(Constants.SETTING_LAST_EMAIL, user.email);
+			Aircandi.settingsEditor.commit();
+		}
+
+		return result;
+	}
+
 	@SuppressWarnings("ucd")
-	public ModelResult signout() {
+	public ModelResult signoutComplete() {
 		final ModelResult result = new ModelResult();
 
 		/*
@@ -405,9 +452,21 @@ public class EntityManager {
 		}
 
 		result.serviceResponse = dispatch(serviceRequest);
+		/*
+		 * We treat user as signed out even if the service call failed.
+		 */
+		Aircandi.tracker.sendEvent(TrackerCategory.USER, "user_signout", null, 0);
+		Logger.i(this, "User signed out: "
+				+ Aircandi.getInstance().getCurrentUser().name
+				+ " (" + Aircandi.getInstance().getCurrentUser().id + ")");
 
-		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-			Aircandi.tracker.sendEvent(TrackerCategory.USER, "user_signout", null, 0);
+		/* Set to anonymous user */
+		User anonymous = (User) EntityManager.getInstance().loadEntityFromResources(R.raw.user_entity, Json.ObjectType.ENTITY);
+		Aircandi.getInstance().setCurrentUser(anonymous);
+		activateCurrentUser();
+
+		if (result.serviceResponse.responseCode != ResponseCode.SUCCESS) {
+			Logger.w(this, "User sign out but service call failed: " + Aircandi.getInstance().getCurrentUser().id);
 		}
 		return result;
 	}
@@ -441,7 +500,7 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult registerUser(User user, Link link, Bitmap bitmap) {
+	public ModelResult registerUser(User user, Bitmap bitmap) {
 
 		/* Pre-fetch an id so a failed request can be retried */
 		final ModelResult result = getDocumentId(User.collectionId);
@@ -1166,15 +1225,15 @@ public class EntityManager {
 		return cacheStamp;
 	}
 
-	public ModelResult registerDevice(Boolean register, Device device) {
+	public ModelResult registerInstall(Boolean register, Install install) {
 
 		ModelResult result = new ModelResult();
 		final Bundle parameters = new Bundle();
 		parameters.putBoolean("register", register);
-		parameters.putString("device", "object:" + Json.objectToJson(device, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
+		parameters.putString("install", "object:" + Json.objectToJson(install, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "registerDevice")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "registerInstall")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);

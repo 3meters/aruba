@@ -1,13 +1,15 @@
 package com.aircandi.components;
 
-import org.apache.http.HttpStatus;
+import java.io.IOException;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v4.app.NotificationCompat;
 
 import com.aircandi.Aircandi;
@@ -19,32 +21,34 @@ import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
 import com.aircandi.events.MessageEvent;
+import com.aircandi.service.GcmRegistrationIOException;
 import com.aircandi.service.RequestListener;
 import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.AirNotification.ActionType;
 import com.aircandi.service.objects.AirNotification.NotificationType;
-import com.aircandi.service.objects.Device;
+import com.aircandi.service.objects.Install;
 import com.aircandi.ui.AircandiForm;
-import com.aircandi.utilities.Json;
-import com.google.android.gcm.GCMRegistrar;
+import com.aircandi.utilities.Errors;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 @SuppressWarnings("ucd")
-public class NotificationManager {
+public class MessagingManager {
 
-	public static android.app.NotificationManager	mNotificationManager;
-	private Device									mDevice;
-	private Integer									mNewCount	= 0;
+	public static NotificationManager	mNotificationManager;
+	private GoogleCloudMessaging		mGcm;
+	private Install						mInstall;
+	private Integer						mNewCount	= 0;
 
-	private NotificationManager() {
-		mNotificationManager = (android.app.NotificationManager) Aircandi.applicationContext.getSystemService(Service.NOTIFICATION_SERVICE);
+	private MessagingManager() {
+		mNotificationManager = (NotificationManager) Aircandi.applicationContext.getSystemService(Service.NOTIFICATION_SERVICE);
 	}
 
 	private static class NotificationManagerHolder {
-		public static final NotificationManager	instance	= new NotificationManager();
+		public static final MessagingManager	instance	= new MessagingManager();
 	}
 
-	public static NotificationManager getInstance() {
+	public static MessagingManager getInstance() {
 		return NotificationManagerHolder.instance;
 	}
 
@@ -52,70 +56,86 @@ public class NotificationManager {
 	// GCM
 	// --------------------------------------------------------------------------------------------	
 
-	public void registerDeviceWithGCM() {
+	public void registerInstallWithGCM() {
 		/*
-		 * Registration gets redone if app version code changes. Registration id
-		 * and associated app version code are stored in shared prefs.
+		 * Only called when aircandi application first runs.
+		 * 
+		 * Returns as not registered if no registration id or version has changed which clears any current registration
+		 * id forcing us to fetch a new one. Registration id and associated app version code are stored in the gcm
+		 * shared prefs.
 		 */
-		if (!GCMRegistrar.isRegistered(Aircandi.applicationContext)) {
-			GCMRegistrar.register(Aircandi.applicationContext, Constants.SENDER_ID);
-		}
-	}
-
-	public void unregisterDeviceWithGCM() {
-		if (GCMRegistrar.isRegistered(Aircandi.applicationContext)) {
-			GCMRegistrar.unregister(Aircandi.applicationContext);
-		}
-	}
-
-	public ModelResult registerDeviceWithAircandi() {
-
-		ModelResult result = new ModelResult();
-		if (GCMRegistrar.isRegistered(Aircandi.applicationContext)) {
-			Logger.i(this, "GCM: Registering device with Aircandi notification service");
-
-			Device device = new Device(Aircandi.getInstance().getCurrentUser().id
-					, GCMRegistrar.getRegistrationId(Aircandi.applicationContext)
-					, Aircandi.getInstallId());
-
-			device.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, AircandiForm.class);
-			device.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
-
-			result = EntityManager.getInstance().registerDevice(true, device);
-
-			if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-				Logger.i(this, "GCM: device registered with Aircandi notification service");
-				final String jsonResponse = (String) result.serviceResponse.data;
-				mDevice = (Device) Json.jsonToObject(jsonResponse, Json.ObjectType.DEVICE);
-				GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, true);
-			}
-		}
-		return result;
-	}
-
-	public ModelResult unregisterDeviceWithAircandi() {
-
-		ModelResult result = new ModelResult();
-		final String registrationId = GCMRegistrar.getRegistrationId(Aircandi.applicationContext);
-		if (registrationId != null) {
-
-			/* service notifications */
-			Logger.i(this, "GCM: Unregistering this install with Aircandi notification service");
-
-			Device device = new Device(null, null, Aircandi.getInstallId());
-			result = EntityManager.getInstance().registerDevice(false, device);
-
-			if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-				Logger.i(this, "GCM: device successfully unregistered with Aircandi notification service");
-			}
-			else {
-				if (result.serviceResponse.statusCode != null && result.serviceResponse.statusCode == HttpStatus.SC_NOT_FOUND) {
-					Logger.i(this, "GCM: device already unregistered with Aircandi notification service");
+		String registrationId = getRegistrationId(Aircandi.applicationContext);
+		if (registrationId.isEmpty()) {
+			try {
+				if (mGcm == null) {
+					mGcm = GoogleCloudMessaging.getInstance(Aircandi.applicationContext);
 				}
+				registrationId = mGcm.register(Constants.SENDER_ID);
+				setRegistrationId(Aircandi.applicationContext, registrationId);
+				Logger.i(this, "Registered aircandi install with GCM");
 			}
-			GCMRegistrar.setRegisteredOnServer(Aircandi.applicationContext, false);
+			catch (IOException ex) {
+				ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.FAILED, null, new GcmRegistrationIOException());
+				serviceResponse.errorResponse = Errors.getErrorResponse(Aircandi.applicationContext, serviceResponse);
+				Errors.handleError(null, serviceResponse);
+			}
+		}
+	}
+
+	public ModelResult registerInstallWithAircandi() {
+
+		ModelResult result = new ModelResult();
+		Logger.i(this, "Registering install with Aircandi service");
+
+		String registrationId = getRegistrationId(Aircandi.applicationContext);
+
+		Install install = new Install(Aircandi.getInstance().getCurrentUser().id
+				, registrationId
+				, Aircandi.getInstallationId());
+
+		install.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, AircandiForm.class);
+		install.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
+
+		result = EntityManager.getInstance().registerInstall(true, install);
+
+		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+			Logger.i(this, "Install successfully registered with Aircandi service");
 		}
 		return result;
+	}
+
+	private void setRegistrationId(Context context, String registrationId) {
+		final SharedPreferences prefs = getGcmPreferences(context);
+		int versionCode = Aircandi.getVersionCode(Aircandi.applicationContext, MessagingManager.class);
+
+		Logger.i(this, "Saving GCM registrationId for app version code " + String.valueOf(versionCode));
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putString(Constants.SETTING_GCM_REGISTRATION_ID, registrationId);
+		editor.putInt(Constants.SETTING_GCM_VERSION_CODE, versionCode);
+		editor.commit();
+	}
+
+	private String getRegistrationId(Context context) {
+		final SharedPreferences prefs = getGcmPreferences(context);
+		String registrationId = prefs.getString(Constants.SETTING_GCM_REGISTRATION_ID, "");
+		if (registrationId.isEmpty()) {
+			Logger.i(this, "GCM registration not found in settings.");
+			return "";
+		}
+		// Check if app was updated; if so, it must clear the registration ID
+		// since the existing regID is not guaranteed to work with the new
+		// app version.
+		int registeredVersionCode = prefs.getInt(Constants.SETTING_GCM_VERSION_CODE, Integer.MIN_VALUE);
+		int currentVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, MessagingManager.class);
+		if (registeredVersionCode != currentVersionCode) {
+			Logger.i(this, "GCM app version changed.");
+			return "";
+		}
+		return registrationId;
+	}
+
+	private SharedPreferences getGcmPreferences(Context context) {
+		return Aircandi.applicationContext.getSharedPreferences(MessagingManager.class.getSimpleName(), Context.MODE_PRIVATE);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -327,12 +347,12 @@ public class NotificationManager {
 		mNewCount = newCount;
 	}
 
-	public Device getDevice() {
-		return mDevice;
+	public Install getInstall() {
+		return mInstall;
 	}
 
-	public void setDevice(Device device) {
-		mDevice = device;
+	public void setInstall(Install device) {
+		mInstall = device;
 	}
 
 	// --------------------------------------------------------------------------------------------

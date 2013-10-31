@@ -1,5 +1,7 @@
 package com.aircandi.ui;
 
+import java.util.Locale;
+
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -105,7 +107,7 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 				showFragment(RadarFragment.class);
 				return;
 			}
-			
+
 			showTabs(true);
 			mActionBar.selectTab(mActionBar.getTabAt(0));
 		}
@@ -238,12 +240,17 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 	public void onStart() {
 		super.onStart();
 		/*
-		 * Check for location service everytime we start. We won't continue 
+		 * Check for location service everytime we start. We won't continue
 		 * if location services are disabled.
 		 */
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 			Routing.route(this, Route.SETTINGS_LOCATION);
 			finish();
+		}
+
+		/* Show current user */
+		if (mActionBar != null) {
+			mActionBar.setSubtitle(Aircandi.getInstance().getCurrentUser().name.toUpperCase(Locale.US));
 		}
 
 		/* Manage tabs */

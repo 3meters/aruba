@@ -109,9 +109,9 @@ public final class Constants {
 	public static final int		IMAGE_DIMENSION_MAX							= 960;
 
 	public static final String	URL_AIRCANDI_UPGRADE						= "https://aircandi.com/install";															//$NON-NLS-1$
-	public static final String	URL_AIRCANDI_TERMS							= "http://aircandi.com/legal/terms";															//$NON-NLS-1$
-	public static final String	URL_AIRCANDI_PRIVACY						= "http://aircandi.com/legal/privacy";															//$NON-NLS-1$
-	public static final String	URL_AIRCANDI_LEGAL							= "http://aircandi.com/legal/android";															//$NON-NLS-1$
+	public static final String	URL_AIRCANDI_TERMS							= "http://aircandi.com/legal/terms";														//$NON-NLS-1$
+	public static final String	URL_AIRCANDI_PRIVACY						= "http://aircandi.com/legal/privacy";														//$NON-NLS-1$
+	public static final String	URL_AIRCANDI_LEGAL							= "http://aircandi.com/legal/android";														//$NON-NLS-1$
 	public static final String	S3_BUCKET_IMAGES							= "aircandi-images";																		// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
 
 	public static final String	SCHEMA_ANY									= "any";																					//$NON-NLS-1$
@@ -251,7 +251,7 @@ public final class Constants {
 	public static final String	PREF_TESTING_LOCATION						= "Pref_Testing_Location";
 	public static final String	PREF_TESTING_SELF_NOTIFY					= "Pref_Testing_Self_Notify";
 
-	/* SETTINGS */
+	/* Settings */
 	public static final String	SETTING_USER								= "Setting_User";
 	public static final String	SETTING_USER_SESSION						= "Setting_User_Session";
 	public static final String	SETTING_PICTURE_SEARCH_LAST					= "Setting_Picture_Search_Last";
@@ -261,6 +261,10 @@ public final class Constants {
 	public static final String	SETTING_RUN_ONCE_HELP_RADAR					= "Setting_Run_Once_Help_Radar";
 	public static final String	SETTING_RUN_ONCE_HELP_CANDI_PLACE			= "Setting_Run_Once_Help_Candi_Place";
 	public static final String	SETTING_NAVIGATION_DRAWER_OPENED_BY_USER	= "Setting_Navigation_Drawer_Opened_By_User";
+
+	/* Cloud messagings */
+	public static final String	SETTING_GCM_REGISTRATION_ID					= "Setting_Gcm_Registration_Id";
+	public static final String	SETTING_GCM_VERSION_CODE					= "Setting_Gcm_Version_Code";
 
 	/* Defaults */
 	public static final String	PREF_THEME_DEFAULT							= "aircandi_theme_snow";
@@ -280,6 +284,11 @@ public final class Constants {
 	public static final String	PREF_TESTING_BEACONS_DEFAULT				= "natural";
 	public static final String	PREF_TESTING_LOCATION_DEFAULT				= "natural";
 	public static final Boolean	PREF_TESTING_SELF_NOTIFY_DEFAULT			= false;
+
+	/* Install id */
+	public static final String	INSTALL_TYPE_RANDOM							= "random_uuid";
+	public static final String	INSTALL_TYPE_ANDROID_ID						= "android_id";
+	public static final String	INSTALL_TYPE_SERIAL							= "serial_num";
 
 	/* For readability */
 	public static final int		DIST_ONE_METER								= 1;

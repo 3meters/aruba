@@ -91,6 +91,9 @@
     <string name="dummy_comments">21 comments</string>
     <string name="dummy_copyright">&#169;2013 3meters LLC.</string>
     <string name="dummy_version">Version: 0.9.35 (76)</string>
+    <string name="dummy_install_id">f8953a63-2019-4793-9b03-e93370913c4b</string>
+    <string name="dummy_install_date">December 23 at 10:12am</string>
+    <string name="dummy_install_type">serial_num</string>
     <string name="dummy_candigram_action">checking schedule</string>
     <string name="dummy_number">10</string>
     <string name="dummy_like_stat">12 likes</string>
@@ -167,6 +170,7 @@
     <string name="alert_signin_message_user_like">Sign in to like users.</string>
     
     <string name="alert_signin_message_invite">Sign in to send invites.</string>
+    <string name="alert_signin_message_place_tune">Sign in to tune places.</string>
     
     <string name="alert_signin_message_candigram_expand">Sign in to repeat candigrams.</string>
     <string name="alert_signin_message_candigram_bounce">Sign in to kick candigrams.</string>
@@ -260,6 +264,7 @@
     <string name="error_update_required">You need to sign in to enable internet access</string>
     <string name="error_image_too_large">Photo is too large for the current device.</string>
     <string name="error_image_unusable">Photo is unusable.</string>
+    <string name="error_gcm_registration_failed">Registration for notifications failed.</string>
     
     <!-- Toast -->
 
@@ -511,7 +516,7 @@
     <!-- About -->
     
     <string name="about_title">about aircandi</string>
-    <string name="about_label_version">version</string>
+    <string name="about_label_version">Version</string>
     
 
     <!-- Alerts: kicked candigram -->

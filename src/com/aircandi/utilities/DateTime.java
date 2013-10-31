@@ -12,7 +12,8 @@ public class DateTime {
 	private static final String	DATE_FORMAT_TIME_SINCE_WITH_YEAR	= "MMM d, yyyy";
 	private static final String	TIME_FORMAT_TIME_SINCE				= "h:mm";
 	private static final String	AMPM_FORMAT_TIME_SINCE				= "a";
-	public static final String	DATE_FORMAT_DETAILED				= "MMM d, yyyy h:mm:ss.SSS"; // NO_UCD (unused code)
+	public static final String	DATE_FORMAT_DETAILED				= "MMM d, yyyy h:mm:ss.SSS";	// NO_UCD (unused code)
+	public static final String	DATE_FORMAT_DEFAULT					= "MMMM d, yyyy h:mma";
 
 	public static String nowString(String pattern) {
 		final Calendar cal = Calendar.getInstance();
@@ -25,7 +26,7 @@ public class DateTime {
 		final SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.US);
 		return sdf.format(time);
 	}
-	
+
 	public static Date nowDate() {
 		final Calendar cal = Calendar.getInstance();
 		return cal.getTime();

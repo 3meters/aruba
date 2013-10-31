@@ -19,13 +19,11 @@ import com.aircandi.R;
 import com.aircandi.components.EntityManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
+import com.aircandi.components.MessagingManager;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NotificationManager;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager;
-import com.aircandi.service.objects.LinkOptions;
-import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.Animate;
@@ -60,6 +58,12 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	private void initialize() {
+		/* Clear the current user */
+		Aircandi.getInstance().setCurrentUser(null);
+
+		/* Always reset the entity cache */
+		EntityManager.getEntityCache().clear();
+
 		if (!Aircandi.applicationUpdateRequired) {
 			if (Aircandi.firstStartApp) {
 				warmup();
@@ -110,7 +114,7 @@ public class SplashForm extends SherlockActivity {
 
 					/* service notifications */
 					if (checkPlayServices()) {
-						NotificationManager.getInstance().registerDeviceWithGCM();
+						MessagingManager.getInstance().registerInstallWithGCM();
 					}
 
 					/* Proxibase sdk components */
@@ -155,7 +159,9 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	private void signinAuto() {
-
+		/*
+		 * Gets called on app create and after restart and ending with the back key.
+		 */
 		final String jsonUser = Aircandi.settings.getString(Constants.SETTING_USER, null);
 		final String jsonSession = Aircandi.settings.getString(Constants.SETTING_USER_SESSION, null);
 
@@ -177,10 +183,6 @@ public class SplashForm extends SherlockActivity {
 				}
 			}
 		}
-		else {
-			User anonymous = (User) EntityManager.getInstance().loadEntityFromResources(R.raw.user_entity, Json.ObjectType.ENTITY);
-			Aircandi.getInstance().setCurrentUser(anonymous);
-		}
 		showButtons(Buttons.ACCOUNT);
 	}
 
@@ -201,20 +203,14 @@ public class SplashForm extends SherlockActivity {
 
 	private void startMainApp() {
 
-		/* Always reset the entity cache */
-		EntityManager.getEntityCache().clear();
-
 		new AsyncTask() {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				ModelResult result = new ModelResult();
-
-				if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
-					LinkOptions options = LinkOptions.getDefault(LinkProfile.LINKS_FOR_USER_CURRENT);
-					result = EntityManager.getInstance().getEntity(Aircandi.getInstance().getCurrentUser().id, true, options);
+				ModelResult result = EntityManager.getInstance().activateCurrentUser();
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+					result = MessagingManager.getInstance().registerInstallWithAircandi();
 				}
-
 				return result;
 			}
 
@@ -239,6 +235,7 @@ public class SplashForm extends SherlockActivity {
 							updateRequired();
 							return;
 						}
+						Aircandi.getInstance().setCurrentUser(null);
 						showButtons(Buttons.ACCOUNT);
 					}
 				}
@@ -324,6 +321,8 @@ public class SplashForm extends SherlockActivity {
 			updateRequired();
 			return;
 		}
+		User anonymous = (User) EntityManager.getInstance().loadEntityFromResources(R.raw.user_entity, Json.ObjectType.ENTITY);
+		Aircandi.getInstance().setCurrentUser(anonymous);
 		startMainApp();
 	}
 
@@ -357,6 +356,11 @@ public class SplashForm extends SherlockActivity {
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Classes

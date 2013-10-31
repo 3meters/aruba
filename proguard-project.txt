@@ -90,7 +90,7 @@
 -keep class android.support.v4.content.**	{ *; }
 
 # -------------------------------------------------------------------------------------------------
-# Google api specific settings
+# Google play services api specific settings
 # -------------------------------------------------------------------------------------------------
 
 -keep class * extends java.util.ListResourceBundle {

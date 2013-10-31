@@ -12,14 +12,15 @@ import com.aircandi.R;
 import com.aircandi.ui.base.BaseBrowse;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
 
 public class AboutForm extends BaseBrowse {
 
-	TextView	mVersion;
-	TextView	mCopyright;
-	String		mVersionName;
+	private TextView	mVersion;
+	private TextView	mCopyright;
+	private String		mVersionName;
 
 	@Override
 	public void initialize(Bundle savedInstanceState) {
@@ -31,7 +32,7 @@ public class AboutForm extends BaseBrowse {
 		final String company = getString(R.string.name_company);
 		final String copyrightSymbol = getString(R.string.symbol_copyright);
 
-		final String mVersionName = Aircandi.getVersionName(this, AircandiForm.class);
+		mVersionName = Aircandi.getVersionName(this, AircandiForm.class);
 		final String version = getString(R.string.about_label_version) + ": " + mVersionName
 				+ " (" + String.valueOf(Aircandi.getVersionCode(this, AircandiForm.class)) + ")";
 
@@ -39,6 +40,9 @@ public class AboutForm extends BaseBrowse {
 
 		mVersion.setText(version);
 		mCopyright.setText(copyright);
+		((TextView) findViewById(R.id.install_id)).setText(Aircandi.getInstallationId());
+		((TextView) findViewById(R.id.install_type)).setText(Aircandi.getInstallType());
+		((TextView) findViewById(R.id.install_date)).setText(DateTime.dateString(Aircandi.getInstallDate(), DateTime.DATE_FORMAT_DEFAULT));
 	}
 
 	@Override
@@ -46,9 +50,6 @@ public class AboutForm extends BaseBrowse {
 		super.configureActionBar();
 
 		setActivityTitle(getString(R.string.about_title));
-		if (mActionBar != null) {
-			mActionBar.setSubtitle(mVersionName);
-		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -75,6 +76,20 @@ public class AboutForm extends BaseBrowse {
 	@SuppressWarnings("ucd")
 	public void onLegalButtonClick(View view) {
 		Routing.route(this, Route.LEGAL);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		if (!isFinishing()) {
+			if (mActionBar != null) {
+				mActionBar.setSubtitle(mVersionName);
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

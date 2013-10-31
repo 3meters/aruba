@@ -35,8 +35,6 @@ public class User extends Entity {
 	@Expose
 	public Boolean				developer;
 	@Expose
-	public Boolean				doNotTrack;
-	@Expose
 	public String				password;
 
 	@Expose(serialize = false, deserialize = true)
@@ -104,7 +102,6 @@ public class User extends Entity {
 			entity.bio = (String) map.get("bio");
 			entity.webUri = (String) map.get("webUri");
 			entity.developer = (Boolean) map.get("developer");
-			entity.doNotTrack = (Boolean) map.get("doNotTrack");
 			entity.password = (String) map.get("password");
 			entity.authSource = (String) map.get("authSource");
 			entity.lastSignedInDate = (Number) map.get("lastSignedInDate");

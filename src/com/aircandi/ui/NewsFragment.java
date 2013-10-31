@@ -29,8 +29,8 @@ import com.aircandi.applications.Comments;
 import com.aircandi.components.DatabaseHelper;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
-import com.aircandi.components.NotificationManager;
-import com.aircandi.components.NotificationManager.Tag;
+import com.aircandi.components.MessagingManager;
+import com.aircandi.components.MessagingManager.Tag;
 import com.aircandi.components.NotificationTable;
 import com.aircandi.components.NotificationsContentProvider;
 import com.aircandi.service.objects.AirNotification;
@@ -112,7 +112,7 @@ public class NewsFragment extends BaseFragment implements LoaderManager.LoaderCa
 
 			@Override
 			public void run() {
-				NotificationManager.getInstance().setNewCount(0);
+				MessagingManager.getInstance().setNewCount(0);
 				if (mAdapter == null) {
 					mAdapter = new ListAdapter(getSherlockActivity(), null, false);
 					getSherlockActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, NewsFragment.this);
@@ -170,8 +170,8 @@ public class NewsFragment extends BaseFragment implements LoaderManager.LoaderCa
 
 		/* Clear notifications from status bar because user is viewing them */
 
-		NotificationManager.getInstance().cancelNotification(Tag.INSERT);
-		NotificationManager.getInstance().cancelNotification(Tag.UPDATE);
+		MessagingManager.getInstance().cancelNotification(Tag.INSERT);
+		MessagingManager.getInstance().cancelNotification(Tag.UPDATE);
 
 		hideBusy();
 	}
