@@ -237,7 +237,8 @@ public abstract class BaseEntityListEdit extends BaseEdit implements ListDelegat
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-
+		super.onActivityResult(requestCode, resultCode, intent);
+		
 		if (resultCode != Activity.RESULT_CANCELED) {
 			if (requestCode == Constants.ACTIVITY_ENTITY_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
@@ -278,7 +279,6 @@ public abstract class BaseEntityListEdit extends BaseEdit implements ListDelegat
 				}
 			}
 		}
-		super.onActivityResult(requestCode, resultCode, intent);		
 	}
 
 	// --------------------------------------------------------------------------------------------

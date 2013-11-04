@@ -75,6 +75,7 @@ public final class Constants {
 	/* Ui */
 	public static final int		MAX_Y_OVERSCROLL_DISTANCE					= 50;
 	public static final float	DIALOGS_DIM_AMOUNT							= 0.5f;
+	public static final float	POPUP_DIM_AMOUNT							= 0.0f;
 	public static final int		INTERVAL_FAKE_BUSY							= 1000;
 
 	public static final int		TABS_PRIMARY_ID								= 1;

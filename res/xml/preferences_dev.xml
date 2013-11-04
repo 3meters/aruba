@@ -4,7 +4,7 @@
 
     <PreferenceCategory
         android:id="@+id/Pref_Category_Dev"
-        android:title="Development preferences" >
+        android:title="@string/pref_category_title_development" >
         <CheckBoxPreference
             android:id="@+id/Pref_Enable_Dev"
             android:defaultValue="false"

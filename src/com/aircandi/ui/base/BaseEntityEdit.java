@@ -33,6 +33,7 @@ import com.aircandi.R;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.EntityManager;
+import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -182,8 +183,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (!mEditing && mEntity == null && mEntitySchema != null) {
 			mEntity = Entity.makeEntity(mEntitySchema);
 			setActivityTitle("new " + mEntity.getSchemaMapped());
-			mEntity.creator = Aircandi.getInstance().getCurrentUser();
-			mEntity.creatorId = Aircandi.getInstance().getCurrentUser().id;
+			if (Aircandi.getInstance().getCurrentUser() != null) {
+				mEntity.creator = Aircandi.getInstance().getCurrentUser();
+				mEntity.creatorId = Aircandi.getInstance().getCurrentUser().id;
+			}
 		}
 	}
 
@@ -349,14 +352,15 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		if (isDirty()) {
 			if (validate()) {
 
-				/* 
+				/*
 				 * Pull all the control values back into the entity object. Validate
-				 * does that too but we don't know if validate is always being performed. 
+				 * does that too but we don't know if validate is always being performed.
 				 */
 				gather();
 
 				if (mSkipSave) {
-					setResultCode(Activity.RESULT_OK);
+					final IntentBuilder intentBuilder = new IntentBuilder().setEntity(mEntity);
+					setResultCode(Constants.RESULT_ENTITY_EDITED, intentBuilder.create());
 					finish();
 					Animate.doOverridePendingTransition(this, TransitionType.FORM_TO_PAGE);
 				}
@@ -502,12 +506,12 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				Aircandi.tracker.sendEvent(TrackerCategory.UX, "photo_select_using_search", null, 0);
 				if (intent != null && intent.getExtras() != null) {
-					
+
 					final Bundle extras = intent.getExtras();
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
 					final Photo photo = (Photo) Json.jsonToObject(jsonPhoto, Json.ObjectType.PHOTO);
 					photo.setBitmapLocalOnly(true);
-					photo.photoBroken = Entity.getBrokenPhoto(); 
+					photo.photoBroken = Entity.getBrokenPhoto();
 
 					if (mImageRequestWebImageView.getPhoto() == null || !mImageRequestWebImageView.getPhoto().getUri().equals(photo.getUri())) {
 						UI.drawPhoto(mImageRequestWebImageView, photo, mImageRequestListener);
@@ -523,7 +527,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 					final String jsonPhoto = extras.getString(Constants.EXTRA_PHOTO);
 					final Photo photo = (Photo) Json.jsonToObject(jsonPhoto, Json.ObjectType.PHOTO);
 					photo.setBitmapLocalOnly(true);
-					photo.photoBroken = Entity.getBrokenPhoto(); 
+					photo.photoBroken = Entity.getBrokenPhoto();
 
 					if (mImageRequestWebImageView.getPhoto() == null || !mImageRequestWebImageView.getPhoto().getUri().equals(photo.getUri())) {
 						UI.drawPhoto(mImageRequestWebImageView, photo, mImageRequestListener);
@@ -558,14 +562,14 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	};
 
 	protected void gather() {
-		if (findViewById(R.id.name) != null) {
-			mEntity.name = Type.emptyAsNull(((TextView) findViewById(R.id.name)).getText().toString().trim());
+		if (mName != null) {
+			mEntity.name = Type.emptyAsNull(mName.getText().toString().trim());
 		}
-		if (findViewById(R.id.description) != null) {
-			mEntity.description = Type.emptyAsNull(((TextView) findViewById(R.id.description)).getText().toString().trim());
+		if (mDescription != null) {
+			mEntity.description = Type.emptyAsNull(mDescription.getText().toString().trim());
 		}
-		if (findViewById(R.id.chk_locked) != null) {
-			mEntity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
+		if (mLocked != null) {
+			mEntity.locked = mLocked.isChecked();
 		}
 
 		/* Might need to rebuild photo because it requires current property values */
@@ -857,10 +861,10 @@ public abstract class BaseEntityEdit extends BaseEdit {
 								Aircandi.settingsEditor.putString(Constants.SETTING_USER, jsonUser);
 								Aircandi.settingsEditor.commit();
 
-								/* 
+								/*
 								 * Update the global user but retain the session info. We don't need
 								 * to call activateCurrentUser because we don't need to refetch link data
-								 * or change notification registration. 
+								 * or change notification registration.
 								 */
 								((User) mEntity).session = Aircandi.getInstance().getCurrentUser().session;
 								Aircandi.getInstance().setCurrentUser((User) mEntity);

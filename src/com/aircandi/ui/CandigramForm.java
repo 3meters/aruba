@@ -42,6 +42,7 @@ import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.CandiView;
+import com.aircandi.ui.widgets.CandiView.IndicatorOptions;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
@@ -114,7 +115,7 @@ public class CandigramForm extends BaseEntityForm {
 			/*
 			 * This is a place entity with a fancy image widget
 			 */
-			candiView.databind((Place) mEntity);
+			candiView.databind((Place) mEntity, new IndicatorOptions());
 		}
 		else {
 			UI.setVisibility(photoView, View.GONE);

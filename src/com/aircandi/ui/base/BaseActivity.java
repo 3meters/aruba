@@ -1,7 +1,6 @@
 package com.aircandi.ui.base;
 
 import java.lang.reflect.Field;
-import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -493,13 +492,6 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 		if (!isFinishing()) {
 			Logger.d(this, "Activity starting");
 			Aircandi.tracker.activityStart(this);
-
-			/* Show current user */
-			if (mActionBar != null
-					&& Aircandi.getInstance().getCurrentUser() != null
-					&& Aircandi.getInstance().getCurrentUser().name != null) {
-				mActionBar.setSubtitle(Aircandi.getInstance().getCurrentUser().name.toUpperCase(Locale.US));
-			}
 
 			if (mPrefChangeReloadNeeded) {
 				final Intent intent = getIntent();

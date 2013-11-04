@@ -17,10 +17,12 @@ import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.Animate.TransitionType;
 
 public class Pictures {
-	public static int ICON_COLOR = R.color.accent_green_dark;
+	public static int	ICON_COLOR	= R.color.accent_green_dark;
 
-	public static void view(Context context, String entityId, String parentId) {
+	public static void view(Context context, String entityId, String linkType, String parentId) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, PictureForm.class)
+				.setListLinkType(linkType)
+				.setListLinkSchema(Constants.SCHEMA_ENTITY_PICTURE)
 				.setEntityId(entityId)
 				.setEntityParentId(parentId);
 		context.startActivity(intentBuilder.create());

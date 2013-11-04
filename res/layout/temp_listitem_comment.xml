@@ -82,6 +82,20 @@
             android:textColor="?attr/textColorSecondary" />
     </LinearLayout>
 
+    <com.aircandi.ui.widgets.ComboButton
+        android:id="@+id/button_overflow"
+        style="@style/form_button_link"
+        android:layout_width="@dimen/form_button_height"
+        android:layout_height="@dimen/form_button_height"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="5dp"
+        android:layout_weight="0"
+        aircandi:drawable="?attr/iconOverflow"
+        aircandi:layout="@layout/widget_combo_button_no_text"
+        android:minWidth="@dimen/form_button_height"
+        android:onClick="onOverflowButtonClick" />
+
     <LinearLayout
         android:id="@+id/place_holder"
         android:layout_width="match_parent"
@@ -121,8 +135,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:lineSpacingExtra="-1dp"
                 android:gravity="top"
+                android:lineSpacingExtra="-1dp"
                 android:maxLines="2"
                 android:text="@string/dummy_title"
                 android:textAppearance="@style/textAppearanceSmall" />

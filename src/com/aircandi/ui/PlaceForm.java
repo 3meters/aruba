@@ -39,6 +39,7 @@ import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.CandiView;
+import com.aircandi.ui.widgets.CandiView.IndicatorOptions;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Errors;
@@ -244,7 +245,13 @@ public class PlaceForm extends BaseEntityForm {
 			/*
 			 * This is a place entity with a fancy image widget
 			 */
-			candiView.databind((Place) mEntity);
+			IndicatorOptions options = new IndicatorOptions();
+			options.candigramsEnabled = false;
+			options.picturesEnabled = false;
+			options.commentsEnabled = false;
+			options.showIfZero = true;
+			options.imageSizePixels = 15;
+			candiView.databind((Place) mEntity, options);
 		}
 		else {
 			UI.setVisibility(photoView, View.GONE);
@@ -282,12 +289,6 @@ public class PlaceForm extends BaseEntityForm {
 			description.setText(Html.fromHtml(mEntity.description));
 			UI.setVisibility(findViewById(R.id.section_description), View.VISIBLE);
 		}
-
-		/* Stats */
-
-		drawStats();
-
-		/* Shortcuts */
 
 		/* Clear shortcut holder */
 		((ViewGroup) findViewById(R.id.shortcut_holder)).removeAllViews();
@@ -398,15 +399,15 @@ public class PlaceForm extends BaseEntityForm {
 	@Override
 	protected void drawStats() {
 
+		final CandiView candiView = (CandiView) findViewById(R.id.candi_view);
+
 		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, false, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_PLACE, 0);
-		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
-		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
+		candiView.updateIndicator(R.id.holder_indicator_likes, String.valueOf(count.count.intValue()));
 
 		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, false, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE, 0);
-		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
-		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
+		candiView.updateIndicator(R.id.holder_indicator_watching, String.valueOf(count.count.intValue()));
 	}
 
 	@Override

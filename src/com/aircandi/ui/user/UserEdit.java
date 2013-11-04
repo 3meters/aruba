@@ -124,6 +124,7 @@ public class UserEdit extends BaseEntityEdit {
 		mTabManager.doSaveInstanceState(savedInstanceState);
 	}
 
+
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
@@ -138,7 +139,7 @@ public class UserEdit extends BaseEntityEdit {
 		super.gather();
 
 		User user = (User) mEntity;
-		user.email = Type.emptyAsNull(mEmail.getText().toString().trim());;
+		user.email = Type.emptyAsNull(mEmail.getText().toString().trim());
 		user.bio = Type.emptyAsNull(mBio.getText().toString().trim());
 		user.area = Type.emptyAsNull(mArea.getText().toString().trim());
 		user.webUri = Type.emptyAsNull(mWebUri.getText().toString().trim());

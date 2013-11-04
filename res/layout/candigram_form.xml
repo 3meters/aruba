@@ -28,7 +28,7 @@
             <!-- Main body -->
 
             <LinearLayout
-                android:id="@+id/body_holder"
+                android:id="@+id/holder_body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -178,11 +178,11 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/authoring_holder"
+                android:id="@+id/holder_authoring"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_below="@+id/body_holder"
+                android:layout_below="@+id/holder_body"
                 android:baselineAligned="false"
                 android:gravity="bottom"
                 android:orientation="horizontal" >

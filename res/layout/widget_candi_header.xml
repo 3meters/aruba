@@ -60,8 +60,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:layout_marginLeft="5dp"
-        android:layout_weight="1"
         android:orientation="vertical" >
 
         <com.aircandi.ui.widgets.AirTextView
@@ -87,13 +87,26 @@
             android:visibility="gone" />
     </LinearLayout>
 
+    <com.aircandi.ui.widgets.ComboButton
+        android:id="@+id/button_overflow"
+        style="@style/form_button"
+        android:layout_width="@dimen/form_button_height"
+        android:layout_height="@dimen/form_button_height"
+        android:layout_weight="0"
+        aircandi:drawable="?attr/iconOverflow"
+        aircandi:layout="@layout/widget_combo_button_no_text"
+        android:minWidth="@dimen/form_button_height"
+        android:onClick="onOverflowButtonClick" />
+
     <com.aircandi.ui.widgets.AirTextView
         android:id="@+id/action_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dp"
+        android:layout_weight="1"
+        android:gravity="bottom"
         android:text="@string/dummy_candigram_action"
         android:textColor="?attr/textColorButtonLink"
-        android:visibility="gone" />
+        android:visibility="invisible" />
 
 </LinearLayout>

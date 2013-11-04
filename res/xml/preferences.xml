@@ -3,7 +3,7 @@
 
     <PreferenceCategory
         android:key="Pref_General_Category"
-        android:title="@string/pref_general_category_title" >
+        android:title="@string/pref_category_title_general" >
         <ListPreference
             android:id="@+id/Pref_Search_Radius"
             android:defaultValue="457"
@@ -24,6 +24,17 @@
             android:negativeButtonText="@string/pref_dialog_cancel"
             android:positiveButtonText="@string/pref_dialog_ok"
             android:title="@string/pref_theme_title" />
+        <ListPreference
+            android:id="@+id/Pref_Place_Provider"
+            android:defaultValue="foursquare"
+            android:dialogTitle="@string/pref_place_provider_dialog_title"
+            android:entries="@array/place_provider_entries"
+            android:entryValues="@array/place_provider_values"
+            android:key="Pref_Place_Provider"
+            android:negativeButtonText="@string/pref_dialog_cancel"
+            android:positiveButtonText="@string/pref_dialog_ok"
+            android:summary="@string/pref_place_provider_summary"
+            android:title="@string/pref_place_provider_title" />
 
         <PreferenceScreen
             android:key="Pref_Notifications_Screen"
@@ -72,21 +83,13 @@
                 android:title="@string/pref_sound_effects_title" />
         </PreferenceScreen>
 
-        <ListPreference
-            android:id="@+id/Pref_Place_Provider"
-            android:defaultValue="foursquare"
-            android:dialogTitle="@string/pref_place_provider_dialog_title"
-            android:entries="@array/place_provider_entries"
-            android:entryValues="@array/place_provider_values"
-            android:key="Pref_Place_Provider"
-            android:negativeButtonText="@string/pref_dialog_cancel"
-            android:positiveButtonText="@string/pref_dialog_ok"
-            android:summary="@string/pref_place_provider_summary"
-            android:title="@string/pref_place_provider_title" />
-
         <Preference
             android:key="Pref_Feedback"
             android:title="Feedback" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="Pref_About_Category"
+        android:title="@string/pref_category_title_about" >
         <Preference
             android:key="Pref_About"
             android:title="About" />

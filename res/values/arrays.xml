@@ -185,4 +185,20 @@
 		<item>The candigram will be retired in two weeks</item>
     </string-array>
     
+    <!-- Context menu items: default -->
+
+    <string-array name="more_options_entity">
+        <item>Report a problem</item>
+    </string-array>
+    
+    <string-array name="more_options_place">
+        <item>Tune to your location</item>
+        <item>Report a problem</item>
+    </string-array>
+    
+    <string-array name="more_options_user">
+        <item>Block</item>
+        <item>Report a problem</item>
+    </string-array>
+    
 </resources>

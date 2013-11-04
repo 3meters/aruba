@@ -80,7 +80,7 @@ public class CandiView extends RelativeLayout {
 		mInfoHolder = (LinearLayout) mLayout.findViewById(R.id.info_holder);
 	}
 
-	public void databind(Entity entity) {
+	public void databind(Entity entity, IndicatorOptions options) {
 		synchronized (entity) {
 			/*
 			 * If it is the same entity and it hasn't changed then nothing to do
@@ -89,6 +89,9 @@ public class CandiView extends RelativeLayout {
 				if (mEntity != null && entity.id.equals(mEntity.id) && mCacheStamp.equals(entity.getCacheStamp())) {
 					mEntity = entity;
 					showDistance(entity);
+					if (options.forceUpdate) {
+						showIndicators(entity, options);
+					}
 					return;
 				}
 			}
@@ -96,6 +99,9 @@ public class CandiView extends RelativeLayout {
 				if (mEntity != null && entity.id != null && mEntity.id != null && entity.id.equals(mEntity.id)) {
 					mEntity = entity;
 					showDistance(entity);
+					if (options.forceUpdate) {
+						showIndicators(entity, options);
+					}
 					return;
 				}
 			}
@@ -151,73 +157,24 @@ public class CandiView extends RelativeLayout {
 			setVisibility(mCategoryPhoto, View.GONE);
 			if (mCategoryPhoto != null) {
 				if (category != null) {
-					mCategoryPhoto.setSizeHint(UI.getRawPixelsForDisplayPixels(this.getContext(), 50));
 					Photo photo = category.photo.clone();
-					photo.colorize = false;
-					UI.drawPhoto(mCategoryPhoto, photo);
+					if (!UI.photosEqual(mCategoryPhoto.getPhoto(), photo)) {
+						photo.colorize = false;
+						mCategoryPhoto.setSizeHint(UI.getRawPixelsForDisplayPixels(this.getContext(), 50));
+						UI.drawPhoto(mCategoryPhoto, photo);
+					}
 					mCategoryPhoto.setVisibility(View.VISIBLE);
 				}
 			}
 
-			/* Links */
+			/* Indicators */
 
-			setVisibility(mShortcuts, View.GONE);
-			if (mShortcuts != null && !entity.synthetic) {
-
-				mShortcuts.removeAllViews();
-				final int sizePixels = UI.getRawPixelsForDisplayPixels(this.getContext(), 20);
-				final int marginPixels = UI.getRawPixelsForDisplayPixels(this.getContext(), 3);
-
-				/* Post indicator always goes first */
-				Count count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, false, Direction.in);
-				if (count != null && count.count.intValue() > 0) {
-					addApplinkIndicator("resource:ic_candigrams_dark", null, sizePixels, marginPixels);
-				}
-
-				count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, false, Direction.in);
-				if (count != null && count.count.intValue() > 0) {
-					addApplinkIndicator("resource:ic_pictures_dark", null, sizePixels, marginPixels);
-				}
-
-				count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, Direction.in);
-				if (count != null && count.count.intValue() > 0) {
-					addApplinkIndicator("resource:ic_comments_dark", null, sizePixels, marginPixels);
-				}
-
-				count = entity.getCount(Constants.TYPE_LINK_LIKE, null, false, Direction.in);
-				if (count != null && count.count.intValue() > 0) {
-					addApplinkIndicator("resource:ic_like_holo_dark", String.valueOf(count.count.intValue()), sizePixels, marginPixels);
-				}
-
-				count = entity.getCount(Constants.TYPE_LINK_WATCH, null, false, Direction.in);
-				if (count != null && count.count.intValue() > 0) {
-					addApplinkIndicator("resource:ic_watched_holo_dark", String.valueOf(count.count.intValue()), sizePixels, marginPixels);
-				}
-				setVisibility(mShortcuts, View.VISIBLE);
-			}
+			showIndicators(entity, options);
 
 			/* Distance */
+
 			showDistance(entity);
 		}
-	}
-
-	private void addApplinkIndicator(String photoUri, String name, Integer sizePixels, Integer marginPixels) {
-
-		View view = LayoutInflater.from(this.getContext()).inflate(R.layout.temp_radar_link_item, null);
-		AirImageView photoView = (AirImageView) view.findViewById(R.id.photo);
-		TextView label = (TextView) view.findViewById(R.id.name);
-
-		label.setVisibility(View.GONE);
-		if (name != null) {
-			label.setText(name);
-			label.setVisibility(View.VISIBLE);
-		}
-
-		photoView.setSizeHint(sizePixels);
-		Photo photo = new Photo(photoUri, null, null, null, PhotoSource.resource);
-		UI.drawPhoto(photoView, photo);
-
-		mShortcuts.addView(view);
 	}
 
 	private void drawPhoto() {
@@ -238,6 +195,93 @@ public class CandiView extends RelativeLayout {
 				UI.drawPhoto(mPhotoView, photo);
 			}
 		}
+	}
+
+	public void showIndicators(Entity entity, IndicatorOptions options) {
+
+		/* Indicators */
+		setVisibility(mShortcuts, View.GONE);
+		if (mShortcuts != null && !entity.synthetic) {
+
+			mShortcuts.removeAllViews();
+			final int sizePixels = UI.getRawPixelsForDisplayPixels(this.getContext(), options.imageSizePixels);
+
+			/* Post indicator always goes first */
+			if (options.candigramsEnabled) {
+				Count count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, false, Direction.in);
+				if (count != null && (count.count.intValue() > 0 || options.showIfZero)) {
+					addIndicator(R.id.holder_indicator_candigrams, "resource:ic_candigrams_dark", null, sizePixels);
+				}
+			}
+
+			if (options.picturesEnabled) {
+				Count count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, false, Direction.in);
+				if (count != null && (count.count.intValue() > 0 || options.showIfZero)) {
+					addIndicator(R.id.holder_indicator_pictures, "resource:ic_pictures_dark", null, sizePixels);
+				}
+			}
+
+			if (options.commentsEnabled) {
+				Count count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, Direction.in);
+				if (count != null && (count.count.intValue() > 0 || options.showIfZero)) {
+					addIndicator(R.id.holder_indicator_comments, "resource:ic_comments_dark", null, sizePixels);
+				}
+			}
+
+			if (options.likesEnabled) {
+				Count count = entity.getCount(Constants.TYPE_LINK_LIKE, null, false, Direction.in);
+				if (count != null && (count.count.intValue() > 0 || options.showIfZero)) {
+					addIndicator(R.id.holder_indicator_likes, "resource:ic_like_holo_dark", String.valueOf(count.count.intValue()), sizePixels);
+				}
+			}
+
+			if (options.watchingEnabled) {
+				Count count = entity.getCount(Constants.TYPE_LINK_WATCH, null, false, Direction.in);
+				if (count != null && (count.count.intValue() > 0 || options.showIfZero)) {
+					addIndicator(R.id.holder_indicator_watching, "resource:ic_watched_holo_dark", String.valueOf(count.count.intValue()), sizePixels);
+				}
+			}
+			setVisibility(mShortcuts, View.VISIBLE);
+		}
+	}
+
+	private void addIndicator(Integer id, String photoUri, String name, Integer sizePixels) {
+
+		View view = LayoutInflater.from(this.getContext()).inflate(R.layout.temp_radar_link_item, null);
+		view.setId(id);
+		AirImageView photoView = (AirImageView) view.findViewById(R.id.photo);
+		TextView label = (TextView) view.findViewById(R.id.name);
+
+		label.setVisibility(View.GONE);
+		if (name != null) {
+			label.setText(name);
+			label.setVisibility(View.VISIBLE);
+		}
+
+		photoView.setSizeHint(sizePixels);
+		Photo photo = new Photo(photoUri, null, null, null, PhotoSource.resource);
+		UI.drawPhoto(photoView, photo);
+
+		mShortcuts.addView(view);
+	}
+
+	public void updateIndicator(Integer id, String value) {
+
+		View view = findViewById(id);
+		AirImageView photoView = (AirImageView) view.findViewById(R.id.photo);
+		TextView label = (TextView) view.findViewById(R.id.name);
+
+		if (!label.getText().equals(value)) {
+
+			label.setVisibility(View.GONE);
+			if (value != null) {
+				label.setText(value);
+				label.setVisibility(View.VISIBLE);
+			}
+
+			UI.drawPhoto(photoView, photoView.getPhoto());
+		}
+
 	}
 
 	public void showDistance(Entity entity) {
@@ -326,5 +370,20 @@ public class CandiView extends RelativeLayout {
 
 	public void setTextGroup(LinearLayout textGroup) {
 		mInfoHolder = textGroup;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Classes
+	// --------------------------------------------------------------------------------------------
+
+	public static class IndicatorOptions {
+		public int		imageSizePixels		= 20;
+		public boolean	showIfZero			= false;
+		public boolean	forceUpdate			= false;
+		public boolean	picturesEnabled		= true;
+		public boolean	candigramsEnabled	= true;
+		public boolean	commentsEnabled		= true;
+		public boolean	likesEnabled		= true;
+		public boolean	watchingEnabled		= true;
 	}
 }

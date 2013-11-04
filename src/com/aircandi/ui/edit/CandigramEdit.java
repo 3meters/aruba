@@ -384,7 +384,7 @@ public class CandigramEdit extends BaseEntityEdit {
 			/* Hide controls that don't make sense when in wizard mode */
 			findViewById(R.id.type_holder).setVisibility(View.GONE);
 			findViewById(R.id.type).setVisibility(View.GONE);
-			findViewById(R.id.authoring_holder).setVisibility(View.GONE);
+			findViewById(R.id.holder_authoring).setVisibility(View.GONE);
 			findViewById(R.id.stopped_holder).setVisibility(View.GONE);
 
 			/* Go to first page of wizard */

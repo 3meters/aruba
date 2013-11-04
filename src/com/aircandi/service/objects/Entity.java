@@ -519,6 +519,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 							 */
 							Shortcut shortcut = link.shortcut.clone();
 							shortcut.inactive = link.inactive;
+							shortcut.linkType = settings.linkType;
 							shortcuts.add(shortcut);
 						}
 					}

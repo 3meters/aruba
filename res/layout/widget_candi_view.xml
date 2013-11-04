@@ -59,6 +59,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_marginBottom="5dp"
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="1"
@@ -66,6 +67,14 @@
                 android:textAppearance="?attr/textAppearanceExtraSmall"
                 android:textColor="?attr/textColorCandiView"
                 android:textSize="14sp" />
+
+            <LinearLayout
+                android:id="@+id/shortcuts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:orientation="horizontal"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 

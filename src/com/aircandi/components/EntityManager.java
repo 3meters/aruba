@@ -1174,7 +1174,6 @@ public class EntityManager {
 
 		/* Construct entity, link, and observation */
 		final Bundle parameters = new Bundle();
-		parameters.putString("method", "range");
 		if (toId != null) {
 			parameters.putString("toId", toId);
 		}
@@ -1295,6 +1294,34 @@ public class EntityManager {
 		return result;
 	}
 
+	public ModelResult insertReport(Document report) {
+
+		/* Pre-fetch an id so a failed request can be retried */
+		ModelResult result = getDocumentId(Document.collectionId);
+		report.id = (String) result.serviceResponse.data;
+
+		final Bundle parameters = new Bundle();
+		parameters.putString("report", "object:" + Json.objectToJson(report, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "insertReport")
+				.setRequestType(RequestType.METHOD)
+				.setParameters(parameters)
+				.setResponseFormat(ResponseFormat.JSON);
+
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+		}
+
+		result.serviceResponse = dispatch(serviceRequest);
+
+		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+			Aircandi.tracker.sendEvent(TrackerCategory.USER, report.type + "_insert", report.type, 0);
+		}
+
+		return result;
+	}
+	
 	public ModelResult sendInvite(List<String> emails, String invitor, String message) {
 
 		ModelResult result = new ModelResult();

@@ -26,6 +26,7 @@
         <attr name="textColorCandiViewSynthetic" format="color|reference" />
         <attr name="textOutlineRadar" format="boolean" />
         <attr name="backgroundButton" format="color|reference" />
+        <attr name="backgroundButtonLink" format="color|reference" />
         <attr name="backgroundBalloon" format="color|reference" />
         <attr name="backgroundHelp" format="color|reference" />
         <attr name="backgroundCandi" format="color|reference" />
@@ -73,6 +74,9 @@
 		<attr name="iconHelp" format="reference" />
 		<attr name="iconLike" format="reference" />
 		<attr name="iconWatch" format="reference" />
+		<attr name="iconOverflow" format="reference" />
+		<attr name="iconZoomIn" format="reference" />
+		<attr name="iconZoomOut" format="reference" />
 	</declare-styleable>
     <declare-styleable name="CandiView">
         <attr name="layout" />

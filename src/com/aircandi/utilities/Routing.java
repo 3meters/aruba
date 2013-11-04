@@ -48,6 +48,7 @@ import com.aircandi.ui.edit.ApplinkListEdit;
 import com.aircandi.ui.edit.CommentEdit;
 import com.aircandi.ui.edit.FeedbackEdit;
 import com.aircandi.ui.edit.InviteEdit;
+import com.aircandi.ui.edit.ReportEdit;
 import com.aircandi.ui.edit.TuningEdit;
 import com.aircandi.ui.helpers.AddressBuilder;
 import com.aircandi.ui.helpers.ApplicationPicker;
@@ -56,6 +57,7 @@ import com.aircandi.ui.helpers.PhotoPicker;
 import com.aircandi.ui.helpers.PhotoSourcePicker;
 import com.aircandi.ui.helpers.ShortcutPicker;
 import com.aircandi.ui.user.PasswordEdit;
+import com.aircandi.ui.user.ProfileForm;
 import com.aircandi.ui.user.RegisterEdit;
 import com.aircandi.ui.user.SignInEdit;
 import com.aircandi.ui.user.UserForm;
@@ -231,12 +233,22 @@ public final class Routing {
 			return true;
 		}
 
+		else if (route == Route.REPORT) {
+
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, ReportEdit.class)
+					.setEntity(entity)
+					.setEntitySchema(schema);
+			activity.startActivity(intentBuilder.create());
+			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
+			return true;
+		}
+
 		else if (route == Route.INVITE) {
-			
+
 			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 				Dialogs.signin(activity, R.string.alert_signin_message_invite);
 				return true;
-			}						
+			}
 
 			final IntentBuilder intentBuilder = new IntentBuilder(activity, InviteEdit.class);
 			activity.startActivity(intentBuilder.create());
@@ -251,7 +263,7 @@ public final class Routing {
 			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
-		
+
 		else if (route == Route.BROWSE) {
 
 			if (entity == null) {
@@ -277,66 +289,66 @@ public final class Routing {
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
 			}
-			
+
 			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 				Integer messageResId = R.string.alert_signin_message;
 				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-					messageResId = R.string.alert_signin_message_place_edit;					
+					messageResId = R.string.alert_signin_message_place_edit;
 				}
 				else if (entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
-					messageResId = R.string.alert_signin_message_candigram_edit;					
+					messageResId = R.string.alert_signin_message_candigram_edit;
 				}
 				else if (entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-					messageResId = R.string.alert_signin_message_picture_edit;					
+					messageResId = R.string.alert_signin_message_picture_edit;
 				}
 				Dialogs.signin(activity, messageResId);
 				return true;
-			}			
-			
+			}
+
 			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.editFormBySchema(entity.schema))
 					.setEntity(entity)
 					.setExtras(extras);
-			
+
 			Intent intent = intentBuilder.create();
-			
-//			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
-//				PendingIntent pendingIntent = PendingIntent.getActivity(activity, Constants.ACTIVITY_ENTITY_EDIT, intent, PendingIntent.FLAG_ONE_SHOT);
-//				Intent signin = new Intent(activity, SignInEdit.class).putExtra("pendingIntent", pendingIntent);
-//				activity.startActivityForResult(signin, Constants.ACTIVITY_ENTITY_EDIT);
-//				Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
-//				return true;
-//			}
-			
+
+			//			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			//				PendingIntent pendingIntent = PendingIntent.getActivity(activity, Constants.ACTIVITY_ENTITY_EDIT, intent, PendingIntent.FLAG_ONE_SHOT);
+			//				Intent signin = new Intent(activity, SignInEdit.class).putExtra("pendingIntent", pendingIntent);
+			//				activity.startActivityForResult(signin, Constants.ACTIVITY_ENTITY_EDIT);
+			//				Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
+			//				return true;
+			//			}
+
 			activity.startActivityForResult(intent, Constants.ACTIVITY_ENTITY_EDIT);
 			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
 			return true;
 		}
 
 		else if (route == Route.ADD) {
-			
+
 			((BaseBrowse) activity).onAdd();
 			return true;
 		}
 
 		else if (route == Route.NEW) {
-			
+
 			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 				Integer messageResId = R.string.alert_signin_message;
 				if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-					messageResId = R.string.alert_signin_message_place_add;					
+					messageResId = R.string.alert_signin_message_place_add;
 				}
 				else if (schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
-					messageResId = R.string.alert_signin_message_candigram_add;					
+					messageResId = R.string.alert_signin_message_candigram_add;
 				}
 				else if (schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-					messageResId = R.string.alert_signin_message_picture_add;					
+					messageResId = R.string.alert_signin_message_picture_add;
 				}
 				else if (schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-					messageResId = R.string.alert_signin_message_comment_add;					
+					messageResId = R.string.alert_signin_message_comment_add;
 				}
 				Dialogs.signin(activity, messageResId);
 				return true;
-			}			
+			}
 
 			IntentBuilder intentBuilder = new IntentBuilder(activity, BaseEntityEdit.insertFormBySchema(schema))
 					.setEntitySchema(schema)
@@ -351,18 +363,18 @@ public final class Routing {
 			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 				Integer messageResId = R.string.alert_signin_message;
 				if (entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-					messageResId = R.string.alert_signin_message_place_add_to;					
+					messageResId = R.string.alert_signin_message_place_add_to;
 				}
 				else if (entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
-					messageResId = R.string.alert_signin_message_candigram_add_to;					
+					messageResId = R.string.alert_signin_message_candigram_add_to;
 				}
 				else if (entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-					messageResId = R.string.alert_signin_message_picture_add_to;					
+					messageResId = R.string.alert_signin_message_picture_add_to;
 				}
 				Dialogs.signin(activity, messageResId);
 				return true;
 			}
-			
+
 			IntentBuilder intentBuilder = new IntentBuilder(activity, ApplicationPicker.class).setEntity(entity);
 			activity.startActivityForResult(intentBuilder.create(), Constants.ACTIVITY_APPLICATION_PICK);
 			Animate.doOverridePendingTransition(activity, TransitionType.PAGE_TO_FORM);
@@ -388,12 +400,12 @@ public final class Routing {
 				Dialogs.signin(activity, null);
 				return true;
 			}
-			
+
 			entity = Aircandi.getInstance().getCurrentUser();
 			if (entity == null) {
 				throw new IllegalArgumentException("valid user entity required for selected route");
 			}
-			final IntentBuilder intentBuilder = new IntentBuilder(activity, UserForm.class)
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, ProfileForm.class)
 					.setEntityId(entity.id);
 
 			activity.startActivity(intentBuilder.create());
@@ -414,7 +426,14 @@ public final class Routing {
 			photo.setUser(entity.creator);
 			final String jsonPhoto = Json.objectToJson(photo);
 
-			intent = new Intent(activity, PhotoForm.class);
+			final IntentBuilder intentBuilder = new IntentBuilder(activity, PhotoForm.class)
+					.setExtras(extras);
+
+			if (entity.toId != null) {
+				intentBuilder.setEntityParentId(entity.toId);
+			}
+
+			intent = intentBuilder.create();
 			intent.putExtra(Constants.EXTRA_PHOTO, jsonPhoto);
 
 			activity.startActivity(intent);
@@ -423,11 +442,11 @@ public final class Routing {
 		}
 
 		else if (route == Route.COMMENT_NEW) {
-			
+
 			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 				Dialogs.signin(activity, null);
 				return true;
-			}						
+			}
 
 			if (entity == null) {
 				throw new IllegalArgumentException("valid entity required for selected route");
@@ -478,6 +497,18 @@ public final class Routing {
 			return true;
 		}
 
+		else if (route == Route.ZOOM_IN) {
+
+			((PhotoForm) activity).onZoomIn();
+			return true;
+		}
+		
+		else if (route == Route.ZOOM_OUT) {
+
+			((PhotoForm) activity).onZoomOut();
+			return true;
+		}
+		
 		else if (route == Route.DELETE_NOTIFICATIONS) {
 
 			return false;
@@ -485,7 +516,7 @@ public final class Routing {
 
 		else if (route == Route.CANCEL_HELP) {
 
-			((BaseActivity)activity).setResultCode(Activity.RESULT_CANCELED);
+			((BaseActivity) activity).setResultCode(Activity.RESULT_CANCELED);
 			activity.finish();
 			Animate.doOverridePendingTransition(activity, TransitionType.HELP_TO_PAGE);
 			return true;
@@ -687,18 +718,17 @@ public final class Routing {
 		if (shortcut.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
 			Aircandi.tracker.sendEvent(TrackerCategory.UX, "applink_click", shortcut.app, 0);
 
-
 			if (shortcut.app.equals(Constants.TYPE_APP_PICTURE)
 					|| shortcut.app.equals(Constants.TYPE_APP_POST)) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					Pictures.view(activity, shortcut.appId, entity.id);
+					Pictures.view(activity, shortcut.appId, shortcut.linkType, entity.id);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
 					Pictures.viewFor(activity, entity.id, shortcut.linkType, direction);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_AUTO)) {
 					if (shortcut.count == 1) {
-						Pictures.view(activity, shortcut.appId, entity.id);
+						Pictures.view(activity, shortcut.appId, shortcut.linkType, entity.id);
 					}
 					else {
 						Pictures.viewFor(activity, entity.id, shortcut.linkType, direction);
@@ -707,14 +737,14 @@ public final class Routing {
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_CANDIGRAM)) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					Candigrams.view(activity, entity.id, entity.id);
+					Candigrams.view(activity, entity.id, null, entity.id);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
 					Candigrams.viewFor(activity, entity.id, shortcut.linkType, direction);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_AUTO)) {
 					if (shortcut.count == 1) {
-						Candigrams.view(activity, shortcut.appId, entity.id);
+						Candigrams.view(activity, shortcut.appId, shortcut.linkType, entity.id);
 					}
 					else {
 						Candigrams.viewFor(activity, entity.id, shortcut.linkType, direction);
@@ -790,10 +820,10 @@ public final class Routing {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
 					if (shortcut.app.equals(Constants.TYPE_APP_PICTURE)
 							|| shortcut.app.equals(Constants.TYPE_APP_POST)) {
-						Pictures.view(activity, shortcut.getId(), entity != null ? entity.id : null);
+						Pictures.view(activity, shortcut.getId(), shortcut.linkType, entity != null ? entity.id : null);
 					}
 					else if (shortcut.app.equals(Constants.TYPE_APP_CANDIGRAM)) {
-						Candigrams.view(activity, shortcut.getId(), entity != null ? entity.id : null);
+						Candigrams.view(activity, shortcut.getId(), shortcut.linkType, entity != null ? entity.id : null);
 					}
 					else if (shortcut.app.equals(Constants.TYPE_APP_COMMENT)) {
 						Comments.view(activity, shortcut.getId());
@@ -861,6 +891,12 @@ public final class Routing {
 		else if (itemId == R.id.delete) {
 			return Route.DELETE;
 		}
+		else if (itemId == R.id.zoom_in) {
+			return Route.ZOOM_IN;
+		}
+		else if (itemId == R.id.zoom_out) {
+			return Route.ZOOM_OUT;
+		}
 		return Route.UNKNOWN;
 	}
 
@@ -882,6 +918,7 @@ public final class Routing {
 		HOME,
 		SETTINGS,
 		FEEDBACK,
+		REPORT,
 		CANCEL,
 		CANCEL_FORCE,
 		CANCEL_HELP,
@@ -913,6 +950,8 @@ public final class Routing {
 		CREATED,
 		INVITE,
 		TEST,
-		ABOUT
+		ABOUT,
+		ZOOM_IN,
+		ZOOM_OUT
 	}
 }

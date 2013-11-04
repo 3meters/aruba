@@ -15,7 +15,7 @@
         android:text="@string/dummy_address" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:orientation="horizontal" >
@@ -24,6 +24,7 @@
             android:id="@+id/button_holder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="horizontal" >
 
             <com.aircandi.ui.widgets.ComboButton
@@ -60,27 +61,16 @@
                 android:onClick="onWatchButtonClick" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <com.aircandi.ui.widgets.ComboButton
+            android:id="@+id/button_overflow"
+            style="@style/form_button"
+            android:layout_width="@dimen/form_button_height"
             android:layout_height="@dimen/form_button_height"
-            android:layout_marginLeft="8dp"
-            android:gravity="center_vertical"
-            android:orientation="vertical" >
-
-            <com.aircandi.ui.widgets.AirTextView
-                android:id="@+id/like_stats"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/dummy_like_stat"
-                android:textAppearance="@style/textAppearanceSmall" />
-
-            <com.aircandi.ui.widgets.AirTextView
-                android:id="@+id/watching_stats"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/dummy_watch_stat"
-                android:textAppearance="@style/textAppearanceSmall" />
-        </LinearLayout>
+            android:layout_weight="0"
+            aircandi:drawable="?attr/iconOverflow"
+            aircandi:layout="@layout/widget_combo_button_no_text"
+            android:minWidth="@dimen/form_button_height"
+            android:onClick="onOverflowButtonClick" />
     </LinearLayout>
 
     <com.aircandi.ui.widgets.SectionLayout

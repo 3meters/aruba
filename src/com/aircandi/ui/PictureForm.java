@@ -28,6 +28,7 @@ import com.aircandi.service.objects.ShortcutSettings;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.widgets.AirImageView;
 import com.aircandi.ui.widgets.CandiView;
+import com.aircandi.ui.widgets.CandiView.IndicatorOptions;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.Dialogs;
 import com.aircandi.utilities.Routing;
@@ -113,7 +114,7 @@ public class PictureForm extends BaseEntityForm {
 			/*
 			 * This is a place entity with a fancy image widget
 			 */
-			candiView.databind((Place) mEntity);
+			candiView.databind((Place) mEntity, new IndicatorOptions());
 		}
 		else {
 			UI.setVisibility(photoView, View.GONE);

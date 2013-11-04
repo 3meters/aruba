@@ -641,7 +641,7 @@ public class EntityCache implements Map<String, Entity> {
 		Entity entity = null;
 		while (iter.hasNext()) {
 			entity = get(iter.next());
-			if (entity.toId != null && entity.toId.equals(entityId)) {
+			if ((entity.toId != null && entity.toId.equals(entityId)) || (entity.fromId != null && entity.fromId.equals(entityId))) {
 				if (!entity.isHidden()) {
 					if (schema == null || schema.equals(Constants.SCHEMA_ANY) || entity.schema.equals(schema)) {
 						if (type == null || type.equals(Constants.TYPE_ANY) || (entity.type != null && entity.type.equals(type))) {

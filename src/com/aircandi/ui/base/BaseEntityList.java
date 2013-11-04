@@ -4,14 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
-import android.text.TextUtils.TruncateAt;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -21,6 +23,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
+import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
@@ -53,6 +57,7 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.ui.widgets.AirImageView;
+import com.aircandi.ui.widgets.ComboButton;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.DateTime.IntervalContext;
@@ -154,6 +159,7 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 
 				final Entity entity = (Entity) ((ViewHolder) v.getTag()).data;
 				final Shortcut shortcut = entity.getShortcut();
+				shortcut.linkType = mListLinkType;
 				Routing.shortcut(BaseEntityList.this, shortcut, mForEntity, null);
 			}
 		};
@@ -306,6 +312,35 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
+	public void onOverflowButtonClick(View view) {
+
+		final Entity entity = (Entity) view.getTag();
+
+		if (Constants.SUPPORTS_HONEYCOMB) {
+
+			PopupMenu popupMenu = new PopupMenu(this, view);
+			onCreatePopupMenu(popupMenu.getMenu());
+			popupMenu.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
+				@Override
+				public boolean onMenuItemClick(android.view.MenuItem item) {
+					switch (item.getItemId()) {
+						case R.id.report:
+							Routing.route(BaseEntityList.this, Route.REPORT, entity, entity.getSchemaMapped(), null);
+							return true;
+						default:
+							return false;
+					}
+				}
+			});
+			popupMenu.show();
+		}
+		else {
+			gingerbreadPopupMenu(entity);
+		}
+	}
+
+	@SuppressWarnings("ucd")
 	public void onNewEntityButtonClick(View view) {
 		onAdd();
 	}
@@ -389,8 +424,6 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 	private void lazyLoad() {
 
 		final ViewSwitcher switcher = (ViewSwitcher) mLoading.findViewById(R.id.animator_more);
-//		switcher.setInAnimation(Animate.fadeInMedium());
-//		switcher.setOutAnimation(Animate.fadeOutMedium());
 
 		new AsyncTask() {
 
@@ -462,6 +495,32 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 	// --------------------------------------------------------------------------------------------
 	// Menus
 	// --------------------------------------------------------------------------------------------
+
+	public void gingerbreadPopupMenu(final Entity entity) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this)
+				.setItems(R.array.more_options_entity, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int item) {
+						if (item == 0) {
+							Routing.route(BaseEntityList.this, Route.REPORT, entity, entity.getSchemaMapped(), null);
+						}
+					}
+				});
+		AlertDialog alert = builder.create();
+
+		/* Prevent dimming the background */
+		if (Constants.SUPPORTS_ICE_CREAM_SANDWICH) {
+			alert.getWindow().setDimAmount(Constants.POPUP_DIM_AMOUNT);
+		}
+
+		alert.show();
+	}
+
+	public boolean onCreatePopupMenu(android.view.Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu_popup_entity, menu);
+		return true;
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -571,6 +630,7 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 				holder.createdDate = (TextView) view.findViewById(R.id.created_date);
 				holder.comments = (TextView) view.findViewById(R.id.comments);
 				holder.checked = (CheckBox) view.findViewById(R.id.checked);
+				holder.overflow = (ComboButton) view.findViewById(R.id.button_overflow);
 
 				if (holder.checked != null) {
 					holder.checked.setOnClickListener(new OnClickListener() {
@@ -609,6 +669,12 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 					holder.checked.setChecked(entity.checked);
 					holder.checked.setTag(entity);
 					UI.setVisibility(holder.checked, View.VISIBLE);
+				}
+
+				UI.setVisibility(holder.overflow, View.GONE);
+				if (holder.overflow != null) {
+					holder.overflow.setTag(entity);
+					UI.setVisibility(holder.overflow, View.VISIBLE);
 				}
 
 				UI.setVisibility(holder.name, View.GONE);
@@ -661,8 +727,6 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 
 				UI.setVisibility(holder.description, View.GONE);
 				if (holder.description != null && entity.description != null && entity.description.length() > 0) {
-					holder.description.setMaxLines(5);
-					holder.description.setEllipsize(TruncateAt.END);
 					holder.description.setText(entity.description);
 					UI.setVisibility(holder.description, View.VISIBLE);
 				}
@@ -797,6 +861,7 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 		public TextView		area;
 		public TextView		createdDate;
 		public UserView		creator;
+		public ComboButton	overflow;
 		public CheckBox		checked;
 		@SuppressWarnings("ucd")
 		public int			position;

@@ -242,7 +242,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Events
+	// Methods
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -270,10 +270,6 @@ public class ApplinkEdit extends BaseEntityEdit {
 	protected String getLinkType() {
 		return Constants.TYPE_LINK_CONTENT;
 	};
-
-	// --------------------------------------------------------------------------------------------
-	// Services
-	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected boolean validate() {

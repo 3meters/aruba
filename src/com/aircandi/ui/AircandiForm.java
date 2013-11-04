@@ -249,7 +249,9 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 		}
 
 		/* Show current user */
-		if (mActionBar != null) {
+		if (mActionBar != null
+				&& Aircandi.getInstance().getCurrentUser() != null
+				&& Aircandi.getInstance().getCurrentUser().name != null) {
 			mActionBar.setSubtitle(Aircandi.getInstance().getCurrentUser().name.toUpperCase(Locale.US));
 		}
 

@@ -73,21 +73,6 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 			});
 		}
 
-		/* Listen for privacy change */
-		pref = findPreference("Pref_Browse_In_Private");
-		if (pref != null) {
-			pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
-
-				@Override
-				public boolean onPreferenceChange(Preference preference, Object newValue) {
-					/*
-					 * Update user property and push update to service
-					 */
-					return true; // we handled it
-				}
-			});
-		}
-
 		/* Listen for clear history click */
 		pref = findPreference("Pref_Button_Clear_History");
 		if (pref != null) {
@@ -106,6 +91,9 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 		/* Listen for about click */
 		pref = findPreference("Pref_About");
 		if (pref != null) {
+			pref.setTitle("Version: " + Aircandi.getVersionName(this, Preferences.class));
+			pref.setSummary("Terms of Service, Privacy Policy, Licenses");
+
 			pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 
 				@Override

@@ -2,10 +2,6 @@ package com.aircandi.ui.user;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.InputType;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -26,8 +22,7 @@ public class PasswordEdit extends BaseEdit {
 
 	private EditText	mPasswordOld;
 	private EditText	mPassword;
-	private CheckBox	mPasswordUnmask;
-	private CheckBox	mPasswordUnmaskOld;
+	private EditText	mPasswordConfirm;
 
 	/* Inputs */
 	protected String	mEntityId;
@@ -47,40 +42,7 @@ public class PasswordEdit extends BaseEdit {
 
 		mPasswordOld = (EditText) findViewById(R.id.password_old);
 		mPassword = (EditText) findViewById(R.id.password);
-		mPasswordUnmask = (CheckBox) findViewById(R.id.chk_unmask);
-		mPasswordUnmaskOld = (CheckBox) findViewById(R.id.chk_unmask_old);
-		
-		mPasswordUnmask.setOnCheckedChangeListener(new OnCheckedChangeListener(){
-
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if (isChecked) {
-					mPassword.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-							| InputType.TYPE_CLASS_TEXT
-							| InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-				}
-				else {
-					mPassword.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD
-							| InputType.TYPE_CLASS_TEXT
-							| InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-				}
-			}});
-		
-		mPasswordUnmaskOld.setOnCheckedChangeListener(new OnCheckedChangeListener(){
-
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if (isChecked) {
-					mPasswordOld.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-							| InputType.TYPE_CLASS_TEXT
-							| InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-				}
-				else {
-					mPasswordOld.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD
-							| InputType.TYPE_CLASS_TEXT
-							| InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-				}
-			}});
+		mPasswordConfirm = (EditText) findViewById(R.id.password_confirm);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -125,7 +87,7 @@ public class PasswordEdit extends BaseEdit {
 				hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 
-					Logger.i(this, "User changed password: " + Aircandi.getInstance().getCurrentUser().name + " (" + Aircandi.getInstance().getCurrentUser().id + ")");
+					Logger.i(this, "USER changed password: " + Aircandi.getInstance().getCurrentUser().name + " (" + Aircandi.getInstance().getCurrentUser().id + ")");
 					UI.showToastNotification(getResources().getString(R.string.alert_password_changed)
 							+ " " + Aircandi.getInstance().getCurrentUser().name, Toast.LENGTH_SHORT);
 					finish();
@@ -163,7 +125,17 @@ public class PasswordEdit extends BaseEdit {
 					, null, null, null, null);
 			return false;
 		}
-		if (mPassword.getText().length() < 6) {
+		if (mPasswordConfirm.getText().length() == 0) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_password_confirmation)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			return false;
+		}
+		if (mPassword.getText().length() < 6 || mPasswordConfirm.getText().length() < 6) {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_password_weak)
@@ -171,6 +143,18 @@ public class PasswordEdit extends BaseEdit {
 					, this
 					, android.R.string.ok
 					, null, null, null, null);
+			return false;
+		}
+		if (!mPassword.getText().toString().equals(mPasswordConfirm.getText().toString())) {
+
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, getResources().getString(R.string.error_signup_missmatched_passwords_title)
+					, getResources().getString(R.string.error_signup_missmatched_passwords_message)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			mPasswordConfirm.setText("");
 			return false;
 		}
 		return true;

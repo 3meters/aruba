@@ -85,12 +85,16 @@
                 android:inputType="textPassword"
                 android:textSize="18sp" />
 
-            <com.aircandi.ui.widgets.AirCheckBox
-                android:id="@+id/chk_unmask"
+            <com.aircandi.ui.widgets.AirEditText
+                android:id="@+id/password_confirm"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:text="@string/form_label_password_unmask"
-                android:textAppearance="?android:attr/textAppearance" />
+                android:layout_marginBottom="10dp"
+                android:drawableRight="?attr/iconClear"
+                android:hint="@string/form_label_password_confirm"
+                android:imeOptions="actionGo"
+                android:inputType="textPassword"
+                android:textSize="18sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -112,7 +116,7 @@
 
                 <com.aircandi.ui.widgets.AirButton
                     android:id="@+id/button_view_terms"
-                    style="@style/form_button"
+                    style="@style/form_button_link"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"

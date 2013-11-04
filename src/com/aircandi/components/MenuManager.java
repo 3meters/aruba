@@ -21,6 +21,7 @@ public class MenuManager {
 		/* Editing */
 
 		if (activityName.equals("CommentEdit")
+				|| activityName.equals("ReportEdit")
 				|| activityName.equals("FeedbackEdit")
 				|| activityName.equals("InviteEdit")) {
 			menuInflater.inflate(R.menu.menu_send, menu);
@@ -74,9 +75,15 @@ public class MenuManager {
 				else if (activityName.equals("PictureForm")) {
 					menuInflater.inflate(R.menu.menu_browse_entity, menu);
 				}
+				else if (activityName.equals("PhotoForm")) {
+					menuInflater.inflate(R.menu.menu_browse_photo, menu);
+				}
 				else if (activityName.equals("CandigramForm")) {
 					menuInflater.inflate(R.menu.menu_browse_entity, menu);
 					menuInflater.inflate(R.menu.menu_help, menu);
+				}
+				else if (activityName.equals("ProfileForm")) {
+					menuInflater.inflate(R.menu.menu_browse_profile, menu);
 				}
 				else if (activityName.equals("UserForm")) {
 					menuInflater.inflate(R.menu.menu_browse_user, menu);

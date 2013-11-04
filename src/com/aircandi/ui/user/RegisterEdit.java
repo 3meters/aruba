@@ -4,13 +4,9 @@ import java.util.Locale;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -39,7 +35,7 @@ public class RegisterEdit extends BaseEntityEdit {
 
 	private EditText	mEmail;
 	private EditText	mPassword;
-	private CheckBox	mPasswordUnmask;
+	private EditText	mPasswordConfirm;
 
 	@Override
 	public void initialize(Bundle savedInstanceState) {
@@ -48,27 +44,10 @@ public class RegisterEdit extends BaseEntityEdit {
 		mEntitySchema = Constants.SCHEMA_ENTITY_USER;
 		mEmail = (EditText) findViewById(R.id.email);
 		mPassword = (EditText) findViewById(R.id.password);
-		mPasswordUnmask = (CheckBox) findViewById(R.id.chk_unmask);
+		mPasswordConfirm = (EditText) findViewById(R.id.password_confirm);
 
-		mPasswordUnmask.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if (isChecked) {
-					mPassword.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-							| InputType.TYPE_CLASS_TEXT
-							| InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-				}
-				else {
-					mPassword.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD
-							| InputType.TYPE_CLASS_TEXT
-							| InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-				}
-			}
-		});
-
-		mPassword.setImeOptions(EditorInfo.IME_ACTION_GO);
-		mPassword.setOnEditorActionListener(new OnEditorActionListener() {
+		mPasswordConfirm.setImeOptions(EditorInfo.IME_ACTION_GO);
+		mPasswordConfirm.setOnEditorActionListener(new OnEditorActionListener() {
 
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -157,6 +136,16 @@ public class RegisterEdit extends BaseEntityEdit {
 					, null, null, null, null);
 			return false;
 		}
+		if (mPasswordConfirm.getText().length() < 6) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_password_confirmation)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			return false;
+		}
 		if (!Utilities.validEmail(mEmail.getText().toString())) {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
 					, null
@@ -165,6 +154,17 @@ public class RegisterEdit extends BaseEntityEdit {
 					, this
 					, android.R.string.ok
 					, null, null, null, null);
+			return false;
+		}
+		if (!mPassword.getText().toString().equals(mPasswordConfirm.getText().toString())) {
+			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+					, getResources().getString(R.string.error_signup_missmatched_passwords_title)
+					, getResources().getString(R.string.error_signup_missmatched_passwords_message)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null, null);
+			mPasswordConfirm.setText("");
 			return false;
 		}
 		return true;
@@ -200,7 +200,6 @@ public class RegisterEdit extends BaseEntityEdit {
 						result = MessagingManager.getInstance().registerInstallWithAircandi();
 					}
 				}
-
 				return result;
 			}
 

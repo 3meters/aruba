@@ -30,8 +30,10 @@ public class Candigrams {
 	public static int ICON_COLOR = R.color.brand_pink_lighter;
 	
 
-	public static void view(Context context, String entityId, String parentId) {
+	public static void view(Context context, String entityId, String linkType, String parentId) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, CandigramForm.class)
+				.setListLinkType(linkType)
+				.setListLinkSchema(Constants.SCHEMA_ENTITY_CANDIGRAM)
 				.setEntityId(entityId)
 				.setEntityParentId(parentId);
 		context.startActivity(intentBuilder.create());

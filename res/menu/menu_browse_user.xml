@@ -7,16 +7,5 @@
         android:orderInCategory="1"
         android:showAsAction="always"
         android:title="@string/menu_refresh_item"/>
-    <item
-        android:id="@+id/edit"
-        android:icon="?attr/iconEdit"
-        android:orderInCategory="1"
-        android:showAsAction="always"
-        android:title="@string/menu_edit_item"/>
-    <item
-        android:id="@+id/signout"
-        android:orderInCategory="2"
-        android:showAsAction="ifRoom"
-        android:title="@string/menu_signout_item"/>
 
 </menu>

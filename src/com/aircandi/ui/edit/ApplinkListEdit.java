@@ -28,7 +28,6 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityListEdit;
 import com.aircandi.ui.widgets.AirImageView;
-import com.aircandi.utilities.Json;
 import com.aircandi.utilities.UI;
 
 public class ApplinkListEdit extends BaseEntityListEdit {
@@ -61,23 +60,13 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		super.onActivityResult(requestCode, resultCode, intent);
 
 		if (resultCode != Activity.RESULT_CANCELED) {
 			if (requestCode == Constants.ACTIVITY_ENTITY_INSERT) {
-				if (intent != null && intent.getExtras() != null) {
-					final Bundle extras = intent.getExtras();
-					final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
-					if (jsonEntity != null) {
-
-						final Entity entityNew = (Entity) Json.jsonToObject(jsonEntity, Json.ObjectType.ENTITY);
-						if (entityNew != null) {
-							searchApplinks(mEntities, true, (Place) mParent, false);
-						}
-					}
-				}
+				searchApplinks(mEntities, true, (Place) mParent, false);
 			}
 		}
-		super.onActivityResult(requestCode, resultCode, intent);
 	}
 
 	// --------------------------------------------------------------------------------------------

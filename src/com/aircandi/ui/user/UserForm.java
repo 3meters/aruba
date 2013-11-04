@@ -40,6 +40,7 @@ public class UserForm extends BaseEntityForm {
 
 	@Override
 	public void afterDatabind() {
+		super.afterDatabind();
 		loadStats();
 	}
 

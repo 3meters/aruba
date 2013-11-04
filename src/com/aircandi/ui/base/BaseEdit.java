@@ -48,7 +48,7 @@ public abstract class BaseEdit extends BaseActivity implements EditDelegate {
 
 	@Override
 	public void initialize(Bundle savedInstanceState) {
-		Aircandi.resultCode = Activity.RESULT_OK;		
+		Aircandi.resultCode = Activity.RESULT_OK;
 	}
 
 	@Override
@@ -81,7 +81,6 @@ public abstract class BaseEdit extends BaseActivity implements EditDelegate {
 		}
 		else {
 			setResultCode(Activity.RESULT_CANCELED);
-			Aircandi.resultCode = Activity.RESULT_CANCELED;
 			finish();
 			Animate.doOverridePendingTransition(this, TransitionType.PAGE_BACK);
 		}
@@ -94,10 +93,6 @@ public abstract class BaseEdit extends BaseActivity implements EditDelegate {
 	public Boolean isDirty() {
 		return mDirty;
 	}
-
-	// --------------------------------------------------------------------------------------------
-	// Services
-	// --------------------------------------------------------------------------------------------
 
 	protected void insert() {}
 
@@ -180,5 +175,9 @@ public abstract class BaseEdit extends BaseActivity implements EditDelegate {
 	}
 
 	protected void beforeInsert(Entity entity) {}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle
+	// --------------------------------------------------------------------------------------------
 
 }

@@ -71,6 +71,7 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseActivity;
 import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.ui.widgets.CandiView;
+import com.aircandi.ui.widgets.CandiView.IndicatorOptions;
 import com.aircandi.utilities.Animate;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.DateTime.IntervalContext;
@@ -1099,7 +1100,7 @@ public class RadarFragment extends BaseFragment implements
 
 			if (itemData != null) {
 				final Place entity = (Place) itemData;
-				holder.candiView.databind(entity);
+				holder.candiView.databind(entity, new IndicatorOptions());
 			}
 			return view;
 		}

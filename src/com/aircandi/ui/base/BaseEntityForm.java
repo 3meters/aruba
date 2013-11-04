@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
@@ -14,10 +16,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -78,6 +83,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 	public String					mEntityId;
 	@SuppressWarnings("ucd")
 	public String					mMessage;
+	protected String				mListLinkType;
 
 	protected final PackageReceiver	mPackageReceiver	= new PackageReceiver();
 
@@ -90,6 +96,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 			mParentId = extras.getString(Constants.EXTRA_ENTITY_PARENT_ID);
 			mEntityId = extras.getString(Constants.EXTRA_ENTITY_ID);
 			mMessage = extras.getString(Constants.EXTRA_MESSAGE);
+			mListLinkType = extras.getString(Constants.EXTRA_LIST_LINK_TYPE);
 		}
 	}
 
@@ -100,7 +107,14 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 		mScrollView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 	}
 
-	public void afterDatabind() {}
+	public void afterDatabind() {
+		if (mMenuItemEdit != null) {
+			mMenuItemEdit.setVisible(UI.showAction(Route.EDIT, mEntity));
+		}
+		if (mMenuItemAdd != null) {
+			mMenuItemAdd.setVisible(UI.showAction(Route.ADD, mEntity));
+		}
+	}
 
 	public void beforeDatabind() {
 		/*
@@ -212,20 +226,20 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 
 	@SuppressWarnings("ucd")
 	public void onLikeButtonClick(View view) {
-		
+
 		if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 			Integer messageResId = R.string.alert_signin_message;
 			if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-				messageResId = R.string.alert_signin_message_place_like;					
+				messageResId = R.string.alert_signin_message_place_like;
 			}
 			else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
-				messageResId = R.string.alert_signin_message_candigram_like;					
+				messageResId = R.string.alert_signin_message_candigram_like;
 			}
 			else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-				messageResId = R.string.alert_signin_message_picture_like;					
+				messageResId = R.string.alert_signin_message_picture_like;
 			}
 			else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
-				messageResId = R.string.alert_signin_message_user_like;					
+				messageResId = R.string.alert_signin_message_user_like;
 			}
 			Dialogs.signin(this, messageResId);
 			return;
@@ -290,16 +304,16 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 		if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
 			Integer messageResId = R.string.alert_signin_message;
 			if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
-				messageResId = R.string.alert_signin_message_place_watch;					
+				messageResId = R.string.alert_signin_message_place_watch;
 			}
 			else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
-				messageResId = R.string.alert_signin_message_candigram_watch;					
+				messageResId = R.string.alert_signin_message_candigram_watch;
 			}
 			else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
-				messageResId = R.string.alert_signin_message_picture_watch;					
+				messageResId = R.string.alert_signin_message_picture_watch;
 			}
 			else if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_USER)) {
-				messageResId = R.string.alert_signin_message_user_watch;					
+				messageResId = R.string.alert_signin_message_user_watch;
 			}
 			Dialogs.signin(this, messageResId);
 			return;
@@ -359,6 +373,33 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 	}
 
 	@SuppressWarnings("ucd")
+	public void onOverflowButtonClick(View view) {
+
+		if (Constants.SUPPORTS_HONEYCOMB) {
+
+			PopupMenu popupMenu = new PopupMenu(this, view);
+			onCreatePopupMenu(popupMenu.getMenu());
+			popupMenu.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
+				@Override
+				public boolean onMenuItemClick(android.view.MenuItem item) {
+					switch (item.getItemId()) {
+						case R.id.report:
+							Routing.route(BaseEntityForm.this, Route.REPORT, mEntity, mEntity.getSchemaMapped(), null);
+							return true;
+						default:
+							return false;
+					}
+				}
+			});
+			popupMenu.show();
+		}
+		else {
+			gingerbreadPopupMenu();
+		}
+	}
+
+	@SuppressWarnings("ucd")
 	public void onShortcutClick(View view) {
 		final Shortcut shortcut = (Shortcut) view.getTag();
 		if (!shortcut.app.equals(Constants.TYPE_APP_MAP)) {
@@ -376,7 +417,11 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 	@SuppressWarnings("ucd")
 	public void onImageClick(View view) {
 		if (mEntity.photo != null) {
-			Routing.route(this, Route.PHOTO, mEntity);
+			Bundle extras = new Bundle();
+			extras.putString(Constants.EXTRA_ENTITY_PARENT_ID, mParentId);
+			extras.putString(Constants.EXTRA_LIST_LINK_TYPE, mListLinkType);
+			extras.putString(Constants.EXTRA_LIST_LINK_SCHEMA, mEntity.schema);
+			Routing.route(this, Route.PHOTO, mEntity, null, extras);
 		}
 	}
 
@@ -677,6 +722,23 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
+	protected void routeTune() {
+		if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			Integer messageResId = R.string.alert_signin_message_place_tune;
+			Dialogs.signin(BaseEntityForm.this, messageResId);
+			return;
+		}
+
+		if (EntityManager.canUserAdd(mEntity)) {
+			Routing.route(BaseEntityForm.this, Route.TUNE, mEntity);
+			return;
+		}
+
+		if (mEntity.locked) {
+			Dialogs.locked(BaseEntityForm.this, mEntity);
+		}
+	}
+
 	public static Class<?> viewFormBySchema(String schema) {
 		if (schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			return PlaceForm.class;
@@ -696,6 +758,32 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 	// --------------------------------------------------------------------------------------------
 	// Menus
 	// --------------------------------------------------------------------------------------------
+
+	public void gingerbreadPopupMenu() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this)
+				.setItems(R.array.more_options_entity, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int item) {
+						if (item == 0) {
+							Routing.route(BaseEntityForm.this, Route.REPORT, mEntity, mEntity.getSchemaMapped(), null);
+						}
+					}
+				});
+		AlertDialog alert = builder.create();
+
+		/* Prevent dimming the background */
+		if (Constants.SUPPORTS_ICE_CREAM_SANDWICH) {
+			alert.getWindow().setDimAmount(Constants.POPUP_DIM_AMOUNT);
+		}
+
+		alert.show();
+	}
+
+	public boolean onCreatePopupMenu(android.view.Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu_popup_entity, menu);
+		return true;
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

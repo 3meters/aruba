@@ -154,6 +154,15 @@
         <item name="android:textColor">?attr/textColorButtonLink</item>
     </style>
 
+    <style name="form_button_link">
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
+        <item name="android:paddingLeft">@dimen/form_button_padding</item>
+        <item name="android:paddingRight">@dimen/form_button_padding</item>
+        <item name="android:background">?attr/backgroundButtonLink</item>
+        <item name="android:minHeight">@dimen/form_button_height</item>
+        <item name="android:textColor">?attr/textColorButtonLink</item>
+    </style>
+    
     <style name="form_button_floating" parent="form_button">
         <item name="android:minHeight">@dimen/form_button_height</item>
         <item name="android:minWidth">@dimen/form_button_floating_width_min</item>

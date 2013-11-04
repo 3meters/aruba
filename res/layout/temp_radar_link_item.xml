@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginRight="3dp"
-        android:gravity="top|right"
+        android:gravity="center_vertical"
         android:text="@string/dummy_number"
         android:textAppearance="@style/textAppearanceExtraSmall"
         android:textColor="?attr/textColorCandiView"
