@@ -268,20 +268,17 @@ public class CandiView extends RelativeLayout {
 	public void updateIndicator(Integer id, String value) {
 
 		View view = findViewById(id);
+		if (view == null) return;
+
 		AirImageView photoView = (AirImageView) view.findViewById(R.id.photo);
 		TextView label = (TextView) view.findViewById(R.id.name);
 
-		if (!label.getText().equals(value)) {
-
-			label.setVisibility(View.GONE);
-			if (value != null) {
+		if (photoView != null && label != null) {
+			if (!label.getText().equals(value)) {
 				label.setText(value);
-				label.setVisibility(View.VISIBLE);
+				UI.drawPhoto(photoView, photoView.getPhoto());
 			}
-
-			UI.drawPhoto(photoView, photoView.getPhoto());
 		}
-
 	}
 
 	public void showDistance(Entity entity) {

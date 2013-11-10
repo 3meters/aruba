@@ -32,8 +32,6 @@ public class Link extends ServiceBase {
 	public Proximity			proximity;
 	
 	@Expose(serialize = false, deserialize = true)
-	public Boolean				strong;
-	@Expose(serialize = false, deserialize = true)
 	public String				fromSchema;		
 	@Expose(serialize = false, deserialize = true)
 	public String				toSchema;		
@@ -137,7 +135,6 @@ public class Link extends ServiceBase {
 
 		link.fromId = (String) (nameMapping ? map.get("_from") : map.get("fromId"));
 		link.toId = (String) (nameMapping ? map.get("_to") : map.get("toId"));
-		link.strong = (Boolean) map.get("strong");
 		link.inactive = (Boolean) map.get("inactive");
 		link.fromSchema = (String) map.get("fromSchema");
 		link.toSchema = (String) map.get("toSchema");

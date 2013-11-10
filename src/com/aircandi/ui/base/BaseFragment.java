@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
+import android.widget.ScrollView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
@@ -32,12 +34,14 @@ public abstract class BaseFragment extends SherlockFragment implements FormDeleg
 	public void onAttach(Activity activity) {
 		/* Called when the fragment has been associated with the activity. */
 		super.onAttach(activity);
+		Logger.d(this, "Fragment attached");
 		mBusyManager = new BusyManager(activity);
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Logger.d(this, "Fragment created");
 		/*
 		 * Triggers fragment menu construction in some android versions
 		 * so mBusyManager must have already been created.
@@ -48,15 +52,53 @@ public abstract class BaseFragment extends SherlockFragment implements FormDeleg
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		Logger.d(this, "Fragment create view");
+		Logger.d(this, "Fragment view created");
 		if (getSherlockActivity() == null || getSherlockActivity().isFinishing()) {
 			return null;
-		}		
+		}
 		return inflater.inflate(getLayoutId(), container, false);
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		Logger.d(this, "Activity for fragment created");
+	}
+
+	@Override
+	public void onViewStateRestored(Bundle savedInstanceState) {
+		super.onViewStateRestored(savedInstanceState);
+		Logger.d(this, "Fragment system managed view state restored");
+	}
+
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		Logger.d(this, "Fragment detached");
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Events
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onRefresh() {
+		databind(BindingMode.MANUAL); // Called from Routing
+	}
+
+	@Override
+	public void onAdd() {}
+
+	@Override
+	public void onHelp() {}
+
+	@Override
+	public void onError() {}
+
+	public abstract void onScollToTop();
+	
+	// --------------------------------------------------------------------------------------------
+	// Methods
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -75,19 +117,23 @@ public abstract class BaseFragment extends SherlockFragment implements FormDeleg
 	@Override
 	public void draw() {}
 
-	@Override
-	public void onRefresh() {
-		databind(BindingMode.MANUAL); // Called from Routing
+	private void startBodyBusyIndicator() {
+		if (getView() != null) {
+			final View progress = getView().findViewById(R.id.progress);
+			if (progress != null) {
+				progress.setVisibility(View.VISIBLE);
+			}
+		}
 	}
 
-	@Override
-	public void onAdd() {}
-
-	@Override
-	public void onHelp() {}
-
-	@Override
-	public void onError() {}
+	private void stopBodyBusyIndicator() {
+		if (getView() != null) {
+			final View progress = getView().findViewById(R.id.progress);
+			if (progress != null) {
+				progress.setVisibility(View.GONE);
+			}
+		}
+	}
 
 	@Override
 	public void showBusy() {
@@ -152,34 +198,35 @@ public abstract class BaseFragment extends SherlockFragment implements FormDeleg
 		});
 	}
 
+	protected void scrollToTop(final Object scroller) {
+		if (scroller instanceof ListView) {
+			getSherlockActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					((ListView)scroller).smoothScrollToPositionFromTop(0, 0, 100);
+				}
+			});
+			
+		}
+		else if (scroller instanceof ScrollView) {
+			getSherlockActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					((ScrollView)scroller).smoothScrollTo(0,  0);
+				}
+			});
+			
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// UI
 	// --------------------------------------------------------------------------------------------
 
 	protected int getLayoutId() {
 		return 0;
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Methods
-	// --------------------------------------------------------------------------------------------
-
-	private void startBodyBusyIndicator() {
-		if (getView() != null) {
-			final View progress = getView().findViewById(R.id.progress);
-			if (progress != null) {
-				progress.setVisibility(View.VISIBLE);
-			}
-		}
-	}
-
-	private void stopBodyBusyIndicator() {
-		if (getView() != null) {
-			final View progress = getView().findViewById(R.id.progress);
-			if (progress != null) {
-				progress.setVisibility(View.GONE);
-			}
-		}
 	}
 
 	// --------------------------------------------------------------------------------------------

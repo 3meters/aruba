@@ -10,7 +10,7 @@ import com.aircandi.service.objects.CacheStamp;
 
 public abstract class BaseBrowse extends BaseActivity {
 
-	protected CacheStamp	mCacheStamp;
+	protected CacheStamp	mCacheStamp;	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

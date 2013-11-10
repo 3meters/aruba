@@ -10,7 +10,6 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.DefaultH
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
@@ -88,25 +87,25 @@ import com.squareup.otto.Subscribe;
 public class RadarFragment extends BaseFragment implements
 		PullToRefreshAttacher.OnRefreshListener {
 
-	private final Handler			mHandler				= new Handler();
-
-	private Number					mEntityModelBeaconDate;
-	private String					mEntityModelProvider;
-	private Integer					mEntityModelWifiState	= WifiManager.WIFI_STATE_UNKNOWN;
-
-	private ListView				mList;
+	private ListView				mListView;
 	private TextView				mAttribution;
 	private View					mAttributionHolder;
 	private Boolean					mAttributionHidden		= false;
+
 	private MenuItem				mMenuItemBeacons;
 	private TextView				mBeaconIndicator;
 	private String					mDebugWifi;
 	private String					mDebugLocation			= "--";
 	private PullToRefreshAttacher	mPullToRefreshAttacher;
 
+	private final Handler			mHandler				= new Handler();
+	private Number					mEntityModelBeaconDate;
+	private String					mEntityModelProvider;
+	private Integer					mEntityModelWifiState	= WifiManager.WIFI_STATE_UNKNOWN;
 	private int						mNewCandiSoundId;
-	private final List<Entity>		mEntities				= new ArrayList<Entity>();
-	private RadarListAdapter		mRadarAdapter;
+
+	private final List<Entity>		mPlaces					= new ArrayList<Entity>();
+	private RadarListAdapter		mAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -117,11 +116,11 @@ public class RadarFragment extends BaseFragment implements
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
 		View view = super.onCreateView(inflater, container, savedInstanceState);
+
 		if (view == null) return view;
 
-		mList = (ListView) view.findViewById(R.id.radar_list);
+		mListView = (ListView) view.findViewById(R.id.radar_list);
 		mAttribution = (TextView) view.findViewById(R.id.place_provider);
 		mAttributionHolder = view.findViewById(R.id.attribution_holder);
 		View dismiss = mAttributionHolder.findViewById(R.id.image_dismiss);
@@ -140,7 +139,7 @@ public class RadarFragment extends BaseFragment implements
 
 		// Now set the ScrollView as the refreshable view, and the refresh listener (this)
 		if (mPullToRefreshAttacher != null) {
-			mPullToRefreshAttacher.addRefreshableView(mList, this);
+			mPullToRefreshAttacher.addRefreshableView(mListView, this);
 
 			DefaultHeaderTransformer header = (DefaultHeaderTransformer) mPullToRefreshAttacher.getHeaderTransformer();
 			header.setRefreshingText(getString(R.string.refresh_scanning_for_location));
@@ -150,11 +149,11 @@ public class RadarFragment extends BaseFragment implements
 		}
 
 		/* Other UI references */
-		mList.setOnItemClickListener(new OnItemClickListener() {
+		mListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				final Place entity = (Place) mRadarAdapter.getItems().get(position);
+				final Place entity = (Place) mAdapter.getItems().get(position);
 				Bundle extras = null;
 				if (entity.synthetic) {
 					extras = new Bundle();
@@ -164,7 +163,7 @@ public class RadarFragment extends BaseFragment implements
 			}
 		});
 
-		mList.setOnScrollListener(new OnScrollListener() {
+		mListView.setOnScrollListener(new OnScrollListener() {
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {}
 
@@ -178,6 +177,21 @@ public class RadarFragment extends BaseFragment implements
 				}
 			}
 		});
+
+		/*
+		 * Triggers data fetch because endless wrapper calls cacheInBackground()
+		 * when first created.
+		 */
+		mAdapter = new RadarListAdapter(mPlaces);
+		/*
+		 * Bind adapter to UI triggers view generation but we might not
+		 * have any data yet. When a new chuck of data is added to mEntities,
+		 * notifyDataSetChanged is called on the adapter when then lets the
+		 * UI know to repaint.
+		 */
+		if (mListView != null) {
+			mListView.setAdapter(mAdapter);
+		}
 
 		return view;
 	}
@@ -210,11 +224,8 @@ public class RadarFragment extends BaseFragment implements
 		mEntityModelProvider = provider;
 
 		/* Adapter snapshots the items in mEntities */
-		if (mRadarAdapter == null) {
-			Logger.d(getSherlockActivity(), "Databind: adapter null - start first place search");
-
-			mRadarAdapter = new RadarListAdapter(getSherlockActivity(), mEntities);
-			mList.setAdapter(mRadarAdapter);
+		if (mPlaces.size() == 0) {
+			Logger.d(getSherlockActivity(), "Databind: places are empty");
 			mHandler.postDelayed(new Runnable() {
 
 				@Override
@@ -228,14 +239,6 @@ public class RadarFragment extends BaseFragment implements
 				}
 			}, 500);
 
-		}
-		else if (mList.getAdapter() == null) {
-			/*
-			 * View is being recreated but we already have data.
-			 */
-			Logger.d(getSherlockActivity(), "Databind: list adapter null - reset and repaint");
-			mList.setAdapter(mRadarAdapter);
-			mRadarAdapter.notifyDataSetChanged();
 		}
 		else if (LocationManager.getInstance().getLocationLocked() == null) {
 			/*
@@ -258,9 +261,9 @@ public class RadarFragment extends BaseFragment implements
 			Logger.v(this, "Removed synthetic places from cache: count = " + String.valueOf(removeCount));
 			handleAttribution(provider);
 			showBusy();
-			mRadarAdapter.getItems().clear();
-			mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
-			mRadarAdapter.notifyDataSetChanged();
+			mPlaces.clear();
+			mPlaces.addAll(EntityManager.getInstance().getPlaces(null, null));
+			mAdapter.notifyDataSetChanged();
 			hideBusy();
 			LocationManager.getInstance().setLocationLocked(null);
 			LocationManager.getInstance().lockLocationBurst();
@@ -332,14 +335,6 @@ public class RadarFragment extends BaseFragment implements
 				}.execute();
 
 			}
-			else {
-				Logger.d(getSherlockActivity(), "Databind: repaint to catch changes to places while paused");
-				mBusyManager.showBusy();
-				mRadarAdapter.getItems().clear();
-				mRadarAdapter.getItems().addAll(EntityManager.getInstance().getPlaces(null, null));
-				mRadarAdapter.notifyDataSetChanged();
-				hideBusy();
-			}
 		}
 	}
 
@@ -396,11 +391,11 @@ public class RadarFragment extends BaseFragment implements
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Wifi scan received event fired");
-				
+
 				Aircandi.tracker.sendTiming(TrackerCategory.PERFORMANCE, Aircandi.stopwatch1.getTotalTimeMills()
 						, "wifi_scan_finished"
 						, NetworkManager.getInstance().getNetworkType());
-				
+
 				Logger.d(getSherlockActivity(), "Query wifi scan received event: locking beacons");
 
 				if (event.wifiList != null) {
@@ -454,11 +449,11 @@ public class RadarFragment extends BaseFragment implements
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Entities by proximity finished event fired");
-				
+
 				Aircandi.tracker.sendTiming(TrackerCategory.PERFORMANCE, Aircandi.stopwatch1.getTotalTimeMills()
 						, "places_by_proximity_downloaded"
 						, NetworkManager.getInstance().getNetworkType());
-				
+
 				Logger.d(getSherlockActivity(), "Entities for beacons finished event: ** done **");
 				mEntityModelWifiState = NetworkManager.getInstance().getWifiState();
 				mCacheStamp = EntityManager.getInstance().getCacheStamp();
@@ -530,11 +525,11 @@ public class RadarFragment extends BaseFragment implements
 
 					if (Aircandi.stopwatch2.isStarted()) {
 						Aircandi.stopwatch2.stop("Location accepted");
-						
+
 						Aircandi.tracker.sendTiming(TrackerCategory.PERFORMANCE, Aircandi.stopwatch2.getTotalTimeMills()
 								, "location_accepted"
 								, NetworkManager.getInstance().getNetworkType());
-						
+
 					}
 
 					final AirLocation location = LocationManager.getInstance().getAirLocationLocked();
@@ -579,11 +574,11 @@ public class RadarFragment extends BaseFragment implements
 	@SuppressWarnings("ucd")
 	public void onPlacesNearLocationFinished(final PlacesNearLocationFinishedEvent event) {
 		Aircandi.stopwatch2.stop("Places near location complete");
-		
+
 		Aircandi.tracker.sendTiming(TrackerCategory.PERFORMANCE, Aircandi.stopwatch2.getTotalTimeMills()
 				, "places_near_location_downloaded"
 				, NetworkManager.getInstance().getNetworkType());
-		
+
 		mHandler.post(new Runnable() {
 
 			@Override
@@ -610,7 +605,7 @@ public class RadarFragment extends BaseFragment implements
 				Aircandi.stopwatch1.segmentTime("Entities changed: start radar display");
 
 				/* Point radar adapter at the updated entities */
-				final int previousCount = mRadarAdapter.getCount();
+				final int previousCount = mAdapter.getCount();
 				final List<Entity> entities = event.entities;
 
 				Logger.d(getSherlockActivity(), "Databind: fresh entities: source = " + event.changeSource + ", count = " + String.valueOf(entities.size()));
@@ -618,8 +613,9 @@ public class RadarFragment extends BaseFragment implements
 				//					for (StackTraceElement element: stackTrace) {
 				//						Logger.v(this, "Databind: " + element.toString());
 				//					}
-				mRadarAdapter.setItems(entities);
-				mRadarAdapter.notifyDataSetChanged();
+				mPlaces.clear();
+				mPlaces.addAll(entities);
+				mAdapter.notifyDataSetChanged();
 
 				Aircandi.stopwatch1.stop("Search for places by beacon complete");
 
@@ -661,7 +657,7 @@ public class RadarFragment extends BaseFragment implements
 		/*
 		 * Refreshes radar so newly created place can pop in.
 		 */
-		if (event.notification.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+		if (event.activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			getSherlockActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -734,6 +730,11 @@ public class RadarFragment extends BaseFragment implements
 	public void hideBusy() {
 		super.hideBusy();
 		mPullToRefreshAttacher.setRefreshing(false);
+	}
+
+	@Override
+	public void onScollToTop() {
+		scrollToTop(mListView);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1068,25 +1069,21 @@ public class RadarFragment extends BaseFragment implements
 
 	private class RadarListAdapter extends ArrayAdapter<Entity> implements OnTouchListener {
 
-		private final LayoutInflater	mInflater;
-		private final Integer			mItemLayoutId	= R.layout.temp_listitem_radar;
-		private List<Entity>			mItems;
+		private final Integer	mItemLayoutId	= R.layout.temp_listitem_radar;
 
-		public RadarListAdapter(Context context, List<Entity> entities) {
-			super(context, 0, entities);
-			mItems = entities;
-			mInflater = LayoutInflater.from(context);
+		public RadarListAdapter(List<Entity> entities) {
+			super(getSherlockActivity(), 0, entities);
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+
 			View view = convertView;
 			final RadarViewHolder holder;
-			final Entity itemData = mItems.get(position);
-			Logger.v(this, "getView: position = " + String.valueOf(position) + " name = " + itemData.name);
+			final Entity itemData = mPlaces.get(position);
 
 			if (view == null) {
-				view = mInflater.inflate(mItemLayoutId, null);
+				view = LayoutInflater.from(getSherlockActivity()).inflate(mItemLayoutId, null);
 				holder = new RadarViewHolder();
 				holder.candiView = (CandiView) view.findViewById(R.id.candi_view);
 				/* Need this line so clicks bubble up to the listview click handler */
@@ -1118,20 +1115,16 @@ public class RadarFragment extends BaseFragment implements
 
 		@Override
 		public Entity getItem(int position) {
-			return mItems.get(position);
+			return mPlaces.get(position);
 		}
 
 		@Override
 		public int getCount() {
-			return mItems.size();
+			return mPlaces.size();
 		}
 
 		public List<Entity> getItems() {
-			return mItems;
-		}
-
-		public void setItems(List<Entity> items) {
-			mItems = items;
+			return mPlaces;
 		}
 
 		@SuppressWarnings("ucd")

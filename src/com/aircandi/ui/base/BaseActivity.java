@@ -90,13 +90,14 @@ public abstract class BaseActivity extends SherlockFragmentActivity implements B
 			 * We do all this here so the work is finished before subclasses start
 			 * their create/initialize processing.
 			 */
+			Logger.d(this, "Activity created");
 			mResources = getResources();
 			mBusyManager = new BusyManager(this);
 			/*
 			 * Theme must be set before contentView is processed.
 			 */
 			setTheme(isDialog(), isTransparent());
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 			super.setContentView(getLayoutId());
 			super.onCreate(savedInstanceState);
 

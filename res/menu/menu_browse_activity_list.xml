@@ -7,10 +7,5 @@
         android:orderInCategory="1"
         android:showAsAction="always"
         android:title="@string/menu_refresh_item"/>
-    <item
-        android:id="@+id/delete_notifications"
-        android:orderInCategory="40"
-        android:showAsAction="ifRoom"
-        android:title="@string/menu_clear_item"/>
 
 </menu>

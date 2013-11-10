@@ -41,7 +41,7 @@
     <!-- Tabs -->
 
     <string name="tab_radar_item">radar</string>
-    <string name="tab_notifications_item">news</string>
+    <string name="tab_activity_item">activity</string>
     <string name="tab_watching_item">watch</string>
     <string name="tab_created_item">mine</string>
         

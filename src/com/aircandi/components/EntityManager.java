@@ -32,6 +32,7 @@ import com.aircandi.service.RequestType;
 import com.aircandi.service.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ServiceResponse;
+import com.aircandi.service.objects.Activity;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.CacheStamp;
@@ -56,6 +57,7 @@ import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.Activities;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Type;
@@ -165,10 +167,48 @@ public class EntityManager {
 		}
 		return result;
 	}
+		
 
 	// --------------------------------------------------------------------------------------------
 	// service queries
 	// --------------------------------------------------------------------------------------------
+	
+	public synchronized ModelResult loadActivities(String entityId, Cursor cursor) {
+		
+		final ModelResult result = new ModelResult();
+		
+		final Bundle parameters = new Bundle();
+		parameters.putString("entityId", entityId);
+
+		if (cursor != null) {
+			parameters.putString("cursor", "object:" + Json.objectToJson(cursor));
+		}
+
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "getActivities")
+				.setRequestType(RequestType.METHOD)
+				.setParameters(parameters)
+				.setResponseFormat(ResponseFormat.JSON);
+
+		if (!Aircandi.getInstance().getCurrentUser().isAnonymous()) {
+			serviceRequest.setSession(Aircandi.getInstance().getCurrentUser().session);
+		}
+
+		result.serviceResponse = dispatch(serviceRequest);
+
+		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+			final String jsonResponse = (String) result.serviceResponse.data;
+			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.ACTIVITY, Json.ServiceDataWrapper.TRUE);
+			final List<Activity> loadedActivities = (List<Activity>) serviceData.data;
+			for (Activity activity: loadedActivities) {
+				Activities.decorate(activity);
+			}
+			result.serviceResponse.data = serviceData;
+			result.data = loadedActivities;
+		}
+
+		return result;
+	}
 
 	public synchronized CacheStamp loadCacheStamp(String entityId, CacheStamp cacheStamp) {
 
@@ -1006,7 +1046,6 @@ public class EntityManager {
 					}
 					else {
 						link = new Link(entity.id, beacon.id, Constants.TYPE_LINK_PROXIMITY, Constants.SCHEMA_ENTITY_BEACON);
-						link.strong = false;
 						link.proximity = new Proximity();
 						link.proximity.signal = beacon.signal;
 						if (primary) {
@@ -1224,11 +1263,10 @@ public class EntityManager {
 		return cacheStamp;
 	}
 
-	public ModelResult registerInstall(Boolean register, Install install) {
+	public ModelResult registerInstall(Install install) {
 
 		ModelResult result = new ModelResult();
 		final Bundle parameters = new Bundle();
-		parameters.putBoolean("register", register);
 		parameters.putString("install", "object:" + Json.objectToJson(install, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
 
 		final ServiceRequest serviceRequest = new ServiceRequest()

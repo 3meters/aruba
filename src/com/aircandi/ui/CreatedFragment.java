@@ -11,6 +11,9 @@ import com.aircandi.ui.base.BaseShortcutFragment;
 
 @SuppressWarnings("ucd")
 public class CreatedFragment extends BaseShortcutFragment {
+	
+	protected static int	mScrollX	= 0;
+	protected static int	mScrollY	= -1;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -34,11 +37,35 @@ public class CreatedFragment extends BaseShortcutFragment {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
+	public void draw() {
+		super.draw();
+		if (mScrollView != null) {
+			mScrollView.post(new Runnable() {
+				@Override
+				public void run() {
+					mScrollView.scrollTo(mScrollX, mScrollY);
+				}
+			});
+		}
+	}
+
+	@Override
 	protected void showMessage(Boolean visible) {
 		if (mMessage != null) {
 			mMessage.setText(R.string.list_created_empty);
 			mMessage.setVisibility(visible ? View.VISIBLE : View.GONE);
 		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		mScrollX = mScrollView.getScrollX();
+		mScrollY = mScrollView.getScrollY();
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -117,8 +117,8 @@ public class MenuManager {
 			else if (fragmentName.equals("WatchingFragment")) {
 				menuInflater.inflate(R.menu.menu_browse_watching, menu);
 			}
-			else if (fragmentName.equals("NewsFragment")) {
-				menuInflater.inflate(R.menu.menu_browse_notification_list, menu);
+			else if (fragmentName.equals("ActivityFragment")) {
+				menuInflater.inflate(R.menu.menu_browse_activity_list, menu);
 			}
 		}
 

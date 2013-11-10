@@ -1,6 +1,5 @@
 package com.aircandi.components;
 
-import android.app.Activity;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
@@ -10,13 +9,14 @@ import android.os.PowerManager;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.applications.Comments;
-import com.aircandi.service.objects.AirNotification;
+import com.aircandi.service.objects.Action.EventType;
+import com.aircandi.service.objects.Activity;
+import com.aircandi.ui.ActivityFragment;
 import com.aircandi.ui.AircandiForm;
-import com.aircandi.ui.NewsFragment;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.base.BaseFragment;
+import com.aircandi.utilities.Activities;
 import com.aircandi.utilities.Json;
-import com.aircandi.utilities.Notifications;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 public class GcmIntentService extends IntentService {
@@ -55,54 +55,57 @@ public class GcmIntentService extends IntentService {
 					 * has
 					 * a payload, its contents are available as extras in the intent.
 					 */
-					String jsonNotification = extras.getString("notification");
-					AirNotification notification = (AirNotification) Json.jsonToObject(jsonNotification, Json.ObjectType.AIR_NOTIFICATION);
+					String jsonActivity = extras.getString("activity");
+					Activity activity = (Activity) Json.jsonToObject(jsonActivity, Json.ObjectType.ACTIVITY);
 
 					/* We don't self notify unless dev settings are on and self notify is enabled */
 					if (!Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
 							|| !Aircandi.settings.getBoolean(Constants.PREF_TESTING_SELF_NOTIFY, Constants.PREF_TESTING_SELF_NOTIFY_DEFAULT)) {
-						if (notification.user != null
+						if (activity.action.user != null
 								&& Aircandi.getInstance().getCurrentUser() != null
-								&& notification.user.id.equals(Aircandi.getInstance().getCurrentUser().id)) {
+								&& activity.action.user.id.equals(Aircandi.getInstance().getCurrentUser().id)) {
 							return;
 						}
 					}
+					
+					/* Cherry pick refresh notifications */
+					if (activity.action.getEventCategory().equals(EventType.REFRESH)) {
+						MessagingManager.getInstance().broadcastActivity(activity);
+						return;
+					}
 
 					/* Build intent that can be used in association with the notification */
-					if (notification.entity != null) {
-						if (notification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-							notification.intent = Comments.viewForGetIntent(Aircandi.applicationContext, notification.toEntity.id, Constants.TYPE_LINK_CONTENT,
+					if (activity.action.entity != null) {
+						if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+							activity.intent = Comments.viewForGetIntent(Aircandi.applicationContext, activity.action.toEntity.id, Constants.TYPE_LINK_CONTENT,
 									null, null);
 						}
 						else {
-							Class<?> clazz = BaseEntityForm.viewFormBySchema(notification.entity.schema);
+							Class<?> clazz = BaseEntityForm.viewFormBySchema(activity.action.entity.schema);
 							IntentBuilder intentBuilder = new IntentBuilder(Aircandi.applicationContext, clazz)
-									.setEntityId(notification.entity.id)
-									.setEntitySchema(notification.entity.schema)
+									.setEntityId(activity.action.entity.id)
+									.setEntitySchema(activity.action.entity.schema)
 									.setForceRefresh(true);
-							notification.intent = intentBuilder.create();
+							activity.intent = intentBuilder.create();
 						}
 					}
 
 					/* Customize title and subtitle before storing and broadcasting */
-					Notifications.decorate(notification);
-
-					/* Stash in our local database */
-					MessagingManager.getInstance().storeNotification(notification, jsonNotification);
+					Activities.decorate(activity);
 
 					/* Trigger event so subscribers can decide if they should refresh */
-					MessagingManager.getInstance().broadcastNotification(notification);
+					MessagingManager.getInstance().broadcastActivity(activity);
 
 					/* Display if user is not currently using the notifications activity */
-					Activity currentActivity = Aircandi.getInstance().getCurrentActivity();
+					android.app.Activity currentActivity = Aircandi.getInstance().getCurrentActivity();
 					if (currentActivity != null && currentActivity.getClass().equals(AircandiForm.class)) {
 						BaseFragment fragment = ((AircandiForm) currentActivity).getCurrentFragment();
-						if (fragment.getClass().equals(NewsFragment.class)) {
+						if (fragment.getClass().equals(ActivityFragment.class)) {
 							return;
 						}
 					}
 
-					MessagingManager.getInstance().showNotification(notification, Aircandi.applicationContext);
+					MessagingManager.getInstance().showActivity(activity, Aircandi.applicationContext);
 
 				}
 			}

@@ -371,7 +371,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		if (linksIn != null) {
 			if (direction == Direction.in || direction == Direction.both) {
 				for (Link link : linksIn) {
-					if ((type == null || type.contains(link.type)) && link.strong) {
+					if (type == null || type.contains(link.type)) {
 						Entity entity = EntityManager.getEntity(link.fromId);
 						if (entity != null) {
 							if (traverse) {
@@ -388,7 +388,7 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 		if (linksOut != null) {
 			if (direction == Direction.out || direction == Direction.both) {
 				for (Link link : linksOut) {
-					if ((type == null || type.contains(link.type)) && link.strong) {
+					if (type == null || type.contains(link.type)) {
 						Entity entity = EntityManager.getEntity(link.toId);
 						if (entity != null) {
 							if (traverse) {

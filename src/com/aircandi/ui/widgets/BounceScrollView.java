@@ -9,9 +9,8 @@ import com.aircandi.Constants;
 
 public class BounceScrollView extends ScrollView {
 
-
 	private final Context	mContext;
-	private int		mMaxYOverscrollDistance;
+	private int				mMaxYOverscrollDistance;
 
 	public BounceScrollView(Context context) {
 		super(context);
@@ -52,7 +51,7 @@ public class BounceScrollView extends ScrollView {
 			, int maxOverScrollY
 			, boolean isTouchEvent) {
 		/*
-		 * This is where the magic happens, we have replaced the incoming maxOverScrollY 
+		 * This is where the magic happens, we have replaced the incoming maxOverScrollY
 		 * with our own custom variable mMaxYOverscrollDistance;
 		 */
 		return super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX, scrollRangeY, maxOverScrollX, mMaxYOverscrollDistance, isTouchEvent);

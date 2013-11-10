@@ -1,11 +1,11 @@
 package com.aircandi.events;
 
-import com.aircandi.service.objects.AirNotification;
+import com.aircandi.service.objects.Activity;
 
 public class MessageEvent {
-	public final AirNotification	notification;
+	public final Activity	activity;
 
-	public MessageEvent(AirNotification notification) {
-		this.notification = notification;
+	public MessageEvent(Activity activity) {
+		this.activity = activity;
 	}
 }

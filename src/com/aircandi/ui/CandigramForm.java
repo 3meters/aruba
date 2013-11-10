@@ -27,6 +27,7 @@ import com.aircandi.components.EntityManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.events.MessageEvent;
+import com.aircandi.service.objects.Action.EventType;
 import com.aircandi.service.objects.Candigram;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Entity;
@@ -381,7 +382,17 @@ public class CandigramForm extends BaseEntityForm {
 		 * Refresh the form because something new has been added to it
 		 * like a comment or post.
 		 */
-		if (event.notification.toEntity != null && mEntityId.equals(event.notification.toEntity.id)) {
+		if (event.activity.action.getEventCategory().equals(EventType.REFRESH)) {
+			if (event.activity.action.entity != null && mEntityId.equals(event.activity.action.entity.id)) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						onRefresh();
+					}
+				});
+			}
+		}
+		else if (event.activity.action.toEntity != null && mEntityId.equals(event.activity.action.toEntity.id)) {
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -389,7 +400,7 @@ public class CandigramForm extends BaseEntityForm {
 				}
 			});
 		}
-		else if (event.notification.entity != null && mEntityId.equals(event.notification.entity.id)) {
+		else if (event.activity.action.entity != null && mEntityId.equals(event.activity.action.entity.id)) {
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -400,17 +411,17 @@ public class CandigramForm extends BaseEntityForm {
 					 * - Refresh will update stats, show new place.
 					 */
 					String message = null;
-					if (event.notification.entity.type.equals(Constants.TYPE_APP_BOUNCE)) {
+					if (event.activity.action.entity.type.equals(Constants.TYPE_APP_BOUNCE)) {
 						message = getString(R.string.alert_candigram_bounced);
 					}
-					else if (event.notification.entity.type.equals(Constants.TYPE_APP_TOUR)) {
+					else if (event.activity.action.entity.type.equals(Constants.TYPE_APP_TOUR)) {
 						message = getString(R.string.alert_candigram_toured);
 					}
-					else if (event.notification.entity.type.equals(Constants.TYPE_APP_EXPAND)) {
+					else if (event.activity.action.entity.type.equals(Constants.TYPE_APP_EXPAND)) {
 						message = getString(R.string.alert_candigram_expanded);
 					}
-					if (!TextUtils.isEmpty(event.notification.toEntity.name)) {
-						message += ": " + event.notification.toEntity.name;
+					if (!TextUtils.isEmpty(event.activity.action.toEntity.name)) {
+						message += ": " + event.activity.action.toEntity.name;
 					}
 					UI.showToastNotification(message, Toast.LENGTH_SHORT);
 					onRefresh();

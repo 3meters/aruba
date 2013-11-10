@@ -18,9 +18,9 @@ import com.aircandi.Constants;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
+import com.aircandi.service.objects.Activity;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirMarker;
-import com.aircandi.service.objects.AirNotification;
 import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.CacheStamp;
@@ -240,9 +240,9 @@ public class Json {
 				else if (objectType == Json.ObjectType.AIR_LOCATION) {
 					list.add(AirLocation.setPropertiesFromMap(new AirLocation(), (HashMap) map, nameMapping));
 				}
-				else if (objectType == Json.ObjectType.AIR_NOTIFICATION) {
-					AirNotification notification = AirNotification.setPropertiesFromMap(new AirNotification(), (HashMap) map, nameMapping);
-					list.add(notification);
+				else if (objectType == Json.ObjectType.ACTIVITY) {
+					Activity activity = Activity.setPropertiesFromMap(new Activity(), (HashMap) map, nameMapping);
+					list.add(activity);
 				}
 				else if (objectType == Json.ObjectType.LINK) {
 					list.add(Link.setPropertiesFromMap(new Link(), (HashMap) map, nameMapping));
@@ -426,11 +426,11 @@ public class Json {
 		APPLINK,
 		SHORTCUT,
 		INSTALL,
-		AIR_NOTIFICATION,
 		PLACE,
 		POST,
 		COMMENT,
-		AIR_MARKER
+		AIR_MARKER,
+		ACTIVITY
 	}
 
 }

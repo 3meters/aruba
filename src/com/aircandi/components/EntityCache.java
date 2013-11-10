@@ -87,7 +87,6 @@ public class EntityCache implements Map<String, Entity> {
 			}
 			for (Shortcut shortcut : shortcuts) {
 				Link link = new Link(shortcut.getId(), entity.id, Constants.TYPE_LINK_CONTENT, shortcut.schema);
-				link.strong = true;
 				link.shortcut = shortcut;
 				entity.linksIn.add(link);
 			}
@@ -455,7 +454,6 @@ public class EntityCache implements Map<String, Entity> {
 			}
 
 			Link link = new Link(fromId, toId, type, fromShortcut.schema);
-			link.strong = strong;
 			link.modifiedDate = time;
 
 			if (fromShortcut != null) {
@@ -487,7 +485,6 @@ public class EntityCache implements Map<String, Entity> {
 			}
 
 			Link link = new Link(fromId, toId, type, fromShortcut.schema);
-			link.strong = strong;
 			link.modifiedDate = time;
 
 			if (toShortcut != null) {

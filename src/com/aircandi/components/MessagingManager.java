@@ -6,7 +6,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,9 +23,9 @@ import com.aircandi.events.MessageEvent;
 import com.aircandi.service.GcmRegistrationIOException;
 import com.aircandi.service.RequestListener;
 import com.aircandi.service.ServiceResponse;
-import com.aircandi.service.objects.AirNotification;
-import com.aircandi.service.objects.AirNotification.ActionType;
-import com.aircandi.service.objects.AirNotification.NotificationType;
+import com.aircandi.service.objects.Action.EventType;
+import com.aircandi.service.objects.Activity;
+import com.aircandi.service.objects.Activity.TriggerType;
 import com.aircandi.service.objects.Install;
 import com.aircandi.ui.AircandiForm;
 import com.aircandi.utilities.Errors;
@@ -38,7 +37,6 @@ public class MessagingManager {
 	public static NotificationManager	mNotificationManager;
 	private GoogleCloudMessaging		mGcm;
 	private Install						mInstall;
-	private Integer						mNewCount	= 0;
 
 	private MessagingManager() {
 		mNotificationManager = (NotificationManager) Aircandi.applicationContext.getSystemService(Service.NOTIFICATION_SERVICE);
@@ -96,7 +94,7 @@ public class MessagingManager {
 		install.clientVersionName = Aircandi.getVersionName(Aircandi.applicationContext, AircandiForm.class);
 		install.clientVersionCode = Aircandi.getVersionCode(Aircandi.applicationContext, AircandiForm.class);
 
-		result = EntityManager.getInstance().registerInstall(true, install);
+		result = EntityManager.getInstance().registerInstall(install);
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			Logger.i(this, "Install successfully registered with Aircandi service");
@@ -142,62 +140,61 @@ public class MessagingManager {
 	// Notifications
 	// --------------------------------------------------------------------------------------------	
 
-	public void broadcastNotification(final AirNotification notification) {
-		BusProvider.getInstance().post(new MessageEvent(notification));
+	public void broadcastActivity(final Activity activity) {
+		BusProvider.getInstance().post(new MessageEvent(activity));
 	}
 
-	public void showNotification(final AirNotification airNotification, Context context) {
+	public void showActivity(final Activity activity, Context context) {
 		/*
 		 * Small icon displays on left unless a large icon is specified
 		 * and then it moves to the right.
 		 */
-		if (airNotification.type != null) {
-			if (airNotification.type.equals(NotificationType.NEARBY)) {
+		if (activity.trigger != null) {
+			if (activity.getTriggerCategory().equals(TriggerType.NEARBY)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_NEARBY, Constants.PREF_NOTIFICATIONS_NEARBY_DEFAULT)) {
 					return;
 				}
 			}
-			else if (airNotification.type.equals(NotificationType.OWN)) {
+			else if (activity.getTriggerCategory().equals(TriggerType.OWN)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_OWN, Constants.PREF_NOTIFICATIONS_OWN_DEFAULT)) {
 					return;
 				}
 			}
-			else if (airNotification.type.equals(NotificationType.WATCH)
-					|| airNotification.type.equals(NotificationType.WATCH_USER)) {
+			else if (activity.getTriggerCategory().equals(TriggerType.WATCH)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_WATCH, Constants.PREF_NOTIFICATIONS_WATCH_DEFAULT)) {
 					return;
 				}
 			}
 
-			if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_COMMENTS, Constants.PREF_NOTIFICATIONS_COMMENTS_DEFAULT)) {
 					return;
 				}
 			}
-			else if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+			else if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_PICTURES, Constants.PREF_NOTIFICATIONS_PICTURES_DEFAULT)) {
 					return;
 				}
 			}
-			else if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			else if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_CANDIGRAMS, Constants.PREF_NOTIFICATIONS_CANDIGRAMS_DEFAULT)) {
 					return;
 				}
 			}
 		}
 
-		airNotification.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		airNotification.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		activity.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		activity.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		final PendingIntent pendingIntent = PendingIntent.getActivity(Aircandi.applicationContext, 0
-				, airNotification.intent
+				, activity.intent
 				, PendingIntent.FLAG_CANCEL_CURRENT);
 
 		/* Default base notification configuration */
 
 		final NotificationCompat.Builder builder = new NotificationCompat.Builder(Aircandi.applicationContext)
-				.setContentTitle(airNotification.title)
-				.setContentText(airNotification.subtitle)
+				.setContentTitle(activity.title)
+				.setContentText(activity.subtitle)
 				.setSmallIcon(R.drawable.ic_stat_notification)
 				.setAutoCancel(true)
 				.setOnlyAlertOnce(true)
@@ -205,14 +202,14 @@ public class MessagingManager {
 				.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS)
 				.setWhen(System.currentTimeMillis());
 
-		String byImageUri = airNotification.photoBy.getUri();
+		String byImageUri = activity.photoBy.getUri();
 
 		/* Large icon */
 
 		if (byImageUri != null) {
 			final BitmapRequest bitmapRequest = new BitmapRequest()
 					.setBitmapUri(byImageUri)
-					.setBitmapRequestor(airNotification)
+					.setBitmapRequestor(activity)
 					.setBitmapSize((int) Aircandi.applicationContext.getResources().getDimensionPixelSize(R.dimen.notification_large_icon_width))
 					.setRequestListener(new RequestListener() {
 
@@ -227,18 +224,18 @@ public class MessagingManager {
 
 								/* Enhance or go with default */
 
-								if (airNotification.entity != null && airNotification.action.equals(ActionType.INSERT)) {
-									if ((airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)
-											|| airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM))
-											&& airNotification.entity.getPhoto().getUri() != null) {
-										useBigPicture(builder, airNotification);
+								if (activity.action.entity != null && activity.action.getEventCategory().equals(EventType.INSERT)) {
+									if ((activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)
+											|| activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM))
+											&& activity.action.entity.getPhoto().getUri() != null) {
+										useBigPicture(builder, activity);
 									}
-									else if (airNotification.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-										useBigText(builder, airNotification);
+									else if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+										useBigText(builder, activity);
 									}
 								}
 								else {
-									String tag = getTag(airNotification);
+									String tag = getTag(activity);
 									mNotificationManager.notify(tag, 0, builder.build());
 								}
 							}
@@ -248,16 +245,16 @@ public class MessagingManager {
 			BitmapManager.getInstance().masterFetch(bitmapRequest);
 		}
 		else {
-			mNotificationManager.notify(getTag(airNotification), 0, builder.build());
+			mNotificationManager.notify(getTag(activity), 0, builder.build());
 		}
 	}
 
-	public void useBigPicture(final NotificationCompat.Builder builder, final AirNotification airNotification) {
+	public void useBigPicture(final NotificationCompat.Builder builder, final Activity activity) {
 
-		String imageUri = airNotification.entity.getPhoto().getUri();
+		String imageUri = activity.action.entity.getPhoto().getUri();
 		final BitmapRequest bitmapRequest = new BitmapRequest()
 				.setBitmapUri(imageUri)
-				.setBitmapRequestor(airNotification)
+				.setBitmapRequestor(activity)
 				.setBitmapSize((int) Aircandi.applicationContext.getResources().getDimensionPixelSize(R.dimen.notification_big_picture_width))
 				.setRequestListener(new RequestListener() {
 
@@ -270,11 +267,11 @@ public class MessagingManager {
 							final BitmapResponse bitmapResponse = (BitmapResponse) serviceResponse.data;
 							NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle()
 									.bigPicture(bitmapResponse.bitmap)
-									.setBigContentTitle(airNotification.title)
-									.setSummaryText(airNotification.subtitle);
+									.setBigContentTitle(activity.title)
+									.setSummaryText(activity.subtitle);
 
 							builder.setStyle(style);
-							String tag = getTag(airNotification);
+							String tag = getTag(activity);
 							mNotificationManager.notify(tag, 0, builder.build());
 						}
 					}
@@ -283,58 +280,37 @@ public class MessagingManager {
 		BitmapManager.getInstance().masterFetch(bitmapRequest);
 	}
 
-	public void useBigText(NotificationCompat.Builder builder, AirNotification airNotification) {
+	public void useBigText(NotificationCompat.Builder builder, Activity activity) {
 		NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle()
-				.setBigContentTitle(airNotification.title)
-				.bigText(airNotification.entity.description)
-				.setSummaryText(airNotification.subtitle);
+				.setBigContentTitle(activity.title)
+				.bigText(activity.action.entity.description)
+				.setSummaryText(activity.subtitle);
 
 		builder.setStyle(style);
 
-		mNotificationManager.notify(getTag(airNotification), 0, builder.build());
+		mNotificationManager.notify(getTag(activity), 0, builder.build());
 	}
 
 	public void cancelNotification(String tag) {
 		mNotificationManager.cancel(tag, 0);
 	}
 
-	public void storeNotification(final AirNotification notification, String jsonNotification) {
-
-		ContentValues values = new ContentValues();
-		values.put(NotificationTable.COLUMN_SENT_DATE, notification.sentDate.longValue());
-		values.put(NotificationTable.COLUMN_OBJECT, jsonNotification);
-
-		String where = NotificationTable.COLUMN_TARGET_ID
-				+ "=? AND "
-				+ NotificationTable.COLUMN_ACTION + "=?";
-
-		int updateCount = Aircandi.applicationContext.getContentResolver().update(NotificationsContentProvider.CONTENT_URI
-				, values
-				, where
-				, new String[] { notification.entity.id, notification.action });
-
-		if (updateCount == 0) {
-			values.put(NotificationTable.COLUMN_ACTION, notification.action);
-			values.put(NotificationTable.COLUMN_TARGET_ID, notification.entity.id);
-			Aircandi.applicationContext.getContentResolver().insert(NotificationsContentProvider.CONTENT_URI, values);
-		}
-
-		mNewCount++;
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
-	public String getTag(AirNotification notification) {
-		if (notification.action.equals(ActionType.EXPAND)) {
+	public String getTag(Activity activity) {
+		if (activity.action.getEventCategory().equals(EventType.EXPAND)) {
 			return Tag.UPDATE;
 		}
-		else if (notification.action.equals(ActionType.MOVE)) {
+		else if (activity.action.getEventCategory().equals(EventType.MOVE)) {
 			return Tag.UPDATE;
 		}
-		else if (notification.action.equals(ActionType.INSERT)) {
+		else if (activity.action.getEventCategory().equals(EventType.INSERT)) {
 			return Tag.INSERT;
+		}
+		else if (activity.action.getEventCategory().equals(EventType.REFRESH)) {
+			return Tag.REFRESH;
 		}
 		return Tag.UPDATE;
 	}
@@ -342,10 +318,6 @@ public class MessagingManager {
 	// --------------------------------------------------------------------------------------------
 	// Properties
 	// --------------------------------------------------------------------------------------------	
-
-	public void setNewCount(Integer newCount) {
-		mNewCount = newCount;
-	}
 
 	public Install getInstall() {
 		return mInstall;
@@ -362,5 +334,6 @@ public class MessagingManager {
 	public static class Tag {
 		public static String	INSERT	= "insert";
 		public static String	UPDATE	= "update";
+		public static String	REFRESH	= "refresh";
 	}
 }

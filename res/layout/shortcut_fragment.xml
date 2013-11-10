@@ -14,7 +14,7 @@
         android:layout_alignParentTop="true"
         android:background="?attr/backgroundCandi"
         android:fillViewport="true"
-        android:visibility="gone" >
+        android:visibility="invisible" >
 
         <LinearLayout
             style="@style/form_content_layout"

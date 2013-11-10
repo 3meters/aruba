@@ -27,6 +27,7 @@ import com.aircandi.applications.Pictures;
 import com.aircandi.applications.Places;
 import com.aircandi.applications.Users;
 import com.aircandi.components.EntityManager;
+import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.CacheStamp;
@@ -58,12 +59,30 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	protected Entity		mEntity;
 
 	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		if (savedInstanceState != null) {
+			Logger.d(this, "Fragment restoring state");
+			final int[] position = savedInstanceState.getIntArray("ARTICLE_SCROLL_POSITION");
+			if (position != null && mScrollView != null) {
+				mScrollView.post(new Runnable() {
+					@Override
+					public void run() {
+						mScrollView.scrollTo(position[0], position[1]);
+					}
+				});
+			}
+		}
+	}
+
+	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = super.onCreateView(inflater, container, savedInstanceState);
 		if (view == null) return view;
-		
+
 		mScrollView = (ScrollView) view.findViewById(R.id.scroll_view);
 		mMessage = (TextView) view.findViewById(R.id.message);
+
 		return view;
 	}
 
@@ -221,7 +240,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 		else if (mShortcutType.equals(Constants.TYPE_LINK_WATCH)) {
 
 			Boolean empty = true;
-			
+
 			/* Watching places */
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PLACE, Direction.out, null, false, false);
 			settings.appClass = Places.class;
@@ -281,7 +300,7 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 						, R.id.shortcut_holder
 						, R.layout.temp_place_switchboard_item);
 			}
-			
+
 			showMessage(empty);
 		}
 
@@ -494,6 +513,23 @@ public abstract class BaseShortcutFragment extends BaseFragment {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		/*
+		 * I think this only gets called if the fragment is detached.
+		 */
+		super.onSaveInstanceState(outState);
+		Logger.d(this, "Fragment saving state");
+		if (mScrollView != null) {
+			outState.putIntArray("ARTICLE_SCROLL_POSITION", new int[] { mScrollView.getScrollX(), mScrollView.getScrollY() });
+		}
+	}
+
+	@Override
+	public void onScollToTop() {
+		scrollToTop(mScrollView);
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Methods

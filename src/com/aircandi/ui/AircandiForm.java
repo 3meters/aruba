@@ -3,8 +3,10 @@ package com.aircandi.ui;
 import java.util.Locale;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 
@@ -63,11 +65,15 @@ import com.aircandi.utilities.Routing.Route;
  * Unlock screen with Aircandi in foreground: Restart->Start->Resume
  */
 
-public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
+public class AircandiForm extends BaseBrowse {
 
 	private Number					mPauseDate;
-	private Fragment				mCurrentFragment;
 	private Fragment				mRadarFragment;
+	private static String			TAG_RADAR		= "radar";
+	private static String			TAG_CREATED		= "created";
+	private static String			TAG_WATCHING	= "watching";
+	private static String			TAG_ACTIVITY	= "activity";
+	private static String[]			fragmentTags	= { TAG_RADAR, TAG_CREATED, TAG_WATCHING, TAG_ACTIVITY };
 
 	private PullToRefreshAttacher	mPullToRefreshAttacher;
 
@@ -104,7 +110,7 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 			mActionBar.setDisplayHomeAsUpEnabled(false);
 
 			if (Aircandi.getInstance().getCurrentUser().isAnonymous()) {
-				showFragment(RadarFragment.class);
+				showFragment(RadarFragment.class, null);
 				return;
 			}
 
@@ -123,6 +129,11 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 		Routing.shortcut(this, shortcut, null, null);
 	}
 
+	public void onMoreButtonClick(View view) {
+		ActivityFragment fragment = (ActivityFragment) getCurrentFragment();
+		fragment.onMoreButtonClick(view);
+	}
+
 	@Override
 	public void onAdd() {
 		BaseFragment fragment = getCurrentFragment();
@@ -139,67 +150,74 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 		}
 	}
 
-	@Override
-	public void onTabSelected(Tab tab, FragmentTransaction ft) {
-		TabInfo info = (TabInfo) tab.getTag();
-		showFragment(info.clss);
-	}
-
-	@Override
-	public void onTabUnselected(Tab tab, FragmentTransaction ft) {}
-
-	@Override
-	public void onTabReselected(Tab tab, FragmentTransaction ft) {}
-
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
 	protected void showTabs(Boolean visible) {
 		if (visible) {
-			mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-			if (getSupportActionBar().getTabCount() == 0) {
-				addTab(getString(R.string.tab_radar_item), getString(R.string.tab_radar_item), RadarFragment.class, null);
-				addTab(getString(R.string.tab_watching_item), getString(R.string.tab_watching_item), WatchingFragment.class, null);
-				addTab(getString(R.string.tab_created_item), getString(R.string.tab_created_item), CreatedFragment.class, null);
-				addTab(getString(R.string.tab_notifications_item), getString(R.string.tab_notifications_item), NewsFragment.class, null);
+			if (mActionBar.getNavigationMode() != ActionBar.NAVIGATION_MODE_TABS) {
+				mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+				if (getSupportActionBar().getTabCount() == 0) {
+
+					addTab(getString(R.string.tab_radar_item)
+							, getString(R.string.tab_radar_item)
+							, new TabListener<RadarFragment>(this, TAG_RADAR, RadarFragment.class)
+							, RadarFragment.class, null);
+					addTab(getString(R.string.tab_watching_item)
+							, getString(R.string.tab_watching_item)
+							, new TabListener<WatchingFragment>(this, TAG_WATCHING, WatchingFragment.class)
+							, WatchingFragment.class, null);
+					addTab(getString(R.string.tab_created_item)
+							, getString(R.string.tab_created_item)
+							, new TabListener<CreatedFragment>(this, TAG_CREATED, CreatedFragment.class)
+							, CreatedFragment.class, null);
+					addTab(getString(R.string.tab_activity_item)
+							, getString(R.string.tab_activity_item)
+							, new TabListener<ActivityFragment>(this, TAG_ACTIVITY, ActivityFragment.class)
+							, ActivityFragment.class, null);
+				}
 			}
 		}
 		else {
-			mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-			getSupportActionBar().removeAllTabs();
+			if (mActionBar.getNavigationMode() != ActionBar.NAVIGATION_MODE_STANDARD) {
+				mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+				getSupportActionBar().removeAllTabs();
+			}
 		}
 	}
 
-	public void addTab(String tag, CharSequence label, Class<?> clss, Bundle args) {
-		ActionBar.Tab tab = getSupportActionBar().newTab();
-		tab.setText(label);
-		tab.setTabListener(this);
+	public void addTab(String tag, CharSequence label, TabListener listener, Class<?> clss, Bundle args) {
+		ActionBar.Tab tab = getSupportActionBar().newTab()
+				.setText(label)
+				.setTag(tag)
+				.setTabListener(listener);
+
 		getSupportActionBar().addTab(tab, false);
-		TabInfo info = new TabInfo(tag, clss, args);
-		tab.setTag(info);
 	}
 
-	public void showFragment(Class<?> clazz) {
+	public void showFragment(Class<?> clazz, FragmentTransaction ft) {
 		Fragment fragment = null;
+		FragmentTransaction transaction = ft;
+
 		if (clazz.getName().equals("com.aircandi.ui.RadarFragment") && mRadarFragment != null) {
 			fragment = mRadarFragment;
 		}
 		else {
 			fragment = Fragment.instantiate(this, clazz.getName(), null);
 		}
-		mCurrentFragment = fragment;
 		if (clazz.getName().equals("com.aircandi.ui.RadarFragment")) {
 			mRadarFragment = fragment;
 		}
 
-		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
-		/* Replace whatever is in the fragment_container view with this fragment */
-		transaction.replace(R.id.fragment_holder, fragment);
-
-		/* Commit the transaction */
-		transaction.commit();
+		if (transaction == null) {
+			transaction = getSupportFragmentManager().beginTransaction();
+			transaction.replace(R.id.fragment_holder, fragment);
+			transaction.commit();
+		}
+		else {
+			transaction.add(R.id.fragment_holder, fragment);
+		}
 
 		/* Creates call to onPrepareOptionsMenu */
 		invalidateOptionsMenu();
@@ -221,7 +239,14 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 	}
 
 	public BaseFragment getCurrentFragment() {
-		return (BaseFragment) mCurrentFragment;
+		FragmentManager fm = getSupportFragmentManager();
+		for (int i = 0; i < fragmentTags.length; i++) {
+			Fragment fragment = fm.findFragmentByTag(fragmentTags[i]);
+			if (fragment != null && fragment.isVisible()) {
+				return (BaseFragment) fragment;
+			}
+		}
+		return null;
 	}
 
 	public PullToRefreshAttacher getPullToRefreshAttacher() {
@@ -321,16 +346,43 @@ public class AircandiForm extends BaseBrowse implements ActionBar.TabListener {
 	// Classes
 	// --------------------------------------------------------------------------------------------
 
-	@SuppressWarnings("unused")
-	private static final class TabInfo {
-		private final String	tag;
-		private final Class<?>	clss;
-		private final Bundle	args;
+	public static class TabListener<T extends Fragment> implements ActionBar.TabListener {
+		private Fragment		mFragment;
+		private final Activity	mActivity;
+		private final String	mTag;
+		private final Class<T>	mClass;
 
-		TabInfo(String _tag, Class<?> _class, Bundle _args) {
-			tag = _tag;
-			clss = _class;
-			args = _args;
+		public TabListener(Activity activity, String tag, Class<T> clss) {
+			mActivity = activity;
+			mTag = tag;
+			mClass = clss;
+		}
+
+		@Override
+		public void onTabSelected(Tab tab, FragmentTransaction ft) {
+			if (mFragment == null) {
+				mFragment = Fragment.instantiate(mActivity, mClass.getName());
+				ft.add(android.R.id.content, mFragment, mTag);
+			}
+			else {
+				ft.attach(mFragment);
+			}
+		}
+
+		@Override
+		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+			if (mFragment != null) {
+				ft.detach(mFragment);
+			}
+		}
+
+		@Override
+		public void onTabReselected(Tab tab, FragmentTransaction ft) {
+			((AircandiForm)mActivity).getCurrentFragment().onScollToTop();
+			/*
+			 * User selected the already selected tab. We could use
+			 * this gestured to refresh or scroll to the top.
+			 */
 		}
 	}
 }

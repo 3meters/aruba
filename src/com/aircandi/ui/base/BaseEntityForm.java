@@ -465,6 +465,8 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
+		Logger.d(this, "Activity saving state");
+
 		if (mScrollView != null) {
 			outState.putIntArray("ARTICLE_SCROLL_POSITION", new int[] { mScrollView.getScrollX(), mScrollView.getScrollY() });
 		}
@@ -472,7 +474,13 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		/*
+		 * Will only be called if the activity is destroyed and restored. Restore
+		 * state could be handled in onCreate or here later in the lifecycle after
+		 * everything has been initialized.
+		 */
 		super.onRestoreInstanceState(savedInstanceState);
+		Logger.d(this, "Activity restoring state");
 		final int[] position = savedInstanceState.getIntArray("ARTICLE_SCROLL_POSITION");
 		if (position != null && mScrollView != null) {
 			mScrollView.post(new Runnable() {

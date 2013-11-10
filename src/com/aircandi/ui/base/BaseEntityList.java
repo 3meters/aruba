@@ -71,20 +71,19 @@ import com.aircandi.utilities.UI;
 public abstract class BaseEntityList extends BaseBrowse implements ListDelegate {
 
 	protected AbsListView		mListView;
-	protected OnClickListener	mClickListener;
-	protected Integer			mPhotoWidthPixels;
-
-	private List<Entity>		mEntities			= new ArrayList<Entity>();
-	private Cursor				mCursorSettings;
 	private Button				mButtonNewEntity;
+	protected Integer			mPhotoWidthPixels;
+	protected View				mLoading;
 
 	private static final long	LIST_MAX			= 300L;
 	private static final int	PAGE_SIZE_DEFAULT	= 20;
 	private static final int	LAZY_LOAD_THRESHOLD	= 10;
 
+	protected OnClickListener	mClickListener;
+	private List<Entity>		mEntities			= new ArrayList<Entity>();
+	private Cursor				mCursorSettings;
 	private ListAdapter			mAdapter;
 	private Boolean				mMore				= false;
-	protected View				mLoading;
 
 	/* Inputs */
 	public String				mForEntityId;

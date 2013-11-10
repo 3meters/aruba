@@ -39,7 +39,7 @@ public class EntityGrid extends BaseEntityList {
 
 		mPhotoWidthPixels = requestedColumnWidth + spaceLeftOver / mNumColumns;
 		gridView.setColumnWidth(mPhotoWidthPixels);
-		
+
 		mLoading = LayoutInflater.from(this).inflate(R.layout.temp_grid_item_loading, null);
 		Integer nudge = mResources.getDimensionPixelSize(R.dimen.grid_item_height_kick);
 		final AbsListView.LayoutParams params = new AbsListView.LayoutParams(mPhotoWidthPixels, mPhotoWidthPixels - nudge);
@@ -53,8 +53,8 @@ public class EntityGrid extends BaseEntityList {
 		/*
 		 * Refreshes the comment list to show new comment.
 		 */
-		if (event.notification.toEntity != null && mForEntityId.equals(event.notification.toEntity.id)
-				&& mListLinkSchema.equals(event.notification.entity.schema)) {
+		if (event.activity.action.toEntity != null && mForEntityId.equals(event.activity.action.toEntity.id)
+				&& mListLinkSchema.equals(event.activity.action.entity.schema)) {
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
