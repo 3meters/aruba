@@ -329,7 +329,7 @@ public class GifDecoder {
 					code = prefix[code];
 				}
 				first = ((int) suffix[code]) & 0xff;
-				// ADD a new string to the string table,
+				// Add a new string to the string table,
 				if (available >= MAX_STACK_SIZE) {
 					break;
 				}

@@ -13,7 +13,7 @@ public class Stat extends ServiceObject implements Cloneable, Serializable {
 	private static final long	serialVersionUID	= 455904759787968585L;
 
 	@Expose
-	public String				type;
+	public String				event;
 	@Expose
 	public Number				countBy;
 
@@ -32,7 +32,7 @@ public class Stat extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public static Stat setPropertiesFromMap(Stat stat, Map map, Boolean nameMapping) {
-		stat.type = (String) map.get("type");
+		stat.event = (String) map.get("event");
 		stat.countBy = (Number) map.get("countBy");
 		return stat;
 	}

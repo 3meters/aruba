@@ -67,7 +67,7 @@ public class PhotoSourcePicker extends BasePicker implements OnItemClickListener
 			}
 		}
 
-		/* ADD place photo option if this is a place entity */
+		/* Add place photo option if this is a place entity */
 		if (mEntity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			Place place = (Place) mEntity;
 			if (place.getProvider().type != null && place.getProvider().type.equals(Constants.TYPE_PROVIDER_FOURSQUARE)) {

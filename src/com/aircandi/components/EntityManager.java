@@ -614,7 +614,7 @@ public class EntityManager {
 			final ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_REST
 							+ "actions?countBy="
-							+ URLEncoder.encode("_user,type", "utf-8")
+							+ URLEncoder.encode("_user,event", "utf-8")
 							+ "&find="
 							+ URLEncoder.encode("{\"_user\":\"" + entityId + "\"}", "utf-8"))
 					.setRequestType(RequestType.GET)
@@ -783,7 +783,7 @@ public class EntityManager {
 				final ServiceData serviceData = (ServiceData) Json.jsonToObject(jsonResponse, serviceDataType, Json.ServiceDataWrapper.TRUE);
 				final Entity insertedEntity = (Entity) serviceData.data;
 				/*
-				 * Optimization: ADD soft 'create' link so user entity doesn't have to be refetched
+				 * Optimization: Add soft 'create' link so user entity doesn't have to be refetched
 				 */
 				if (!entity.synthetic) {
 					Aircandi.getInstance().getCurrentUser().activityDate = DateTime.nowDate().getTime();
@@ -1077,14 +1077,14 @@ public class EntityManager {
 			, Boolean strong
 			, Shortcut fromShortcut
 			, Shortcut toShortcut
-			, String actionType) {
+			, String actionEvent) {
 		final ModelResult result = new ModelResult();
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("fromId", fromId); 		// required
 		parameters.putString("toId", toId);				// required
 		parameters.putString("type", type);				// required
-		parameters.putString("actionType", actionType);
+		parameters.putString("actionEvent", actionEvent);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "insertLink")
@@ -1112,14 +1112,14 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult deleteLink(String fromId, String toId, String type, String schema, String actionType) {
+	public ModelResult deleteLink(String fromId, String toId, String type, String schema, String actionEvent) {
 		final ModelResult result = new ModelResult();
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("fromId", fromId); 		// required
 		parameters.putString("toId", toId);				// required
 		parameters.putString("type", type);				// required
-		parameters.putString("actionType", actionType);
+		parameters.putString("actionEvent", actionEvent);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteLink")

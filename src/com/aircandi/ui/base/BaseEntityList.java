@@ -81,7 +81,7 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 
 	protected OnClickListener	mClickListener;
 	private List<Entity>		mEntities			= new ArrayList<Entity>();
-	private Cursor				mCursorSettings;
+	private Cursor				mCursor;
 	private ListAdapter			mAdapter;
 	private Boolean				mMore				= false;
 
@@ -387,34 +387,34 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 		 * 
 		 * Sorting is applied to links not the entities on the service side.
 		 */
-		mCursorSettings = new Cursor()
+		mCursor = new Cursor()
 				.setLimit(mListPageSize)
 				.setSort(Maps.asMap("modifiedDate", -1))
 				.setSkip(skip);
 
 		if (mListLinkInactive != null) {
-			mCursorSettings.setWhere(Maps.asMap("inactive", Boolean.parseBoolean(mListLinkInactive)));
+			mCursor.setWhere(Maps.asMap("inactive", Boolean.parseBoolean(mListLinkInactive)));
 		}
 
 		if (mListLinkSchema != null) {
 			List<String> schemas = new ArrayList<String>();
 			schemas.add(mListLinkSchema);
-			mCursorSettings.setSchemas(schemas);
+			mCursor.setSchemas(schemas);
 		}
 
 		if (mListLinkType != null) {
 			List<String> linkTypes = new ArrayList<String>();
 			linkTypes.add(mListLinkType);
-			mCursorSettings.setLinkTypes(linkTypes);
+			mCursor.setLinkTypes(linkTypes);
 		}
 
 		if (mListLinkDirection != null) {
-			mCursorSettings.setDirection(mListLinkDirection);
+			mCursor.setDirection(mListLinkDirection);
 		}
 
 		ModelResult result = EntityManager.getInstance().loadEntitiesForEntity(mForEntityId
 				, getLinkOptions(mListLinkSchema)
-				, mCursorSettings
+				, mCursor
 				, null);
 
 		return result;

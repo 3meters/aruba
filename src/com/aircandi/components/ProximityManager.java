@@ -16,6 +16,7 @@ import android.net.wifi.WifiManager;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
+import com.aircandi.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.events.BeaconsLockedEvent;
 import com.aircandi.events.EntitiesByProximityFinishedEvent;
@@ -26,6 +27,7 @@ import com.aircandi.events.QueryWifiScanReceivedEvent;
 import com.aircandi.service.ServiceResponse;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Beacon;
+import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
@@ -244,12 +246,18 @@ public class ProximityManager {
 
 		}
 
-		/* ADD current registrationId */
+		/* Add current registrationId */
 		String installationId = Aircandi.getInstallationId();
+
+		/* Cursor */
+		Cursor cursor = new Cursor()
+				.setLimit(Aircandi.applicationContext.getResources().getInteger(R.integer.limit_places_radar))
+				.setSort(Maps.asMap("modifiedDate", -1))
+				.setSkip(0);
 
 		serviceResponse = mEntityCache.loadEntitiesByProximity(beaconIds
 				, LinkOptions.getDefault(LinkProfile.LINKS_FOR_BEACONS)
-				, null
+				, cursor
 				, installationId
 				, Aircandi.stopwatch1);
 

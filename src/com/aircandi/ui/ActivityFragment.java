@@ -24,9 +24,11 @@ import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
+import com.aircandi.events.MessageEvent;
 import com.aircandi.service.objects.Activity;
 import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.ServiceData;
+import com.aircandi.service.objects.Action.EventType;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.ui.widgets.AirImageView;
@@ -35,6 +37,7 @@ import com.aircandi.utilities.DateTime.IntervalContext;
 import com.aircandi.utilities.Errors;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.UI;
+import com.squareup.otto.Subscribe;
 
 public class ActivityFragment extends BaseFragment {
 
@@ -170,6 +173,22 @@ public class ActivityFragment extends BaseFragment {
 	// --------------------------------------------------------------------------------------------
 	// Events
 	// --------------------------------------------------------------------------------------------
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onMessage(final MessageEvent event) {
+		/*
+		 * Refresh the form because something new has been added to it
+		 * like a comment or post.
+		 */
+		if (!event.activity.action.getEventCategory().equals(EventType.REFRESH)) {
+			getSherlockActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					onRefresh();
+				}
+			});
+		}
+	}
 
 	@Override
 	public void onRefresh() {
@@ -212,7 +231,7 @@ public class ActivityFragment extends BaseFragment {
 				.setSkip(skip)
 				.setSchemas(schemas)
 				.setLinkTypes(linkTypes)
-				.setWhere(Maps.asMap("type", Maps.asMap("$regex", "^insert|^move|^expand|^restart")));
+				.setWhere(Maps.asMap("event", Maps.asMap("$regex", "^insert|^move|^expand|^restart")));
 
 		ModelResult result = EntityManager.getInstance().loadActivities(Aircandi.getInstance().getCurrentUser().id, mCursor);
 

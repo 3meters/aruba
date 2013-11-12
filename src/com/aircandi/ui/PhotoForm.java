@@ -86,6 +86,7 @@ public class PhotoForm extends BaseBrowse implements FormDelegate {
 			mForEntityId = extras.getString(Constants.EXTRA_ENTITY_PARENT_ID);
 			mListLinkSchema = extras.getString(Constants.EXTRA_LIST_LINK_SCHEMA);
 			mListLinkType = extras.getString(Constants.EXTRA_LIST_LINK_TYPE);
+			mPagingEnabled = extras.getBoolean(Constants.EXTRA_PAGING_ENABLED, true);
 		}
 	}
 
@@ -93,6 +94,9 @@ public class PhotoForm extends BaseBrowse implements FormDelegate {
 	public void initialize(Bundle savedInstanceState) {
 		super.initialize(savedInstanceState);
 		setSupportProgressBarIndeterminateVisibility(true);
+		if (mForEntityId == null) {
+			mPagingEnabled = false;
+		}
 	}
 
 	@Override
@@ -129,13 +133,23 @@ public class PhotoForm extends BaseBrowse implements FormDelegate {
 				else {
 					List<Entity> entities = (List<Entity>) EntityManager.getEntityCache().getEntitiesForEntity(mForEntityId, mListLinkSchema, null,
 							null, null, null);
-					Collections.sort(entities, new Entity.SortByPositionSortDate());
-					for (Entity entity : entities) {
-						Photo photo = entity.getPhoto();
-						photo.setCreatedAt(entity.modifiedDate.longValue());
-						photo.setName(entity.name);
-						photo.setUser(entity.creator);
-						mPhotosForPaging.add(photo);
+					/*
+					 * We might get here just using a link without a downloaded entity. Treat it like paging
+					 * is not enabled.
+					 */
+					if (entities == null || entities.size() == 0) {
+						mPagingEnabled = false;
+						databind(mode);
+					}
+					else {
+						Collections.sort(entities, new Entity.SortByPositionSortDate());
+						for (Entity entity : entities) {
+							Photo photo = entity.getPhoto();
+							photo.setCreatedAt(entity.modifiedDate.longValue());
+							photo.setName(entity.name);
+							photo.setUser(entity.creator);
+							mPhotosForPaging.add(photo);
+						}
 					}
 				}
 				updateViewPager();

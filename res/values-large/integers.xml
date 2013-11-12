@@ -3,13 +3,11 @@
 
     <integer name="limit_shortcuts_flow">21</integer>
     <integer name="limit_shortcuts_flow_create">14</integer>
-   	<integer name="limit_shortcuts_flow_watch">14</integer>
-    
-    <integer name="limit_links_default">22</integer>
+    <integer name="limit_shortcuts_flow_watch">14</integer>
     <integer name="limit_links_like_default">15</integer>
     <integer name="limit_links_watch_default">15</integer>
     <integer name="limit_links_create_default">15</integer>
     <integer name="limit_links_proximity_default">22</integer>
-    <integer name="limit_links_content_default">1</integer>
+    <integer name="limit_links_content_default">15</integer>
     
 </resources>

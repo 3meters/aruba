@@ -619,7 +619,7 @@ public class RadarFragment extends BaseFragment implements
 
 				Aircandi.stopwatch1.stop("Search for places by beacon complete");
 
-				/* ADD some sparkle */
+				/* Add some sparkle */
 				if (previousCount == 0 && entities.size() > 0) {
 					if (Aircandi.settings.getBoolean(Constants.PREF_SOUND_EFFECTS, Constants.PREF_SOUND_EFFECTS_DEFAULT)) {
 						new AsyncTask() {

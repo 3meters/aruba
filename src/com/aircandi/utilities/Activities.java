@@ -1,5 +1,7 @@
 package com.aircandi.utilities;
 
+import android.text.TextUtils;
+
 import com.aircandi.Constants;
 import com.aircandi.components.Logger;
 import com.aircandi.service.objects.Action.EventType;
@@ -66,7 +68,7 @@ public class Activities {
 	}
 
 	public static String subtitle(Activity activity) {
-		
+
 		if (activity.action.getEventCategory().equals(EventType.MOVE)) {
 			if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 
@@ -156,7 +158,8 @@ public class Activities {
 			else if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 
 				if (activity.trigger.equals(TriggerType.NEARBY)) {
-					return String.format("added a %1$s to a %2$s nearby.", activity.action.entity.getSchemaMapped(), activity.action.toEntity.getSchemaMapped());
+					return String
+							.format("added a %1$s to a %2$s nearby.", activity.action.entity.getSchemaMapped(), activity.action.toEntity.getSchemaMapped());
 				}
 				else if (activity.trigger.equals(TriggerType.WATCH)) {
 					return String.format("added a %1$s you are watching.", activity.action.entity.getSchemaMapped());
@@ -248,17 +251,23 @@ public class Activities {
 				&& activity.action.entity.type.equals(Constants.TYPE_APP_TOUR)
 				&& activity.action.getEventCategory().equals(EventType.MOVE)) {
 			photo = activity.action.toEntity.getPhoto();
-			photo.name = activity.action.toEntity.getSchemaMapped();
+			photo.name = TextUtils.isEmpty(activity.action.toEntity.name)
+					? activity.action.toEntity.getSchemaMapped()
+					: activity.action.toEntity.name;
 			photo.shortcut = activity.action.toEntity.getShortcut();
 		}
 		else if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 			photo = activity.action.toEntity.getPhoto();
-			photo.name = activity.action.toEntity.getSchemaMapped();
+			photo.name = TextUtils.isEmpty(activity.action.toEntity.name)
+					? activity.action.toEntity.getSchemaMapped()
+					: activity.action.toEntity.name;
 			photo.shortcut = activity.action.toEntity.getShortcut();
 		}
 		else {
 			photo = activity.action.entity.getPhoto();
-			photo.name = activity.action.entity.getSchemaMapped();
+			photo.name = TextUtils.isEmpty(activity.action.entity.name)
+					? activity.action.entity.getSchemaMapped()
+					: activity.action.entity.name;
 			photo.shortcut = activity.action.entity.getShortcut();
 		}
 		return photo;

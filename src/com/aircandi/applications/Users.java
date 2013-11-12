@@ -18,8 +18,10 @@ import com.aircandi.utilities.Animate.TransitionType;
 
 public class Users {
 
-	public static void view(Context context, String entityId, String parentId) {
+	public static void view(Context context, String entityId, String linkType, String parentId) {
 		IntentBuilder intentBuilder = new IntentBuilder(context, UserForm.class)
+				.setListLinkType(linkType)
+				.setListLinkSchema(Constants.SCHEMA_ENTITY_USER)
 				.setEntityId(entityId)
 				.setEntityParentId(parentId);
 		context.startActivity(intentBuilder.create());

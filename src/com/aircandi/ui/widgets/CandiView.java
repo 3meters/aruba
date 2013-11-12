@@ -201,7 +201,7 @@ public class CandiView extends RelativeLayout {
 
 		/* Indicators */
 		setVisibility(mShortcuts, View.GONE);
-		if (mShortcuts != null && !entity.synthetic) {
+		if (mShortcuts != null) {
 
 			mShortcuts.removeAllViews();
 			final int sizePixels = UI.getRawPixelsForDisplayPixels(this.getContext(), options.imageSizePixels);
@@ -209,35 +209,40 @@ public class CandiView extends RelativeLayout {
 			/* Post indicator always goes first */
 			if (options.candigramsEnabled) {
 				Count count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_CANDIGRAM, false, Direction.in);
-				if (count != null && (count.count.intValue() > 0 || options.showIfZero)) {
+				if (options.showIfZero && count == null) count = new Count(Constants.TYPE_LINK_CONTENT, null, 0);
+				if (options.showIfZero || (count != null && (count.count.intValue() > 0))) {
 					addIndicator(R.id.holder_indicator_candigrams, "resource:ic_candigrams_dark", null, sizePixels);
 				}
 			}
 
 			if (options.picturesEnabled) {
 				Count count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_PICTURE, false, Direction.in);
-				if (count != null && (count.count.intValue() > 0 || options.showIfZero)) {
+				if (options.showIfZero && count == null) count = new Count(Constants.TYPE_LINK_CONTENT, null, 0);
+				if (options.showIfZero || (count != null && (count.count.intValue() > 0))) {
 					addIndicator(R.id.holder_indicator_pictures, "resource:ic_pictures_dark", null, sizePixels);
 				}
 			}
 
 			if (options.commentsEnabled) {
 				Count count = entity.getCount(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_COMMENT, false, Direction.in);
-				if (count != null && (count.count.intValue() > 0 || options.showIfZero)) {
+				if (options.showIfZero && count == null) count = new Count(Constants.TYPE_LINK_CONTENT, null, 0);
+				if (options.showIfZero || (count != null && (count.count.intValue() > 0))) {
 					addIndicator(R.id.holder_indicator_comments, "resource:ic_comments_dark", null, sizePixels);
 				}
 			}
 
 			if (options.likesEnabled) {
 				Count count = entity.getCount(Constants.TYPE_LINK_LIKE, null, false, Direction.in);
-				if (count != null && (count.count.intValue() > 0 || options.showIfZero)) {
+				if (options.showIfZero && count == null) count = new Count(Constants.TYPE_LINK_LIKE, null, 0);
+				if (options.showIfZero || (count != null && (count.count.intValue() > 0))) {
 					addIndicator(R.id.holder_indicator_likes, "resource:ic_like_holo_dark", String.valueOf(count.count.intValue()), sizePixels);
 				}
 			}
 
 			if (options.watchingEnabled) {
 				Count count = entity.getCount(Constants.TYPE_LINK_WATCH, null, false, Direction.in);
-				if (count != null && (count.count.intValue() > 0 || options.showIfZero)) {
+				if (options.showIfZero && count == null) count = new Count(Constants.TYPE_LINK_WATCH, null, 0);
+				if (options.showIfZero || (count != null && (count.count.intValue() > 0))) {
 					addIndicator(R.id.holder_indicator_watching, "resource:ic_watched_holo_dark", String.valueOf(count.count.intValue()), sizePixels);
 				}
 			}

@@ -197,35 +197,35 @@ public class UserForm extends BaseEntityForm {
 			int placeEditCount = 0;
 
 			for (Stat stat : user.stats) {
-				if (stat.type.startsWith("link_proximity")) {
+				if (stat.event.startsWith("link_proximity")) {
 					tuneCount += stat.countBy.intValue();
 				}
 
-				if (stat.type.equals("entity_proximity")) {
+				if (stat.event.equals("entity_proximity")) {
 					tuneCount += stat.countBy.intValue();
 				}
 
-				if (stat.type.startsWith("update_entity")) {
+				if (stat.event.startsWith("update_entity")) {
 					editCount += stat.countBy.intValue();
 				}
 
-				if (stat.type.startsWith("insert_entity")) {
+				if (stat.event.startsWith("insert_entity")) {
 					insertCount += stat.countBy.intValue();
 				}
 
-				if (stat.type.equals("insert_entity_place_custom")) {
+				if (stat.event.equals("insert_entity_place_custom")) {
 					placeInsertCount += stat.countBy.intValue();
 				}
-				else if (stat.type.equals("insert_entity_post")) {
+				else if (stat.event.equals("insert_entity_post")) {
 					postInsertCount += stat.countBy.intValue();
 				}
-				else if (stat.type.equals("insert_entity_comment")) {
+				else if (stat.event.equals("insert_entity_comment")) {
 					commentInsertCount += stat.countBy.intValue();
 				}
-				else if (stat.type.equals("update_entity_place")) {
+				else if (stat.event.equals("update_entity_place")) {
 					placeEditCount += stat.countBy.intValue();
 				}
-				else if (stat.type.equals("update_entity_post")) {
+				else if (stat.event.equals("update_entity_post")) {
 					postEditCount += stat.countBy.intValue();
 				}
 			}

@@ -13,6 +13,7 @@ import android.os.Bundle;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
+import com.aircandi.R;
 import com.aircandi.ServiceConstants;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.service.RequestType;
@@ -199,8 +200,23 @@ public class EntityCache implements Map<String, Entity> {
 						entity.toId = forEntityId;
 					}
 				}
+				
 				decorate(loadedEntities, linkOptions);
-				upsertEntities(loadedEntities);
+				upsertEntities(loadedEntities);				
+				/*
+				 * Make sure the forEntity has links to match so it stays
+				 * synchronized.
+				 */
+//				for (Entity entity : loadedEntities) {
+//					Entity forEntity = get(forEntityId);
+//					if (forEntity != null) {
+//						Link link = forEntity.getLink(Constants.TYPE_LINK_CONTENT, entity.schema, entity.id, Direction.in);
+//						if (link == null) {
+//							Shortcut fromShortcut = entity.getShortcut();
+//							addLink(entity.id, forEntityId, Constants.TYPE_LINK_CONTENT, true, fromShortcut, null);
+//						}
+//					}
+//				}
 			}
 		}
 
@@ -278,7 +294,7 @@ public class EntityCache implements Map<String, Entity> {
 
 		final Bundle parameters = new Bundle();
 		parameters.putString("location", "object:" + Json.objectToJson(location));
-		parameters.putInt("limit", 50);
+		parameters.putInt("limit", Aircandi.applicationContext.getResources().getInteger(R.integer.limit_places_radar));
 		parameters.putString("provider",
 				Aircandi.settings.getString(
 						Constants.PREF_PLACE_PROVIDER,

@@ -769,7 +769,7 @@ public final class Routing {
 			}
 			else if (shortcut.app.equals(Constants.TYPE_APP_USER)) {
 				if (shortcut.getAction().equals(Constants.ACTION_VIEW)) {
-					Users.view(activity, shortcut.appId, entity.id);
+					Users.view(activity, shortcut.appId, shortcut.linkType, entity.id);
 				}
 				else if (shortcut.getAction().equals(Constants.ACTION_VIEW_FOR)) {
 					Users.viewFor(activity, entity.id, shortcut.linkType, direction);
@@ -832,7 +832,7 @@ public final class Routing {
 						Places.view(activity, shortcut.getId(), entity != null ? entity.id : null);
 					}
 					else if (shortcut.app.equals(Constants.TYPE_APP_USER)) {
-						Users.view(activity, shortcut.getId(), entity != null ? entity.id : null);
+						Users.view(activity, shortcut.getId(), shortcut.linkType, entity != null ? entity.id : null);
 					}
 				}
 			}

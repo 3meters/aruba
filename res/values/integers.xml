@@ -1,26 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Need more applinks because we stack them by app -->
+
     <integer name="limit_shortcuts_flow">8</integer>
     <integer name="limit_shortcuts_flow_create">8</integer>
-   	<integer name="limit_shortcuts_flow_watch">8</integer>
-    
-    <integer name="limit_links_default">9</integer>
-    <integer name="limit_links_like_default">9</integer>
-    <integer name="limit_links_watch_default">9</integer>
-    <integer name="limit_links_create_default">9</integer>
-    <integer name="limit_links_proximity_default">9</integer>
-    
-    <!-- Only need one so we can show a picture for the stack -->
-    
-    <integer name="limit_links_content_default">1</integer>
-    
-    <!-- Need more applinks because we stack them by app -->
-    
+    <integer name="limit_shortcuts_flow_watch">8</integer>
+    <integer name="limit_links_like_default">0</integer>
+    <integer name="limit_links_watch_default">0</integer>
+    <integer name="limit_links_create_default">0</integer>
+    <integer name="limit_links_proximity_default">0</integer>
+    <integer name="limit_links_content_default">9</integer>
     <integer name="limit_links_applinks_default">30</integer>
-    
     <integer name="limit_places_radar">50</integer>
-    
     <integer name="anim_extra_long">300</integer>
-    
+
 </resources>

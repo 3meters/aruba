@@ -109,7 +109,7 @@ public class AirAutoCompleteTextView extends AutoCompleteTextView {
 			this.setCompoundDrawables(mSearchDrawable, null, null, null);
 		}
 		else {
-			/* ADD clear button */
+			/* Add clear button */
 			this.setCompoundDrawablesWithIntrinsicBounds(mSearchDrawable, null, mClearDrawable, null);
 		}
 	}
