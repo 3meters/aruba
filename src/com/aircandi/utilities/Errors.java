@@ -14,7 +14,6 @@ import org.apache.http.conn.ConnectTimeoutException;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
@@ -27,9 +26,8 @@ import com.aircandi.service.GcmRegistrationIOException;
 import com.aircandi.service.ImageSizeException;
 import com.aircandi.service.ImageUnusableException;
 import com.aircandi.service.ServiceResponse;
-import com.aircandi.ui.SplashForm;
 import com.aircandi.ui.base.BaseActivity;
-import com.aircandi.utilities.Animate.TransitionType;
+import com.aircandi.utilities.Routing.Route;
 
 public final class Errors {
 
@@ -77,19 +75,14 @@ public final class Errors {
 		}
 
 		if (errorResponse.signout) {
-			BaseActivity.signout(activity, true);
+			BaseActivity.signout(activity, false);
 		}
 		else if (errorResponse.splash) {
 			/*
 			 * Mostly because a more current client version is required.
 			 */
-			Aircandi.applicationUpdateRequired = true;
 			if (activity != null && !activity.getClass().getSimpleName().equals("SplashForm")) {
-				final Intent intent = new Intent(activity, SplashForm.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				activity.startActivity(intent);
-				activity.finish();
-				Animate.doOverridePendingTransition(activity, TransitionType.FORM_TO_PAGE);
+				Routing.route(activity, Route.SPLASH);
 			}
 		}
 	}
@@ -146,7 +139,7 @@ public final class Errors {
 						ErrorResponse errorResponse = new ErrorResponse(ResponseType.DIALOG
 								, context.getString(R.string.error_session_expired)
 								, context.getString(R.string.error_session_expired_title));
-						errorResponse.signout = true;
+						errorResponse.splash = true;
 						return errorResponse;
 					}
 					else if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
@@ -159,7 +152,7 @@ public final class Errors {
 							}
 						}
 						ErrorResponse errorResponse = new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_session_invalid));
-						errorResponse.signout = true;
+						errorResponse.splash = true;
 						return errorResponse;
 					}
 					else if (serviceResponse.statusCodeService == ServiceConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
@@ -183,6 +176,7 @@ public final class Errors {
 				 * is not allowed to access the service api.
 				 */
 				ErrorResponse errorResponse = new ErrorResponse(ResponseType.NONE, context.getString(R.string.dialog_update_message));
+				Aircandi.applicationUpdateRequired = true;
 				errorResponse.track = true;
 				errorResponse.splash = true;
 				return errorResponse;

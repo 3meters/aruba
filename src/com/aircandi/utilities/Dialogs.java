@@ -289,7 +289,14 @@ public class Dialogs {
 						}
 						else if (which == Dialog.BUTTON_NEGATIVE) {
 							final ShortcutMeta meta = Shortcut.shortcutMeta.get(shortcut.app);
-							meta.installDeclined = true;
+							if (meta != null) {
+								meta.installDeclined = true;
+							}
+							else {
+								ShortcutMeta shortcutMeta = new ShortcutMeta();
+								shortcutMeta.installDeclined = true;
+								Shortcut.shortcutMeta.put(shortcut.app, shortcutMeta);
+							}
 							Routing.route(activity, Route.SHORTCUT, entity, shortcut, null, null);
 							dialog.dismiss();
 						}
