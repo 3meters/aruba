@@ -447,7 +447,7 @@ public class EntityCache implements Map<String, Entity> {
 		}
 	}
 
-	public void addLink(String fromId, String toId, String type, Boolean strong, Shortcut fromShortcut, Shortcut toShortcut) {
+	public void addLink(String fromId, String toId, String type, Shortcut fromShortcut, Shortcut toShortcut) {
 
 		Long time = DateTime.nowDate().getTime();
 

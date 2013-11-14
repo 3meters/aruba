@@ -32,8 +32,8 @@ public class Count extends ServiceObject implements Cloneable, Serializable {
 	@Override
 	public Count clone() {
 		try {
-			final Count stat = (Count) super.clone();
-			return stat;
+			final Count count = (Count) super.clone();
+			return count;
 		}
 		catch (final CloneNotSupportedException ex) {
 			throw new AssertionError();
@@ -42,9 +42,15 @@ public class Count extends ServiceObject implements Cloneable, Serializable {
 
 	public static Count setPropertiesFromMap(Count stat, Map map, Boolean nameMapping) {
 		stat.type = (String) map.get("type");
+		if (stat.type == null && map.get("event") != null) {
+			stat.type = (String) map.get("event");
+		}
 		stat.schema = (String) map.get("schema");
 		stat.inactive = (Boolean) map.get("inactive");
 		stat.count = (Number) map.get("count");
+		if (stat.count == null && map.get("countBy") != null) {
+			stat.count = (Number) map.get("countBy");
+		}
 		return stat;
 	}
 }

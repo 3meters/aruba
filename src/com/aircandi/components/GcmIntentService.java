@@ -58,17 +58,19 @@ public class GcmIntentService extends IntentService {
 					String jsonActivity = extras.getString("activity");
 					Activity activity = (Activity) Json.jsonToObject(jsonActivity, Json.ObjectType.ACTIVITY);
 
-					/* We don't self notify unless dev settings are on and self notify is enabled */
-					if (!Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
-							|| !Aircandi.settings.getBoolean(Constants.PREF_TESTING_SELF_NOTIFY, Constants.PREF_TESTING_SELF_NOTIFY_DEFAULT)) {
-						if (activity.action.user != null
-								&& Aircandi.getInstance().getCurrentUser() != null
-								&& activity.action.user.id.equals(Aircandi.getInstance().getCurrentUser().id)) {
+					/*
+					 * If user is currently on the activities list, it will be auto refreshed so don't show
+					 * notification in the status bar. Don't need to broadcast either.
+					 */
+					android.app.Activity currentActivity = Aircandi.getInstance().getCurrentActivity();
+					if (currentActivity != null && currentActivity.getClass().equals(AircandiForm.class)) {
+						BaseFragment fragment = ((AircandiForm) currentActivity).getCurrentFragment();
+						if (fragment.getClass().equals(ActivityFragment.class)) {
 							return;
 						}
 					}
-					
-					/* Cherry pick refresh notifications */
+
+					/* Cherry pick pure refresh notifications */
 					if (activity.action.getEventCategory().equals(EventType.REFRESH)) {
 						MessagingManager.getInstance().broadcastActivity(activity);
 						return;
@@ -96,17 +98,11 @@ public class GcmIntentService extends IntentService {
 					/* Trigger event so subscribers can decide if they should refresh */
 					MessagingManager.getInstance().broadcastActivity(activity);
 
-					/* Display if user is not currently using the notifications activity */
-					android.app.Activity currentActivity = Aircandi.getInstance().getCurrentActivity();
-					if (currentActivity != null && currentActivity.getClass().equals(AircandiForm.class)) {
-						BaseFragment fragment = ((AircandiForm) currentActivity).getCurrentFragment();
-						if (fragment.getClass().equals(ActivityFragment.class)) {
-							return;
-						}
-					}
+					/* Tickle activity date on current user to flag auto refresh for activity list */
+					Aircandi.getInstance().getCurrentUser().activityDate = activity.sentDate;
 
-					MessagingManager.getInstance().showActivity(activity, Aircandi.applicationContext);
-
+					/* Send notification */
+					MessagingManager.getInstance().notificationForActivity(activity, Aircandi.applicationContext);
 				}
 			}
 		}

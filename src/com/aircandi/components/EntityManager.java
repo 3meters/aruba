@@ -38,6 +38,7 @@ import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Candigram;
 import com.aircandi.service.objects.Category;
+import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.Document;
 import com.aircandi.service.objects.Entity;
@@ -55,7 +56,6 @@ import com.aircandi.service.objects.ServiceBase.UpdateScope;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.Shortcut;
-import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.Activities;
 import com.aircandi.utilities.DateTime;
@@ -627,8 +627,8 @@ public class EntityManager {
 			result.serviceResponse = dispatch(serviceRequest);
 			if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 				final String jsonResponse = (String) result.serviceResponse.data;
-				final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.STAT, Json.ServiceDataWrapper.TRUE);
-				final List<Stat> stats = (List<Stat>) serviceData.data;
+				final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.COUNT, Json.ServiceDataWrapper.TRUE);
+				final List<Count> stats = (List<Count>) serviceData.data;
 				result.data = stats;
 			}
 
@@ -790,7 +790,6 @@ public class EntityManager {
 					mEntityCache.addLink(Aircandi.getInstance().getCurrentUser().id
 							, insertedEntity.id
 							, Constants.TYPE_LINK_CREATE
-							, false
 							, Aircandi.getInstance().getCurrentUser().getShortcut()
 							, insertedEntity.getShortcut());
 				}
@@ -1106,7 +1105,7 @@ public class EntityManager {
 			 * Fail could be because of ServiceConstants.HTTP_STATUS_CODE_FORBIDDEN_DUPLICATE which is what
 			 * prevents any user from liking the same entity more than once.
 			 */
-			mEntityCache.addLink(fromId, toId, type, strong, fromShortcut, toShortcut);
+			mEntityCache.addLink(fromId, toId, type, fromShortcut, toShortcut);
 		}
 
 		return result;

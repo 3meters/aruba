@@ -27,6 +27,7 @@ import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Candigram;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Comment;
+import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Install;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Photo;
@@ -38,7 +39,6 @@ import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.ServiceObject;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.Shortcut;
-import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 
 public class Json {
@@ -253,8 +253,8 @@ public class Json {
 				else if (objectType == Json.ObjectType.PHOTO) {
 					list.add(Photo.setPropertiesFromMap(new Photo(), (HashMap) map, nameMapping));
 				}
-				else if (objectType == Json.ObjectType.STAT) {
-					list.add(Stat.setPropertiesFromMap(new Stat(), (HashMap) map, nameMapping));
+				else if (objectType == Json.ObjectType.COUNT) {
+					list.add(Count.setPropertiesFromMap(new Count(), (HashMap) map, nameMapping));
 				}
 				else if (objectType == Json.ObjectType.CATEGORY) {
 					list.add(Category.setPropertiesFromMap(new Category(), (HashMap) map, nameMapping));
@@ -421,7 +421,6 @@ public class Json {
 		AIR_LOCATION,
 		CATEGORY,
 		NONE,
-		STAT,
 		SERVICE_ENTRY,
 		APPLINK,
 		SHORTCUT,
@@ -430,7 +429,8 @@ public class Json {
 		POST,
 		COMMENT,
 		AIR_MARKER,
-		ACTIVITY
+		ACTIVITY, 
+		COUNT
 	}
 
 }

@@ -63,13 +63,11 @@ public class User extends Entity {
 	@Expose(serialize = false, deserialize = true)
 	public Number				validationNotifyDate;
 
-	@Expose(serialize = false, deserialize = true)
-	public List<Stat>			stats;
-
 	// --------------------------------------------------------------------------------------------
 	// client fields
 	// --------------------------------------------------------------------------------------------
 
+	public List<Count>			stats;
 	public Session				session;
 
 	public User() {}
@@ -86,7 +84,7 @@ public class User extends Entity {
 	public Boolean isAnonymous() {
 		return id.equals(ServiceConstants.ANONYMOUS_USER_ID);
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Copy and serialization
 	// --------------------------------------------------------------------------------------------
@@ -112,11 +110,12 @@ public class User extends Entity {
 				entity.session = Session.setPropertiesFromMap(new Session(), (HashMap<String, Object>) map.get("session"), nameMapping);
 			}
 
+			/* For local serialization */
 			if (map.get("stats") != null) {
-				entity.stats = new ArrayList<Stat>();
+				entity.stats = new ArrayList<Count>();
 				final List<LinkedHashMap<String, Object>> statMaps = (List<LinkedHashMap<String, Object>>) map.get("stats");
 				for (Map<String, Object> statMap : statMaps) {
-					entity.stats.add(Stat.setPropertiesFromMap(new Stat(), statMap, nameMapping));
+					entity.stats.add(Count.setPropertiesFromMap(new Count(), statMap, nameMapping));
 				}
 			}
 		}
@@ -128,7 +127,7 @@ public class User extends Entity {
 	public User clone() {
 		final User user = (User) super.clone();
 		if (stats != null) {
-			user.stats = (List<Stat>) ((ArrayList) stats).clone();
+			user.stats = (List<Count>) ((ArrayList) stats).clone();
 		}
 		return user;
 	}

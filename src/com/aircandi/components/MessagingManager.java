@@ -144,7 +144,7 @@ public class MessagingManager {
 		BusProvider.getInstance().post(new MessageEvent(activity));
 	}
 
-	public void showActivity(final Activity activity, Context context) {
+	public void notificationForActivity(final Activity activity, Context context) {
 		/*
 		 * Small icon displays on left unless a large icon is specified
 		 * and then it moves to the right.

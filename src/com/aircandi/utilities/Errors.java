@@ -35,19 +35,23 @@ public final class Errors {
 
 	public static void handleError(final Activity activity, ServiceResponse serviceResponse) {
 
-		final ErrorResponse errorResponse = serviceResponse.errorResponse;
+		ErrorResponse errorResponse = serviceResponse.errorResponse;
+		if (errorResponse == null || errorResponse.errorResponseType == null) {
+			errorResponse = new ErrorResponse(ResponseType.TOAST, "Unhandled status error: " + serviceResponse.statusCode);
+		}		
 		/*
 		 * First show any required UI
 		 */
 		if (errorResponse.errorResponseType == ResponseType.DIALOG) {
 			if (activity != null) {
+				final String errorMessage = errorResponse.errorMessage;
 				Aircandi.mainThreadHandler.post(new Runnable() {
 
 					@Override
 					public void run() {
 						Dialogs.alertDialog(R.drawable.ic_launcher
 								, null
-								, errorResponse.errorMessage
+								, errorMessage
 								, null
 								, activity
 								, android.R.string.ok
@@ -213,14 +217,6 @@ public final class Errors {
 						return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_connection_none));
 					}
 				}
-				else {
-					/* We have a network connection so now check for a walled garden */
-					if (!NetworkManager.getInstance().isMobileNetwork()) {
-						if (NetworkManager.getInstance().isWalledGardenConnection()) {
-							return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_connection_walled_garden));
-						}
-					}
-				}
 
 				/*
 				 * Network request failed for some reason:
@@ -266,11 +262,23 @@ public final class Errors {
 					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_client_request_stream_error));
 				}
 				else {
+					/* If we have a wifi network connection, check for a walled garden */
+					if (NetworkManager.getInstance().isConnected()) {
+						if (!NetworkManager.getInstance().isMobileNetwork()) {
+							/* This can trigger another call to getErrorResponse and recurse until a stack overflow.*/
+							if (NetworkManager.getInstance().isWalledGardenConnection()) {
+								return new ErrorResponse(ResponseType.DIALOG, context.getString(R.string.error_connection_walled_garden));
+							}
+						}
+					}
+					
+					/* Show unfriendly message if user is developer and dev stuff is enabled */
 					if (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
 							&& Type.isTrue(Aircandi.getInstance().getCurrentUser().developer)) {
 						return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown_exception) + ": "
 								+ exception.getClass().getSimpleName());
 					}
+					
 					return new ErrorResponse(ResponseType.TOAST, context.getString(R.string.error_service_unknown));
 				}
 			}

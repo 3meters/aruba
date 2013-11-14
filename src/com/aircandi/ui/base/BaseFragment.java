@@ -204,7 +204,7 @@ public abstract class BaseFragment extends SherlockFragment implements FormDeleg
 
 				@Override
 				public void run() {
-					((ListView)scroller).scrollTo(0, 0);
+					((ListView)scroller).setSelection(0);
 				}
 			});
 			

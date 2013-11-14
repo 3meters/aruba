@@ -19,7 +19,6 @@ import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Link.Direction;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
 import com.aircandi.service.objects.Photo;
-import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.widgets.AirImageView;
@@ -68,7 +67,7 @@ public class UserForm extends BaseEntityForm {
 				/* get user stats using rest api */
 				ModelResult result = EntityManager.getInstance().getUserStats(mEntityId);
 				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
-					((User) mEntity).stats = (List<Stat>) result.data;
+					((User) mEntity).stats = (List<Count>) result.data;
 				}
 				return result;
 			}
@@ -196,37 +195,37 @@ public class UserForm extends BaseEntityForm {
 			int postEditCount = 0;
 			int placeEditCount = 0;
 
-			for (Stat stat : user.stats) {
-				if (stat.event.startsWith("link_proximity")) {
-					tuneCount += stat.countBy.intValue();
+			for (Count stat : user.stats) {
+				if (stat.type.startsWith("link_proximity")) {
+					tuneCount += stat.count.intValue();
 				}
 
-				if (stat.event.equals("entity_proximity")) {
-					tuneCount += stat.countBy.intValue();
+				if (stat.type.equals("entity_proximity")) {
+					tuneCount += stat.count.intValue();
 				}
 
-				if (stat.event.startsWith("update_entity")) {
-					editCount += stat.countBy.intValue();
+				if (stat.type.startsWith("update_entity")) {
+					editCount += stat.count.intValue();
 				}
 
-				if (stat.event.startsWith("insert_entity")) {
-					insertCount += stat.countBy.intValue();
+				if (stat.type.startsWith("insert_entity")) {
+					insertCount += stat.count.intValue();
 				}
 
-				if (stat.event.equals("insert_entity_place_custom")) {
-					placeInsertCount += stat.countBy.intValue();
+				if (stat.type.equals("insert_entity_place_custom")) {
+					placeInsertCount += stat.count.intValue();
 				}
-				else if (stat.event.equals("insert_entity_post")) {
-					postInsertCount += stat.countBy.intValue();
+				else if (stat.type.equals("insert_entity_post")) {
+					postInsertCount += stat.count.intValue();
 				}
-				else if (stat.event.equals("insert_entity_comment")) {
-					commentInsertCount += stat.countBy.intValue();
+				else if (stat.type.equals("insert_entity_comment")) {
+					commentInsertCount += stat.count.intValue();
 				}
-				else if (stat.event.equals("update_entity_place")) {
-					placeEditCount += stat.countBy.intValue();
+				else if (stat.type.equals("update_entity_place")) {
+					placeEditCount += stat.count.intValue();
 				}
-				else if (stat.event.equals("update_entity_post")) {
-					postEditCount += stat.countBy.intValue();
+				else if (stat.type.equals("update_entity_post")) {
+					postEditCount += stat.count.intValue();
 				}
 			}
 

@@ -25,10 +25,11 @@ import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.events.MessageEvent;
+import com.aircandi.service.objects.Action.EventType;
 import com.aircandi.service.objects.Activity;
+import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Cursor;
 import com.aircandi.service.objects.ServiceData;
-import com.aircandi.service.objects.Action.EventType;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.base.BaseFragment;
 import com.aircandi.ui.widgets.AirImageView;
@@ -136,7 +137,11 @@ public class ActivityFragment extends BaseFragment {
 				ModelResult result = new ModelResult();
 
 				showBusy();
-				if (mActivities.size() == 0 || mode == BindingMode.MANUAL) {
+				CacheStamp cacheStamp = Aircandi.getInstance().getCurrentUser().getCacheStamp();
+
+				if (mActivities.size() == 0
+						|| mode == BindingMode.MANUAL
+						|| (cacheStamp != null && !cacheStamp.equals(mCacheStamp))) {
 					showBusy("Loading activity...", false);
 					result = loadActivities(0);
 				}
@@ -156,6 +161,7 @@ public class ActivityFragment extends BaseFragment {
 					if (result.data != null) {
 						ServiceData serviceData = (ServiceData) result.serviceResponse.data;
 						mMore = serviceData.more;
+						mCacheStamp = Aircandi.getInstance().getCurrentUser().getCacheStamp();
 
 						mActivities.clear();
 						mAdapter.setNotifyOnChange(false);
