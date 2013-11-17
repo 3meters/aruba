@@ -93,12 +93,13 @@ public final class Errors {
 			/*
 			 * Status code based error
 			 */
-			if (serviceResponse.statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+			if ((Integer) serviceResponse.statusCode / 100 == HttpStatus.SC_INTERNAL_SERVER_ERROR / 100) {
 				/*
 				 * Reached the service with a good call but the service failed for an unknown reason. Examples
 				 * are service bugs like missing indexes causing mongo queries to throw errors.
 				 * 
 				 * - 500: Something bad and unknown has happened in the service.
+				 * - 502: Something bad and unknown has happened with a third party service (via our service)
 				 */
 				if (Aircandi.settings.getBoolean(Constants.PREF_ENABLE_DEV, Constants.PREF_ENABLE_DEV_DEFAULT)
 						&& Type.isTrue(Aircandi.getInstance().getCurrentUser().developer)) {

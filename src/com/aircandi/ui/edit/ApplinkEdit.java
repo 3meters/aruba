@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
@@ -19,9 +22,17 @@ import android.widget.TextView;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
+import com.aircandi.ServiceConstants;
+import com.aircandi.components.EntityManager;
+import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.service.objects.Applink;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.base.BaseEntityEdit;
+import com.aircandi.utilities.Animate;
+import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.Dialogs;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Type;
 import com.aircandi.utilities.UI;
@@ -233,6 +244,23 @@ public class ApplinkEdit extends BaseEntityEdit {
 	// Events
 	// --------------------------------------------------------------------------------------------
 
+	@Override
+	public void onAccept() {
+		if (isDirty()) {
+			if (validate()) {
+				/*
+				 * Pull all the control values back into the entity object. Validate
+				 * does that too but we don't know if validate is always being performed.
+				 */
+				gather();
+				verifyAndExit();
+			}
+		}
+		else {
+			onCancel(false);
+		}
+	}
+
 	@SuppressWarnings("ucd")
 	public void onTestButtonClick() {
 		if (validate()) {
@@ -244,6 +272,66 @@ public class ApplinkEdit extends BaseEntityEdit {
 	// --------------------------------------------------------------------------------------------
 	// Methods
 	// --------------------------------------------------------------------------------------------
+
+	private void verifyAndExit() {
+
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				showBusy(R.string.progress_applink_verify, false);
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("ApplinkVerify");
+				ModelResult result = EntityManager.getInstance().verifyApplink(mEntity, ServiceConstants.TIMEOUT_APPLINK_SEARCH, true);
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				final ModelResult result = (ModelResult) response;
+				if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+					final List<Entity> applinks = (List<Entity>) result.data;
+					Long validatedDate = null;
+					if (applinks.size() > 0) {
+						Applink validated = (Applink) applinks.get(0);
+						validatedDate = (Long) validated.data.get("validated");
+					}
+
+					/* Validation failed */
+					if (applinks.size() == 0 || (validatedDate != null && validatedDate == -1)) {
+						Applink applink = (Applink) mEntity;
+						String message = getResources().getString(R.string.error_applink_verification_failed) + " "
+								+ (applink.appId != null ? applink.appId : applink.appUrl);
+
+						Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
+								, null
+								, message
+								, null
+								, ApplinkEdit.this
+								, android.R.string.ok
+								, null, null, null, null);
+					}
+					else {
+						final Intent intent = new Intent();
+						final List<String> jsonApplinks = new ArrayList<String>();
+
+						for (Entity applink : applinks) {
+							jsonApplinks.add(Json.objectToJson(applink, Json.UseAnnotations.FALSE, Json.ExcludeNulls.TRUE));
+						}
+
+						intent.putStringArrayListExtra(Constants.EXTRA_ENTITIES, (ArrayList<String>) jsonApplinks);
+						setResultCode(Activity.RESULT_OK, intent);
+						finish();
+						Animate.doOverridePendingTransition(ApplinkEdit.this, TransitionType.FORM_TO_PAGE);
+					}
+				}
+				hideBusy();
+			}
+		}.execute();
+	}
 
 	@Override
 	protected void gather() {
@@ -286,17 +374,6 @@ public class ApplinkEdit extends BaseEntityEdit {
 					, null, null, null, null);
 			return false;
 		}
-
-		//		if (mName != null && mName.getText().length() == 0) {
-		//			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert
-		//					, null
-		//					, getResources().getString(R.string.error_missing_entity_label)
-		//					, null
-		//					, this
-		//					, android.R.string.ok
-		//					, null, null, null, null);
-		//			return false;
-		//		}
 
 		if (!mEditing && mAppId != null && mAppId.getText().length() == 0 && findViewById(R.id.app_id_holder).getVisibility() == View.VISIBLE) {
 			Dialogs.alertDialog(android.R.drawable.ic_dialog_alert

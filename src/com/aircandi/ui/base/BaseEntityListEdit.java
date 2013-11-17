@@ -238,12 +238,14 @@ public abstract class BaseEntityListEdit extends BaseEdit implements ListDelegat
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
-		
+
 		if (resultCode != Activity.RESULT_CANCELED) {
 			if (requestCode == Constants.ACTIVITY_ENTITY_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
-					final Bundle extras = intent.getExtras();
+					
+					final Bundle extras = intent.getExtras();					
 					final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
+					
 					if (jsonEntity != null) {
 						final Entity entityUpdated = (Entity) Json.jsonToObject(jsonEntity, Json.ObjectType.ENTITY);
 						if (entityUpdated != null) {
@@ -262,14 +264,16 @@ public abstract class BaseEntityListEdit extends BaseEdit implements ListDelegat
 			}
 			else if (requestCode == Constants.ACTIVITY_ENTITY_INSERT) {
 				if (intent != null && intent.getExtras() != null) {
+					
 					final Bundle extras = intent.getExtras();
 					final String jsonEntity = extras.getString(Constants.EXTRA_ENTITY);
+					
 					if (jsonEntity != null) {
 						final Entity entityNew = (Entity) Json.jsonToObject(jsonEntity, Json.ObjectType.ENTITY);
 						if (entityNew != null) {
 							entityNew.checked = false;
 							mEntities.add(entityNew);
-							
+
 							mDirty = true;
 							rebuildPositions();
 							mAdapter.notifyDataSetChanged();
@@ -341,7 +345,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements ListDelegat
 								}
 							}
 							mDirty = true;
-							mAdapter.notifyDataSetChanged();							
+							mAdapter.notifyDataSetChanged();
 						}
 					}
 				}
@@ -349,7 +353,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements ListDelegat
 		dialog.setCanceledOnTouchOutside(false);
 	}
 
-	private void scrollToBottom() {
+	protected void scrollToBottom() {
 		runOnUiThread(new Runnable() {
 
 			@Override
@@ -367,7 +371,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements ListDelegat
 
 	@Override
 	protected void delete() {}
-	
+
 	protected void rebuildPositions() {
 		Integer position = 0;
 		for (Entity entity : mEntities) {
@@ -375,7 +379,7 @@ public abstract class BaseEntityListEdit extends BaseEdit implements ListDelegat
 			position++;
 		}
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle
 	// --------------------------------------------------------------------------------------------

@@ -28,7 +28,7 @@ import com.aircandi.components.bitmaps.BitmapRequest.BitmapResponse;
 import com.aircandi.events.MessageEvent;
 import com.aircandi.service.RequestListener;
 import com.aircandi.service.ServiceResponse;
-import com.aircandi.service.objects.Action.EventType;
+import com.aircandi.service.objects.Action.EventCategory;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.Direction;
@@ -168,8 +168,8 @@ public class PlaceForm extends BaseEntityForm {
 		 * Refresh the form because something new has been added to it
 		 * like a comment or post. Or something has moved like a candigram.
 		 */
-		if (event.activity.action.equals(EventType.REFRESH)) {
-			if (event.activity.action.entity != null && mEntityId.equals(event.activity.action.entity.id)) {
+		if (event.message.action.equals(EventCategory.REFRESH)) {
+			if (event.message.action.entity != null && mEntityId.equals(event.message.action.entity.id)) {
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -178,7 +178,7 @@ public class PlaceForm extends BaseEntityForm {
 				});
 			}
 		}
-		else if (event.activity.action.toEntity != null && mEntityId.equals(event.activity.action.toEntity.id)) {
+		else if (event.message.action.toEntity != null && mEntityId.equals(event.message.action.toEntity.id)) {
 
 			runOnUiThread(new Runnable() {
 				@Override
@@ -324,6 +324,11 @@ public class PlaceForm extends BaseEntityForm {
 		settings.appClass = Applinks.class;
 		shortcuts = (List<Shortcut>) mEntity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
 		if (shortcuts.size() > 0) {
+			for (Shortcut shortcut: shortcuts) {
+				if (!shortcut.app.equals(Constants.TYPE_APP_WEBSITE)) {
+					shortcut.name = shortcut.app;
+				}
+			}
 			Collections.sort(shortcuts, new Shortcut.SortByPositionSortDate());
 			drawShortcuts(shortcuts
 					, settings

@@ -1,11 +1,11 @@
 package com.aircandi.events;
 
-import com.aircandi.service.objects.Activity;
+import com.aircandi.service.objects.ServiceMessage;
 
 public class MessageEvent {
-	public final Activity	activity;
+	public final ServiceMessage	message;
 
-	public MessageEvent(Activity activity) {
-		this.activity = activity;
+	public MessageEvent(ServiceMessage message) {
+		this.message = message;
 	}
 }

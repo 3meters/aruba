@@ -217,16 +217,7 @@ public class CandigramEdit extends BaseEntityEdit {
 
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					Candigram candigram = (Candigram) mEntity;
-					
-					if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)
-							|| candigram.type.equals(Constants.TYPE_APP_TOUR)) {
-						mHintParked.setText(getString(isChecked ? R.string.candigram_stopped_true_help : R.string.candigram_stopped_false_help));
-					}
-					else if (candigram.type.equals(Constants.TYPE_APP_EXPAND)) {
-						mHintParked.setText(getString(isChecked ? R.string.candigram_stopped_expand_true_help
-								: R.string.candigram_stopped_expand_false_help));
-					}
+					Candigram candigram = (Candigram) mEntity;					
 					if (candigram.stopped != isChecked) {
 						if (!mFirstDraw) {
 							mDirty = true;
@@ -265,12 +256,11 @@ public class CandigramEdit extends BaseEntityEdit {
 				if (candigram.type.equals(Constants.TYPE_APP_BOUNCE)
 						|| candigram.type.equals(Constants.TYPE_APP_TOUR)) {
 					mStopped.setText(getString(R.string.form_label_parked));
-					mHintParked.setText(getString(candigram.stopped ? R.string.candigram_stopped_true_help : R.string.candigram_stopped_false_help));
+					mHintParked.setText(getString(R.string.candigram_stopped_true_help));
 				}
 				else if (candigram.type.equals(Constants.TYPE_APP_EXPAND)) {
 					mStopped.setText(getString(R.string.form_label_retired));
-					mHintParked.setText(getString(candigram.stopped ? R.string.candigram_stopped_expand_true_help
-							: R.string.candigram_stopped_expand_false_help));
+					mHintParked.setText(getString(R.string.candigram_stopped_expand_true_help));
 				}
 			}
 		}

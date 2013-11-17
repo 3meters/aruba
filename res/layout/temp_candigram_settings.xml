@@ -206,6 +206,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/hint_indent_spinner"
+                android:text="@string/form_candigram_locked_true_help"
                 android:textAppearance="?android:attr/textAppearance"
                 android:textColor="?attr/textColorSecondary" />
         </LinearLayout>

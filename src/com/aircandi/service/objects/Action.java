@@ -120,21 +120,32 @@ public class Action extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public String getEventCategory() {
-		if (this.event.contains("insert")) return EventType.INSERT;
-		if (this.event.contains("move")) return EventType.MOVE;
-		if (this.event.contains("expand")) return EventType.EXPAND;
-		if (this.event.contains("refresh")) return EventType.REFRESH;
-		return null;
+		if (this.event.contains("insert")) return EventCategory.INSERT;
+		if (this.event.contains("move")) return EventCategory.MOVE;
+		if (this.event.contains("expand")) return EventCategory.EXPAND;
+		if (this.event.contains("refresh")) return EventCategory.REFRESH;
+		return EventCategory.UNKNOWN;
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Classes
 	// --------------------------------------------------------------------------------------------
 
-	public static class EventType {
+	public static class EventCategory {
 		public static String	INSERT	= "insert";
 		public static String	MOVE	= "move";
 		public static String	EXPAND	= "expand";
 		public static String	REFRESH	= "refresh";
+		public static String	UNKNOWN	= "unknown";
+	}
+
+	public static class EventType {
+		public static String	INSERT_PLACE		= "insert_entity_place_custom";
+		public static String	INSERT_CANDIGRAM	= "insert_entity_candigram";
+		public static String	INSERT_PICTURE		= "insert_entity_post";
+		public static String	INSERT_COMMENT		= "insert_entity_comment";
+		public static String	MOVE_CANDIGRAM		= "move_candigram";
+		public static String	EXPAND_CANDIGRAM	= "expand_candigram";
+		public static String	RESTART_CANDIGRAM	= "restart_candigram";
 	}
 }

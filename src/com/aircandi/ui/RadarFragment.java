@@ -657,7 +657,7 @@ public class RadarFragment extends BaseFragment implements
 		/*
 		 * Refreshes radar so newly created place can pop in.
 		 */
-		if (event.activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
+		if (event.message.action.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 			getSherlockActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {

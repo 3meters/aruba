@@ -191,9 +191,14 @@ public class UserForm extends BaseEntityForm {
 			int postInsertCount = 0;
 			int placeInsertCount = 0;
 			int commentInsertCount = 0;
+			int candigramInsertCount = 0;
 
+			int bounceCount = 0;
+			int expandCount = 0;
+			
 			int postEditCount = 0;
 			int placeEditCount = 0;
+			int candigramEditCount = 0;
 
 			for (Count stat : user.stats) {
 				if (stat.type.startsWith("link_proximity")) {
@@ -221,18 +226,36 @@ public class UserForm extends BaseEntityForm {
 				else if (stat.type.equals("insert_entity_comment")) {
 					commentInsertCount += stat.count.intValue();
 				}
+				else if (stat.type.equals("insert_entity_candigram")) {
+					candigramInsertCount += stat.count.intValue();
+				}
 				else if (stat.type.equals("update_entity_place")) {
 					placeEditCount += stat.count.intValue();
 				}
 				else if (stat.type.equals("update_entity_post")) {
 					postEditCount += stat.count.intValue();
 				}
+				else if (stat.type.equals("update_entity_candigram")) {
+					candigramEditCount += stat.count.intValue();
+				}
+				
+				if (stat.type.equals("move_candigram")) {
+					bounceCount += stat.count.intValue();
+				}
+				if (stat.type.equals("expand_candigram")) {
+					expandCount += stat.count.intValue();
+				}
+				
 			}
 
 			if (placeInsertCount > 0) {
 				statString.append("Places: " + String.valueOf(placeInsertCount) + "<br/>");
 			}
 
+			if (candigramInsertCount > 0) {
+				statString.append("Candigrams: " + String.valueOf(candigramInsertCount) + "<br/>");
+			}
+			
 			if (postInsertCount > 0) {
 				statString.append("Pictures: " + String.valueOf(postInsertCount) + "<br/>");
 			}
@@ -245,12 +268,24 @@ public class UserForm extends BaseEntityForm {
 				statString.append("Places edited: " + String.valueOf(placeEditCount) + "<br/>");
 			}
 
+			if (candigramEditCount > 0) {
+				statString.append("Candigrams edited: " + String.valueOf(candigramEditCount) + "<br/>");
+			}
+			
 			if (postEditCount > 0) {
 				statString.append("Pictures edited: " + String.valueOf(postEditCount) + "<br/>");
 			}
 
 			if (tuneCount > 0) {
 				statString.append("Places tuned: " + String.valueOf(tuneCount) + "<br/>");
+			}
+			
+			if (bounceCount > 0) {
+				statString.append("Candigrams kicks: " + String.valueOf(bounceCount) + "<br/>");
+			}
+			
+			if (expandCount > 0) {
+				statString.append("Candigrams repeats: " + String.valueOf(expandCount) + "<br/>");
 			}
 
 			stats.setText(Html.fromHtml(statString.toString()));

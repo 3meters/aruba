@@ -28,6 +28,7 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.BaseEntityListEdit;
 import com.aircandi.ui.widgets.AirImageView;
+import com.aircandi.utilities.Json;
 import com.aircandi.utilities.UI;
 
 public class ApplinkListEdit extends BaseEntityListEdit {
@@ -60,11 +61,69 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		super.onActivityResult(requestCode, resultCode, intent);
 
 		if (resultCode != Activity.RESULT_CANCELED) {
-			if (requestCode == Constants.ACTIVITY_ENTITY_INSERT) {
-				searchApplinks(mEntities, true, (Place) mParent, false);
+			if (requestCode == Constants.ACTIVITY_ENTITY_EDIT || requestCode == Constants.ACTIVITY_ENTITY_INSERT) {
+				if (intent != null && intent.getExtras() != null) {
+
+					final Bundle extras = intent.getExtras();
+					List<Entity> entities = new ArrayList<Entity>();
+
+					/* Deserialize */
+					final List<String> jsonEntities = extras.getStringArrayList(Constants.EXTRA_ENTITIES);
+					if (jsonEntities != null) {
+						for (String jsonEntity : jsonEntities) {
+							Entity entity = (Applink) Json.jsonToObject(jsonEntity, Json.ObjectType.ENTITY);
+							entities.add(entity);
+						}
+					}
+
+					if (requestCode == Constants.ACTIVITY_ENTITY_EDIT) {
+
+						/* Replace the edited applink */
+						for (Entity updated : entities) {
+							Boolean replaced = false;
+							for (Entity entity : mEntities) {
+								if (entity.editing && updated.id.equals(entity.id)) {
+									replaced = true;
+									entity.editing = false;
+									mEntities.set(mEntities.indexOf(entity), updated);
+									entities.remove(updated);
+									break;
+								}
+							}
+							if (replaced) break;
+						}
+
+						/* Add any extra applinks */
+						for (Entity updated : entities) {
+							updated.checked = false;
+							mEntities.add(updated);
+						}
+					}
+					else if (requestCode == Constants.ACTIVITY_ENTITY_INSERT) {
+
+						/* Add the inserted entity */
+						for (Entity inserted : entities) {
+							inserted.checked = false;
+							mEntities.add(inserted);
+						}
+					}
+					
+					mDirty = true;
+					rebuildPositions();
+					mAdapter.notifyDataSetChanged();
+					if (requestCode == Constants.ACTIVITY_ENTITY_INSERT) {
+						scrollToBottom();
+					}
+
+					/* Did we get back extra entities? */
+					if (entities.size() > (requestCode == Constants.ACTIVITY_ENTITY_INSERT ? 1: 0)) {
+						UI.showToastNotification(getResources().getString((entities.size() == 1)
+								? R.string.toast_applinks_linked
+								: R.string.toast_applinks_linked), Toast.LENGTH_SHORT);
+					}
+				}
 			}
 		}
 	}
@@ -274,7 +333,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 
 				UI.setVisibility(holder.appId, View.GONE);
 				if (holder.appId != null) {
-					if (applink.appId != null && applink.appId.length() > 0) {
+					if (applink.appId != null && applink.appId.length() > 0 && !applink.type.equals(Constants.TYPE_APP_WEBSITE)) {
 						holder.appId.setText(applink.appId);
 						UI.setVisibility(holder.appId, View.VISIBLE);
 					}

@@ -22,9 +22,9 @@ public class EntityList extends BaseEntityList {
 		/*
 		 * Refreshes the comment list to show new comment.
 		 */
-		if (event.activity.action.toEntity != null
-				&& mForEntityId.equals(event.activity.action.toEntity.id)
-				&& mListLinkSchema.equals(event.activity.action.entity.schema)) {
+		if (event.message.action.toEntity != null
+				&& mForEntityId.equals(event.message.action.toEntity.id)
+				&& mListLinkSchema.equals(event.message.action.entity.schema)) {
 
 			runOnUiThread(new Runnable() {
 				@Override

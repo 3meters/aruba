@@ -249,6 +249,7 @@
     <string name="error_missing_invite_email">Enter at least one email address.</string>
     <string name="error_missing_place_name">Enter a name.</string>
     <string name="error_missing_photo">Select a photo.</string>
+    <string name="error_applink_verification_failed">Oops! Aircandi could not find</string>
     
     <!-- Errors: network or location -->
 
@@ -306,6 +307,7 @@
     <string name="progress_upsizing">Searching for links to reviews, tips, and info&#8230;</string>
     <string name="progress_applink_search">Searching for more links&#8230;</string>
     <string name="progress_applink_refresh">Refreshing links&#8230;</string>
+    <string name="progress_applink_verify">Verifying link&#8230;</string>
     
     <!-- Pull to refresh -->
 
@@ -459,9 +461,9 @@
 
     <!-- Forms.labels -->
 
-    <string name="form_label_applink_edit_name">Label</string>
-    <string name="form_label_applink_edit_app_id">Username or id (optional)</string>
-    <string name="form_label_applink_edit_app_url">Web address (optional)</string>
+    <string name="form_label_applink_edit_name">Label (optional)</string>
+    <string name="form_label_applink_edit_app_id">Username or id</string>
+    <string name="form_label_applink_edit_app_url">Web address</string>
     
     <string name="form_label_fullname">full name</string>
     <string name="form_label_bio">bio</string>
@@ -515,10 +517,8 @@
     <string name="candigram_type_bounce_verbose">bouncing</string>
     <string name="candigram_label_place">currently at:</string>
 
-    <string name="candigram_stopped_true_help">The candigram is parked</string>
-    <string name="candigram_stopped_false_help">The candigram is free to travel</string>
-    <string name="candigram_stopped_expand_true_help">The candigram is retired</string>
-    <string name="candigram_stopped_expand_false_help">The candigram is active</string>
+    <string name="candigram_stopped_true_help">Park the candigram and stop traveling</string>
+    <string name="candigram_stopped_expand_true_help">Retire the candigram</string>
     
     <string name="button_candigram_bounce">kick</string>
     <string name="button_candigram_expand">repeat</string>
@@ -600,11 +600,9 @@
     <string name="form_comment_hint">comment</string>
     <string name="form_feedback_hint">feedback</string>
     <string name="picture_search_query_hint">search</string>
-    <string name="form_do_not_track_on_hint">All browsing activity is anonymous but editing, creating and commenting are public.</string>
-    <string name="form_do_not_track_off_hint">All browsing, editing, creating and commenting activities are public.</string>
     
-    <string name="form_locked_true_help">Aircandi users can\'t add pictures or comments</string>
-    <string name="form_locked_false_help">Aircandi users can add pictures and comments</string>
+    <string name="form_locked_true_help">Don\'t allow Aircandi users to add candigrams, pictures or comments</string>
+    <string name="form_candigram_locked_true_help">Don\'t allow Aircandi users to add pictures or comments</string>
     
     <string name="form_invite_email_hint">email address</string>
     <string name="form_invite_message_hint">add a personal note (optional)</string>

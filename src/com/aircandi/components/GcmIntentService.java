@@ -9,8 +9,8 @@ import android.os.PowerManager;
 import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.applications.Comments;
-import com.aircandi.service.objects.Action.EventType;
-import com.aircandi.service.objects.Activity;
+import com.aircandi.service.objects.Action.EventCategory;
+import com.aircandi.service.objects.ServiceMessage;
 import com.aircandi.ui.ActivityFragment;
 import com.aircandi.ui.AircandiForm;
 import com.aircandi.ui.base.BaseEntityForm;
@@ -55,54 +55,61 @@ public class GcmIntentService extends IntentService {
 					 * has
 					 * a payload, its contents are available as extras in the intent.
 					 */
-					String jsonActivity = extras.getString("activity");
-					Activity activity = (Activity) Json.jsonToObject(jsonActivity, Json.ObjectType.ACTIVITY);
+					String jsonMessage = extras.getString("message");
+					ServiceMessage message = (ServiceMessage) Json.jsonToObject(jsonMessage, Json.ObjectType.SERVICE_MESSAGE);
 
-					/*
-					 * If user is currently on the activities list, it will be auto refreshed so don't show
-					 * notification in the status bar. Don't need to broadcast either.
-					 */
-					android.app.Activity currentActivity = Aircandi.getInstance().getCurrentActivity();
-					if (currentActivity != null && currentActivity.getClass().equals(AircandiForm.class)) {
-						BaseFragment fragment = ((AircandiForm) currentActivity).getCurrentFragment();
-						if (fragment.getClass().equals(ActivityFragment.class)) {
+					if (message != null) {
+						
+						/* Is this a message event we know how to handle */
+						if (message.action.getEventCategory().equals(EventCategory.UNKNOWN)) return;
+						
+						/*
+						 * If user is currently on the activities list, it will be auto refreshed so don't show
+						 * notification in the status bar. Don't need to broadcast either.
+						 */
+						android.app.Activity currentActivity = Aircandi.getInstance().getCurrentActivity();
+						if (currentActivity != null && currentActivity.getClass().equals(AircandiForm.class)) {
+							BaseFragment fragment = ((AircandiForm) currentActivity).getCurrentFragment();
+							if (fragment.getClass().equals(ActivityFragment.class)) {
+								return;
+							}
+						}
+
+						/* Cherry pick pure refresh notifications */
+						if (message.action.getEventCategory().equals(EventCategory.REFRESH)) {
+							MessagingManager.getInstance().broadcastMessage(message);
 							return;
 						}
-					}
 
-					/* Cherry pick pure refresh notifications */
-					if (activity.action.getEventCategory().equals(EventType.REFRESH)) {
-						MessagingManager.getInstance().broadcastActivity(activity);
-						return;
-					}
-
-					/* Build intent that can be used in association with the notification */
-					if (activity.action.entity != null) {
-						if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-							activity.intent = Comments.viewForGetIntent(Aircandi.applicationContext, activity.action.toEntity.id, Constants.TYPE_LINK_CONTENT,
-									null, null);
+						/* Build intent that can be used in association with the notification */
+						if (message.action.entity != null) {
+							if (message.action.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+								message.intent = Comments.viewForGetIntent(Aircandi.applicationContext, message.action.toEntity.id,
+										Constants.TYPE_LINK_CONTENT,
+										null, null);
+							}
+							else {
+								Class<?> clazz = BaseEntityForm.viewFormBySchema(message.action.entity.schema);
+								IntentBuilder intentBuilder = new IntentBuilder(Aircandi.applicationContext, clazz)
+										.setEntityId(message.action.entity.id)
+										.setEntitySchema(message.action.entity.schema)
+										.setForceRefresh(true);
+								message.intent = intentBuilder.create();
+							}
 						}
-						else {
-							Class<?> clazz = BaseEntityForm.viewFormBySchema(activity.action.entity.schema);
-							IntentBuilder intentBuilder = new IntentBuilder(Aircandi.applicationContext, clazz)
-									.setEntityId(activity.action.entity.id)
-									.setEntitySchema(activity.action.entity.schema)
-									.setForceRefresh(true);
-							activity.intent = intentBuilder.create();
-						}
+
+						/* Customize title and subtitle before storing and broadcasting */
+						Activities.decorate(message);
+
+						/* Trigger event so subscribers can decide if they care about the activity */
+						MessagingManager.getInstance().broadcastMessage(message);
+
+						/* Tickle activity date on current user to flag auto refresh for activity list */
+						Aircandi.getInstance().getCurrentUser().activityDate = message.sentDate;
+
+						/* Send notification */
+						MessagingManager.getInstance().notificationForMessage(message, Aircandi.applicationContext);
 					}
-
-					/* Customize title and subtitle before storing and broadcasting */
-					Activities.decorate(activity);
-
-					/* Trigger event so subscribers can decide if they should refresh */
-					MessagingManager.getInstance().broadcastActivity(activity);
-
-					/* Tickle activity date on current user to flag auto refresh for activity list */
-					Aircandi.getInstance().getCurrentUser().activityDate = activity.sentDate;
-
-					/* Send notification */
-					MessagingManager.getInstance().notificationForActivity(activity, Aircandi.applicationContext);
 				}
 			}
 		}

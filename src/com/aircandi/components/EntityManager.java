@@ -32,7 +32,6 @@ import com.aircandi.service.RequestType;
 import com.aircandi.service.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ServiceResponse;
-import com.aircandi.service.objects.Activity;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.CacheStamp;
@@ -52,6 +51,7 @@ import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Provider;
 import com.aircandi.service.objects.Proximity;
+import com.aircandi.service.objects.ServiceActivity;
 import com.aircandi.service.objects.ServiceBase.UpdateScope;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
@@ -167,21 +167,24 @@ public class EntityManager {
 		}
 		return result;
 	}
-		
 
 	// --------------------------------------------------------------------------------------------
 	// service queries
 	// --------------------------------------------------------------------------------------------
-	
-	public synchronized ModelResult loadActivities(String entityId, Cursor cursor) {
-		
+
+	public synchronized ModelResult loadActivities(String entityId, Cursor cursor, List<String> events) {
+
 		final ModelResult result = new ModelResult();
-		
+
 		final Bundle parameters = new Bundle();
 		parameters.putString("entityId", entityId);
 
 		if (cursor != null) {
 			parameters.putString("cursor", "object:" + Json.objectToJson(cursor));
+		}
+
+		if (events != null) {
+			parameters.putStringArrayList("events", (ArrayList<String>) events);
 		}
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
@@ -198,9 +201,9 @@ public class EntityManager {
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
 			final String jsonResponse = (String) result.serviceResponse.data;
-			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.ACTIVITY, Json.ServiceDataWrapper.TRUE);
-			final List<Activity> loadedActivities = (List<Activity>) serviceData.data;
-			for (Activity activity: loadedActivities) {
+			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.SERVICE_ACTIVITY, Json.ServiceDataWrapper.TRUE);
+			final List<ServiceActivity> loadedActivities = (List<ServiceActivity>) serviceData.data;
+			for (ServiceActivity activity : loadedActivities) {
 				Activities.decorate(activity);
 			}
 			result.serviceResponse.data = serviceData;
@@ -274,10 +277,20 @@ public class EntityManager {
 		return result;
 	}
 
+	public ModelResult verifyApplink(Entity applink, Integer timeout, Boolean waitForContent) {
+		List<Entity> entities = new ArrayList<Entity>();
+		entities.add(applink);
+		ModelResult result = refreshApplinks(entities, timeout, waitForContent);
+
+		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+			Aircandi.tracker.sendEvent(TrackerCategory.UX, "applinks_verify", null, 0);
+		}
+		return result;
+	}
+
 	public ModelResult refreshApplinks(List<Entity> applinks, Integer timeout, Boolean waitForContent) {
 
 		final ModelResult result = new ModelResult();
-		Aircandi.tracker.sendEvent(TrackerCategory.UX, "applinks_refresh", null, 0);
 		final Bundle parameters = new Bundle();
 
 		final List<String> entityStrings = new ArrayList<String>();
@@ -297,7 +310,7 @@ public class EntityManager {
 		parameters.putInt("timeout", timeout);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_APPLINKS + "refresh")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_APPLINKS + "get")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
@@ -305,6 +318,7 @@ public class EntityManager {
 		result.serviceResponse = dispatch(serviceRequest);
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+			Aircandi.tracker.sendEvent(TrackerCategory.UX, "applinks_refresh", null, 0);
 			final String jsonResponse = (String) result.serviceResponse.data;
 			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.APPLINK, Json.ServiceDataWrapper.TRUE);
 			result.data = serviceData.data; // updated collection of applinks
@@ -312,14 +326,13 @@ public class EntityManager {
 		return result;
 	}
 
-	public ModelResult searchApplinks(List<Entity> applinks, Place place, Integer timeout, Boolean waitForAllContent) {
+	public ModelResult searchApplinks(List<Entity> applinks, Place place, Integer timeout, Boolean waitForContent) {
 
 		final ModelResult result = new ModelResult();
-		Aircandi.tracker.sendEvent(TrackerCategory.UX, "applinks_search", null, 0);
 		final Bundle parameters = new Bundle();
 
 		if (place != null) {
-			parameters.putString("place", "object:" + Json.objectToJson(place, Json.UseAnnotations.TRUE, Json.ExcludeNulls.TRUE));
+			parameters.putString("placeId", place.id);
 		}
 
 		final List<String> entityStrings = new ArrayList<String>();
@@ -328,8 +341,8 @@ public class EntityManager {
 		}
 		parameters.putStringArrayList("applinks", (ArrayList<String>) entityStrings);
 
-		if (Type.isTrue(waitForAllContent)) {
-			parameters.putBoolean("waitForContent", waitForAllContent);
+		if (Type.isTrue(waitForContent)) {
+			parameters.putBoolean("waitForContent", waitForContent);
 		}
 
 		if (timeout == null) {
@@ -339,7 +352,7 @@ public class EntityManager {
 		parameters.putInt("timeout", timeout);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_APPLINKS + "suggest")
+				.setUri(ServiceConstants.URL_PROXIBASE_SERVICE_APPLINKS + "get")
 				.setRequestType(RequestType.METHOD)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.JSON);
@@ -347,6 +360,7 @@ public class EntityManager {
 		result.serviceResponse = dispatch(serviceRequest);
 
 		if (result.serviceResponse.responseCode == ResponseCode.SUCCESS) {
+			Aircandi.tracker.sendEvent(TrackerCategory.UX, "applinks_search", null, 0);
 			final String jsonResponse = (String) result.serviceResponse.data;
 			final ServiceData serviceData = (ServiceData) Json.jsonToObjects(jsonResponse, Json.ObjectType.APPLINK, Json.ServiceDataWrapper.TRUE);
 			result.data = serviceData.data; // updated collection of applinks
@@ -432,7 +446,7 @@ public class EntityManager {
 			Aircandi.getInstance().setCurrentUser(user);
 
 			activateCurrentUser();
-			
+
 			Aircandi.tracker.sendEvent(TrackerCategory.USER, "user_signin", null, 0);
 			Logger.i(this, "User signed in: " + Aircandi.getInstance().getCurrentUser().name);
 		}
@@ -1358,7 +1372,7 @@ public class EntityManager {
 
 		return result;
 	}
-	
+
 	public ModelResult sendInvite(List<String> emails, String invitor, String message) {
 
 		ModelResult result = new ModelResult();

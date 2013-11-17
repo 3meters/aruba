@@ -83,7 +83,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	protected AirEditText		mDescription;
 	protected ViewGroup			mPhotoHolder;
 	protected CheckBox			mLocked;
-	private TextView			mHintLocked;
 
 	protected RequestListener	mImageRequestListener;
 	protected AirImageView		mImageRequestWebImageView;
@@ -134,7 +133,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		mPhotoView = (AirImageView) findViewById(R.id.photo);
 		mPhotoHolder = (ViewGroup) findViewById(R.id.photo_holder);
 		mLocked = (CheckBox) findViewById(R.id.chk_locked);
-		mHintLocked = (TextView) findViewById(R.id.hint_locked);
 
 		if (mName != null) {
 			mName.addTextChangedListener(new SimpleTextWatcher() {
@@ -167,7 +165,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					mHintLocked.setText(getString(isChecked ? R.string.form_locked_true_help : R.string.form_locked_false_help));
 					if (mEntity.locked != isChecked) {
 						if (!mFirstDraw) {
 							mDirty = true;
@@ -220,7 +217,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			if (findViewById(R.id.chk_locked) != null) {
 				((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
 				((CheckBox) findViewById(R.id.chk_locked)).setChecked(entity.locked);
-				mHintLocked.setText(getString(entity.locked ? R.string.form_locked_true_help : R.string.form_locked_false_help));
 			}
 
 			/* Shortcuts */
@@ -351,7 +347,6 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	public void onAccept() {
 		if (isDirty()) {
 			if (validate()) {
-
 				/*
 				 * Pull all the control values back into the entity object. Validate
 				 * does that too but we don't know if validate is always being performed.

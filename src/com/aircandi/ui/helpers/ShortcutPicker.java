@@ -66,7 +66,7 @@ public class ShortcutPicker extends BasePicker {
 			setActivityTitle(shortcut.app);
 
 			/* Show default photo based on the type of the shortcut set */
-			
+
 			Photo photo = Entity.getDefaultPhoto(shortcut.schema, shortcut.app);
 			final BitmapRequest bitmapRequest = new BitmapRequest()
 					.setBitmapUri(photo.getUri())
@@ -169,7 +169,7 @@ public class ShortcutPicker extends BasePicker {
 
 				UI.setVisibility(holder.appId, View.GONE);
 				if (holder.appId != null) {
-					if (shortcut.appId != null && shortcut.appId.length() > 0) {
+					if (shortcut.appId != null && shortcut.appId.length() > 0 && !shortcut.app.equals(Constants.TYPE_APP_WEBSITE)) {
 						holder.appId.setText(shortcut.appId);
 						UI.setVisibility(holder.appId, View.VISIBLE);
 					}

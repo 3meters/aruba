@@ -63,7 +63,6 @@ public class LinkOptions extends ServiceObject {
 			Number limitProximity = resources.getInteger(R.integer.limit_links_proximity_default);
 			Number limitCreate = resources.getInteger(R.integer.limit_links_create_default);
 			Number limitWatch = resources.getInteger(R.integer.limit_links_watch_default);
-			Number limitLike = resources.getInteger(R.integer.limit_links_like_default);
 			Number limitContent = resources.getInteger(R.integer.limit_links_content_default);
 			Number limitApplinks = resources.getInteger(R.integer.limit_links_applinks_default);
 
@@ -136,9 +135,9 @@ public class LinkOptions extends ServiceObject {
 			}
 			else if (linkProfile == LinkProfile.LINKS_FOR_USER) {
 				linkOptions.getActive().add(
-						new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, true, true, limitLike, Maps.asMap("_from", currentUser.id)));
+						new LinkSettings(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_USER, true, true, 1, Maps.asMap("_from", currentUser.id)));
 				linkOptions.getActive().add(
-						new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, limitWatch, Maps.asMap("_from", currentUser.id)));
+						new LinkSettings(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_USER, true, true, 1, Maps.asMap("_from", currentUser.id)));
 			}
 			return linkOptions;
 		}

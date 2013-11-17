@@ -18,7 +18,6 @@ import com.aircandi.Constants;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
-import com.aircandi.service.objects.Activity;
 import com.aircandi.service.objects.AirLocation;
 import com.aircandi.service.objects.AirMarker;
 import com.aircandi.service.objects.Applink;
@@ -33,9 +32,11 @@ import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Post;
+import com.aircandi.service.objects.ServiceActivity;
 import com.aircandi.service.objects.ServiceBase.UpdateScope;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
+import com.aircandi.service.objects.ServiceMessage;
 import com.aircandi.service.objects.ServiceObject;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.Shortcut;
@@ -240,9 +241,13 @@ public class Json {
 				else if (objectType == Json.ObjectType.AIR_LOCATION) {
 					list.add(AirLocation.setPropertiesFromMap(new AirLocation(), (HashMap) map, nameMapping));
 				}
-				else if (objectType == Json.ObjectType.ACTIVITY) {
-					Activity activity = Activity.setPropertiesFromMap(new Activity(), (HashMap) map, nameMapping);
+				else if (objectType == Json.ObjectType.SERVICE_ACTIVITY) {
+					ServiceActivity activity = ServiceActivity.setPropertiesFromMap(new ServiceActivity(), (HashMap) map, nameMapping);
 					list.add(activity);
+				}
+				else if (objectType == Json.ObjectType.SERVICE_MESSAGE) {
+					ServiceMessage message = ServiceMessage.setPropertiesFromMap(new ServiceMessage(), (HashMap) map, nameMapping);
+					list.add(message);
 				}
 				else if (objectType == Json.ObjectType.LINK) {
 					list.add(Link.setPropertiesFromMap(new Link(), (HashMap) map, nameMapping));
@@ -429,7 +434,8 @@ public class Json {
 		POST,
 		COMMENT,
 		AIR_MARKER,
-		ACTIVITY, 
+		SERVICE_ACTIVITY,
+		SERVICE_MESSAGE,
 		COUNT
 	}
 

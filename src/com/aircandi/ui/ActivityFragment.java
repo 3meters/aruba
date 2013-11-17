@@ -25,10 +25,11 @@ import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.events.MessageEvent;
+import com.aircandi.service.objects.Action.EventCategory;
 import com.aircandi.service.objects.Action.EventType;
-import com.aircandi.service.objects.Activity;
 import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Cursor;
+import com.aircandi.service.objects.ServiceActivity;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.base.BaseEntityForm;
 import com.aircandi.ui.base.BaseFragment;
@@ -53,7 +54,7 @@ public class ActivityFragment extends BaseFragment {
 	private static final int	PAGE_SIZE_DEFAULT	= 20;
 
 	protected OnClickListener	mClickListener;
-	private List<Activity>		mActivities			= new ArrayList<Activity>();
+	private List<ServiceActivity>		mActivities			= new ArrayList<ServiceActivity>();
 	private Cursor				mCursor;
 	private ListAdapter			mAdapter;
 	private Boolean				mMore				= false;
@@ -66,7 +67,7 @@ public class ActivityFragment extends BaseFragment {
 		mClickListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				final Activity activity = (Activity) ((ViewHolder) v.getTag()).data;
+				final ServiceActivity activity = (ServiceActivity) ((ViewHolder) v.getTag()).data;
 
 				/* Build intent that can be used in association with the notification */
 				if (activity.action.entity != null) {
@@ -166,8 +167,8 @@ public class ActivityFragment extends BaseFragment {
 						mActivities.clear();
 						mAdapter.setNotifyOnChange(false);
 						mAdapter.clear();
-						mAdapter.addAll((List<Activity>) result.data);
-						mAdapter.sort(new Activity.SortBySortDate());
+						mAdapter.addAll((List<ServiceActivity>) result.data);
+						mAdapter.sort(new ServiceActivity.SortBySortDate());
 						mAdapter.notifyDataSetChanged();
 					}
 					hideBusy();
@@ -186,7 +187,7 @@ public class ActivityFragment extends BaseFragment {
 		 * Refresh the form because something new has been added to it
 		 * like a comment or post.
 		 */
-		if (!event.activity.action.getEventCategory().equals(EventType.REFRESH)) {
+		if (!event.message.action.getEventCategory().equals(EventCategory.REFRESH)) {
 			getSherlockActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -236,10 +237,18 @@ public class ActivityFragment extends BaseFragment {
 				.setSort(Maps.asMap("modifiedDate", -1))
 				.setSkip(skip)
 				.setSchemas(schemas)
-				.setLinkTypes(linkTypes)
-				.setWhere(Maps.asMap("event", Maps.asMap("$regex", "^insert|^move|^expand|^restart")));
+				.setLinkTypes(linkTypes);
+		
+		List<String> events = new ArrayList<String>();
+		events.add(EventType.INSERT_PLACE);
+		events.add(EventType.INSERT_CANDIGRAM);
+		events.add(EventType.INSERT_PICTURE);
+		events.add(EventType.INSERT_COMMENT);
+		events.add(EventType.MOVE_CANDIGRAM);
+		events.add(EventType.EXPAND_CANDIGRAM);
+		events.add(EventType.RESTART_CANDIGRAM);
 
-		ModelResult result = EntityManager.getInstance().loadActivities(Aircandi.getInstance().getCurrentUser().id, mCursor);
+		ModelResult result = EntityManager.getInstance().loadActivities(Aircandi.getInstance().getCurrentUser().id, mCursor, events);
 
 		return result;
 	}
@@ -273,8 +282,8 @@ public class ActivityFragment extends BaseFragment {
 					if (result.data != null) {
 						ServiceData serviceData = (ServiceData) result.serviceResponse.data;
 						mMore = serviceData.more;
-						mAdapter.addAll((List<Activity>) result.data);
-						mAdapter.sort(new Activity.SortBySortDate());
+						mAdapter.addAll((List<ServiceActivity>) result.data);
+						mAdapter.sort(new ServiceActivity.SortBySortDate());
 						mAdapter.notifyDataSetChanged();
 					}
 				}
@@ -329,9 +338,9 @@ public class ActivityFragment extends BaseFragment {
 	// Classes
 	// --------------------------------------------------------------------------------------------
 
-	public class ListAdapter extends ArrayAdapter<Activity> {
+	public class ListAdapter extends ArrayAdapter<ServiceActivity> {
 
-		private ListAdapter(List<Activity> items) {
+		private ListAdapter(List<ServiceActivity> items) {
 			super(getSherlockActivity(), 0, items);
 		}
 
@@ -349,7 +358,7 @@ public class ActivityFragment extends BaseFragment {
 
 			View view = convertView;
 			final ViewHolder holder;
-			final Activity activity = mActivities.get(position);
+			final ServiceActivity activity = mActivities.get(position);
 
 			if (view == null || view.findViewById(R.id.animator_more) != null) {
 				view = LayoutInflater.from(getSherlockActivity()).inflate(R.layout.temp_listitem_activity, null);
@@ -433,7 +442,7 @@ public class ActivityFragment extends BaseFragment {
 		}
 
 		@Override
-		public Activity getItem(int position) {
+		public ServiceActivity getItem(int position) {
 			return mActivities.get(position);
 		}
 

@@ -1,7 +1,6 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,24 +12,14 @@ import com.aircandi.service.Expose;
  * @author Jayma
  */
 @SuppressWarnings("ucd")
-public class Activity extends ServiceObject implements Cloneable, Serializable {
+public abstract class ActivityBase extends ServiceObject implements Cloneable, Serializable {
 
-	private static final long	serialVersionUID	= 4362288672244719448L;
+	private static final long	serialVersionUID	= -9162254814199461867L;
 
 	@Expose
-	public String				trigger;									// create, watch
+	public String				trigger;										// create, watch
 	@Expose
 	public Action				action;
-	@Expose
-	public String				summary;
-	@Expose
-	public Boolean				grouped;
-	@Expose
-	public Number				sortDate;
-	@Expose
-	public Number				activityDate;
-	@Expose
-	public Number				sentDate;
 
 	/* client only */
 	public Intent				intent;
@@ -40,26 +29,21 @@ public class Activity extends ServiceObject implements Cloneable, Serializable {
 	public Photo				photoBy;
 	public Photo				photoOne;
 
-	public Activity() {}
+	public ActivityBase() {}
 
-	public static Activity setPropertiesFromMap(Activity activity, Map map, Boolean nameMapping) {
+	public static ActivityBase setPropertiesFromMap(ActivityBase base, Map map, Boolean nameMapping) {
 		/*
-		 * Properties involved with editing are copied from one entity to another.
+		 * Need to include any properties that need to survive encode/decoded between activities.
 		 */
-		activity.trigger = (String) map.get("trigger");
-		activity.summary = (String) map.get("summary");
-		activity.grouped = (Boolean) map.get("grouped");
-		activity.sentDate = (Number) map.get("sentDate");
-		activity.sortDate = (Number) map.get("sortDate");
-		activity.activityDate = (Number) map.get("activityDate");
+		base.trigger = (String) map.get("trigger");
 
 		if (map.get("action") != null) {
-			activity.action = Action.setPropertiesFromMap(new Action(), (HashMap<String, Object>) map.get("action"), nameMapping);
+			base.action = Action.setPropertiesFromMap(new Action(), (HashMap<String, Object>) map.get("action"), nameMapping);
 		}
 
-		return activity;
+		return base;
 	}
-	
+
 	public String getTriggerCategory() {
 		if (this.trigger.contains("nearby")) return TriggerType.NEARBY;
 		if (this.trigger.contains("watch")) return TriggerType.WATCH;
@@ -80,24 +64,5 @@ public class Activity extends ServiceObject implements Cloneable, Serializable {
 		public static String	OWN			= "own";		// sent because this user is the owner of the entity
 		public static String	OWN_TO		= "own_to";	// sent because this user is the owner of the 'to' entity
 		public static String	OWN_FROM	= "own_from";	// sent because this user is the owner of the 'from' entity
-	}
-
-	public static class SortBySortDate implements Comparator<Activity> {
-
-		@Override
-		public int compare(Activity object1, Activity object2) {
-			if (object1.sortDate == null || object2.sortDate == null) {
-				return 0;
-			}
-			else {
-				if (object1.sortDate.longValue() < object2.sortDate.longValue()) {
-					return 1;
-				}
-				else if (object1.sortDate.longValue() == object2.sortDate.longValue()) {
-					return 0;
-				}
-				return -1;
-			}
-		}
 	}
 }

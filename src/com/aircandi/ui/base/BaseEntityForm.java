@@ -50,6 +50,7 @@ import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.LinkOptions;
 import com.aircandi.service.objects.LinkOptions.LinkProfile;
+import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Shortcut;
 import com.aircandi.service.objects.ShortcutMeta;
@@ -660,37 +661,58 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 			if (shortcut.group != null && shortcut.group.size() > 1) {
 				badgeUpper.setText(String.valueOf(shortcut.group.size()));
 				badgeUpper.setVisibility(View.VISIBLE);
-
-				if (shortcut.app.equals(Constants.TYPE_APP_FACEBOOK)) {
-					badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_dark);
-					if (getThemeTone().equals("light")) {
-						badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_light);
-					}
-				}
-				else if (shortcut.app.equals(Constants.TYPE_APP_TWITTER)) {
-					badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_dark);
-					if (getThemeTone().equals("light")) {
-						badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_light);
-					}
-				}
-				else if (shortcut.app.equals(Constants.TYPE_APP_WEBSITE)) {
-					badgeLower.setBackgroundResource(R.drawable.ic_action_website_dark);
-					if (getThemeTone().equals("light")) {
-						badgeLower.setBackgroundResource(R.drawable.ic_action_website_light);
-					}
-				}
-				else if (shortcut.app.equals(Constants.TYPE_APP_FOURSQUARE)) {
-					badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
-					if (getThemeTone().equals("light")) {
-						badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
-					}
-				}
 				badgeLower.setVisibility(View.VISIBLE);
 			}
 			else if (shortcut.count != null && shortcut.count > 0) {
 				badgeUpper.setTag(shortcut);
 				badgeUpper.setText(String.valueOf(shortcut.count));
 				badgeUpper.setVisibility(View.VISIBLE);
+			}
+
+			if ((shortcut.photo != null && !shortcut.photo.source.equals(PhotoSource.assets_applinks))
+					|| (shortcut.group != null && shortcut.group.size() > 1)) {
+				if (shortcut.app.equals(Constants.TYPE_APP_FACEBOOK)) {
+					badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_dark);
+					if (getThemeTone().equals("light")) {
+						badgeLower.setBackgroundResource(R.drawable.ic_action_facebook_light);
+					}
+					badgeLower.setVisibility(View.VISIBLE);
+				}
+				else if (shortcut.app.equals(Constants.TYPE_APP_TWITTER)) {
+					badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_dark);
+					if (getThemeTone().equals("light")) {
+						badgeLower.setBackgroundResource(R.drawable.ic_action_twitter_light);
+					}
+					badgeLower.setVisibility(View.VISIBLE);
+				}
+				else if (shortcut.app.equals(Constants.TYPE_APP_WEBSITE)) {
+					badgeLower.setBackgroundResource(R.drawable.ic_action_website_dark);
+					if (getThemeTone().equals("light")) {
+						badgeLower.setBackgroundResource(R.drawable.ic_action_website_light);
+					}
+					badgeLower.setVisibility(View.VISIBLE);
+				}
+				else if (shortcut.app.equals(Constants.TYPE_APP_FOURSQUARE)) {
+					badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_dark);
+					if (getThemeTone().equals("light")) {
+						badgeLower.setBackgroundResource(R.drawable.ic_action_foursquare_light);
+					}
+					badgeLower.setVisibility(View.VISIBLE);
+				}
+				else if (shortcut.app.equals(Constants.TYPE_APP_YELP)) {
+					badgeLower.setBackgroundResource(R.drawable.ic_action_yelp_dark);
+					if (getThemeTone().equals("light")) {
+						badgeLower.setBackgroundResource(R.drawable.ic_action_yelp_light);
+					}
+					badgeLower.setVisibility(View.VISIBLE);
+				}
+				else if (shortcut.app.equals(Constants.TYPE_APP_CITYGRID)) {
+					badgeLower.setBackgroundResource(R.drawable.ic_action_citygrid_dark);
+					if (getThemeTone().equals("light")) {
+						badgeLower.setBackgroundResource(R.drawable.ic_action_citygrid_light);
+					}
+					badgeLower.setVisibility(View.VISIBLE);
+				}
 			}
 
 			/* Show hint if source has app that hasn't been installed */

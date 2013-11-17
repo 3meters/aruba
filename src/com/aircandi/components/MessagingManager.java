@@ -23,10 +23,11 @@ import com.aircandi.events.MessageEvent;
 import com.aircandi.service.GcmRegistrationIOException;
 import com.aircandi.service.RequestListener;
 import com.aircandi.service.ServiceResponse;
-import com.aircandi.service.objects.Action.EventType;
-import com.aircandi.service.objects.Activity;
-import com.aircandi.service.objects.Activity.TriggerType;
+import com.aircandi.service.objects.Action.EventCategory;
+import com.aircandi.service.objects.ActivityBase;
+import com.aircandi.service.objects.ActivityBase.TriggerType;
 import com.aircandi.service.objects.Install;
+import com.aircandi.service.objects.ServiceMessage;
 import com.aircandi.ui.AircandiForm;
 import com.aircandi.utilities.Errors;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -140,61 +141,61 @@ public class MessagingManager {
 	// Notifications
 	// --------------------------------------------------------------------------------------------	
 
-	public void broadcastActivity(final Activity activity) {
-		BusProvider.getInstance().post(new MessageEvent(activity));
+	public void broadcastMessage(final ServiceMessage message) {
+		BusProvider.getInstance().post(new MessageEvent(message));
 	}
 
-	public void notificationForActivity(final Activity activity, Context context) {
+	public void notificationForMessage(final ServiceMessage message, Context context) {
 		/*
 		 * Small icon displays on left unless a large icon is specified
 		 * and then it moves to the right.
 		 */
-		if (activity.trigger != null) {
-			if (activity.getTriggerCategory().equals(TriggerType.NEARBY)) {
+		if (message.trigger != null) {
+			if (message.getTriggerCategory().equals(TriggerType.NEARBY)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_NEARBY, Constants.PREF_NOTIFICATIONS_NEARBY_DEFAULT)) {
 					return;
 				}
 			}
-			else if (activity.getTriggerCategory().equals(TriggerType.OWN)) {
+			else if (message.getTriggerCategory().equals(TriggerType.OWN)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_OWN, Constants.PREF_NOTIFICATIONS_OWN_DEFAULT)) {
 					return;
 				}
 			}
-			else if (activity.getTriggerCategory().equals(TriggerType.WATCH)) {
+			else if (message.getTriggerCategory().equals(TriggerType.WATCH)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_WATCH, Constants.PREF_NOTIFICATIONS_WATCH_DEFAULT)) {
 					return;
 				}
 			}
 
-			if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+			if (message.action.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_COMMENTS, Constants.PREF_NOTIFICATIONS_COMMENTS_DEFAULT)) {
 					return;
 				}
 			}
-			else if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
+			else if (message.action.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_PICTURES, Constants.PREF_NOTIFICATIONS_PICTURES_DEFAULT)) {
 					return;
 				}
 			}
-			else if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
+			else if (message.action.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 				if (!Aircandi.settings.getBoolean(Constants.PREF_NOTIFICATIONS_CANDIGRAMS, Constants.PREF_NOTIFICATIONS_CANDIGRAMS_DEFAULT)) {
 					return;
 				}
 			}
 		}
 
-		activity.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		activity.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		message.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		message.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		final PendingIntent pendingIntent = PendingIntent.getActivity(Aircandi.applicationContext, 0
-				, activity.intent
+				, message.intent
 				, PendingIntent.FLAG_CANCEL_CURRENT);
 
 		/* Default base notification configuration */
 
 		final NotificationCompat.Builder builder = new NotificationCompat.Builder(Aircandi.applicationContext)
-				.setContentTitle(activity.title)
-				.setContentText(activity.subtitle)
+				.setContentTitle(message.title)
+				.setContentText(message.subtitle)
 				.setSmallIcon(R.drawable.ic_stat_notification)
 				.setAutoCancel(true)
 				.setOnlyAlertOnce(true)
@@ -202,14 +203,14 @@ public class MessagingManager {
 				.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS)
 				.setWhen(System.currentTimeMillis());
 
-		String byImageUri = activity.photoBy.getUri();
+		String byImageUri = message.photoBy.getUri();
 
 		/* Large icon */
 
 		if (byImageUri != null) {
 			final BitmapRequest bitmapRequest = new BitmapRequest()
 					.setBitmapUri(byImageUri)
-					.setBitmapRequestor(activity)
+					.setBitmapRequestor(message)
 					.setBitmapSize((int) Aircandi.applicationContext.getResources().getDimensionPixelSize(R.dimen.notification_large_icon_width))
 					.setRequestListener(new RequestListener() {
 
@@ -224,18 +225,18 @@ public class MessagingManager {
 
 								/* Enhance or go with default */
 
-								if (activity.action.entity != null && activity.action.getEventCategory().equals(EventType.INSERT)) {
-									if ((activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)
-											|| activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM))
-											&& activity.action.entity.getPhoto().getUri() != null) {
-										useBigPicture(builder, activity);
+								if (message.action.entity != null && message.action.getEventCategory().equals(EventCategory.INSERT)) {
+									if ((message.action.entity.schema.equals(Constants.SCHEMA_ENTITY_PICTURE)
+											|| message.action.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM))
+											&& message.action.entity.getPhoto().getUri() != null) {
+										useBigPicture(builder, message);
 									}
-									else if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
-										useBigText(builder, activity);
+									else if (message.action.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
+										useBigText(builder, message);
 									}
 								}
 								else {
-									String tag = getTag(activity);
+									String tag = getTag(message);
 									mNotificationManager.notify(tag, 0, builder.build());
 								}
 							}
@@ -245,16 +246,16 @@ public class MessagingManager {
 			BitmapManager.getInstance().masterFetch(bitmapRequest);
 		}
 		else {
-			mNotificationManager.notify(getTag(activity), 0, builder.build());
+			mNotificationManager.notify(getTag(message), 0, builder.build());
 		}
 	}
 
-	public void useBigPicture(final NotificationCompat.Builder builder, final Activity activity) {
+	public void useBigPicture(final NotificationCompat.Builder builder, final ServiceMessage message) {
 
-		String imageUri = activity.action.entity.getPhoto().getUri();
+		String imageUri = message.action.entity.getPhoto().getUri();
 		final BitmapRequest bitmapRequest = new BitmapRequest()
 				.setBitmapUri(imageUri)
-				.setBitmapRequestor(activity)
+				.setBitmapRequestor(message)
 				.setBitmapSize((int) Aircandi.applicationContext.getResources().getDimensionPixelSize(R.dimen.notification_big_picture_width))
 				.setRequestListener(new RequestListener() {
 
@@ -267,11 +268,11 @@ public class MessagingManager {
 							final BitmapResponse bitmapResponse = (BitmapResponse) serviceResponse.data;
 							NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle()
 									.bigPicture(bitmapResponse.bitmap)
-									.setBigContentTitle(activity.title)
-									.setSummaryText(activity.subtitle);
+									.setBigContentTitle(message.title)
+									.setSummaryText(message.subtitle);
 
 							builder.setStyle(style);
-							String tag = getTag(activity);
+							String tag = getTag(message);
 							mNotificationManager.notify(tag, 0, builder.build());
 						}
 					}
@@ -280,15 +281,15 @@ public class MessagingManager {
 		BitmapManager.getInstance().masterFetch(bitmapRequest);
 	}
 
-	public void useBigText(NotificationCompat.Builder builder, Activity activity) {
+	public void useBigText(NotificationCompat.Builder builder, ServiceMessage message) {
 		NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle()
-				.setBigContentTitle(activity.title)
-				.bigText(activity.action.entity.description)
-				.setSummaryText(activity.subtitle);
+				.setBigContentTitle(message.title)
+				.bigText(message.action.entity.description)
+				.setSummaryText(message.subtitle);
 
 		builder.setStyle(style);
 
-		mNotificationManager.notify(getTag(activity), 0, builder.build());
+		mNotificationManager.notify(getTag(message), 0, builder.build());
 	}
 
 	public void cancelNotification(String tag) {
@@ -299,17 +300,17 @@ public class MessagingManager {
 	// Methods
 	// --------------------------------------------------------------------------------------------
 
-	public String getTag(Activity activity) {
-		if (activity.action.getEventCategory().equals(EventType.EXPAND)) {
+	public String getTag(ActivityBase activity) {
+		if (activity.action.getEventCategory().equals(EventCategory.EXPAND)) {
 			return Tag.UPDATE;
 		}
-		else if (activity.action.getEventCategory().equals(EventType.MOVE)) {
+		else if (activity.action.getEventCategory().equals(EventCategory.MOVE)) {
 			return Tag.UPDATE;
 		}
-		else if (activity.action.getEventCategory().equals(EventType.INSERT)) {
+		else if (activity.action.getEventCategory().equals(EventCategory.INSERT)) {
 			return Tag.INSERT;
 		}
-		else if (activity.action.getEventCategory().equals(EventType.REFRESH)) {
+		else if (activity.action.getEventCategory().equals(EventCategory.REFRESH)) {
 			return Tag.REFRESH;
 		}
 		return Tag.UPDATE;

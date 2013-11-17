@@ -17,7 +17,7 @@ import com.aircandi.ServiceConstants;
 import com.aircandi.applications.Applinks;
 import com.aircandi.components.EntityManager;
 import com.aircandi.events.MessageEvent;
-import com.aircandi.service.objects.Action.EventType;
+import com.aircandi.service.objects.Action.EventCategory;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Link.Direction;
@@ -57,8 +57,8 @@ public class PictureForm extends BaseEntityForm {
 		 * Refresh the form because something new has been added to it
 		 * like a comment or post.
 		 */
-		if (event.activity.action.getEventCategory().equals(EventType.REFRESH)) {
-			if (event.activity.action.entity != null && mEntityId.equals(event.activity.action.entity.id)) {
+		if (event.message.action.getEventCategory().equals(EventCategory.REFRESH)) {
+			if (event.message.action.entity != null && mEntityId.equals(event.message.action.entity.id)) {
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -67,7 +67,7 @@ public class PictureForm extends BaseEntityForm {
 				});
 			}
 		}
-		else if (event.activity.action.toEntity != null && mEntityId.equals(event.activity.action.toEntity.id)) {
+		else if (event.message.action.toEntity != null && mEntityId.equals(event.message.action.toEntity.id)) {
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {

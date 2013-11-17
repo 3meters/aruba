@@ -4,9 +4,9 @@ import android.text.TextUtils;
 
 import com.aircandi.Constants;
 import com.aircandi.components.Logger;
-import com.aircandi.service.objects.Action.EventType;
-import com.aircandi.service.objects.Activity;
-import com.aircandi.service.objects.Activity.TriggerType;
+import com.aircandi.service.objects.Action.EventCategory;
+import com.aircandi.service.objects.ActivityBase;
+import com.aircandi.service.objects.ActivityBase.TriggerType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 
@@ -56,7 +56,7 @@ public class Activities {
 	 * A candigram has traveled to a place you are watching.
 	 */
 
-	public static void decorate(Activity activity) {
+	public static void decorate(ActivityBase activity) {
 		activity.title = title(activity);
 		activity.subtitle = subtitle(activity);
 		if (activity.subtitle == null) {
@@ -67,9 +67,9 @@ public class Activities {
 		activity.photoOne = photoOne(activity);
 	}
 
-	public static String subtitle(Activity activity) {
+	public static String subtitle(ActivityBase activity) {
 
-		if (activity.action.getEventCategory().equals(EventType.MOVE)) {
+		if (activity.action.getEventCategory().equals(EventCategory.MOVE)) {
 			if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 
 				if (activity.action.entity.type.equals(Constants.TYPE_APP_BOUNCE)) {
@@ -113,7 +113,7 @@ public class Activities {
 				}
 			}
 		}
-		else if (activity.action.getEventCategory().equals(EventType.EXPAND)) {
+		else if (activity.action.getEventCategory().equals(EventCategory.EXPAND)) {
 			if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)) {
 
 				if (activity.action.entity.type.equals(Constants.TYPE_APP_EXPAND)) {
@@ -139,7 +139,7 @@ public class Activities {
 				}
 			}
 		}
-		else if (activity.action.getEventCategory().equals(EventType.INSERT)) {
+		else if (activity.action.getEventCategory().equals(EventCategory.INSERT)) {
 			if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 
 				if (activity.trigger.equals(TriggerType.NEARBY)) {
@@ -200,20 +200,24 @@ public class Activities {
 			else if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_PLACE)) {
 
 				if (activity.trigger.equals(TriggerType.NEARBY)) {
-					return "tagged a new place nearby.";
+					return "created a new place nearby.";
 				}
 				else if (activity.trigger.equals(TriggerType.WATCH_USER)) {
-					return "tagged a new place.";
+					return "created a new place.";
+				}
+				else if (activity.trigger.equals(TriggerType.WATCH)) {
+					return "created a place you are watching.";
 				}
 			}
 		}
+		Logger.w(Activities.class, "activity missing subtitle");
 		return null;
 	}
 
-	public static String title(Activity activity) {
+	public static String title(ActivityBase activity) {
 		if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
 				&& activity.action.entity.type.equals(Constants.TYPE_APP_TOUR)
-				&& activity.action.getEventCategory().equals(EventType.MOVE)) {
+				&& activity.action.getEventCategory().equals(EventCategory.MOVE)) {
 			return activity.action.entity.name;
 		}
 		else if (activity.action.user == null) {
@@ -224,11 +228,11 @@ public class Activities {
 		}
 	}
 
-	public static Photo photoBy(Activity activity) {
+	public static Photo photoBy(ActivityBase activity) {
 		Photo photo = null;
 		if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
 				&& activity.action.entity.type.equals(Constants.TYPE_APP_TOUR)
-				&& activity.action.getEventCategory().equals(EventType.MOVE)) {
+				&& activity.action.getEventCategory().equals(EventCategory.MOVE)) {
 			photo = activity.action.entity.getPhoto();
 			photo.name = activity.action.entity.name;
 			photo.shortcut = activity.action.entity.getShortcut();
@@ -244,12 +248,12 @@ public class Activities {
 		return photo;
 	}
 
-	public static Photo photoOne(Activity activity) {
+	public static Photo photoOne(ActivityBase activity) {
 		Photo photo = null;
 
 		if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_CANDIGRAM)
 				&& activity.action.entity.type.equals(Constants.TYPE_APP_TOUR)
-				&& activity.action.getEventCategory().equals(EventType.MOVE)) {
+				&& activity.action.getEventCategory().equals(EventCategory.MOVE)) {
 			photo = activity.action.toEntity.getPhoto();
 			photo.name = TextUtils.isEmpty(activity.action.toEntity.name)
 					? activity.action.toEntity.getSchemaMapped()
@@ -273,14 +277,14 @@ public class Activities {
 		return photo;
 	}
 
-	public static Photo photoTwo(Activity activity) {
+	public static Photo photoTwo(ActivityBase activity) {
 		Photo photo = activity.action.fromEntity.getPhoto();
 		photo.name = activity.action.fromEntity.name;
 		photo.shortcut = activity.action.fromEntity.getShortcut();
 		return photo;
 	}
 
-	public static String description(Activity activity) {
+	public static String description(ActivityBase activity) {
 		if (activity.action.entity.schema.equals(Constants.SCHEMA_ENTITY_COMMENT)) {
 			return "\"" + activity.action.entity.description + "\"";
 		}
