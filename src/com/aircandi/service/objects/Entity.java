@@ -513,14 +513,17 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 				if ((settings.linkType == null || link.type.equals(settings.linkType)) && link.shortcut != null) {
 					if (settings.linkTargetSchema == null || (link.targetSchema.equals(settings.linkTargetSchema))) {
 						if (settings.synthetic == null || link.shortcut.isSynthetic() == settings.synthetic) {
-							/*
-							 * Must clone or the groups added below will cause circular references
-							 * that choke serializing to json.
-							 */
-							Shortcut shortcut = link.shortcut.clone();
-							shortcut.inactive = link.inactive;
-							shortcut.linkType = settings.linkType;
-							shortcuts.add(shortcut);
+							if (settings.linkBroken
+									|| (!settings.linkBroken && (link.shortcut.validatedDate == null || link.shortcut.validatedDate.longValue() != -1))) {
+								/*
+								 * Must clone or the groups added below will cause circular references
+								 * that choke serializing to json.
+								 */
+								Shortcut shortcut = link.shortcut.clone();
+								shortcut.inactive = link.inactive;
+								shortcut.linkType = settings.linkType;
+								shortcuts.add(shortcut);
+							}
 						}
 					}
 				}
@@ -534,13 +537,20 @@ public abstract class Entity extends ServiceBase implements Cloneable, Serializa
 
 				final Map<String, List<Shortcut>> shortcutLists = new HashMap<String, List<Shortcut>>();
 				for (Shortcut shortcut : shortcuts) {
-					if (shortcutLists.containsKey(shortcut.app)) {
-						shortcutLists.get(shortcut.app).add(shortcut);
-					}
-					else {
+					if (shortcut.app.equals(Constants.TYPE_APP_WEBSITE)) {
 						List<Shortcut> list = new ArrayList<Shortcut>();
 						list.add(shortcut);
-						shortcutLists.put(shortcut.app, list);
+						shortcutLists.put(shortcut.appUrl, list);
+					}
+					else {
+						if (shortcutLists.containsKey(shortcut.app)) {
+							shortcutLists.get(shortcut.app).add(shortcut);
+						}
+						else {
+							List<Shortcut> list = new ArrayList<Shortcut>();
+							list.add(shortcut);
+							shortcutLists.put(shortcut.app, list);
+						}
 					}
 				}
 

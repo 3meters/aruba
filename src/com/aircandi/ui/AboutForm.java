@@ -1,9 +1,11 @@
 package com.aircandi.ui;
 
 import java.util.Calendar;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.TextView;
 
@@ -15,6 +17,8 @@ import com.aircandi.utilities.Animate.TransitionType;
 import com.aircandi.utilities.DateTime;
 import com.aircandi.utilities.Routing;
 import com.aircandi.utilities.Routing.Route;
+import com.aircandi.utilities.Utilities;
+import com.aircandi.utilities.Utilities.ScreenSize;
 
 public class AboutForm extends BaseBrowse {
 
@@ -40,9 +44,19 @@ public class AboutForm extends BaseBrowse {
 
 		mVersion.setText(version);
 		mCopyright.setText(copyright);
+
+		DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+		Integer screenWidthDp = Math.round(displayMetrics.widthPixels / displayMetrics.density);
+		Integer screenHeightDp = Math.round(displayMetrics.heightPixels / displayMetrics.density);
+
+		ScreenSize screenSize = Utilities.getScreenSize();
+
 		((TextView) findViewById(R.id.install_id)).setText(Aircandi.getInstallationId());
 		((TextView) findViewById(R.id.install_type)).setText(Aircandi.getInstallType());
 		((TextView) findViewById(R.id.install_date)).setText(DateTime.dateString(Aircandi.getInstallDate(), DateTime.DATE_FORMAT_DEFAULT));
+		((TextView) findViewById(R.id.screen_info)).setText("Screen size: " + screenSize.name().toLowerCase(Locale.US)
+				+ ", height: " + String.valueOf(screenHeightDp)
+				+ "dp, width: " + String.valueOf(screenWidthDp) + "dp");
 	}
 
 	@Override

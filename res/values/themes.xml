@@ -45,6 +45,7 @@
         <item name="ruleColorStrong">@color/rule_60_dark</item>
         <item name="textColor">@color/text_dark</item>
         <item name="textColorSecondary">@color/text_secondary_dark</item>
+        <item name="textColorAlert">@color/text_alert_dark</item>
         <item name="textColorUnfocused">@color/text_dark</item>
         <item name="textColorButtonLink">@color/accent</item>
         <item name="textColorBullet">@color/brand_pink</item>
@@ -153,6 +154,7 @@
         <item name="ruleColorStrong">@color/rule_60_light</item>
         <item name="textColor">@color/text_light</item>
         <item name="textColorSecondary">@color/text_secondary_light</item>
+        <item name="textColorAlert">@color/text_alert_light</item>
         <item name="textColorUnfocused">@color/text_light</item>
         <item name="textColorButtonLink">@color/accent_darker</item>
         <item name="textColorBullet">@color/brand_pink</item>

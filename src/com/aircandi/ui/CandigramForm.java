@@ -13,7 +13,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -126,7 +126,7 @@ public class CandigramForm extends BaseEntityForm {
 				int widgetWidthDp = 122;
 				if (screenWidthDp - widgetWidthDp <= 264) {
 					int photoViewWidth = UI.getRawPixelsForDisplayPixels(this, screenWidthDp - widgetWidthDp);
-					LinearLayout.LayoutParams paramsImage = new LinearLayout.LayoutParams(photoViewWidth, photoViewWidth);
+					RelativeLayout.LayoutParams paramsImage = new RelativeLayout.LayoutParams(photoViewWidth, photoViewWidth);
 					photoView.setLayoutParams(paramsImage);
 				}
 
@@ -325,13 +325,11 @@ public class CandigramForm extends BaseEntityForm {
 
 		Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, false, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_CANDIGRAM, 0);
-		String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
-		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count) + " " + label);
+		((TextView) findViewById(R.id.like_stats)).setText(String.valueOf(count.count));
 
 		count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, false, Direction.in);
 		if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_CANDIGRAM, 0);
-		label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
-		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count) + " " + label);
+		((TextView) findViewById(R.id.watching_stats)).setText(String.valueOf(count.count));
 
 		UI.setVisibility(findViewById(R.id.places_stats), View.GONE);
 		if (mEntity.type.equals(Constants.TYPE_APP_EXPAND)) {
@@ -345,8 +343,8 @@ public class CandigramForm extends BaseEntityForm {
 				summed.count = summed.count.intValue() + inactive.count.intValue();
 			}
 
-			label = this.getString(summed.count.intValue() == 1 ? R.string.stats_label_places : R.string.stats_label_places_plural);
-			((TextView) findViewById(R.id.places_stats)).setText(String.valueOf(summed.count) + " " + label);
+			String label = this.getString(summed.count.intValue() == 1 ? R.string.stats_label_places : R.string.stats_label_places_plural);
+			((TextView) findViewById(R.id.places_stats)).setText(label + " " + String.valueOf(summed.count));
 			UI.setVisibility(findViewById(R.id.places_stats), View.VISIBLE);
 		}
 

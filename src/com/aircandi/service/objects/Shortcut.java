@@ -37,6 +37,8 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String									appUrl;
 	@Expose
+	public Number									validatedDate;
+	@Expose
 	public Number									position;
 	@Expose
 	public Photo									photo;
@@ -75,6 +77,7 @@ public class Shortcut extends ServiceObject implements Cloneable, Serializable {
 		shortcut.app = (String) map.get("app");
 		shortcut.appId = (String) map.get("appId");
 		shortcut.appUrl = (String) map.get("appUrl");
+		shortcut.validatedDate = (Number) map.get("validatedDate");
 		shortcut.position = (Number) map.get("position");
 		shortcut.content = (Boolean) map.get("content");
 		shortcut.action = (String) map.get("action");

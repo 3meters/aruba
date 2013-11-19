@@ -1,7 +1,6 @@
 package com.aircandi.ui.edit;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;
@@ -95,6 +94,14 @@ public class ApplinkEdit extends BaseEntityEdit {
 			});
 		}
 		bind(BindingMode.AUTO);
+	}
+
+	@Override
+	public void bind(BindingMode mode) {
+		super.bind(mode);
+		if (!mEditing) {
+			((Applink) mEntity).origin = "aircandi";
+		}
 	}
 
 	@Override
@@ -232,10 +239,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 	@Override
 	protected void setEntityType(String type) {
 		super.setEntityType(type);
-		if (mEntity.data == null) {
-			mEntity.data = new HashMap<String, Object>();
-		}
-		mEntity.data.put("origin", "user");
+		((Applink) mEntity).origin = "aircandi";
 		((Applink) mEntity).appId = null;
 		((Applink) mEntity).appUrl = null;
 	}
@@ -297,7 +301,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 					Long validatedDate = null;
 					if (applinks.size() > 0) {
 						Applink validated = (Applink) applinks.get(0);
-						validatedDate = (Long) validated.data.get("validated");
+						validatedDate = (Long) validated.validatedDate;
 					}
 
 					/* Validation failed */
@@ -350,6 +354,7 @@ public class ApplinkEdit extends BaseEntityEdit {
 				if (!appUrl.startsWith("http://") && !appUrl.startsWith("https://")) {
 					applink.appUrl = "http://" + appUrl;
 				}
+				applink.appId = applink.appUrl;
 			}
 		}
 	}

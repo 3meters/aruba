@@ -96,13 +96,14 @@
     <string name="dummy_category_name">Restaurant</string>
     <string name="dummy_uri">http://goodeats.com</string>
     <string name="dummy_name">Jay Massena</string>
+    <string name="dummy_alert">Link failed verification</string>
     <string name="dummy_label">candigram</string>
     <string name="dummy_location">Seattle, WA</string>
     <string name="dummy_address">"2200 N 56th (at Keystone Pl N)\nSeattle, WA 98103\n(206) 545&#8211;4277"</string>
     <string name="dummy_comments">21 comments</string>
     <string name="dummy_copyright">&#169;2013 3meters LLC.</string>
     <string name="dummy_version">Version: 0.9.35 (76)</string>
-    <string name="dummy_install_id">f8953a63-2019-4793-9b03-e93370913c4b</string>
+    <string name="dummy_install_id" tools:ignore="TypographyDashes">f8953a63-2019-4793-9b03-e93370913c4b</string>
     <string name="dummy_install_date">December 23 at 10:12am</string>
     <string name="dummy_install_type">serial_num</string>
     <string name="dummy_candigram_action">checking schedule</string>
@@ -112,13 +113,13 @@
     <string name="dummy_place_stat">28 places</string>
     <string name="dummy_timesince">10 minutes ago</string>
     <string name="dummy_type_candigram">bouncing</string>
+    <string name="dummy_web_address">http://massenamodern.com</string>
     <string name="dummy_datetime">December 23 at 10:12am</string>
     <string name="dummy_tags">Coffee Shop, Cafe, Tea Room</string>
     <string name="dummy_button_label">Watch</string>
     <string name="dummy_description">Ever wonder why Aircandi fans refuse to use anything else? For more than four days, Aircandi has attracted a growing family of loyal, almost zealous customers, known as “Candiniks”. By remaining true to the quality tenets of our founder – emphasizing knowledge, taste, and using the senses to evaluate quality at every step – Aircandi defines the gold standard by which all other proximity applications are judged.</string>
     <string name="dummy_username" tools:ignore="UnusedResources,UnusedResources">jay.massena</string>
     <string name="dummy_edit_hint" tools:ignore="UnusedResources">How long a candigram will stay someplace before moving on</string>
-    <string name="dummy_web_address" tools:ignore="UnusedResources">http://massenamodern.com</string>
     
     <!-- Alerts general -->
 
@@ -149,6 +150,8 @@
     <string name="alert_candigram_toured">This candigram traveled to a new place</string>
     <string name="alert_candigram_bounced">This candigram was kicked to a new place</string>
     <string name="alert_candigram_expanded">This candigram was repeated to another place</string>
+    <string name="alert_applink_broken">Link failed verification</string>
+    <string name="alert_applinks_broken">One or more links failed verification</string>
     
     <!-- Alerts: anonymous -->
     
@@ -488,6 +491,7 @@
     <string name="form_label_tuning_tune_name">If you are currently at <i>%1$s</i>, make Aircandi better by tuning for faster and more accurate discovery.</string>
     <string name="form_label_tuning_edit_no_name">Update place details like the address or customize links.</string>
     <string name="form_label_tuning_edit_name">Update place details for %1$s like the address or customize links.</string>
+    <string name="form_label_about_install">Install</string>
     
     <!-- Candigrams -->
     

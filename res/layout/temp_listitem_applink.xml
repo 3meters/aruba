@@ -57,7 +57,8 @@
             android:maxLines="1"
             android:text="@string/dummy_subtitle"
             android:textColor="?attr/textColorSecondary" />
-    </LinearLayout>
+        
+        </LinearLayout>
 
     <ImageView
         android:id="@+id/image_forward"

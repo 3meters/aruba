@@ -13,6 +13,7 @@ public class ShortcutSettings {
 	public Boolean		linkInactive;
 	public Boolean		synthetic		= false;
 	public Boolean		groupedByApp	= false;
+	public Boolean		linkBroken		= false;
 	public Class<?>		appClass;
 
 	public ShortcutSettings() {}

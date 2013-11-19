@@ -90,7 +90,6 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:layout_marginTop="5dp"
-        android:layout_weight="0"
         aircandi:drawable="?attr/iconOverflow"
         aircandi:layout="@layout/widget_combo_button_no_text"
         android:minWidth="@dimen/form_button_height"

@@ -59,10 +59,10 @@ public class GcmIntentService extends IntentService {
 					ServiceMessage message = (ServiceMessage) Json.jsonToObject(jsonMessage, Json.ObjectType.SERVICE_MESSAGE);
 
 					if (message != null) {
-						
+
 						/* Is this a message event we know how to handle */
 						if (message.action.getEventCategory().equals(EventCategory.UNKNOWN)) return;
-						
+
 						/*
 						 * If user is currently on the activities list, it will be auto refreshed so don't show
 						 * notification in the status bar. Don't need to broadcast either.
@@ -70,7 +70,7 @@ public class GcmIntentService extends IntentService {
 						android.app.Activity currentActivity = Aircandi.getInstance().getCurrentActivity();
 						if (currentActivity != null && currentActivity.getClass().equals(AircandiForm.class)) {
 							BaseFragment fragment = ((AircandiForm) currentActivity).getCurrentFragment();
-							if (fragment.getClass().equals(ActivityFragment.class)) {
+							if (fragment != null && fragment.getClass().equals(ActivityFragment.class)) {
 								return;
 							}
 						}
@@ -104,8 +104,13 @@ public class GcmIntentService extends IntentService {
 						/* Trigger event so subscribers can decide if they care about the activity */
 						MessagingManager.getInstance().broadcastMessage(message);
 
-						/* Tickle activity date on current user to flag auto refresh for activity list */
-						Aircandi.getInstance().getCurrentUser().activityDate = message.sentDate;
+						/*
+						 * Tickle activity date on current user to flag auto refresh for activity list. This service
+						 * can be woken up when we don't have a current user.
+						 */
+						if (Aircandi.getInstance().getCurrentUser() != null) {
+							Aircandi.getInstance().getCurrentUser().activityDate = message.sentDate;
+						}
 
 						/* Send notification */
 						MessagingManager.getInstance().notificationForMessage(message, Aircandi.applicationContext);

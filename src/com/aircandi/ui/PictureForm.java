@@ -8,7 +8,7 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aircandi.Constants;
@@ -135,7 +135,7 @@ public class PictureForm extends BaseEntityForm {
 				int widgetWidthDp = 122;
 				if (screenWidthDp - widgetWidthDp <= 264) {
 					int photoViewWidth = UI.getRawPixelsForDisplayPixels(this, screenWidthDp - widgetWidthDp);
-					LinearLayout.LayoutParams paramsImage = new LinearLayout.LayoutParams(photoViewWidth, photoViewWidth);
+					RelativeLayout.LayoutParams paramsImage = new RelativeLayout.LayoutParams(photoViewWidth, photoViewWidth);
 					photoView.setLayoutParams(paramsImage);
 				}
 
@@ -325,16 +325,14 @@ public class PictureForm extends BaseEntityForm {
 		if (likeStats != null) {
 			Count count = mEntity.getCount(Constants.TYPE_LINK_LIKE, null, false, Direction.in);
 			if (count == null) count = new Count(Constants.TYPE_LINK_LIKE, Constants.SCHEMA_ENTITY_PICTURE, 0);
-			String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_likes : R.string.stats_label_likes_plural);
-			likeStats.setText(String.valueOf(count.count) + " " + label);
+			likeStats.setText(String.valueOf(count.count));
 		}
 
 		TextView watchingStats = (TextView) findViewById(R.id.watching_stats);
 		if (watchingStats != null) {
 			Count count = mEntity.getCount(Constants.TYPE_LINK_WATCH, null, false, Direction.in);
 			if (count == null) count = new Count(Constants.TYPE_LINK_WATCH, Constants.SCHEMA_ENTITY_PICTURE, 0);
-			String label = this.getString(count.count.intValue() == 1 ? R.string.stats_label_watching : R.string.stats_label_watching_plural);
-			watchingStats.setText(String.valueOf(count.count) + " " + label);
+			watchingStats.setText(String.valueOf(count.count));
 		}
 	}
 

@@ -27,6 +27,14 @@ public class Applink extends Entity implements Cloneable, Serializable {
 	public String				appId;
 	@Expose
 	public String				appUrl;
+	@Expose
+	public String				origin;
+	@Expose
+	public String				originId;
+	@Expose
+	public Number				validatedDate;
+	@Expose
+	public Number				popularity;
 
 	public Applink() {}
 
@@ -60,6 +68,10 @@ public class Applink extends Entity implements Cloneable, Serializable {
 			entity = (Applink) Entity.setPropertiesFromMap(entity, map, nameMapping);
 			entity.appId = (String) map.get("appId");
 			entity.appUrl = (String) map.get("appUrl");
+			entity.origin = (String) map.get("origin");
+			entity.originId = (String) map.get("originId");
+			entity.validatedDate = (Number) map.get("validatedDate");
+			entity.popularity = (Number) map.get("popularity");
 		}
 		return entity;
 	}

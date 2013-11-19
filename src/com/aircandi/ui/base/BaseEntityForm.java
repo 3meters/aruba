@@ -3,6 +3,7 @@ package com.aircandi.ui.base;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -373,6 +374,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 
 	}
 
+	@SuppressLint("NewApi")
 	@SuppressWarnings("ucd")
 	public void onOverflowButtonClick(View view) {
 
@@ -789,6 +791,7 @@ public abstract class BaseEntityForm extends BaseBrowse implements FormDelegate 
 	// Menus
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressLint("NewApi")
 	public void gingerbreadPopupMenu() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this)
 				.setItems(R.array.more_options_entity, new DialogInterface.OnClickListener() {

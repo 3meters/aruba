@@ -17,6 +17,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.app.Service;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Environment;
 import android.widget.Toast;
 
@@ -199,4 +200,29 @@ public class Utilities {
 		return availableMemory;
 	}
 
+	public static ScreenSize getScreenSize() {
+		int screenLayout = Aircandi.applicationContext.getResources().getConfiguration().screenLayout;
+		screenLayout &= Configuration.SCREENLAYOUT_SIZE_MASK;
+
+		switch (screenLayout) {
+			case Configuration.SCREENLAYOUT_SIZE_SMALL:
+				return ScreenSize.SMALL;
+			case Configuration.SCREENLAYOUT_SIZE_NORMAL:
+				return ScreenSize.NORMAL;
+			case Configuration.SCREENLAYOUT_SIZE_LARGE:
+				return ScreenSize.LARGE;
+			case 4: // Configuration.SCREENLAYOUT_SIZE_XLARGE is API >= 9
+				return ScreenSize.XLARGE;
+			default:
+				return ScreenSize.UNDEFINED;
+		}
+	}
+
+	public static enum ScreenSize {
+		SMALL,
+		NORMAL,
+		LARGE,
+		XLARGE,
+		UNDEFINED
+	}
 }

@@ -17,6 +17,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aircandi.Aircandi;
 import com.aircandi.Constants;
 import com.aircandi.R;
 import com.aircandi.ServiceConstants;
@@ -291,6 +292,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 				holder.appId = (TextView) view.findViewById(R.id.app_id);
 				holder.appUrl = (TextView) view.findViewById(R.id.app_url);
 				holder.type = (TextView) view.findViewById(R.id.type);
+				holder.alert = (TextView) view.findViewById(R.id.alert);
 				holder.checked = (CheckBox) view.findViewById(R.id.checked);
 				if (holder.checked != null) {
 					holder.checked.setOnClickListener(new OnClickListener() {
@@ -347,6 +349,14 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 					}
 				}
 
+				UI.setVisibility(holder.alert, View.GONE);
+				if (holder.alert != null) {
+					if (applink.validatedDate != null && applink.validatedDate.longValue() == -1) {
+						holder.alert.setText(Aircandi.applicationContext.getString(R.string.alert_applink_broken));
+						UI.setVisibility(holder.alert, View.VISIBLE);
+					}
+				}
+				
 				if (holder.photoView != null) {
 					holder.photoView.setTag(applink);
 					UI.drawPhoto(holder.photoView, applink.getPhoto());
@@ -365,6 +375,7 @@ public class ApplinkListEdit extends BaseEntityListEdit {
 			private AirImageView	photoView;
 			private TextView		name;
 			private TextView		appId;
+			private TextView		alert;
 			private TextView		appUrl;
 			private TextView		type;
 			private CheckBox		checked;

@@ -167,7 +167,9 @@ public class ActivityFragment extends BaseFragment {
 						mActivities.clear();
 						mAdapter.setNotifyOnChange(false);
 						mAdapter.clear();
-						mAdapter.addAll((List<ServiceActivity>) result.data);
+						for (ServiceActivity activity: (List<ServiceActivity>) result.data) {
+							mAdapter.add(activity);
+						}
 						mAdapter.sort(new ServiceActivity.SortBySortDate());
 						mAdapter.notifyDataSetChanged();
 					}
@@ -282,7 +284,9 @@ public class ActivityFragment extends BaseFragment {
 					if (result.data != null) {
 						ServiceData serviceData = (ServiceData) result.serviceResponse.data;
 						mMore = serviceData.more;
-						mAdapter.addAll((List<ServiceActivity>) result.data);
+						for (ServiceActivity activity: (List<ServiceActivity>) result.data) {
+							mAdapter.add(activity);
+						}
 						mAdapter.sort(new ServiceActivity.SortBySortDate());
 						mAdapter.notifyDataSetChanged();
 					}

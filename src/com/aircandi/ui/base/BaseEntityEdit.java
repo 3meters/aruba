@@ -90,6 +90,8 @@ public abstract class BaseEntityEdit extends BaseEdit {
 	protected File				mMediaFile;
 	protected String			mPhotoSource;
 
+	protected Boolean			mBrokenLink				= false;
+
 	protected Integer			mInsertProgressResId	= R.string.progress_saving;
 	protected Integer			mUpdateProgressResId	= R.string.progress_updating;
 	protected Integer			mDeleteProgressResId	= R.string.progress_deleting;
@@ -183,7 +185,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 			if (Aircandi.getInstance().getCurrentUser() != null) {
 				mEntity.creator = Aircandi.getInstance().getCurrentUser();
 				mEntity.creatorId = Aircandi.getInstance().getCurrentUser().id;
-			}
+			}			
 		}
 	}
 
@@ -223,6 +225,11 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 			if (findViewById(R.id.applinks) != null) {
 				drawShortcuts(entity);
+				UI.setVisibility(findViewById(R.id.alert), View.GONE);
+				if (mBrokenLink) {
+					((TextView)findViewById(R.id.alert)).setText(Aircandi.applicationContext.getString(R.string.alert_applinks_broken));
+					UI.setVisibility(findViewById(R.id.alert), View.VISIBLE);
+				}
 			}
 
 			/* Creator block */
@@ -298,6 +305,7 @@ public abstract class BaseEntityEdit extends BaseEdit {
 		}
 		else {
 			ShortcutSettings settings = new ShortcutSettings(Constants.TYPE_LINK_CONTENT, Constants.SCHEMA_ENTITY_APPLINK, Direction.in, null, false, false);
+			settings.linkBroken = true;
 			shortcuts = (List<Shortcut>) entity.getShortcuts(settings, null, new Shortcut.SortByPositionSortDate());
 		}
 
@@ -317,23 +325,26 @@ public abstract class BaseEntityEdit extends BaseEdit {
 
 			/* We only show the first five */
 			int shortcutCount = 0;
+			mBrokenLink = false;
 			for (Shortcut shortcut : shortcuts) {
-				if (shortcutCount >= 5) {
-					break;
+				if (shortcutCount < 5) {
+					View view = inflater.inflate(R.layout.temp_entity_edit_link_item, null);
+					AirImageView photoView = (AirImageView) view.findViewById(R.id.photo);
+					photoView.setSizeHint(sizePixels);
+
+					UI.drawPhoto(photoView, shortcut.getPhoto());
+
+					LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
+					params.setMargins(marginPixels
+							, marginPixels
+							, marginPixels
+							, marginPixels);
+					view.setLayoutParams(params);
+					button.getViewGroup().addView(view);
 				}
-				View view = inflater.inflate(R.layout.temp_entity_edit_link_item, null);
-				AirImageView photoView = (AirImageView) view.findViewById(R.id.photo);
-				photoView.setSizeHint(sizePixels);
-
-				UI.drawPhoto(photoView, shortcut.getPhoto());
-
-				LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
-				params.setMargins(marginPixels
-						, marginPixels
-						, marginPixels
-						, marginPixels);
-				view.setLayoutParams(params);
-				button.getViewGroup().addView(view);
+				if (shortcut.validatedDate != null && shortcut.validatedDate.longValue() == -1) {
+					mBrokenLink = true;
+				}
 				shortcutCount++;
 			}
 		}

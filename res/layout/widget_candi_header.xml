@@ -57,36 +57,6 @@
             android:onClick="onWatchButtonClick" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="5dp"
-        android:orientation="vertical" >
-
-        <com.aircandi.ui.widgets.AirTextView
-            android:id="@+id/like_stats"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/dummy_like_stat"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        <com.aircandi.ui.widgets.AirTextView
-            android:id="@+id/watching_stats"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/dummy_watch_stat"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        <com.aircandi.ui.widgets.AirTextView
-            android:id="@+id/places_stats"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/dummy_place_stat"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:visibility="gone" />
-    </LinearLayout>
-
     <com.aircandi.ui.widgets.ComboButton
         android:id="@+id/button_overflow"
         style="@style/form_button"

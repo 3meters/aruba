@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.PorterDuff;
@@ -45,6 +46,7 @@ import com.aircandi.components.Maps;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProximityManager.ModelResult;
 import com.aircandi.components.TrackerBase.TrackerCategory;
+import com.aircandi.service.objects.Applink;
 import com.aircandi.service.objects.CacheStamp;
 import com.aircandi.service.objects.Count;
 import com.aircandi.service.objects.Cursor;
@@ -181,7 +183,12 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 		 * UI know to repaint.
 		 */
 		if (mListView != null) {
-			mListView.setAdapter(mAdapter);
+			if (mListView instanceof ListView) {
+				((ListView) mListView).setAdapter(mAdapter);
+			}
+			else if (mListView instanceof GridView) {
+				((GridView) mListView).setAdapter(mAdapter);
+			}
 		}
 	}
 
@@ -248,7 +255,18 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 							mEntities.clear();
 							mAdapter.setNotifyOnChange(false);
 							mAdapter.clear();
-							mAdapter.addAll((List<Entity>) result.data);
+							for (Entity entity : (List<Entity>) result.data) {
+								/*
+								 * Special case: skip broken applinks
+								 */
+								if (entity instanceof Applink) {
+									Applink applink = (Applink) entity;
+									if (applink.validatedDate != null && applink.validatedDate.longValue() == -1) {
+										continue;
+									}
+								}
+								mAdapter.add(entity);
+							}
 							mAdapter.sort(new Entity.SortByPositionSortDate());
 							mAdapter.notifyDataSetChanged();
 						}
@@ -310,6 +328,7 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 	// Events
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressLint("NewApi")
 	@SuppressWarnings("ucd")
 	public void onOverflowButtonClick(View view) {
 
@@ -449,7 +468,9 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 					if (result.data != null) {
 						ServiceData serviceData = (ServiceData) result.serviceResponse.data;
 						mMore = serviceData.more;
-						mAdapter.addAll((List<Entity>) result.data);
+						for (Entity activity : (List<Entity>) result.data) {
+							mAdapter.add(activity);
+						}
 						mAdapter.sort(new Entity.SortByPositionSortDate());
 						mAdapter.notifyDataSetChanged();
 					}
@@ -495,6 +516,7 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 	// Menus
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressLint("NewApi")
 	public void gingerbreadPopupMenu(final Entity entity) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this)
 				.setItems(R.array.more_options_entity, new DialogInterface.OnClickListener() {
@@ -696,6 +718,25 @@ public abstract class BaseEntityList extends BaseBrowse implements ListDelegate 
 								UI.setVisibility(holder.subtitle, View.VISIBLE);
 							}
 						}
+					}
+				}
+				else if (entity.schema.equals(Constants.SCHEMA_ENTITY_APPLINK)) {
+					String subtitle = null;
+					if (entity.type.equals(Constants.TYPE_APP_WEBSITE)) {
+						subtitle = ((Applink) entity).appUrl;
+					}
+					else if (entity.type.equals(Constants.TYPE_APP_EMAIL)) {
+						subtitle = ((Applink) entity).appId;
+					}
+					else if (entity.type.equals(Constants.TYPE_APP_OPENTABLE)
+							|| entity.type.equals(Constants.TYPE_APP_URBANSPOON)
+							|| entity.type.equals(Constants.TYPE_APP_TRIPADVISOR)) {
+						subtitle = ((Applink) entity).appUrl;
+					}
+
+					if (subtitle != null) {
+						holder.subtitle.setText(subtitle);
+						UI.setVisibility(holder.subtitle, View.VISIBLE);
 					}
 				}
 				else {

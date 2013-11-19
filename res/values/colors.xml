@@ -16,6 +16,8 @@
     <color name="text_light">#ff000000</color>
     <color name="text_secondary_dark">@color/gray_50_pcnt</color>
     <color name="text_secondary_light">@color/gray_50_pcnt</color>
+    <color name="text_alert_dark">@color/accent_orange_dark</color>
+    <color name="text_alert_light">@color/accent_orange_dark</color>
     <color name="text_unfocused_dark">#ffcccccc</color>
     <color name="text_unfocused_light">#ff666666</color>
     <color name="text_pressed">#ff000000</color>
