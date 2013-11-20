@@ -1,58 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-    name="aircandi_custom"
+    name="aircandi_ting"
     default="revision" >
 
     <property
         name="android.local.dir"
         value="D:\Files\Proxibase\Android\" />
-    
+
    	<!-- See the instructions at the top of crashlytics_build.xml
-         for information about nonstandard builds. 
+         for information about nonstandard builds.
     <import file="${android.local.dir}crashlytics\crashlytics_build.xml"/>
     -->
-    
+
     <!-- extra output directory -->
 
     <property
         name="web.local.dir"
         value="D:\Files\Proxibase\Code\Aircandi\Web\lib\public\android" />
-        
+
     <!-- Pre-build targets -->
-    
+
 	<target name="-pre-build">
-		<antcall target="bump-version" />				
-	</target>	
-    
+		<antcall target="bump-version" />
+	</target>
+
 	<target name="bump-version" description="Bumps and updates version info in the manifest.">
-	    
+
 		<!-- Increment revision number in the property file -->
 	    <propertyfile  file="version.properties">
 			<entry key="build.revision.number" type="int" operation="+" value="1" />
 	    </propertyfile>
-	    
+
     	<property file="version.properties" />
-    	
+
 	    <property name="build.version" value="${build.major.number}.${build.minor.number}.${build.patch.number}" />
 	    <property name="build.code" value="${build.code}" />
-	    
+
     	<echo>Version code: ${build.code}</echo>
-        <echo>Version name: ${build.version}</echo>    			
-    
-        <!-- Push version info to the manifest file 
+        <echo>Version name: ${build.version}</echo>
+
+        <!-- Push version info to the manifest file
    		<SetVersion code="${build.code}" name="${build.version}"/>-->
-	    	    
-	</target>	
-						
+
+	</target>
+
 	<target name="current_build_version" description="Shows current build version.">
 	 	<echo>Target build version:${build.version}</echo>
 	</target>
-	
+
 	<target name="current_manifest_version_name" description="Shows current version in the manifest.">
 		<xpath input="AndroidManifest.xml" expression="/manifest/@android:versionName" output="build.version.name" default="unknown" />
 	    <echo>Current manifest version name:${build.version.name}</echo>
 	</target>
-	
+
 	<target name="upload" description="Upload aircandi apk to website.">
 		<property file="${source.absolute.dir}/com/proxibase/aircandi/aws.properties"/>
 		<S3Upload verbose="true"
@@ -63,15 +63,15 @@
 			<fileset dir="${out.absolute.dir}" includes="${out.final.file}"/>
 		</S3Upload>
 	</target>
-	
+
     <!-- Customized release target: Adds steps to update versionName in the manifest
          and output the signed release apk file to the web server. -->
-         
+
     <target name="-release-sign" if="has.keystore" >
         <!-- only create apk if *not* a library project -->
         <do-only-if-not-library elseText="Library project: do not create apk..." >
             <sequential>
-                
+
                 <!-- Add version to final file name -->
     			<property file="version.properties" />
 	    		<property name="build.version" value="${build.major.number}.${build.minor.number}.${build.patch.number}" />
@@ -93,10 +93,10 @@
                 <zipalign-helper
                         in.package="${out.unaligned.file}"
                         out.package="${out.final.file.versioned}" />
-                
+
 				<copy file="${out.final.file.versioned}" toDir="${web.local.dir}" overwrite="true" />
-				
-                <!-- Extra copy to website                 
+
+                <!-- Extra copy to website
         		<property file="${source.absolute.dir}/com/proxibase/aircandi/aws.properties"/>
 		        <S3Upload verbose="true"
 		                        accessId="${accessId}"
@@ -110,12 +110,12 @@
         </do-only-if-not-library>
         <record-build-info />
     </target>
-    
+
     <target name="-release-sign-custom" if="has.keystore" >
         <!-- only create apk if *not* a library project -->
         <do-only-if-not-library elseText="Library project: do not create apk..." >
             <sequential>
-                
+
                 <!-- Add version to final file name -->
     			<property file="version.properties" />
 	    		<property name="build.version" value="${build.major.number}.${build.minor.number}.${build.patch.number}" />
@@ -137,10 +137,10 @@
                 <zipalign-helper
                         in.package="${out.unaligned.file}"
                         out.package="${out.final.file.versioned}" />
-                
+
 				<copy file="${out.final.file.versioned}" toDir="${web.local.dir}" overwrite="true" />
-				
-                <!-- Extra copy to website                 
+
+                <!-- Extra copy to website
         		<property file="${source.absolute.dir}/com/proxibase/aircandi/aws.properties"/>
 		        <S3Upload verbose="true"
 		                        accessId="${accessId}"
@@ -154,12 +154,12 @@
         </do-only-if-not-library>
         <record-build-info />
     </target>
-    
+
     <!-- This runs -package-release and -release-nosign first and then runs
          only if release-sign is true (set in -release-check, called by -release-no-sign)-->
     <target name="release-custom"
                 depends="-set-release-mode, -release-obfuscation-check, -package, -post-package, -release-prompt-for-password, -release-nosign, -release-sign-custom, -post-build"
                 description="Builds a custom version of the application in release mode.">
     </target>
-    	
+
 </project>

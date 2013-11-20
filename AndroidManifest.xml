@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.aircandi"
+    package="com.aircandi.ting"
     android:installLocation="auto"
     android:versionCode="83"
     android:versionName="0.9.39.dev" >
@@ -22,7 +22,11 @@
         android:required="true" />
 
     <permission
-        android:name="com.aircandi.permission.MAPS_RECEIVE"
+        android:name="com.aircandi.ting.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature" />
+
+    <permission
+        android:name="com.aircandi.ting.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -33,7 +37,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="com.aircandi.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="com.aircandi.ting.permission.MAPS_RECEIVE" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <!-- To support GCM -->
@@ -42,11 +46,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
-    <permission
-        android:name="com.aircandi.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
-
-    <uses-permission android:name="com.aircandi.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.aircandi.ting.permission.C2D_MESSAGE" />
 
     <!-- Needed to trigger a wifi scan -->
 
@@ -91,13 +91,6 @@
                 <category android:name="com.aircandi" />
             </intent-filter>
         </receiver>
-
-        <!-- Providers -->
-
-        <provider
-            android:name="com.aircandi.library.components.NotificationsContentProvider"
-            android:authorities="com.aircandi.library.notifications.contentprovider"
-            android:exported="false" />
 
         <!-- Activities -->
 
