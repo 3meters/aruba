@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <item name="holder_indicator_likes" type="id"/>
-    <item name="holder_indicator_watching" type="id"/>
-    <item name="holder_indicator_candigrams" type="id"/>
-    <item name="holder_indicator_pictures" type="id"/>
-    <item name="holder_indicator_comments" type="id"/>
-</resources>
