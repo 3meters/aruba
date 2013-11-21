@@ -22,13 +22,7 @@
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onPrepareOptionsMenu~QMenu;"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{JsonHelper.java[JsonHelper~toJSON~QObject;"/>
-		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onPlacesNearLocationFinished~QPlacesNearLocationFinishedEvent;"/>
-		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{JsonHelper.java[JsonHelper~fromJson~QObject;"/>
-		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{LocationChangedReceiver.java[LocationChangedReceiver~onReceive~QContext;~QIntent;"/>
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.components.bitmaps{DiskLruImageCache.java[DiskLruImageCache~writeBitmapToFile~QBitmap;~QDiskLruCache.Editor;"/>
 		<explicit-entry-point
@@ -48,21 +42,19 @@
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onWifiChanged~QWifiChangedEvent;"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{JsonHelper.java[JsonHelper~toList~QJSONArray;"/>
-		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onEntitiesForBeaconsFinished~QEntitiesForBeaconsFinishedEvent;[~run"/>
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onStart"/>
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiForm.java[CandiForm~onMapButtonClick~QView;"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onCreate~QBundle;"/>
-		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onEntitiesChanged~QEntitiesChangedEvent;[~run"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onOptionsItemSelected~QMenuItem;"/>
+				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onCreate~QBundle;"/>
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onEntitiesForLocationFinished~QEntitiesForLocationFinishedEvent;[~run"/>
+		<explicit-entry-point
+				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onOptionsItemSelected~QMenuItem;"/>
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onLocationChanged~QLocationChangedEvent;[~run[~onPostExecute~QObject;"/>
 		<explicit-entry-point
@@ -84,8 +76,6 @@
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onEntitiesChanged~QEntitiesChangedEvent;"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{JsonHelper.java[JsonHelper~getMap~QJSONObject;~QString;"/>
-		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onEntitiesForLocationFinished~QEntitiesForLocationFinishedEvent;"/>
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiForm.java[CandiForm~onNewCommentButtonClick~QView;"/>
@@ -100,8 +90,6 @@
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{EntityForm.java[EntityForm~onSaveButtonClick~QView;"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{JsonHelper.java[JsonHelper~toMap~QJSONObject;"/>
-		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onStop"/>
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiForm.java[CandiForm~onCallButtonClick~QView;"/>
@@ -112,11 +100,7 @@
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi{Aircandi.java[Aircandi~getVersionName~QContext;~QClass;"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{JsonHelper.java[JsonHelper~isEmptyObject~QJSONObject;"/>
-		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui{CandiRadar.java[CandiRadar~onResume"/>
-		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{LocationReceivedEvent.java[LocationReceivedEvent~LocationReceivedEvent~QLocation;"/>
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.ui.builders{LinkPicker.java[LinkPicker~onCreate~QBundle;"/>
 		<explicit-entry-point
@@ -139,14 +123,6 @@
 				handle="=Aircandi/src&lt;com.aircandi.components{java[AircandiCommon~onWifiScanReceived~QMonitoringWifiScanReceivedEvent;"/>
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.components{java[AircandiCommon~onLocationReceived~QLocationReceivedEvent;"/>
-		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi{Constants.java[PlacesConstants"/>
-		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{LocationChangedReceiver.java[LocationChangedReceiver"/>
-		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{LocationReceivedEvent.java[LocationReceivedEvent"/>
-		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{JsonHelper.java[JsonHelper"/>
 	</explicit-entry-points>
 	<include-main
 			enabled="true"/>
