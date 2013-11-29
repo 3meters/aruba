@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.aircandi.ting"
+    package="com.aircandi.aruba"
     android:installLocation="auto"
-    android:versionCode="83"
-    android:versionName="0.9.39.dev" >
+    android:versionCode="84"
+    android:versionName="0.9.40" >
 
     <supports-screens
         android:anyDensity="true"
@@ -22,11 +22,11 @@
         android:required="true" />
 
     <permission
-        android:name="com.aircandi.ting.permission.MAPS_RECEIVE"
+        android:name="com.aircandi.aruba.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
 
     <permission
-        android:name="com.aircandi.ting.permission.C2D_MESSAGE"
+        android:name="com.aircandi.aruba.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -37,7 +37,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="com.aircandi.ting.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="com.aircandi.aruba.permission.MAPS_RECEIVE" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <!-- To support GCM -->
@@ -46,14 +46,14 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
-    <uses-permission android:name="com.aircandi.ting.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.aircandi.aruba.permission.C2D_MESSAGE" />
 
     <!-- Needed to trigger a wifi scan -->
 
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <application
-        android:name="com.aircandi.library.Aircandi"
+        android:name="com.aircandi.aruba.Aruba"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
@@ -72,17 +72,17 @@
         <!-- Services -->
 
         <service
-            android:name="com.aircandi.library.ScanService"
+            android:name="com.aircandi.ScanService"
             android:enabled="true" />
-        
-        <service android:name="com.aircandi.library.components.GcmIntentService" />
+
+        <service android:name="com.aircandi.components.GcmIntentService" />
 
         <!-- Receivers -->
 
-        <receiver android:name="com.aircandi.library.components.LocationChangedReceiver" />
-        
+        <receiver android:name="com.aircandi.components.LocationChangedReceiver" />
+
         <receiver
-            android:name="com.aircandi.library.components.GcmBroadcastReceiver"
+            android:name="com.aircandi.components.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -94,7 +94,7 @@
         <!-- Activities -->
 
         <activity
-            android:name="com.aircandi.library.ui.SplashForm"
+            android:name="com.aircandi.ui.SplashForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/aircandi_theme_midnight_notitlebar"
             android:windowSoftInputMode="stateHidden" >
@@ -105,142 +105,142 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.aircandi.library.ui.AircandiForm"
+            android:name="com.aircandi.ui.AircandiForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase" />
         <activity
-            android:name="com.aircandi.library.ui.PlaceForm"
+            android:name="com.aircandi.ui.PlaceForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.PictureForm"
+            android:name="com.aircandi.ui.PictureForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.CandigramForm"
+            android:name="com.aircandi.ui.CandigramForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.MapForm"
+            android:name="com.aircandi.ui.MapForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.EntityList"
+            android:name="com.aircandi.ui.EntityList"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.EntityGrid"
+            android:name="com.aircandi.ui.EntityGrid"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.HelpForm"
+            android:name="com.aircandi.ui.HelpForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:theme="@style/aircandi_theme_midnight_transparent"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.PhotoForm"
+            android:name="com.aircandi.ui.PhotoForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.AboutForm"
+            android:name="com.aircandi.ui.AboutForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
-        
+
         <!-- Editing activities -->
 
         <activity
-            android:name="com.aircandi.library.ui.edit.PlaceEdit"
+            android:name="com.aircandi.ui.edit.PlaceEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.edit.PictureEdit"
+            android:name="com.aircandi.ui.edit.PictureEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.edit.CandigramEdit"
+            android:name="com.aircandi.ui.edit.CandigramEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.edit.CandigramWizard"
+            android:name="com.aircandi.ui.edit.CandigramWizard"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.edit.TuningEdit"
+            android:name="com.aircandi.ui.edit.TuningEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_tune"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.edit.ApplinkEdit"
+            android:name="com.aircandi.ui.edit.ApplinkEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.edit.ApplinkListEdit"
+            android:name="com.aircandi.ui.edit.ApplinkListEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.edit.CommentEdit"
+            android:name="com.aircandi.ui.edit.CommentEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_comment"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.aircandi.library.ui.edit.InviteEdit"
+            android:name="com.aircandi.ui.edit.InviteEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_invite"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.aircandi.library.ui.edit.FeedbackEdit"
+            android:name="com.aircandi.ui.edit.FeedbackEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_feedback"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.aircandi.library.ui.edit.ReportEdit"
+            android:name="com.aircandi.ui.edit.ReportEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_report"
             android:windowSoftInputMode="adjustResize" />
-        
+
         <!-- User activities -->
 
         <activity
-            android:name="com.aircandi.library.ui.user.ProfileForm"
+            android:name="com.aircandi.ui.user.ProfileForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.user.UserForm"
+            android:name="com.aircandi.ui.user.UserForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.user.UserEdit"
+            android:name="com.aircandi.ui.user.UserEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_profile"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.user.SignInEdit"
+            android:name="com.aircandi.ui.user.SignInEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_signin"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.aircandi.library.ui.user.RegisterEdit"
+            android:name="com.aircandi.ui.user.RegisterEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_signup"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.user.PasswordEdit"
+            android:name="com.aircandi.ui.user.PasswordEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_password"
             android:windowSoftInputMode="stateHidden" />
@@ -248,31 +248,31 @@
         <!-- Builders/pickers -->
 
         <activity
-            android:name="com.aircandi.library.ui.helpers.PhotoPicker"
+            android:name="com.aircandi.ui.helpers.PhotoPicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.helpers.ApplicationPicker"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@style/aircandi_theme_dialog_dark"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name="com.aircandi.library.ui.helpers.PhotoSourcePicker"
+            android:name="com.aircandi.ui.helpers.ApplicationPicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/aircandi_theme_dialog_dark"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.helpers.ShortcutPicker"
+            android:name="com.aircandi.ui.helpers.PhotoSourcePicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/aircandi_theme_dialog_dark"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.library.ui.helpers.AddressBuilder"
+            android:name="com.aircandi.ui.helpers.ShortcutPicker"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/aircandi_theme_dialog_dark"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name="com.aircandi.ui.helpers.AddressBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/aircandi_theme_dialog_dark"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="com.aircandi.library.ui.helpers.CategoryBuilder"
+            android:name="com.aircandi.ui.helpers.CategoryBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/aircandi_theme_dialog_dark"
             android:windowSoftInputMode="stateHidden" />
@@ -280,11 +280,11 @@
         <!-- Misc -->
 
         <activity
-            android:name="com.aircandi.library.ui.Preferences"
+            android:name="com.aircandi.ui.Preferences"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false" >
             <intent-filter>
-                <action android:name="com.aircandi.library.Preferences" />
+                <action android:name="com.aircandi.Preferences" />
 
                 <category android:name="android.intent.category.PREFERENCE" />
             </intent-filter>

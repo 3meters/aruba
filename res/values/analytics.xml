@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="TypographyDashes">
+
+	<!--     	
+		By default, the reported app name and version come from the package. 
+		Every aircandi application has a unique tracking id 
+	-->
+    <string name="ga_trackingId">UA-33660954-3</string>
+
+</resources>

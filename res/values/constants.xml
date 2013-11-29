@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Names -->
+
+    <string name="name_app">Aruba</string>
+    <string name="name_app_lowercase">aruba</string>
+    <string name="name_company">3meters LLC.</string>
+    <string name="name_app">Aruba</string>
+
+    <!-- Identifiers -->
+
+    <string name="id_gcm_sender">657673071389</string>
+    <string name="id_package">com.aircandi.aruba</string>
+    <string name="id_referrer">com.aircandi.aruba</string>
+
+    <!-- Splash -->
+
+    <string name="splash_message">get more out of the places you love</string>
+    <string name="splash_button_signin">sign in</string>
+    <string name="splash_button_start">start!</string>
+    <string name="splash_button_retry">retry</string>
+
+    <!-- Splash -->
+
+    <string name="signin_message_general">Sign in to create and share candi with other [@string/name_app] users!</string>
+
+    <!-- Invite -->
+
+    <string name="invite_heading">Invite your friends to [@string/name_app].</string>
+    <string name="invite_message_default">I enjoy [@string/name_app] and I thought you might like it too!</string>
+    <string name="form_invite_email_hint">email address</string>
+    <string name="form_invite_message_hint">add a personal note (optional)</string>
+
+    <!-- Feedback -->
+
+    <string name="feedback_message">How can we make [@string/name_app] better for you?</string>
+
+    <!-- Preferences -->
+
+    <string name="pref_theme">[@string/id_package]_pref_theme</string>
+    <string name="pref_search_radius">[@string/id_package]_pref_search_radius</string>
+    <string name="pref_place_provider">[@string/id_package]_pref_place_provider</string>
+    <string name="pref_sound_effects">[@string/id_package]_pref_sound_effects</string>
+    <string name="pref_messages_comments">[@string/id_package]_pref_messages_comments</string>
+    <string name="pref_messages_pictures">[@string/id_package]_pref_messages_pictures</string>
+    <string name="pref_messages_candigrams">[@string/id_package]_pref_messages_candigrams</string>
+    <string name="pref_messages_nearby">[@string/id_package]_pref_messages_nearby</string>
+    <string name="pref_messages_own">[@string/id_package]_pref_messages_own</string>
+    <string name="pref_messages_watch">[@string/id_package]_pref_messages_watch</string>
+    <string name="pref_enable_dev">[@string/id_package]_pref_enable_dev</string>
+    <string name="pref_entity_fencing">[@string/id_package]_pref_entity_fencing</string>
+    <string name="pref_testing_beacons">[@string/id_package]_pref_testing_beacons</string>
+    <string name="pref_testing_location">[@string/id_package]_pref_testing_location</string>
+
+    <!-- Preference defaults -->
+
+    <string name="pref_theme_default">aircandi_theme_snow</string>
+    
+    <!-- Settings -->
+
+    <string name="setting_user">[@string/id_package]_setting_user</string>
+    <string name="setting_user_session">[@string/id_package]_setting_user_session</string>
+    <string name="setting_picture_search_last">[@string/id_package]_setting_picture_search_last</string>
+    <string name="setting_invite_message_last">[@string/id_package]_setting_invite_message_last</string>
+    <string name="setting_picture_searches">[@string/id_package]_setting_picture_searches</string>
+    <string name="setting_last_email">[@string/id_package]_setting_last_email</string>
+    <string name="setting_gcm_registration_id">[@string/id_package]_setting_gcm_registration_id</string>
+    <string name="setting_gcm_version_code">[@string/id_package]_setting_gcm_version_code</string>
+    
+    <string name="setting_unique_id">[@string/id_package]_setting_unique_id</string>
+   	<string name="setting_unique_id_date">[@string/id_package]_setting_unique_id_date</string>
+    <string name="setting_unique_id_type">[@string/id_package]_setting_unique_id_type</string>
+        
+    <!-- Content links -->
+
+    <string name="url_terms">http://aircandi.com/legal/terms</string>
+    <string name="url_privacy">http://aircandi.com/legal/privacy</string>
+    <string name="url_legal">http://aircandi.com/legal/android</string>
+    <string name="s3_bucket_images">aircandi-images</string>
+    <string name="uri_app_update">market://details?id=[@string/id_package]&amp;referrer=utm_source%3D[@string/id_referrer]</string>
+    <string name="uri_app_update_web">http://play.google.com/store/apps/details?id=[@string/id_package]&amp;referrer=utm_source%3D[@string/id_referrer]</string>
+
+    <!-- Service paging sizes -->
+
+    <integer name="page_size_applinks">100</integer>
+    <integer name="page_size_candigrams">30</integer>
+    <integer name="page_size_comments">30</integer>
+    <integer name="page_size_pictures">30</integer>
+    <integer name="page_size_places">30</integer>
+    <integer name="page_size_users">30</integer>
+    <integer name="page_size_places_map">30</integer>
+
+</resources>

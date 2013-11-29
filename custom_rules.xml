@@ -54,7 +54,7 @@
 	</target>
 
 	<target name="upload" description="Upload aircandi apk to website.">
-		<property file="${source.absolute.dir}/com/proxibase/aircandi/aws.properties"/>
+		<property file="${source.absolute.dir}/aws.properties"/>
 		<S3Upload verbose="true"
 		                accessId="${accessId}"
 		                secretKey="${secretKey}"
@@ -97,7 +97,7 @@
 				<copy file="${out.final.file.versioned}" toDir="${web.local.dir}" overwrite="true" />
 
                 <!-- Extra copy to website
-        		<property file="${source.absolute.dir}/com/proxibase/aircandi/aws.properties"/>
+        		<property file="${source.absolute.dir}/aws.properties"/>
 		        <S3Upload verbose="true"
 		                        accessId="${accessId}"
 		                        secretKey="${secretKey}"
@@ -141,7 +141,7 @@
 				<copy file="${out.final.file.versioned}" toDir="${web.local.dir}" overwrite="true" />
 
                 <!-- Extra copy to website
-        		<property file="${source.absolute.dir}/com/proxibase/aircandi/aws.properties"/>
+        		<property file="${source.absolute.dir}/aws.properties"/>
 		        <S3Upload verbose="true"
 		                        accessId="${accessId}"
 		                        secretKey="${secretKey}"
