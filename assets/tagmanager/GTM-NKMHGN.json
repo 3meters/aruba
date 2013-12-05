@@ -1,0 +1,6 @@
+{ 
+  "aws-access-key": "empty",
+  "aws-secret-key": "empty",  
+  "candigrams-enabled": false,
+  "user-secret":"empty"
+}

@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi.aruba"
     android:installLocation="auto"
-    android:versionCode="84"
-    android:versionName="0.9.40" >
+    android:versionCode="85"
+    android:versionName="0.9.41" >
 
     <supports-screens
         android:anyDensity="true"
@@ -238,6 +238,11 @@
             android:name="com.aircandi.ui.user.RegisterEdit"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_signup"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name="com.aircandi.ui.user.ResetEdit"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/form_title_reset"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name="com.aircandi.ui.user.PasswordEdit"

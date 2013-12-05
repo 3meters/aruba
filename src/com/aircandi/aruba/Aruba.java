@@ -1,6 +1,11 @@
 package com.aircandi.aruba;
 
 import com.aircandi.Aircandi;
+import com.aircandi.R;
+import com.aircandi.aruba.objects.Links;
+import com.aircandi.components.EntityManager;
+import com.aircandi.components.MenuManager;
+import com.aircandi.utilities.Strings;
 
 public class Aruba extends Aircandi {
 
@@ -11,17 +16,17 @@ public class Aruba extends Aircandi {
 
 	@Override
 	protected void initializeInstance() {
-		/*
-		 * Handle additional initialization needed by the aircandi app.
-		 */
+		/* Must have this so activity rerouting works. */
+		Aircandi.applicationContext = getApplicationContext();
 		super.initializeInstance();
+
+		/* Inject configuration */
+		openContainer(Strings.getString(R.string.id_container));
 	}
 
 	@Override
-	public void snapshotPreferences() {
-		/*
-		 * Handle additional preferences needed by the aircandi app.
-		 */
-		super.snapshotPreferences();
+	protected void configure() {
+		EntityManager.getInstance().setLinks(new Links());
+		mMenuManager = new MenuManager();
 	}
 }
