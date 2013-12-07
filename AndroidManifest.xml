@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi.aruba"
     android:installLocation="auto"
-    android:versionCode="86"
-    android:versionName="0.9.42" >
+    android:versionCode="87"
+    android:versionName="0.9.43" >
 
     <supports-screens
         android:anyDensity="true"
@@ -119,11 +119,6 @@
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.aircandi.ui.CandigramForm"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app_lowercase"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
             android:name="com.aircandi.ui.MapForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
@@ -164,16 +159,6 @@
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name="com.aircandi.ui.edit.PictureEdit"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app_lowercase"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name="com.aircandi.ui.edit.CandigramEdit"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app_lowercase"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name="com.aircandi.ui.edit.CandigramWizard"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
