@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-    name="aruba"
-    default="revision" >
+<project>
 
     <property
         name="android.local.dir"
@@ -22,6 +20,7 @@
 
 	<target name="-pre-build">
 		<antcall target="bump-version" />
+        <delete dir="${out.absolute.dir}/res/crunch" verbose="${verbose}" failonerror="false" />	    	    
 	</target>
 
 	<target name="bump-version" description="Bumps and updates version info in the manifest.">
@@ -39,13 +38,17 @@
     	<echo>Version code: ${build.code}</echo>
         <echo>Version name: ${build.version}</echo>
 
-        <!-- Push version info to the manifest file
-   		<SetVersion code="${build.code}" name="${build.version}"/>-->
+        <!-- Push version info to the manifest file -->
+   		<SetVersion code="${build.code}" name="${build.version}"/>
 
 	</target>
 
 	<target name="current_build_version" description="Shows current build version.">
-	 	<echo>Target build version:${build.version}</echo>
+	    <property file="version.properties"/>
+	    <property name="build.version" value="${build.major.number}.${build.minor.number}.${build.patch.number}" />
+	    <property name="build.code" value="${build.code}" />
+	   	<echo>Current version code: ${build.code}</echo>
+	   	<echo>Current version name: ${build.version}</echo>
 	</target>
 
 	<target name="current_manifest_version_name" description="Shows current version in the manifest.">
