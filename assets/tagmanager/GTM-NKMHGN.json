@@ -1,6 +1,7 @@
 { 
   "aws-access-key": "empty",
   "aws-secret-key": "empty",  
+  "bing-access-key": "empty",  
   "candigrams-enabled": false,
   "user-secret":"empty"
 }

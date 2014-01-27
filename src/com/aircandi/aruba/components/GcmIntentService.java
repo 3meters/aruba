@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.aircandi.Constants;
-import com.aircandi.service.objects.Action.EventType;
-import com.aircandi.service.objects.ServiceMessage;
+import com.aircandi.objects.EventType;
+import com.aircandi.objects.ServiceMessage;
 
 public class GcmIntentService extends com.aircandi.components.GcmIntentService {
 

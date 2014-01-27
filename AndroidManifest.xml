@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi.aruba"
     android:installLocation="auto"
-    android:versionCode="90"
-    android:versionName="0.9.45" >
+    android:versionCode="95"
+    android:versionName="0.9.47" >
 
     <supports-screens
         android:anyDensity="true"
@@ -30,14 +30,25 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- Support location -->
+
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
+
+    <!-- Support network and wifi interactions -->
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- Support email addresses for invite -->
+
     <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="com.aircandi.aruba.permission.MAPS_RECEIVE" />
+
+    <!-- Support play services -->
+
+    <uses-permission android:name="com.aircandi.catalina.permission.MAPS_RECEIVE" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <!-- To support GCM -->
@@ -45,7 +56,6 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-
     <uses-permission android:name="com.aircandi.aruba.permission.C2D_MESSAGE" />
 
     <!-- Needed to trigger a wifi scan -->
@@ -87,7 +97,7 @@
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-                <category android:name="com.aircandi" />
+                <category android:name="com.aircandi.aruba" />
             </intent-filter>
         </receiver>
 
@@ -119,6 +129,11 @@
             android:label="@string/name_app_lowercase"
             android:windowSoftInputMode="stateHidden" />
         <activity
+            android:name="com.aircandi.ui.CommentForm"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/form_title_comment"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
             android:name="com.aircandi.ui.MapForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app_lowercase"
@@ -126,12 +141,6 @@
         <activity
             android:name="com.aircandi.ui.EntityList"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_picture_browse"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name="com.aircandi.ui.EntityGrid"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name="com.aircandi.ui.HelpForm"
@@ -142,7 +151,7 @@
         <activity
             android:name="com.aircandi.ui.PhotoForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_picture_browse"
+            android:label="@string/form_title_photo"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name="com.aircandi.ui.AboutForm"
@@ -199,11 +208,6 @@
 
         <!-- User activities -->
 
-        <activity
-            android:name="com.aircandi.ui.user.ProfileForm"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app_lowercase"
-            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name="com.aircandi.ui.user.UserForm"
             android:configChanges="orientation|keyboardHidden|screenSize"

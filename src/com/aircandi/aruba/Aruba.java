@@ -2,10 +2,7 @@ package com.aircandi.aruba;
 
 import com.aircandi.Aircandi;
 import com.aircandi.R;
-import com.aircandi.aruba.objects.Links;
-import com.aircandi.components.EntityManager;
-import com.aircandi.components.MenuManager;
-import com.aircandi.utilities.Strings;
+import com.aircandi.components.StringManager;
 import com.google.tagmanager.TagManager.RefreshMode;
 
 public class Aruba extends Aircandi {
@@ -22,12 +19,6 @@ public class Aruba extends Aircandi {
 		super.initializeInstance();
 
 		/* Inject configuration */
-		openContainer(Strings.getString(R.string.id_container), RefreshMode.STANDARD);
-	}
-
-	@Override
-	protected void configure() {
-		EntityManager.getInstance().setLinks(new Links());
-		mMenuManager = new MenuManager();
+		openContainer(StringManager.getString(R.string.id_container), RefreshMode.STANDARD);
 	}
 }

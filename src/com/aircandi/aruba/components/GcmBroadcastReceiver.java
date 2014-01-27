@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.aircandi.R;
-import com.aircandi.utilities.Strings;
+import com.aircandi.components.StringManager;
 
 /**
  * This {@code WakefulBroadcastReceiver} takes care of creating and managing a
@@ -29,6 +29,6 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 	 * Gets the class name of the intent service that will handle GCM messages.
 	 */
 	protected String getGCMIntentServiceClassName(Context context) {
-		return Strings.getString(R.string.class_gcm_intent_service);
+		return StringManager.getString(R.string.class_gcm_intent_service);
 	}
 }
