@@ -6,5 +6,11 @@
 		Every aircandi application has a unique tracking id 
 	-->
     <string name="ga_trackingId">UA-33660954-3</string>
-
+    
+    <!-- 
+    	- All default settings and screen names come from aircandi/res/values/analytics.xml.
+    	- To override a setting or screen name, add it here using the same name.
+    	- To add a screen name, add it here.
+    -->
+    
 </resources>
