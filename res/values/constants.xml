@@ -16,7 +16,8 @@
     <!-- Splash -->
 
     <string name="splash_message">get more out of the places you love</string>
-
+    <color name="splash_progress_bar_color">@color/accent_darkest</color>
+    
     <!-- Preference defaults -->
 
     <string name="pref_theme_default">aircandi_theme_snow</string>
