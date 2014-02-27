@@ -78,11 +78,18 @@
 # Otto specific settings
 # -------------------------------------------------------------------------------------------------
 
+-keepattributes *Annotation*
 -keepclassmembers class ** {
     @com.squareup.otto.Subscribe public *;
     @com.squareup.otto.Produce public *;
 }
 -keep class com.aircandi.events.**			{ *; }
+
+# -------------------------------------------------------------------------------------------------
+# Picasso specific settings
+# -------------------------------------------------------------------------------------------------
+
+-dontwarn com.squareup.okhttp.**
 
 # -------------------------------------------------------------------------------------------------
 # ActionBarSherlock specific settings

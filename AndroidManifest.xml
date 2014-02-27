@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi.aruba"
     android:installLocation="auto"
-    android:versionCode="100"
-    android:versionName="0.9.54" >
+    android:versionCode="105"
+    android:versionName="0.9.58" >
 
     <supports-screens
         android:anyDensity="true"
