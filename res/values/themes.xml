@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="aircandi_theme_dark" parent="Theme.Sherlock">
+        
+        <item name="actionBarItemBackground">@drawable/selectable_background_dark</item>
+        <item name="popupMenuStyle">@style/PopupMenu.Dark</item>
+        <item name="dropDownListViewStyle">@style/DropDownListView.Dark</item>
+        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Dark</item>
+        <item name="actionDropDownStyle">@style/DropDownNav.Dark</item>
+        <item name="actionBarStyle">@style/actionbar_style_dark</item>
+        <item name="actionModeBackground">@drawable/cab_background_top_dark</item>
+        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_dark</item>
+        <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Dark</item>
+        
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_dark</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Dark</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Dark</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Dark</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Dark</item>
+        <item name="android:actionBarStyle">@style/actionbar_style_dark</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_dark</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_dark</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Dark</item>
+        
+    </style>
+
+    <style name="aircandi_theme_light" parent="Theme.Sherlock.Light">
+        
+        <item name="actionBarItemBackground">@drawable/selectable_background_light</item>
+        <item name="popupMenuStyle">@style/PopupMenu.Light</item>
+        <item name="dropDownListViewStyle">@style/DropDownListView.Light</item>
+        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Light</item>
+        <item name="actionDropDownStyle">@style/DropDownNav.Light</item>
+        <item name="actionBarStyle">@style/actionbar_style_light</item>
+        <item name="actionModeBackground">@drawable/cab_background_top_light</item>
+        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_light</item>
+        <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Light</item>
+        
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_light</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Light</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Light</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Light</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Light</item>
+        <item name="android:actionBarStyle">@style/actionbar_style_light</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_light</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_light</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Light</item>
+        
+    </style>
+
+    <!-- ActionBar title text -->
+    
+    <style name="actionbar_style_light" parent="@style/ActionBar.Solid.Light">
+        <item name="android:titleTextStyle">@style/actionbar_title_text_light</item>
+        <item name="android:subtitleTextStyle">@style/actionbar_subtitle_text_light</item>
+    </style>
+    
+    <style name="actionbar_style_dark" parent="@style/ActionBar.Solid.Dark">
+        <item name="android:titleTextStyle">@style/actionbar_title_text_dark</item>
+        <item name="android:subtitleTextStyle">@style/actionbar_subtitle_text_dark</item>
+    </style>
+    
+    <style name="actionbar_title_text_light" parent="@style/TextAppearance.Sherlock.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/black</item>
+    </style>
+    
+    <style name="actionbar_title_text_dark" parent="@style/TextAppearance.Sherlock.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/white</item>
+    </style>
+    
+    <style name="actionbar_subtitle_text_light" parent="@style/TextAppearance.Sherlock.Widget.ActionBar.Subtitle">
+        <item name="android:textColor">@color/gray_80_pcnt</item>
+    </style>
+    
+    <style name="actionbar_subtitle_text_dark" parent="@style/TextAppearance.Sherlock.Widget.ActionBar.Subtitle">
+        <item name="android:textColor">@color/gray_10_pcnt</item>
+    </style>
+    
+</resources>

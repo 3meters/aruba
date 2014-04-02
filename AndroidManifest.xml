@@ -58,6 +58,10 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="com.aircandi.aruba.permission.C2D_MESSAGE" />
 
+    <!-- To support Notifications -->
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+    
     <!-- Needed to trigger a wifi scan -->
 
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
