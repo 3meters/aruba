@@ -1,7 +1,6 @@
 package com.aircandi.aruba;
 
 import com.aircandi.Aircandi;
-import com.aircandi.R;
 import com.aircandi.components.DispatchManager;
 import com.aircandi.components.StringManager;
 import com.google.tagmanager.TagManager.RefreshMode;

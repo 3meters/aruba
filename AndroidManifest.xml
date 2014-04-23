@@ -31,7 +31,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    
     <!-- Support location -->
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -42,15 +43,12 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-    <!-- Support email addresses for invite -->
-
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-
     <!-- Support play services -->
 
     <uses-permission android:name="com.aircandi.aruba.permission.MAPS_RECEIVE" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
-
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+    
     <!-- To support GCM -->
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -88,12 +86,19 @@
         <service
             android:name="com.aircandi.ScanService"
             android:enabled="true" />
-
-        <service android:name="com.aircandi.aruba.components.GcmIntentService" />
+        <service
+            android:name="com.aircandi.catalina.components.GcmIntentService"
+            android:enabled="true" />
+        <service
+            android:name="com.aircandi.components.ActivityRecognitionService"
+            android:exported="false"
+            android:enabled="false"
+            android:label="@string/name_app" />
 
         <!-- Receivers -->
 
-        <receiver android:name="com.aircandi.components.LocationChangedReceiver" />
+        <receiver android:name="com.aircandi.components.LocationChangedReceiver" 
+            android:enabled="false" />
 
         <receiver
             android:name="com.aircandi.aruba.components.GcmBroadcastReceiver"
