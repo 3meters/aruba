@@ -107,3 +107,4 @@ Desktop.ini
 
 # Backups
 *.bak
+/assets/crashlytics-build.properties

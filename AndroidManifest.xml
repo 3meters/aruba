@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi.aruba"
     android:installLocation="auto"
-    android:versionCode="109"
-    android:versionName="0.9.62" >
+    android:versionCode="110"
+    android:versionName="0.9.63" >
 
     <supports-screens
         android:anyDensity="true"
@@ -80,12 +80,12 @@
         <meta-data
             android:name="com.crashlytics.ApiKey"
             android:value="3f03e3891f0d0c56c4bc1c393db5efe2aa0f90c7" />
-
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        
         <!-- Services -->
 
-        <service
-            android:name="com.aircandi.ScanService"
-            android:enabled="true" />
         <service
             android:name="com.aircandi.catalina.components.GcmIntentService"
             android:enabled="true" />
