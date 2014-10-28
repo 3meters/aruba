@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="aircandi_theme_dark" parent="Theme.Sherlock">
+    <style name="aircandi_theme_midnight" parent="aircandi_theme_dark">
         
         <item name="actionBarItemBackground">@drawable/selectable_background_dark</item>
         <item name="popupMenuStyle">@style/PopupMenu.Dark</item>
@@ -25,7 +25,7 @@
         
     </style>
 
-    <style name="aircandi_theme_light" parent="Theme.Sherlock.Light">
+    <style name="aircandi_theme_snow" parent="aircandi_theme_light">
         
         <item name="actionBarItemBackground">@drawable/selectable_background_light</item>
         <item name="popupMenuStyle">@style/PopupMenu.Light</item>
